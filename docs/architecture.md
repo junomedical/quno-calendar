@@ -3,9 +3,11 @@
 Interface vocabulary in this document follows [Interface Taxonomy](./taxonomy.md).
 
 ## Component Shape
-`CalendarRoot` is the public shell. It accepts shared settings, calendars, data loading, event rendering, and interaction callbacks. The current `view` is `infinite`, which delegates to `InfiniteTimelineView`.
+`CalendarRoot` is the public shell. It accepts shared settings, calendars, data loading, event rendering, and interaction callbacks. It supports `view="infinite-horizontal"` for the original time-horizontal timeline and `view="infinite-vertical"` for the calendar-column timeline. The legacy `view="infinite"` remains an alias for `infinite-horizontal`.
 
 `InfiniteTimelineView` owns scroll state, zoom geometry, virtual day rendering, hit-testing, drag previews, and new-event draft state. It does not persist event changes. Parent code owns accepted data updates.
+
+`InfiniteVerticalTimelineView` shares the same public contracts, bounded date virtualization, async loading, renderer contract, and parent-validated interaction callbacks. It swaps the projection so dates and hours flow vertically while calendars render as horizontal columns.
 
 The infinite view also exposes an imperative navigation handle with `scrollToDate(dateKey)`, `scrollToDateTime(dateKey, time)`, and `scrollToToday()`. This keeps date/time navigation reusable while preserving internal virtualization details.
 
@@ -53,6 +55,13 @@ The infinite timeline renders a two-dimensional projection of dates, calendars, 
 - Persisted events, availability blocks, drag previews, and creation drafts all render through the same external `eventRenderer`.
 - Calendar geometry lives in `EventShell`; product event visuals live in the external renderer.
 
+The infinite vertical view uses the same included-date sequence but changes the inner day projection:
+- Each visible date owns one calendar column per selected calendar.
+- The vertical axis inside each date is the configured timeline window, converted with `minuteToY`.
+- The horizontal axis is selected calendars, with each column using a `240px` base minimum.
+- Overlapping timed events split into horizontal lanes inside their calendar column. Each column fits up to three parallel lanes at its base width, then grows by `80px` for each additional lane, allowing horizontal scroll.
+- Availability blocks, drag previews, and drafts render through the same `EventShell` and external `eventRenderer`.
+
 ## Rendering Pipeline
 ```mermaid
 flowchart TD
@@ -69,6 +78,8 @@ flowchart TD
   Layout --> Shell["EventShell"]
   Shell --> Renderer["external eventRenderer"]
 ```
+
+For `view="infinite-vertical"`, `CalendarRoot` delegates to `InfiniteVerticalTimelineView`. The loader, virtual window hook, event shell, interaction proposals, and renderer contract remain shared; the layout step uses vertical column geometry instead of horizontal row geometry.
 
 ### Virtual Scroll Window
 The infinite view computes visible date keys from the virtual scroll position.
@@ -130,6 +141,11 @@ flowchart TD
   Lanes --> Shells["positioned EventShells"]
 ```
 
+### Vertical Column Layout
+The vertical view computes one grid column per selected calendar for each rendered date. Columns fill available width when there is room and start from a `240px` minimum. Timed event overlaps use horizontal lanes inside the column. The first three parallel lanes fit inside the base width; every additional lane adds `80px` to that date/calendar column. The sticky doctor-name header for the same date uses the same grid template as the body columns, so a locally widened column also widens its title cell.
+
+The day height is `settings.dayHeaderHeight + timelineHeight(settings) + 16`, so `settings.zoom` controls vertical pixels per minute while the first and last visible hours each keep an 8px vertical gutter. Changing zoom resizes virtualized day items and keeps the parent as the source of truth through `onZoomChange`.
+
 ### Interaction Flow
 Drag/drop and draft drawing use hit-testing against the rendered virtual day item and row-local heights to convert pointer coordinates into date, calendar, and snapped minute.
 
@@ -166,6 +182,10 @@ Timeline grid cadence is 15 minutes by default and switches to 5-minute columns 
 
 Current-time markers render on every visible day; today is fully opaque and other days are shown at 50% opacity. The demo passes live system time into the calendar. The round pin appears once in the sticky time scale, with a header segment that connects the line to the pin. The pin, day-header marker segments, and body lines use the same natural timeline x-position. The marker is above timeline grid data, day-header bands, and events, while sticky labels remain above the marker.
 
+In the vertical view, each day owns its own CSS-sticky date plus doctor-name header, so headers pin naturally at the top and transition with the scrolling day sections. The date cell and time pane are sticky only on the left axis, and the left pane is 30% narrower than the configured horizontal-view label width. The time pane remains in each day's normal vertical flow, so time labels move at the same vertical pace as events. Vertical hour labels render as `8:00`; minor labels render as minute numbers such as `15` or `30`. The first and last hour labels sit 8px inside the board edges, mirroring the horizontal view's timeline gutter. The current-time marker is a horizontal line across today's calendar columns only, and it renders only when `now` is inside the enabled timeline range.
+
+Vertical date labels use smaller two-line text: month/day on the first line and weekday on the second line.
+
 Calendar cells use one shared 1px gray border token (`--ic-cell-border`) for the shell, date label, calendar labels, time header, timeline grid lines, and row dividers. Shared edges have a single owner so left labels and timeline cells do not create doubled seams during horizontal scroll.
 
 ### Zoom Flow
@@ -183,7 +203,7 @@ The demo renderer shows title, subtitle/patient, and a time range line in `H:mmâ
 
 The shell also exposes `--event-accent` from `event.color`. The demo uses that value for a thick card-left accent border while calendar row labels remain uncolored.
 
-Hover width expansion is CSS-driven by the event shell and applies only to the hovered row instance. The shell exposes `--event-width` and `--event-hover-width`; the hovered shell uses `width: max-content`, `min-width: var(--event-width)`, and a capped max width so cards whose content already fits stay at their base width. Events narrower than 250px can expand up to 250px or the remaining row space; events already wider than 250px receive a wider cap so hover does not shrink them. Hovered event shells take the full calendar row lane height without exceeding it. The demo renderer reveals its time line on hover without reducing title or patient font sizes and keeps the same vertical text alignment as the normal state. New-event drafts are not width-capped.
+Hover width expansion is CSS-driven by the event shell and applies only to the hovered row instance. The shell exposes `--event-width` and `--event-hover-width`; the hovered shell uses `width: max-content`, `min-width: var(--event-width)`, and a capped max width so cards whose content already fits stay at their base width. Events narrower than 250px can expand up to 250px or the remaining row space; events already wider than 250px receive a wider cap so hover does not shrink them. Hovered event shells take the full calendar row lane height without exceeding it. In the vertical view, hovered timed events instead expand to the full calendar column width and get a minimum height large enough for the demo card's three content lines. Vertical hover still re-hit-tests the underlying unexpanded overlap lanes on every pointer move, so users can move through an expanded card to focus another event it visually covers. The demo renderer reveals its time line on hover without reducing title or patient font sizes and keeps the same vertical text alignment as the normal state. New-event drafts are not width-capped.
 
 Event shells are memoized around event identity, status, and geometry. Drag-end state changes remove the preview and update the moved event without invoking every unchanged external event renderer.
 

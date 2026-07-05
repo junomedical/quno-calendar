@@ -243,3 +243,145 @@
   pointer-events: none;
   opacity: 0.42;
 }
+
+.icv-shell {
+  --ic-vertical-header-bg: #f4f7fb;
+}
+
+.icv-virtual-space {
+  position: relative;
+}
+
+.icv-day {
+  background: #ffffff;
+}
+
+.icv-day-header {
+  position: sticky;
+  top: 0;
+  z-index: 520;
+  height: 42px;
+  background: var(--ic-vertical-header-bg);
+  border-bottom: 1px solid var(--ic-cell-border);
+  pointer-events: none;
+}
+
+.icv-date-label {
+  position: sticky;
+  left: 0;
+  z-index: 286;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 1px;
+  height: 100%;
+  border-right: 1px solid var(--ic-cell-border);
+  line-height: 1.18;
+  pointer-events: auto;
+}
+
+.icv-date-main,
+.icv-date-weekday {
+  display: block;
+}
+
+.icv-date-weekday {
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.icv-date-main {
+  font-size: 14px;
+}
+
+.icv-calendar-header-grid {
+  position: absolute;
+  top: 0;
+  display: grid;
+  height: 100%;
+  background: var(--ic-vertical-header-bg);
+}
+
+.icv-calendar-header-cell {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  padding: 0 12px;
+  overflow: hidden;
+  color: #17202a;
+  border-right: 1px solid var(--ic-cell-border);
+  font-size: 14px;
+  font-weight: 750;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.icv-time-pane {
+  position: sticky;
+  left: 0;
+  z-index: 260;
+  background: #fbfdff;
+  border-right: 1px solid var(--ic-cell-border);
+  pointer-events: none;
+}
+
+.icv-time-pane-content {
+  position: relative;
+}
+
+.icv-time-tick {
+  position: absolute;
+  right: 12px;
+  display: block;
+  color: #1f2937;
+  font-size: 13px;
+  line-height: 1;
+  transform: translateY(-50%);
+}
+
+.icv-time-tick.is-hour {
+  font-weight: 800;
+}
+
+.icv-time-tick.is-label-hidden {
+  width: 0;
+  overflow: hidden;
+}
+
+.icv-day-board {
+  position: absolute;
+  display: grid;
+  background: #ffffff;
+}
+
+.icv-calendar-column-grid {
+  position: relative;
+  min-width: 0;
+  background-color: #ffffff;
+  border-bottom: 1px solid var(--ic-cell-border);
+  box-shadow: inset -1px 0 0 var(--ic-cell-border);
+}
+
+.icv-calendar-column-grid:nth-child(2n + 1) {
+  background-color: #f7fbfa;
+}
+
+.icv-now-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 232;
+  height: 2px;
+  background: #ef3333;
+  pointer-events: none;
+}
+
+.icv-event-shell {
+  min-width: 0;
+}
+
+.icv-event-shell.is-hovered {
+  width: var(--event-width) !important;
+  min-width: 0;
+  max-width: none;
+}

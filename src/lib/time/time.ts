@@ -45,6 +45,11 @@ export function timelineWidth(geometry: Pick<TimelineGeometry, "startHour" | "en
   return timelineTotalMinutes(geometry) * pixelsPerMinute(geometry.zoom);
 }
 
+/** Returns the full vertical pixel height of the visible timeline. */
+export function timelineHeight(geometry: Pick<TimelineGeometry, "startHour" | "endHour" | "zoom">): number {
+  return timelineWidth(geometry);
+}
+
 /** Converts an absolute minute from midnight into a clamped x-position. */
 export function minuteToX(
   minute: number,
@@ -61,6 +66,22 @@ export function xToMinute(
 ): number {
   const minute = timelineStartMinute(geometry) + x / pixelsPerMinute(geometry.zoom);
   return Math.min(timelineEndMinute(geometry), Math.max(timelineStartMinute(geometry), minute));
+}
+
+/** Converts an absolute minute from midnight into a clamped y-position. */
+export function minuteToY(
+  minute: number,
+  geometry: Pick<TimelineGeometry, "startHour" | "endHour" | "zoom">
+): number {
+  return minuteToX(minute, geometry);
+}
+
+/** Converts a timeline y-position into a clamped minute from midnight. */
+export function yToMinute(
+  y: number,
+  geometry: Pick<TimelineGeometry, "startHour" | "endHour" | "zoom">
+): number {
+  return xToMinute(y, geometry);
 }
 
 /** Snaps a minute value to the configured interaction cadence. */

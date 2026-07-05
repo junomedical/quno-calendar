@@ -1,5 +1,6 @@
 import { forwardRef } from "react";
 import { InfiniteTimelineView } from "../infinite/InfiniteTimelineView";
+import { InfiniteVerticalTimelineView } from "../infinite/InfiniteVerticalTimelineView";
 import type { CalendarNavigationHandle, CalendarRootProps } from "./types";
 
 /**
@@ -11,8 +12,8 @@ export const CalendarRoot = forwardRef<CalendarNavigationHandle, CalendarRootPro
   { view = "infinite", ...props },
   ref
 ) {
-  if (view !== "infinite") {
-    return null;
+  if (view === "infinite-vertical") {
+    return <InfiniteVerticalTimelineView ref={ref} {...props} />;
   }
 
   return <InfiniteTimelineView ref={ref} {...props} />;

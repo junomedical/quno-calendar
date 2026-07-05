@@ -1,5 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { clampEventToTimeline, minuteToX, snapMinute, timelineWidth, xToMinute } from "../../../../src/lib/time/time";
+import {
+  clampEventToTimeline,
+  minuteToX,
+  minuteToY,
+  snapMinute,
+  timelineHeight,
+  timelineWidth,
+  xToMinute,
+  yToMinute
+} from "../../../../src/lib/time/time";
 
 describe("timeline math", () => {
   const geometry = { startHour: 8, endHour: 18, zoom: 2, snapMinutes: 15 };
@@ -8,6 +17,12 @@ describe("timeline math", () => {
     expect(timelineWidth(geometry)).toBe(1_200);
     expect(minuteToX(9 * 60, geometry)).toBe(120);
     expect(xToMinute(120, geometry)).toBe(9 * 60);
+  });
+
+  it("converts vertical time to pixels and back with zoom", () => {
+    expect(timelineHeight(geometry)).toBe(1_200);
+    expect(minuteToY(9 * 60, geometry)).toBe(120);
+    expect(yToMinute(120, geometry)).toBe(9 * 60);
   });
 
   it("snaps minutes to the configured interval", () => {

@@ -1,5 +1,5 @@
 import type { CalendarEvent, TimelineSettings } from "../core/types";
-import { minuteToX, minutesSinceStartOfDay, timelineEndMinute, timelineStartMinute } from "../time/time";
+import { minuteToX, minuteToY, minutesSinceStartOfDay, timelineEndMinute, timelineStartMinute } from "../time/time";
 
 /** Positioned event geometry for one rendered calendar row. */
 export type EventLayoutItem = {
@@ -14,11 +14,30 @@ export type EventLayoutItem = {
   isOverlapping: boolean;
 };
 
+/** Positioned event geometry for one rendered vertical calendar column. */
+export type EventColumnLayoutItem = {
+  event: CalendarEvent;
+  leftPercent: number;
+  widthPercent: number;
+  top: number;
+  height: number;
+  lane: number;
+  laneCount: number;
+  isOverlapping: boolean;
+};
+
 type EventInterval = {
   event: CalendarEvent;
   startMinute: number;
   endMinute: number;
 };
+
+/** Minimum base width for one vertical calendar column. */
+export const MIN_VERTICAL_CALENDAR_COLUMN_WIDTH = 240;
+/** Number of parallel vertical events that fit before a column grows. */
+export const VERTICAL_COLUMN_BASE_OVERLAP_CAPACITY = 3;
+/** Additional column width added for each vertical event lane beyond the base capacity. */
+export const VERTICAL_COLUMN_EXTRA_OVERLAP_WIDTH = 80;
 
 /** Grows only the dense row as overlap lanes require more vertical space. */
 export function rowHeightForOverlapDepth(baseRowHeight: number, laneCount: number): number {
@@ -104,20 +123,27 @@ function assignLanes(group: EventInterval[]): Map<string, { lane: number; laneCo
   return new Map(sorted.map((interval) => [interval.event.id, { lane: lanes.get(interval.event.id) ?? 0, laneCount }]));
 }
 
-/** Converts row events into positioned shells with compact overlap lanes. */
-export function layoutEventsForRow(
+function eventIntervals(
   events: CalendarEvent[],
-  settings: Pick<TimelineSettings, "startHour" | "endHour" | "zoom" | "rowHeight">
-): EventLayoutItem[] {
+  settings: Pick<TimelineSettings, "startHour" | "endHour">
+): EventInterval[] {
   const timelineStart = timelineStartMinute(settings);
   const timelineEnd = timelineEndMinute(settings);
-  const intervals = events
+  return events
     .map((event) => ({
       event,
       startMinute: Math.max(timelineStart, minutesSinceStartOfDay(event.start)),
       endMinute: Math.min(timelineEnd, minutesSinceStartOfDay(event.end))
     }))
     .filter((interval) => interval.endMinute > timelineStart && interval.startMinute < timelineEnd);
+}
+
+/** Converts row events into positioned shells with compact overlap lanes. */
+export function layoutEventsForRow(
+  events: CalendarEvent[],
+  settings: Pick<TimelineSettings, "startHour" | "endHour" | "zoom" | "rowHeight">
+): EventLayoutItem[] {
+  const intervals = eventIntervals(events, settings);
 
   return groupOverlaps(intervals).flatMap((group) => {
     const laneMap = assignLanes(group);
@@ -132,6 +158,51 @@ export function layoutEventsForRow(
         top: laneInfo.lane * laneHeight + laneInset,
         height: Math.max(1, laneHeight - laneInset * 2),
         laneHeight,
+        lane: laneInfo.lane,
+        laneCount: laneInfo.laneCount,
+        isOverlapping: laneInfo.laneCount > 1
+      };
+    });
+  });
+}
+
+/** Computes the maximum vertical overlap lane count needed for non-availability events. */
+export function verticalLaneCountForEvents(
+  events: CalendarEvent[],
+  settings: Pick<TimelineSettings, "startHour" | "endHour" | "zoom">
+): number {
+  return Math.max(
+    1,
+    ...layoutEventsForColumn(events.filter((event) => event.kind !== "availability"), settings).map((item) => item.laneCount)
+  );
+}
+
+/** Returns the minimum column width needed for vertical overlap lanes. */
+export function columnWidthForEvents(
+  events: CalendarEvent[],
+  settings: Pick<TimelineSettings, "startHour" | "endHour" | "zoom">
+): number {
+  const extraLaneCount = Math.max(0, verticalLaneCountForEvents(events, settings) - VERTICAL_COLUMN_BASE_OVERLAP_CAPACITY);
+  return MIN_VERTICAL_CALENDAR_COLUMN_WIDTH + extraLaneCount * VERTICAL_COLUMN_EXTRA_OVERLAP_WIDTH;
+}
+
+/** Converts column events into top/bottom shells with horizontal overlap lanes. */
+export function layoutEventsForColumn(
+  events: CalendarEvent[],
+  settings: Pick<TimelineSettings, "startHour" | "endHour" | "zoom">
+): EventColumnLayoutItem[] {
+  const intervals = eventIntervals(events, settings);
+
+  return groupOverlaps(intervals).flatMap((group) => {
+    const laneMap = assignLanes(group);
+    return group.map((interval) => {
+      const laneInfo = laneMap.get(interval.event.id) ?? { lane: 0, laneCount: 1 };
+      return {
+        event: interval.event,
+        leftPercent: (laneInfo.lane / laneInfo.laneCount) * 100,
+        widthPercent: 100 / laneInfo.laneCount,
+        top: minuteToY(interval.startMinute, settings),
+        height: Math.max(12, minuteToY(interval.endMinute, settings) - minuteToY(interval.startMinute, settings)),
         lane: laneInfo.lane,
         laneCount: laneInfo.laneCount,
         isOverlapping: laneInfo.laneCount > 1

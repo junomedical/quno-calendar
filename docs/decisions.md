@@ -101,3 +101,8 @@ The calendar shell, sticky labels, time header, row dividers, and timeline grid 
 
 ## 032 - Drafts Do Not Recalculate Row Layout
 New-event drafts are visual overlays in the target row. They do not enter committed row event lists, overlap lane assignment, row-height metrics, or virtual day resizing while the pointer is moving. Once creation is accepted and inserted into loaded events, the committed event participates in normal row layout recalculation.
+
+## 033 - Infinite Views Are Named By Time Orientation
+The original infinite view is now `view="infinite-horizontal"` because time runs horizontally. The new calendar-column view is `view="infinite-vertical"` because time runs vertically inside each date. The legacy `view="infinite"` stays as an alias for the horizontal view so existing callers keep working.
+
+Vertical calendar columns start at a `240px` minimum, fit up to three parallel events, and then grow by `80px` for each additional overlap lane. This keeps the normal column width generous while making dense calendar/day combinations grow predictably. The vertical date and doctor-name row uses native per-day sticky positioning rather than synchronized overlay state, and the left date/time pane is 30% narrower than the horizontal row-label pane. The vertical timeline adds an 8px gutter before the first hour and after the last hour so labels and events do not touch the board edge. The time pane is sticky only on the left axis so its labels move vertically at the same pace as events.

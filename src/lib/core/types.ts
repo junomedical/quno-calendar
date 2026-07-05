@@ -110,7 +110,7 @@ export type CalendarNavigationHandle = {
 
 /** Public reusable calendar shell props. */
 export type CalendarRootProps = CalendarViewComponentProps & {
-  view?: "infinite";
+  view?: "infinite" | "infinite-horizontal" | "infinite-vertical";
 };
 
 /** Defaults merged with caller-provided timeline settings. */

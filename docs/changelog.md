@@ -1,6 +1,14 @@
 # Changelog
 
 ## 0.1.0
+- Added `view="infinite-vertical"` with calendars as left-to-right columns, vertical time zoom, sticky left time pane, today's horizontal current-time marker, and full event interaction parity.
+- Renamed the original orientation to `view="infinite-horizontal"` while preserving `view="infinite"` as a backward-compatible alias.
+- Added a demo calendar-type switch and vertical column growth for dense overlaps.
+- Changed the vertical view to keep per-day date and doctor-name headers top-sticky, keep date/time labels left-sticky, format vertical hour labels as `H:00`, use a 240px base calendar-column width, fit three parallel events before +80px overlap growth, and expand hovered appointments to full column width.
+- Removed synchronized vertical header switching and changed the vertical time pane to sticky-left only, so headers pin naturally and time labels scroll vertically with events.
+- Changed vertical hover hit-testing so expanded appointment cards do not block focusing underlying overlapped events.
+- Changed vertical date labels to smaller two-line text with weekday on the second line.
+- Changed the vertical date/time pane to 30% narrower than the horizontal label width, added 8px top/bottom time padding, and kept hovered card typography from inheriting compact line-height reductions.
 - Added greenfield Vite React TypeScript PoC.
 - Added reusable `CalendarRoot` and `InfiniteTimelineView` components.
 - Added async range loading, virtual date rows, fixed row labels, horizontal timeline zoom, current-time line, overlap layout, drag/drop previews, and drawn new-event drafts.

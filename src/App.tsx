@@ -112,6 +112,7 @@ function DemoStatsPanel() {
 export function App() {
   const initialBounds = useMemo(() => initialTimelineBounds(), []);
   const [scale, setScale] = useState(1_000);
+  const [calendarView, setCalendarView] = useState<"infinite-horizontal" | "infinite-vertical">("infinite-horizontal");
   const [calendarCount, setCalendarCount] = useState(6);
   const [zoom, setZoom] = useState(1.2);
   const [snapMinutes, setSnapMinutes] = useState(15);
@@ -205,6 +206,32 @@ export function App() {
             ))}
           </select>
         </label>
+
+        <fieldset className="view-switch" aria-label="Calendar type">
+          <legend>Calendar type</legend>
+          <label>
+            <input
+              type="radio"
+              name="calendar-view"
+              value="infinite-horizontal"
+              checked={calendarView === "infinite-horizontal"}
+              onChange={() => setCalendarView("infinite-horizontal")}
+              data-testid="view-infinite-horizontal"
+            />
+            <span>Infinite Horizontal</span>
+          </label>
+          <label>
+            <input
+              type="radio"
+              name="calendar-view"
+              value="infinite-vertical"
+              checked={calendarView === "infinite-vertical"}
+              onChange={() => setCalendarView("infinite-vertical")}
+              data-testid="view-infinite-vertical"
+            />
+            <span>Infinite Vertical</span>
+          </label>
+        </fieldset>
 
         <label>
           Calendars
@@ -337,6 +364,7 @@ export function App() {
       <section className="demo-calendar-panel">
         <CalendarRoot
           key={scale}
+          view={calendarView}
           ref={calendarRef}
           calendars={demoCalendars}
           selectedCalendarIds={selectedCalendarIds}

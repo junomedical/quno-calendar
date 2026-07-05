@@ -29,12 +29,28 @@ export function Calendar() {
   selectedCalendarIds={["room-201"]}
   loadEvents={loadEvents}
   eventRenderer={EventCard}
+  view="infinite-horizontal"
   interactionMode="events"
   settings={{ startHour: 8, endHour: 18, zoom: 1, snapMinutes: 15 }}
 />
   );
 }
 ```
+
+Use `view="infinite-vertical"` when calendars should render left-to-right as columns and time should run top-to-bottom inside each day:
+
+```tsx
+<CalendarRoot
+  calendars={calendars}
+  selectedCalendarIds={["dr-kirillov", "room-201"]}
+  loadEvents={loadEvents}
+  eventRenderer={EventCard}
+  view="infinite-vertical"
+  settings={{ startHour: 8, endHour: 18, zoom: 1.2, snapMinutes: 15 }}
+/>;
+```
+
+`view="infinite"` remains supported as a compatibility alias for `view="infinite-horizontal"`.
 
 ## Calendar and Event Data
 Use `calendarId` for a single-row event. Use `calendarIds` when the same event should render in multiple selected rows, such as a doctor and a room:
@@ -134,7 +150,7 @@ function CalendarWithNavigation(props) {
 }
 ```
 
-`scrollToDateTime(dateKey, time)` accepts a `yyyy-MM-dd` date key and an `HH:mm` local time string. The view scrolls vertically to the date and horizontally to the requested time column.
+`scrollToDateTime(dateKey, time)` accepts a `yyyy-MM-dd` date key and an `HH:mm` local time string. In the horizontal view, the calendar scrolls vertically to the date and horizontally to the requested time column. In the vertical view, it scrolls vertically to the date plus the requested time offset inside that date.
 
 The infinite view keeps vertical scrollbar dragging bounded to nearby dates. From the current top visible date, the scroll range covers one month before and one month after. After scrolling settles, the view recenters the scrollbar around the new top visible date and applies the same one-month bounds again, preserving the pixel offset inside that date so the visible content does not snap to the date header.
 
@@ -165,11 +181,15 @@ function CalendarWithZoom(props) {
 }
 ```
 
-When `onZoomChange` is provided, `Shift` + vertical wheel over the calendar viewport zooms the horizontal time scale and cancels the native scroll action before the calendar viewport or browser window can scroll.
+When `onZoomChange` is provided, `Shift` + vertical wheel over the calendar viewport requests a zoom change and cancels the native scroll action before the calendar viewport or browser window can scroll. The horizontal view uses zoom as horizontal pixels per minute; the vertical view uses the same value as vertical pixels per minute.
 
 Time labels automatically thin out as zoom becomes dense. Quarter-hour labels render at normal scale, 15/45 labels disappear at medium density, and all minute labels disappear at the tightest scale so only hour labels remain.
 
 The grid uses 15-minute columns through zoom `6`. Above zoom `6`, the row grid and time header switch to 5-minute cadence, showing labels like `9 5 10 15 ... 55` for finer high-zoom positioning.
+
+In the vertical view, calendar columns fill available width with a `240px` base minimum. Each column fits up to three parallel overlapping events before growing; every additional overlap lane adds `80px` to that date/calendar column and its matching doctor-name header cell. Hovered appointments expand to the full column width and a minimum readable height for three-line cards.
+
+Vertical date/doctor headers stay sticky at the top. The date cell and time pane stay sticky on the left, with the vertical left pane 30% narrower than `settings.labelWidth`. Vertical time labels use `8:00` for hours and plain minute numbers such as `15` or `30` for minor ticks. The first and last hour positions include 8px of vertical padding inside each day board.
 
 ## Custom Event Rendering
 ```tsx

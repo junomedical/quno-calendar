@@ -162,13 +162,28 @@
 
 .demo-event-card.status-hovered {
   /* Hover is the only normal state that reveals details hidden by compact height. */
-  gap: 0;
-  padding-block: 2px;
+  gap: 2px;
+  justify-content: center;
+  padding-block: 6px;
   filter: drop-shadow(0 10px 16px rgba(15, 23, 42, 0.2));
+  line-height: 1.25;
+}
+
+.demo-event-card.status-hovered .demo-event-title {
+  font-size: 13px;
+  line-height: 1.25;
+}
+
+.demo-event-card.status-hovered .demo-event-patient {
+  display: flex;
+  font-size: 12px;
+  line-height: 1.25;
 }
 
 .demo-event-card.status-hovered .demo-event-time {
   display: flex;
+  font-size: 11px;
+  line-height: 1.25;
 }
 
 .demo-event-card.status-dragging {

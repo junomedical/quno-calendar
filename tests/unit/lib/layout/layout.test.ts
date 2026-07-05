@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { layoutEventsForRow, rowHeightForEvents, rowHeightForOverlapDepth } from "../../../../src/lib/layout/layout";
+import {
+  columnWidthForEvents,
+  layoutEventsForColumn,
+  layoutEventsForRow,
+  rowHeightForEvents,
+  rowHeightForOverlapDepth
+} from "../../../../src/lib/layout/layout";
 import type { CalendarEvent } from "../../../../src/lib/core/types";
 
 const settings = { startHour: 8, endHour: 18, zoom: 1, rowHeight: 50 };
@@ -91,5 +97,29 @@ describe("event overlap layout", () => {
     expect(bottom).toBeLessThanOrEqual(rowHeight);
     expect(Math.min(...layout.map((item) => item.laneHeight))).toBeGreaterThanOrEqual(24);
     expect(Math.min(...layout.map((item) => item.height))).toBeGreaterThanOrEqual(20);
+  });
+
+  it("splits vertical overlaps into horizontal lanes", () => {
+    const events = [event("a", "09:00", "10:00"), event("b", "09:30", "10:15")];
+    const layout = layoutEventsForColumn(events, settings);
+
+    expect(layout).toHaveLength(2);
+    expect(layout.map((item) => item.laneCount)).toEqual([2, 2]);
+    expect(layout[0]).toMatchObject({ leftPercent: 0, widthPercent: 50 });
+    expect(layout[1]).toMatchObject({ leftPercent: 50, widthPercent: 50 });
+  });
+
+  it("grows vertical columns after three parallel overlap lanes", () => {
+    const compact = [event("compact", "09:00", "10:00")];
+    const threeLanes = [
+      event("dense-a", "09:00", "10:00"),
+      event("dense-b", "09:00", "10:00"),
+      event("dense-c", "09:00", "10:00")
+    ];
+    const fourLanes = [...threeLanes, event("dense-d", "09:00", "10:00")];
+
+    expect(columnWidthForEvents(compact, settings)).toBe(240);
+    expect(columnWidthForEvents(threeLanes, settings)).toBe(240);
+    expect(columnWidthForEvents(fourLanes, settings)).toBe(320);
   });
 });

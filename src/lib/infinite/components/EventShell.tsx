@@ -6,14 +6,16 @@ import type {
   EventRenderStatus
 } from "../../core/types";
 
+type CssLength = number | string;
+
 type EventShellProps = {
   event: CalendarEvent;
   status: EventRenderStatus;
-  left: number;
-  top: number;
-  width: number;
-  hoverMaxWidth: number;
-  height: number;
+  left: CssLength;
+  top: CssLength;
+  width: CssLength;
+  hoverMaxWidth: CssLength;
+  height: CssLength;
   zIndex: number;
   lane: number;
   laneCount: number;
@@ -88,8 +90,8 @@ export const EventShell = memo(function EventShell({
           width,
           height,
           zIndex,
-          "--event-width": `${width}px`,
-          "--event-hover-width": `${hoverMaxWidth}px`,
+          "--event-width": toCssLength(width),
+          "--event-hover-width": toCssLength(hoverMaxWidth),
           "--event-accent": event.color ?? "#0b6eff"
         } as CSSProperties
       }
@@ -105,6 +107,10 @@ export const EventShell = memo(function EventShell({
     </div>
   );
 }, areEventShellPropsEqual);
+
+function toCssLength(value: CssLength): string {
+  return typeof value === "number" ? `${value}px` : value;
+}
 
 /** Keeps unchanged external event cards from re-rendering during unrelated drag/scroll state changes. */
 function areEventShellPropsEqual(previous: EventShellProps, next: EventShellProps): boolean {

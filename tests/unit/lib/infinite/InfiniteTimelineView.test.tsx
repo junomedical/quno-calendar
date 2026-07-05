@@ -44,4 +44,63 @@ describe("InfiniteTimelineView", () => {
     });
     expect(renderer).not.toHaveBeenCalledWith(expect.objectContaining({ dateKey: expect.any(String) }));
   });
+
+  it("preserves the legacy infinite alias for the horizontal view", async () => {
+    const renderer = vi.fn(({ event, status, style }: EventRendererProps) => (
+      <div data-testid="custom-event" data-status={status} style={style}>
+        {event.title}
+      </div>
+    ));
+    const loadEvents = vi.fn(async () => []);
+
+    render(
+      <CalendarRoot
+        view="infinite"
+        calendars={calendars}
+        selectedCalendarIds={["calendar-a"]}
+        loadEvents={loadEvents}
+        eventRenderer={renderer}
+        now={new Date("2026-07-04T09:30:00")}
+      />
+    );
+
+    expect(screen.getByTestId("time-scale-header")).toBeInTheDocument();
+    await waitFor(() => expect(loadEvents).toHaveBeenCalled());
+  });
+
+  it("renders the vertical infinite view", async () => {
+    const renderer = vi.fn(({ event, status, style }: EventRendererProps) => (
+      <div data-testid="custom-event" data-status={status} style={style}>
+        {event.title}
+      </div>
+    ));
+    const loadEvents = vi.fn(async ({ startDate }) => [
+      {
+        id: "event-a",
+        calendarId: "calendar-a",
+        title: "Vertical Event",
+        start: `${startDate}T09:00:00`,
+        end: `${startDate}T10:00:00`
+      } satisfies CalendarEvent
+    ]);
+
+    render(
+      <CalendarRoot
+        view="infinite-vertical"
+        calendars={calendars}
+        selectedCalendarIds={["calendar-a", "calendar-b"]}
+        loadEvents={loadEvents}
+        eventRenderer={renderer}
+        now={new Date("2026-07-04T09:30:00")}
+        settings={{ startHour: 8, endHour: 18, zoom: 1, excludedWeekdays: [] }}
+      />
+    );
+
+    expect(screen.getAllByTestId("vertical-time-pane").length).toBeGreaterThan(0);
+    expect(screen.getAllByTestId("vertical-calendar-header").length).toBeGreaterThan(0);
+    await waitFor(() => expect(loadEvents).toHaveBeenCalled());
+    expect(loadEvents.mock.calls[0][0]).toMatchObject({
+      calendarIds: ["calendar-a", "calendar-b"]
+    });
+  });
 });
