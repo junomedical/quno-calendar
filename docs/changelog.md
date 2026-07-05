@@ -1,0 +1,52 @@
+# Changelog
+
+## 0.1.0
+- Added greenfield Vite React TypeScript PoC.
+- Added reusable `CalendarRoot` and `InfiniteTimelineView` components.
+- Added async range loading, virtual date rows, fixed row labels, horizontal timeline zoom, current-time line, overlap layout, drag/drop previews, and drawn new-event drafts.
+- Added deterministic demo datasets from 100 to 20,000 events per year.
+- Added usage, architecture, decision, brief, and test documentation.
+- Added Vitest and Playwright coverage.
+- Added a single sticky top time scale, CSS-sticky per-day date labels, all-day current-time markers with one top pin, date navigation controls, scroll anchoring across calendar-count changes, larger virtual overscan, and row-position-based overlap hover behavior.
+- Updated the demo event renderer to own its internal height with CSS container queries, hiding lower-priority details before reducing title font size in short event cards.
+- Changed drag rendering so the original event remains as a shadow in the stable row layout while a separate time-width-correct preview card moves over the calendar.
+- Changed sticky headers to use CSS sticky positioning inside the scroll container, and kept demo drag/drop event colors stable while still passing drag/drop status to renderers.
+- Restricted create/move interactions to timeline grid space and disabled hover expansion under an active drag preview.
+- Expanded deterministic demo treatment and patient-name pools, and made hover width expansion use shell-level CSS min/max sizing instead of JavaScript overflow measurement.
+- Stabilized dataset scale changes by remounting the infinite calendar for new generated datasets, memoized event shells to avoid re-rendering unchanged external event components on drag end, and kept the demo event loader stable across move updates.
+- Removed width caps from new-event draft rendering and allowed already-wide hovered events to use a wider max width than the standard 250px cap.
+- Made per-day date labels sticky on the left during horizontal scroll, added controlled `onZoomChange` support, and wired `Shift` + wheel over the calendar viewport to zoom the horizontal time scale.
+- Added repository-level agent notes requiring behavioral/API changes to update project Markdown documentation.
+- Inserted newly created drawn events into the loaded visible cache after `onEventCreateRequest`, so the created appointment remains visible after mouse-up.
+- Changed day headers to full-width gray day bands with sticky-left date labels, matching the reference layout more closely.
+- Kept the current-time red line and top pin on the same natural timeline column so the marker moves with horizontal timeline scroll and connects visually through the time scale.
+- Added optional multi-calendar event membership with `calendarIds`; demo events now render as doctor plus room appointments.
+- Synchronized drag/drop-preview status across every visible instance of the same multi-calendar event.
+- Removed colored calendar-row strips and moved color coding to a thicker event-card left accent border.
+- Limited multi-calendar hover expansion to the row instance under the pointer while keeping drag/drop-preview shared across related rows.
+- Removed event resize/focus transitions so event size changes apply immediately.
+- Cancelled native scrolling during `Shift` + wheel zoom and kept the current-time marker on the same natural timeline coordinate as the grid.
+- Added row-height growth when loaded overlap depth exceeds three lanes.
+- Restored the time scale as the top sticky layer above day date bands.
+- Allowed dense overlap mini-lanes to continue shrinking when row height is still too constrained.
+- Changed hover expansion to grow from the event's original row slot so dense-dataset cards do not disappear under sticky day bands.
+- Distributed deterministic demo events across every demo calendar to avoid large-dataset hot spots and keep the 5,000 and 20,000 events/year scales visible.
+- Changed overlap-driven row growth from one global loaded maximum to per-date/per-calendar row heights, so a dense row no longer inflates every day in the virtual list.
+- Switched variable day sizing to cheap base estimates plus measured rendered day elements, avoiding expensive date walks across the full virtual range.
+- Changed the demo current-time source from a hard-coded timestamp to live system time, and raised the current-time marker layer so the red line renders above events and connects to the sticky header pin.
+- Added `kind: "availability"` support as a full-row, half-transparent background event layer that does not affect overlap row height and allows draft/new events to be drawn on top.
+- Changed overlapped hover expansion to fill the row from the top, so bottom-lane events can expand to a larger readable card.
+- Pushed known variable day heights into the virtualizer so the last calendar row does not overlap the next date row while measurements settle.
+- Added an `interactionMode` API and demo "Availabilities" switch. Availability mode makes availability blocks draggable/creatable and renders appointments as inactive background context.
+- Changed demo generation so provider availability repeats by weekday window and generated appointments are scheduled inside the primary calendar's availability window.
+- Moved the sticky date label into the same top row as the time scale and raised left-label stacking so active availability blocks cannot cover calendar names.
+- Added a third event-card line showing the event time range in `H:mm–H:mm` format.
+- Changed compact event cards to hide the time line first when three lines do not fit, revealing it again when hover expansion gives the card enough height.
+- Changed vertical virtual scrolling to a recentered two-month window around the visible date, with one month above and one month below the current anchor.
+- Preserved the intra-day pixel offset during scroll-end recentering so the page no longer visibly jumps back to the date header.
+- Added adaptive time labels that drop 15/45 minute labels first and then all minute labels at dense zoom levels.
+- Added native `scrollend` handling and same-anchor reset logic so dragging the scrollbar thumb recenters the scrollbar after release.
+- Added demo sidebar rendering stats for average redraw frame time and visible event DOM-node count.
+- Replaced zoom stepper buttons with a `0.5-8` zoom slider and aligned wheel/settings clamps to that range.
+- Changed high-zoom row grid cadence to 5-minute columns when zoom is greater than `6`.
+- Added high-zoom 5-minute time labels while keeping hour labels as plain numbers.
