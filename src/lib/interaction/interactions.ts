@@ -1,13 +1,14 @@
-import type { CalendarEvent, CalendarId, TimelineSettings } from "./types";
-import { dateAtVirtualOffset } from "./dateVirtualization";
+import type { CalendarEvent, CalendarId, TimelineSettings } from "../core/types";
+import { dateAtVirtualOffset } from "../date/dateVirtualization";
 import {
   clampEventToTimeline,
   dateKeyAndMinuteToIso,
   minutesSinceStartOfDay,
   snapMinute,
   xToMinute
-} from "./time";
+} from "../time/time";
 
+/** Raw coordinates and calendar geometry used for non-virtualized hit tests. */
 export type HitTestInput = {
   clientX: number;
   clientY: number;
@@ -24,6 +25,7 @@ export type HitTestInput = {
   >;
 };
 
+/** Snapped calendar cell target under a pointer. */
 export type CalendarHit = {
   dateKey: string;
   calendarId: CalendarId;
@@ -32,6 +34,7 @@ export type CalendarHit = {
   rowIndex: number;
 };
 
+/** Converts pointer coordinates into a date, calendar row, and snapped minute. */
 export function hitTestCalendar(input: HitTestInput): CalendarHit | null {
   const { settings } = input;
   const x = input.clientX - input.containerLeft + input.scrollLeft - settings.labelWidth;
@@ -60,6 +63,7 @@ export function hitTestCalendar(input: HitTestInput): CalendarHit | null {
   };
 }
 
+/** Builds the parent validation payload for a drag/drop move preview. */
 export function buildMoveProposal(
   event: CalendarEvent,
   hit: CalendarHit,
@@ -77,6 +81,7 @@ export function buildMoveProposal(
   };
 }
 
+/** Builds the externally rendered draft event for a drawn creation range. */
 export function buildDraftEvent(startHit: CalendarHit, endHit: CalendarHit, kind: CalendarEvent["kind"] = "draft"): CalendarEvent {
   const startMinute = Math.min(startHit.minute, endHit.minute);
   const endMinute = Math.max(startHit.minute, endHit.minute);

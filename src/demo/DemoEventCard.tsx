@@ -1,11 +1,31 @@
 import { Video, Lock } from "lucide-react";
 import type { EventRendererProps } from "../lib";
+import "./DemoEventCard.css";
 
+/** Formats ISO event times for the demo card's compact third line. */
 function formatEventTime(value: string) {
   const date = new Date(value);
   return `${date.getHours()}:${String(date.getMinutes()).padStart(2, "0")}`;
 }
 
+/**
+ * Demo implementation of the external event renderer contract.
+ *
+ * Product code can replace this component without knowing about virtual days,
+ * row heights, horizontal scroll, drag hit-testing, or overlap calculations. The
+ * calendar passes the event plus interaction status (`existing`, `hovered`,
+ * `dragging`, `drop-preview`, or `new`) and lane metadata. A real product card
+ * can branch on event kind, appointment status, provider type, availability,
+ * validation state, permissions, or remote data already attached to the event.
+ *
+ * The wrapper shell provides size through CSS container queries and accent color
+ * through `--event-accent`, so external cards can drop less important lines,
+ * shrink typography, or show distinct drag/new/drop-preview styles without
+ * importing calendar internals.
+ *
+ * @see docs/architecture.md#event-renderer-contract
+ * @see docs/usage.md#custom-event-rendering
+ */
 export function DemoEventCard({ event, status, isOverlapping }: EventRendererProps) {
   const isAvailability = event.kind === "availability";
   const isConsultation = event.kind === "consultation";

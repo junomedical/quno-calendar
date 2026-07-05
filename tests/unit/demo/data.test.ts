@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { eventBelongsToCalendar } from "../lib";
-import { createDemoEvents, demoCalendars } from "./data";
+import { eventBelongsToCalendar } from "../../../src/lib";
+import { createDemoEvents, demoCalendars } from "../../../src/demo/data";
 
 function minutes(value: string) {
   const date = new Date(value);

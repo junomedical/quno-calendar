@@ -1,0 +1,205 @@
+/*
+ * The calendar owns position, row geometry, and interaction state. This demo
+ * card owns only product-level appointment visuals inside the provided shell.
+ */
+.ic-event-shell.is-hovered .demo-event-card {
+  /* Match the shell hover expansion without teaching the card about rows. */
+  width: max-content;
+  min-width: 100%;
+  max-width: var(--event-hover-width);
+}
+
+.demo-event-card {
+  /*
+   * The shell is a size container named `calendar-event`; the card fills that
+   * container and uses container queries below to decide which details fit.
+   */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  padding: 6px 10px;
+  overflow: hidden;
+  color: #213040;
+  background: #e4f0ff;
+  border: 1px solid var(--event-accent, #0b6eff);
+  border-left: 6px solid var(--event-accent, #0b6eff);
+  border-radius: 5px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.09);
+  line-height: 1.25;
+}
+
+.demo-event-title,
+.demo-event-patient,
+.demo-event-time {
+  /* Each line truncates independently so narrow event durations do not spill. */
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.demo-event-title {
+  font-size: 13px;
+}
+
+.demo-event-title svg {
+  flex: 0 0 auto;
+  width: 1em;
+  height: 1em;
+}
+
+.demo-event-patient {
+  color: #405163;
+  font-size: 12px;
+}
+
+.demo-event-time {
+  color: #526579;
+  font-size: 11px;
+}
+
+@container calendar-event (height < 52px) {
+  /*
+   * First compact step: keep title and patient readable, hide the third time
+   * line unless an interaction status explicitly reveals it below.
+   */
+  .demo-event-card {
+    gap: 0;
+    padding-block: 4px;
+  }
+
+  .demo-event-time {
+    display: none;
+  }
+}
+
+@container calendar-event (height < 32px) {
+  /*
+   * Second compact step: remove secondary text and reduce title size. This
+   * keeps tiny overlap lanes usable while preserving the appointment label.
+   */
+  .demo-event-card {
+    padding: 2px 7px;
+  }
+
+  .demo-event-patient {
+    display: none;
+  }
+
+  .demo-event-title {
+    font-size: 11px;
+  }
+}
+
+@container calendar-event (height < 22px) {
+  /*
+   * Densest lanes still reserve room for title icons, such as video/locked
+   * state, because those icons can carry meaningful appointment type/status.
+   */
+  .demo-event-card {
+    padding: 0 6px;
+  }
+
+  .demo-event-title {
+    font-size: 10px;
+    line-height: 1;
+  }
+
+  .demo-event-title svg {
+    width: 10px;
+    height: 10px;
+  }
+}
+
+.demo-event-card.kind-consultation {
+  /* Consultations use the warmer appointment style from the design reference. */
+  background: #fff6db;
+  border-color: var(--event-accent, #f59e0b);
+  border-left-color: var(--event-accent, #f59e0b);
+}
+
+.demo-event-card.kind-availability {
+  /*
+   * Availability is background context in appointment mode: transparent enough
+   * for new appointments and existing events to read above it.
+   */
+  justify-content: flex-start;
+  padding: 8px 10px;
+  color: #0f5132;
+  background: rgba(187, 247, 208, 0.34);
+  border-color: rgba(22, 163, 74, 0.38);
+  border-left-color: rgba(22, 163, 74, 0.65);
+  box-shadow: none;
+  opacity: 0.55;
+}
+
+.ic-availability-shell.is-active-layer .demo-event-card.kind-availability {
+  /* Availability editing mode promotes availability blocks to active objects. */
+  opacity: 0.82;
+  box-shadow:
+    inset 0 0 0 1px rgba(22, 163, 74, 0.2),
+    0 4px 8px rgba(15, 23, 42, 0.1);
+}
+
+.demo-event-card.kind-blocked {
+  /* Blocked/locked events stay visible but visually communicate unavailable time. */
+  color: #6b7280;
+  background:
+    repeating-linear-gradient(-45deg, rgba(239, 68, 68, 0.14), rgba(239, 68, 68, 0.14) 3px, transparent 3px, transparent 7px),
+    #ffffff;
+  border-color: #ef4444;
+  border-left-color: #ef4444;
+  text-decoration: line-through;
+}
+
+.demo-event-card.status-hovered {
+  /* Hover is the only normal state that reveals details hidden by compact height. */
+  gap: 0;
+  padding-block: 2px;
+  filter: drop-shadow(0 10px 16px rgba(15, 23, 42, 0.2));
+}
+
+.demo-event-card.status-hovered .demo-event-time {
+  display: flex;
+}
+
+.demo-event-card.status-dragging {
+  /* The original card remains in place as a 50% opacity drag shadow. */
+  opacity: 0.5;
+  box-shadow:
+    inset 0 0 0 1px rgba(15, 23, 42, 0.18),
+    0 1px 2px rgba(15, 23, 42, 0.09);
+}
+
+.demo-event-card.status-drop-preview {
+  /* The moving preview is nearly opaque and lifted above the grid. */
+  opacity: 0.92;
+  box-shadow:
+    0 14px 20px rgba(15, 23, 42, 0.22),
+    0 0 0 2px rgba(22, 163, 74, 0.34);
+}
+
+.demo-event-card.status-new {
+  /*
+   * Drafts are active creation objects, not background context. Keep them fully
+   * opaque and reveal the time range while the user is drawing.
+   */
+  color: #0f5132;
+  background: #dcfce7;
+  border-color: #16a34a;
+  border-left-color: #16a34a;
+  border-style: dashed;
+  opacity: 1;
+}
+
+.demo-event-card.status-new .demo-event-time {
+  display: flex;
+}

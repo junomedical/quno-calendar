@@ -50,3 +50,45 @@
 - Replaced zoom stepper buttons with a `0.5-8` zoom slider and aligned wheel/settings clamps to that range.
 - Changed high-zoom row grid cadence to 5-minute columns when zoom is greater than `6`.
 - Added high-zoom 5-minute time labels while keeping hour labels as plain numbers.
+- Decomposed `InfiniteTimelineView` into focused render components and hooks for event loading, virtual scroll windows, row/day metrics, time scale rendering, and event shell rendering.
+- Added `docs/refactor-plan.md` to track remaining module splits toward the 100-200 line target.
+- Grouped source files into responsibility folders under `src/lib/core`, `data`, `date`, `interaction`, `layout`, `time`, and `infinite`.
+- Added JSDoc to public/helper functions and code-to-doc `@see` links for the rendering architecture.
+- Reworked architecture data flow into grouped rendering, virtualization, async loading, layout, interaction, sticky header, and zoom sections with Mermaid diagrams.
+- Changed day header bands to continue their gray background across the timeline while staying below the sticky top time scale.
+- Restricted draft creation and drag/drop hit-testing to row-grid cells only, so clicks on time labels, day headers, date labels, and calendar labels do not interact with the calendar.
+- Added an 8px left timeline gutter and centered time labels on their grid lines.
+- Rendered minute labels as superscript, clipped the time header away from the sticky date label, and hid 15/45 minute labels below zoom `2`.
+- Changed time labels to left-align from their grid line instead of centering over it.
+- Added Playwright visual-layer assertions for sticky date headers, full-width day bands, time-scale clipping, and current-time marker z-index/geometry.
+- Made the time-scale clipping boundary follow horizontal scroll so timeline labels cannot slide under sticky date labels.
+- Added `scrollToDateTime(dateKey, time)` navigation and a demo time input beside the date jump control.
+- Filled the left timeline gutter with the same grid-cell styling and fixed availability widths so timeline-start availability does not lose the gutter width.
+- Split global CSS into base app styles, demo shell styles, demo event-card styles, and reusable infinite-calendar library styles imported by the owning modules.
+- Added explicit bottom borders to sticky date/calendar-name labels so horizontal scroll cannot show through 1px transparent seams.
+- Moved Vitest unit tests out of `src` into a mirrored `tests/unit` tree.
+- Narrowed scroll-aware clipping to the time-label layer and separated current-time marker layering from time-label clipping.
+- Changed current-time marker stacking so sticky date/calendar labels render above the red cursor while the cursor remains above timeline grid data and event cards.
+- Moved body current-time lines into row grids and render sticky day headers after rows, preventing row labels from painting into the top sticky date/header band.
+- Normalized calendar shell, sticky labels, row dividers, and timeline grid lines to the same 1px gray border token, with Playwright coverage for the shared border color and marker clipping.
+- Removed duplicate parent row/day borders so sticky label cells and timeline grid cells each draw one shared edge, including horizontal dividers across the calendar timeline zone.
+- Changed the compact calendar-row default height to 50px and added stepped local row growth for overlapping appointments: 60px for two lanes, 75px for three, 80px for four, then +20px per extra lane.
+- Changed hovered compact single-lane event shells to take the full row height without exceeding it, while the demo card uses a compact hover state to reveal its time line.
+- Changed overlap lane geometry to derive event shells from row-local lane slots, and kept demo card typography stable on hover.
+- Clamped dense overlap lanes to at least 24px, leaving 20px resting event shells plus a 4px mini-lane gap, and kept compact title icons visible in short event cards.
+- Changed hovered overlapped event shells to expand to the full calendar row lane height, kept demo event-card text vertically centered in both normal and hovered states, and added Playwright coverage for the visible full-height expansion.
+- Added `docs/taxonomy.md` as the canonical interface vocabulary for calendar surface, headers, rows, lanes, shells, cards, availability, and interaction statuses.
+- Changed `Shift` + wheel zoom handling to use a native non-passive capture listener so two-finger trackpad gestures zoom without scrolling the calendar viewport or browser window.
+- Removed scroll-synchronized time-header clipping and changed sticky layering so date headers/date labels overlay the top-only sticky time scale with native CSS.
+- Adjusted sticky layering so only the left date label sits above the time scale; the full-width day band stays below hour/minute labels, with Playwright coverage that time labels remain visible.
+- Added high-zoom horizontal-scroll Playwright coverage to verify date labels and calendar row labels stay above scrolled timeline content while time labels remain visible in the timeline board.
+- Moved the day gray band to an absolute non-layout layer below the sticky time scale, keeping the left date label sticky above the scale without adding a visual row.
+- Added a demo sidebar stat for total rendered calendar DOM nodes alongside visible event nodes.
+- Reduced mounted virtual day sections to the visible viewport plus five day sections of overscan, while keeping the one-month scroll spacer window.
+- Suppressed browser text selection during event drawing and drag/drop interactions.
+- Suppressed other event hover effects while drawing a new event or drag/dropping an existing event.
+- Changed new-event drafts to render as row overlays without recalculating committed row heights or overlap lanes until the event is created.
+- Extended the current-time marker through each gray day-header band in the timeline zone while keeping sticky date/calendar labels above it, with Playwright layering coverage.
+- Made drawn draft cards opaque and kept their time range visible while drawing.
+- Added explanatory comments to the demo event-card stylesheet.
+- Fixed calendar-count changes to keep the same top visible day and intra-day scroll offset even when the day is already the virtual window anchor.

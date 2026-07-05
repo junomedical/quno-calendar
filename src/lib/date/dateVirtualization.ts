@@ -1,17 +1,21 @@
 import { addDays, addMonths, format, isSameDay, parseISO, subMonths } from "date-fns";
 
+/** Formats a Date as the calendar's stable `yyyy-MM-dd` date key. */
 export function toDateKey(date: Date): string {
   return format(date, "yyyy-MM-dd");
 }
 
+/** Parses a `yyyy-MM-dd` date key as a local midnight Date. */
 export function fromDateKey(dateKey: string): Date {
   return parseISO(`${dateKey}T00:00:00`);
 }
 
+/** Returns whether the date should be removed from the virtual date sequence. */
 export function isWeekdayExcluded(date: Date, excludedWeekdays: number[]): boolean {
   return excludedWeekdays.includes(date.getDay());
 }
 
+/** Moves an excluded anchor date forward to the next included date. */
 export function normalizeAnchorDate(dateKey: string, excludedWeekdays: number[]): string {
   let date = fromDateKey(dateKey);
   for (let guard = 0; guard < 7 && isWeekdayExcluded(date, excludedWeekdays); guard += 1) {
@@ -20,6 +24,7 @@ export function normalizeAnchorDate(dateKey: string, excludedWeekdays: number[])
   return toDateKey(date);
 }
 
+/** Returns the included date key at an offset from an anchor date. */
 export function dateAtVirtualOffset(
   anchorDateKey: string,
   offset: number,
@@ -41,6 +46,7 @@ export function dateAtVirtualOffset(
   return toDateKey(date);
 }
 
+/** Returns the included-date offset between an anchor and target date key. */
 export function virtualOffsetForDate(
   anchorDateKey: string,
   targetDateKey: string,
@@ -64,6 +70,7 @@ export function virtualOffsetForDate(
   return offset;
 }
 
+/** Returns the smallest contiguous requested load range for a set of date keys. */
 export function dateRangeFromKeys(dateKeys: string[]): { startDate: string; endDate: string } | null {
   if (dateKeys.length === 0) {
     return null;
@@ -72,6 +79,7 @@ export function dateRangeFromKeys(dateKeys: string[]): { startDate: string; endD
   return { startDate: sorted[0], endDate: sorted[sorted.length - 1] };
 }
 
+/** Bounded one-month date window used by the infinite scrollbar illusion. */
 export type VirtualDateWindow = {
   startDateKey: string;
   anchorDateKey: string;
@@ -80,6 +88,7 @@ export type VirtualDateWindow = {
   count: number;
 };
 
+/** Builds the bounded virtual date window around the current anchor date. */
 export function virtualDateWindowAround(
   anchorDateKey: string,
   excludedWeekdays: number[],

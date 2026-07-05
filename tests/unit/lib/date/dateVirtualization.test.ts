@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { dateAtVirtualOffset, normalizeAnchorDate, virtualDateWindowAround, virtualOffsetForDate } from "./dateVirtualization";
+import { dateAtVirtualOffset, normalizeAnchorDate, virtualDateWindowAround, virtualOffsetForDate } from "../../../../src/lib/date/dateVirtualization";
 
 describe("date virtualization", () => {
   it("walks dates forward and backward from the anchor", () => {

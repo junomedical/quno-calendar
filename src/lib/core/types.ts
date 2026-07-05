@@ -1,14 +1,19 @@
 import type { CSSProperties, ReactNode } from "react";
 
+/** Stable identifier for a rendered calendar row. */
 export type CalendarId = string;
+
+/** Stable identifier for an appointment, availability block, or draft event. */
 export type EventId = string;
 
+/** User-selectable calendar row metadata. */
 export type CalendarRow = {
   id: CalendarId;
   name: string;
   color?: string;
 };
 
+/** Event data accepted by the reusable calendar renderer. */
 export type CalendarEvent = {
   id: EventId;
   calendarId: CalendarId;
@@ -21,6 +26,7 @@ export type CalendarEvent = {
   kind?: "appointment" | "consultation" | "blocked" | "draft" | "availability";
 };
 
+/** Visual state passed to the external event renderer. */
 export type EventRenderStatus =
   | "existing"
   | "hovered"
@@ -28,6 +34,7 @@ export type EventRenderStatus =
   | "drop-preview"
   | "new";
 
+/** Shared geometry, interaction, and filtering settings for timeline views. */
 export type TimelineSettings = {
   startHour: number;
   endHour: number;
@@ -39,6 +46,7 @@ export type TimelineSettings = {
   labelWidth: number;
 };
 
+/** Props passed to custom event card renderers. */
 export type EventRendererProps = {
   event: CalendarEvent;
   status: EventRenderStatus;
@@ -48,16 +56,20 @@ export type EventRendererProps = {
   isOverlapping: boolean;
 };
 
+/** External event renderer contract used by calendar views. */
 export type EventRenderer = (props: EventRendererProps) => ReactNode;
 
+/** Async range loader request produced by the virtual timeline. */
 export type LoadEventsArgs = {
   startDate: string;
   endDate: string;
   calendarIds: CalendarId[];
 };
 
+/** Async event loader used by calendar views. */
 export type LoadEvents = (args: LoadEventsArgs) => Promise<CalendarEvent[]>;
 
+/** Parent-validation payload for a proposed event move. */
 export type EventMoveRequest = {
   event: CalendarEvent;
   sourceCalendarId: CalendarId;
@@ -67,6 +79,7 @@ export type EventMoveRequest = {
   proposedCalendarIds: CalendarId[];
 };
 
+/** Parent callback payload for a drawn new-event range. */
 export type EventCreateRequest = {
   start: string;
   end: string;
@@ -74,6 +87,7 @@ export type EventCreateRequest = {
   kind?: CalendarEvent["kind"];
 };
 
+/** Common props passed from the shell to a concrete calendar view. */
 export type CalendarViewComponentProps = {
   calendars: CalendarRow[];
   selectedCalendarIds: CalendarId[];
@@ -87,22 +101,26 @@ export type CalendarViewComponentProps = {
   onZoomChange?: (zoom: number) => void;
 };
 
+/** Imperative navigation methods exposed by `CalendarRoot`. */
 export type CalendarNavigationHandle = {
   scrollToDate: (dateKey: string) => void;
+  scrollToDateTime: (dateKey: string, time: string) => void;
   scrollToToday: () => void;
 };
 
+/** Public reusable calendar shell props. */
 export type CalendarRootProps = CalendarViewComponentProps & {
   view?: "infinite";
 };
 
+/** Defaults merged with caller-provided timeline settings. */
 export const defaultTimelineSettings: TimelineSettings = {
   startHour: 8,
   endHour: 18,
   zoom: 1,
   snapMinutes: 15,
   excludedWeekdays: [],
-  rowHeight: 76,
+  rowHeight: 50,
   dayHeaderHeight: 42,
   labelWidth: 220
 };

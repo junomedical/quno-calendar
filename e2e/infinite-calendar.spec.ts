@@ -23,6 +23,14 @@ async function goToWorkday(page: Page, date = "2026-07-06") {
   await expect.poll(async () => topVisibleDayDate(page)).toBe(date);
 }
 
+function todayDateKey() {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, "0");
+  const day = String(today.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 async function firstViewportEventForPrefix(page: Page, prefix: string) {
   await expect
     .poll(async () => {
@@ -58,6 +66,97 @@ async function firstViewportEventForPrefix(page: Page, prefix: string) {
 
   if (!eventBox) {
     throw new Error(`No viewport-visible calendar event found for ${prefix}`);
+  }
+  return eventBox;
+}
+
+async function firstCompactSingleLaneEvent(page: Page) {
+  await page.waitForSelector('[data-testid="calendar-event"][data-lane-count="1"]');
+  const eventBox = await page.evaluate(() => {
+    const viewport = document.querySelector(".ic-viewport")?.getBoundingClientRect();
+    if (!viewport) return null;
+    const safeTop = viewport.y + 92;
+
+    for (const element of Array.from(document.querySelectorAll<HTMLElement>('[data-testid="calendar-event"][data-lane-count="1"]'))) {
+      const box = element.getBoundingClientRect();
+      const rowBox = element.closest<HTMLElement>('[data-testid="calendar-row"]')?.getBoundingClientRect();
+      const timeLine = element.querySelector<HTMLElement>(".demo-event-time");
+      if (
+        element.dataset.eventId &&
+        element.dataset.calendarId &&
+        rowBox &&
+        timeLine &&
+        window.getComputedStyle(timeLine).display === "none" &&
+        box.height < 52 &&
+        box.y >= safeTop &&
+        box.y + box.height <= viewport.y + viewport.height &&
+        box.x >= viewport.x &&
+        box.x < viewport.right
+      ) {
+        return {
+          id: element.dataset.eventId,
+          calendarId: element.dataset.calendarId,
+          x: box.x,
+          y: box.y,
+          width: box.width,
+          height: box.height,
+          rowHeight: rowBox.height,
+          laneHeight: rowBox.height
+        };
+      }
+    }
+
+    return null;
+  });
+
+  if (!eventBox) {
+    throw new Error("No compact single-lane event found");
+  }
+  return eventBox;
+}
+
+async function firstExpandableOverlappedEvent(page: Page) {
+  await page.waitForSelector('[data-testid="calendar-event"][data-lane-count]');
+  const eventBox = await page.evaluate(() => {
+    const viewport = document.querySelector(".ic-viewport")?.getBoundingClientRect();
+    if (!viewport) return null;
+    const safeTop = viewport.y + 92;
+
+    for (const element of Array.from(document.querySelectorAll<HTMLElement>('[data-testid="calendar-event"]'))) {
+      const box = element.getBoundingClientRect();
+      const rowBox = element.closest<HTMLElement>('[data-testid="calendar-row"]')?.getBoundingClientRect();
+      const laneCount = Number(element.dataset.laneCount ?? "1");
+      const laneHeight = rowBox ? rowBox.height / Math.max(1, laneCount) : 0;
+      if (
+        element.dataset.eventId &&
+        element.dataset.calendarId &&
+        rowBox &&
+        laneCount > 1 &&
+        laneHeight > 0 &&
+        box.height < laneHeight - 0.5 &&
+        box.y >= safeTop &&
+        box.y + box.height <= viewport.y + viewport.height &&
+        box.x >= viewport.x &&
+        box.x < viewport.right
+      ) {
+        return {
+          id: element.dataset.eventId,
+          calendarId: element.dataset.calendarId,
+          x: box.x,
+          y: box.y,
+          width: box.width,
+          height: box.height,
+          laneHeight,
+          rowHeight: rowBox.height
+        };
+      }
+    }
+
+    return null;
+  });
+
+  if (!eventBox) {
+    throw new Error("No hover-expandable overlapped event found");
   }
   return eventBox;
 }
@@ -163,6 +262,20 @@ async function topVisibleDayState(page: Page) {
   });
 }
 
+async function selectPageText(page: Page) {
+  await page.evaluate(() => {
+    const target = document.querySelector("main") ?? document.body;
+    const range = document.createRange();
+    range.selectNodeContents(target);
+    const selection = window.getSelection();
+    selection?.removeAllRanges();
+    selection?.addRange(range);
+  });
+  await expect
+    .poll(async () => page.evaluate(() => window.getSelection()?.toString().length ?? 0))
+    .toBeGreaterThan(0);
+}
+
 async function visibleDayDates(page: Page) {
   return page.evaluate(() => {
     const viewport = document.querySelector(".ic-viewport")?.getBoundingClientRect();
@@ -188,11 +301,48 @@ async function verticalScrollRatio(page: Page) {
   });
 }
 
+async function renderedDayOverscanFailures(page: Page, maxDistanceDays: number) {
+  return page.evaluate((distanceLimit) => {
+    const viewport = document.querySelector(".ic-viewport")?.getBoundingClientRect();
+    if (!viewport) {
+      return ["missing viewport"];
+    }
+
+    const dayNodes = Array.from(document.querySelectorAll<HTMLElement>('[data-testid="calendar-day"]'));
+    const visibleDates = dayNodes
+      .filter((element) => {
+        const box = element.getBoundingClientRect();
+        return box.bottom > viewport.top && box.top < viewport.bottom;
+      })
+      .map((element) => element.dataset.date)
+      .filter((date): date is string => Boolean(date));
+    if (visibleDates.length === 0) {
+      return ["missing visible day"];
+    }
+
+    const toDayNumber = (dateKey: string) => new Date(`${dateKey}T00:00:00`).getTime() / 86_400_000;
+    const visibleDayNumbers = visibleDates.map(toDayNumber);
+    const firstVisibleDay = Math.min(...visibleDayNumbers);
+    const lastVisibleDay = Math.max(...visibleDayNumbers);
+
+    return dayNodes.flatMap((element) => {
+      const dateKey = element.dataset.date;
+      if (!dateKey) {
+        return ["missing rendered day date"];
+      }
+      const dayNumber = toDayNumber(dateKey);
+      const distance = dayNumber < firstVisibleDay ? firstVisibleDay - dayNumber : Math.max(0, dayNumber - lastVisibleDay);
+      return distance > distanceLimit ? [`${dateKey}: ${distance}d`] : [];
+    });
+  }, maxDistanceDays);
+}
+
 test("renders, scrolls vertically, zooms, and changes dataset scale", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByTestId("infinite-calendar")).toBeVisible();
   await goToWorkday(page);
   await firstViewportEventBox(page);
+  expect(await renderedDayOverscanFailures(page, 5)).toEqual([]);
   await expect(page.getByTestId("stat-frame-ms")).toContainText(/\d+\.\d ms/);
   await expect
     .poll(async () => {
@@ -200,6 +350,16 @@ test("renders, scrolls vertically, zooms, and changes dataset scale", async ({ p
       return Number.parseInt(text?.replace(/,/g, "") ?? "0", 10);
     })
     .toBeGreaterThan(0);
+  await expect
+    .poll(async () => {
+      const text = await page.getByTestId("stat-total-calendar-nodes").textContent();
+      return Number.parseInt(text?.replace(/,/g, "") ?? "0", 10);
+    })
+    .toBeGreaterThan(0);
+  const compactRowHeights = await page.getByTestId("calendar-row").evaluateAll((rows) =>
+    rows.map((row) => Math.round(row.getBoundingClientRect().height)).filter((height) => height > 0)
+  );
+  expect(Math.min(...compactRowHeights)).toBe(50);
 
   const viewport = page.locator(".ic-viewport");
   const firstDate = await topVisibleDayDate(page);
@@ -216,6 +376,7 @@ test("renders, scrolls vertically, zooms, and changes dataset scale", async ({ p
   });
   await page.waitForTimeout(32);
   expect(await page.getByTestId("calendar-row").count()).toBeGreaterThan(0);
+  expect(await renderedDayOverscanFailures(page, 5)).toEqual([]);
 
   const beforeZoom = await page.getByTestId("zoom-value").textContent();
   await page.getByTestId("zoom-slider").fill("2");
@@ -224,6 +385,8 @@ test("renders, scrolls vertically, zooms, and changes dataset scale", async ({ p
   await page.getByTestId("zoom-slider").fill("8");
   await expect(page.getByTestId("zoom-value")).toHaveText("8.00");
   await expect(page.getByTestId("calendar-row").first().locator(".ic-row-grid")).toHaveCSS("background-size", "40px 100%");
+  await expect(page.getByTestId("calendar-row").first().locator(".ic-row-grid")).toHaveCSS("background-position-x", "8px");
+  await expect(page.getByTestId("calendar-row").first().locator(".ic-row-grid")).toHaveCSS("background-repeat", "repeat");
   await page.getByTestId("zoom-slider").fill("6");
   await expect(page.getByTestId("calendar-row").first().locator(".ic-row-grid")).toHaveCSS("background-size", "90px 100%");
   await page.getByTestId("zoom-slider").fill("0.5");
@@ -233,12 +396,24 @@ test("renders, scrolls vertically, zooms, and changes dataset scale", async ({ p
   expect(viewportBox).not.toBeNull();
   if (!viewportBox) return;
   const scrollTopBeforeShiftWheel = await viewport.evaluate((element) => element.scrollTop);
+  const scrollLeftBeforeShiftWheel = await viewport.evaluate((element) => element.scrollLeft);
+  await page.evaluate(() => {
+    document.body.style.minHeight = "2400px";
+    window.scrollTo(0, 120);
+  });
+  const windowScrollBeforeShiftWheel = await page.evaluate(() => ({ x: window.scrollX, y: window.scrollY }));
   await page.mouse.move(viewportBox.x + 520, viewportBox.y + 160);
   await page.keyboard.down("Shift");
   await page.mouse.wheel(0, -500);
   await page.keyboard.up("Shift");
   await expect(page.getByTestId("zoom-value")).not.toHaveText(afterButtonZoom ?? "");
   await expect.poll(async () => viewport.evaluate((element) => element.scrollTop)).toBe(scrollTopBeforeShiftWheel);
+  await expect.poll(async () => viewport.evaluate((element) => element.scrollLeft)).toBe(scrollLeftBeforeShiftWheel);
+  await expect.poll(async () => page.evaluate(() => ({ x: window.scrollX, y: window.scrollY }))).toEqual(windowScrollBeforeShiftWheel);
+  await page.evaluate(() => {
+    document.body.style.minHeight = "";
+    window.scrollTo(0, 0);
+  });
 
   await page.getByTestId("scale-select").selectOption("20000");
   await expect(page.getByTestId("demo-message")).toContainText("20,000");
@@ -289,6 +464,26 @@ test("keeps large dataset events visible and hoverable", async ({ page }) => {
       .map((box) => Math.round(box.height));
   });
   expect(Math.min(...visibleRowHeights)).toBeLessThan(Math.max(...visibleRowHeights));
+  const visibleEventMetrics = await page.evaluate(() => {
+    const viewport = document.querySelector(".ic-viewport")?.getBoundingClientRect();
+    if (!viewport) return [];
+    const safeTop = viewport.y + 92;
+    return Array.from(document.querySelectorAll<HTMLElement>('[data-testid="calendar-event"]'))
+      .map((element) => {
+        const box = element.getBoundingClientRect();
+        const row = element.closest<HTMLElement>('[data-testid="calendar-row"]');
+        const rowBox = row?.getBoundingClientRect();
+        const laneCount = Number(element.dataset.laneCount ?? "1");
+        return {
+          box,
+          height: Math.round(box.height),
+          laneHeight: rowBox ? rowBox.height / Math.max(1, laneCount) : 0
+        };
+      })
+      .filter(({ box }) => box.y >= safeTop && box.y + box.height <= viewport.bottom && box.x >= viewport.x && box.x < viewport.right);
+  });
+  expect(Math.min(...visibleEventMetrics.map((metric) => metric.height))).toBeGreaterThanOrEqual(20);
+  expect(Math.min(...visibleEventMetrics.map((metric) => metric.laneHeight))).toBeGreaterThanOrEqual(24);
 
   const bottomLaneEvent = await page.evaluate(() => {
     const viewport = document.querySelector(".ic-viewport")?.getBoundingClientRect();
@@ -299,11 +494,20 @@ test("keeps large dataset events visible and hoverable", async ({ page }) => {
       if (!row) continue;
       const box = element.getBoundingClientRect();
       const rowBox = row.getBoundingClientRect();
+      const laneCount = Number(element.dataset.laneCount ?? "1");
       const isVisible = box.y >= viewport.y + 92 && box.y + box.height <= viewport.bottom && box.x >= viewport.x && box.x < viewport.right;
       const isBottomLane = rowBox.bottom - (box.y + box.height) <= 12 || box.y > rowBox.y + rowBox.height / 2;
       const canExpand = box.height < rowBox.height / 2;
       if (isVisible && isBottomLane && canExpand) {
-        return { id: element.dataset.eventId, x: box.x, y: box.y, width: box.width, height: box.height };
+        return {
+          id: element.dataset.eventId,
+          x: box.x,
+          y: box.y,
+          width: box.width,
+          height: box.height,
+          laneHeight: rowBox.height / Math.max(1, laneCount),
+          rowHeight: rowBox.height
+        };
       }
     }
 
@@ -315,7 +519,8 @@ test("keeps large dataset events visible and hoverable", async ({ page }) => {
     const expandedHeight = await page
       .locator(`[data-testid="calendar-event"][data-event-id="${bottomLaneEvent.id}"]:has([data-render-status="hovered"])`)
       .evaluate((element) => element.getBoundingClientRect().height);
-    expect(expandedHeight).toBeGreaterThan(bottomLaneEvent.height * 2);
+    expect(expandedHeight).toBeGreaterThan(bottomLaneEvent.height);
+    expect(expandedHeight).toBeCloseTo(bottomLaneEvent.rowHeight, 0);
   }
 
   const dayBoundaryIssues = await page.evaluate(() => {
@@ -350,9 +555,24 @@ test("keeps the visible day when calendar count changes and supports date naviga
   await page.goto("/");
   const viewport = page.locator(".ic-viewport");
 
+  await page.getByTestId("zoom-slider").fill("4");
   await page.getByTestId("jump-date-input").fill("2026-08-12");
+  await page.getByTestId("jump-time-input").fill("15:30");
   await page.getByTestId("go-date-button").click();
-  await expect(page.getByTestId("demo-message")).toContainText("2026-08-12");
+  await expect(page.getByTestId("demo-message")).toContainText("2026-08-12 15:30");
+  await expect
+    .poll(async () => topVisibleDayDate(page))
+    .toBe("2026-08-12");
+  await expect
+    .poll(async () => viewport.evaluate((element) => element.scrollLeft))
+    .toBeGreaterThan(400);
+
+  await page.getByTestId("calendar-count").evaluate((element) => {
+    const input = element as HTMLInputElement;
+    input.value = "3";
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+  });
   await expect
     .poll(async () => topVisibleDayDate(page))
     .toBe("2026-08-12");
@@ -361,6 +581,8 @@ test("keeps the visible day when calendar count changes and supports date naviga
   await viewport.evaluate((element) => {
     element.scrollTop += 90;
   });
+  await page.waitForTimeout(40);
+  const visibleStateBeforeCountChange = await topVisibleDayState(page);
   await page.getByTestId("calendar-count").evaluate((element) => {
     const input = element as HTMLInputElement;
     input.value = "9";
@@ -370,12 +592,15 @@ test("keeps the visible day when calendar count changes and supports date naviga
   await expect
     .poll(async () => topVisibleDayDate(page))
     .toBe(visibleDate);
+  const visibleStateAfterCountChange = await topVisibleDayState(page);
+  expect(visibleStateAfterCountChange.date).toBe(visibleStateBeforeCountChange.date);
+  expect(Math.abs(visibleStateAfterCountChange.offsetWithinDate - visibleStateBeforeCountChange.offsetWithinDate)).toBeLessThanOrEqual(2);
 
   await page.getByTestId("today-button").click();
   await expect(page.getByTestId("demo-message")).toContainText("today");
   await expect
     .poll(async () => topVisibleDayDate(page))
-    .toBe("2026-07-04");
+    .toBe(todayDateKey());
 });
 
 test("limits vertical scrollbar to one month around the visible date and recenters after scroll end", async ({ page }) => {
@@ -440,10 +665,15 @@ test("keeps the time scale fixed and day dates css-sticky", async ({ page }) => 
   expect(await page.locator(".ic-day .ic-time-header").count()).toBe(0);
   expect(await page.locator(".ic-now-pin").count()).toBe(1);
   expect(await page.getByTestId("current-time-line").count()).toBeGreaterThan(1);
+  expect(await page.getByTestId("current-time-day-header-line").count()).toBeGreaterThan(1);
   const referenceLineOpacity = await page.locator(".ic-now-line.is-reference").first().evaluate((element) => {
     return window.getComputedStyle(element).opacity;
   });
   expect(referenceLineOpacity).toBe("0.5");
+  const referenceHeaderLineOpacity = await page.locator(".ic-now-day-header-line.is-reference").first().evaluate((element) => {
+    return window.getComputedStyle(element).opacity;
+  });
+  expect(referenceHeaderLineOpacity).toBe("0.5");
 
   const topDate = await topVisibleDayDate(page);
   const timeHeaderBox = await page.getByTestId("time-scale-header").boundingBox();
@@ -451,9 +681,25 @@ test("keeps the time scale fixed and day dates css-sticky", async ({ page }) => 
   if (!timeHeaderBox) return;
   expect(Math.abs(timeHeaderBox.y - viewportBox.y)).toBeLessThanOrEqual(2);
   await expect(page.locator(".ic-time-tick").first()).toBeVisible();
+  const firstTickAlignment = await page.locator(".ic-time-tick").first().evaluate((element) => {
+    const rect = element.getBoundingClientRect();
+    const headerRect = element.closest(".ic-time-header")?.getBoundingClientRect();
+    return headerRect ? Math.abs(rect.left - headerRect.left - Number.parseFloat((element as HTMLElement).style.left)) : Number.POSITIVE_INFINITY;
+  });
+  expect(firstTickAlignment).toBeLessThanOrEqual(1);
 
   const topDateHeader = page.locator(`[data-testid="calendar-day-header"][data-date="${topDate}"]`);
+  const topDateBand = page.locator(`[data-testid="calendar-day-header-band"][data-date="${topDate}"]`);
+  const topDateHeaderLine = page.locator(`[data-testid="current-time-day-header-line"][data-date="${topDate}"]`);
   await expect(topDateHeader).toBeVisible();
+  await expect(topDateBand).toBeVisible();
+  await expect(topDateHeaderLine).toBeVisible();
+  const dateLabelBox = await topDateHeader.locator(".ic-date-label").boundingBox();
+  const timelineHeaderBox = await page.locator(".ic-time-header").boundingBox();
+  expect(dateLabelBox).not.toBeNull();
+  expect(timelineHeaderBox).not.toBeNull();
+  if (!dateLabelBox || !timelineHeaderBox) return;
+  expect(timelineHeaderBox.x).toBeGreaterThanOrEqual(dateLabelBox.x + dateLabelBox.width - 1);
   const pinBeforeScroll = await page.locator(".ic-now-pin").boundingBox();
   const lineBeforeScroll = await page.locator(".ic-now-line.is-current").first().boundingBox();
   expect(pinBeforeScroll).not.toBeNull();
@@ -475,10 +721,144 @@ test("keeps the time scale fixed and day dates css-sticky", async ({ page }) => 
     return window.getComputedStyle(element).backgroundColor;
   });
   expect(headerBackground).toBe("rgb(244, 247, 251)");
-  const headerBandBox = await topDateHeader.boundingBox();
+  const leftLabelBorders = await page.evaluate(() => {
+    const shell = document.querySelector<HTMLElement>(".ic-shell");
+    const day = document.querySelector<HTMLElement>(".ic-day");
+    const dayHeader = document.querySelector<HTMLElement>(".ic-day-header");
+    const dayHeaderBand = document.querySelector<HTMLElement>(".ic-day-header-band");
+    const dateLabel = document.querySelector<HTMLElement>(".ic-date-label");
+    const row = document.querySelector<HTMLElement>(".ic-row");
+    const rowLabel = document.querySelector<HTMLElement>(".ic-row-label");
+    const timeHeader = document.querySelector<HTMLElement>(".ic-time-header");
+    const rowGrid = document.querySelector<HTMLElement>(".ic-row-grid");
+    if (!shell || !day || !dayHeader || !dayHeaderBand || !dateLabel || !row || !rowLabel || !timeHeader || !rowGrid) {
+      return null;
+    }
+    const shellStyles = window.getComputedStyle(shell);
+    const dayStyles = window.getComputedStyle(day);
+    const dayHeaderStyles = window.getComputedStyle(dayHeader);
+    const dayHeaderBandStyles = window.getComputedStyle(dayHeaderBand);
+    const dateStyles = window.getComputedStyle(dateLabel);
+    const rowContainerStyles = window.getComputedStyle(row);
+    const rowStyles = window.getComputedStyle(rowLabel);
+    const timeStyles = window.getComputedStyle(timeHeader);
+    const rowGridStyles = window.getComputedStyle(rowGrid);
+    return {
+      shellBorderColor: shellStyles.borderTopColor,
+      shellBorderWidth: shellStyles.borderTopWidth,
+      dayBorderBottomWidth: dayStyles.borderBottomWidth,
+      dayHeaderBackgroundColor: dayHeaderStyles.backgroundColor,
+      dayHeaderBandPosition: dayHeaderBandStyles.position,
+      dayHeaderBandZIndex: dayHeaderBandStyles.zIndex,
+      dayHeaderBandBackgroundColor: dayHeaderBandStyles.backgroundColor,
+      dayHeaderBandBorderBottomColor: dayHeaderBandStyles.borderBottomColor,
+      dayHeaderBandBorderBottomWidth: dayHeaderBandStyles.borderBottomWidth,
+      dateBorderBottomWidth: dateStyles.borderBottomWidth,
+      dateBorderRightColor: dateStyles.borderRightColor,
+      dateBorderRightWidth: dateStyles.borderRightWidth,
+      rowContainerBorderBottomWidth: rowContainerStyles.borderBottomWidth,
+      rowBorderBottomColor: rowStyles.borderBottomColor,
+      rowBorderBottomWidth: rowStyles.borderBottomWidth,
+      rowBorderRightColor: rowStyles.borderRightColor,
+      rowBorderRightWidth: rowStyles.borderRightWidth,
+      timeBorderBottomColor: timeStyles.borderBottomColor,
+      timeBorderBottomWidth: timeStyles.borderBottomWidth,
+      rowGridBorderBottomColor: rowGridStyles.borderBottomColor,
+      rowGridBorderBottomWidth: rowGridStyles.borderBottomWidth,
+      rowGridBorderRightColor: rowGridStyles.borderRightColor,
+      rowGridBorderRightWidth: rowGridStyles.borderRightWidth,
+      rowGridBackgroundImage: rowGridStyles.backgroundImage,
+      rowGridBackgroundPositionX: rowGridStyles.backgroundPositionX
+    };
+  });
+  const cellBorderColor = "rgb(223, 229, 236)";
+  expect(leftLabelBorders).toEqual({
+    shellBorderColor: cellBorderColor,
+    shellBorderWidth: "1px",
+    dayBorderBottomWidth: "0px",
+    dayHeaderBackgroundColor: "rgba(0, 0, 0, 0)",
+    dayHeaderBandPosition: "absolute",
+    dayHeaderBandZIndex: "0",
+    dayHeaderBandBackgroundColor: "rgb(244, 247, 251)",
+    dayHeaderBandBorderBottomColor: cellBorderColor,
+    dayHeaderBandBorderBottomWidth: "1px",
+    dateBorderBottomWidth: "0px",
+    dateBorderRightColor: cellBorderColor,
+    dateBorderRightWidth: "1px",
+    rowContainerBorderBottomWidth: "0px",
+    rowBorderBottomColor: cellBorderColor,
+    rowBorderBottomWidth: "1px",
+    rowBorderRightColor: cellBorderColor,
+    rowBorderRightWidth: "1px",
+    timeBorderBottomColor: cellBorderColor,
+    timeBorderBottomWidth: "1px",
+    rowGridBorderBottomColor: cellBorderColor,
+    rowGridBorderBottomWidth: "1px",
+    rowGridBorderRightColor: cellBorderColor,
+    rowGridBorderRightWidth: "1px",
+    rowGridBackgroundImage: expect.stringContaining(cellBorderColor),
+    rowGridBackgroundPositionX: "8px"
+  });
+  const dayBandStyles = await topDateBand.evaluate((element) => {
+    const styles = window.getComputedStyle(element);
+    return {
+      backgroundColor: styles.backgroundColor,
+      position: styles.position,
+      pointerEvents: styles.pointerEvents,
+      zIndex: styles.zIndex
+    };
+  });
+  const timeHeaderZIndex = await page.locator(".ic-time-header").evaluate((element) => {
+    return Number(window.getComputedStyle(element).zIndex);
+  });
+  const dateLabelZIndex = await topDateHeader.locator(".ic-date-label").evaluate((element) => {
+    return Number(window.getComputedStyle(element).zIndex);
+  });
+  const rowLabelZIndex = await page.locator(".ic-row-label").first().evaluate((element) => {
+    return Number(window.getComputedStyle(element).zIndex);
+  });
+  expect(dayBandStyles.backgroundColor).toBe("rgb(244, 247, 251)");
+  expect(dayBandStyles.position).toBe("absolute");
+  expect(dayBandStyles.pointerEvents).toBe("none");
+  expect(dayBandStyles.zIndex).toBe("0");
+  expect(timeHeaderZIndex).toBeGreaterThan(Number(dayBandStyles.zIndex));
+  expect(dateLabelZIndex).toBeGreaterThan(rowLabelZIndex);
+  expect(dateLabelZIndex).toBeGreaterThan(timeHeaderZIndex);
+  const headerBandBox = await topDateBand.boundingBox();
   expect(headerBandBox).not.toBeNull();
   if (!headerBandBox) return;
+  const headerLineBox = await topDateHeaderLine.boundingBox();
+  expect(headerLineBox).not.toBeNull();
+  if (!headerLineBox) return;
   expect(headerBandBox.width).toBeGreaterThanOrEqual(viewportBox.width - 1);
+  expect(headerBandBox.x).toBeLessThanOrEqual(viewportBox.x + 1);
+  expect(headerBandBox.x + headerBandBox.width).toBeGreaterThanOrEqual(viewportBox.x + viewportBox.width - 1);
+  expect(headerLineBox.x).toBeGreaterThanOrEqual(timelineHeaderBox.x - 1);
+  expect(headerLineBox.y).toBeLessThanOrEqual(headerBandBox.y + 1);
+  expect(headerLineBox.y + headerLineBox.height).toBeGreaterThanOrEqual(headerBandBox.y + headerBandBox.height - 1);
+  const headerLineLayering = await topDateHeaderLine.evaluate((line) => {
+    const band = document.querySelector<HTMLElement>(".ic-day-header-band");
+    const dateLabel = document.querySelector<HTMLElement>(".ic-date-label");
+    const timeHeader = document.querySelector<HTMLElement>(".ic-time-header");
+    const zIndex = (element: Element) => {
+      const parsed = Number.parseInt(window.getComputedStyle(element).zIndex || "0", 10);
+      return Number.isFinite(parsed) ? parsed : 0;
+    };
+    if (!band || !dateLabel || !timeHeader) {
+      return null;
+    }
+    return {
+      headerLineZ: zIndex(line),
+      bandZ: zIndex(band),
+      dateLabelZ: zIndex(dateLabel),
+      timeHeaderZ: zIndex(timeHeader)
+    };
+  });
+  expect(headerLineLayering).not.toBeNull();
+  if (!headerLineLayering) return;
+  expect(headerLineLayering.headerLineZ).toBeGreaterThan(headerLineLayering.bandZ);
+  expect(headerLineLayering.headerLineZ).toBeGreaterThan(headerLineLayering.timeHeaderZ);
+  expect(headerLineLayering.headerLineZ).toBeLessThan(headerLineLayering.dateLabelZ);
   await viewport.evaluate((element) => {
     element.scrollLeft += 420;
   });
@@ -486,6 +866,75 @@ test("keeps the time scale fixed and day dates css-sticky", async ({ page }) => 
   expect(horizontalStickyBox).not.toBeNull();
   if (!horizontalStickyBox) return;
   expect(Math.abs(horizontalStickyBox.x - viewportBox.x)).toBeLessThanOrEqual(2);
+  const stickyLayering = await page.evaluate(() => {
+    const dateLabel = document.querySelector<HTMLElement>(".ic-date-label");
+    const dayHeaderBand = document.querySelector<HTMLElement>(".ic-day-header-band");
+    const timeHeader = document.querySelector<HTMLElement>(".ic-time-header");
+    if (!dateLabel || !dayHeaderBand || !timeHeader) {
+      return null;
+    }
+    const dateBox = dateLabel.getBoundingClientRect();
+    const timeBox = timeHeader.getBoundingClientRect();
+    return {
+      dateCoversTimeHeader: timeBox.left < dateBox.right,
+      dayBandZ: window.getComputedStyle(dayHeaderBand).zIndex,
+      dayBandPointerEvents: window.getComputedStyle(dayHeaderBand).pointerEvents,
+      dateLayerZ: Number(window.getComputedStyle(dateLabel).zIndex),
+      timeLayerZ: Number(window.getComputedStyle(timeHeader).zIndex),
+      dateBackground: window.getComputedStyle(dateLabel).backgroundColor,
+      timeHeaderClipPath: window.getComputedStyle(timeHeader).clipPath,
+      clipVariable: window.getComputedStyle(timeHeader.closest(".ic-viewport") ?? timeHeader).getPropertyValue("--ic-time-header-clip-left")
+    };
+  });
+  expect(stickyLayering).toEqual({
+    dateCoversTimeHeader: true,
+    dayBandZ: "0",
+    dayBandPointerEvents: "none",
+    dateLayerZ: expect.any(Number),
+    timeLayerZ: expect.any(Number),
+    dateBackground: "rgb(244, 247, 251)",
+    timeHeaderClipPath: "none",
+    clipVariable: ""
+  });
+  expect(stickyLayering?.dateLayerZ ?? 0).toBeGreaterThan(stickyLayering?.timeLayerZ ?? 0);
+
+  const timeLabelVisibility = await page.evaluate(() => {
+    const viewport = document.querySelector<HTMLElement>(".ic-viewport")?.getBoundingClientRect();
+    const dateLabel = document.querySelector<HTMLElement>(".ic-date-label")?.getBoundingClientRect();
+    const timeHeader = document.querySelector<HTMLElement>(".ic-time-header");
+    const dayHeaderBand = document.querySelector<HTMLElement>(".ic-day-header-band");
+    if (!viewport || !dateLabel || !timeHeader || !dayHeaderBand) {
+      return null;
+    }
+    const visibleTick = Array.from(document.querySelectorAll<HTMLElement>(".ic-time-tick")).find((tick) => {
+      const box = tick.getBoundingClientRect();
+      return box.width > 0 && box.height > 0 && box.left > dateLabel.right + 8 && box.left < viewport.right - 20;
+    });
+    if (!visibleTick) {
+      return null;
+    }
+    return {
+      text: visibleTick.textContent?.trim() ?? "",
+      tickColor: window.getComputedStyle(visibleTick).color,
+      tickOpacity: window.getComputedStyle(visibleTick).opacity,
+      tickDisplay: window.getComputedStyle(visibleTick).display,
+      tickVisibility: window.getComputedStyle(visibleTick).visibility,
+      timeHeaderZ: Number(window.getComputedStyle(timeHeader).zIndex),
+      dayBandZ: window.getComputedStyle(dayHeaderBand).zIndex,
+      dayBandBackground: window.getComputedStyle(dayHeaderBand).backgroundColor
+    };
+  });
+  expect(timeLabelVisibility).toEqual({
+    text: expect.stringMatching(/\d+/),
+    tickColor: "rgb(31, 41, 55)",
+    tickOpacity: "1",
+    tickDisplay: "block",
+    tickVisibility: "visible",
+    timeHeaderZ: expect.any(Number),
+    dayBandZ: "0",
+    dayBandBackground: "rgb(244, 247, 251)"
+  });
+  expect(timeLabelVisibility?.timeHeaderZ ?? 0).toBeGreaterThan(Number(timeLabelVisibility?.dayBandZ ?? 0));
 
   await viewport.evaluate((element) => {
     element.scrollTop += 80;
@@ -494,6 +943,197 @@ test("keeps the time scale fixed and day dates css-sticky", async ({ page }) => 
   expect(stickyDateBox).not.toBeNull();
   if (!stickyDateBox) return;
   expect(Math.abs(stickyDateBox.y - viewportBox.y)).toBeLessThanOrEqual(2);
+  const dayHeaderPaintsAfterRows = await page.locator(`[data-testid="calendar-day"][data-date="${topDate}"]`).evaluate((element) => {
+    return element.lastElementChild?.classList.contains("ic-day-header") ?? false;
+  });
+  expect(dayHeaderPaintsAfterRows).toBe(true);
+
+  await page.getByTestId("zoom-slider").fill("4");
+  await viewport.evaluate((element) => {
+    const currentLine = document.querySelector<HTMLElement>(".ic-now-line.is-current") ?? document.querySelector<HTMLElement>(".ic-now-line");
+    const rowLabel = document.querySelector<HTMLElement>(".ic-row-label");
+    const rowGrid = currentLine?.closest<HTMLElement>(".ic-row-grid");
+    if (!currentLine || !rowLabel || !rowGrid) {
+      return;
+    }
+    element.scrollLeft = Math.max(
+      0,
+      Number.parseFloat(rowGrid.style.left) +
+        Number.parseFloat(currentLine.style.left) -
+        rowLabel.getBoundingClientRect().width / 2
+    );
+    element.dispatchEvent(new Event("scroll"));
+  });
+
+  const markerLayering = await page.evaluate(() => {
+    const currentLine = document.querySelector<HTMLElement>(".ic-now-line.is-current") ?? document.querySelector<HTMLElement>(".ic-now-line");
+    const rowLabel = document.querySelector<HTMLElement>(".ic-row-label");
+    const rowGrid = document.querySelector<HTMLElement>(".ic-row-grid");
+    const dayHeader = document.querySelector<HTMLElement>(".ic-day-header");
+    const dateLabel = document.querySelector<HTMLElement>(".ic-date-label");
+    const timeHeader = document.querySelector<HTMLElement>(".ic-time-header");
+    const eventShell = document.querySelector<HTMLElement>('[data-testid="calendar-event"], [data-testid="availability-event"]');
+    const timeTick = document.querySelector<HTMLElement>(".ic-time-tick");
+    const nowPin = document.querySelector<HTMLElement>(".ic-now-pin");
+    const nowHeaderLine = document.querySelector<HTMLElement>(".ic-now-header-line");
+    if (!currentLine || !rowLabel || !rowGrid || !dayHeader || !dateLabel || !timeHeader || !timeTick || !nowPin || !nowHeaderLine) {
+      return null;
+    }
+
+    const currentLineBox = currentLine.getBoundingClientRect();
+    const rowLabelBox = rowLabel.getBoundingClientRect();
+    const dateLabelBox = dateLabel.getBoundingClientRect();
+    const zIndex = (element: Element) => {
+      const parsed = Number.parseInt(window.getComputedStyle(element).zIndex || "0", 10);
+      return Number.isFinite(parsed) ? parsed : 0;
+    };
+    return {
+      lineLeft: currentLineBox.left,
+      lineRight: currentLineBox.right,
+      rowLabelLeft: rowLabelBox.left,
+      rowLabelRight: rowLabelBox.right,
+      dateLabelRight: dateLabelBox.right,
+      currentLineZ: zIndex(currentLine),
+      rowLabelZ: zIndex(rowLabel),
+      dateLabelZ: zIndex(dateLabel),
+      rowGridZ: zIndex(rowGrid),
+      eventShellZ: eventShell ? zIndex(eventShell) : 0,
+      nowPinZ: zIndex(nowPin),
+      nowHeaderLineZ: zIndex(nowHeaderLine),
+      timeTickZ: zIndex(timeTick)
+    };
+  });
+  expect(markerLayering).not.toBeNull();
+  if (!markerLayering) return;
+  expect(markerLayering.lineLeft).toBeLessThan(markerLayering.rowLabelRight);
+  expect(markerLayering.lineRight).toBeGreaterThan(markerLayering.rowLabelLeft);
+  expect(markerLayering.currentLineZ).toBeLessThan(markerLayering.rowLabelZ);
+  expect(markerLayering.currentLineZ).toBeLessThan(markerLayering.dateLabelZ);
+  expect(markerLayering.currentLineZ).toBeGreaterThan(markerLayering.rowGridZ);
+  expect(markerLayering.currentLineZ).toBeGreaterThan(markerLayering.eventShellZ);
+  expect(markerLayering.nowPinZ).toBeLessThan(markerLayering.rowLabelZ);
+  expect(markerLayering.nowHeaderLineZ).toBeLessThan(markerLayering.rowLabelZ);
+  expect(markerLayering.nowPinZ).toBeGreaterThan(markerLayering.timeTickZ);
+  expect(markerLayering.nowHeaderLineZ).toBeGreaterThan(markerLayering.timeTickZ);
+});
+
+test("keeps sticky labels above the timeline after high-zoom horizontal scroll", async ({ page }) => {
+  await page.goto("/");
+  await page.getByTestId("zoom-slider").fill("8");
+  await goToWorkday(page, "2026-07-06");
+
+  const viewport = page.locator(".ic-viewport");
+  await viewport.evaluate((element) => {
+    element.scrollLeft = 900;
+    element.scrollTop += 90;
+    element.dispatchEvent(new Event("scroll"));
+  });
+
+  const layering = await page.evaluate(() => {
+    const viewport = document.querySelector<HTMLElement>(".ic-viewport")?.getBoundingClientRect();
+    const timeHeader = document.querySelector<HTMLElement>(".ic-time-header");
+    const dayHeaderBand = document.querySelector<HTMLElement>(".ic-day-header-band");
+    const rowGrid = document.querySelector<HTMLElement>(".ic-row-grid");
+    if (!viewport || !timeHeader || !dayHeaderBand || !rowGrid) {
+      return null;
+    }
+    const dateLabel = Array.from(document.querySelectorAll<HTMLElement>(".ic-date-label")).find((label) => {
+      const box = label.getBoundingClientRect();
+      return box.bottom > viewport.top && box.top < viewport.top + 60;
+    });
+    const rowLabel = Array.from(document.querySelectorAll<HTMLElement>(".ic-row-label")).find((label) => {
+      const box = label.getBoundingClientRect();
+      return box.top > viewport.top + 45 && box.bottom < viewport.bottom;
+    });
+    if (!dateLabel || !rowLabel) {
+      return null;
+    }
+
+    const dateBox = dateLabel.getBoundingClientRect();
+    const rowBox = rowLabel.getBoundingClientRect();
+    const topAtDate = document.elementFromPoint(dateBox.left + Math.min(dateBox.width / 2, 90), dateBox.top + dateBox.height / 2);
+    const topAtRowLabel = document.elementFromPoint(rowBox.left + Math.min(rowBox.width / 2, 90), rowBox.top + rowBox.height / 2);
+    const visibleTick = Array.from(document.querySelectorAll<HTMLElement>(".ic-time-tick")).find((tick) => {
+      const tickBox = tick.getBoundingClientRect();
+      const styles = window.getComputedStyle(tick);
+      return (
+        tick.textContent?.trim() &&
+        styles.visibility === "visible" &&
+        styles.display !== "none" &&
+        tickBox.left > dateBox.right + 16 &&
+        tickBox.left < viewport.right - 20 &&
+        tickBox.top >= viewport.top &&
+        tickBox.bottom <= viewport.top + dateBox.height
+      );
+    });
+    const tickBox = visibleTick?.getBoundingClientRect();
+    const zIndex = (element: Element) => {
+      const parsed = Number.parseInt(window.getComputedStyle(element).zIndex || "0", 10);
+      return Number.isFinite(parsed) ? parsed : 0;
+    };
+
+    return {
+      dateIsStickyLeft: Math.abs(dateBox.left - viewport.left) <= 2,
+      rowLabelIsStickyLeft: Math.abs(rowBox.left - viewport.left) <= 2,
+      dateLayerIsTop: Boolean(topAtDate?.closest(".ic-date-label")),
+      rowLabelLayerIsTop: Boolean(topAtRowLabel?.closest(".ic-row-label")),
+      dateLabelZ: zIndex(dateLabel),
+      rowLabelZ: zIndex(rowLabel),
+      timeHeaderZ: zIndex(timeHeader),
+      dayBandZ: zIndex(dayHeaderBand),
+      dayBandPosition: window.getComputedStyle(dayHeaderBand).position,
+      dayBandBackground: window.getComputedStyle(dayHeaderBand).backgroundColor,
+      rowGridZ: zIndex(rowGrid),
+      visibleTickText: visibleTick?.textContent?.trim() ?? "",
+      visibleTickLeft: tickBox?.left ?? 0,
+      labelRight: dateBox.right
+    };
+  });
+
+  expect(layering).toEqual({
+    dateIsStickyLeft: true,
+    rowLabelIsStickyLeft: true,
+    dateLayerIsTop: true,
+    rowLabelLayerIsTop: true,
+    dateLabelZ: expect.any(Number),
+    rowLabelZ: expect.any(Number),
+    timeHeaderZ: expect.any(Number),
+    dayBandZ: 0,
+    dayBandPosition: "absolute",
+    dayBandBackground: "rgb(244, 247, 251)",
+    rowGridZ: expect.any(Number),
+    visibleTickText: expect.stringMatching(/\d+/),
+    visibleTickLeft: expect.any(Number),
+    labelRight: expect.any(Number)
+  });
+  expect(layering?.dateLabelZ ?? 0).toBeGreaterThan(layering?.timeHeaderZ ?? 0);
+  expect(layering?.rowLabelZ ?? 0).toBeGreaterThan(layering?.timeHeaderZ ?? 0);
+  expect(layering?.timeHeaderZ ?? 0).toBeGreaterThan(layering?.dayBandZ ?? 0);
+  expect(layering?.timeHeaderZ ?? 0).toBeGreaterThan(layering?.rowGridZ ?? 0);
+  expect(layering?.visibleTickLeft ?? 0).toBeGreaterThan((layering?.labelRight ?? 0) + 16);
+
+  const dateRowOverlaps = await page.evaluate(() => {
+    const viewport = document.querySelector<HTMLElement>(".ic-viewport")?.getBoundingClientRect();
+    if (!viewport) {
+      return ["missing viewport"];
+    }
+
+    return Array.from(document.querySelectorAll<HTMLElement>('[data-testid="calendar-day"]')).flatMap((day) => {
+      const date = day.dataset.date ?? "";
+      const dateLabel = day.querySelector<HTMLElement>(".ic-date-label");
+      const firstRowLabel = day.querySelector<HTMLElement>(".ic-row-label");
+      if (!dateLabel || !firstRowLabel) {
+        return [];
+      }
+      const dateBox = dateLabel.getBoundingClientRect();
+      const rowBox = firstRowLabel.getBoundingClientRect();
+      const isVisible = dateBox.bottom > viewport.top && dateBox.top < viewport.bottom && rowBox.bottom > viewport.top && rowBox.top < viewport.bottom;
+      const isPinnedAtViewportTop = Math.abs(dateBox.top - viewport.top) <= 2;
+      const overlapsFirstRow = dateBox.bottom > rowBox.top + 1;
+      return isVisible && !isPinnedAtViewportTop && overlapsFirstRow ? [`${date}: ${Math.round(dateBox.bottom - rowBox.top)}px`] : [];
+    });
+  });
+  expect(dateRowOverlaps).toEqual([]);
 });
 
 test("drops minor time labels at dense zoom levels", async ({ page }) => {
@@ -501,9 +1141,18 @@ test("drops minor time labels at dense zoom levels", async ({ page }) => {
   const minuteLabelsAtDefaultZoom = await page.locator(".ic-time-tick:not(.is-hour)").evaluateAll((elements) =>
     elements.map((element) => element.textContent?.trim()).filter(Boolean)
   );
-  expect(minuteLabelsAtDefaultZoom).toContain("15");
   expect(minuteLabelsAtDefaultZoom).toContain("30");
-  expect(minuteLabelsAtDefaultZoom).toContain("45");
+  expect(minuteLabelsAtDefaultZoom).not.toContain("15");
+  expect(minuteLabelsAtDefaultZoom).not.toContain("45");
+  await expect(page.locator(".ic-time-tick sup").first()).toHaveText("30");
+
+  await page.getByTestId("zoom-slider").fill("2");
+  const minuteLabelsAtReadableZoom = await page.locator(".ic-time-tick:not(.is-hour)").evaluateAll((elements) =>
+    elements.map((element) => element.textContent?.trim()).filter(Boolean)
+  );
+  expect(minuteLabelsAtReadableZoom).toContain("15");
+  expect(minuteLabelsAtReadableZoom).toContain("30");
+  expect(minuteLabelsAtReadableZoom).toContain("45");
 
   await page.getByTestId("zoom-slider").fill("0.5");
 
@@ -539,6 +1188,25 @@ test("lets external event renderers adapt content to short heights with CSS", as
       </article>
     `;
     document.body.append(fixture);
+
+    const iconFixture = document.createElement("div");
+    iconFixture.style.position = "fixed";
+    iconFixture.style.left = "160px";
+    iconFixture.style.bottom = "20px";
+    iconFixture.style.width = "130px";
+    iconFixture.style.height = "16px";
+    iconFixture.className = "ic-event-shell";
+    iconFixture.innerHTML = `
+      <article class="demo-event-card" data-testid="icon-event-fixture">
+        <strong class="demo-event-title">
+          <svg data-testid="compact-event-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 6h10v12H4z"></path>
+          </svg>
+          Phone Consultation
+        </strong>
+      </article>
+    `;
+    document.body.append(iconFixture);
   });
 
   const patientDisplay = await page.locator(".demo-event-patient").last().evaluate((element) => {
@@ -562,6 +1230,60 @@ test("lets external event renderers adapt content to short heights with CSS", as
     }
   });
   await expect(page.locator(".demo-event-time").last()).toHaveCSS("display", "flex");
+  const compactIconBox = await page.getByTestId("compact-event-icon").boundingBox();
+  expect(compactIconBox).not.toBeNull();
+  expect(compactIconBox?.width ?? 0).toBeGreaterThanOrEqual(9);
+  expect(compactIconBox?.height ?? 0).toBeGreaterThanOrEqual(9);
+});
+
+test("expands compact single-lane events on hover so renderer details fit", async ({ page }) => {
+  await page.goto("/");
+  await page.getByTestId("scale-select").selectOption("100");
+  await goToWorkday(page);
+
+  const compactEvent = await firstCompactSingleLaneEvent(page);
+  const eventSelector = `[data-testid="calendar-event"][data-event-id="${compactEvent.id}"][data-calendar-id="${compactEvent.calendarId}"]`;
+  const cardSelector = `${eventSelector} .demo-event-card`;
+  await expect(page.locator(`${eventSelector} .demo-event-time`)).toHaveCSS("display", "none");
+  const titleFontSizeBeforeHover = await page.locator(`${eventSelector} .demo-event-title`).evaluate((element) => {
+    return window.getComputedStyle(element).fontSize;
+  });
+  const justifyContentBeforeHover = await page.locator(cardSelector).evaluate((element) => {
+    return window.getComputedStyle(element).justifyContent;
+  });
+
+  await page.mouse.move(compactEvent.x + Math.min(20, compactEvent.width / 2), compactEvent.y + compactEvent.height / 2);
+  await expect(page.locator(`${eventSelector}:has([data-render-status="hovered"])`)).toBeVisible();
+  await expect(page.locator(`${eventSelector}:has([data-render-status="hovered"]) .demo-event-time`)).toHaveCSS("display", "flex");
+  await expect(page.locator(`${eventSelector}:has([data-render-status="hovered"]) .demo-event-title`)).toHaveCSS("font-size", titleFontSizeBeforeHover);
+  await expect(page.locator(`${eventSelector}:has([data-render-status="hovered"]) .demo-event-card`)).toHaveCSS(
+    "justify-content",
+    justifyContentBeforeHover
+  );
+  const hoveredHeight = await page.locator(`${eventSelector}:has([data-render-status="hovered"])`).evaluate((element) => {
+    return element.getBoundingClientRect().height;
+  });
+  expect(hoveredHeight).toBeLessThanOrEqual(compactEvent.rowHeight);
+  expect(hoveredHeight).toBe(compactEvent.laneHeight);
+  expect(hoveredHeight).toBeGreaterThan(compactEvent.height);
+});
+
+test("expands overlapped event shells to the full row lane height on hover", async ({ page }) => {
+  await page.goto("/");
+  await page.getByTestId("scale-select").selectOption("20000");
+  await goToWorkday(page);
+
+  const event = await firstExpandableOverlappedEvent(page);
+  const eventSelector = `[data-testid="calendar-event"][data-event-id="${event.id}"][data-calendar-id="${event.calendarId}"]`;
+  await page.mouse.move(event.x + Math.min(20, event.width / 2), event.y + event.height / 2);
+  await expect(page.locator(`${eventSelector}:has([data-render-status="hovered"])`)).toBeVisible();
+
+  const hoveredHeight = await page.locator(`${eventSelector}:has([data-render-status="hovered"])`).evaluate((element) => {
+    return element.getBoundingClientRect().height;
+  });
+  expect(hoveredHeight).toBeGreaterThan(event.height);
+  expect(hoveredHeight).toBeGreaterThan(event.laneHeight);
+  expect(hoveredHeight).toBeCloseTo(event.rowHeight, 0);
 });
 
 test("uses card left accent borders without calendar row color strips", async ({ page }) => {
@@ -621,13 +1343,13 @@ test("supports availability editing mode", async ({ page }) => {
       const rowBox = row.getBoundingClientRect();
       const gridBox = grid.getBoundingClientRect();
       const isVisible = rowBox.y >= viewport.y + 90 && rowBox.bottom <= viewport.bottom;
-      const hasEmptySpaceAfter = availabilityBox.right + 160 < gridBox.right;
+      const hasEmptySpaceAfter = availabilityBox.right + 40 < gridBox.right;
       if (!isVisible || !hasEmptySpaceAfter) continue;
 
       const startX = availabilityBox.right + 24;
       return {
         startX,
-        endX: startX + 120,
+        endX: startX + 30,
         y: rowBox.y + rowBox.height / 2
       };
     }
@@ -775,16 +1497,51 @@ test("supports drawing a new event area", async ({ page }) => {
   expect(box).not.toBeNull();
   if (!box) return;
 
+  const targetRowBeforeDraft = await page.evaluate(({ x, y }) => {
+    const row = document.elementFromPoint(x, y)?.closest<HTMLElement>('[data-testid="calendar-row"]');
+    const grid = row?.querySelector<HTMLElement>(".ic-row-grid");
+    return row && grid
+      ? {
+          height: row.getBoundingClientRect().height,
+          eventCount: grid.dataset.eventCount ?? ""
+        }
+      : null;
+  }, { x: box.x + 310, y: box.y + 90 });
+  expect(targetRowBeforeDraft).not.toBeNull();
+  if (!targetRowBeforeDraft) return;
+
+  await selectPageText(page);
   await page.mouse.move(box.x + 310, box.y + 90);
   await page.mouse.down();
   await page.mouse.move(box.x + 650, box.y + 90);
   await expect(page.getByTestId("draft-event")).toBeVisible();
+  await expect(page.getByTestId("draft-event").locator(".demo-event-card")).toHaveCSS("opacity", "1");
+  await expect(page.getByTestId("draft-event").locator(".demo-event-card")).toHaveCSS("background-color", "rgb(220, 252, 231)");
+  await expect(page.getByTestId("draft-event").locator(".demo-event-time")).toHaveCSS("display", "flex");
+  await expect(page.locator("body")).toHaveCSS("user-select", "none");
+  await expect(page.locator("html")).toHaveCSS("user-select", "none");
+  expect(await page.evaluate(() => window.getSelection()?.toString() ?? "")).toBe("");
   await expect
     .poll(async () => {
       const draftBox = await page.getByTestId("draft-event").boundingBox();
       return draftBox?.width ?? 0;
     })
     .toBeGreaterThan(250);
+  const targetRowDuringDraft = await page.evaluate(({ x, y }) => {
+    const row = document.elementFromPoint(x, y)?.closest<HTMLElement>('[data-testid="calendar-row"]');
+    const grid = row?.querySelector<HTMLElement>(".ic-row-grid");
+    return row && grid
+      ? {
+          height: row.getBoundingClientRect().height,
+          eventCount: grid.dataset.eventCount ?? ""
+        }
+      : null;
+  }, { x: box.x + 310, y: box.y + 90 });
+  expect(targetRowDuringDraft).toEqual(targetRowBeforeDraft);
+  const hoverTarget = await firstViewportEventBox(page);
+  await page.mouse.move(hoverTarget.x + Math.min(hoverTarget.width / 2, 20), hoverTarget.y + hoverTarget.height / 2);
+  await expect(page.getByTestId("draft-event")).toBeVisible();
+  expect(await page.locator('[data-render-status="hovered"]').count()).toBe(0);
   await page.mouse.up();
   await expect(page.getByTestId("demo-message")).toContainText("Created new event");
   await expect(page.getByTestId("draft-event")).toHaveCount(0);
@@ -792,18 +1549,26 @@ test("supports drawing a new event area", async ({ page }) => {
   expect(await page.getByTestId("calendar-event").count()).toBeGreaterThan(initialEventCount);
 });
 
-test("does not start event creation from calendar labels", async ({ page }) => {
+test("does not start event creation outside row grid cells", async ({ page }) => {
   await page.goto("/");
   await goToWorkday(page);
-  const labelBox = await page.locator(".ic-row-label").first().boundingBox();
-  expect(labelBox).not.toBeNull();
-  if (!labelBox) return;
+  const nonInteractiveTargets = [
+    await page.locator(".ic-row-label").first().boundingBox(),
+    await page.getByTestId("calendar-day-header").first().boundingBox(),
+    await page.getByTestId("time-scale-header").boundingBox()
+  ];
 
-  await page.mouse.move(labelBox.x + 20, labelBox.y + 20);
-  await page.mouse.down();
-  await page.mouse.move(labelBox.x + 80, labelBox.y + 20);
-  await expect(page.getByTestId("draft-event")).toHaveCount(0);
-  await page.mouse.up();
+  for (const targetBox of nonInteractiveTargets) {
+    expect(targetBox).not.toBeNull();
+    if (!targetBox) return;
+
+    await page.mouse.move(targetBox.x + Math.min(24, targetBox.width / 2), targetBox.y + Math.min(20, targetBox.height / 2));
+    await page.mouse.down();
+    await page.mouse.move(targetBox.x + Math.min(90, targetBox.width - 2), targetBox.y + Math.min(20, targetBox.height / 2));
+    await expect(page.getByTestId("draft-event")).toHaveCount(0);
+    await page.mouse.up();
+  }
+
   await expect(page.getByTestId("demo-message")).not.toContainText("Created new event");
 });
 
@@ -813,10 +1578,19 @@ test("supports dragging an event to another time", async ({ page }) => {
   const initialEventCount = await page.getByTestId("calendar-event").count();
   const duplicate = await firstDuplicatedViewportEvent(page);
   const [box] = duplicate.boxes;
+  const gridBox = await page.locator(`[data-testid="calendar-event"][data-event-id="${duplicate.id}"]`).first().evaluate((element) => {
+    const grid = element.closest(".ic-row-grid");
+    const rect = grid?.getBoundingClientRect();
+    return rect ? { left: rect.left, right: rect.right } : null;
+  });
+  expect(gridBox).not.toBeNull();
+  if (!gridBox) return;
+  const targetX = Math.max(gridBox.left + 12, Math.min(box.x + 80, gridBox.right - 12));
 
+  await selectPageText(page);
   await page.mouse.move(box.x + 12, box.y + 12);
   await page.mouse.down();
-  await page.mouse.move(box.x + 110, box.y + 12);
+  await page.mouse.move(targetX, box.y + 12);
   await expect(page.getByTestId("drag-preview-event").first()).toBeVisible();
   await expect(page.locator(`[data-testid="calendar-event"][data-event-id="${duplicate.id}"] [data-render-status="dragging"]`)).toHaveCount(
     duplicate.boxes.length
@@ -824,6 +1598,9 @@ test("supports dragging an event to another time", async ({ page }) => {
   expect(await page.getByTestId("drag-preview-event").count()).toBeGreaterThanOrEqual(duplicate.boxes.length);
   await expect(page.locator('[data-render-status="dragging"]').first()).toHaveCSS("opacity", "0.5");
   await expect(page.locator(".ic-viewport")).toHaveCSS("user-select", "none");
+  await expect(page.locator("body")).toHaveCSS("user-select", "none");
+  await expect(page.locator("html")).toHaveCSS("user-select", "none");
+  expect(await page.evaluate(() => window.getSelection()?.toString() ?? "")).toBe("");
   expect(await page.locator('[data-render-status="hovered"]').count()).toBe(0);
   expect(await page.getByTestId("calendar-event").count()).toBe(initialEventCount);
   await page.mouse.up();

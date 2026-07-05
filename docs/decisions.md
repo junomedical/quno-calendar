@@ -37,10 +37,10 @@ Events support optional `calendarIds` in addition to the backward-compatible `ca
 Calendar row labels do not use colored left strips. Event cards carry the color code with a thicker left border via `--event-accent`, which better matches the reference appointment-card design and keeps resource labels visually quieter.
 
 ## 013 - Dense Overlaps Grow Rows
-Mini-lanes remain compact through three overlapping events. Above that threshold, row height grows by a fixed increment per extra lane so dense overlap groups remain readable without animating neighboring cards. If overlap density still exceeds the available row height, event mini-lanes keep shrinking instead of enforcing a large minimum height that would overflow.
+Compact rows default to 50px. Overlapping rows grow on a fixed ladder, but the final height is also clamped to at least 24px per overlap lane. Resting event shells are inset 2px from the top and bottom of their mini-lane, so dense event shells stay at least 20px tall and neighboring resting lanes do not touch. Hovered event shells expand to the full calendar row lane height with a higher z-index, matching the interaction design where the focused appointment becomes readable without permanently resizing the row.
 
-## 014 - Time Scale Owns The Top Sticky Layer
-The time scale has the highest sticky-layer priority and day date bands stick below it. This keeps the horizontal timeline visible while dates remain sticky and avoids duplicating time labels on each day band.
+## 014 - Date Headers Overlay The Time Scale
+The time scale is sticky only on the top axis. Day date headers are sticky on the top axis, but only the left date label stacks above the time scale; the full-width gray day band stays below it so hour and minute labels remain visible. Calendar row labels also stack above horizontally scrolled timeline content. This lets native CSS sticky positioning make left labels cover scrolled timeline content instead of using JavaScript-driven clipping.
 
 ## 015 - Demo Data Is Spread Across All Calendars
 The deterministic generator assigns each event to two calendars chosen from the full demo calendar set. This prevents large dataset scales from clustering into a few rows, proves multi-calendar rendering across doctors and rooms, and keeps the 5,000 and 20,000 events/year smoke tests representative.
@@ -63,6 +63,8 @@ The deterministic demo now generates recurring weekday availability windows per 
 ## 021 - Virtual Scroll Recenters Around The Visible Date
 The infinite vertical scrollbar exposes a bounded two-month window around the current top visible date: one month before and one month after. When scrolling settles, the visible date becomes the new anchor and the scrollbar is moved back into the center of the rebuilt range. This prevents a tiny unusable scrollbar thumb across years of dates while still allowing continuous past/future navigation.
 
+The virtual scroll spacer keeps the month-before/month-after range, but mounted day DOM nodes are capped to the visible range plus five day sections of overscan. This keeps fast nearby scrolls populated while preventing far-away dates inside the scroll range from adding unnecessary browser node pressure.
+
 ## 022 - Recenter Preserves Intra-Day Offset
 Rebuilding the virtual window must preserve both the top visible date and the pixel offset inside that date. Snapping back to the date header makes scroll-end recentering visible, so pending scroll targets store `{ dateKey, offsetWithinDate }` and restore the exact offset after the month window is rebuilt.
 
@@ -72,4 +74,30 @@ Native scrollbar-thumb dragging can complete without another React scroll callba
 Time labels thin out based on available pixel spacing. The view removes 15 and 45 minute labels first, then removes every minute label at the densest scales while keeping hour labels visible. This preserves scanability without overlapping numbers.
 
 ## 024 - Rendering Stats Stay Demo-Only
-The PoC sidebar reports average redraw frame interval and visible event DOM-node count with a throttled browser-side sampler. These stats help evaluate virtualization behavior across dataset scales, but they remain outside the reusable calendar API so production consumers can choose their own instrumentation.
+The PoC sidebar reports average redraw frame interval, visible event DOM-node count, and total rendered calendar DOM-node count with a throttled browser-side sampler. These stats help evaluate virtualization behavior across dataset scales, but they remain outside the reusable calendar API so production consumers can choose their own instrumentation.
+
+## 025 - Infinite Timeline Is Split By Responsibility
+`InfiniteTimelineView` was too large to reason about safely. The first modularization pass splits pure helpers, event shell rendering, row/day rendering, virtual scroll anchoring, day metrics, and async visible-range loading into focused modules. Future work should continue extracting hit-testing, drag/drop, draft drawing, and hover lane selection until orchestration files are close to the 100-200 line target.
+
+## 026 - Source Folders Mirror Product Responsibilities
+The reusable library now groups files by responsibility instead of keeping all implementation files flat under `src/lib`. Public shell/types live in `core`, pure data/date/time/layout/interaction helpers live in their own folders, and infinite-view orchestration, hooks, components, and utilities live under `infinite`. This keeps imports readable and makes architecture documentation map directly to code.
+
+Code modules include short JSDoc plus `@see` links to architecture or refactor docs where the behavior needs more context than a source comment should carry.
+
+## 027 - Styles Follow Ownership Boundaries
+Reusable infinite-calendar styles live with the infinite view and are imported by that module. Demo app chrome and the demo event card keep their own styles outside the library. This keeps the package closer to a reusable component library instead of a demo page with one global stylesheet.
+
+## 028 - Unit Tests Live Outside Source
+Vitest unit tests live under `tests/unit` with paths that mirror the source modules they cover. This keeps shipped source folders focused on library/demo code while preserving a direct mapping from tests back to implementation.
+
+## 029 - Current-Time Marker Does Not Cover Labels
+The current-time marker uses the same timeline coordinate as the grid and stays above grid data, day-header bands, and event cards. Body lines render inside row grids, and day-header marker segments render in the gray day band so the marker is continuous through the calendar zone. Sticky date/calendar labels stay above the marker, so horizontal scroll cannot place the red line, pin, or time labels over label text where the pointed time is no longer visible.
+
+## 030 - Day Headers Paint After Rows
+Each virtual day renders absolute calendar rows first and the sticky day header after them. This keeps the date label visually above row labels while preserving normal row hit-testing and the single sticky time-header layer.
+
+## 031 - Calendar Cells Share One Border Token
+The calendar shell, sticky labels, time header, row dividers, and timeline grid lines use the same 1px gray border token. Each shared edge is owned by one adjacent cell layer to avoid transparent seams or doubled 2px lines during horizontal scrolling.
+
+## 032 - Drafts Do Not Recalculate Row Layout
+New-event drafts are visual overlays in the target row. They do not enter committed row event lists, overlap lane assignment, row-height metrics, or virtual day resizing while the pointer is moving. Once creation is accepted and inserted into loaded events, the committed event participates in normal row layout recalculation.

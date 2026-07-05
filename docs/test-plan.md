@@ -1,9 +1,12 @@
 # Test Plan
 
 ## Unit Tests
+Vitest unit tests live in `tests/unit` and mirror the source module grouping.
+
 - Date virtualization with excluded weekdays.
+- Virtual scroll window behavior remains covered through existing date virtualization unit tests and Playwright scroll tests after extraction into `useVirtualTimelineWindow`.
 - Time-to-pixel conversion, zoom, and snap interval.
-- Event overlap lane layout, row-height growth above three lanes, and continued mini-lane shrinking for dense groups.
+- Event overlap lane layout, 50px compact row height, stepped overlap growth, at least 24px lane slots, and at least 20px visible resting event shells for dense groups.
 - Row-height growth remains local to the dense date/calendar row instead of inflating every loaded day.
 - Availability events are excluded from row-height growth and overlap calculations.
 - Availability editing mode switches pointer activity from appointments to availability blocks.
@@ -20,27 +23,31 @@
 
 ## Playwright Tests
 - Initial demo render.
-- Demo sidebar rendering stats populate frame redraw time and visible event DOM-node count.
+- Demo sidebar rendering stats populate frame redraw time, visible event DOM-node count, and total rendered calendar DOM-node count.
 - Vertical virtual scrolling changes visible dates.
+- Rendered day DOM nodes are pruned to the visible viewport plus five day sections of overscan.
 - Vertical scrollbar dragging is bounded to one month before/after the visible date and recenters around the new visible date after scroll end.
 - Scroll-end recentering preserves the intra-day pixel offset, so a user scrolled partway into a date stays partway into that same date.
 - Native scrollbar-thumb completion resets the scrollbar thumb back near the center of the rebuilt virtual window.
-- The `0.5-8` zoom slider and `Shift` + wheel change timeline scale without also scrolling the calendar.
+- The `0.5-8` zoom slider and `Shift` + wheel change timeline scale without also scrolling the calendar viewport or browser window.
 - Zoom values above `6` switch the timeline row grid and time labels from 15-minute to 5-minute cadence.
 - Dense zoom levels progressively hide minor time labels so 15/45 disappear first and minute labels disappear entirely before labels overlap.
+- Sticky-header visual artefacts are covered: dates stay pinned to the top, the absolute day-header band does not create an extra visual row or overlap the first calendar row, day header background fills across the timeline below the time scale, sticky date labels and calendar row labels cover horizontally scrolled timeline content through CSS layering instead of JavaScript clipping, visible hour/minute labels remain painted above the day band at high zoom, current-time markers stay out of date/calendar names while layering above calendar data and the gray day band, and calendar cells share one 1px gray border color without doubled sticky-label seams.
 - Dataset scale can switch to 20,000 events per year.
 - Large dataset scales keep events visible and hoverable instead of clustering into a few calendars.
 - At 20,000 events/year, hovering visible events keeps them visible and rendered row heights vary locally according to overlap density.
-- Bottom-lane overlapped cards expand to a readable height on hover.
+- Overlapped cards expand to the full calendar row lane height on hover while resting shells keep a 4px mini-lane gap.
 - Visible day boxes do not overlap adjacent date rows when variable row heights are measured.
 - Availability renders as a background layer while draft/new event drawing can occur on top.
 - Availability editing mode makes appointments inactive background blocks, supports drawing new availability, and supports dragging an existing availability block.
 - Event cards include a visible `H:mm–H:mm` time range line.
-- Compact event cards hide the time line when three lines do not fit and reveal it once the card has enough hover-expanded height.
+- Compact event cards hide the time line when three lines do not fit and reveal it once the card has enough hover-expanded height, including single non-overlapping events in compact rows, without reducing hover typography, changing vertical text alignment, or hiding title icons.
 - Date navigation can jump to a specific date and back to today.
-- Calendar count changes preserve the visible day while day height changes.
-- Drawing a new event area renders an uncapped-width draft, commits creation, and leaves the created event visible after mouse-up.
+- Date/time navigation can jump vertically to a date and horizontally to a requested time.
+- Calendar count changes preserve the visible day and the intra-day offset while day height changes.
+- Drawing a new event area renders an opaque uncapped-width draft with visible time text without changing row height, lane layout, or committed row event count, then commits creation and leaves the created event visible after mouse-up.
 - Multi-calendar events focus only the hovered row instance, while dragging renders drag/drop previews in every proposed row.
+- Drawing and drag/drop clear existing browser text selection, suppress new selection, and suppress other event hover effects while the interaction is active.
 - Event resize/focus changes are not animated.
 - Event cards show a thick left accent border while row labels remain uncolored.
 - Dragging an event produces parent-side accept/reject feedback.

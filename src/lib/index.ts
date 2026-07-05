@@ -1,4 +1,4 @@
-export { CalendarRoot } from "./CalendarRoot";
-export { InfiniteTimelineView } from "./InfiniteTimelineView";
-export * from "./calendarEvents";
-export * from "./types";
+export { CalendarRoot } from "./core/CalendarRoot";
+export { InfiniteTimelineView } from "./infinite/InfiniteTimelineView";
+export * from "./data/calendarEvents";
+export * from "./core/types";

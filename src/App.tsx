@@ -3,12 +3,14 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CalendarRoot, type CalendarNavigationHandle, type EventCreateRequest, type EventMoveRequest } from "./lib";
 import { appendCreatedEvent, applyMove, createDemoEvents, createRangeLoader, demoCalendars } from "./demo/data";
 import { DemoEventCard } from "./demo/DemoEventCard";
+import "./App.css";
 
 const scales = [100, 1_000, 5_000, 20_000];
 
 type DemoStats = {
   frameMs: number;
   visibleEventNodes: number;
+  totalCalendarNodes: number;
 };
 
 function initialTimelineBounds() {
@@ -17,6 +19,14 @@ function initialTimelineBounds() {
     startHour: Math.min(8, hour),
     endHour: Math.min(24, Math.max(18, hour + 1))
   };
+}
+
+function timeInputValue(date: Date) {
+  return `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
+}
+
+function dateInputValue(date: Date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 }
 
 function countVisibleEventNodes() {
@@ -33,8 +43,17 @@ function countVisibleEventNodes() {
   ).length;
 }
 
+function countTotalCalendarNodes() {
+  const shell = document.querySelector(".ic-shell");
+  if (!shell) {
+    return 0;
+  }
+
+  return shell.querySelectorAll("*").length + 1;
+}
+
 function DemoStatsPanel() {
-  const [stats, setStats] = useState<DemoStats>({ frameMs: 0, visibleEventNodes: 0 });
+  const [stats, setStats] = useState<DemoStats>({ frameMs: 0, visibleEventNodes: 0, totalCalendarNodes: 0 });
 
   useEffect(() => {
     let animationFrame = 0;
@@ -57,9 +76,11 @@ function DemoStatsPanel() {
         const averageFrameMs =
           frameSamples.length === 0 ? 0 : frameSamples.reduce((total, value) => total + value, 0) / frameSamples.length;
         const visibleEventNodes = countVisibleEventNodes();
+        const totalCalendarNodes = countTotalCalendarNodes();
         setStats({
           frameMs: Number(averageFrameMs.toFixed(1)),
-          visibleEventNodes
+          visibleEventNodes,
+          totalCalendarNodes
         });
       }
 
@@ -80,6 +101,10 @@ function DemoStatsPanel() {
         <dt>Visible event nodes</dt>
         <dd data-testid="stat-visible-events">{stats.visibleEventNodes.toLocaleString()}</dd>
       </div>
+      <div>
+        <dt>Total calendar nodes</dt>
+        <dd data-testid="stat-total-calendar-nodes">{stats.totalCalendarNodes.toLocaleString()}</dd>
+      </div>
     </dl>
   );
 }
@@ -95,6 +120,7 @@ export function App() {
   const [excludeWeekends, setExcludeWeekends] = useState(false);
   const [editAvailabilities, setEditAvailabilities] = useState(false);
   const [jumpDate, setJumpDate] = useState("2026-07-04");
+  const [jumpTime, setJumpTime] = useState("09:00");
   const [events, setEvents] = useState(() => createDemoEvents(1_000));
   const [systemNow, setSystemNow] = useState(() => new Date());
   const eventsRef = useRef(events);
@@ -126,7 +152,7 @@ export function App() {
       zoom,
       snapMinutes,
       excludedWeekdays: excludeWeekends ? [0, 6] : [],
-      rowHeight: 76,
+      rowHeight: 50,
       dayHeaderHeight: 42,
       labelWidth: 230
     }),
@@ -255,7 +281,7 @@ export function App() {
         </label>
 
         <div className="date-jump">
-          <label>
+          <label className="date-jump-date">
             Go to date
             <input
               type="date"
@@ -264,11 +290,22 @@ export function App() {
               data-testid="jump-date-input"
             />
           </label>
+          <label className="date-jump-time">
+            Time
+            <input
+              type="time"
+              value={jumpTime}
+              onChange={(event) => setJumpTime(event.target.value)}
+              data-testid="jump-time-input"
+            />
+          </label>
           <div className="date-jump-actions">
             <button
               type="button"
               onClick={() => {
                 calendarRef.current?.scrollToToday();
+                setJumpDate(dateInputValue(systemNow));
+                setJumpTime(timeInputValue(systemNow));
                 setMessage("Scrolled to today");
               }}
               data-testid="today-button"
@@ -279,8 +316,8 @@ export function App() {
             <button
               type="button"
               onClick={() => {
-                calendarRef.current?.scrollToDate(jumpDate);
-                setMessage(`Scrolled to ${jumpDate}`);
+                calendarRef.current?.scrollToDateTime(jumpDate, jumpTime);
+                setMessage(`Scrolled to ${jumpDate} ${jumpTime}`);
               }}
               data-testid="go-date-button"
             >

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { buildDraftEvent, buildMoveProposal, hitTestCalendar } from "./interactions";
-import type { CalendarEvent, TimelineSettings } from "./types";
+import { buildDraftEvent, buildMoveProposal, hitTestCalendar } from "../../../../src/lib/interaction/interactions";
+import type { CalendarEvent, TimelineSettings } from "../../../../src/lib/core/types";
 
 const settings: TimelineSettings = {
   startHour: 8,

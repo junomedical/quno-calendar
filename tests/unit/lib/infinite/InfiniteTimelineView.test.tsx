@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { CalendarRoot, type CalendarEvent, type EventRendererProps } from ".";
+import { CalendarRoot, type CalendarEvent, type EventRendererProps } from "../../../../src/lib";
 
 const calendars = [
   { id: "calendar-a", name: "Calendar A", color: "#0b6eff" },

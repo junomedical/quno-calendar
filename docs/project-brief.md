@@ -15,7 +15,7 @@ Create a reusable React calendar component that can host multiple views. The fir
 - Drawing on empty calendar space starts a new event draft and calls the parent creation callback.
 - The demo shows dataset scales from 100 to 20,000 events per year.
 - Deterministic demo data is spread across all demo calendars so large scales exercise the full row set.
-- The demo sidebar reports lightweight rendering stats: average frame redraw time and visible event DOM nodes.
+- The demo sidebar reports lightweight rendering stats: average frame redraw time, visible event DOM nodes, and total rendered calendar DOM nodes.
 - Tests cover the core math, rendering contract, and browser interactions.
 
 ## Out of Scope for PoC

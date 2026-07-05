@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { clampEventToTimeline, minuteToX, snapMinute, timelineWidth, xToMinute } from "./time";
+import { clampEventToTimeline, minuteToX, snapMinute, timelineWidth, xToMinute } from "../../../../src/lib/time/time";
 
 describe("timeline math", () => {
   const geometry = { startHour: 8, endHour: 18, zoom: 2, snapMinutes: 15 };

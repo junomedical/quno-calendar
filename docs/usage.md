@@ -1,5 +1,7 @@
 # Library Usage Examples
 
+For canonical names of interface parts such as date header, calendar row, overlap lane, event shell, and event card, see [Interface Taxonomy](./taxonomy.md).
+
 ## Minimal Read-Only Infinite Calendar
 ```tsx
 import { CalendarRoot, type CalendarEvent, type LoadEvents } from "./lib";
@@ -123,11 +125,16 @@ function CalendarWithNavigation(props) {
       <button type="button" onClick={() => calendarRef.current?.scrollToDate("2026-08-12")}>
         Go to Aug 12
       </button>
+      <button type="button" onClick={() => calendarRef.current?.scrollToDateTime("2026-08-12", "14:30")}>
+        Go to Aug 12, 14:30
+      </button>
       <CalendarRoot ref={calendarRef} {...props} />
     </>
   );
 }
 ```
+
+`scrollToDateTime(dateKey, time)` accepts a `yyyy-MM-dd` date key and an `HH:mm` local time string. The view scrolls vertically to the date and horizontally to the requested time column.
 
 The infinite view keeps vertical scrollbar dragging bounded to nearby dates. From the current top visible date, the scroll range covers one month before and one month after. After scrolling settles, the view recenters the scrollbar around the new top visible date and applies the same one-month bounds again, preserving the pixel offset inside that date so the visible content does not snap to the date header.
 
@@ -158,7 +165,7 @@ function CalendarWithZoom(props) {
 }
 ```
 
-When `onZoomChange` is provided, `Shift` + vertical wheel over the calendar viewport zooms the horizontal time scale and cancels the native scroll action.
+When `onZoomChange` is provided, `Shift` + vertical wheel over the calendar viewport zooms the horizontal time scale and cancels the native scroll action before the calendar viewport or browser window can scroll.
 
 Time labels automatically thin out as zoom becomes dense. Quarter-hour labels render at normal scale, 15/45 labels disappear at medium density, and all minute labels disappear at the tightest scale so only hour labels remain.
 
