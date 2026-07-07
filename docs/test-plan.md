@@ -7,7 +7,7 @@ Vitest unit tests live in `tests/unit` and mirror the source module grouping.
 - Virtual scroll window behavior remains covered through existing date virtualization unit tests and Playwright scroll tests after extraction into `useVirtualTimelineWindow`.
 - Time-to-pixel conversion, vertical time-to-pixel conversion, zoom, and snap interval.
 - Event overlap lane layout, 50px compact row height, stepped overlap growth, at least 24px lane slots, and at least 20px visible resting event shells for dense groups.
-- Vertical overlap column layout, 240px base column width, three-lane fit, and +80px growth for each additional overlap lane.
+- Vertical overlap column layout, default 240px base column width, three-lane fit, +80px growth for each additional overlap lane, and custom caller-provided column sizing rules.
 - Row-height growth remains local to the dense date/calendar row instead of inflating every loaded day.
 - Availability events are excluded from row-height growth and overlap calculations.
 - Availability editing mode switches pointer activity from appointments to availability blocks.
@@ -24,6 +24,7 @@ Vitest unit tests live in `tests/unit` and mirror the source module grouping.
 
 ## Playwright Tests
 - Initial demo render.
+- Demo routes `/demo1`, `/demo2`, and `/demo3` render distinct calendar compositions using route-specific settings, view defaults, and event-card styles while `/` remains the original demo; each variant still supports live orientation and interaction-mode switching.
 - Demo sidebar rendering stats populate frame redraw time, visible event DOM-node count, and total rendered calendar DOM-node count.
 - Vertical virtual scrolling changes visible dates.
 - Rendered day DOM nodes are pruned to the visible viewport plus five day sections of overscan.
@@ -53,7 +54,7 @@ Vitest unit tests live in `tests/unit` and mirror the source module grouping.
 - Event cards show a thick left accent border, standard card backgrounds use a muted version of the same accent color, and row labels remain uncolored.
 - Dragging an event produces parent-side accept/reject feedback.
 - Demo calendar-type switch changes between infinite horizontal and infinite vertical views.
-- Infinite vertical columns fill available space, start at no less than 240px, fit up to three parallel event lanes, and grow by 80px for each additional lane.
+- Infinite vertical columns fill available space, follow `verticalColumnMinWidth`, `verticalColumnOverlapCapacity`, and `verticalColumnOverlapGrowth`, and keep default 240px/three-lane/+80px behavior when callers do not override those settings.
 - Infinite vertical date/doctor headers remain sticky at the top, and widened date/calendar columns keep their doctor-name header cells aligned.
 - Infinite vertical date labels render about 25% smaller than horizontal date labels, with weekday on a second line.
 - Infinite vertical time pane and date cell remain sticky on the left during horizontal scroll, with the left pane 30% narrower than the horizontal-view label width.
@@ -61,7 +62,7 @@ Vitest unit tests live in `tests/unit` and mirror the source module grouping.
 - Infinite vertical time labels render hours as `H:00` and minor labels as minute numbers.
 - Infinite vertical first and last hour positions keep 8px of padding inside the day board.
 - Infinite vertical zoom increases day/time height and uses the shared adaptive time-label cadence.
-- Infinite vertical zoom changes keep the current visible date anchored, including large zoom-out changes from late in the day.
+- Infinite vertical zoom changes keep the current visible date anchored, including large zoom-out changes from late in the day and gesture zoom that changes virtual day height while the scroll monitor is active.
 - Infinite vertical current-time marker renders as one horizontal line on today only when `now` is inside enabled hours.
 - Infinite vertical hovered appointments expand to the full calendar column width and a minimum readable height for three-line cards.
 - Infinite vertical hover can pass through an expanded card to focus another underlying overlap lane.

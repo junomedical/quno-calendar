@@ -45,7 +45,7 @@ This document defines the names used for visible calendar interface parts and th
 | Row grid cell area | The interactive timeline space inside a calendar row. Event creation and moves start only here. | `.ic-row-grid` |
 | Row height | The full height of one calendar row. It starts compact and grows locally when overlap density requires it. | `rowHeightForEvents` |
 | Calendar column | One vertical resource column inside one day section in the infinite vertical timeline. | `[data-testid="calendar-column"]` |
-| Column width | The rendered width of a calendar column. It starts at 240px, fits up to three parallel events, then grows by 80px per additional overlap lane. | `columnWidthForEvents` |
+| Column width | The rendered width of a calendar column. It starts at `settings.verticalColumnMinWidth`, fits `settings.verticalColumnOverlapCapacity` parallel events, then grows by `settings.verticalColumnOverlapGrowth` per additional overlap lane. | `columnWidthForEvents` |
 | Overlap lane | A mini-lane inside a calendar row used to separate overlapping event shells at rest. | `lane`, `laneCount` |
 | Lane slot | The vertical allocation for one overlap lane. Dense rows keep each slot at least 24px. | `laneHeight` |
 | Resting shell gap | The 2px top and 2px bottom inset inside a lane slot, so neighboring resting event shells do not touch. | `layoutEventsForRow` |

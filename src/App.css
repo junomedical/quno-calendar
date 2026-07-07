@@ -43,6 +43,29 @@
   font-size: 13px;
 }
 
+.demo-route-nav {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.demo-route-nav a {
+  display: grid;
+  place-items: center;
+  min-height: 32px;
+  padding: 0 8px;
+  color: #d9e8ef;
+  border: 1px solid #287284;
+  border-radius: 6px;
+  font-size: 12px;
+  text-decoration: none;
+}
+
+.demo-route-nav a[aria-current="page"] {
+  color: #10202b;
+  background: #f7fbfc;
+}
+
 .demo-sidebar select,
 .demo-sidebar input[type="number"],
 .demo-sidebar input[type="date"],
@@ -240,6 +263,7 @@
   }
 
   .demo-brand,
+  .demo-route-nav,
   .demo-message {
     grid-column: 1 / -1;
   }

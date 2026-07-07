@@ -44,6 +44,10 @@ export type TimelineSettings = {
   rowHeight: number;
   dayHeaderHeight: number;
   labelWidth: number;
+  verticalColumnMinWidth: number;
+  verticalColumnOverlapCapacity: number;
+  verticalColumnOverlapGrowth: number;
+  verticalEventHoverMinHeight: number;
 };
 
 /** Props passed to custom event card renderers. */
@@ -122,5 +126,9 @@ export const defaultTimelineSettings: TimelineSettings = {
   excludedWeekdays: [],
   rowHeight: 50,
   dayHeaderHeight: 42,
-  labelWidth: 220
+  labelWidth: 220,
+  verticalColumnMinWidth: 240,
+  verticalColumnOverlapCapacity: 3,
+  verticalColumnOverlapGrowth: 80,
+  verticalEventHoverMinHeight: 64
 };

@@ -25,7 +25,9 @@ The infinite view is now decomposed into focused modules:
 - `src/lib/infinite/components`: sticky header, day, row, and event shell render layers.
 - `src/lib/infinite/utils`: infinite-view constants and local pure helpers.
 - `src/lib/infinite/InfiniteTimelineView.css`: reusable calendar shell, grid, sticky-label, marker, and event-shell styles imported by the infinite view.
-- `src/App.css` and `src/demo/DemoEventCard.css`: demo-only app chrome and demo renderer styles.
+- `src/App.css`, `src/demo/DefaultDemo.tsx`, `src/demo/DemoEventCard.css`, and `src/demo/demo*/`: demo-only app chrome, route variants, and renderer styles.
+
+The demo app composes `CalendarRoot` through separate route components. `/` keeps the original PoC controls and renderer, while `/demo1`, `/demo2`, and `/demo3` each own their setup, controls, settings, app chrome, and `eventRenderer` styles inside their folder. Each variant keeps live controls for view orientation, zoom, date navigation, and interaction mode rather than hardcoding a static preview. The variants intentionally share the deterministic event generator but avoid a shared demo shell, demonstrating that compact horizontal boards, wide vertical planners, and availability-first schedules use the same reusable calendar surface without branching inside the library.
 
 ## Core API
 ```tsx
@@ -58,8 +60,8 @@ The infinite timeline renders a two-dimensional projection of dates, calendars, 
 The infinite vertical view uses the same included-date sequence but changes the inner day projection:
 - Each visible date owns one calendar column per selected calendar.
 - The vertical axis inside each date is the configured timeline window, converted with `minuteToY`.
-- The horizontal axis is selected calendars, with each column using a `240px` base minimum.
-- Overlapping timed events split into horizontal lanes inside their calendar column. Each column fits up to three parallel lanes at its base width, then grows by `80px` for each additional lane, allowing horizontal scroll.
+- The horizontal axis is selected calendars, with each column using `settings.verticalColumnMinWidth` as its base minimum.
+- Overlapping timed events split into horizontal lanes inside their calendar column. Each column fits up to `settings.verticalColumnOverlapCapacity` parallel lanes at its base width, then grows by `settings.verticalColumnOverlapGrowth` for each additional lane, allowing horizontal scroll.
 - Availability blocks, drag previews, and drafts render through the same `EventShell` and external `eventRenderer`.
 
 ## Rendering Pipeline
@@ -86,7 +88,7 @@ The infinite view computes visible date keys from the virtual scroll position.
 
 Vertical virtualization is bounded around the current visible anchor date. The scroll spacer range starts one month before the anchor and ends one month after it, but React only mounts the visible day sections plus five day sections of virtual overscan outside the viewport. When vertical scrolling settles, including native scrollbar-thumb drag completion through `scrollend`, the view promotes the current top visible date to the new anchor, rebuilds the month-before/month-after range, and scrolls that date back to the center area of the scrollbar while preserving the pixel offset inside that date. This keeps scrollbar dragging bounded to nearby dates while preserving the infinite-scroll illusion through recentering without a visible content jump.
 
-The top visible date and the pixel offset inside that date are tracked and restored when the selected calendar count changes, because changing row count changes virtual day heights.
+The top visible date and the pixel offset inside that date are tracked and restored when the selected calendar count changes, because changing row count changes virtual day heights. The vertical view uses the same layout-change path for zoom gestures: it snapshots the visible date before requesting `onZoomChange`, cancels pending scroll-end recenter timers, and restores the proportional time offset after the day height changes instead of restoring the obsolete raw `scrollTop`.
 
 ```mermaid
 sequenceDiagram
@@ -142,7 +144,7 @@ flowchart TD
 ```
 
 ### Vertical Column Layout
-The vertical view computes one grid column per selected calendar for each rendered date. Columns fill available width when there is room and start from a `240px` minimum. Timed event overlaps use horizontal lanes inside the column. The first three parallel lanes fit inside the base width; every additional lane adds `80px` to that date/calendar column. The sticky doctor-name header for the same date uses the same grid template as the body columns, so a locally widened column also widens its title cell.
+The vertical view computes one grid column per selected calendar for each rendered date. Columns fill available width when there is room and start from `settings.verticalColumnMinWidth`. Timed event overlaps use horizontal lanes inside the column. `settings.verticalColumnOverlapCapacity` controls how many parallel lanes fit inside the base width; every additional lane adds `settings.verticalColumnOverlapGrowth` to that date/calendar column. The sticky doctor-name header for the same date uses the same grid template as the body columns, so a locally widened column also widens its title cell. Hovered vertical events use `settings.verticalEventHoverMinHeight` as their readable minimum height.
 
 The day height is `settings.dayHeaderHeight + timelineHeight(settings) + 16`, so `settings.zoom` controls vertical pixels per minute while the first and last visible hours each keep an 8px vertical gutter. Changing zoom resizes virtualized day items and keeps the parent as the source of truth through `onZoomChange`.
 

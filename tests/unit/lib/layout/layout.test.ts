@@ -8,7 +8,15 @@ import {
 } from "../../../../src/lib/layout/layout";
 import type { CalendarEvent } from "../../../../src/lib/core/types";
 
-const settings = { startHour: 8, endHour: 18, zoom: 1, rowHeight: 50 };
+const settings = {
+  startHour: 8,
+  endHour: 18,
+  zoom: 1,
+  rowHeight: 50,
+  verticalColumnMinWidth: 240,
+  verticalColumnOverlapCapacity: 3,
+  verticalColumnOverlapGrowth: 80
+};
 
 function event(id: string, start: string, end: string): CalendarEvent {
   return {
@@ -121,5 +129,19 @@ describe("event overlap layout", () => {
     expect(columnWidthForEvents(compact, settings)).toBe(240);
     expect(columnWidthForEvents(threeLanes, settings)).toBe(240);
     expect(columnWidthForEvents(fourLanes, settings)).toBe(320);
+  });
+
+  it("uses caller-provided vertical column width and overlap growth rules", () => {
+    const twoLanes = [event("dense-a", "09:00", "10:00"), event("dense-b", "09:00", "10:00")];
+    const threeLanes = [...twoLanes, event("dense-c", "09:00", "10:00")];
+    const customSettings = {
+      ...settings,
+      verticalColumnMinWidth: 320,
+      verticalColumnOverlapCapacity: 2,
+      verticalColumnOverlapGrowth: 120
+    };
+
+    expect(columnWidthForEvents(twoLanes, customSettings)).toBe(320);
+    expect(columnWidthForEvents(threeLanes, customSettings)).toBe(440);
   });
 });

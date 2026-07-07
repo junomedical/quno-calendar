@@ -32,13 +32,6 @@ type EventInterval = {
   endMinute: number;
 };
 
-/** Minimum base width for one vertical calendar column. */
-export const MIN_VERTICAL_CALENDAR_COLUMN_WIDTH = 240;
-/** Number of parallel vertical events that fit before a column grows. */
-export const VERTICAL_COLUMN_BASE_OVERLAP_CAPACITY = 3;
-/** Additional column width added for each vertical event lane beyond the base capacity. */
-export const VERTICAL_COLUMN_EXTRA_OVERLAP_WIDTH = 80;
-
 /** Grows only the dense row as overlap lanes require more vertical space. */
 export function rowHeightForOverlapDepth(baseRowHeight: number, laneCount: number): number {
   if (laneCount <= 1) {
@@ -180,10 +173,13 @@ export function verticalLaneCountForEvents(
 /** Returns the minimum column width needed for vertical overlap lanes. */
 export function columnWidthForEvents(
   events: CalendarEvent[],
-  settings: Pick<TimelineSettings, "startHour" | "endHour" | "zoom">
+  settings: Pick<
+    TimelineSettings,
+    "startHour" | "endHour" | "zoom" | "verticalColumnMinWidth" | "verticalColumnOverlapCapacity" | "verticalColumnOverlapGrowth"
+  >
 ): number {
-  const extraLaneCount = Math.max(0, verticalLaneCountForEvents(events, settings) - VERTICAL_COLUMN_BASE_OVERLAP_CAPACITY);
-  return MIN_VERTICAL_CALENDAR_COLUMN_WIDTH + extraLaneCount * VERTICAL_COLUMN_EXTRA_OVERLAP_WIDTH;
+  const extraLaneCount = Math.max(0, verticalLaneCountForEvents(events, settings) - settings.verticalColumnOverlapCapacity);
+  return settings.verticalColumnMinWidth + extraLaneCount * settings.verticalColumnOverlapGrowth;
 }
 
 /** Converts column events into top/bottom shells with horizontal overlap lanes. */

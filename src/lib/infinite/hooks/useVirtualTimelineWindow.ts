@@ -64,6 +64,13 @@ export function useVirtualTimelineWindow({
   });
   const scrollEndTimerRef = useRef<number | null>(null);
 
+  const clearScrollEndTimer = useCallback(() => {
+    if (scrollEndTimerRef.current !== null) {
+      window.clearTimeout(scrollEndTimerRef.current);
+      scrollEndTimerRef.current = null;
+    }
+  }, []);
+
   useEffect(() => {
     setAnchorDateKey((current) => {
       const normalized = normalizeAnchorDate(current, settings.excludedWeekdays);
@@ -176,6 +183,7 @@ export function useVirtualTimelineWindow({
         ? resolveOffsetOnLayoutChange(topVisibleOffsetRef.current, previousBaseDayHeightRef.current, baseDayHeight)
         : topVisibleOffsetRef.current
     );
+    clearScrollEndTimer();
     previousLayoutSignatureRef.current = verticalLayoutSignature;
     previousBaseDayHeightRef.current = baseDayHeight;
     virtualizer.measure();
@@ -194,6 +202,7 @@ export function useVirtualTimelineWindow({
   }, [
     scrollToVisibleDateOffset,
     baseDayHeight,
+    clearScrollEndTimer,
     resolveOffsetOnLayoutChange,
     setAnchorDateKey,
     settings.excludedWeekdays,
@@ -239,13 +248,6 @@ export function useVirtualTimelineWindow({
     }
     setAnchorDateKey(() => normalizedDateKey);
   }, [scrollToVisibleDateOffset, setAnchorDateKey, settings.excludedWeekdays, virtualWindow.anchorDateKey]);
-
-  const clearScrollEndTimer = useCallback(() => {
-    if (scrollEndTimerRef.current !== null) {
-      window.clearTimeout(scrollEndTimerRef.current);
-      scrollEndTimerRef.current = null;
-    }
-  }, []);
 
   const finishScrollRecenter = useCallback(() => {
     clearScrollEndTimer();

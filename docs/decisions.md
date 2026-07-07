@@ -70,6 +70,8 @@ Rebuilding the virtual window must preserve both the top visible date and the pi
 
 Native scrollbar-thumb dragging can complete without another React scroll callback after release, so the view also listens for the browser `scrollend` event and recomputes the top visible date synchronously before recentring. Even if the date is already the current anchor, the view still scrolls back to the anchor's centered offset so the scrollbar thumb resets.
 
+Vertical zoom changes are layout changes, not user scrolls. Gesture zoom snapshots the current top visible date before requesting the parent-owned zoom change, cancels pending recenter timers, and restores a proportional intra-day offset after the virtual day height changes instead of writing the old raw `scrollTop` back into the resized list.
+
 ## 023 - Dense Time Labels Are Progressive
 Time labels thin out based on available pixel spacing. The view removes 15 and 45 minute labels first, then removes every minute label at the densest scales while keeping hour labels visible. This preserves scanability without overlapping numbers.
 
@@ -105,4 +107,7 @@ New-event drafts are visual overlays in the target row. They do not enter commit
 ## 033 - Infinite Views Are Named By Time Orientation
 The original infinite view is now `view="infinite-horizontal"` because time runs horizontally. The new calendar-column view is `view="infinite-vertical"` because time runs vertically inside each date. The legacy `view="infinite"` stays as an alias for the horizontal view so existing callers keep working.
 
-Vertical calendar columns start at a `240px` minimum, fit up to three parallel events, and then grow by `80px` for each additional overlap lane. This keeps the normal column width generous while making dense calendar/day combinations grow predictably. The vertical date and doctor-name row uses native per-day sticky positioning rather than synchronized overlay state, and the left date/time pane is 30% narrower than the horizontal row-label pane. The vertical timeline adds an 8px gutter before the first hour and after the last hour so labels and events do not touch the board edge. The time pane is sticky only on the left axis so its labels move vertically at the same pace as events.
+Vertical calendar columns default to a `240px` minimum, fit up to three parallel events, and then grow by `80px` for each additional overlap lane. These values are parent-owned settings so product surfaces can choose compact or wide column rules without changing library internals. The vertical date and doctor-name row uses native per-day sticky positioning rather than synchronized overlay state, and the left date/time pane is 30% narrower than the horizontal row-label pane. The vertical timeline adds an 8px gutter before the first hour and after the last hour so labels and events do not touch the board edge. The time pane is sticky only on the left axis so its labels move vertically at the same pace as events.
+
+## 034 - Demo Variants Stay Outside Calendar Internals
+Additional demo routes are implemented as self-contained parent components over `CalendarRoot`. Each variant folder owns its settings, selected defaults, interaction mode, app chrome, and external event renderer, while sharing only deterministic event data helpers and keeping reusable calendar internals unaware of product treatments.

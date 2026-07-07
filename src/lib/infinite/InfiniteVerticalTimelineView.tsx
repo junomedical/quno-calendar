@@ -52,9 +52,7 @@ import "./InfiniteTimelineView.css";
 type HoveredEvent = { eventId: string; calendarId: CalendarId } | null;
 
 const VERTICAL_COLUMN_GAP_PX = 0;
-const VERTICAL_HOVER_MIN_HEIGHT_PX = 64;
 const VERTICAL_LEFT_PANE_WIDTH_RATIO = 0.7;
-const VERTICAL_BASE_COLUMN_WIDTH_PX = 240;
 const VERTICAL_TIMELINE_GUTTER_PX = 8;
 
 /**
@@ -159,7 +157,7 @@ export const InfiniteVerticalTimelineView = forwardRef<CalendarNavigationHandle,
     const { eventsForColumn, columnWidthForDateCalendar, dayMinWidth, maxVisibleDayMinWidth } = useMemo(() => {
       const columnEvents = new Map<string, CalendarEvent[]>();
       const columnWidths = new Map<string, number>();
-      let widestDay = selectedCalendars.length * VERTICAL_BASE_COLUMN_WIDTH_PX;
+      let widestDay = selectedCalendars.length * settings.verticalColumnMinWidth;
 
       for (const dateKey of visibleDateKeys) {
         let dayColumnsWidth = 0;
@@ -177,10 +175,10 @@ export const InfiniteVerticalTimelineView = forwardRef<CalendarNavigationHandle,
       return {
         eventsForColumn: (dateKey: string, calendarId: CalendarId) => columnEvents.get(`${dateKey}:${calendarId}`) ?? [],
         columnWidthForDateCalendar: (dateKey: string, calendarId: CalendarId) =>
-          columnWidths.get(`${dateKey}:${calendarId}`) ?? VERTICAL_BASE_COLUMN_WIDTH_PX,
+          columnWidths.get(`${dateKey}:${calendarId}`) ?? settings.verticalColumnMinWidth,
         dayMinWidth: (dateKey: string) =>
           selectedCalendars.reduce(
-            (total, calendar) => total + (columnWidths.get(`${dateKey}:${calendar.id}`) ?? VERTICAL_BASE_COLUMN_WIDTH_PX),
+            (total, calendar) => total + (columnWidths.get(`${dateKey}:${calendar.id}`) ?? settings.verticalColumnMinWidth),
             0
           ),
         maxVisibleDayMinWidth: widestDay
@@ -450,7 +448,6 @@ export const InfiniteVerticalTimelineView = forwardRef<CalendarNavigationHandle,
       if (!scrollElement) {
         return;
       }
-      const previousScrollTop = scrollElement.scrollTop;
       const previousScrollLeft = scrollElement.scrollLeft;
       const previousWindowScrollX = window.scrollX;
       const previousWindowScrollY = window.scrollY;
@@ -459,6 +456,8 @@ export const InfiniteVerticalTimelineView = forwardRef<CalendarNavigationHandle,
         return;
       }
 
+      clearScrollEndTimer();
+      updateTopVisibleDate();
       clearScrollEndTimer();
       event.preventDefault();
       event.stopPropagation();
@@ -470,7 +469,6 @@ export const InfiniteVerticalTimelineView = forwardRef<CalendarNavigationHandle,
       }
 
       const restoreScroll = () => {
-        scrollElement.scrollTop = previousScrollTop;
         scrollElement.scrollLeft = previousScrollLeft;
         window.scrollTo(previousWindowScrollX, previousWindowScrollY);
       };
@@ -479,7 +477,7 @@ export const InfiniteVerticalTimelineView = forwardRef<CalendarNavigationHandle,
         window.requestAnimationFrame(restoreScroll);
         window.setTimeout(restoreScroll, 0);
       });
-    }, [clearScrollEndTimer, containerRef, onZoomChange, settings.zoom]);
+    }, [clearScrollEndTimer, containerRef, onZoomChange, settings.zoom, updateTopVisibleDate]);
 
     useEffect(() => {
       const scrollElement = containerRef.current;
@@ -969,7 +967,7 @@ function VerticalCalendarColumn({
             top={item.top}
             width={width}
             hoverMaxWidth={width}
-            height={isHovered ? Math.max(item.height, VERTICAL_HOVER_MIN_HEIGHT_PX) : item.height}
+            height={isHovered ? Math.max(item.height, settings.verticalEventHoverMinHeight) : item.height}
             zIndex={isHovered ? 30 : item.lane + 2}
             lane={item.lane}
             laneCount={item.laneCount}

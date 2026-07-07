@@ -46,11 +46,22 @@ Use `view="infinite-vertical"` when calendars should render left-to-right as col
   loadEvents={loadEvents}
   eventRenderer={EventCard}
   view="infinite-vertical"
-  settings={{ startHour: 8, endHour: 18, zoom: 1.2, snapMinutes: 15 }}
+  settings={{
+    startHour: 8,
+    endHour: 18,
+    zoom: 1.2,
+    snapMinutes: 15,
+    verticalColumnMinWidth: 280,
+    verticalColumnOverlapCapacity: 4,
+    verticalColumnOverlapGrowth: 90,
+    verticalEventHoverMinHeight: 76
+  }}
 />;
 ```
 
 `view="infinite"` remains supported as a compatibility alias for `view="infinite-horizontal"`.
+
+The same `CalendarRoot` contract can back multiple product treatments. Keep product-specific layout choices in parent-owned `settings`, selected calendar defaults, and the supplied `eventRenderer`; the demo routes `/demo1`, `/demo2`, and `/demo3` show compact horizontal, wide vertical, and availability-first compositions without changing library APIs.
 
 ## Calendar and Event Data
 Use `calendarId` for a single-row event. Use `calendarIds` when the same event should render in multiple selected rows, such as a doctor and a room:
@@ -189,7 +200,7 @@ Time labels automatically thin out as zoom becomes dense. Quarter-hour labels re
 
 The grid uses 15-minute columns through zoom `6`. Above zoom `6`, the row grid and time header switch to 5-minute cadence, showing labels like `9 5 10 15 ... 55` for finer high-zoom positioning.
 
-In the vertical view, calendar columns fill available width with a `240px` base minimum. Each column fits up to three parallel overlapping events before growing; every additional overlap lane adds `80px` to that date/calendar column and its matching doctor-name header cell. Hovered appointments expand to the full column width and a minimum readable height for three-line cards.
+In the vertical view, calendar columns fill available width from `settings.verticalColumnMinWidth`. `settings.verticalColumnOverlapCapacity` controls how many parallel overlapping events fit before a column grows, and `settings.verticalColumnOverlapGrowth` controls the added width for each extra lane. Hovered appointments expand to the full column width and use `settings.verticalEventHoverMinHeight` as a minimum readable height for richer cards.
 
 Vertical date/doctor headers stay sticky at the top. The date cell and time pane stay sticky on the left, with the vertical left pane 30% narrower than `settings.labelWidth`. Vertical time labels use `8:00` for hours and plain minute numbers such as `15` or `30` for minor ticks. The first and last hour positions include 8px of vertical padding inside each day board.
 

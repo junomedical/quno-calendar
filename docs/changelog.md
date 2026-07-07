@@ -1,6 +1,9 @@
 # Changelog
 
 ## 0.1.0
+- Added `/demo1`, `/demo2`, and `/demo3` demo routes with compact horizontal, wide vertical, and availability-first event-card treatments.
+- Kept the additional demo routes fully interactive, including calendar orientation and availability-mode switching.
+- Added vertical column sizing settings for base width, overlap-lane capacity, overlap growth, and hover minimum height.
 - Added `view="infinite-vertical"` with calendars as left-to-right columns, vertical time zoom, sticky left time pane, today's horizontal current-time marker, and full event interaction parity.
 - Renamed the original orientation to `view="infinite-horizontal"` while preserving `view="infinite"` as a backward-compatible alias.
 - Added a demo calendar-type switch and vertical column growth for dense overlaps.
@@ -9,7 +12,7 @@
 - Changed vertical hover hit-testing so expanded appointment cards do not block focusing underlying overlapped events.
 - Changed vertical date labels to smaller two-line text with weekday on the second line.
 - Changed the vertical date/time pane to 30% narrower than the horizontal label width, added 8px top/bottom time padding, and kept hovered card typography from inheriting compact line-height reductions.
-- Fixed vertical zoom changes so the current visible date stays anchored instead of jumping when the day height changes.
+- Fixed vertical zoom changes so the current visible date stays anchored instead of jumping when the day height changes, including gesture zoom that would otherwise restore stale scroll pixels.
 - Changed standard demo event-card backgrounds to use a muted version of the same color as the left accent border.
 - Added greenfield Vite React TypeScript PoC.
 - Added reusable `CalendarRoot` and `InfiniteTimelineView` components.

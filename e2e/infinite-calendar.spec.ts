@@ -273,6 +273,37 @@ async function topVisibleDayState(page: Page) {
   });
 }
 
+async function verticalTopVisibleGeometry(page: Page) {
+  return page.evaluate(() => {
+    const viewport = document.querySelector(".ic-viewport")?.getBoundingClientRect();
+    if (!viewport) {
+      throw new Error("Calendar viewport not found");
+    }
+
+    let best: { date: string; y: number; offsetWithinDate: number; dayHeight: number; headerHeight: number } | null = null;
+    for (const element of Array.from(document.querySelectorAll<HTMLElement>('[data-testid="calendar-day"]'))) {
+      const box = element.getBoundingClientRect();
+      const date = element.dataset.date;
+      if (!date || box.y > viewport.y + 2 || box.bottom <= viewport.y) {
+        continue;
+      }
+      if (!best || box.y > best.y) {
+        best = {
+          date,
+          y: box.y,
+          offsetWithinDate: viewport.y - box.y,
+          dayHeight: box.height,
+          headerHeight: element.querySelector<HTMLElement>(".icv-day-header")?.getBoundingClientRect().height ?? 0
+        };
+      }
+    }
+    if (!best) {
+      throw new Error("No top visible vertical day found");
+    }
+    return best;
+  });
+}
+
 async function selectPageText(page: Page) {
   await page.evaluate(() => {
     const target = document.querySelector("main") ?? document.body;
@@ -438,6 +469,112 @@ test("renders, scrolls vertically, zooms, and changes dataset scale", async ({ p
       );
     })
     .toBe(true);
+});
+
+test("renders route-specific demo treatments", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.locator('[data-demo-id="default"]')).toBeVisible();
+  await expect(page.getByTestId("demo-route-default")).toHaveAttribute("aria-current", "page");
+  await goToWorkday(page);
+  await expect(page.locator(".demo-event-card").first()).toBeVisible();
+
+  await page.goto("/demo1");
+  await expect(page.locator('[data-demo-id="demo1"]')).toBeVisible();
+  await expect(page.getByTestId("demo-route-demo1")).toHaveAttribute("aria-current", "page");
+  await expect(page.getByTestId("view-infinite-horizontal")).toBeChecked();
+  await expect(page.getByTestId("zoom-value")).toHaveText("1.40");
+  await goToWorkday(page);
+  await expect(page.locator(".demo1-event-card").first()).toBeVisible();
+  const compactMetrics = await page.evaluate(() => {
+    const row = document.querySelector<HTMLElement>('[data-testid="calendar-row"]');
+    const label = document.querySelector<HTMLElement>(".ic-row-label");
+    const card = document.querySelector<HTMLElement>(".demo1-event-card");
+    if (!row || !label || !card) return null;
+    const cardStyles = window.getComputedStyle(card);
+    return {
+      rowHeight: Math.round(row.getBoundingClientRect().height),
+      labelWidth: Math.round(label.getBoundingClientRect().width),
+      borderLeftWidth: cardStyles.borderLeftWidth,
+      display: cardStyles.display
+    };
+  });
+  expect(compactMetrics).toEqual({
+    rowHeight: 42,
+    labelWidth: 190,
+    borderLeftWidth: "4px",
+    display: "grid"
+  });
+  await page.getByTestId("view-infinite-vertical").check();
+  await expect(page.getByTestId("calendar-column").first()).toBeVisible();
+
+  await page.goto("/demo2");
+  await expect(page.locator('[data-demo-id="demo2"]')).toBeVisible();
+  await expect(page.getByTestId("view-infinite-vertical")).toBeChecked();
+  await expect(page.getByTestId("zoom-value")).toHaveText("2.40");
+  await goToWorkday(page);
+  await expect(page.locator(".demo2-event-card").first()).toBeVisible();
+  const plannerMetrics = await page.evaluate(() => {
+    const header = document.querySelector<HTMLElement>(".icv-day-header");
+    const timePane = document.querySelector<HTMLElement>(".icv-time-pane");
+    const column = document.querySelector<HTMLElement>('[data-testid="calendar-column"]');
+    const card = document.querySelector<HTMLElement>(".demo2-event-card");
+    if (!header || !timePane || !column || !card) return null;
+    const cardStyles = window.getComputedStyle(card);
+    return {
+      headerHeight: Math.round(header.getBoundingClientRect().height),
+      timePaneWidth: Math.round(timePane.getBoundingClientRect().width),
+      columnWidth: Math.round(column.getBoundingClientRect().width),
+      borderTopWidth: cardStyles.borderTopWidth,
+      borderRadius: cardStyles.borderRadius
+    };
+  });
+  expect(plannerMetrics).toEqual({
+    headerHeight: 52,
+    timePaneWidth: 196,
+    columnWidth: 280,
+    borderTopWidth: "4px",
+    borderRadius: "7px"
+  });
+  await page.getByTestId("view-infinite-horizontal").check();
+  await expect(page.getByTestId("calendar-row").first()).toBeVisible();
+
+  await page.goto("/demo3");
+  await expect(page.locator('[data-demo-id="demo3"]')).toBeVisible();
+  await expect(page.getByTestId("view-infinite-vertical")).toBeChecked();
+  await expect(page.getByTestId("availability-mode")).toBeChecked();
+  await expect(page.getByTestId("calendar-count")).toHaveValue("3");
+  await goToWorkday(page);
+  await expect(page.locator(".demo3-event-card").first()).toBeVisible();
+  await expect(page.locator(".ic-availability-shell.is-active-layer").first()).toBeVisible();
+  const availabilityMetrics = await page.evaluate(() => {
+    const header = document.querySelector<HTMLElement>(".icv-day-header");
+    const timePane = document.querySelector<HTMLElement>(".icv-time-pane");
+    const column = document.querySelector<HTMLElement>('[data-testid="calendar-column"]');
+    const availabilityCard = document.querySelector<HTMLElement>(".demo3-event-card.kind-availability");
+    if (!header || !timePane || !column || !availabilityCard) return null;
+    const cardStyles = window.getComputedStyle(availabilityCard);
+    return {
+      headerHeight: Math.round(header.getBoundingClientRect().height),
+      timePaneWidth: Math.round(timePane.getBoundingClientRect().width),
+      columnWidth: Math.round(column.getBoundingClientRect().width),
+      borderLeftWidth: cardStyles.borderLeftWidth,
+      opacity: cardStyles.opacity
+    };
+  });
+  expect(availabilityMetrics).toEqual({
+    headerHeight: 48,
+    timePaneWidth: 182,
+    columnWidth: expect.any(Number),
+    borderLeftWidth: "7px",
+    opacity: "0.94"
+  });
+  expect(availabilityMetrics?.columnWidth ?? 0).toBeGreaterThanOrEqual(320);
+  expect(((availabilityMetrics?.columnWidth ?? 0) - 320) % 120).toBe(0);
+  expect(availabilityMetrics?.columnWidth ?? 0).toBeGreaterThan(plannerMetrics?.columnWidth ?? 0);
+  await page.getByTestId("availability-mode").uncheck();
+  await expect(page.locator(".ic-availability-shell.is-active-layer")).toHaveCount(0);
+  await page.getByTestId("view-infinite-horizontal").check();
+  await expect(page.getByTestId("calendar-row").first()).toBeVisible();
 });
 
 test("keeps large dataset events visible and hoverable", async ({ page }) => {
@@ -1857,6 +1994,39 @@ test("keeps the vertical current date anchored when zoom changes", async ({ page
   await expect.poll(async () => topVisibleDayDate(page)).toBe("2026-08-12");
   const afterZoom = await topVisibleDayState(page);
   expect(afterZoom.date).toBe("2026-08-12");
+
+  const viewport = page.locator(".ic-viewport");
+  const viewportBox = await viewport.boundingBox();
+  expect(viewportBox).not.toBeNull();
+  if (!viewportBox) return;
+
+  const beforeGestureZoomIn = await verticalTopVisibleGeometry(page);
+  await page.mouse.move(viewportBox.x + 520, viewportBox.y + 180);
+  await page.keyboard.down("Shift");
+  await page.mouse.wheel(0, -500);
+  await page.keyboard.up("Shift");
+  await expect(page.getByTestId("zoom-value")).toHaveText("0.65");
+  await expect.poll(async () => topVisibleDayDate(page)).toBe(beforeGestureZoomIn.date);
+  const afterGestureZoomIn = await verticalTopVisibleGeometry(page);
+  const expectedZoomInOffset =
+    afterGestureZoomIn.headerHeight +
+    ((beforeGestureZoomIn.offsetWithinDate - beforeGestureZoomIn.headerHeight) /
+      Math.max(1, beforeGestureZoomIn.dayHeight - beforeGestureZoomIn.headerHeight)) *
+      Math.max(1, afterGestureZoomIn.dayHeight - afterGestureZoomIn.headerHeight);
+  expect(Math.abs(afterGestureZoomIn.offsetWithinDate - expectedZoomInOffset)).toBeLessThanOrEqual(4);
+
+  await page.keyboard.down("Shift");
+  await page.mouse.wheel(0, 500);
+  await page.keyboard.up("Shift");
+  await expect(page.getByTestId("zoom-value")).toHaveText("0.50");
+  await expect.poll(async () => topVisibleDayDate(page)).toBe(beforeGestureZoomIn.date);
+  const afterGestureZoomOut = await verticalTopVisibleGeometry(page);
+  const expectedZoomOutOffset =
+    afterGestureZoomOut.headerHeight +
+    ((afterGestureZoomIn.offsetWithinDate - afterGestureZoomIn.headerHeight) /
+      Math.max(1, afterGestureZoomIn.dayHeight - afterGestureZoomIn.headerHeight)) *
+      Math.max(1, afterGestureZoomOut.dayHeight - afterGestureZoomOut.headerHeight);
+  expect(Math.abs(afterGestureZoomOut.offsetWithinDate - expectedZoomOutOffset)).toBeLessThanOrEqual(4);
 });
 
 test("supports draft creation and dragging in the vertical view", async ({ page }) => {

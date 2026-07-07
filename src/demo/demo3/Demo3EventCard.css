@@ -1,0 +1,152 @@
+.icv-event-shell.is-hovered .demo3-event-card,
+.ic-event-shell.is-hovered .demo3-event-card {
+  width: 100%;
+}
+
+.demo3-event-card {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 4px;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  padding: 8px 10px;
+  overflow: hidden;
+  color: #253044;
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--event-accent, #2563eb) 12%, white), rgba(255, 255, 255, 0.82)),
+    #ffffff;
+  border: 1px solid color-mix(in srgb, var(--event-accent, #2563eb) 28%, #d8e0ea);
+  border-left: 3px solid var(--event-accent, #2563eb);
+  border-radius: 6px;
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.07);
+  line-height: 1.18;
+}
+
+.demo3-event-label,
+.demo3-event-detail {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.demo3-event-label {
+  gap: 4px;
+  color: var(--event-accent, #2563eb);
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.demo3-event-label svg {
+  flex: 0 0 auto;
+}
+
+.demo3-event-title {
+  align-self: center;
+  min-width: 0;
+  overflow: hidden;
+  color: #111827;
+  font-size: 12px;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.demo3-event-detail {
+  color: #64748b;
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+.demo3-event-card.kind-availability {
+  color: #115e36;
+  background:
+    linear-gradient(135deg, rgba(240, 253, 244, 0.95), rgba(220, 252, 231, 0.58)),
+    rgba(187, 247, 208, 0.38);
+  border: 1px solid rgba(22, 163, 74, 0.32);
+  border-left: 7px solid rgba(22, 163, 74, 0.78);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+  opacity: 0.68;
+}
+
+.demo3-event-card.kind-availability .demo3-event-label,
+.demo3-event-card.kind-availability .demo3-event-title {
+  color: #166534;
+}
+
+.ic-availability-shell.is-active-layer .demo3-event-card.kind-availability {
+  opacity: 0.94;
+  box-shadow:
+    inset 0 0 0 1px rgba(22, 163, 74, 0.22),
+    0 8px 16px rgba(15, 23, 42, 0.12);
+}
+
+.demo3-event-card.kind-consultation {
+  border-left-style: double;
+}
+
+.demo3-event-card.kind-blocked {
+  color: #64748b;
+  background:
+    repeating-linear-gradient(0deg, rgba(100, 116, 139, 0.14), rgba(100, 116, 139, 0.14) 2px, transparent 2px, transparent 7px),
+    #ffffff;
+  border-color: #94a3b8;
+  border-left-color: #64748b;
+  text-decoration: line-through;
+}
+
+.demo3-event-card.status-hovered {
+  filter: drop-shadow(0 14px 20px rgba(15, 23, 42, 0.2));
+}
+
+.demo3-event-card.status-dragging {
+  opacity: 0.5;
+}
+
+.demo3-event-card.status-drop-preview {
+  opacity: 0.95;
+  box-shadow:
+    0 14px 24px rgba(15, 23, 42, 0.22),
+    0 0 0 2px rgba(22, 163, 74, 0.28);
+}
+
+.demo3-event-card.status-new {
+  color: #14532d;
+  background: #dcfce7;
+  border-color: #16a34a;
+  border-left-color: #16a34a;
+  border-style: dashed;
+  opacity: 1;
+}
+
+@container calendar-event (height < 50px) {
+  .demo3-event-card {
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 2px;
+    padding-block: 5px;
+  }
+
+  .demo3-event-detail {
+    display: none;
+  }
+}
+
+@container calendar-event (height < 30px) {
+  .demo3-event-card {
+    grid-template-rows: 1fr;
+    padding: 2px 7px;
+  }
+
+  .demo3-event-label {
+    display: none;
+  }
+
+  .demo3-event-title {
+    font-size: 10px;
+  }
+}
