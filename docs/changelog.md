@@ -1,6 +1,16 @@
 # Changelog
 
 ## 0.1.0
+- Added parent-controlled external create/edit support with `activeDraft`, `onEventDraftRequest`, and `onEventActivate`.
+- Added a default-demo external event popup that edits title, date/time, duration, and participants while keeping the calendar scrollable.
+- Added active-draft dragging through `onActiveDraftMoveRequest`; popup time fields update during drag and multi-calendar drafts move as one participant block.
+- Changed drawn creation in the default demo to delegate to the external popup before saving, while preserving immediate-create fallback through `onEventCreateRequest`.
+- Refined the external popup participant flow so empty participant lists keep the previous calendar set visible and disable save, while edit popups do not filter calendars until participants change.
+- Blocked drawing a separate grid range while an external popup draft is active.
+- Preserved drawn draft position when the external popup opens and hides other calendars, and kept saved or cancelled events anchored when the popup closes.
+- Changed popup field edits so visible drafts update without scrolling, while offscreen drafts are restored to their last seen viewport position.
+- Fixed same-anchor date navigation so popup field edits can focus an active draft even after the user scrolls elsewhere inside the current virtual window.
+- Changed `Shift` + wheel zoom to anchor around the rendered time-grid node closest to the mouse in both horizontal and vertical timeline views.
 - Added `/demo1`, `/demo2`, and `/demo3` demo routes with compact horizontal, wide vertical, and availability-first event-card treatments.
 - Kept the additional demo routes fully interactive, including calendar orientation and availability-mode switching.
 - Added vertical column sizing settings for base width, overlap-lane capacity, overlap growth, and hover minimum height.
@@ -105,3 +115,5 @@
 - Made drawn draft cards opaque and kept their time range visible while drawing.
 - Added explanatory comments to the demo event-card stylesheet.
 - Fixed calendar-count changes to keep the same top visible day and intra-day scroll offset even when the day is already the virtual window anchor.
+- Split oversized timeline, demo, and Playwright files by responsibility: shared timeline gestures moved to `useTimelineInteractions`, external popup demo state moved to `useExternalEventDrafts` plus `ExternalEventPopup`, vertical day rendering moved to its own component, and e2e coverage moved into behavior-focused spec files.
+- Fixed external popup date edits so moving a draft to a future or past date refocuses the preview on the first date change instead of only after a second edit.

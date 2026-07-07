@@ -74,6 +74,16 @@ export function gridCadenceMinutes(zoom: number): number {
   return zoom > FINE_GRID_ZOOM_THRESHOLD ? 5 : 15;
 }
 
+/** Returns the nearest rendered time-grid node for a minute in the current zoom cadence. */
+export function nearestTimeNodeMinute(
+  minute: number,
+  settings: Pick<TimelineSettings, "startHour" | "endHour" | "zoom">
+): number {
+  const cadenceMinutes = gridCadenceMinutes(settings.zoom);
+  const nodeMinute = Math.round(minute / cadenceMinutes) * cadenceMinutes;
+  return Math.min(timelineEndMinute(settings), Math.max(timelineStartMinute(settings), nodeMinute));
+}
+
 /** Builds visible sticky-header ticks for the current zoom density. */
 export function buildTimeTicks(settings: TimelineSettings) {
   const quarterHourSpacing = pixelsPerMinute(settings.zoom) * 15;

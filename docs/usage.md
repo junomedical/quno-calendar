@@ -192,7 +192,7 @@ function CalendarWithZoom(props) {
 }
 ```
 
-When `onZoomChange` is provided, `Shift` + vertical wheel over the calendar viewport requests a zoom change and cancels the native scroll action before the calendar viewport or browser window can scroll. The horizontal view uses zoom as horizontal pixels per minute; the vertical view uses the same value as vertical pixels per minute.
+When `onZoomChange` is provided, `Shift` + vertical wheel over the calendar viewport requests a zoom change and cancels the native scroll action before the calendar viewport or browser window can scroll. The gesture anchors around the rendered time-grid node closest to the mouse. Horizontal mode keeps that time node in place when the timeline can scroll, and vertical mode keeps the nearest date/time node in place. The horizontal view uses zoom as horizontal pixels per minute; the vertical view uses the same value as vertical pixels per minute.
 
 Zoom changes keep the current visible date anchored. In the vertical view, the calendar scales the intra-day offset to the new day height so changing zoom does not jump to a different date.
 
@@ -306,6 +306,116 @@ function handleCreate(request) {
 ```
 
 Returning the created event is optional, but useful. The infinite view adds the returned event to the currently loaded visible range immediately. If nothing is returned, the view keeps a local copy of the drawn draft so the user still sees the created appointment after mouse-up.
+
+## External Create and Edit Popup
+Use `onEventDraftRequest`, `onEventActivate`, and `activeDraft` when a product-owned popup should control event details. The popup is a sibling or portal outside the calendar; it should not use a blocking backdrop if the calendar must remain scrollable.
+
+```tsx
+function Scheduler() {
+  const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [activeDraft, setActiveDraft] = useState<ActiveEventDraft | null>(null);
+  const [participantsChanged, setParticipantsChanged] = useState(false);
+  const [popupBaseCalendarIds, setPopupBaseCalendarIds] = useState<string[]>([]);
+  const [normalSelectedIds, setNormalSelectedIds] = useState(["dr-kirillov", "room-201"]);
+
+  const participantIds = activeDraft
+    ? activeDraft.event.calendarIds ?? [activeDraft.event.calendarId]
+    : [];
+  const shouldFilterCalendars = activeDraft?.mode === "create" || participantsChanged;
+  const visibleCalendarIds = !activeDraft
+    ? normalSelectedIds
+    : !shouldFilterCalendars
+      ? normalSelectedIds
+      : participantIds.length > 0
+        ? participantIds
+        : popupBaseCalendarIds;
+
+  function openCreatePopup(request: EventCreateRequest) {
+    setPopupBaseCalendarIds(normalSelectedIds);
+    setParticipantsChanged(false);
+    setActiveDraft({
+      mode: "create",
+      event: {
+        id: crypto.randomUUID(),
+        calendarId: request.calendarId,
+        calendarIds: [request.calendarId],
+        title: "New appointment",
+        start: request.start,
+        end: request.end,
+        kind: request.kind === "availability" ? "availability" : "draft"
+      }
+    });
+  }
+
+  function openEditPopup({ event }: EventActivateRequest) {
+    setPopupBaseCalendarIds(normalSelectedIds);
+    setParticipantsChanged(false);
+    setActiveDraft({
+      mode: "edit",
+      sourceEventId: event.id,
+      event: { ...event, calendarIds: event.calendarIds?.length ? event.calendarIds : [event.calendarId] }
+    });
+  }
+
+  function updateDraft(updater: (event: CalendarEvent) => CalendarEvent) {
+    setActiveDraft((draft) => (draft ? { ...draft, event: updater(draft.event) } : draft));
+  }
+
+  function moveActiveDraft(request: EventMoveRequest) {
+    updateDraft((event) => ({
+      ...event,
+      calendarId: request.proposedCalendarId,
+      calendarIds: request.proposedCalendarIds,
+      start: request.proposedStart,
+      end: request.proposedEnd
+    }));
+  }
+
+  function saveDraft() {
+    if (!activeDraft) return;
+    if (participantIds.length === 0) return;
+    if (activeDraft.mode === "edit") {
+      const sourceId = activeDraft.sourceEventId ?? activeDraft.event.id;
+      setEvents((current) => current.map((event) => (event.id === sourceId ? { ...activeDraft.event, id: sourceId } : event)));
+    } else {
+      setEvents((current) => [...current, { ...activeDraft.event, kind: "appointment" }]);
+    }
+    setActiveDraft(null);
+  }
+
+  return (
+    <>
+      {activeDraft ? (
+        <EventPopup
+          event={activeDraft.event}
+          onChange={(event) => updateDraft(() => event)}
+          onParticipantsChange={(event) => {
+            setParticipantsChanged(true);
+            updateDraft(() => event);
+          }}
+          onSave={saveDraft}
+          onCancel={() => setActiveDraft(null)}
+          saveDisabled={participantIds.length === 0}
+        />
+      ) : null}
+      <CalendarRoot
+        calendars={calendars}
+        selectedCalendarIds={visibleCalendarIds}
+        loadEvents={loadEvents}
+        eventRenderer={EventCard}
+        activeDraft={activeDraft}
+        onEventDraftRequest={openCreatePopup}
+        onEventActivate={openEditPopup}
+        onActiveDraftMoveRequest={moveActiveDraft}
+      />
+    </>
+  );
+}
+```
+
+When `onEventDraftRequest` is present, drawing on the grid delegates creation to the parent instead of committing through `onEventCreateRequest`. Edit drafts replace the source event visually until save or cancel. While `activeDraft` is present, the grid will not start another drawn range; the active draft shell can still be dragged. Use `onActiveDraftMoveRequest` to copy proposed start, end, and participant calendar ids into popup state. If a draft has multiple `calendarIds`, dragging one visible instance moves the whole block and preserves the participant list.
+
+For popup field edits, first check whether the active draft is visible in the calendar viewport. If it is visible, update `activeDraft` without scrolling. If it is offscreen, restore it to the last viewport-relative position where the user saw it; use `calendarRef.current?.scrollToDateTime(date, time)` only as the fallback when no last-seen position exists. For calendar-list changes, save, and cancel, snapshot the draft's viewport-relative event position before updating popup state and restore the saved, cancelled, or replacement draft to that position after the batch. In the default demo, edit popups keep the existing visible calendars until the participant list changes; participant filtering then limits visible rows to selected participants. If the participant list becomes empty, the previous calendar set remains visible and save is disabled.
 
 ## Large Dataset Demo Configuration
 ```tsx

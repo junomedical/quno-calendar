@@ -39,6 +39,7 @@ type EventShellProps = {
     calendarEvent: CalendarEvent,
     renderedCalendarId: CalendarId
   ) => void;
+  onEventClick?: (calendarEvent: CalendarEvent, renderedCalendarId: CalendarId) => void;
   onPointerMove?: (event: PointerEvent<HTMLDivElement>) => void;
   onPointerUp?: () => void;
   onMouseMove?: (event: MouseEvent<HTMLDivElement>) => void;
@@ -69,6 +70,7 @@ export const EventShell = memo(function EventShell({
   disableDrag = false,
   onEventPointerDown,
   onEventMouseDown,
+  onEventClick,
   onPointerMove,
   onPointerUp,
   onMouseMove,
@@ -82,6 +84,7 @@ export const EventShell = memo(function EventShell({
       data-lane-count={laneCount}
       data-testid={testId}
       onPointerDown={(pointerEvent) => !disableDrag && onEventPointerDown?.(pointerEvent, event, renderedCalendarId)}
+      onClick={() => !disableDrag && onEventClick?.(event, renderedCalendarId)}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
       onMouseDown={(mouseEvent) => !disableDrag && onEventMouseDown?.(mouseEvent, event, renderedCalendarId)}
@@ -171,6 +174,7 @@ function areEventShellPropsEqual(previous: EventShellProps, next: EventShellProp
     previous.renderedCalendarId === next.renderedCalendarId &&
     previous.className === next.className &&
     previous.disableDrag === next.disableDrag &&
-    previous.eventRenderer === next.eventRenderer
+    previous.eventRenderer === next.eventRenderer &&
+    previous.onEventClick === next.onEventClick
   );
 }

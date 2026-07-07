@@ -91,6 +91,19 @@ export type EventCreateRequest = {
   kind?: CalendarEvent["kind"];
 };
 
+/** Parent-owned create/edit preview rendered by the calendar without committing data. */
+export type ActiveEventDraft = {
+  mode: "create" | "edit";
+  event: CalendarEvent;
+  sourceEventId?: EventId;
+};
+
+/** Parent callback payload for activating an existing rendered event. */
+export type EventActivateRequest = {
+  event: CalendarEvent;
+  renderedCalendarId: CalendarId;
+};
+
 /** Common props passed from the shell to a concrete calendar view. */
 export type CalendarViewComponentProps = {
   calendars: CalendarRow[];
@@ -100,8 +113,12 @@ export type CalendarViewComponentProps = {
   settings?: Partial<TimelineSettings>;
   now?: Date;
   interactionMode?: "events" | "availability";
+  activeDraft?: ActiveEventDraft | null;
   onEventMoveRequest?: (request: EventMoveRequest) => boolean | Promise<boolean>;
   onEventCreateRequest?: (request: EventCreateRequest) => CalendarEvent | void | Promise<CalendarEvent | void>;
+  onEventDraftRequest?: (request: EventCreateRequest) => void;
+  onEventActivate?: (request: EventActivateRequest) => void;
+  onActiveDraftMoveRequest?: (request: EventMoveRequest) => void;
   onZoomChange?: (zoom: number) => void;
 };
 

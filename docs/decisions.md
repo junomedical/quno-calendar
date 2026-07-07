@@ -16,7 +16,7 @@ Drag/drop previews are local, but accepted data changes must come from the paren
 The event renderer handles `existing`, `hovered`, `drop-preview`, and `new` states. This lets product-specific appointment cards render all interaction states without depending on calendar internals.
 
 ## 006 - Controlled Zoom Changes
-Zoom remains parent-controlled through settings, and the infinite view requests changes with `onZoomChange`. This keeps wheel gestures, sliders, and any future external zoom controls synchronized without making the view own application state. The PoC uses a `0.5-8` slider and clamps wheel/settings zoom to that same range. High zoom should reveal finer timing, so the grid and time labels switch from 15-minute to 5-minute cadence only after zoom is greater than `6`.
+Zoom remains parent-controlled through settings, and the infinite view requests changes with `onZoomChange`. This keeps wheel gestures, sliders, and any future external zoom controls synchronized without making the view own application state. The PoC uses a `0.5-8` slider and clamps wheel/settings zoom to that same range. `Shift` + wheel anchors to the rendered time-grid node nearest the mouse, so zooming feels aligned to the visible timeline structure rather than an arbitrary fractional minute. High zoom should reveal finer timing, so the grid and time labels switch from 15-minute to 5-minute cadence only after zoom is greater than `6`.
 
 ## 007 - Sticky Labels Use Native CSS
 The top time scale and per-day date labels use native CSS sticky positioning. Date labels stick on both the top and left axes, while calendar row labels stick on the left axis. This keeps labels visible during vertical and horizontal virtual scrolling without extra overlay synchronization.
@@ -70,7 +70,7 @@ Rebuilding the virtual window must preserve both the top visible date and the pi
 
 Native scrollbar-thumb dragging can complete without another React scroll callback after release, so the view also listens for the browser `scrollend` event and recomputes the top visible date synchronously before recentring. Even if the date is already the current anchor, the view still scrolls back to the anchor's centered offset so the scrollbar thumb resets.
 
-Vertical zoom changes are layout changes, not user scrolls. Gesture zoom snapshots the current top visible date before requesting the parent-owned zoom change, cancels pending recenter timers, and restores a proportional intra-day offset after the virtual day height changes instead of writing the old raw `scrollTop` back into the resized list.
+Vertical zoom changes are layout changes, not user scrolls. Slider zoom snapshots the current top visible date before requesting the parent-owned zoom change, cancels pending recenter timers, and restores a proportional intra-day offset after the virtual day height changes instead of writing the old raw `scrollTop` back into the resized list. `Shift` + wheel zoom instead anchors the nearest rendered date/time node and flushes the controlled zoom update before restoring scroll, so the restore uses committed layout measurements.
 
 ## 023 - Dense Time Labels Are Progressive
 Time labels thin out based on available pixel spacing. The view removes 15 and 45 minute labels first, then removes every minute label at the densest scales while keeping hour labels visible. This preserves scanability without overlapping numbers.
@@ -111,3 +111,9 @@ Vertical calendar columns default to a `240px` minimum, fit up to three parallel
 
 ## 034 - Demo Variants Stay Outside Calendar Internals
 Additional demo routes are implemented as self-contained parent components over `CalendarRoot`. Each variant folder owns its settings, selected defaults, interaction mode, app chrome, and external event renderer, while sharing only deterministic event data helpers and keeping reusable calendar internals unaware of product treatments.
+
+## 035 - External Popups Own Create And Edit Forms
+The reusable calendar reports create/edit intent but does not own product form UI. `onEventDraftRequest` delegates drawn creation to the parent, `onEventActivate` reports clicked events for editing, and `activeDraft` renders one parent-owned create/edit preview. Edit previews filter out the loaded source event and render the draft in its proposed position, preserving popup-owned save/cancel semantics without mutating loaded data. While an active draft is present, new grid drawing is blocked and only that draft remains draggable; `onActiveDraftMoveRequest` lets the parent update popup state from drag proposals. Multi-calendar active drafts move as a block so participant edits remain the source of calendar membership changes. The parent owns participant-filtering policy, including whether edit opens keep current calendars visible, how empty participant lists disable save, and whether a form change avoids scrolling a visible draft or restores an offscreen draft to its last seen viewport-relative position.
+
+## 036 - Large Files Split By Ownership Boundary
+Timeline gesture state is shared by horizontal and vertical views through `useTimelineInteractions`; each view keeps only orientation-specific geometry, hit-testing, and rendering orchestration. The default demo keeps product popup behavior outside the calendar library through `useExternalEventDrafts` and `ExternalEventPopup`. Playwright specs are split by behavior so coverage can grow without returning to one oversized scenario file.

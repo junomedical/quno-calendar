@@ -1,8 +1,17 @@
-import { CalendarDays, LocateFixed } from "lucide-react";
+import { CalendarDays, LocateFixed, Plus } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { CalendarRoot, type CalendarNavigationHandle, type EventCreateRequest, type EventMoveRequest } from "../lib";
+import {
+  CalendarRoot,
+  type CalendarEvent,
+  type CalendarNavigationHandle,
+  type EventCreateRequest,
+  type EventMoveRequest
+} from "../lib";
 import { appendCreatedEvent, applyMove, createDemoEvents, createRangeLoader, demoCalendars } from "./data";
 import { DemoEventCard } from "./DemoEventCard";
+import { ExternalEventPopup } from "./ExternalEventPopup";
+import { dateInputValue, timeInputValue } from "./draftFormUtils";
+import { useExternalEventDrafts } from "./useExternalEventDrafts";
 
 const scales = [100, 1_000, 5_000, 20_000];
 
@@ -28,14 +37,6 @@ function initialTimelineBounds() {
     startHour: Math.min(8, hour),
     endHour: Math.min(24, Math.max(18, hour + 1))
   };
-}
-
-function timeInputValue(date: Date) {
-  return `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
-}
-
-function dateInputValue(date: Date) {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 }
 
 function countVisibleEventNodes() {
@@ -186,9 +187,35 @@ export function DefaultDemo({ routes }: DefaultDemoProps) {
     [endHour, excludeWeekends, snapMinutes, startHour, zoom]
   );
 
+  const {
+    activeDraft,
+    visibleCalendarIds,
+    canSaveActiveDraft,
+    resetActiveDraft,
+    openCreateDraft,
+    handleActivate,
+    handleActiveDraftMove,
+    handleExternalAdd,
+    saveActiveDraft,
+    cancelActiveDraft,
+    updateDraftEvent,
+    toggleDraftParticipant
+  } = useExternalEventDrafts({
+    selectedCalendarIds,
+    calendarSettings,
+    calendarRef,
+    jumpDate,
+    jumpTime,
+    snapMinutes,
+    editAvailabilities,
+    setEvents,
+    setMessage
+  });
+
   const handleScaleChange = (nextScale: number) => {
     setScale(nextScale);
     setEvents(createDemoEvents(nextScale));
+    resetActiveDraft();
     setMessage(`Loaded deterministic ${nextScale.toLocaleString()} events/year dataset`);
   };
 
@@ -348,6 +375,11 @@ export function DefaultDemo({ routes }: DefaultDemoProps) {
           </div>
         </div>
 
+        <button type="button" className="external-add-button" onClick={handleExternalAdd} data-testid="external-add-button">
+          <Plus size={15} aria-hidden />
+          Add event
+        </button>
+
         <p className="demo-message" data-testid="demo-message">
           {message}
         </p>
@@ -356,16 +388,30 @@ export function DefaultDemo({ routes }: DefaultDemoProps) {
       </aside>
 
       <section className="demo-calendar-panel">
+        {activeDraft ? (
+          <ExternalEventPopup
+            activeDraft={activeDraft}
+            canSave={canSaveActiveDraft}
+            onCancel={cancelActiveDraft}
+            onSave={saveActiveDraft}
+            onUpdateDraftEvent={updateDraftEvent}
+            onToggleParticipant={toggleDraftParticipant}
+          />
+        ) : null}
         <CalendarRoot
           key={scale}
           view={calendarView}
           ref={calendarRef}
           calendars={demoCalendars}
-          selectedCalendarIds={selectedCalendarIds}
+          selectedCalendarIds={visibleCalendarIds}
           loadEvents={loadEvents}
           eventRenderer={DemoEventCard}
+          activeDraft={activeDraft}
           onEventMoveRequest={handleMove}
           onEventCreateRequest={handleCreate}
+          onEventDraftRequest={openCreateDraft}
+          onEventActivate={handleActivate}
+          onActiveDraftMoveRequest={handleActiveDraftMove}
           onZoomChange={setZoom}
           now={systemNow}
           interactionMode={editAvailabilities ? "availability" : "events"}

@@ -15,6 +15,7 @@ import type {
   CalendarEvent,
   CalendarId,
   CalendarRow,
+  EventRenderStatus,
   EventRenderer,
   TimelineSettings
 } from "../../core/types";
@@ -37,6 +38,8 @@ type InfiniteTimelineRowProps = {
   dragEventId?: string;
   dragPreviewEvent: CalendarEvent | null;
   draftEvent: CalendarEvent | null;
+  draftEventStatus: EventRenderStatus;
+  draftEventIsDraggable: boolean;
   eventRenderer: EventRenderer;
   onHoverMove: (
     event: MouseEvent<HTMLDivElement> | PointerEvent<HTMLDivElement>,
@@ -58,6 +61,7 @@ type InfiniteTimelineRowProps = {
     calendarEvent: CalendarEvent,
     renderedCalendarId: CalendarId
   ) => void;
+  onEventClick: (calendarEvent: CalendarEvent, renderedCalendarId: CalendarId) => void;
 };
 
 /**
@@ -81,6 +85,8 @@ export function InfiniteTimelineRow({
   dragEventId,
   dragPreviewEvent,
   draftEvent,
+  draftEventStatus,
+  draftEventIsDraggable,
   eventRenderer,
   onHoverMove,
   onHoverLeave,
@@ -88,7 +94,8 @@ export function InfiniteTimelineRow({
   onMouseMove,
   onPointerUp,
   onEventPointerDown,
-  onEventMouseDown
+  onEventMouseDown,
+  onEventClick
 }: InfiniteTimelineRowProps) {
   const rowSettings = useMemo(() => ({ ...settings, rowHeight }), [rowHeight, settings]);
   const availabilityEvents = useMemo(() => rowEvents.filter((event) => event.kind === "availability"), [rowEvents]);
@@ -161,6 +168,7 @@ export function InfiniteTimelineRow({
               disableDrag={!isAvailabilityMode || isDraft || isDraggingOriginal}
               onEventPointerDown={onEventPointerDown}
               onEventMouseDown={onEventMouseDown}
+              onEventClick={onEventClick}
               onPointerMove={onPointerMove}
               onPointerUp={onPointerUp}
               onMouseMove={onMouseMove}
@@ -200,6 +208,7 @@ export function InfiniteTimelineRow({
               disableDrag={interactionMode === "availability" || isDraggingOriginal}
               onEventPointerDown={onEventPointerDown}
               onEventMouseDown={onEventMouseDown}
+              onEventClick={onEventClick}
               onPointerMove={onPointerMove}
               onPointerUp={onPointerUp}
               onMouseMove={onMouseMove}
@@ -210,7 +219,7 @@ export function InfiniteTimelineRow({
         {draftEvent && draftBelongsToRow ? (
           <EventShell
             event={draftEvent}
-            status="new"
+            status={draftEventStatus}
             left={TIMELINE_LEFT_GUTTER_PX + minuteToX(minutesSinceStartOfDay(draftEvent.start), settings)}
             top={0}
             width={Math.max(
@@ -230,10 +239,17 @@ export function InfiniteTimelineRow({
             isOverlapping={false}
             testId="draft-event"
             renderedCalendarId={calendar.id}
-            className="ic-draft-shell"
+            className={draftEventIsDraggable ? "ic-draft-shell is-draggable" : "ic-draft-shell"}
             key={`draft-${draftEvent.id}-${calendar.id}`}
             eventRenderer={eventRenderer}
-            disableDrag
+            disableDrag={!draftEventIsDraggable}
+            onEventPointerDown={onEventPointerDown}
+            onEventMouseDown={onEventMouseDown}
+            onEventClick={onEventClick}
+            onPointerMove={onPointerMove}
+            onPointerUp={onPointerUp}
+            onMouseMove={onMouseMove}
+            onMouseUp={onPointerUp}
           />
         ) : null}
         {dragPreviewEvent &&

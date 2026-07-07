@@ -62,6 +62,8 @@ This document defines the names used for visible calendar interface parts and th
 | Event card | The product-owned visual content rendered inside an event shell. The demo card is only one possible renderer. | `eventRenderer`, `.demo-event-card` |
 | Availability shell | An event shell used for an availability event. It is pointer-transparent in event mode and active in availability mode. | `.ic-availability-shell` |
 | Draft | A temporary event shown while the user draws a new time range. | `draft-new-event`, `status="new"` |
+| Active draft | A parent-owned create or edit preview rendered while an external popup is open. Create active drafts render as `new`; edit active drafts replace their source event visually. | `activeDraft` |
+| Active draft move | A drag proposal for the controlled active draft. The parent applies it to popup state instead of persisting loaded data. | `onActiveDraftMoveRequest` |
 | Drag preview | A temporary shell showing the proposed event position during drag/drop. | `status="drop-preview"` |
 
 ## Interaction Terms
@@ -75,9 +77,13 @@ This document defines the names used for visible calendar interface parts and th
 | Dragging event | The original event instance during pointer drag. Multi-calendar siblings share drag status by event id. | `status="dragging"` |
 | Drop proposal | The snapped date, time range, and calendar membership proposed by a drag. | `buildMoveProposal` |
 | Creation draft | The snapped date, time range, calendar, and kind proposed by drawing on the row grid. | `buildDraftEvent` |
+| Draft request | The parent callback payload for opening an external create flow from a drawn range. | `onEventDraftRequest` |
+| Event activation | The parent callback payload for opening an external edit flow from an existing rendered event. | `onEventActivate` |
+| Draft drag | Moving the currently controlled active draft while a popup is open. Drawing new ranges is blocked during this state. | `onActiveDraftMoveRequest` |
 | Parent validation | The parent callback that accepts or rejects moves and creates. | `onEventMoveRequest`, `onEventCreateRequest` |
 | Snap interval | The minute increment used for drag and draw interactions. | `settings.snapMinutes` |
-| Zoom | Pixels-per-minute scale for the horizontal timeline. | `settings.zoom` |
+| Zoom | Pixels-per-minute scale for the timeline axis. | `settings.zoom` |
+| Nearest-node zoom anchor | `Shift` + wheel behavior that keeps the rendered time-grid node nearest the mouse visually fixed while zoom changes. | `onZoomChange` |
 
 ## Renderer Statuses
 

@@ -103,4 +103,48 @@ describe("InfiniteTimelineView", () => {
       calendarIds: ["calendar-a", "calendar-b"]
     });
   });
+
+  it("renders an active edit draft in place of the loaded source event", async () => {
+    const renderer = vi.fn(({ event, status, style }: EventRendererProps) => (
+      <div data-testid="custom-event" data-status={status} style={style}>
+        {event.title}
+      </div>
+    ));
+    const loadEvents = vi.fn(async () => [
+      {
+        id: "event-a",
+        calendarId: "calendar-a",
+        title: "Original Event",
+        start: "2026-07-04T09:00:00",
+        end: "2026-07-04T10:00:00"
+      } satisfies CalendarEvent
+    ]);
+
+    render(
+      <CalendarRoot
+        calendars={calendars}
+        selectedCalendarIds={["calendar-a"]}
+        loadEvents={loadEvents}
+        eventRenderer={renderer}
+        now={new Date("2026-07-04T09:30:00")}
+        activeDraft={{
+          mode: "edit",
+          sourceEventId: "event-a",
+          event: {
+            id: "event-a",
+            calendarId: "calendar-a",
+            title: "Edited Event",
+            start: "2026-07-04T09:30:00",
+            end: "2026-07-04T10:30:00"
+          }
+        }}
+        settings={{ startHour: 8, endHour: 18, zoom: 1, excludedWeekdays: [] }}
+      />
+    );
+
+    await waitFor(() => expect(loadEvents).toHaveBeenCalled());
+    expect(screen.queryByText("Original Event")).not.toBeInTheDocument();
+    expect(screen.getByText("Edited Event")).toBeInTheDocument();
+    expect(screen.getByTestId("custom-event")).toHaveAttribute("data-status", "existing");
+  });
 });

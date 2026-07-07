@@ -5,21 +5,19 @@ import {
   useImperativeHandle,
   useLayoutEffect,
   useMemo,
-  useRef,
   useState,
   type MouseEvent as ReactMouseEvent,
   type PointerEvent as ReactPointerEvent
 } from "react";
+import { flushSync } from "react-dom";
 import {
   normalizeAnchorDate,
   toDateKey
 } from "../date/dateVirtualization";
-import { replaceEventCalendarMembership } from "../data/calendarEvents";
-import { buildDraftEvent, buildMoveProposal, type CalendarHit } from "../interaction/interactions";
+import { withoutActiveDraftSourceEvents } from "../data/activeDrafts";
 import { layoutEventsForRow } from "../layout/layout";
 import {
   minuteToX,
-  minutesSinceStartOfDay,
   parseClockToMinutes,
   snapMinute,
   timelineEndMinute,
@@ -28,11 +26,9 @@ import {
   xToMinute
 } from "../time/time";
 import {
-  type CalendarEvent,
   type CalendarId,
   type CalendarNavigationHandle,
-  type CalendarViewComponentProps,
-  type EventMoveRequest
+  type CalendarViewComponentProps
 } from "../core/types";
 import { InfiniteTimeScaleHeader } from "./components/InfiniteTimeScaleHeader";
 import { InfiniteTimelineDay } from "./components/InfiniteTimelineDay";
@@ -41,12 +37,13 @@ import {
   MAX_ZOOM,
   mergeTimelineSettings,
   MIN_ZOOM,
-  sameMoveRequest,
+  nearestTimeNodeMinute,
   TIMELINE_LEFT_GUTTER_PX
 } from "./utils/infiniteTimelineUtils";
 import { useEventRangeLoader } from "./hooks/useEventRangeLoader";
 import { useVirtualTimelineWindow } from "./hooks/useVirtualTimelineWindow";
 import { useDayMetrics } from "./hooks/useDayMetrics";
+import { useTimelineInteractions } from "./hooks/useTimelineInteractions";
 import "./InfiniteTimelineView.css";
 
 /**
@@ -66,6 +63,10 @@ export const InfiniteTimelineView = forwardRef<CalendarNavigationHandle, Calenda
   interactionMode = "events",
   onEventMoveRequest,
   onEventCreateRequest,
+  activeDraft,
+  onEventDraftRequest,
+  onEventActivate,
+  onActiveDraftMoveRequest,
   onZoomChange
 }, ref) {
   const baseSettings = useMemo(() => mergeTimelineSettings(settingsInput), [settingsInput]);
@@ -76,20 +77,10 @@ export const InfiniteTimelineView = forwardRef<CalendarNavigationHandle, Calenda
   const selectedIds = useMemo(() => selectedCalendars.map((calendar) => calendar.id), [selectedCalendars]);
   const initialAnchorDateKey = useMemo(() => normalizeAnchorDate(toDateKey(now), baseSettings.excludedWeekdays), [baseSettings.excludedWeekdays, now]);
   const [windowAnchorDateKey, setWindowAnchorDateKey] = useState(initialAnchorDateKey);
-  const [hoveredEvent, setHoveredEvent] = useState<{ eventId: string; calendarId: CalendarId } | null>(null);
-  const [dragState, setDragState] = useState<{
-    event: CalendarEvent;
-    sourceCalendarId: CalendarId;
-    offsetMinutes: number;
-    preview: EventMoveRequest | null;
-  } | null>(null);
-  const [draftState, setDraftState] = useState<{ start: CalendarHit; current: CalendarHit; event: CalendarEvent } | null>(
-    null
-  );
   const settings = baseSettings;
   const baseDayHeight = settings.dayHeaderHeight + selectedCalendars.length * settings.rowHeight;
   const width = timelineWidth(settings);
-  const createdEventSequenceRef = useRef(0);
+  const [isInteractionActive, setIsInteractionActive] = useState(false);
   const verticalLayoutSignature = `${selectedIds.join("|")}:${settings.dayHeaderHeight}:${settings.rowHeight}:${settings.excludedWeekdays.join("|")}`;
   const {
     containerRef,
@@ -109,7 +100,7 @@ export const InfiniteTimelineView = forwardRef<CalendarNavigationHandle, Calenda
     settings,
     baseDayHeight,
     verticalLayoutSignature,
-    isInteractionActive: Boolean(dragState || draftState)
+    isInteractionActive
   });
 
   const scrollToTime = useCallback(
@@ -155,6 +146,10 @@ export const InfiniteTimelineView = forwardRef<CalendarNavigationHandle, Calenda
     getDayHeight,
     getRowHeight
   } = useDayMetrics({ eventsByDate, selectedCalendars, settings, baseDayHeight });
+  const renderEventsForRow = useCallback(
+    (dateKey: string, calendarId: CalendarId) => withoutActiveDraftSourceEvents(eventsForRow(dateKey, calendarId), activeDraft),
+    [activeDraft, eventsForRow]
+  );
 
   useLayoutEffect(() => {
     if (dayMetricsByDate.size === 0) {
@@ -240,175 +235,44 @@ export const InfiniteTimelineView = forwardRef<CalendarNavigationHandle, Calenda
     return isGridInteractionPoint(event);
   }, [isGridInteractionPoint]);
 
-  const handleGridPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if ((event.target as HTMLElement).closest("[data-event-id]")) {
-      return;
-    }
-    if (!isTimelinePoint(event)) {
-      return;
-    }
-    const hit = getHit(event);
-    if (!hit) {
-      return;
-    }
-    event.preventDefault();
-    event.currentTarget.setPointerCapture(event.pointerId);
-    const draftEvent = buildDraftEvent(hit, hit, interactionMode === "availability" ? "availability" : "draft");
-    setDraftState({ start: hit, current: hit, event: draftEvent });
-    setHoveredEvent(null);
-  };
+  const {
+    hoveredEvent,
+    setHoveredEvent,
+    dragState,
+    draftState,
+    dragPreviewEvent,
+    renderedDraftEvent,
+    renderedDraftStatus,
+    renderedDraftIsDraggable,
+    isInteractionActive: currentInteractionActive,
+    handleGridPointerDown,
+    handleGridMouseDown,
+    handleEventPointerDown,
+    handleEventMouseDown,
+    handlePointerMove,
+    handleMouseMove,
+    handlePointerUp
+  } = useTimelineInteractions({
+    activeDraft,
+    interactionMode,
+    settings,
+    getHit,
+    isTimelinePoint,
+    onEventMoveRequest,
+    onEventCreateRequest,
+    onEventDraftRequest,
+    onEventActivate,
+    onActiveDraftMoveRequest,
+    applyMoveToLoadedEvents,
+    applyCreatedEventToLoadedEvents
+  });
 
-  const handleGridMouseDown = (event: ReactMouseEvent<HTMLDivElement>) => {
-    if ((event.target as HTMLElement).closest("[data-event-id]") || dragState || draftState) {
-      return;
-    }
-    if (!isTimelinePoint(event)) {
-      return;
-    }
-    const hit = getHit(event);
-    if (!hit) {
-      return;
-    }
-    event.preventDefault();
-    const draftEvent = buildDraftEvent(hit, hit, interactionMode === "availability" ? "availability" : "draft");
-    setDraftState({ start: hit, current: hit, event: draftEvent });
-    setHoveredEvent(null);
-  };
+  useEffect(() => {
+    setIsInteractionActive(currentInteractionActive);
+  }, [currentInteractionActive]);
 
-  const handleEventPointerDown = (
-    pointerEvent: ReactPointerEvent<HTMLDivElement>,
-    event: CalendarEvent,
-    renderedCalendarId: CalendarId
-  ) => {
-    pointerEvent.stopPropagation();
-    if ((interactionMode === "availability") !== (event.kind === "availability")) {
-      return;
-    }
-    if (!isTimelinePoint(pointerEvent)) {
-      return;
-    }
-    pointerEvent.preventDefault();
-    pointerEvent.currentTarget.setPointerCapture(pointerEvent.pointerId);
-    const hit = getHit(pointerEvent);
-    const pointerMinute = hit?.minute ?? minutesSinceStartOfDay(event.start);
-    setDragState({
-      event,
-      sourceCalendarId: renderedCalendarId,
-      offsetMinutes: pointerMinute - minutesSinceStartOfDay(event.start),
-      preview: null
-    });
-    setHoveredEvent(null);
-  };
-
-  const handleEventMouseDown = (
-    mouseEvent: ReactMouseEvent<HTMLDivElement>,
-    event: CalendarEvent,
-    renderedCalendarId: CalendarId
-  ) => {
-    mouseEvent.stopPropagation();
-    if ((interactionMode === "availability") !== (event.kind === "availability")) {
-      return;
-    }
-    if (!isTimelinePoint(mouseEvent)) {
-      return;
-    }
-    mouseEvent.preventDefault();
-    const hit = getHit(mouseEvent);
-    const pointerMinute = hit?.minute ?? minutesSinceStartOfDay(event.start);
-    setDragState({
-      event,
-      sourceCalendarId: renderedCalendarId,
-      offsetMinutes: pointerMinute - minutesSinceStartOfDay(event.start),
-      preview: null
-    });
-    setHoveredEvent(null);
-  };
-
-  const updateInteractionFromPoint = useCallback(
-    (event: Pick<PointerEvent | MouseEvent | ReactPointerEvent | ReactMouseEvent, "clientX" | "clientY">) => {
-    if (dragState) {
-      const hit = getHit(event);
-      if (!hit) {
-        return;
-      }
-      const baseProposal = buildMoveProposal(dragState.event, hit, dragState.offsetMinutes, settings);
-      const proposal: EventMoveRequest = {
-        ...baseProposal,
-        sourceCalendarId: dragState.sourceCalendarId,
-        proposedCalendarIds: replaceEventCalendarMembership(
-          dragState.event,
-          dragState.sourceCalendarId,
-          baseProposal.proposedCalendarId
-        )
-      };
-      setDragState((current) => {
-        if (!current || sameMoveRequest(proposal, current.preview)) {
-          return current;
-        }
-        return { ...current, preview: proposal };
-      });
-      return;
-    }
-
-    if (draftState) {
-      const hit = getHit(event);
-      if (!hit || hit.dateKey !== draftState.start.dateKey || hit.calendarId !== draftState.start.calendarId) {
-        return;
-      }
-      setDraftState({
-        start: draftState.start,
-        current: hit,
-        event: buildDraftEvent(draftState.start, hit, interactionMode === "availability" ? "availability" : "draft")
-      });
-    }
-    },
-    [draftState, dragState, getHit, interactionMode, settings]
-  );
-
-  const handlePointerMove = (event: ReactPointerEvent<HTMLDivElement>) => updateInteractionFromPoint(event);
-  const handleMouseMove = (event: ReactMouseEvent<HTMLDivElement>) => updateInteractionFromPoint(event);
   const handleViewportScroll = () => {
     updateTopVisibleDate();
-  };
-
-  const finishInteraction = useCallback(async () => {
-    if (dragState) {
-      const proposal = dragState.preview;
-      if (proposal && onEventMoveRequest) {
-        const accepted = await onEventMoveRequest(proposal);
-        if (accepted !== false) {
-          applyMoveToLoadedEvents(proposal);
-        }
-      }
-      setDragState(null);
-      return;
-    }
-
-    if (draftState) {
-      const draft = draftState.event;
-      setDraftState(null);
-      if (onEventCreateRequest && minutesSinceStartOfDay(draft.end) > minutesSinceStartOfDay(draft.start)) {
-        const request = {
-          start: draft.start,
-          end: draft.end,
-          calendarId: draft.calendarId,
-          kind: draft.kind
-        };
-        const createdEvent = await onEventCreateRequest(request);
-        createdEventSequenceRef.current += 1;
-        applyCreatedEventToLoadedEvents(
-          createdEvent ?? {
-            ...draft,
-            id: `created-local-${createdEventSequenceRef.current}`,
-            subtitle: "Created from drawn area"
-          }
-        );
-      }
-    }
-  }, [applyCreatedEventToLoadedEvents, applyMoveToLoadedEvents, draftState, dragState, onEventCreateRequest, onEventMoveRequest]);
-
-  const handlePointerUp = () => {
-    void finishInteraction();
   };
 
   const handleShiftWheelZoom = useCallback((event: WheelEvent) => {
@@ -421,9 +285,19 @@ export const InfiniteTimelineView = forwardRef<CalendarNavigationHandle, Calenda
       return;
     }
     const previousScrollTop = scrollElement.scrollTop;
-    const previousScrollLeft = scrollElement.scrollLeft;
     const previousWindowScrollX = window.scrollX;
     const previousWindowScrollY = window.scrollY;
+    const containerBox = scrollElement.getBoundingClientRect();
+    const pointerX = event.clientX - containerBox.left;
+    const anchoredMinute = nearestTimeNodeMinute(
+      xToMinute(
+        pointerX + scrollElement.scrollLeft - settings.labelWidth - TIMELINE_LEFT_GUTTER_PX,
+        settings
+      ),
+      settings
+    );
+    const anchoredScreenX =
+      settings.labelWidth + TIMELINE_LEFT_GUTTER_PX + minuteToX(anchoredMinute, settings) - scrollElement.scrollLeft;
     const wheelDelta = Math.abs(event.deltaY) >= Math.abs(event.deltaX) ? event.deltaY : event.deltaX;
     if (wheelDelta === 0) {
       return;
@@ -436,20 +310,22 @@ export const InfiniteTimelineView = forwardRef<CalendarNavigationHandle, Calenda
     const direction = wheelDelta < 0 ? 1 : -1;
     const nextZoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, Number((settings.zoom + direction * 0.15).toFixed(2))));
     if (nextZoom !== settings.zoom) {
-      onZoomChange(nextZoom);
+      flushSync(() => onZoomChange(nextZoom));
     }
 
+    const nextSettings = { ...settings, zoom: nextZoom };
     const restoreScroll = () => {
       scrollElement.scrollTop = previousScrollTop;
-      scrollElement.scrollLeft = previousScrollLeft;
+      scrollElement.scrollLeft = settings.labelWidth + TIMELINE_LEFT_GUTTER_PX + minuteToX(anchoredMinute, nextSettings) - anchoredScreenX;
       window.scrollTo(previousWindowScrollX, previousWindowScrollY);
     };
+    restoreScroll();
     window.requestAnimationFrame(() => {
       restoreScroll();
       window.requestAnimationFrame(restoreScroll);
       window.setTimeout(restoreScroll, 0);
     });
-  }, [clearScrollEndTimer, containerRef, onZoomChange, settings.zoom]);
+  }, [clearScrollEndTimer, containerRef, onZoomChange, settings]);
 
   useEffect(() => {
     const scrollElement = containerRef.current;
@@ -462,50 +338,6 @@ export const InfiniteTimelineView = forwardRef<CalendarNavigationHandle, Calenda
       scrollElement.removeEventListener("wheel", handleShiftWheelZoom, { capture: true });
     };
   }, [containerRef, handleShiftWheelZoom]);
-
-  useEffect(() => {
-    if (!dragState && !draftState) {
-      return;
-    }
-
-    const handleWindowMove = (event: PointerEvent | MouseEvent) => {
-      event.preventDefault();
-      document.getSelection()?.removeAllRanges();
-      updateInteractionFromPoint(event);
-    };
-    const handleWindowUp = () => {
-      void finishInteraction();
-    };
-
-    window.addEventListener("pointermove", handleWindowMove);
-    window.addEventListener("mousemove", handleWindowMove);
-    window.addEventListener("pointerup", handleWindowUp);
-    window.addEventListener("mouseup", handleWindowUp);
-
-    return () => {
-      window.removeEventListener("pointermove", handleWindowMove);
-      window.removeEventListener("mousemove", handleWindowMove);
-      window.removeEventListener("pointerup", handleWindowUp);
-      window.removeEventListener("mouseup", handleWindowUp);
-    };
-  }, [draftState, dragState, finishInteraction, updateInteractionFromPoint]);
-
-  useEffect(() => {
-    if (!dragState && !draftState) {
-      return;
-    }
-
-    const previousUserSelect = document.body.style.userSelect;
-    const previousDocumentUserSelect = document.documentElement.style.userSelect;
-    document.body.style.userSelect = "none";
-    document.documentElement.style.userSelect = "none";
-    document.getSelection()?.removeAllRanges();
-    return () => {
-      document.body.style.userSelect = previousUserSelect;
-      document.documentElement.style.userSelect = previousDocumentUserSelect;
-      document.getSelection()?.removeAllRanges();
-    };
-  }, [draftState, dragState]);
 
   const timeTicks = useMemo(() => buildTimeTicks(settings), [settings]);
   const todayKey = toDateKey(now);
@@ -543,16 +375,6 @@ export const InfiniteTimelineView = forwardRef<CalendarNavigationHandle, Calenda
     },
     [draftState, dragState, interactionMode]
   );
-
-  const dragPreviewEvent = dragState?.preview
-    ? {
-        ...dragState.event,
-        calendarId: dragState.preview.proposedCalendarId,
-        calendarIds: dragState.preview.proposedCalendarIds,
-        start: dragState.preview.proposedStart,
-        end: dragState.preview.proposedEnd
-      }
-    : null;
 
   return (
     <section className="ic-shell" data-testid="infinite-calendar">
@@ -592,11 +414,13 @@ export const InfiniteTimelineView = forwardRef<CalendarNavigationHandle, Calenda
                 hoveredEvent={hoveredEvent}
                 dragEventId={dragState?.event.id}
                 dragPreviewEvent={dragPreviewEvent}
-                draftEvent={draftState?.event ?? null}
+                draftEvent={renderedDraftEvent}
+                draftEventStatus={renderedDraftStatus}
+                draftEventIsDraggable={renderedDraftIsDraggable}
                 eventRenderer={eventRenderer}
                 measureElement={virtualizer.measureElement}
                 getRowHeight={getRowHeight}
-                eventsForRow={eventsForRow}
+                eventsForRow={renderEventsForRow}
                 onHoverMove={updateHoverFromRow}
                 onHoverLeave={() => setHoveredEvent(null)}
                 onPointerMove={handlePointerMove}
@@ -604,6 +428,7 @@ export const InfiniteTimelineView = forwardRef<CalendarNavigationHandle, Calenda
                 onPointerUp={handlePointerUp}
                 onEventPointerDown={handleEventPointerDown}
                 onEventMouseDown={handleEventMouseDown}
+                onEventClick={() => undefined}
                 key={item.key}
               />
             );

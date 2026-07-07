@@ -125,9 +125,14 @@ export function useVirtualTimelineWindow({
       pendingScrollTargetRef.current = { dateKey: normalizedDateKey, offsetWithinDate: 0 };
       topVisibleDateRef.current = normalizedDateKey;
       topVisibleOffsetRef.current = 0;
+      if (normalizedDateKey === virtualWindow.anchorDateKey) {
+        pendingScrollTargetRef.current = null;
+        scrollToVisibleDateOffset(normalizedDateKey, 0);
+        return;
+      }
       setAnchorDateKey(() => normalizedDateKey);
     },
-    [setAnchorDateKey, settings.excludedWeekdays]
+    [scrollToVisibleDateOffset, setAnchorDateKey, settings.excludedWeekdays, virtualWindow.anchorDateKey]
   );
 
   const rememberVisibleDateOffset = useCallback(

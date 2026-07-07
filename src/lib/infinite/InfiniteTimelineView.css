@@ -231,6 +231,10 @@
   pointer-events: none;
 }
 
+.ic-draft-shell.is-draggable {
+  pointer-events: auto;
+}
+
 .ic-availability-shell {
   pointer-events: none;
 }

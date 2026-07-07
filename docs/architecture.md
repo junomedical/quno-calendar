@@ -5,13 +5,15 @@ Interface vocabulary in this document follows [Interface Taxonomy](./taxonomy.md
 ## Component Shape
 `CalendarRoot` is the public shell. It accepts shared settings, calendars, data loading, event rendering, and interaction callbacks. It supports `view="infinite-horizontal"` for the original time-horizontal timeline and `view="infinite-vertical"` for the calendar-column timeline. The legacy `view="infinite"` remains an alias for `infinite-horizontal`.
 
-`InfiniteTimelineView` owns scroll state, zoom geometry, virtual day rendering, hit-testing, drag previews, and new-event draft state. It does not persist event changes. Parent code owns accepted data updates.
+`InfiniteTimelineView` owns horizontal scroll geometry, virtual day rendering, and row hit-testing. `InfiniteVerticalTimelineView` owns vertical scroll geometry, vertical hit-testing, and date/calendar column sizing. Shared pointer interaction state for drag/drop, drawn creation, event activation, and controlled active-draft dragging lives in `useTimelineInteractions`, so both orientations follow the same gesture contract. The views do not persist event changes. Parent code owns accepted data updates and may also own a controlled `activeDraft` for external create/edit popups.
 
 `InfiniteVerticalTimelineView` shares the same public contracts, bounded date virtualization, async loading, renderer contract, and parent-validated interaction callbacks. It swaps the projection so dates and hours flow vertically while calendars render as horizontal columns.
 
-The infinite view also exposes an imperative navigation handle with `scrollToDate(dateKey)`, `scrollToDateTime(dateKey, time)`, and `scrollToToday()`. This keeps date/time navigation reusable while preserving internal virtualization details.
+The infinite view also exposes an imperative navigation handle with `scrollToDate(dateKey)`, `scrollToDateTime(dateKey, time)`, and `scrollToToday()`. This keeps date/time navigation reusable while preserving internal virtualization details. Date navigation scrolls immediately even when the requested date is already the current virtual window anchor, so parent-owned popup edits can refocus an active draft after the user has scrolled elsewhere inside the same bounded window.
 
 The active editing layer is selected with `interactionMode`. In `events` mode, appointments are active and availability is a pointer-transparent background. In `availability` mode, availability blocks are active and draggable/creatable while appointments become pointer-transparent background context.
+
+External create/edit UI stays outside the reusable calendar. The parent can pass `activeDraft` to render one controlled create or edit preview. Create drafts render as `status="new"`. Edit drafts visually replace the loaded source event identified by `sourceEventId ?? event.id`, so unsaved popup edits update the calendar without mutating loaded data.
 
 The infinite view is now decomposed into focused modules:
 - `src/lib/core`: public shell and API types.
@@ -21,11 +23,11 @@ The infinite view is now decomposed into focused modules:
 - `src/lib/layout`: overlap lane assignment and row-height math.
 - `src/lib/interaction`: pointer hit-test and draft/move proposal builders.
 - `src/lib/infinite`: the infinite view coordinator.
-- `src/lib/infinite/hooks`: async loading, virtual scroll window, and day metrics.
-- `src/lib/infinite/components`: sticky header, day, row, and event shell render layers.
+- `src/lib/infinite/hooks`: async loading, virtual scroll window, day metrics, and shared timeline interaction state.
+- `src/lib/infinite/components`: sticky header, horizontal day/row render layers, vertical day render layer, and event shell render layers.
 - `src/lib/infinite/utils`: infinite-view constants and local pure helpers.
 - `src/lib/infinite/InfiniteTimelineView.css`: reusable calendar shell, grid, sticky-label, marker, and event-shell styles imported by the infinite view.
-- `src/App.css`, `src/demo/DefaultDemo.tsx`, `src/demo/DemoEventCard.css`, and `src/demo/demo*/`: demo-only app chrome, route variants, and renderer styles.
+- `src/App.css`, `src/demo/DefaultDemo.tsx`, `src/demo/useExternalEventDrafts.ts`, `src/demo/ExternalEventPopup.tsx`, `src/demo/DemoEventCard.css`, and `src/demo/demo*/`: demo-only app chrome, external popup orchestration, route variants, and renderer styles.
 
 The demo app composes `CalendarRoot` through separate route components. `/` keeps the original PoC controls and renderer, while `/demo1`, `/demo2`, and `/demo3` each own their setup, controls, settings, app chrome, and `eventRenderer` styles inside their folder. Each variant keeps live controls for view orientation, zoom, date navigation, and interaction mode rather than hardcoding a static preview. The variants intentionally share the deterministic event generator but avoid a shared demo shell, demonstrating that compact horizontal boards, wide vertical planners, and availability-first schedules use the same reusable calendar surface without branching inside the library.
 
@@ -36,8 +38,12 @@ The demo app composes `CalendarRoot` through separate route components. `/` keep
   selectedCalendarIds={selectedCalendarIds}
   loadEvents={loadEvents}
   eventRenderer={EventCard}
+  activeDraft={activeDraft}
   onEventMoveRequest={handleMove}
   onEventCreateRequest={handleCreate}
+  onEventDraftRequest={openExternalCreatePopup}
+  onEventActivate={openExternalEditPopup}
+  onActiveDraftMoveRequest={updateExternalDraftFromDrag}
   interactionMode="events"
   settings={{
     startHour: 8,
@@ -159,7 +165,11 @@ During drag, every visible instance of the original event remains in normal row 
 
 Hover expansion is disabled while a drag or draft drawing interaction is active so cards under the pointer do not resize or open beneath the preview/draft. Dragging and draft drawing also clear current text selection and temporarily apply `user-select: none` to the document so browser selection cannot start during pointer movement.
 
-Create requests are rendered as status `new` in a draft overlay, then committed through `onEventCreateRequest`. After the callback resolves, the view inserts the created event into the loaded visible date cache immediately; if the parent does not return a created event object, the view uses a local copy of the draft. Only this committed event participates in row-height and overlap lane recalculation.
+Create requests are rendered as status `new` in a transient draft overlay while the pointer is drawing. On release, the view either calls `onEventDraftRequest` for parent-owned external creation, or falls back to `onEventCreateRequest` for immediate creation. After `onEventCreateRequest` resolves, the view inserts the created event into the loaded visible date cache immediately; if the parent does not return a created event object, the view uses a local copy of the draft. Only committed events participate in row-height and overlap lane recalculation.
+
+Clicking an active event without producing a move proposal calls `onEventActivate({ event, renderedCalendarId })`. Parents use that to copy the loaded event into `activeDraft` and open an external edit popup. While an edit draft is active, render lists filter out the source event and render `activeDraft.event` through the same event shell in its edited date/time/calendar position. The grid does not start new drawn ranges while any `activeDraft` is present; only the controlled draft shell remains draggable. Dragging that shell emits `onActiveDraftMoveRequest`, and the parent updates `activeDraft.event` so popup date/time fields and every rendered participant instance move from the same state. Multi-calendar active drafts keep their `calendarIds` as a block during drag.
+
+Popup code decides whether a draft edit should focus the event or preserve the current screen position. The default demo records the draft's last visible viewport-relative position. Same-date time edits do not scroll when the draft is already visible. Date changes can move the draft to a different virtual day, so they immediately restore the preview to the last seen viewport-relative position on the first edit. If the draft is offscreen, the demo restores it to that last seen position instead of jumping to a fixed date/time offset. Participant filtering, drawn create handoff, save, and cancel also snapshot the draft and restore the replacement, saved, or original event to the relevant viewport-relative position.
 
 ```mermaid
 flowchart TD
@@ -171,8 +181,12 @@ flowchart TD
   Preview --> Validate["onEventMoveRequest"]
   Validate --> Commit["applyMoveToLoadedEvents"]
   Draft --> NewShell["status new EventShell"]
-  NewShell --> Create["onEventCreateRequest"]
+  NewShell --> DraftRequest["onEventDraftRequest"]
+  NewShell --> Create["onEventCreateRequest fallback"]
   Create --> Insert["applyCreatedEventToLoadedEvents"]
+  Move --> Activate["onEventActivate without move proposal"]
+  Activate --> ActiveDraft["parent activeDraft"]
+  ActiveDraft --> Shell
 ```
 
 ### Sticky Headers And Current Time
@@ -193,7 +207,9 @@ Calendar cells use one shared 1px gray border token (`--ic-cell-border`) for the
 ### Zoom Flow
 `Shift` + wheel on the calendar viewport requests a zoom change through `onZoomChange`. The parent remains the source of truth for the actual zoom value. The view handles this with a native non-passive capture-phase `wheel` listener so trackpad gestures are cancelled before browser scrolling or page scrolling can occur. The demo exposes zoom as a `0.5-8` slider and the infinite view clamps incoming zoom settings to the same range.
 
-Zoom changes preserve the current visible date. In the vertical view, the intra-day scroll offset is scaled from the previous day height to the next day height so zooming in or out keeps the same date anchored instead of carrying an old pixel offset into another virtual day.
+`Shift` + wheel zoom is nearest-node anchored. The view finds the rendered time-grid node closest to the mouse, using the current grid cadence, and keeps that node at its existing screen position while zoom changes. The horizontal view anchors the nearest time node on the x-axis when horizontal overflow allows it. The vertical view anchors the nearest date/time node on the y-axis. Because zoom is parent-controlled from a native event listener, the view flushes the parent zoom update before restoring scroll against the committed layout, avoiding a visible snap from stale geometry.
+
+Zoom changes outside the wheel gesture still preserve the current visible date. In the vertical view, the intra-day scroll offset is scaled from the previous day height to the next day height so zooming in or out keeps the same date anchored instead of carrying an old pixel offset into another virtual day.
 
 ## Demo Instrumentation
 The demo app reports lightweight rendering stats in the left pane. A throttled `requestAnimationFrame` sampler shows the average redraw frame interval in milliseconds. The same sampler counts currently visible event DOM nodes by querying rendered appointment, availability, and draft shells that intersect the calendar viewport. It also reports the total number of rendered calendar DOM nodes under the reusable calendar shell. The sampler runs in its own sidebar component so stats updates do not re-render the calendar tree. This is intentionally demo-only instrumentation and is not part of the reusable calendar API.

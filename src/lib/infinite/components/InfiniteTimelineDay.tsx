@@ -5,6 +5,7 @@ import type {
   CalendarEvent,
   CalendarId,
   CalendarRow,
+  EventRenderStatus,
   EventRenderer,
   TimelineSettings
 } from "../../core/types";
@@ -35,6 +36,8 @@ type InfiniteTimelineDayProps = {
   dragEventId?: string;
   dragPreviewEvent: CalendarEvent | null;
   draftEvent: CalendarEvent | null;
+  draftEventStatus: EventRenderStatus;
+  draftEventIsDraggable: boolean;
   eventRenderer: EventRenderer;
   measureElement: RefCallback<HTMLDivElement>;
   getRowHeight: (dateKey: string, calendarId: CalendarId) => number;
@@ -59,6 +62,7 @@ type InfiniteTimelineDayProps = {
     calendarEvent: CalendarEvent,
     renderedCalendarId: CalendarId
   ) => void;
+  onEventClick: (calendarEvent: CalendarEvent, renderedCalendarId: CalendarId) => void;
 };
 
 /**
@@ -81,6 +85,8 @@ export function InfiniteTimelineDay({
   dragEventId,
   dragPreviewEvent,
   draftEvent,
+  draftEventStatus,
+  draftEventIsDraggable,
   eventRenderer,
   measureElement,
   getRowHeight,
@@ -91,7 +97,8 @@ export function InfiniteTimelineDay({
   onMouseMove,
   onPointerUp,
   onEventPointerDown,
-  onEventMouseDown
+  onEventMouseDown,
+  onEventClick
 }: InfiniteTimelineDayProps) {
   const date = parseISO(`${dateKey}T00:00:00`);
   let rowTop = settings.dayHeaderHeight;
@@ -127,6 +134,8 @@ export function InfiniteTimelineDay({
             dragEventId={dragEventId}
             dragPreviewEvent={dragPreviewEvent}
             draftEvent={draftEvent}
+            draftEventStatus={draftEventStatus}
+            draftEventIsDraggable={draftEventIsDraggable}
             eventRenderer={eventRenderer}
             onHoverMove={onHoverMove}
             onHoverLeave={onHoverLeave}
@@ -135,6 +144,7 @@ export function InfiniteTimelineDay({
             onPointerUp={onPointerUp}
             onEventPointerDown={onEventPointerDown}
             onEventMouseDown={onEventMouseDown}
+            onEventClick={onEventClick}
             key={calendar.id}
           />
         );
