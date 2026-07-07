@@ -32,13 +32,13 @@ type EventInterval = {
   endMinute: number;
 };
 
-/** Grows only the dense row as overlap lanes require more vertical space. */
+/** Grows only dense rows; two overlap lanes stay at the compact base height. */
 export function rowHeightForOverlapDepth(baseRowHeight: number, laneCount: number): number {
-  if (laneCount <= 1) {
+  if (laneCount <= 2) {
     return baseRowHeight;
   }
 
-  const steppedHeight = laneCount === 2 ? 60 : laneCount === 3 ? 75 : 80 + Math.max(0, laneCount - 4) * 20;
+  const steppedHeight = laneCount === 3 ? 75 : 80 + Math.max(0, laneCount - 4) * 20;
   const minimumRestingShellHeight = 20;
   const laneHoverSlack = 4;
   return Math.max(baseRowHeight, steppedHeight, laneCount * (minimumRestingShellHeight + laneHoverSlack));

@@ -70,6 +70,7 @@ export function useTimelineInteractions({
   const [dragState, setDragState] = useState<DragState | null>(null);
   const [draftState, setDraftState] = useState<DraftState | null>(null);
   const createdEventSequenceRef = useRef(0);
+  const pendingDraftClearFrameRef = useRef<number | null>(null);
 
   const isActiveDraftEvent = useCallback(
     (event: CalendarEvent) => Boolean(activeDraft && event.id === activeDraft.event.id),
@@ -218,6 +219,9 @@ export function useTimelineInteractions({
     }
 
     if (draftState) {
+      if (pendingDraftClearFrameRef.current !== null) {
+        return;
+      }
       const draft = draftState.event;
       if (minutesSinceStartOfDay(draft.end) > minutesSinceStartOfDay(draft.start)) {
         const request = {
@@ -228,7 +232,10 @@ export function useTimelineInteractions({
         };
         if (onEventDraftRequest) {
           onEventDraftRequest(request);
-          setDraftState(null);
+          pendingDraftClearFrameRef.current = window.requestAnimationFrame(() => {
+            pendingDraftClearFrameRef.current = null;
+            setDraftState(null);
+          });
         } else if (onEventCreateRequest) {
           setDraftState(null);
           const createdEvent = await onEventCreateRequest(request);
@@ -262,6 +269,14 @@ export function useTimelineInteractions({
   const handlePointerUp = () => {
     void finishInteraction();
   };
+
+  useEffect(() => {
+    return () => {
+      if (pendingDraftClearFrameRef.current !== null) {
+        window.cancelAnimationFrame(pendingDraftClearFrameRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (!dragState && !draftState) {

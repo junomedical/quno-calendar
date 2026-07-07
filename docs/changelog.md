@@ -8,9 +8,14 @@
 - Refined the external popup participant flow so empty participant lists keep the previous calendar set visible and disable save, while edit popups do not filter calendars until participants change.
 - Blocked drawing a separate grid range while an external popup draft is active.
 - Preserved drawn draft position when the external popup opens and hides other calendars, and kept saved or cancelled events anchored when the popup closes.
+- Smoothed the drawn-create handoff so the controlled external draft takes over without a one-frame position jump.
 - Changed popup field edits so visible drafts update without scrolling, while offscreen drafts are restored to their last seen viewport position.
 - Fixed same-anchor date navigation so popup field edits can focus an active draft even after the user scrolls elsewhere inside the current virtual window.
+- Added simulated delayed external saves in the default demo, including deterministic validation failures that keep the popup editable with a bottom error message.
+- Fixed visible-calendar changes so reducing the calendar list keeps the active day visible instead of letting the old row offset jump into later dates.
+- Pinned the active draft date during virtual relayouts without replacing the current scroll anchor, so visible participant-row changes no longer park the draft in the viewport center.
 - Changed `Shift` + wheel zoom to anchor around the rendered time-grid node closest to the mouse in both horizontal and vertical timeline views.
+- Fixed vertical `Shift` + wheel zoom near the bottom of a day so the anchor clamps to the configured timeline end instead of an off-hours node.
 - Added a horizontal render-time viewport-fill zoom floor so the timeline board does not become narrower than the available screen area even when the controlled zoom value is lower.
 - Added `/demo1`, `/demo2`, and `/demo3` demo routes with compact horizontal, wide vertical, and availability-first event-card treatments.
 - Kept the additional demo routes fully interactive, including calendar orientation and availability-mode switching.
@@ -96,7 +101,7 @@
 - Moved body current-time lines into row grids and render sticky day headers after rows, preventing row labels from painting into the top sticky date/header band.
 - Normalized calendar shell, sticky labels, row dividers, and timeline grid lines to the same 1px gray border token, with Playwright coverage for the shared border color and marker clipping.
 - Removed duplicate parent row/day borders so sticky label cells and timeline grid cells each draw one shared edge, including horizontal dividers across the calendar timeline zone.
-- Changed the compact calendar-row default height to 50px and added stepped local row growth for overlapping appointments: 60px for two lanes, 75px for three, 80px for four, then +20px per extra lane.
+- Changed the compact calendar-row default height to 50px and added stepped local row growth for dense overlapping appointments: two lanes stay compact, three lanes use 75px, four lanes use at least 96px, then grow with lane density.
 - Changed hovered compact single-lane event shells to take the full row height without exceeding it, while the demo card uses a compact hover state to reveal its time line.
 - Changed overlap lane geometry to derive event shells from row-local lane slots, and kept demo card typography stable on hover.
 - Clamped dense overlap lanes to at least 24px, leaving 20px resting event shells plus a 4px mini-lane gap, and kept compact title icons visible in short event cards.
@@ -118,3 +123,11 @@
 - Fixed calendar-count changes to keep the same top visible day and intra-day scroll offset even when the day is already the virtual window anchor.
 - Split oversized timeline, demo, and Playwright files by responsibility: shared timeline gestures moved to `useTimelineInteractions`, external popup demo state moved to `useExternalEventDrafts` plus `ExternalEventPopup`, vertical day rendering moved to its own component, and e2e coverage moved into behavior-focused spec files.
 - Fixed external popup date edits so moving a draft to a future or past date refocuses the preview on the first date change instead of only after a second edit.
+- Fixed popup cancel positioning so visible create/edit cancels restore from the last event or draft anchor without falling back to date/time centering.
+- Fixed active edit draft layout so the replaced source event is excluded from row-height and vertical column-width metrics; draft previews no longer add another overlap lane while the popup is open.
+- De-duplicated async loaded event buckets by event id so popup handoff range reloads cannot duplicate committed events and grow overlap rows.
+- Kept two overlapping events at the compact row height; overlap-driven row growth now starts at three lanes.
+- Refined popup date-edit focus: visible destination dates now move naturally without scrolling, offscreen destination dates keep the last screen position, and manual scrolling cancels delayed restore corrections after popup handoff.
+- Cancelled stale delayed offscreen restore corrections when a later popup edit moves the draft back to a visible date, preventing the draft from being thrown to an old edge position.
+- Delayed bounded vertical-scroll recentering after scroll stop or scrollbar release, so the scrollbar correction no longer fires immediately.
+- Added `eventVersion` cache invalidation and wired the default demo to refresh loaded visible events after external popup saves, fixing saved vertical create drafts disappearing after the popup closes.

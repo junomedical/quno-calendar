@@ -6,14 +6,15 @@ Vitest unit tests live in `tests/unit` and mirror the source module grouping.
 - Date virtualization with excluded weekdays.
 - Virtual scroll window behavior remains covered through existing date virtualization unit tests and Playwright scroll tests after extraction into `useVirtualTimelineWindow`.
 - Time-to-pixel conversion, vertical time-to-pixel conversion, zoom, and snap interval.
-- Event overlap lane layout, 50px compact row height, stepped overlap growth, at least 24px lane slots, and at least 20px visible resting event shells for dense groups.
+- Event overlap lane layout, 50px compact row height for one or two lanes, stepped overlap growth from three lanes onward, at least 24px lane slots, and at least 20px visible resting event shells for dense groups.
 - Vertical overlap column layout, default 240px base column width, three-lane fit, +80px growth for each additional overlap lane, and custom caller-provided column sizing rules.
 - Row-height growth remains local to the dense date/calendar row instead of inflating every loaded day.
 - Availability events are excluded from row-height growth and overlap calculations.
 - Availability editing mode switches pointer activity from appointments to availability blocks.
 - Generated appointments stay inside the primary calendar's generated availability window.
+- Async range loading de-duplicates committed events by id when a range response includes already-loaded dates, so reloads do not add overlap lanes or grow rows.
 - Multi-calendar event membership and move application.
-- Active edit drafts replace their source event id while create drafts do not remove loaded events.
+- Active edit drafts replace their source event id while create drafts do not remove loaded events; draft overlays do not add overlap lanes, row-height growth, or vertical column-width growth.
 - Deterministic demo event generation distributes events across every demo calendar.
 - Pointer hit-testing, move proposal calculation, and draft creation.
 
@@ -32,9 +33,9 @@ Playwright coverage is split by behavior under `e2e/specs`: core navigation and 
 - Demo sidebar rendering stats populate frame redraw time, visible event DOM-node count, and total rendered calendar DOM-node count.
 - Vertical virtual scrolling changes visible dates.
 - Rendered day DOM nodes are pruned to the visible viewport plus five day sections of overscan.
-- Vertical scrollbar dragging is bounded to one month before/after the visible date and recenters around the new visible date after scroll end.
+- Vertical scrollbar dragging is bounded to one month before/after the visible date and recenters around the new visible date only after the idle recenter delay following scroll end.
 - Scroll-end recentering preserves the intra-day pixel offset, so a user scrolled partway into a date stays partway into that same date.
-- Native scrollbar-thumb completion resets the scrollbar thumb back near the center of the rebuilt virtual window.
+- Native scrollbar-thumb completion leaves the scrollbar thumb near the released edge briefly, then resets it near the center of the rebuilt virtual window after the idle recenter delay.
 - The `0.5-8` zoom slider and `Shift` + wheel change timeline scale without also scrolling the browser window; `Shift` + wheel keeps the nearest rendered time-grid node anchored when scroll range allows it.
 - Horizontal rendering applies a viewport-fill floor so the timeline board does not become narrower than the available viewport width even when an incoming prop value falls below that floor; wheel gestures still stop at the slider minimum.
 - Zoom values above `6` switch the timeline row grid and time labels from 15-minute to 5-minute cadence.
@@ -51,9 +52,10 @@ Playwright coverage is split by behavior under `e2e/specs`: core navigation and 
 - Compact event cards hide the time line when three lines do not fit and reveal it once the card has enough hover-expanded height, including single non-overlapping events in compact rows, without reducing hover typography, changing vertical text alignment, or hiding title icons.
 - Date navigation can jump to a specific date and back to today.
 - Date/time navigation can jump vertically to a date and horizontally to a requested time.
-- Calendar count changes preserve the visible day and the intra-day offset while day height changes.
-- Drawing a new event area renders an opaque uncapped-width draft with visible time text without changing row height, lane layout, or committed row event count, then delegates to the external popup in the default demo and leaves the saved event visible after popup save.
-- External create/edit popup flows update `activeDraft`, drawn create drafts stay at the same viewport-relative position when the popup opens and other calendars hide, create participant selection limits visible calendars to selected participants, empty participants restore the previous visible calendar set and disable save, visible same-date time edits do not scroll the calendar, date edits immediately refocus the moved draft on the first future or past change, offscreen field edits restore the draft to its last seen viewport-relative position, active draft dragging updates popup time fields, multi-calendar active drafts drag as one block, drawing a different range is blocked while a popup draft is open, popup save keeps the saved event in the draft's position, edit opens without immediately filtering calendars, edit cancel restores the original event in the draft's position, and the calendar viewport remains scrollable while the popup is open.
+- Vertical `Shift` + wheel zoom anchors to the closest rendered in-range time node even when the pointer sits below the configured timeline end.
+- Calendar count changes preserve the visible day and the intra-day offset while day height changes, and reducing calendars clamps any too-large offset inside the same active day. Active draft participant filtering pins the draft date into mounted virtual items and keeps a mounted draft target available for viewport-position restoration without replacing the current scroll anchor.
+- Drawing a new event area renders an opaque uncapped-width draft with visible time text without changing row height, lane layout, or committed row event count, then delegates to the external popup in the default demo and leaves the saved event visible after popup save. Drawing a create draft in a row with two saved overlaps keeps the saved row at the compact two-lane height after popup handoff. Editing one event in a three-overlap row filters the source before metrics, so the draft replacement leaves only two committed overlap lanes and the row drops to the compact height.
+- External create/edit popup flows update `activeDraft`, drawn create drafts stay at the same viewport-relative position on the first animation frame when the popup opens and other calendars hide, create participant selection limits visible calendars to selected participants without parking a visible draft in the viewport center, empty participants restore the previous visible calendar set and disable save, visible same-date time edits do not scroll the calendar, visible date edits move the draft to the visible destination date without scrolling, offscreen date edits and other offscreen field edits restore the draft to its last seen viewport-relative position, newer visible date edits cancel stale offscreen restore corrections, active draft dragging updates popup time fields, multi-calendar active drafts drag as one block, drawing a different range is blocked while a popup draft is open, delayed popup save disables the form and can show a bottom error while keeping the draft editable, popup save keeps the saved event in the draft's position, vertical popup create save renders the persisted event after visible-range cache invalidation, edit opens without immediately filtering calendars, edit cancel restores the original event in the draft's position, create cancel keeps the possible event row in place instead of centering, manual scroll after popup handoff cancels pending restore corrections, and the calendar viewport remains scrollable while the popup is open.
 - Multi-calendar events focus only the hovered row instance, while dragging renders drag/drop previews in every proposed row.
 - Drawing and drag/drop clear existing browser text selection, suppress new selection, and suppress other event hover effects while the interaction is active.
 - Event resize/focus changes are not animated.

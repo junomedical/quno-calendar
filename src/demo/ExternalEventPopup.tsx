@@ -13,6 +13,8 @@ import {
 type ExternalEventPopupProps = {
   activeDraft: ActiveEventDraft;
   canSave: boolean;
+  isSaving: boolean;
+  saveError: string | null;
   onCancel: () => void;
   onSave: () => void;
   onUpdateDraftEvent: (updater: (event: CalendarEvent) => CalendarEvent) => void;
@@ -22,6 +24,8 @@ type ExternalEventPopupProps = {
 export function ExternalEventPopup({
   activeDraft,
   canSave,
+  isSaving,
+  saveError,
   onCancel,
   onSave,
   onUpdateDraftEvent,
@@ -38,7 +42,7 @@ export function ExternalEventPopup({
     >
       <div className="external-event-popup-header">
         <strong>{activeDraft.mode === "edit" ? "Edit event" : "Create event"}</strong>
-        <button type="button" aria-label="Cancel event editing" onClick={onCancel} data-testid="draft-cancel-button">
+        <button type="button" aria-label="Cancel event editing" onClick={onCancel} disabled={isSaving} data-testid="draft-cancel-button">
           <X size={15} aria-hidden />
         </button>
       </div>
@@ -47,6 +51,7 @@ export function ExternalEventPopup({
         <input
           type="text"
           value={activeDraft.event.title}
+          disabled={isSaving}
           onChange={(event) => onUpdateDraftEvent((draft) => ({ ...draft, title: event.target.value }))}
           data-testid="draft-title-input"
         />
@@ -57,6 +62,7 @@ export function ExternalEventPopup({
           <input
             type="date"
             value={isoDateInputValue(activeDraft.event.start)}
+            disabled={isSaving}
             onChange={(event) => {
               if (!/^\d{4}-\d{2}-\d{2}$/.test(event.target.value)) {
                 return;
@@ -73,6 +79,7 @@ export function ExternalEventPopup({
           <input
             type="time"
             value={isoTimeInputValue(activeDraft.event.start)}
+            disabled={isSaving}
             onChange={(event) => {
               if (!/^\d{2}:\d{2}$/.test(event.target.value)) {
                 return;
@@ -91,6 +98,7 @@ export function ExternalEventPopup({
             min="5"
             step="5"
             value={eventDurationMinutes(activeDraft.event)}
+            disabled={isSaving}
             onChange={(event) => {
               const duration = Number(event.target.value);
               if (!Number.isFinite(duration) || duration < 5) {
@@ -109,6 +117,7 @@ export function ExternalEventPopup({
             <input
               type="checkbox"
               checked={draftParticipantIds(activeDraft.event).includes(calendar.id)}
+              disabled={isSaving}
               onChange={(event) => onToggleParticipant(calendar.id, event.target.checked)}
               data-testid={`draft-participant-${calendar.id}`}
             />
@@ -117,14 +126,19 @@ export function ExternalEventPopup({
         ))}
       </fieldset>
       <div className="external-event-actions">
-        <button type="button" onClick={onCancel} data-testid="draft-cancel-secondary-button">
+        <button type="button" onClick={onCancel} disabled={isSaving} data-testid="draft-cancel-secondary-button">
           Cancel
         </button>
-        <button type="submit" disabled={!canSave} data-testid="draft-save-button">
+        <button type="submit" disabled={!canSave || isSaving} data-testid="draft-save-button">
           <Save size={15} aria-hidden />
-          Save
+          {isSaving ? "Saving..." : "Save"}
         </button>
       </div>
+      {saveError ? (
+        <p className="external-event-error" data-testid="draft-save-error">
+          {saveError}
+        </p>
+      ) : null}
     </form>
   );
 }

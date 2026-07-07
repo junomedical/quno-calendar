@@ -1,7 +1,8 @@
 import { CalendarDays, LocateFixed, Plus } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type SetStateAction } from "react";
 import {
   CalendarRoot,
+  type CalendarId,
   type CalendarEvent,
   type CalendarNavigationHandle,
   type EventCreateRequest,
@@ -146,9 +147,12 @@ export function DefaultDemo({ routes }: DefaultDemoProps) {
   const [jumpDate, setJumpDate] = useState("2026-07-04");
   const [jumpTime, setJumpTime] = useState("09:00");
   const [events, setEvents] = useState(() => createDemoEvents(1_000));
+  const [eventVersion, setEventVersion] = useState(0);
   const [systemNow, setSystemNow] = useState(() => new Date());
   const eventsRef = useRef(events);
+  const saveDelayRef = useRef<number | null>(null);
   const [message, setMessage] = useState("Ready");
+  const [draftSaveState, setDraftSaveState] = useState({ isSaving: false, error: null as string | null });
   const calendarRef = useRef<CalendarNavigationHandle>(null);
 
   useEffect(() => {
@@ -160,6 +164,14 @@ export function DefaultDemo({ routes }: DefaultDemoProps) {
     return () => window.clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    return () => {
+      if (saveDelayRef.current !== null) {
+        window.clearTimeout(saveDelayRef.current);
+      }
+    };
+  }, []);
+
   const selectedCalendarIds = useMemo(
     () => demoCalendars.slice(0, calendarCount).map((calendar) => calendar.id),
     [calendarCount]
@@ -167,6 +179,15 @@ export function DefaultDemo({ routes }: DefaultDemoProps) {
 
   const loadEvents = useCallback((args: Parameters<ReturnType<typeof createRangeLoader>>[0]) => {
     return createRangeLoader(eventsRef.current)(args);
+  }, []);
+
+  const commitEvents = useCallback((updater: SetStateAction<CalendarEvent[]>) => {
+    setEvents((current) => {
+      const next = typeof updater === "function" ? updater(current) : updater;
+      eventsRef.current = next;
+      return next;
+    });
+    setEventVersion((current) => current + 1);
   }, []);
 
   const calendarSettings = useMemo(
@@ -208,31 +229,81 @@ export function DefaultDemo({ routes }: DefaultDemoProps) {
     jumpTime,
     snapMinutes,
     editAvailabilities,
-    setEvents,
+    setEvents: commitEvents,
     setMessage
   });
 
   const handleScaleChange = (nextScale: number) => {
+    const nextEvents = createDemoEvents(nextScale);
     setScale(nextScale);
-    setEvents(createDemoEvents(nextScale));
+    eventsRef.current = nextEvents;
+    setEvents(nextEvents);
+    setEventVersion((current) => current + 1);
     resetActiveDraft();
+    setDraftSaveState({ isSaving: false, error: null });
     setMessage(`Loaded deterministic ${nextScale.toLocaleString()} events/year dataset`);
   };
+
+  const clearDraftSaveFeedback = useCallback(() => {
+    if (saveDelayRef.current !== null) {
+      window.clearTimeout(saveDelayRef.current);
+      saveDelayRef.current = null;
+    }
+    setDraftSaveState({ isSaving: false, error: null });
+  }, []);
+
+  const handleDraftSave = useCallback(() => {
+    if (!activeDraft || draftSaveState.isSaving) {
+      return;
+    }
+    const draftMode = activeDraft.mode;
+    const shouldFail = /\bfail\b/i.test(activeDraft.event.title);
+    setDraftSaveState({ isSaving: true, error: null });
+    setMessage(`Saving external ${draftMode}...`);
+    saveDelayRef.current = window.setTimeout(() => {
+      saveDelayRef.current = null;
+      if (shouldFail) {
+        setDraftSaveState({
+          isSaving: false,
+          error: "Simulated save failed after server validation. Edit the title and try again."
+        });
+        setMessage("External save failed");
+        return;
+      }
+      setDraftSaveState({ isSaving: false, error: null });
+      saveActiveDraft();
+    }, 700);
+  }, [activeDraft, draftSaveState.isSaving, saveActiveDraft, setMessage]);
+
+  const handleDraftCancel = useCallback(() => {
+    clearDraftSaveFeedback();
+    cancelActiveDraft();
+  }, [cancelActiveDraft, clearDraftSaveFeedback]);
+
+  const handleDraftUpdate = useCallback((updater: Parameters<typeof updateDraftEvent>[0]) => {
+    setDraftSaveState((current) => current.error ? { isSaving: false, error: null } : current);
+    updateDraftEvent(updater);
+  }, [updateDraftEvent]);
+
+  const handleDraftParticipantToggle = useCallback((calendarId: CalendarId, checked: boolean) => {
+    setDraftSaveState((current) => current.error ? { isSaving: false, error: null } : current);
+    toggleDraftParticipant(calendarId, checked);
+  }, [toggleDraftParticipant]);
 
   const handleMove = useCallback((request: EventMoveRequest) => {
     if (request.event.title.startsWith("Locked") || request.proposedCalendarId === "blocked-calendar") {
       setMessage("Move rejected by parent validation");
       return false;
     }
-    setEvents((current) => applyMove(current, request));
+    commitEvents((current) => applyMove(current, request));
     setMessage(request.event.kind === "availability" ? "Availability move accepted" : "Move accepted by parent validation");
     return true;
-  }, []);
+  }, [commitEvents]);
 
   const handleCreate = useCallback((request: EventCreateRequest) => {
-    setEvents((current) => appendCreatedEvent(current, request));
+    commitEvents((current) => appendCreatedEvent(current, request));
     setMessage(request.kind === "availability" ? "Created availability from drawn area" : "Created new event from drawn area");
-  }, []);
+  }, [commitEvents]);
 
   return (
     <main className="app-shell" data-demo-id="default">
@@ -392,10 +463,12 @@ export function DefaultDemo({ routes }: DefaultDemoProps) {
           <ExternalEventPopup
             activeDraft={activeDraft}
             canSave={canSaveActiveDraft}
-            onCancel={cancelActiveDraft}
-            onSave={saveActiveDraft}
-            onUpdateDraftEvent={updateDraftEvent}
-            onToggleParticipant={toggleDraftParticipant}
+            isSaving={draftSaveState.isSaving}
+            saveError={draftSaveState.error}
+            onCancel={handleDraftCancel}
+            onSave={handleDraftSave}
+            onUpdateDraftEvent={handleDraftUpdate}
+            onToggleParticipant={handleDraftParticipantToggle}
           />
         ) : null}
         <CalendarRoot
@@ -405,6 +478,7 @@ export function DefaultDemo({ routes }: DefaultDemoProps) {
           calendars={demoCalendars}
           selectedCalendarIds={visibleCalendarIds}
           loadEvents={loadEvents}
+          eventVersion={eventVersion}
           eventRenderer={DemoEventCard}
           activeDraft={activeDraft}
           onEventMoveRequest={handleMove}

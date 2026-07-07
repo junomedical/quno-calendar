@@ -55,6 +55,7 @@ This document defines the names used for visible calendar interface parts and th
 | Term | Meaning | Implementation reference |
 | --- | --- | --- |
 | Calendar event | The data object returned by `loadEvents`. It may represent an appointment, availability, or another product-specific block. | `CalendarEvent` |
+| Event version | Parent-controlled invalidation token for the loaded visible-range cache. Bump it after persisted event-store changes that should be reloaded through `loadEvents`. | `eventVersion` |
 | Appointment | A normal timed event that users move/create in `events` interaction mode. | `kind` omitted or product-specific |
 | Availability | A background schedulable interval, usually full row height, shown with `kind: "availability"`. | `kind: "availability"` |
 | Multi-calendar event | One event that belongs to more than one calendar and renders once in each matching selected calendar row. | `calendarIds` |

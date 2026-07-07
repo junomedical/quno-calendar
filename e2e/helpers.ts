@@ -20,7 +20,15 @@ export async function firstViewportEventBox(page: Page) {
 export async function goToWorkday(page: Page, date = "2026-07-06") {
   await page.getByTestId("jump-date-input").fill(date);
   await page.getByTestId("go-date-button").click();
-  await expect.poll(async () => topVisibleDayDate(page)).toBe(date);
+  await expect
+    .poll(async () => {
+      try {
+        return await topVisibleDayDate(page);
+      } catch {
+        return null;
+      }
+    })
+    .toBe(date);
 }
 
 export async function viewportRelativeEventBox(page: Page, selector: string, textIncludes?: string) {

@@ -109,6 +109,7 @@ export type CalendarViewComponentProps = {
   calendars: CalendarRow[];
   selectedCalendarIds: CalendarId[];
   loadEvents: LoadEvents;
+  eventVersion?: number | string;
   eventRenderer: EventRenderer;
   settings?: Partial<TimelineSettings>;
   now?: Date;

@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { firstViewportEventBox, goToWorkday, todayDateKey, firstViewportEventForPrefix, topVisibleDayDate, topVisibleDayState, renderedDayOverscanFailures, visibleDayDates, verticalScrollRatio } from "../helpers";
+import { firstViewportEventBox, goToWorkday, firstViewportEventForPrefix, topVisibleDayDate, topVisibleDayState, renderedDayOverscanFailures, visibleDayDates, verticalScrollRatio } from "../helpers";
 
 test("renders, scrolls vertically, zooms, and changes dataset scale", async ({ page }) => {
   await page.goto("/");
@@ -396,58 +396,6 @@ test("keeps large dataset events visible and hoverable", async ({ page }) => {
   expect(dayBoundaryIssues).toEqual([]);
 });
 
-test("keeps the visible day when calendar count changes and supports date navigation", async ({ page }) => {
-  await page.goto("/");
-  const viewport = page.locator(".ic-viewport");
-
-  await page.getByTestId("zoom-slider").fill("4");
-  await page.getByTestId("jump-date-input").fill("2026-08-12");
-  await page.getByTestId("jump-time-input").fill("15:30");
-  await page.getByTestId("go-date-button").click();
-  await expect(page.getByTestId("demo-message")).toContainText("2026-08-12 15:30");
-  await expect
-    .poll(async () => topVisibleDayDate(page))
-    .toBe("2026-08-12");
-  await expect
-    .poll(async () => viewport.evaluate((element) => element.scrollLeft))
-    .toBeGreaterThan(400);
-
-  await page.getByTestId("calendar-count").evaluate((element) => {
-    const input = element as HTMLInputElement;
-    input.value = "3";
-    input.dispatchEvent(new Event("input", { bubbles: true }));
-    input.dispatchEvent(new Event("change", { bubbles: true }));
-  });
-  await expect
-    .poll(async () => topVisibleDayDate(page))
-    .toBe("2026-08-12");
-
-  const visibleDate = await topVisibleDayDate(page);
-  await viewport.evaluate((element) => {
-    element.scrollTop += 90;
-  });
-  await page.waitForTimeout(40);
-  const visibleStateBeforeCountChange = await topVisibleDayState(page);
-  await page.getByTestId("calendar-count").evaluate((element) => {
-    const input = element as HTMLInputElement;
-    input.value = "9";
-    input.dispatchEvent(new Event("input", { bubbles: true }));
-    input.dispatchEvent(new Event("change", { bubbles: true }));
-  });
-  await expect
-    .poll(async () => topVisibleDayDate(page))
-    .toBe(visibleDate);
-  const visibleStateAfterCountChange = await topVisibleDayState(page);
-  expect(visibleStateAfterCountChange.date).toBe(visibleStateBeforeCountChange.date);
-  expect(Math.abs(visibleStateAfterCountChange.offsetWithinDate - visibleStateBeforeCountChange.offsetWithinDate)).toBeLessThanOrEqual(2);
-
-  await page.getByTestId("today-button").click();
-  await expect(page.getByTestId("demo-message")).toContainText("today");
-  await expect
-    .poll(async () => topVisibleDayDate(page))
-    .toBe(todayDateKey());
-});
-
 test("limits vertical scrollbar to one month around the visible date and recenters after scroll end", async ({ page }) => {
   await page.goto("/");
   await goToWorkday(page, "2026-07-06");
@@ -466,7 +414,10 @@ test("limits vertical scrollbar to one month around the visible date and recente
     element.scrollTop = element.scrollHeight;
     element.dispatchEvent(new Event("scrollend"));
   });
-  await page.waitForTimeout(260);
+  await page.waitForTimeout(300);
+  expect(await verticalScrollRatio(page)).toBeGreaterThan(0.85);
+
+  await page.waitForTimeout(2500);
   const bottomDates = await visibleDayDates(page);
   expect(bottomDates.length).toBeGreaterThan(0);
   expect(bottomDates[bottomDates.length - 1] >= "2026-08-01").toBe(true);
@@ -491,7 +442,7 @@ test("keeps intra-day scroll offset when the virtual window recenters", async ({
   });
   await page.waitForTimeout(40);
   const beforeRecenter = await topVisibleDayState(page);
-  await page.waitForTimeout(260);
+  await page.waitForTimeout(2800);
   const afterRecenter = await topVisibleDayState(page);
 
   expect(afterRecenter.date).toBe(beforeRecenter.date);

@@ -27,6 +27,7 @@ type UseVirtualTimelineWindowArgs = {
   baseDayHeight: number;
   verticalLayoutSignature: string;
   isInteractionActive: boolean;
+  layoutAnchorDateKey?: string;
   resolveOffsetOnLayoutChange?: (
     offsetWithinDate: number,
     previousBaseDayHeight: number,
@@ -51,6 +52,7 @@ export function useVirtualTimelineWindow({
   baseDayHeight,
   verticalLayoutSignature,
   isInteractionActive,
+  layoutAnchorDateKey,
   resolveOffsetOnLayoutChange
 }: UseVirtualTimelineWindowArgs) {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -121,6 +123,7 @@ export function useVirtualTimelineWindow({
 
   const scrollToDate = useCallback(
     (dateKey: string) => {
+      clearScrollEndTimer();
       const normalizedDateKey = normalizeAnchorDate(dateKey, settings.excludedWeekdays);
       pendingScrollTargetRef.current = { dateKey: normalizedDateKey, offsetWithinDate: 0 };
       topVisibleDateRef.current = normalizedDateKey;
@@ -132,7 +135,7 @@ export function useVirtualTimelineWindow({
       }
       setAnchorDateKey(() => normalizedDateKey);
     },
-    [scrollToVisibleDateOffset, setAnchorDateKey, settings.excludedWeekdays, virtualWindow.anchorDateKey]
+    [clearScrollEndTimer, scrollToVisibleDateOffset, setAnchorDateKey, settings.excludedWeekdays, virtualWindow.anchorDateKey]
   );
 
   const rememberVisibleDateOffset = useCallback(
@@ -186,7 +189,7 @@ export function useVirtualTimelineWindow({
       0,
       resolveOffsetOnLayoutChange
         ? resolveOffsetOnLayoutChange(topVisibleOffsetRef.current, previousBaseDayHeightRef.current, baseDayHeight)
-        : topVisibleOffsetRef.current
+        : Math.min(topVisibleOffsetRef.current, Math.max(0, baseDayHeight - 1))
     );
     clearScrollEndTimer();
     previousLayoutSignatureRef.current = verticalLayoutSignature;
@@ -211,6 +214,7 @@ export function useVirtualTimelineWindow({
     resolveOffsetOnLayoutChange,
     setAnchorDateKey,
     settings.excludedWeekdays,
+    layoutAnchorDateKey,
     verticalLayoutSignature,
     virtualWindow.anchorDateKey,
     virtualizer
@@ -218,10 +222,7 @@ export function useVirtualTimelineWindow({
 
   const virtualItems = virtualizer.getVirtualItems();
   const renderItems = useMemo(() => {
-    if (virtualItems.length > 0) {
-      return virtualItems;
-    }
-    return Array.from({ length: 9 }, (_, index) => {
+    const baseItems = virtualItems.length > 0 ? virtualItems : Array.from({ length: 9 }, (_, index) => {
       const dayIndex = Math.max(0, Math.min(virtualWindow.count - 1, virtualWindow.anchorIndex - 4 + index));
       return {
         key: `fallback-${dayIndex}`,
@@ -230,7 +231,24 @@ export function useVirtualTimelineWindow({
         size: baseDayHeight
       };
     });
-  }, [baseDayHeight, virtualItems, virtualWindow.anchorIndex, virtualWindow.count]);
+    if (!layoutAnchorDateKey) {
+      return baseItems;
+    }
+    const anchorIndex = dateKeyToIndex(layoutAnchorDateKey);
+    if (anchorIndex < 0 || anchorIndex >= virtualWindow.count || baseItems.some((item) => item.index === anchorIndex)) {
+      return baseItems;
+    }
+    const offsetForIndex = virtualizer.getOffsetForIndex(anchorIndex, "start");
+    return [
+      ...baseItems,
+      {
+        key: `layout-anchor-${layoutAnchorDateKey}`,
+        index: anchorIndex,
+        start: offsetForIndex?.[0] ?? anchorIndex * baseDayHeight,
+        size: baseDayHeight
+      }
+    ].sort((left, right) => left.start - right.start);
+  }, [baseDayHeight, dateKeyToIndex, layoutAnchorDateKey, virtualItems, virtualWindow.anchorIndex, virtualWindow.count, virtualizer]);
 
   const visibleDateKeys = useMemo(
     () => renderItems.map((item) => dateKeyForIndex(item.index)),
@@ -262,6 +280,14 @@ export function useVirtualTimelineWindow({
     }
   }, [clearScrollEndTimer, isInteractionActive, recenterVirtualWindow, updateTopVisibleSnapshot]);
 
+  const scheduleScrollRecenter = useCallback(() => {
+    if (!updateTopVisibleSnapshot()) {
+      return;
+    }
+    clearScrollEndTimer();
+    scrollEndTimerRef.current = window.setTimeout(finishScrollRecenter, SCROLL_RECENTER_DELAY_MS);
+  }, [clearScrollEndTimer, finishScrollRecenter, updateTopVisibleSnapshot]);
+
   useEffect(() => {
     return clearScrollEndTimer;
   }, [clearScrollEndTimer]);
@@ -272,19 +298,15 @@ export function useVirtualTimelineWindow({
       return;
     }
 
-    container.addEventListener("scrollend", finishScrollRecenter);
+    container.addEventListener("scrollend", scheduleScrollRecenter);
     return () => {
-      container.removeEventListener("scrollend", finishScrollRecenter);
+      container.removeEventListener("scrollend", scheduleScrollRecenter);
     };
-  }, [finishScrollRecenter]);
+  }, [scheduleScrollRecenter]);
 
   const updateTopVisibleDate = useCallback(() => {
-    if (!updateTopVisibleSnapshot()) {
-      return;
-    }
-    clearScrollEndTimer();
-    scrollEndTimerRef.current = window.setTimeout(finishScrollRecenter, SCROLL_RECENTER_DELAY_MS);
-  }, [clearScrollEndTimer, finishScrollRecenter, updateTopVisibleSnapshot]);
+    scheduleScrollRecenter();
+  }, [scheduleScrollRecenter]);
 
   return {
     containerRef,

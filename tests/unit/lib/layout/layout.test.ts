@@ -63,7 +63,7 @@ describe("event overlap layout", () => {
 
   it("uses the stepped row-height ladder for overlap depth", () => {
     expect(rowHeightForOverlapDepth(50, 1)).toBe(50);
-    expect(rowHeightForOverlapDepth(50, 2)).toBe(60);
+    expect(rowHeightForOverlapDepth(50, 2)).toBe(50);
     expect(rowHeightForOverlapDepth(50, 3)).toBe(75);
     expect(rowHeightForOverlapDepth(50, 4)).toBe(96);
     expect(rowHeightForOverlapDepth(50, 5)).toBe(120);

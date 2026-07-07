@@ -1,7 +1,9 @@
 import { useCallback, useMemo } from "react";
+import { withoutActiveDraftSourceEvents } from "../../data/activeDrafts";
 import { eventBelongsToCalendar } from "../../data/calendarEvents";
 import { rowHeightForEvents } from "../../layout/layout";
 import type {
+  ActiveEventDraft,
   CalendarEvent,
   CalendarId,
   CalendarRow,
@@ -17,12 +19,14 @@ export function useDayMetrics({
   eventsByDate,
   selectedCalendars,
   settings,
-  baseDayHeight
+  baseDayHeight,
+  activeDraft
 }: {
   eventsByDate: Record<string, CalendarEvent[]>;
   selectedCalendars: CalendarRow[];
   settings: TimelineSettings;
   baseDayHeight: number;
+  activeDraft?: ActiveEventDraft | null;
 }) {
   const { dayMetricsByDate, rowEventsByKey } = useMemo(() => {
     const metrics = new Map<string, { height: number; rowHeights: Map<CalendarId, number> }>();
@@ -35,7 +39,10 @@ export function useDayMetrics({
 
       for (const calendar of selectedCalendars) {
         const rowKey = `${dateKey}:${calendar.id}`;
-        const committedRowEvents = (eventsByDate[dateKey] ?? []).filter((event) => eventBelongsToCalendar(event, calendar.id));
+        const committedRowEvents = withoutActiveDraftSourceEvents(
+          (eventsByDate[dateKey] ?? []).filter((event) => eventBelongsToCalendar(event, calendar.id)),
+          activeDraft
+        );
         rowEvents.set(rowKey, committedRowEvents);
         const rowHeight = rowHeightForEvents(committedRowEvents, settings);
         rowHeights.set(calendar.id, rowHeight);
@@ -46,7 +53,7 @@ export function useDayMetrics({
     }
 
     return { dayMetricsByDate: metrics, rowEventsByKey: rowEvents };
-  }, [eventsByDate, selectedCalendars, settings]);
+  }, [activeDraft, eventsByDate, selectedCalendars, settings]);
 
   const eventsForRow = useCallback(
     (dateKey: string, calendarId: CalendarId) => rowEventsByKey.get(`${dateKey}:${calendarId}`) ?? [],

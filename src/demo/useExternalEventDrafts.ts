@@ -9,7 +9,6 @@ import {
   type EventCreateRequest,
   type EventMoveRequest
 } from "../lib";
-import { virtualOffsetForDate } from "../lib/date/dateVirtualization";
 import { demoCalendars } from "./data";
 import {
   addMinutesToIso,
@@ -24,12 +23,15 @@ import {
   findVisibleRenderedDraftBox,
   type DraftScreenSnapshot
 } from "./draftViewportUtils";
+import { buildExternalCreateDraft, calendarColor } from "./externalDraftEvents";
+import { useDraftRestoreCancellation } from "./useDraftRestoreCancellation";
 
 type PendingDraftRestore = {
   snapshot: DraftScreenSnapshot;
   event: CalendarEvent;
   eventId?: string;
   afterRecenter?: boolean;
+  allowNavigationFallback?: boolean;
 };
 
 type DraftCalendarSettings = {
@@ -69,6 +71,8 @@ export function useExternalEventDrafts({
   const [draftParticipantsChanged, setDraftParticipantsChanged] = useState(false);
   const draftSequenceRef = useRef(0);
   const activeDraftLastSeenSnapshotRef = useRef<DraftScreenSnapshot | null>(null);
+  const restoreTokenRef = useRef(0);
+  const expectedProgrammaticScrollRef = useRef<{ top: number; left: number } | null>(null);
 
   const activeDraftParticipants = activeDraft ? draftParticipantIds(activeDraft.event) : [];
   const visibleCalendarIds = useMemo(() => {
@@ -87,33 +91,9 @@ export function useExternalEventDrafts({
   }, [activeDraft, activeDraftBaseCalendarIds, activeDraftParticipants, draftParticipantsChanged, selectedCalendarIds]);
   const canSaveActiveDraft = !activeDraft || activeDraftParticipants.length > 0;
 
-  const restoreVirtualDraftPosition = useCallback((pending: PendingDraftRestore) => {
-    const viewport = document.querySelector<HTMLElement>(".ic-viewport");
-    const firstDay = document.querySelector<HTMLElement>('[data-testid="calendar-day"][data-date]');
-    if (!viewport || !firstDay) {
-      return;
-    }
-    const firstDateKey = firstDay.dataset.date;
-    if (!firstDateKey) {
-      return;
-    }
-    const targetDateKey = pending.event.start.slice(0, 10);
-    const offsetDays = virtualOffsetForDate(firstDateKey, targetDateKey, calendarSettings.excludedWeekdays);
-    const rowElements = Array.from(firstDay.querySelectorAll<HTMLElement>('[data-testid="calendar-row"]'));
-    const rowIndex = rowElements.findIndex((row) => row.dataset.calendarId === pending.event.calendarId);
-    const isVerticalView = Boolean(firstDay.querySelector(".icv-day-board"));
-    const minutes = new Date(pending.event.start).getHours() * 60 + new Date(pending.event.start).getMinutes();
-    const timelineOffset = 8 + (minutes - calendarSettings.startHour * 60) * Math.max(0.5, calendarSettings.zoom);
-    const dayHeight = isVerticalView
-      ? calendarSettings.dayHeaderHeight + (calendarSettings.endHour - calendarSettings.startHour) * 60 * Math.max(0.5, calendarSettings.zoom) + 16
-      : calendarSettings.dayHeaderHeight + Math.max(1, rowElements.length) * calendarSettings.rowHeight;
-    const topWithinDate = isVerticalView
-      ? calendarSettings.dayHeaderHeight + timelineOffset
-      : calendarSettings.dayHeaderHeight + Math.max(0, rowIndex) * calendarSettings.rowHeight;
-    viewport.scrollTop = Math.max(0, firstDay.offsetTop + offsetDays * dayHeight + topWithinDate - pending.snapshot.top);
-  }, [calendarSettings]);
+  useDraftRestoreCancellation(activeDraft, restoreTokenRef, expectedProgrammaticScrollRef);
 
-  const findEventTargetBox = useCallback((pending: PendingDraftRestore): DraftScreenSnapshot | null => {
+  const findEventTargetBox = useCallback((pending: PendingDraftRestore, requireVisible = false): DraftScreenSnapshot | null => {
     const viewport = document.querySelector<HTMLElement>(".ic-viewport");
     if (!viewport) {
       return null;
@@ -126,10 +106,11 @@ export function useExternalEventDrafts({
         ).filter((element) => element.dataset.eventId === pending.eventId)
       : [];
     const viewportBox = viewport.getBoundingClientRect();
-    const eventElement = eventElements.find((element) => {
+    const visibleEventElement = eventElements.find((element) => {
       const box = element.getBoundingClientRect();
       return box.width > 0 && box.height > 0 && box.right > viewportBox.left && box.left < viewportBox.right && box.bottom > viewportBox.top && box.top < viewportBox.bottom;
-    }) ?? eventElements[0] ?? null;
+    });
+    const eventElement = visibleEventElement ?? (requireVisible ? null : eventElements[0] ?? null);
     if (eventElement) {
       const eventBox = eventElement.getBoundingClientRect();
       return {
@@ -171,30 +152,51 @@ export function useExternalEventDrafts({
     if (!pending) {
       return;
     }
+    const restoreToken = (restoreTokenRef.current += 1);
+    const isCurrentRestore = () => restoreTokenRef.current === restoreToken;
+    const applyScrollCorrection = (viewport: HTMLElement, target: DraftScreenSnapshot) => {
+      if (!isCurrentRestore()) {
+        return;
+      }
+      const nextTop = viewport.scrollTop + target.top - pending.snapshot.top;
+      const nextLeft = viewport.scrollLeft + target.left - pending.snapshot.left;
+      expectedProgrammaticScrollRef.current = { top: nextTop, left: nextLeft };
+      viewport.scrollTop = nextTop;
+      viewport.scrollLeft = nextLeft;
+    };
+    const fallbackToDateTime = () => {
+      if (!isCurrentRestore()) {
+        return;
+      }
+      if (findEventTargetBox(pending, pending.allowNavigationFallback === false)) {
+        applyExactCorrection();
+        return;
+      }
+      if (pending.allowNavigationFallback === false) {
+        return;
+      }
+      calendarRef.current?.scrollToDateTime(isoDateInputValue(pending.event.start), isoTimeInputValue(pending.event.start));
+      window.requestAnimationFrame(applyExactCorrection);
+    };
     const applyExactCorrection = () => {
+      if (!isCurrentRestore()) {
+        return;
+      }
       const nextViewport = document.querySelector<HTMLElement>(".ic-viewport");
-      const nextTarget = findEventTargetBox(pending);
+      const nextTarget = findEventTargetBox(pending, pending.allowNavigationFallback === false);
       if (!nextViewport || !nextTarget) {
         return;
       }
-      nextViewport.scrollTop += nextTarget.top - pending.snapshot.top;
-      nextViewport.scrollLeft += nextTarget.left - pending.snapshot.left;
+      applyScrollCorrection(nextViewport, nextTarget);
     };
     const viewport = document.querySelector<HTMLElement>(".ic-viewport");
-    let target = findEventTargetBox(pending);
-    if (!target) {
-      flushSync(() => {
-        calendarRef.current?.scrollToDateTime(isoDateInputValue(pending.event.start), isoTimeInputValue(pending.event.start));
-      });
-      target = findEventTargetBox(pending);
-    }
+    const target = findEventTargetBox(pending, pending.allowNavigationFallback === false);
     if (!viewport || !target) {
-      restoreVirtualDraftPosition(pending);
       window.requestAnimationFrame(applyExactCorrection);
       window.requestAnimationFrame(() => window.requestAnimationFrame(applyExactCorrection));
-      window.setTimeout(applyExactCorrection, 50);
+      window.setTimeout(fallbackToDateTime, 50);
       if (pending.afterRecenter) {
-        window.setTimeout(applyExactCorrection, 100);
+        window.setTimeout(fallbackToDateTime, 100);
         window.setTimeout(applyExactCorrection, 220);
         window.setTimeout(applyExactCorrection, 500);
         window.setTimeout(applyExactCorrection, 1000);
@@ -203,8 +205,7 @@ export function useExternalEventDrafts({
       }
       return;
     }
-    viewport.scrollTop += target.top - pending.snapshot.top;
-    viewport.scrollLeft += target.left - pending.snapshot.left;
+    applyScrollCorrection(viewport, target);
     window.queueMicrotask(applyExactCorrection);
     window.requestAnimationFrame(applyExactCorrection);
     window.requestAnimationFrame(() => window.requestAnimationFrame(applyExactCorrection));
@@ -218,7 +219,7 @@ export function useExternalEventDrafts({
       window.setTimeout(applyExactCorrection, 1500);
       window.setTimeout(applyExactCorrection, 2500);
     }
-  }, [calendarRef, findEventTargetBox, restoreVirtualDraftPosition]);
+  }, [calendarRef, findEventTargetBox]);
 
   const clearActiveDraft = useCallback(() => {
     setActiveDraft(null);
@@ -227,26 +228,11 @@ export function useExternalEventDrafts({
     activeDraftLastSeenSnapshotRef.current = null;
   }, []);
 
-  const resetActiveDraft = useCallback(() => {
-    clearActiveDraft();
-  }, [clearActiveDraft]);
-
   const openCreateDraft = useCallback((request: EventCreateRequest, source: "draw" | "button" = "draw") => {
     draftSequenceRef.current += 1;
-    const calendar = demoCalendars.find((candidate) => candidate.id === request.calendarId) ?? demoCalendars[0];
     const draftId = `external-draft-${draftSequenceRef.current}`;
     const drawnDraftSnapshot = source === "draw" ? findRenderedDraftBox() : null;
-    const nextEvent: CalendarEvent = {
-      id: draftId,
-      calendarId: calendar.id,
-      calendarIds: [calendar.id],
-      title: request.kind === "availability" ? "Available" : "New appointment",
-      subtitle: source === "button" ? "External button draft" : "External popup draft",
-      start: request.start,
-      end: request.end,
-      color: calendar.color,
-      kind: request.kind === "availability" ? "availability" : "draft"
-    };
+    const nextEvent = buildExternalCreateDraft(request, draftId, source);
     if (drawnDraftSnapshot) {
       activeDraftLastSeenSnapshotRef.current = drawnDraftSnapshot;
       flushSync(() => {
@@ -254,7 +240,7 @@ export function useExternalEventDrafts({
         setDraftParticipantsChanged(false);
         setActiveDraft({ mode: "create", event: nextEvent });
       });
-      restoreDraftScreenPositionNow({ snapshot: drawnDraftSnapshot, eventId: draftId, event: nextEvent, afterRecenter: true });
+      restoreDraftScreenPositionNow({ snapshot: drawnDraftSnapshot, eventId: draftId, event: nextEvent, afterRecenter: true, allowNavigationFallback: false });
     } else {
       activeDraftLastSeenSnapshotRef.current = null;
       setActiveDraftBaseCalendarIds(selectedCalendarIds);
@@ -265,21 +251,28 @@ export function useExternalEventDrafts({
   }, [findRenderedDraftBox, restoreDraftScreenPositionNow, selectedCalendarIds, setMessage]);
 
   const handleActivate = useCallback((request: EventActivateRequest) => {
-    activeDraftLastSeenSnapshotRef.current = findVisibleRenderedDraftBox(request.event.id);
+    const draftEvent = {
+      ...request.event,
+      calendarIds: eventParticipantIds(request.event)
+    };
+    activeDraftLastSeenSnapshotRef.current = findEventTargetBox({
+      snapshot: { top: 0, left: 0 },
+      eventId: request.event.id,
+      event: draftEvent
+    });
     setActiveDraftBaseCalendarIds(selectedCalendarIds);
     setDraftParticipantsChanged(false);
     setActiveDraft({
       mode: "edit",
       sourceEventId: request.event.id,
-      event: {
-        ...request.event,
-        calendarIds: eventParticipantIds(request.event)
-      }
+      event: draftEvent
     });
     setMessage(`Editing ${request.event.title} in external popup`);
-  }, [findVisibleRenderedDraftBox, selectedCalendarIds, setMessage]);
+  }, [findEventTargetBox, selectedCalendarIds, setMessage]);
 
   const handleActiveDraftMove = useCallback((request: EventMoveRequest) => {
+    expectedProgrammaticScrollRef.current = null;
+    restoreTokenRef.current += 1;
     setActiveDraft((current) => {
       if (!current || current.event.id !== request.event.id) {
         return current;
@@ -322,11 +315,18 @@ export function useExternalEventDrafts({
       nextEvent.calendarId !== activeDraft.event.calendarId ||
       (nextEvent.calendarIds ?? []).join("|") !== (activeDraft.event.calendarIds ?? []).join("|");
     const dateChanged = nextEvent.start.slice(0, 10) !== activeDraft.event.start.slice(0, 10);
+    expectedProgrammaticScrollRef.current = null;
+    restoreTokenRef.current += 1;
     if (visibleSnapshot && dateChanged) {
       activeDraftLastSeenSnapshotRef.current = visibleSnapshot;
       flushSync(() => {
         setActiveDraft({ ...activeDraft, event: nextEvent });
       });
+      const movedVisibleSnapshot = findVisibleRenderedDraftBox(nextEvent.id);
+      if (movedVisibleSnapshot) {
+        activeDraftLastSeenSnapshotRef.current = movedVisibleSnapshot;
+        return;
+      }
       restoreDraftScreenPositionNow({ snapshot: visibleSnapshot, eventId: nextEvent.id, event: nextEvent, afterRecenter: true });
       return;
     }
@@ -379,26 +379,27 @@ export function useExternalEventDrafts({
       setActiveDraft({ ...activeDraft, event: nextEvent });
     });
     focusDraftEvent(nextEvent, visibleSnapshot);
-  }, [activeDraft, findVisibleRenderedDraftBox, focusDraftEvent]);
+  }, [activeDraft, findVisibleRenderedDraftBox, focusDraftEvent, restoreDraftScreenPositionNow]);
 
   const updateDraftParticipants = useCallback((updater: (event: CalendarEvent) => CalendarEvent) => {
     if (!activeDraft) {
       return;
     }
-    const snapshot = findRenderedDraftBox(activeDraft.event.id) ?? activeDraftLastSeenSnapshotRef.current;
+    const snapshot = findVisibleRenderedDraftBox(activeDraft.event.id) ?? activeDraftLastSeenSnapshotRef.current;
     const nextEvent = updater(activeDraft.event);
     if (snapshot) {
       activeDraftLastSeenSnapshotRef.current = snapshot;
+      document.querySelector<HTMLElement>(".ic-viewport")?.dispatchEvent(new Event("scroll"));
       flushSync(() => {
         setDraftParticipantsChanged(true);
         setActiveDraft({ ...activeDraft, event: nextEvent });
       });
-      restoreDraftScreenPositionNow({ snapshot, eventId: nextEvent.id, event: nextEvent, afterRecenter: true });
+      restoreDraftScreenPositionNow({ snapshot, eventId: nextEvent.id, event: nextEvent, afterRecenter: true, allowNavigationFallback: false });
       return;
     }
     setDraftParticipantsChanged(true);
     setActiveDraft({ ...activeDraft, event: nextEvent });
-  }, [activeDraft, findRenderedDraftBox, restoreDraftScreenPositionNow]);
+  }, [activeDraft, findVisibleRenderedDraftBox, restoreDraftScreenPositionNow]);
 
   const handleExternalAdd = useCallback(() => {
     const start = dateTimeToIso(jumpDate, jumpTime);
@@ -453,7 +454,7 @@ export function useExternalEventDrafts({
   }, [activeDraft, clearActiveDraft, findRenderedDraftBox, restoreDraftScreenPositionNow, setEvents, setMessage]);
 
   const cancelActiveDraft = useCallback(() => {
-    const snapshot = activeDraft ? findRenderedDraftBox(activeDraft.event.id) ?? activeDraftLastSeenSnapshotRef.current : null;
+    const snapshot = activeDraft ? findVisibleRenderedDraftBox(activeDraft.event.id) ?? activeDraftLastSeenSnapshotRef.current : null;
     const cancelledEvent = activeDraft?.event ?? null;
     const sourceEventId = activeDraft?.mode === "edit" ? activeDraft.sourceEventId ?? activeDraft.event.id : undefined;
     flushSync(() => {
@@ -461,9 +462,9 @@ export function useExternalEventDrafts({
       setMessage("External popup cancelled");
     });
     if (snapshot && cancelledEvent) {
-      restoreDraftScreenPositionNow({ snapshot, eventId: sourceEventId, event: cancelledEvent, afterRecenter: true });
+      restoreDraftScreenPositionNow({ snapshot, eventId: sourceEventId, event: cancelledEvent, afterRecenter: true, allowNavigationFallback: false });
     }
-  }, [activeDraft, clearActiveDraft, findRenderedDraftBox, restoreDraftScreenPositionNow, setMessage]);
+  }, [activeDraft, clearActiveDraft, findVisibleRenderedDraftBox, restoreDraftScreenPositionNow, setMessage]);
 
   const toggleDraftParticipant = useCallback((calendarId: CalendarId, checked: boolean) => {
     updateDraftParticipants((event) => {
@@ -472,12 +473,11 @@ export function useExternalEventDrafts({
         ? Array.from(new Set([...currentIds, calendarId]))
         : currentIds.filter((candidate) => candidate !== calendarId);
       const firstCalendarId = nextIds[0] ?? event.calendarId;
-      const firstCalendar = demoCalendars.find((calendar) => calendar.id === firstCalendarId);
       return {
         ...event,
         calendarId: firstCalendarId,
         calendarIds: nextIds,
-        color: firstCalendar?.color ?? event.color
+        color: calendarColor(firstCalendarId) ?? event.color
       };
     });
   }, [updateDraftParticipants]);
@@ -486,7 +486,7 @@ export function useExternalEventDrafts({
     activeDraft,
     visibleCalendarIds,
     canSaveActiveDraft,
-    resetActiveDraft,
+    resetActiveDraft: clearActiveDraft,
     openCreateDraft,
     handleActivate,
     handleActiveDraftMove,

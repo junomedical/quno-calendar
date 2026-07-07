@@ -163,7 +163,7 @@ function CalendarWithNavigation(props) {
 
 `scrollToDateTime(dateKey, time)` accepts a `yyyy-MM-dd` date key and an `HH:mm` local time string. In the horizontal view, the calendar scrolls vertically to the date and horizontally to the requested time column. In the vertical view, it scrolls vertically to the date plus the requested time offset inside that date.
 
-The infinite view keeps vertical scrollbar dragging bounded to nearby dates. From the current top visible date, the scroll range covers one month before and one month after. After scrolling settles, the view recenters the scrollbar around the new top visible date and applies the same one-month bounds again, preserving the pixel offset inside that date so the visible content does not snap to the date header.
+The infinite view keeps vertical scrollbar dragging bounded to nearby dates. From the current top visible date, the scroll range covers one month before and one month after. After scrolling settles, the view waits for the idle recenter delay before recentering the scrollbar around the new top visible date and applying the same one-month bounds again, preserving the pixel offset inside that date so the visible content does not snap to the date header.
 
 ## Controlled Zoom and Shift Wheel
 The view reads zoom from `settings.zoom`. Sliders and `Shift` + wheel should update the same parent state through `onZoomChange`. The PoC clamps zoom to `0.5-8` pixels per minute:
@@ -315,6 +315,7 @@ Use `onEventDraftRequest`, `onEventActivate`, and `activeDraft` when a product-o
 ```tsx
 function Scheduler() {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [eventVersion, setEventVersion] = useState(0);
   const [activeDraft, setActiveDraft] = useState<ActiveEventDraft | null>(null);
   const [participantsChanged, setParticipantsChanged] = useState(false);
   const [popupBaseCalendarIds, setPopupBaseCalendarIds] = useState<string[]>([]);
@@ -382,6 +383,7 @@ function Scheduler() {
     } else {
       setEvents((current) => [...current, { ...activeDraft.event, kind: "appointment" }]);
     }
+    setEventVersion((version) => version + 1);
     setActiveDraft(null);
   }
 
@@ -404,6 +406,7 @@ function Scheduler() {
         calendars={calendars}
         selectedCalendarIds={visibleCalendarIds}
         loadEvents={loadEvents}
+        eventVersion={eventVersion}
         eventRenderer={EventCard}
         activeDraft={activeDraft}
         onEventDraftRequest={openCreatePopup}
@@ -415,9 +418,13 @@ function Scheduler() {
 }
 ```
 
-When `onEventDraftRequest` is present, drawing on the grid delegates creation to the parent instead of committing through `onEventCreateRequest`. Edit drafts replace the source event visually until save or cancel. While `activeDraft` is present, the grid will not start another drawn range; the active draft shell can still be dragged. Use `onActiveDraftMoveRequest` to copy proposed start, end, and participant calendar ids into popup state. If a draft has multiple `calendarIds`, dragging one visible instance moves the whole block and preserves the participant list.
+When `onEventDraftRequest` is present, drawing on the grid delegates creation to the parent instead of committing through `onEventCreateRequest`. Edit drafts replace the source event visually until save or cancel. Draft overlays do not participate in overlap lane metrics: a create draft will not grow a horizontal row, and an edit draft filters its source event before row-height or vertical column-width calculation. While `activeDraft` is present, the grid will not start another drawn range; the active draft shell can still be dragged. Use `onActiveDraftMoveRequest` to copy proposed start, end, and participant calendar ids into popup state. If a draft has multiple `calendarIds`, dragging one visible instance moves the whole block and preserves the participant list.
 
-For popup field edits, first check whether the active draft is visible in the calendar viewport. If it is visible, update `activeDraft` without scrolling. If it is offscreen, restore it to the last viewport-relative position where the user saw it; use `calendarRef.current?.scrollToDateTime(date, time)` only as the fallback when no last-seen position exists. For calendar-list changes, save, and cancel, snapshot the draft's viewport-relative event position before updating popup state and restore the saved, cancelled, or replacement draft to that position after the batch. In the default demo, edit popups keep the existing visible calendars until the participant list changes; participant filtering then limits visible rows to selected participants. If the participant list becomes empty, the previous calendar set remains visible and save is disabled.
+For popup field edits, first check whether the active draft is visible in the calendar viewport. If it is visible, update `activeDraft` without scrolling. For date edits, render the draft in the new date first; if that destination is visible, leave scroll untouched so the card moves to the visible date, and if it is offscreen, restore it to the last viewport-relative position where the user saw it. Use `calendarRef.current?.scrollToDateTime(date, time)` only as the fallback when no last-seen position exists. For calendar-list changes, save, and cancel, snapshot the draft's viewport-relative event position before updating popup state and restore the saved, cancelled, or replacement draft to that position after the batch. Cancel pending delayed restore corrections when the user manually scrolls the calendar or when a newer popup geometry edit supersedes an older offscreen refocus. In the default demo, edit popups keep the existing visible calendars until the participant list changes; participant filtering then limits visible rows to selected participants. If the participant list becomes empty, the previous calendar set remains visible and save is disabled.
+
+Async save belongs in the parent as well. Keep popup edits synchronous in `activeDraft`, then disable the popup while `saveDraft` awaits persistence. On success, update the event store and clear `activeDraft`. On failure, keep or restore the same `activeDraft`, re-enable the form, and show a small popup-level error. The default demo simulates this delay and fails when the draft title contains `fail`.
+
+If `loadEvents` reads from a stable cache or ref, bump `eventVersion` after persisting external create/edit changes. That invalidates the calendar's loaded visible-range cache without remounting the view, so a saved popup draft appears in the same horizontal row or vertical column after `activeDraft` is cleared.
 
 ## Large Dataset Demo Configuration
 ```tsx

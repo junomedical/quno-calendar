@@ -104,6 +104,62 @@ describe("InfiniteTimelineView", () => {
     });
   });
 
+  it("reloads the visible range when eventVersion changes", async () => {
+    const renderer = vi.fn(({ event, status, style }: EventRendererProps) => (
+      <div data-testid="custom-event" data-status={status} style={style}>
+        {event.title}
+      </div>
+    ));
+    let loaderEvents: CalendarEvent[] = [
+      {
+        id: "event-a",
+        calendarId: "calendar-a",
+        title: "Before Version",
+        start: "2026-07-04T09:00:00",
+        end: "2026-07-04T10:00:00"
+      }
+    ];
+    const loadEvents = vi.fn(async () => loaderEvents);
+
+    const { rerender } = render(
+      <CalendarRoot
+        calendars={calendars}
+        selectedCalendarIds={["calendar-a"]}
+        loadEvents={loadEvents}
+        eventVersion={0}
+        eventRenderer={renderer}
+        now={new Date("2026-07-04T09:30:00")}
+        settings={{ startHour: 8, endHour: 18, zoom: 1, excludedWeekdays: [] }}
+      />
+    );
+
+    expect(await screen.findByText("Before Version")).toBeInTheDocument();
+    loaderEvents = [
+      {
+        id: "event-b",
+        calendarId: "calendar-a",
+        title: "After Version",
+        start: "2026-07-04T09:00:00",
+        end: "2026-07-04T10:00:00"
+      }
+    ];
+
+    rerender(
+      <CalendarRoot
+        calendars={calendars}
+        selectedCalendarIds={["calendar-a"]}
+        loadEvents={loadEvents}
+        eventVersion={1}
+        eventRenderer={renderer}
+        now={new Date("2026-07-04T09:30:00")}
+        settings={{ startHour: 8, endHour: 18, zoom: 1, excludedWeekdays: [] }}
+      />
+    );
+
+    expect(await screen.findByText("After Version")).toBeInTheDocument();
+    expect(screen.queryByText("Before Version")).not.toBeInTheDocument();
+  });
+
   it("renders an active edit draft in place of the loaded source event", async () => {
     const renderer = vi.fn(({ event, status, style }: EventRendererProps) => (
       <div data-testid="custom-event" data-status={status} style={style}>
@@ -146,5 +202,68 @@ describe("InfiniteTimelineView", () => {
     expect(screen.queryByText("Original Event")).not.toBeInTheDocument();
     expect(screen.getByText("Edited Event")).toBeInTheDocument();
     expect(screen.getByTestId("custom-event")).toHaveAttribute("data-status", "existing");
+  });
+
+  it("does not let an active draft source increase overlap row height", async () => {
+    const renderer = vi.fn(({ event, status, style }: EventRendererProps) => (
+      <div data-testid="custom-event" data-status={status} style={style}>
+        {event.title}
+      </div>
+    ));
+    const loadEvents = vi.fn(async () => [
+      {
+        id: "event-a",
+        calendarId: "calendar-a",
+        title: "Overlap A",
+        start: "2026-07-04T09:00:00",
+        end: "2026-07-04T10:00:00"
+      } satisfies CalendarEvent,
+      {
+        id: "event-b",
+        calendarId: "calendar-a",
+        title: "Overlap B",
+        start: "2026-07-04T09:00:00",
+        end: "2026-07-04T10:00:00"
+      } satisfies CalendarEvent,
+      {
+        id: "event-c",
+        calendarId: "calendar-a",
+        title: "Replaced Event",
+        start: "2026-07-04T09:00:00",
+        end: "2026-07-04T10:00:00"
+      } satisfies CalendarEvent
+    ]);
+
+    render(
+      <CalendarRoot
+        calendars={calendars}
+        selectedCalendarIds={["calendar-a"]}
+        loadEvents={loadEvents}
+        eventRenderer={renderer}
+        now={new Date("2026-07-04T09:30:00")}
+        activeDraft={{
+          mode: "edit",
+          sourceEventId: "event-c",
+          event: {
+            id: "event-c",
+            calendarId: "calendar-a",
+            title: "Draft Replacement",
+            start: "2026-07-04T09:00:00",
+            end: "2026-07-04T10:00:00"
+          }
+        }}
+        settings={{ startHour: 8, endHour: 18, zoom: 1, rowHeight: 50, excludedWeekdays: [] }}
+      />
+    );
+
+    await waitFor(() => expect(loadEvents).toHaveBeenCalled());
+    await screen.findByText("Draft Replacement");
+    const activeRow = document.querySelector<HTMLElement>(
+      '[data-testid="calendar-day"][data-date="2026-07-04"] [data-testid="calendar-row"][data-calendar-id="calendar-a"]'
+    );
+
+    expect(activeRow).not.toBeNull();
+    expect(activeRow?.style.height).toBe("50px");
+    expect(screen.queryByText("Replaced Event")).not.toBeInTheDocument();
   });
 });

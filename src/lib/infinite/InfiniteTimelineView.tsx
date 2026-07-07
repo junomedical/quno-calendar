@@ -58,6 +58,7 @@ export const InfiniteTimelineView = forwardRef<CalendarNavigationHandle, Calenda
   calendars,
   selectedCalendarIds,
   loadEvents,
+  eventVersion,
   eventRenderer,
   settings: settingsInput,
   now = new Date(),
@@ -91,6 +92,7 @@ export const InfiniteTimelineView = forwardRef<CalendarNavigationHandle, Calenda
   );
   const width = timelineWidth(effectiveSettings);
   const [isInteractionActive, setIsInteractionActive] = useState(false);
+  const layoutAnchorDateKey = activeDraft?.event.start.slice(0, 10);
   const verticalLayoutSignature = `${selectedIds.join("|")}:${settings.dayHeaderHeight}:${settings.rowHeight}:${settings.excludedWeekdays.join("|")}`;
   const {
     containerRef,
@@ -110,7 +112,8 @@ export const InfiniteTimelineView = forwardRef<CalendarNavigationHandle, Calenda
     settings,
     baseDayHeight,
     verticalLayoutSignature,
-    isInteractionActive
+    isInteractionActive,
+    layoutAnchorDateKey
   });
 
   useLayoutEffect(() => {
@@ -160,14 +163,14 @@ export const InfiniteTimelineView = forwardRef<CalendarNavigationHandle, Calenda
     eventsByDate,
     applyMoveToLoadedEvents,
     applyCreatedEventToLoadedEvents
-  } = useEventRangeLoader({ loadEvents, selectedIds, visibleDateKeys });
+  } = useEventRangeLoader({ loadEvents, eventVersion, selectedIds, visibleDateKeys });
 
   const {
     dayMetricsByDate,
     eventsForRow,
     getDayHeight,
     getRowHeight
-  } = useDayMetrics({ eventsByDate, selectedCalendars, settings, baseDayHeight });
+  } = useDayMetrics({ eventsByDate, selectedCalendars, settings, baseDayHeight, activeDraft });
   const renderEventsForRow = useCallback(
     (dateKey: string, calendarId: CalendarId) => withoutActiveDraftSourceEvents(eventsForRow(dateKey, calendarId), activeDraft),
     [activeDraft, eventsForRow]

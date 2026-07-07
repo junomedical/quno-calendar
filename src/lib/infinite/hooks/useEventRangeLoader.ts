@@ -11,9 +11,20 @@ import type {
 
 type UseEventRangeLoaderArgs = {
   loadEvents: LoadEvents;
+  eventVersion?: number | string;
   selectedIds: CalendarId[];
   visibleDateKeys: string[];
 };
+
+function appendUniqueEvent(events: CalendarEvent[], event: CalendarEvent): CalendarEvent[] {
+  const existingIndex = events.findIndex((candidate) => candidate.id === event.id);
+  if (existingIndex === -1) {
+    return [...events, event];
+  }
+  const next = [...events];
+  next[existingIndex] = event;
+  return next;
+}
 
 /**
  * Loads missing visible date ranges asynchronously and keeps a local loaded-date cache.
@@ -25,6 +36,7 @@ type UseEventRangeLoaderArgs = {
  */
 export function useEventRangeLoader({
   loadEvents,
+  eventVersion,
   selectedIds,
   visibleDateKeys
 }: UseEventRangeLoaderArgs) {
@@ -39,7 +51,7 @@ export function useEventRangeLoader({
     loadedDatesRef.current = new Set();
     loadingDatesRef.current = new Set();
     setEventsByDate({});
-  }, [loadEvents, selectedIdsKey]);
+  }, [eventVersion, loadEvents, selectedIdsKey]);
 
   useEffect(() => {
     const missingDateKeys = visibleDateKeys.filter(
@@ -68,7 +80,7 @@ export function useEventRangeLoader({
           }
           for (const event of loadedEvents) {
             const dateKey = eventDateKey(event);
-            next[dateKey] = [...(next[dateKey] ?? []), event];
+            next[dateKey] = appendUniqueEvent(next[dateKey] ?? [], event);
           }
           return next;
         });
@@ -121,7 +133,7 @@ export function useEventRangeLoader({
       }
       return {
         ...current,
-        [createdDateKey]: [...current[createdDateKey], event]
+        [createdDateKey]: appendUniqueEvent(current[createdDateKey], event)
       };
     });
   }, []);

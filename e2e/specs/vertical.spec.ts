@@ -200,6 +200,8 @@ test("grows vertical columns after three overlap lanes and keeps headers aligned
 test("keeps the vertical current date anchored when zoom changes", async ({ page }) => {
   await page.goto("/");
   await page.getByTestId("view-infinite-vertical").check();
+  await page.getByRole("spinbutton", { name: "Start" }).fill("8");
+  await page.getByRole("spinbutton", { name: "End" }).fill("18");
   await page.getByTestId("zoom-slider").fill("8");
   await page.getByTestId("jump-date-input").fill("2026-08-12");
   await page.getByTestId("jump-time-input").fill("17:00");
@@ -365,6 +367,56 @@ test("supports draft creation and dragging in the vertical view", async ({ page 
     element.scrollTop += 200;
   });
   await expect(page.getByTestId("calendar-column").first()).toBeVisible();
+});
+
+test("allows manual vertical scrolling after a drawn draft opens the popup", async ({ page }) => {
+  await page.goto("/");
+  await page.getByTestId("view-infinite-vertical").check();
+  await goToWorkday(page, "2026-07-20");
+  const drawPoint = await page.evaluate(() => {
+    const viewportRect = document.querySelector(".ic-viewport")?.getBoundingClientRect();
+    if (!viewportRect) return null;
+    for (const column of Array.from(document.querySelectorAll<HTMLElement>('[data-testid="calendar-column"]'))) {
+      const box = column.getBoundingClientRect();
+      if (box.bottom <= viewportRect.y + 120 || box.y >= viewportRect.bottom - 120 || box.x < viewportRect.x || box.x >= viewportRect.right) {
+        continue;
+      }
+      const x = box.x + box.width / 2;
+      for (let y = Math.max(box.y + 80, viewportRect.y + 120); y < Math.min(box.bottom - 80, viewportRect.bottom - 80); y += 20) {
+        const target = document.elementFromPoint(x, y);
+        if (target?.closest('[data-testid="calendar-column"]') === column && !target.closest("[data-event-id]")) {
+          return { x, y };
+        }
+      }
+    }
+    return null;
+  });
+  expect(drawPoint).not.toBeNull();
+  if (!drawPoint) return;
+
+  await page.evaluate(async ({ x, y }) => {
+    const target = document.elementFromPoint(x, y);
+    target?.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, clientX: x, clientY: y, pointerId: 1, buttons: 1 }));
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    window.dispatchEvent(new PointerEvent("pointermove", { bubbles: true, clientX: x, clientY: y + 80, pointerId: 1, buttons: 1 }));
+    window.dispatchEvent(new PointerEvent("pointerup", { bubbles: true, clientX: x, clientY: y + 80, pointerId: 1 }));
+  }, drawPoint);
+  await expect(page.getByTestId("external-event-popup")).toBeVisible();
+
+  await page.locator(".ic-viewport").evaluate((element) => {
+    const nextScrollTop = Math.max(0, element.scrollTop - 180);
+    element.scrollTop = nextScrollTop;
+  });
+  const visibleStateAfterScroll = await topVisibleDayState(page);
+  await page.waitForTimeout(800);
+  await expect
+    .poll(async () => {
+      const state = await topVisibleDayState(page);
+      return state.date === visibleStateAfterScroll.date
+        ? Math.abs(state.offsetWithinDate - visibleStateAfterScroll.offsetWithinDate)
+        : Number.POSITIVE_INFINITY;
+    })
+    .toBeLessThanOrEqual(4);
 });
 
 test("lets vertical hover pass through expanded cards to underlying overlap lanes", async ({ page }) => {

@@ -57,6 +57,7 @@ export const InfiniteVerticalTimelineView = forwardRef<CalendarNavigationHandle,
     calendars,
     selectedCalendarIds,
     loadEvents,
+    eventVersion,
     eventRenderer,
     settings: settingsInput,
     now = new Date(),
@@ -85,6 +86,7 @@ export const InfiniteVerticalTimelineView = forwardRef<CalendarNavigationHandle,
     const dayTimelineHeight = timelineHeight(settings) + VERTICAL_TIMELINE_GUTTER_PX * 2;
     const baseDayHeight = settings.dayHeaderHeight + dayTimelineHeight;
     const [isInteractionActive, setIsInteractionActive] = useState(false);
+    const layoutAnchorDateKey = activeDraft?.event.start.slice(0, 10);
     const verticalLayoutSignature = `${selectedIds.join("|")}:${settings.dayHeaderHeight}:${settings.startHour}:${settings.endHour}:${settings.zoom}:${settings.excludedWeekdays.join("|")}`;
     const resolveOffsetOnLayoutChange = useCallback(
       (offsetWithinDate: number, previousBaseDayHeight: number, nextBaseDayHeight: number) => {
@@ -122,6 +124,7 @@ export const InfiniteVerticalTimelineView = forwardRef<CalendarNavigationHandle,
       baseDayHeight,
       verticalLayoutSignature,
       isInteractionActive,
+      layoutAnchorDateKey,
       resolveOffsetOnLayoutChange
     });
 
@@ -138,7 +141,7 @@ export const InfiniteVerticalTimelineView = forwardRef<CalendarNavigationHandle,
       eventsByDate,
       applyMoveToLoadedEvents,
       applyCreatedEventToLoadedEvents
-    } = useEventRangeLoader({ loadEvents, selectedIds, visibleDateKeys });
+    } = useEventRangeLoader({ loadEvents, eventVersion, selectedIds, visibleDateKeys });
 
     const { eventsForColumn, columnWidthForDateCalendar, dayMinWidth, maxVisibleDayMinWidth } = useMemo(() => {
       const columnEvents = new Map<string, CalendarEvent[]>();
@@ -149,7 +152,10 @@ export const InfiniteVerticalTimelineView = forwardRef<CalendarNavigationHandle,
         let dayColumnsWidth = 0;
         for (const calendar of selectedCalendars) {
           const rowKey = `${dateKey}:${calendar.id}`;
-          const events = (eventsByDate[dateKey] ?? []).filter((event) => eventBelongsToCalendar(event, calendar.id));
+          const events = withoutActiveDraftSourceEvents(
+            (eventsByDate[dateKey] ?? []).filter((event) => eventBelongsToCalendar(event, calendar.id)),
+            activeDraft
+          );
           const width = columnWidthForEvents(events, settings);
           columnEvents.set(rowKey, events);
           columnWidths.set(rowKey, width);
@@ -169,7 +175,7 @@ export const InfiniteVerticalTimelineView = forwardRef<CalendarNavigationHandle,
           ),
         maxVisibleDayMinWidth: widestDay
       };
-    }, [eventsByDate, selectedCalendars, settings, visibleDateKeys]);
+    }, [activeDraft, eventsByDate, selectedCalendars, settings, visibleDateKeys]);
 
     const isGridInteractionPoint = useCallback(
       (event: Pick<PointerEvent | MouseEvent | ReactPointerEvent | ReactMouseEvent, "clientX" | "clientY">) => {
@@ -323,16 +329,19 @@ export const InfiniteVerticalTimelineView = forwardRef<CalendarNavigationHandle,
       const previousWindowScrollY = window.scrollY;
       const containerBox = scrollElement.getBoundingClientRect();
       const pointerY = event.clientY - containerBox.top;
-      const contentY = pointerY + scrollElement.scrollTop;
-      const anchoredDayItem = virtualizer.getVirtualItems().find((item) => item.start <= contentY && item.start + item.size > contentY);
-      const anchoredDateKey = anchoredDayItem ? dateKeyForIndex(anchoredDayItem.index) : null;
-      const anchoredDayY = anchoredDayItem ? contentY - anchoredDayItem.start : 0;
-      const anchoredMinute = nearestTimeNodeMinute(
+      const anchoredDayElement = Array.from(scrollElement.querySelectorAll<HTMLElement>('[data-testid="calendar-day"]')).find((element) => {
+        const box = element.getBoundingClientRect();
+        return event.clientY >= box.top && event.clientY <= box.bottom;
+      }) ?? null;
+      const anchoredDateKey = anchoredDayElement?.dataset.date ?? null;
+      const anchoredDayY = anchoredDayElement ? event.clientY - anchoredDayElement.getBoundingClientRect().top : 0;
+      const rawAnchoredMinute = nearestTimeNodeMinute(
         yToMinute(anchoredDayY - settings.dayHeaderHeight - VERTICAL_TIMELINE_GUTTER_PX, settings),
         settings
       );
-      const anchoredScreenY = anchoredDayItem
-        ? anchoredDayItem.start + settings.dayHeaderHeight + verticalMinuteToY(anchoredMinute, settings) - scrollElement.scrollTop
+      const anchoredMinute = Math.min(timelineEndMinute(settings), Math.max(timelineStartMinute(settings), rawAnchoredMinute));
+      const anchoredScreenY = anchoredDayElement
+        ? anchoredDayElement.getBoundingClientRect().top - containerBox.top + settings.dayHeaderHeight + verticalMinuteToY(anchoredMinute, settings)
         : pointerY;
       const wheelDelta = Math.abs(event.deltaY) >= Math.abs(event.deltaX) ? event.deltaY : event.deltaX;
       if (wheelDelta === 0) {
@@ -356,10 +365,12 @@ export const InfiniteVerticalTimelineView = forwardRef<CalendarNavigationHandle,
         if (anchoredDateKey) {
           const dayElement = scrollElement.querySelector<HTMLElement>(`[data-testid="calendar-day"][data-date="${anchoredDateKey}"]`);
           if (dayElement) {
-            const offsetWithinDate =
-              settings.dayHeaderHeight + verticalMinuteToY(anchoredMinute, nextSettings);
+            const offsetWithinDate = settings.dayHeaderHeight + verticalMinuteToY(anchoredMinute, nextSettings);
+            const dayBox = dayElement.getBoundingClientRect();
+            const viewportBox = scrollElement.getBoundingClientRect();
+            const currentScreenY = dayBox.top - viewportBox.top + offsetWithinDate;
             rememberVisibleDateOffset(anchoredDateKey, Math.max(0, offsetWithinDate - anchoredScreenY));
-            scrollElement.scrollTop = Math.max(0, dayElement.offsetTop + offsetWithinDate - anchoredScreenY);
+            scrollElement.scrollTop = Math.max(0, scrollElement.scrollTop + currentScreenY - anchoredScreenY);
           }
         }
         scrollElement.scrollLeft = previousScrollLeft;
@@ -370,17 +381,10 @@ export const InfiniteVerticalTimelineView = forwardRef<CalendarNavigationHandle,
         restoreScroll();
         window.requestAnimationFrame(restoreScroll);
         window.setTimeout(restoreScroll, 0);
+        window.setTimeout(restoreScroll, 50);
+        window.setTimeout(restoreScroll, 120);
       });
-    }, [
-      clearScrollEndTimer,
-      containerRef,
-      dateKeyForIndex,
-      onZoomChange,
-      rememberVisibleDateOffset,
-      settings,
-      updateTopVisibleDate,
-      virtualizer
-    ]);
+    }, [clearScrollEndTimer, containerRef, onZoomChange, rememberVisibleDateOffset, settings, updateTopVisibleDate]);
 
     useEffect(() => {
       const scrollElement = containerRef.current;
