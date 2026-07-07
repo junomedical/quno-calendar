@@ -31,6 +31,17 @@ function todayDateKey() {
   return `${year}-${month}-${day}`;
 }
 
+function mutedAccentColor(accentColor: string) {
+  const match = /^rgba?\((\d+),\s*(\d+),\s*(\d+)/.exec(accentColor);
+  if (!match) {
+    throw new Error(`Unsupported CSS color: ${accentColor}`);
+  }
+  const [, red, green, blue] = match.map(Number);
+  const mix = 0.14;
+  const blend = (channel: number) => Math.round(channel * mix + 255 * (1 - mix));
+  return `rgb(${blend(red)}, ${blend(green)}, ${blend(blue)})`;
+}
+
 async function firstViewportEventForPrefix(page: Page, prefix: string) {
   await expect
     .poll(async () => {
@@ -1306,12 +1317,33 @@ test("uses card left accent borders without calendar row color strips", async ({
       top: styles.borderTopWidth
     };
   });
+  const standardCardColors = await page.evaluate(() => {
+    const card = Array.from(document.querySelectorAll<HTMLElement>('[data-testid="calendar-event"] .demo-event-card')).find(
+      (element) =>
+        !element.classList.contains("kind-availability") &&
+        !element.classList.contains("kind-blocked") &&
+        !element.classList.contains("status-new")
+    );
+    if (!card) return null;
+    const styles = window.getComputedStyle(card);
+    const shell = card.closest<HTMLElement>(".ic-event-shell");
+    const shellStyles = shell ? window.getComputedStyle(shell) : null;
+    return {
+      backgroundColor: styles.backgroundColor,
+      borderLeftColor: styles.borderLeftColor,
+      mutedAccentVariable: shellStyles?.getPropertyValue("--event-accent-muted").trim() ?? ""
+    };
+  });
   const eventTransitionDuration = await page.getByTestId("calendar-event").first().evaluate((element) => {
     return window.getComputedStyle(element).transitionDuration;
   });
 
   expect(rowBorderLeftWidth).toBe("0px");
   expect(cardBorderWidths).toEqual({ left: "6px", top: "1px" });
+  expect(standardCardColors).not.toBeNull();
+  if (!standardCardColors) return;
+  expect(standardCardColors.backgroundColor).toBe(mutedAccentColor(standardCardColors.borderLeftColor));
+  expect(standardCardColors.backgroundColor).toBe(standardCardColors.mutedAccentVariable);
   expect(eventTransitionDuration).toBe("0s");
   await expect(page.locator(".demo-event-time").first()).toContainText(/\d{1,2}:\d{2}–\d{1,2}:\d{2}/);
 });
@@ -1804,6 +1836,27 @@ test("grows vertical columns after three overlap lanes and keeps headers aligned
   expect(denseColumn.columnWidth).toBeGreaterThanOrEqual(240 + (denseColumn.laneCount - 3) * 80);
   expect(denseColumn.eventWidth).toBeGreaterThanOrEqual(79);
   expect(Math.abs(denseColumn.headerWidth - denseColumn.columnWidth)).toBeLessThanOrEqual(1);
+});
+
+test("keeps the vertical current date anchored when zoom changes", async ({ page }) => {
+  await page.goto("/");
+  await page.getByTestId("view-infinite-vertical").check();
+  await page.getByTestId("zoom-slider").fill("8");
+  await page.getByTestId("jump-date-input").fill("2026-08-12");
+  await page.getByTestId("jump-time-input").fill("17:00");
+  await page.getByTestId("go-date-button").click();
+
+  await expect.poll(async () => topVisibleDayDate(page)).toBe("2026-08-12");
+  const beforeZoom = await topVisibleDayState(page);
+  expect(beforeZoom.date).toBe("2026-08-12");
+  expect(beforeZoom.offsetWithinDate).toBeGreaterThan(3_000);
+
+  await page.getByTestId("zoom-slider").fill("0.5");
+  await expect(page.getByTestId("zoom-value")).toHaveText("0.50");
+
+  await expect.poll(async () => topVisibleDayDate(page)).toBe("2026-08-12");
+  const afterZoom = await topVisibleDayState(page);
+  expect(afterZoom.date).toBe("2026-08-12");
 });
 
 test("supports draft creation and dragging in the vertical view", async ({ page }) => {

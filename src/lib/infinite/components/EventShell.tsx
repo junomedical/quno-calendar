@@ -7,6 +7,10 @@ import type {
 } from "../../core/types";
 
 type CssLength = number | string;
+type RgbColor = { red: number; green: number; blue: number };
+
+const DEFAULT_EVENT_ACCENT = "#0b6eff";
+const MUTED_EVENT_ACCENT_MIX = 0.14;
 
 type EventShellProps = {
   event: CalendarEvent;
@@ -92,7 +96,8 @@ export const EventShell = memo(function EventShell({
           zIndex,
           "--event-width": toCssLength(width),
           "--event-hover-width": toCssLength(hoverMaxWidth),
-          "--event-accent": event.color ?? "#0b6eff"
+          "--event-accent": event.color ?? DEFAULT_EVENT_ACCENT,
+          "--event-accent-muted": mutedEventAccent(event.color ?? DEFAULT_EVENT_ACCENT)
         } as CSSProperties
       }
     >
@@ -110,6 +115,42 @@ export const EventShell = memo(function EventShell({
 
 function toCssLength(value: CssLength): string {
   return typeof value === "number" ? `${value}px` : value;
+}
+
+function mutedEventAccent(accent: string): string {
+  const rgb = parseHexColor(accent);
+  if (!rgb) {
+    return `color-mix(in srgb, ${accent} ${MUTED_EVENT_ACCENT_MIX * 100}%, white)`;
+  }
+  return `rgb(${blendWithWhite(rgb.red)}, ${blendWithWhite(rgb.green)}, ${blendWithWhite(rgb.blue)})`;
+}
+
+function blendWithWhite(channel: number): number {
+  return Math.round(channel * MUTED_EVENT_ACCENT_MIX + 255 * (1 - MUTED_EVENT_ACCENT_MIX));
+}
+
+function parseHexColor(color: string): RgbColor | null {
+  const normalized = color.trim();
+  const shortMatch = /^#([0-9a-f]{3})$/i.exec(normalized);
+  if (shortMatch) {
+    const [, value] = shortMatch;
+    return {
+      red: Number.parseInt(value[0] + value[0], 16),
+      green: Number.parseInt(value[1] + value[1], 16),
+      blue: Number.parseInt(value[2] + value[2], 16)
+    };
+  }
+
+  const longMatch = /^#([0-9a-f]{6})$/i.exec(normalized);
+  if (!longMatch) {
+    return null;
+  }
+  const [, value] = longMatch;
+  return {
+    red: Number.parseInt(value.slice(0, 2), 16),
+    green: Number.parseInt(value.slice(2, 4), 16),
+    blue: Number.parseInt(value.slice(4, 6), 16)
+  };
 }
 
 /** Keeps unchanged external event cards from re-rendering during unrelated drag/scroll state changes. */

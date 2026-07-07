@@ -102,6 +102,21 @@ export const InfiniteVerticalTimelineView = forwardRef<CalendarNavigationHandle,
     const baseDayHeight = settings.dayHeaderHeight + dayTimelineHeight;
     const createdEventSequenceRef = useRef(0);
     const verticalLayoutSignature = `${selectedIds.join("|")}:${settings.dayHeaderHeight}:${settings.startHour}:${settings.endHour}:${settings.zoom}:${settings.excludedWeekdays.join("|")}`;
+    const resolveOffsetOnLayoutChange = useCallback(
+      (offsetWithinDate: number, previousBaseDayHeight: number, nextBaseDayHeight: number) => {
+        if (offsetWithinDate <= settings.dayHeaderHeight) {
+          return Math.min(offsetWithinDate, Math.max(0, nextBaseDayHeight - 1));
+        }
+        const previousTimelineHeight = Math.max(1, previousBaseDayHeight - settings.dayHeaderHeight);
+        const nextTimelineHeight = Math.max(1, nextBaseDayHeight - settings.dayHeaderHeight);
+        const relativeTimelineOffset = (offsetWithinDate - settings.dayHeaderHeight) / previousTimelineHeight;
+        return Math.min(
+          Math.max(0, nextBaseDayHeight - 1),
+          settings.dayHeaderHeight + relativeTimelineOffset * nextTimelineHeight
+        );
+      },
+      [settings.dayHeaderHeight]
+    );
 
     const {
       containerRef,
@@ -112,6 +127,7 @@ export const InfiniteVerticalTimelineView = forwardRef<CalendarNavigationHandle,
       renderItems,
       visibleDateKeys,
       scrollToDate,
+      rememberVisibleDateOffset,
       updateTopVisibleDate,
       clearScrollEndTimer
     } = useVirtualTimelineWindow({
@@ -121,7 +137,8 @@ export const InfiniteVerticalTimelineView = forwardRef<CalendarNavigationHandle,
       settings,
       baseDayHeight,
       verticalLayoutSignature,
-      isInteractionActive: Boolean(dragState || draftState)
+      isInteractionActive: Boolean(dragState || draftState),
+      resolveOffsetOnLayoutChange
     });
 
     useLayoutEffect(() => {
@@ -237,15 +254,14 @@ export const InfiniteVerticalTimelineView = forwardRef<CalendarNavigationHandle,
         if (!dayElement) {
           return;
         }
+        const offsetWithinDate = Math.max(0, settings.dayHeaderHeight + verticalMinuteToY(parseClockToMinutes(time), settings) - 48);
+        rememberVisibleDateOffset(dateKey, offsetWithinDate);
         scrollElement.scrollTop = Math.max(
           0,
-          dayElement.offsetTop +
-            settings.dayHeaderHeight +
-            verticalMinuteToY(parseClockToMinutes(time), settings) -
-            48
+          dayElement.offsetTop + offsetWithinDate
         );
       },
-      [containerRef, settings]
+      [containerRef, rememberVisibleDateOffset, settings]
     );
 
     const scrollToDateTime = useCallback(

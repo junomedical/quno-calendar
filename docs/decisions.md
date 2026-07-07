@@ -34,7 +34,7 @@ The sticky top pin and per-day current-time lines use the same natural timeline 
 Events support optional `calendarIds` in addition to the backward-compatible `calendarId`. The infinite view renders one instance in each matching selected calendar row. Hover focus is local to the row instance under the pointer, while drag and drop-preview state is keyed by event id so all visible instances move together.
 
 ## 012 - Row Labels Are Neutral, Event Cards Carry Color
-Calendar row labels do not use colored left strips. Event cards carry the color code with a thicker left border via `--event-accent`, which better matches the reference appointment-card design and keeps resource labels visually quieter.
+Calendar row labels do not use colored left strips. Event cards carry the color code with a thicker left border via `--event-accent`, and standard card backgrounds use the derived `--event-accent-muted` so the fill is a softer version of the same hue. This better matches the reference appointment-card design and keeps resource labels visually quieter.
 
 ## 013 - Dense Overlaps Grow Rows
 Compact rows default to 50px. Overlapping rows grow on a fixed ladder, but the final height is also clamped to at least 24px per overlap lane. Resting event shells are inset 2px from the top and bottom of their mini-lane, so dense event shells stay at least 20px tall and neighboring resting lanes do not touch. Hovered event shells expand to the full calendar row lane height with a higher z-index, matching the interaction design where the focused appointment becomes readable without permanently resizing the row.

@@ -9,6 +9,8 @@
 - Changed vertical hover hit-testing so expanded appointment cards do not block focusing underlying overlapped events.
 - Changed vertical date labels to smaller two-line text with weekday on the second line.
 - Changed the vertical date/time pane to 30% narrower than the horizontal label width, added 8px top/bottom time padding, and kept hovered card typography from inheriting compact line-height reductions.
+- Fixed vertical zoom changes so the current visible date stays anchored instead of jumping when the day height changes.
+- Changed standard demo event-card backgrounds to use a muted version of the same color as the left accent border.
 - Added greenfield Vite React TypeScript PoC.
 - Added reusable `CalendarRoot` and `InfiniteTimelineView` components.
 - Added async range loading, virtual date rows, fixed row labels, horizontal timeline zoom, current-time line, overlap layout, drag/drop previews, and drawn new-event drafts.

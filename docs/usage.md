@@ -183,6 +183,8 @@ function CalendarWithZoom(props) {
 
 When `onZoomChange` is provided, `Shift` + vertical wheel over the calendar viewport requests a zoom change and cancels the native scroll action before the calendar viewport or browser window can scroll. The horizontal view uses zoom as horizontal pixels per minute; the vertical view uses the same value as vertical pixels per minute.
 
+Zoom changes keep the current visible date anchored. In the vertical view, the calendar scales the intra-day offset to the new day height so changing zoom does not jump to a different date.
+
 Time labels automatically thin out as zoom becomes dense. Quarter-hour labels render at normal scale, 15/45 labels disappear at medium density, and all minute labels disappear at the tightest scale so only hour labels remain.
 
 The grid uses 15-minute columns through zoom `6`. Above zoom `6`, the row grid and time header switch to 5-minute cadence, showing labels like `9 5 10 15 ... 55` for finer high-zoom positioning.
@@ -215,10 +217,14 @@ Availability cards receive normal `existing` status and can branch on `event.kin
 
 The calendar wraps every event renderer in a CSS size container named `calendar-event`. A renderer can ignore the supplied `style` prop and size itself with CSS instead:
 
+Event shells expose `--event-accent` from `event.color` and `--event-accent-muted` as a softer background color derived from the same accent. Renderers can use those variables to keep card borders and backgrounds on the same hue.
+
 ```css
 .appointment {
   width: 100%;
   height: 100%;
+  background: var(--event-accent-muted);
+  border-left: 6px solid var(--event-accent);
 }
 
 @container calendar-event (height < 40px) {
