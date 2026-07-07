@@ -43,7 +43,7 @@ export function mergeTimelineSettings(settings?: Partial<TimelineSettings>): Tim
     ...merged,
     endHour: Math.max(merged.startHour + 1, merged.endHour),
     snapMinutes: Math.max(1, merged.snapMinutes),
-    zoom: Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, merged.zoom)),
+    zoom: Number.isFinite(merged.zoom) ? Math.min(MAX_ZOOM, merged.zoom) : defaultTimelineSettings.zoom,
     verticalColumnMinWidth: Math.max(1, merged.verticalColumnMinWidth),
     verticalColumnOverlapCapacity: Math.max(1, Math.floor(merged.verticalColumnOverlapCapacity)),
     verticalColumnOverlapGrowth: Math.max(0, merged.verticalColumnOverlapGrowth),

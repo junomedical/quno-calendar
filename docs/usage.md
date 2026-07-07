@@ -194,6 +194,8 @@ function CalendarWithZoom(props) {
 
 When `onZoomChange` is provided, `Shift` + vertical wheel over the calendar viewport requests a zoom change and cancels the native scroll action before the calendar viewport or browser window can scroll. The gesture anchors around the rendered time-grid node closest to the mouse. Horizontal mode keeps that time node in place when the timeline can scroll, and vertical mode keeps the nearest date/time node in place. The horizontal view uses zoom as horizontal pixels per minute; the vertical view uses the same value as vertical pixels per minute.
 
+In horizontal mode, the timeline renders with an effective zoom large enough to fill the viewport area available after the sticky labels. `settings.zoom` remains the parent-owned logical value, so parent code may still pass lower values, including zero or negative values; the render scale prevents empty horizontal board space. The demo slider and built-in wheel gestures still stay within the `0.5-8` control range.
+
 Zoom changes keep the current visible date anchored. In the vertical view, the calendar scales the intra-day offset to the new day height so changing zoom does not jump to a different date.
 
 Time labels automatically thin out as zoom becomes dense. Quarter-hour labels render at normal scale, 15/45 labels disappear at medium density, and all minute labels disappear at the tightest scale so only hour labels remain.

@@ -108,6 +108,52 @@ test("renders, scrolls vertically, zooms, and changes dataset scale", async ({ p
     window.scrollTo(0, 0);
   });
 
+  await page.getByTestId("zoom-slider").fill("3");
+  await expect(page.getByTestId("zoom-value")).toHaveText("3.00");
+  const horizontalZoomFloor = await viewport.evaluate((element) => {
+    const labelWidth = 230;
+    const timelineGutter = 8;
+    const zoom = Number(document.querySelector<HTMLElement>('[data-testid="zoom-value"]')?.textContent ?? "1");
+    const virtualSpace = document.querySelector<HTMLElement>(".ic-virtual-space");
+    const minWidth = Number.parseFloat(window.getComputedStyle(virtualSpace ?? element).minWidth);
+    const totalMinutes = (minWidth - labelWidth - timelineGutter) / zoom;
+    const availableTimelineWidth = Math.max(0, element.clientWidth - labelWidth - timelineGutter);
+    return Math.min(8, Math.max(0.5, Math.ceil((availableTimelineWidth / totalMinutes) * 100) / 100));
+  });
+  await page.mouse.move(viewportBox.x + pointerX, viewportBox.y + 160);
+  await page.keyboard.down("Shift");
+  for (let index = 0; index < 20; index += 1) {
+    await page.mouse.wheel(0, 500);
+  }
+  await page.keyboard.up("Shift");
+  await expect
+    .poll(async () => Number(await page.getByTestId("zoom-value").textContent()))
+    .toBe(0.5);
+  expect(0.5).toBeLessThan(horizontalZoomFloor);
+  await expect
+    .poll(async () =>
+      viewport.evaluate((element) => {
+        const virtualSpace = document.querySelector<HTMLElement>(".ic-virtual-space");
+        return Number.parseFloat(window.getComputedStyle(virtualSpace ?? element).minWidth) - element.clientWidth;
+      })
+    )
+    .toBeGreaterThanOrEqual(0);
+  const logicalZoomBeforeExtraWheel = Number(await page.getByTestId("zoom-value").textContent());
+  await page.keyboard.down("Shift");
+  await page.mouse.wheel(0, 500);
+  await page.keyboard.up("Shift");
+  await expect
+    .poll(async () => Number(await page.getByTestId("zoom-value").textContent()))
+    .toBe(logicalZoomBeforeExtraWheel);
+  await expect
+    .poll(async () =>
+      viewport.evaluate((element) => {
+        const virtualSpace = document.querySelector<HTMLElement>(".ic-virtual-space");
+        return Number.parseFloat(window.getComputedStyle(virtualSpace ?? element).minWidth) - element.clientWidth;
+      })
+    )
+    .toBeGreaterThanOrEqual(0);
+
   await page.getByTestId("scale-select").selectOption("20000");
   await expect(page.getByTestId("demo-message")).toContainText("20,000");
   await goToWorkday(page);

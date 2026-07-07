@@ -209,6 +209,8 @@ Calendar cells use one shared 1px gray border token (`--ic-cell-border`) for the
 
 `Shift` + wheel zoom is nearest-node anchored. The view finds the rendered time-grid node closest to the mouse, using the current grid cadence, and keeps that node at its existing screen position while zoom changes. The horizontal view anchors the nearest time node on the x-axis when horizontal overflow allows it. The vertical view anchors the nearest date/time node on the y-axis. Because zoom is parent-controlled from a native event listener, the view flushes the parent zoom update before restoring scroll against the committed layout, avoiding a visible snap from stale geometry.
 
+Horizontal rendering has a viewport-fill floor. The view computes the available board width inside the scroll viewport after the sticky label area and timeline gutter, then renders with an effective zoom large enough to fill that space. Parent code may still pass lower `settings.zoom` values, including zero or negative values; the lower bound applies only to rendered pixels-per-minute, not to the controlled zoom value. Built-in wheel gestures stay within the same `0.5-8` range as the demo slider.
+
 Zoom changes outside the wheel gesture still preserve the current visible date. In the vertical view, the intra-day scroll offset is scaled from the previous day height to the next day height so zooming in or out keeps the same date anchored instead of carrying an old pixel offset into another virtual day.
 
 ## Demo Instrumentation

@@ -21,6 +21,7 @@ import {
   parseClockToMinutes,
   snapMinute,
   timelineEndMinute,
+  timelineTotalMinutes,
   timelineStartMinute,
   timelineWidth,
   xToMinute
@@ -79,7 +80,16 @@ export const InfiniteTimelineView = forwardRef<CalendarNavigationHandle, Calenda
   const [windowAnchorDateKey, setWindowAnchorDateKey] = useState(initialAnchorDateKey);
   const settings = baseSettings;
   const baseDayHeight = settings.dayHeaderHeight + selectedCalendars.length * settings.rowHeight;
-  const width = timelineWidth(settings);
+  const [viewportWidth, setViewportWidth] = useState(0);
+  const horizontalRenderZoomFloor = useMemo(() => {
+    const availableTimelineWidth = Math.max(0, viewportWidth - settings.labelWidth - TIMELINE_LEFT_GUTTER_PX);
+    return availableTimelineWidth > 0 ? availableTimelineWidth / timelineTotalMinutes(settings) : settings.zoom;
+  }, [settings, viewportWidth]);
+  const effectiveSettings = useMemo(
+    () => ({ ...settings, zoom: Math.max(settings.zoom, horizontalRenderZoomFloor) }),
+    [horizontalRenderZoomFloor, settings]
+  );
+  const width = timelineWidth(effectiveSettings);
   const [isInteractionActive, setIsInteractionActive] = useState(false);
   const verticalLayoutSignature = `${selectedIds.join("|")}:${settings.dayHeaderHeight}:${settings.rowHeight}:${settings.excludedWeekdays.join("|")}`;
   const {
@@ -103,16 +113,28 @@ export const InfiniteTimelineView = forwardRef<CalendarNavigationHandle, Calenda
     isInteractionActive
   });
 
+  useLayoutEffect(() => {
+    const scrollElement = containerRef.current;
+    if (!scrollElement) {
+      return;
+    }
+    const updateViewportWidth = () => setViewportWidth(scrollElement.clientWidth);
+    updateViewportWidth();
+    const observer = new ResizeObserver(updateViewportWidth);
+    observer.observe(scrollElement);
+    return () => observer.disconnect();
+  }, [containerRef]);
+
   const scrollToTime = useCallback(
     (time: string) => {
       const scrollElement = containerRef.current;
       if (!scrollElement || !/^\d{2}:\d{2}$/.test(time)) {
         return;
       }
-      const targetX = TIMELINE_LEFT_GUTTER_PX + minuteToX(parseClockToMinutes(time), settings);
+      const targetX = TIMELINE_LEFT_GUTTER_PX + minuteToX(parseClockToMinutes(time), effectiveSettings);
       scrollElement.scrollLeft = Math.max(0, targetX - 48);
     },
-    [containerRef, settings]
+    [containerRef, effectiveSettings]
   );
 
   const scrollToDateTime = useCallback(
@@ -218,7 +240,7 @@ export const InfiniteTimelineView = forwardRef<CalendarNavigationHandle, Calenda
           return {
             dateKey,
             calendarId,
-            minute: snapMinute(xToMinute(x, settings), settings.snapMinutes),
+            minute: snapMinute(xToMinute(x, effectiveSettings), settings.snapMinutes),
             dayIndex: dayItem.index,
             rowIndex
           };
@@ -228,7 +250,7 @@ export const InfiniteTimelineView = forwardRef<CalendarNavigationHandle, Calenda
 
       return null;
     },
-    [dateKeyForIndex, getRowHeight, isGridInteractionPoint, selectedIds, settings, virtualizer]
+    [dateKeyForIndex, effectiveSettings, getRowHeight, isGridInteractionPoint, selectedIds, settings.snapMinutes, virtualizer]
   );
 
   const isTimelinePoint = useCallback((event: Pick<PointerEvent | MouseEvent | ReactPointerEvent | ReactMouseEvent, "clientX" | "clientY">) => {
@@ -255,7 +277,7 @@ export const InfiniteTimelineView = forwardRef<CalendarNavigationHandle, Calenda
   } = useTimelineInteractions({
     activeDraft,
     interactionMode,
-    settings,
+    settings: effectiveSettings,
     getHit,
     isTimelinePoint,
     onEventMoveRequest,
@@ -292,12 +314,12 @@ export const InfiniteTimelineView = forwardRef<CalendarNavigationHandle, Calenda
     const anchoredMinute = nearestTimeNodeMinute(
       xToMinute(
         pointerX + scrollElement.scrollLeft - settings.labelWidth - TIMELINE_LEFT_GUTTER_PX,
-        settings
+        effectiveSettings
       ),
-      settings
+      effectiveSettings
     );
     const anchoredScreenX =
-      settings.labelWidth + TIMELINE_LEFT_GUTTER_PX + minuteToX(anchoredMinute, settings) - scrollElement.scrollLeft;
+      settings.labelWidth + TIMELINE_LEFT_GUTTER_PX + minuteToX(anchoredMinute, effectiveSettings) - scrollElement.scrollLeft;
     const wheelDelta = Math.abs(event.deltaY) >= Math.abs(event.deltaX) ? event.deltaY : event.deltaX;
     if (wheelDelta === 0) {
       return;
@@ -313,10 +335,11 @@ export const InfiniteTimelineView = forwardRef<CalendarNavigationHandle, Calenda
       flushSync(() => onZoomChange(nextZoom));
     }
 
-    const nextSettings = { ...settings, zoom: nextZoom };
+    const nextEffectiveSettings = { ...effectiveSettings, zoom: Math.max(nextZoom, horizontalRenderZoomFloor) };
     const restoreScroll = () => {
       scrollElement.scrollTop = previousScrollTop;
-      scrollElement.scrollLeft = settings.labelWidth + TIMELINE_LEFT_GUTTER_PX + minuteToX(anchoredMinute, nextSettings) - anchoredScreenX;
+      scrollElement.scrollLeft =
+        settings.labelWidth + TIMELINE_LEFT_GUTTER_PX + minuteToX(anchoredMinute, nextEffectiveSettings) - anchoredScreenX;
       window.scrollTo(previousWindowScrollX, previousWindowScrollY);
     };
     restoreScroll();
@@ -325,7 +348,7 @@ export const InfiniteTimelineView = forwardRef<CalendarNavigationHandle, Calenda
       window.requestAnimationFrame(restoreScroll);
       window.setTimeout(restoreScroll, 0);
     });
-  }, [clearScrollEndTimer, containerRef, onZoomChange, settings]);
+  }, [clearScrollEndTimer, containerRef, effectiveSettings, horizontalRenderZoomFloor, onZoomChange, settings]);
 
   useEffect(() => {
     const scrollElement = containerRef.current;
@@ -339,7 +362,7 @@ export const InfiniteTimelineView = forwardRef<CalendarNavigationHandle, Calenda
     };
   }, [containerRef, handleShiftWheelZoom]);
 
-  const timeTicks = useMemo(() => buildTimeTicks(settings), [settings]);
+  const timeTicks = useMemo(() => buildTimeTicks(effectiveSettings), [effectiveSettings]);
   const todayKey = toDateKey(now);
   const nowMinute = now.getHours() * 60 + now.getMinutes();
   const showNowLine = nowMinute >= timelineStartMinute(settings) && nowMinute <= timelineEndMinute(settings);
@@ -391,7 +414,7 @@ export const InfiniteTimelineView = forwardRef<CalendarNavigationHandle, Calenda
       >
         <div className="ic-virtual-space" style={{ height: virtualizer.getTotalSize(), width: "100%", minWidth: settings.labelWidth + TIMELINE_LEFT_GUTTER_PX + width }}>
           <InfiniteTimeScaleHeader
-            settings={settings}
+            settings={effectiveSettings}
             width={width}
             timeTicks={timeTicks}
             showNowLine={showNowLine}
@@ -404,7 +427,7 @@ export const InfiniteTimelineView = forwardRef<CalendarNavigationHandle, Calenda
                 item={item}
                 dateKey={dateKey}
                 dayHeight={getDayHeight(dateKey)}
-                settings={settings}
+                settings={effectiveSettings}
                 width={width}
                 selectedCalendars={selectedCalendars}
                 todayKey={todayKey}

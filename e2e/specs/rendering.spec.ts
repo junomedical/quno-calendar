@@ -24,7 +24,9 @@ test("drops minor time labels at dense zoom levels", async ({ page }) => {
   const minuteLabelsAtDenseZoom = await page.locator(".ic-time-tick:not(.is-hour)").evaluateAll((elements) =>
     elements.map((element) => element.textContent?.trim()).filter(Boolean)
   );
-  expect(minuteLabelsAtDenseZoom).toEqual([]);
+  expect(minuteLabelsAtDenseZoom).toContain("30");
+  expect(minuteLabelsAtDenseZoom).not.toContain("15");
+  expect(minuteLabelsAtDenseZoom).not.toContain("45");
   await expect(page.locator(".ic-time-tick.is-hour").first()).toBeVisible();
 
   await page.getByTestId("zoom-slider").fill("8");

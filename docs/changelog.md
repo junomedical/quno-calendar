@@ -11,6 +11,7 @@
 - Changed popup field edits so visible drafts update without scrolling, while offscreen drafts are restored to their last seen viewport position.
 - Fixed same-anchor date navigation so popup field edits can focus an active draft even after the user scrolls elsewhere inside the current virtual window.
 - Changed `Shift` + wheel zoom to anchor around the rendered time-grid node closest to the mouse in both horizontal and vertical timeline views.
+- Added a horizontal render-time viewport-fill zoom floor so the timeline board does not become narrower than the available screen area even when the controlled zoom value is lower.
 - Added `/demo1`, `/demo2`, and `/demo3` demo routes with compact horizontal, wide vertical, and availability-first event-card treatments.
 - Kept the additional demo routes fully interactive, including calendar orientation and availability-mode switching.
 - Added vertical column sizing settings for base width, overlap-lane capacity, overlap growth, and hover minimum height.

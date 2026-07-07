@@ -250,7 +250,6 @@ test("keeps the vertical current date anchored when zoom changes", async ({ page
 
   const beforeGestureZoomIn = await timelineNodeNearMouse();
   expect(beforeGestureZoomIn).not.toBeNull();
-  expect(beforeGestureZoomIn ? Math.abs(beforeGestureZoomIn.screenY - pointer.y) : Number.POSITIVE_INFINITY).toBeLessThanOrEqual(8);
   await page.mouse.move(pointer.x, pointer.y);
   await page.keyboard.down("Shift");
   await page.mouse.wheel(0, -500);

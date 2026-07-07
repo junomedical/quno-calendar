@@ -84,6 +84,7 @@ This document defines the names used for visible calendar interface parts and th
 | Snap interval | The minute increment used for drag and draw interactions. | `settings.snapMinutes` |
 | Zoom | Pixels-per-minute scale for the timeline axis. | `settings.zoom` |
 | Nearest-node zoom anchor | `Shift` + wheel behavior that keeps the rendered time-grid node nearest the mouse visually fixed while zoom changes. | `onZoomChange` |
+| Viewport-fill zoom floor | A horizontal render-scale floor that lets the timeline board fill the available viewport width after sticky labels without changing the parent-owned zoom value. | `settings.zoom` |
 
 ## Renderer Statuses
 
