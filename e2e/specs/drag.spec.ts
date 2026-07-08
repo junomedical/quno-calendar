@@ -70,7 +70,9 @@ test("keeps visible event cache populated after dropping on another day", async 
         (day) => day.dataset.date && day.dataset.date !== sourceDate
       );
       for (const day of laterDays) {
-        const targetRow = day.querySelector<HTMLElement>(`[data-testid="calendar-row"][data-calendar-id="${calendarId}"]`);
+        const targetRow = day.querySelector<HTMLElement>(
+          `[data-testid="calendar-row"][data-calendar-id="${calendarId}"]`
+        );
         const targetGrid = targetRow?.querySelector<HTMLElement>(".ic-row-grid");
         if (!targetRow || !targetGrid) {
           continue;

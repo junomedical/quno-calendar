@@ -16,6 +16,8 @@ The infinite view requests only visible date ranges. This better represents prod
 
 Drag/drop previews are local, but accepted data changes must come from the parent through callbacks. This keeps persistence, permissions, and conflict rules outside the rendering component.
 
+Accepted move proposals also patch the calendar's loaded visible buckets after parent validation. Parent demos still persist the move into their source event arrays, but they do not bump `eventVersion` for accepted moves because that would clear the same visible range the calendar already patched and produce a full redraw.
+
 ## 005 - Renderer Receives Event Status
 
 The event renderer handles `existing`, `hovered`, `drop-preview`, and `new` states. This lets product-specific appointment cards render all interaction states without depending on calendar internals.
