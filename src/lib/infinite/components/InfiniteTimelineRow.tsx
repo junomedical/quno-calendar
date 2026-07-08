@@ -21,6 +21,7 @@ type InfiniteTimelineRowProps = {
   top: number;
   rowHeight: number;
   rowEvents: CalendarEvent[];
+  isHidden?: boolean;
   settings: TimelineSettings;
   width: number;
   showNowLine: boolean;
@@ -68,6 +69,7 @@ export function InfiniteTimelineRow({
   top,
   rowHeight,
   rowEvents,
+  isHidden = false,
   settings,
   width,
   showNowLine,
@@ -104,7 +106,14 @@ export function InfiniteTimelineRow({
       className="ic-row"
       data-testid="calendar-row"
       data-calendar-id={calendar.id}
-      style={{ top, height: rowHeight }}
+      data-retained-hidden={isHidden ? "true" : undefined}
+      aria-hidden={isHidden || undefined}
+      style={{
+        top,
+        height: rowHeight,
+        visibility: isHidden ? "hidden" : undefined,
+        pointerEvents: isHidden ? "none" : undefined
+      }}
     >
       <div className="ic-left-label ic-row-label" style={{ width: settings.labelWidth }}>
         {calendar.name}

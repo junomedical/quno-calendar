@@ -32,6 +32,7 @@ import { useTimelineInteractions } from "./hooks/useTimelineInteractions";
 import { useTimelineViewSetup } from "./hooks/useTimelineViewSetup";
 import { useVerticalTimelineHitTesting } from "./hooks/useTimelineHitTesting";
 import { useVerticalShiftWheelZoom } from "./hooks/useShiftWheelZoom";
+import { useRetainedCalendarRows } from "./hooks/useRetainedCalendarRows";
 import "./InfiniteTimelineView.css";
 
 const VERTICAL_LEFT_PANE_WIDTH_RATIO = 0.7;
@@ -73,13 +74,15 @@ export const InfiniteVerticalTimelineView = forwardRef<CalendarNavigationHandle,
       initialDateKey,
       now
     });
+    const { renderedCalendars, hiddenCalendarIds } = useRetainedCalendarRows(selectedCalendars, activeDraft);
     const [windowAnchorDateKey, setWindowAnchorDateKey] = useState(initialAnchorDateKey);
     const verticalLabelWidth = Math.round(settings.labelWidth * VERTICAL_LEFT_PANE_WIDTH_RATIO);
     const dayTimelineHeight = timelineHeight(settings) + VERTICAL_TIMELINE_GUTTER_PX * 2;
     const baseDayHeight = settings.dayHeaderHeight + dayTimelineHeight;
     const [isInteractionActive, setIsInteractionActive] = useState(false);
     const layoutAnchorDateKey = activeDraft?.event.start.slice(0, 10);
-    const verticalLayoutSignature = `${selectedIds.join("|")}:${settings.dayHeaderHeight}:${settings.startHour}:${settings.endHour}:${settings.zoom}:${settings.excludedWeekdays.join("|")}`;
+    const renderedCalendarIds = renderedCalendars.map((calendar) => calendar.id);
+    const verticalLayoutSignature = `${renderedCalendarIds.join("|")}:${Array.from(hiddenCalendarIds).join("|")}:${settings.dayHeaderHeight}:${settings.startHour}:${settings.endHour}:${settings.zoom}:${settings.excludedWeekdays.join("|")}`;
     const resolveOffsetOnLayoutChange = useCallback(
       (offsetWithinDate: number, previousBaseDayHeight: number, nextBaseDayHeight: number) => {
         if (offsetWithinDate <= settings.dayHeaderHeight) {
@@ -139,11 +142,11 @@ export const InfiniteVerticalTimelineView = forwardRef<CalendarNavigationHandle,
     const { eventsForColumn, columnWidthForDateCalendar, dayMinWidth, maxVisibleDayMinWidth } = useMemo(() => {
       const columnEvents = new Map<string, CalendarEvent[]>();
       const columnWidths = new Map<string, number>();
-      let widestDay = selectedCalendars.length * settings.verticalColumnMinWidth;
+      let widestDay = renderedCalendars.length * settings.verticalColumnMinWidth;
 
       for (const dateKey of visibleDateKeys) {
         let dayColumnsWidth = 0;
-        for (const calendar of selectedCalendars) {
+        for (const calendar of renderedCalendars) {
           const rowKey = `${dateKey}:${calendar.id}`;
           const events = withoutActiveDraftSourceEvents(
             (eventsByDate[dateKey] ?? []).filter((event) => eventBelongsToCalendar(event, calendar.id)),
@@ -163,14 +166,14 @@ export const InfiniteVerticalTimelineView = forwardRef<CalendarNavigationHandle,
         columnWidthForDateCalendar: (dateKey: string, calendarId: CalendarId) =>
           columnWidths.get(`${dateKey}:${calendarId}`) ?? settings.verticalColumnMinWidth,
         dayMinWidth: (dateKey: string) =>
-          selectedCalendars.reduce(
+          renderedCalendars.reduce(
             (total, calendar) =>
               total + (columnWidths.get(`${dateKey}:${calendar.id}`) ?? settings.verticalColumnMinWidth),
             0
           ),
         maxVisibleDayMinWidth: widestDay
       };
-    }, [activeDraft, eventsByDate, selectedCalendars, settings, visibleDateKeys]);
+    }, [activeDraft, eventsByDate, renderedCalendars, settings, visibleDateKeys]);
 
     const { getHit, isTimelinePoint } = useVerticalTimelineHitTesting({
       containerRef,
@@ -358,7 +361,8 @@ export const InfiniteVerticalTimelineView = forwardRef<CalendarNavigationHandle,
                   boardMinWidth={boardMinWidth}
                   labelWidth={verticalLabelWidth}
                   settings={settings}
-                  selectedCalendars={selectedCalendars}
+                  selectedCalendars={renderedCalendars}
+                  hiddenCalendarIds={hiddenCalendarIds}
                   timeTicks={timeTicks}
                   todayKey={todayKey}
                   showNowLine={showNowLine}

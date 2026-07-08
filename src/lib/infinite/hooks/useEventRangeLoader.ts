@@ -46,7 +46,13 @@ export function useEventRangeLoader({
     loadedDatesRef.current = new Set();
     loadingDatesRef.current = new Set();
     setEventsByDate({});
-  }, [eventVersion, loadEvents, selectedIdsKey]);
+  }, [eventVersion, loadEvents]);
+
+  useEffect(() => {
+    requestGenerationRef.current += 1;
+    loadedDatesRef.current = new Set();
+    loadingDatesRef.current = new Set();
+  }, [selectedIdsKey]);
 
   useEffect(() => {
     const missingDateKeys = visibleDateKeys.filter(

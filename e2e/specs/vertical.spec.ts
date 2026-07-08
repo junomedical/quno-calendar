@@ -4,7 +4,7 @@ import {
   selectPageText,
   topVisibleDayDate,
   topVisibleDayState,
-  verticalTopVisibleGeometry
+  viewportRelativeEventBox
 } from "../helpers";
 
 test("switches to the vertical calendar view with sticky time pane and vertical zoom", async ({ page }) => {
@@ -247,7 +247,7 @@ test("keeps the vertical current date anchored when zoom changes", async ({ page
   if (!viewportBox) return;
   const pointer = { x: viewportBox.x + 520, y: viewportBox.y + 180 };
   const timelineNodeNearMouse = async () =>
-    page.evaluate(({ x, y }) => {
+    page.evaluate((y) => {
       const zoomText = document.querySelector<HTMLElement>('[data-testid="zoom-value"]')?.textContent ?? "1";
       const zoom = Number(zoomText);
       const day = Array.from(document.querySelectorAll<HTMLElement>('[data-testid="calendar-day"]')).find((element) => {
@@ -270,32 +270,60 @@ test("keeps the vertical current date anchored when zoom changes", async ({ page
         minute,
         screenY: dayBox.top + dayHeaderHeight + timelineGutter + (minute - startMinute) * Math.max(0.5, zoom)
       };
-    }, pointer);
+    }, pointer.y);
 
   const beforeGestureZoomIn = await timelineNodeNearMouse();
   expect(beforeGestureZoomIn).not.toBeNull();
   await page.mouse.move(pointer.x, pointer.y);
   await page.keyboard.down("Shift");
   await page.mouse.wheel(0, -500);
+  await page.mouse.wheel(0, -500);
   await page.keyboard.up("Shift");
-  await expect(page.getByTestId("zoom-value")).toHaveText("0.65");
+  await expect(page.getByTestId("zoom-value")).toHaveText("0.80");
   await expect.poll(async () => (await timelineNodeNearMouse())?.date ?? null).toBe(beforeGestureZoomIn?.date);
   await expect.poll(async () => (await timelineNodeNearMouse())?.minute ?? null).toBe(beforeGestureZoomIn?.minute);
   await expect
-    .poll(async () => (await timelineNodeNearMouse())?.screenY ?? Number.POSITIVE_INFINITY)
-    .toBeCloseTo(beforeGestureZoomIn?.screenY ?? 0, 0);
+    .poll(async () => Math.abs(((await timelineNodeNearMouse())?.screenY ?? 0) - (beforeGestureZoomIn?.screenY ?? 0)))
+    .toBeLessThanOrEqual(1);
 
   const beforeGestureZoomOut = await timelineNodeNearMouse();
   expect(beforeGestureZoomOut).not.toBeNull();
   await page.keyboard.down("Shift");
+  await page.mouse.wheel(0, 500);
   await page.mouse.wheel(0, 500);
   await page.keyboard.up("Shift");
   await expect(page.getByTestId("zoom-value")).toHaveText("0.50");
   await expect.poll(async () => (await timelineNodeNearMouse())?.date ?? null).toBe(beforeGestureZoomOut?.date);
   await expect.poll(async () => (await timelineNodeNearMouse())?.minute ?? null).toBe(beforeGestureZoomOut?.minute);
   await expect
-    .poll(async () => (await timelineNodeNearMouse())?.screenY ?? Number.POSITIVE_INFINITY)
-    .toBeCloseTo(beforeGestureZoomOut?.screenY ?? 0, 0);
+    .poll(async () => Math.abs(((await timelineNodeNearMouse())?.screenY ?? 0) - (beforeGestureZoomOut?.screenY ?? 0)))
+    .toBeLessThanOrEqual(1);
+
+  const afterGestureZoomOut = await timelineNodeNearMouse();
+  await page.mouse.wheel(0, 500);
+  await page.waitForTimeout(100);
+  await expect.poll(async () => (await timelineNodeNearMouse())?.date ?? null).toBe(afterGestureZoomOut?.date);
+  await expect.poll(async () => (await timelineNodeNearMouse())?.minute ?? null).toBe(afterGestureZoomOut?.minute);
+  await expect
+    .poll(async () => Math.abs(((await timelineNodeNearMouse())?.screenY ?? 0) - (afterGestureZoomOut?.screenY ?? 0)))
+    .toBeLessThanOrEqual(1);
+
+  await page.waitForTimeout(500);
+  const scrollTopBeforeManualWheel = await viewport.evaluate((element) => element.scrollTop);
+  await page.mouse.wheel(0, 500);
+  await page.waitForTimeout(100);
+  await expect.poll(async () => viewport.evaluate((element) => element.scrollTop)).not.toBe(scrollTopBeforeManualWheel);
+  const afterManualWheel = await topVisibleDayState(page);
+
+  await page.waitForTimeout(3200);
+  await expect
+    .poll(async () => {
+      const state = await topVisibleDayState(page);
+      return state.date === afterManualWheel.date
+        ? Math.abs(state.offsetWithinDate - afterManualWheel.offsetWithinDate)
+        : Number.POSITIVE_INFINITY;
+    })
+    .toBeLessThanOrEqual(4);
 });
 
 test("supports draft creation and dragging in the vertical view", async ({ page }) => {
@@ -462,6 +490,40 @@ test("allows manual vertical scrolling after a drawn draft opens the popup", asy
     window.dispatchEvent(new PointerEvent("pointerup", { bubbles: true, clientX: x, clientY: y + 80, pointerId: 1 }));
   }, drawPoint);
   await expect(page.getByTestId("external-event-popup")).toBeVisible();
+  const draftCalendarId = await page.getByTestId("draft-event").first().getAttribute("data-calendar-id");
+  expect(draftCalendarId).toBeTruthy();
+  if (!draftCalendarId) return;
+  const draftBoxBeforeEmptyParticipants = await viewportRelativeEventBox(
+    page,
+    `[data-testid="draft-event"][data-calendar-id="${draftCalendarId}"]`
+  );
+  await page.getByTestId(`draft-participant-${draftCalendarId}`).uncheck();
+  await expect(page.getByTestId("draft-save-button")).toBeDisabled();
+  await expect(
+    page.locator(`[data-testid="calendar-column"][data-calendar-id="${draftCalendarId}"]`).first()
+  ).toHaveAttribute("data-retained-hidden", "true");
+  await expect(page.locator(`[data-testid="draft-event"][data-calendar-id="${draftCalendarId}"]`)).toHaveCount(0);
+  await page.getByTestId(`draft-participant-${draftCalendarId}`).check();
+  await expect(page.getByTestId("draft-save-button")).toBeEnabled();
+  await expect(
+    page.locator(`[data-testid="calendar-column"][data-calendar-id="${draftCalendarId}"]`).first()
+  ).not.toHaveAttribute("data-retained-hidden", "true");
+  if (draftBoxBeforeEmptyParticipants) {
+    await expect
+      .poll(async () => {
+        const box = await viewportRelativeEventBox(
+          page,
+          `[data-testid="draft-event"][data-calendar-id="${draftCalendarId}"]`
+        );
+        return box
+          ? Math.max(
+              Math.abs(box.x - draftBoxBeforeEmptyParticipants.x),
+              Math.abs(box.y - draftBoxBeforeEmptyParticipants.y)
+            )
+          : Number.POSITIVE_INFINITY;
+      })
+      .toBeLessThanOrEqual(12);
+  }
 
   const viewportBox = await page.locator(".ic-viewport").boundingBox();
   expect(viewportBox).not.toBeNull();

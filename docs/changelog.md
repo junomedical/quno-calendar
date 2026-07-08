@@ -19,6 +19,11 @@
 - Added active-draft dragging through `onActiveDraftMoveRequest`; popup time fields update during drag and multi-calendar drafts move as one participant block.
 - Changed drawn creation in the default demo to delegate to the external popup before saving, while preserving immediate-create fallback through `onEventCreateRequest`.
 - Refined the external popup participant flow so empty participant lists keep the previous calendar set visible and disable save, while edit popups do not filter calendars until participants change.
+- Changed empty active-draft participant filtering to retain hidden inert placeholder rows or columns instead of showing fallback calendars or collapsing the draft layout.
+- Preserved the loaded event cache across selected-calendar filter changes so draw-to-popup handoff does not briefly blank calendar content while the filtered range reloads.
+- Kept the default demo's full selected-calendar event range warm while an external draft filters visible rows, preventing empty expanded rows and a follow-up position correction on cancel.
+- Raised the default external create/edit popup above the current-time marker.
+- Changed accepted drag/drop moves in the default demo to update parent data without bumping `eventVersion`, avoiding a full visible-range redraw after drop.
 - Blocked drawing a separate grid range while an external popup draft is active.
 - Preserved drawn draft position when the external popup opens and hides other calendars, and kept saved or cancelled events anchored when the popup closes.
 - Smoothed the drawn-create handoff so the controlled external draft takes over without a one-frame position jump.
@@ -31,6 +36,7 @@
 - Fixed create popup cancel anchoring so closing a draft preserves the drawn calendar row's viewport-relative position while internal virtualizer relayout scrolls are ignored.
 - Fixed repeated draw-after-cancel anchoring so a new draft on the same date/calendar row does not inherit a stale cancel restore and jump upward.
 - Changed `Shift` + wheel zoom to anchor around the rendered time-grid node closest to the mouse in both horizontal and vertical timeline views.
+- Fixed vertical `Shift` + wheel zoom burst handling so the first focused time node remains anchored, stale delayed restores are ignored, immediate trackpad wheel momentum after releasing Shift is captured, and normal wheel scrolling resumes after the brief tail.
 - Fixed vertical `Shift` + wheel zoom near the bottom of a day so the anchor clamps to the configured timeline end instead of an off-hours node.
 - Added a horizontal render-time viewport-fill zoom floor so the timeline board does not become narrower than the available screen area even when the controlled zoom value is lower.
 - Added `/demo1`, `/demo2`, and `/demo3` demo routes with compact horizontal, wide vertical, and availability-first event-card treatments.

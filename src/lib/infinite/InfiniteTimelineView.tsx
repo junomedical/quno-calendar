@@ -31,6 +31,7 @@ import { useTimelineInteractions } from "./hooks/useTimelineInteractions";
 import { useTimelineViewSetup } from "./hooks/useTimelineViewSetup";
 import { useHorizontalTimelineHitTesting } from "./hooks/useTimelineHitTesting";
 import { useHorizontalShiftWheelZoom } from "./hooks/useShiftWheelZoom";
+import { useRetainedCalendarRows } from "./hooks/useRetainedCalendarRows";
 import "./InfiniteTimelineView.css";
 
 /**
@@ -72,8 +73,9 @@ export const InfiniteTimelineView = forwardRef<CalendarNavigationHandle, Calenda
       initialDateKey,
       now
     });
+    const { renderedCalendars, hiddenCalendarIds } = useRetainedCalendarRows(selectedCalendars, activeDraft);
     const [windowAnchorDateKey, setWindowAnchorDateKey] = useState(initialAnchorDateKey);
-    const baseDayHeight = settings.dayHeaderHeight + selectedCalendars.length * settings.rowHeight;
+    const baseDayHeight = settings.dayHeaderHeight + renderedCalendars.length * settings.rowHeight;
     const [viewportWidth, setViewportWidth] = useState(0);
     const horizontalRenderZoomFloor = useMemo(() => {
       const availableTimelineWidth = Math.max(0, viewportWidth - settings.labelWidth - TIMELINE_LEFT_GUTTER_PX);
@@ -86,7 +88,8 @@ export const InfiniteTimelineView = forwardRef<CalendarNavigationHandle, Calenda
     const width = timelineWidth(effectiveSettings);
     const [isInteractionActive, setIsInteractionActive] = useState(false);
     const layoutAnchorDateKey = activeDraft?.event.start.slice(0, 10);
-    const verticalLayoutSignature = `${selectedIds.join("|")}:${settings.dayHeaderHeight}:${settings.rowHeight}:${settings.excludedWeekdays.join("|")}`;
+    const renderedCalendarIds = renderedCalendars.map((calendar) => calendar.id);
+    const verticalLayoutSignature = `${renderedCalendarIds.join("|")}:${Array.from(hiddenCalendarIds).join("|")}:${settings.dayHeaderHeight}:${settings.rowHeight}:${settings.excludedWeekdays.join("|")}`;
     const {
       containerRef,
       virtualizer,
@@ -165,7 +168,7 @@ export const InfiniteTimelineView = forwardRef<CalendarNavigationHandle, Calenda
 
     const { dayMetricsByDate, eventsForRow, getDayHeight, getRowHeight } = useDayMetrics({
       eventsByDate,
-      selectedCalendars,
+      selectedCalendars: renderedCalendars,
       settings,
       baseDayHeight,
       activeDraft
@@ -325,7 +328,8 @@ export const InfiniteTimelineView = forwardRef<CalendarNavigationHandle, Calenda
                   dayHeight={getDayHeight(dateKey)}
                   settings={effectiveSettings}
                   width={width}
-                  selectedCalendars={selectedCalendars}
+                  selectedCalendars={renderedCalendars}
+                  hiddenCalendarIds={hiddenCalendarIds}
                   todayKey={todayKey}
                   showNowLine={showNowLine}
                   nowMinute={nowMinute}

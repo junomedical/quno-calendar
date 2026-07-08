@@ -28,6 +28,7 @@ type InfiniteTimelineDayProps = {
   settings: TimelineSettings;
   width: number;
   selectedCalendars: CalendarRow[];
+  hiddenCalendarIds: Set<CalendarId>;
   todayKey: string;
   showNowLine: boolean;
   nowMinute: number;
@@ -77,6 +78,7 @@ export function InfiniteTimelineDay({
   settings,
   width,
   selectedCalendars,
+  hiddenCalendarIds,
   todayKey,
   showNowLine,
   nowMinute,
@@ -120,6 +122,7 @@ export function InfiniteTimelineDay({
       {selectedCalendars.map((calendar) => {
         const top = rowTop;
         const rowHeight = getRowHeight(dateKey, calendar.id);
+        const isHidden = hiddenCalendarIds.has(calendar.id);
         rowTop += rowHeight;
 
         return (
@@ -128,7 +131,8 @@ export function InfiniteTimelineDay({
             dateKey={dateKey}
             top={top}
             rowHeight={rowHeight}
-            rowEvents={eventsForRow(dateKey, calendar.id)}
+            rowEvents={isHidden ? [] : eventsForRow(dateKey, calendar.id)}
+            isHidden={isHidden}
             settings={settings}
             width={width}
             showNowLine={showNowLine}
@@ -137,8 +141,8 @@ export function InfiniteTimelineDay({
             interactionMode={interactionMode}
             hoveredEvent={hoveredEvent}
             dragEventId={dragEventId}
-            dragPreviewEvent={dragPreviewEvent}
-            draftEvent={draftEvent}
+            dragPreviewEvent={isHidden ? null : dragPreviewEvent}
+            draftEvent={isHidden ? null : draftEvent}
             draftEventStatus={draftEventStatus}
             draftEventIsDraggable={draftEventIsDraggable}
             eventRenderer={eventRenderer}

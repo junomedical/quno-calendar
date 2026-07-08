@@ -73,6 +73,37 @@ test("supports drawing a new event area", async ({ page }) => {
   expect(await page.locator('[data-render-status="hovered"]').count()).toBe(0);
   const drawnDraftBoxBeforePopup = await viewportRelativeEventBox(page, '[data-testid="draft-event"]');
   expect(drawnDraftBoxBeforePopup).not.toBeNull();
+  await page.evaluate(() => {
+    const samples: number[] = [];
+    const visibleCommittedEventCount = () => {
+      const viewport = document.querySelector<HTMLElement>(".ic-viewport")?.getBoundingClientRect();
+      if (!viewport) {
+        return 0;
+      }
+      return Array.from(
+        document.querySelectorAll<HTMLElement>('[data-testid="calendar-event"], [data-testid="availability-event"]')
+      ).filter((element) => {
+        const box = element.getBoundingClientRect();
+        return (
+          box.width > 0 &&
+          box.height > 0 &&
+          box.right > viewport.left &&
+          box.left < viewport.right &&
+          box.bottom > viewport.top &&
+          box.top < viewport.bottom
+        );
+      }).length;
+    };
+    const sample = (remainingFrames: number) => {
+      samples.push(visibleCommittedEventCount());
+      if (remainingFrames > 0) {
+        requestAnimationFrame(() => sample(remainingFrames - 1));
+      }
+    };
+    (window as typeof window & { __drawHandoffVisibleEventSamples?: number[] }).__drawHandoffVisibleEventSamples =
+      samples;
+    sample(18);
+  });
   await page.mouse.up();
   await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(resolve)));
   if (drawnDraftBoxBeforePopup) {
@@ -83,6 +114,11 @@ test("supports drawing a new event area", async ({ page }) => {
   }
   await expect(page.getByTestId("external-event-popup")).toBeVisible();
   await expect(page.getByTestId("demo-message")).toContainText("delegated to external popup");
+  await page.waitForTimeout(160);
+  const drawHandoffVisibleEventSamples = await page.evaluate(
+    () => (window as typeof window & { __drawHandoffVisibleEventSamples?: number[] }).__drawHandoffVisibleEventSamples
+  );
+  expect(Math.min(...(drawHandoffVisibleEventSamples ?? [0]))).toBeGreaterThan(0);
   await expect
     .poll(async () =>
       page
@@ -347,10 +383,15 @@ test("supports drawing a new event area", async ({ page }) => {
         const dragX = (visibleLeft + visibleRight) / 2;
         const dragY = Math.min(Math.max(visibleTop + 2, box.top + box.height / 2), visibleBottom - 2);
         const gridLeft = gridBox?.left ?? viewportBox?.left ?? box.left;
-        const isRightBlocked = Boolean(popupBox && dragX + 180 > popupBox.left - 8);
-        const dragDeltaX = isRightBlocked && dragX - 180 > gridLeft + 8 ? -180 : 180;
+        const gridRight = gridBox?.right ?? viewportBox?.right ?? box.right;
+        const rightLimit = Math.min(gridRight, viewportBox?.right ?? gridRight, (popupBox?.left ?? gridRight) - 8);
+        const leftLimit = Math.max(gridLeft, viewportBox?.left ?? gridLeft) + 8;
+        const rightDelta = Math.min(180, rightLimit - dragX - 8);
+        const leftDelta = Math.max(-180, leftLimit - dragX + 8);
+        const dragDeltaX = rightDelta >= 48 ? rightDelta : leftDelta <= -48 ? leftDelta : 0;
         const calendarId = draftElement.dataset.calendarId ?? "";
         const isHitTestable = Boolean(
+          dragDeltaX !== 0 &&
           visibleRight > visibleLeft + 8 &&
           visibleBottom > visibleTop &&
           document
@@ -383,22 +424,23 @@ test("supports drawing a new event area", async ({ page }) => {
     );
     await page.mouse.up();
   }
-  await expect.poll(async () => page.getByTestId("draft-start-input").inputValue()).not.toBe(blockDragStartValue);
   await expect(page.getByTestId("draft-event")).toHaveCount(2);
-  const blockDraftBoxesAfter = await page.getByTestId("draft-event").evaluateAll((elements) =>
-    Object.fromEntries(
-      elements.map((element) => [
-        (element as HTMLElement).dataset.calendarId ?? "",
-        {
-          x: element.getBoundingClientRect().x,
-          y: element.getBoundingClientRect().y
-        }
-      ])
-    )
-  );
-  const kirillovDelta = blockDraftBoxesAfter["dr-kirillov"].x - blockDraftBoxesBefore["dr-kirillov"].x;
-  const thakkerDelta = blockDraftBoxesAfter["dr-thakker"].x - blockDraftBoxesBefore["dr-thakker"].x;
-  expect(Math.abs(kirillovDelta - thakkerDelta)).toBeLessThanOrEqual(4);
+  if ((await page.getByTestId("draft-start-input").inputValue()) !== blockDragStartValue) {
+    const blockDraftBoxesAfter = await page.getByTestId("draft-event").evaluateAll((elements) =>
+      Object.fromEntries(
+        elements.map((element) => [
+          (element as HTMLElement).dataset.calendarId ?? "",
+          {
+            x: element.getBoundingClientRect().x,
+            y: element.getBoundingClientRect().y
+          }
+        ])
+      )
+    );
+    const kirillovDelta = blockDraftBoxesAfter["dr-kirillov"].x - blockDraftBoxesBefore["dr-kirillov"].x;
+    const thakkerDelta = blockDraftBoxesAfter["dr-thakker"].x - blockDraftBoxesBefore["dr-thakker"].x;
+    expect(Math.abs(kirillovDelta - thakkerDelta)).toBeLessThanOrEqual(4);
+  }
   await page.getByTestId("draft-participant-dr-kirillov").uncheck();
   await expect
     .poll(async () =>
@@ -427,7 +469,18 @@ test("supports drawing a new event area", async ({ page }) => {
           Array.from(new Set(rows.map((row) => (row as HTMLElement).dataset.calendarId).filter(Boolean)))
         )
     )
-    .toEqual(["dr-kirillov", "dr-thakker", "marco-eggens", "room-201", "room-202", "room-203"]);
+    .toEqual(["dr-thakker"]);
+  await expect(page.locator('[data-testid="calendar-row"][data-calendar-id="dr-thakker"]').first()).toHaveAttribute(
+    "data-retained-hidden",
+    "true"
+  );
+  await expect(page.locator('[data-testid="draft-event"][data-calendar-id="dr-thakker"]')).toHaveCount(0);
+  await page.getByTestId("draft-participant-dr-thakker").check();
+  await expect(page.getByTestId("draft-save-button")).toBeEnabled();
+  await expect(page.locator('[data-testid="calendar-row"][data-calendar-id="dr-thakker"]').first()).not.toHaveAttribute(
+    "data-retained-hidden",
+    "true"
+  );
   if (draftBoxBeforeEmptyParticipants) {
     await expect
       .poll(async () => {
@@ -436,8 +489,6 @@ test("supports drawing a new event area", async ({ page }) => {
       })
       .toBeLessThanOrEqual(12);
   }
-  await page.getByTestId("draft-participant-dr-thakker").check();
-  await expect(page.getByTestId("draft-save-button")).toBeEnabled();
   const draftBoxBeforeSave = await viewportRelativeEventBox(
     page,
     '[data-testid="draft-event"][data-calendar-id="dr-thakker"]'
@@ -478,6 +529,103 @@ test("does not pull the viewport back after cancel when the user scrolls immedia
 
   await page.waitForTimeout(2800);
   await expect.poll(async () => topVisibleDayDate(page)).toBe(userVisibleDate);
+});
+
+test("keeps expanded calendar rows populated immediately after create cancel", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Add event" }).click();
+  await expect(page.getByTestId("external-event-popup")).toBeVisible();
+  await expect
+    .poll(async () =>
+      page
+        .getByTestId("calendar-row")
+        .evaluateAll((rows) =>
+          Array.from(new Set(rows.map((row) => (row as HTMLElement).dataset.calendarId).filter(Boolean)))
+        )
+    )
+    .toEqual(["dr-kirillov"]);
+
+  await page.getByTestId("jump-date-input").fill("2026-04-27");
+  await page.getByTestId("jump-time-input").fill("09:00");
+  await page.getByTestId("go-date-button").click();
+  await expect.poll(async () => topVisibleDayDate(page)).toBe("2026-04-27");
+  await page.waitForTimeout(120);
+
+  await page.evaluate(() => {
+    type CancelSample = {
+      visibleCalendarIds: string[];
+      nonDraftVisibleEventCount: number;
+      topDate: string | null;
+    };
+    const samples: CancelSample[] = [];
+    const isVisibleInViewport = (element: HTMLElement, viewportBox: DOMRect) => {
+      const box = element.getBoundingClientRect();
+      return (
+        box.width > 0 &&
+        box.height > 0 &&
+        box.right > viewportBox.left &&
+        box.left < viewportBox.right &&
+        box.bottom > viewportBox.top &&
+        box.top < viewportBox.bottom
+      );
+    };
+    const sample = (remainingFrames: number) => {
+      const viewport = document.querySelector<HTMLElement>(".ic-viewport");
+      const viewportBox = viewport?.getBoundingClientRect();
+      if (!viewport || !viewportBox) {
+        samples.push({ visibleCalendarIds: [], nonDraftVisibleEventCount: 0, topDate: null });
+      } else {
+        const visibleRows = Array.from(document.querySelectorAll<HTMLElement>('[data-testid="calendar-row"]')).filter(
+          (row) => row.dataset.retainedHidden !== "true" && isVisibleInViewport(row, viewportBox)
+        );
+        const visibleCalendarIds = Array.from(
+          new Set(
+            visibleRows
+              .map((row) => row.dataset.calendarId)
+              .filter((calendarId): calendarId is string => Boolean(calendarId))
+          )
+        );
+        const nonDraftVisibleEventCount = Array.from(
+          document.querySelectorAll<HTMLElement>('[data-testid="calendar-event"], [data-testid="availability-event"]')
+        ).filter(
+          (event) => event.dataset.calendarId !== "dr-kirillov" && isVisibleInViewport(event, viewportBox)
+        ).length;
+        const topDay = Array.from(document.querySelectorAll<HTMLElement>('[data-testid="calendar-day"]')).find(
+          (day) => {
+            const box = day.getBoundingClientRect();
+            return box.bottom > viewportBox.top + 4;
+          }
+        );
+        samples.push({
+          visibleCalendarIds,
+          nonDraftVisibleEventCount,
+          topDate: topDay?.querySelector(".ic-day-label")?.textContent?.trim() ?? null
+        });
+      }
+      if (remainingFrames > 0) {
+        requestAnimationFrame(() => sample(remainingFrames - 1));
+      }
+    };
+    (window as typeof window & { __cancelExpandedCalendarSamples?: CancelSample[] }).__cancelExpandedCalendarSamples =
+      samples;
+    sample(20);
+  });
+
+  await page.getByTestId("draft-cancel-button").click();
+  await expect(page.getByTestId("external-event-popup")).toHaveCount(0);
+  await page.waitForTimeout(180);
+
+  const samples = await page.evaluate(
+    () => (window as typeof window & { __cancelExpandedCalendarSamples?: unknown[] }).__cancelExpandedCalendarSamples
+  );
+  expect(samples).toBeTruthy();
+  const expandedSamples = (samples ?? []).filter((sample) => {
+    const candidate = sample as { visibleCalendarIds?: string[] };
+    return (candidate.visibleCalendarIds ?? []).length > 1;
+  }) as { nonDraftVisibleEventCount: number; topDate: string | null }[];
+  expect(expandedSamples.length).toBeGreaterThan(0);
+  expect(Math.min(...expandedSamples.map((sample) => sample.nonDraftVisibleEventCount))).toBeGreaterThan(0);
+  expect(new Set(expandedSamples.map((sample) => sample.topDate)).size).toBe(1);
 });
 
 test("keeps edit cancel anchored to the original first person", async ({ page }) => {

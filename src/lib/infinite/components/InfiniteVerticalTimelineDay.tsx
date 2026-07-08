@@ -28,6 +28,7 @@ type VerticalTimelineDayProps = {
   labelWidth: number;
   settings: TimelineSettings;
   selectedCalendars: CalendarRow[];
+  hiddenCalendarIds: Set<CalendarId>;
   timeTicks: ReturnType<typeof buildTimeTicks>;
   todayKey: string;
   showNowLine: boolean;
@@ -84,6 +85,7 @@ export function VerticalTimelineDay({
   labelWidth,
   settings,
   selectedCalendars,
+  hiddenCalendarIds,
   timeTicks,
   todayKey,
   showNowLine,
@@ -143,7 +145,16 @@ export function VerticalTimelineDay({
           }}
         >
           {selectedCalendars.map((calendar) => (
-            <div className="icv-calendar-header-cell" key={calendar.id}>
+            <div
+              className="icv-calendar-header-cell"
+              data-retained-hidden={hiddenCalendarIds.has(calendar.id) ? "true" : undefined}
+              aria-hidden={hiddenCalendarIds.has(calendar.id) || undefined}
+              style={{
+                visibility: hiddenCalendarIds.has(calendar.id) ? "hidden" : undefined,
+                pointerEvents: hiddenCalendarIds.has(calendar.id) ? "none" : undefined
+              }}
+              key={calendar.id}
+            >
               {calendar.name}
             </div>
           ))}
@@ -188,33 +199,37 @@ export function VerticalTimelineDay({
             style={{ top: verticalMinuteToY(nowMinute, settings) }}
           />
         ) : null}
-        {selectedCalendars.map((calendar) => (
-          <VerticalCalendarColumn
-            calendar={calendar}
-            dateKey={dateKey}
-            rowEvents={eventsForColumn(dateKey, calendar.id)}
-            settings={settings}
-            boardHeight={boardHeight}
-            gridCellHeight={cadenceHeight}
-            interactionMode={interactionMode}
-            hoveredEvent={hoveredEvent}
-            dragEventId={dragEventId}
-            dragPreviewEvent={dragPreviewEvent}
-            draftEvent={draftEvent}
-            draftEventStatus={draftEventStatus}
-            draftEventIsDraggable={draftEventIsDraggable}
-            eventRenderer={eventRenderer}
-            onHoverMove={onHoverMove}
-            onHoverLeave={onHoverLeave}
-            onPointerMove={onPointerMove}
-            onMouseMove={onMouseMove}
-            onPointerUp={onPointerUp}
-            onEventPointerDown={onEventPointerDown}
-            onEventMouseDown={onEventMouseDown}
-            onEventClick={onEventClick}
-            key={calendar.id}
-          />
-        ))}
+        {selectedCalendars.map((calendar) => {
+          const isHidden = hiddenCalendarIds.has(calendar.id);
+          return (
+            <VerticalCalendarColumn
+              calendar={calendar}
+              dateKey={dateKey}
+              rowEvents={isHidden ? [] : eventsForColumn(dateKey, calendar.id)}
+              isHidden={isHidden}
+              settings={settings}
+              boardHeight={boardHeight}
+              gridCellHeight={cadenceHeight}
+              interactionMode={interactionMode}
+              hoveredEvent={hoveredEvent}
+              dragEventId={dragEventId}
+              dragPreviewEvent={isHidden ? null : dragPreviewEvent}
+              draftEvent={isHidden ? null : draftEvent}
+              draftEventStatus={draftEventStatus}
+              draftEventIsDraggable={draftEventIsDraggable}
+              eventRenderer={eventRenderer}
+              onHoverMove={onHoverMove}
+              onHoverLeave={onHoverLeave}
+              onPointerMove={onPointerMove}
+              onMouseMove={onMouseMove}
+              onPointerUp={onPointerUp}
+              onEventPointerDown={onEventPointerDown}
+              onEventMouseDown={onEventMouseDown}
+              onEventClick={onEventClick}
+              key={calendar.id}
+            />
+          );
+        })}
       </div>
     </div>
   );
@@ -224,6 +239,7 @@ type VerticalCalendarColumnProps = {
   calendar: CalendarRow;
   dateKey: string;
   rowEvents: CalendarEvent[];
+  isHidden?: boolean;
   settings: TimelineSettings;
   boardHeight: number;
   gridCellHeight: number;
@@ -261,6 +277,7 @@ function VerticalCalendarColumn({
   calendar,
   dateKey,
   rowEvents,
+  isHidden = false,
   settings,
   boardHeight,
   gridCellHeight,
@@ -297,7 +314,9 @@ function VerticalCalendarColumn({
       className="icv-calendar-column-grid"
       data-testid="calendar-column"
       data-calendar-id={calendar.id}
+      data-retained-hidden={isHidden ? "true" : undefined}
       data-event-count={rowEvents.length}
+      aria-hidden={isHidden || undefined}
       onMouseMove={(mouseEvent) => onHoverMove(mouseEvent, positionedLayoutItems, calendar.id)}
       onMouseLeave={onHoverLeave}
       onPointerMove={(pointerEvent) => {
@@ -306,6 +325,8 @@ function VerticalCalendarColumn({
       }}
       style={{
         minHeight: boardHeight,
+        visibility: isHidden ? "hidden" : undefined,
+        pointerEvents: isHidden ? "none" : undefined,
         backgroundImage: "linear-gradient(to bottom, var(--ic-cell-border) 1px, transparent 1px)",
         backgroundRepeat: "repeat",
         backgroundSize: `100% ${gridCellHeight}px`,

@@ -121,3 +121,35 @@ test("does not duplicate committed events or grow a two-overlap row when drawing
     )
     .toEqual({ rowHeight: 50, duplicateCommittedIds: 0 });
 });
+
+test("renders the external popup above the current-time marker", async ({ page }) => {
+  await page.goto("/");
+  await page.getByTestId("today-button").click();
+  await page.getByRole("button", { name: "Add event" }).click();
+  await expect(page.getByTestId("external-event-popup")).toBeVisible();
+
+  const layering = await page.evaluate(() => {
+    const popup = document.querySelector<HTMLElement>('[data-testid="external-event-popup"]');
+    const marker =
+      document.querySelector<HTMLElement>(".ic-now-line.is-current") ??
+      document.querySelector<HTMLElement>(".ic-now-header-line") ??
+      document.querySelector<HTMLElement>(".ic-now-pin");
+    if (!popup || !marker) {
+      return null;
+    }
+    const popupBox = popup.getBoundingClientRect();
+    const markerBox = marker.getBoundingClientRect();
+    const x = Math.min(Math.max(markerBox.left + markerBox.width / 2, popupBox.left + 4), popupBox.right - 4);
+    const y = Math.min(Math.max(popupBox.top + 28, markerBox.top + markerBox.height / 2), popupBox.bottom - 4);
+    return {
+      popupZ: Number(window.getComputedStyle(popup).zIndex),
+      markerZ: Number(window.getComputedStyle(marker).zIndex),
+      topElementIsPopup: Boolean(document.elementFromPoint(x, y)?.closest('[data-testid="external-event-popup"]'))
+    };
+  });
+
+  expect(layering).not.toBeNull();
+  if (!layering) return;
+  expect(layering.popupZ).toBeGreaterThan(layering.markerZ);
+  expect(layering.topElementIsPopup).toBe(true);
+});

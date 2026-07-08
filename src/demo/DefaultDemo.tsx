@@ -184,9 +184,16 @@ export function DefaultDemo({ routes }: DefaultDemoProps) {
     () => demoCalendars.slice(0, calendarCount).map((calendar) => calendar.id),
     [calendarCount]
   );
+  const selectedCalendarIdsRef = useRef(selectedCalendarIds);
+  const isExternalDraftOpenRef = useRef(false);
+
+  useEffect(() => {
+    selectedCalendarIdsRef.current = selectedCalendarIds;
+  }, [selectedCalendarIds]);
 
   const loadEvents = useCallback((args: Parameters<ReturnType<typeof createRangeLoader>>[0]) => {
-    return createRangeLoader(eventsRef.current)(args);
+    const calendarIds = isExternalDraftOpenRef.current ? selectedCalendarIdsRef.current : args.calendarIds;
+    return createRangeLoader(eventsRef.current)({ ...args, calendarIds });
   }, []);
 
   const commitEvents = useCallback((updater: SetStateAction<CalendarEvent[]>) => {
@@ -196,6 +203,14 @@ export function DefaultDemo({ routes }: DefaultDemoProps) {
       return next;
     });
     setEventVersion((current) => current + 1);
+  }, []);
+
+  const updateEventsWithoutRangeInvalidation = useCallback((updater: SetStateAction<CalendarEvent[]>) => {
+    setEvents((current) => {
+      const next = typeof updater === "function" ? updater(current) : updater;
+      eventsRef.current = next;
+      return next;
+    });
   }, []);
 
   const calendarSettings = useMemo(
@@ -240,6 +255,7 @@ export function DefaultDemo({ routes }: DefaultDemoProps) {
     setEvents: commitEvents,
     setMessage
   });
+  isExternalDraftOpenRef.current = Boolean(activeDraft);
 
   const handleScaleChange = (nextScale: number) => {
     const nextEvents = createDemoEvents(nextScale);
@@ -310,13 +326,13 @@ export function DefaultDemo({ routes }: DefaultDemoProps) {
         setMessage("Move rejected by parent validation");
         return false;
       }
-      commitEvents((current) => applyMove(current, request));
+      updateEventsWithoutRangeInvalidation((current) => applyMove(current, request));
       setMessage(
         request.event.kind === "availability" ? "Availability move accepted" : "Move accepted by parent validation"
       );
       return true;
     },
-    [commitEvents]
+    [updateEventsWithoutRangeInvalidation]
   );
 
   const handleCreate = useCallback(

@@ -71,7 +71,6 @@ export function useExternalEventDrafts({
   setMessage
 }: UseExternalEventDraftsArgs) {
   const [activeDraft, setActiveDraft] = useState<ActiveEventDraft | null>(null);
-  const [activeDraftBaseCalendarIds, setActiveDraftBaseCalendarIds] = useState<CalendarId[]>([]);
   const [draftParticipantsChanged, setDraftParticipantsChanged] = useState(false);
   const draftSequenceRef = useRef(0);
   const activeDraftLastSeenSnapshotRef = useRef<DraftScreenSnapshot | null>(null);
@@ -89,12 +88,8 @@ export function useExternalEventDrafts({
     if (!shouldFilterCalendars) {
       return selectedCalendarIds;
     }
-    return activeDraftParticipants.length > 0
-      ? activeDraftParticipants
-      : activeDraftBaseCalendarIds.length > 0
-        ? activeDraftBaseCalendarIds
-        : selectedCalendarIds;
-  }, [activeDraft, activeDraftBaseCalendarIds, activeDraftParticipants, draftParticipantsChanged, selectedCalendarIds]);
+    return activeDraftParticipants;
+  }, [activeDraft, activeDraftParticipants, draftParticipantsChanged, selectedCalendarIds]);
   const canSaveActiveDraft = !activeDraft || activeDraftParticipants.length > 0;
 
   useDraftRestoreCancellation(activeDraft, restoreTokenRef, expectedProgrammaticScrollRef);
@@ -327,7 +322,6 @@ export function useExternalEventDrafts({
 
   const clearActiveDraft = useCallback(() => {
     setActiveDraft(null);
-    setActiveDraftBaseCalendarIds([]);
     setDraftParticipantsChanged(false);
     activeDraftLastSeenSnapshotRef.current = null;
     activeEditSourceEventRef.current = null;
@@ -350,7 +344,6 @@ export function useExternalEventDrafts({
         activeEditSourceEventRef.current = null;
         activeDraftLastSeenSnapshotRef.current = drawnDraftSnapshot;
         flushSync(() => {
-          setActiveDraftBaseCalendarIds(selectedCalendarIds);
           setDraftParticipantsChanged(false);
           setActiveDraft({ mode: "create", event: nextEvent });
         });
@@ -365,13 +358,12 @@ export function useExternalEventDrafts({
       } else {
         activeEditSourceEventRef.current = null;
         activeDraftLastSeenSnapshotRef.current = null;
-        setActiveDraftBaseCalendarIds(selectedCalendarIds);
         setDraftParticipantsChanged(false);
         setActiveDraft({ mode: "create", event: nextEvent });
       }
       setMessage(source === "button" ? "External create popup opened" : "Drawn range delegated to external popup");
     },
-    [findEventTargetBox, findRenderedDraftBox, restoreDraftScreenPositionNow, selectedCalendarIds, setMessage]
+    [findEventTargetBox, findRenderedDraftBox, restoreDraftScreenPositionNow, setMessage]
   );
 
   const handleActivate = useCallback(
@@ -387,7 +379,6 @@ export function useExternalEventDrafts({
         event: draftEvent,
         targetCalendarId: firstPersonParticipantId(eventParticipantIds(draftEvent)) ?? draftEvent.calendarId
       });
-      setActiveDraftBaseCalendarIds(selectedCalendarIds);
       setDraftParticipantsChanged(false);
       setActiveDraft({
         mode: "edit",
@@ -396,7 +387,7 @@ export function useExternalEventDrafts({
       });
       setMessage(`Editing ${request.event.title} in external popup`);
     },
-    [findEventTargetBox, selectedCalendarIds, setMessage]
+    [findEventTargetBox, setMessage]
   );
 
   const handleActiveDraftMove = useCallback((request: EventMoveRequest) => {

@@ -30,6 +30,10 @@ flowchart TD
 
 The view requests missing visible dates through `loadEvents({ startDate, endDate, calendarIds })`. Loaded buckets are cached by date and can be invalidated with `eventVersion`.
 
+Changing selected calendar ids invalidates in-flight range requests and schedules a refetch, but it does not immediately clear the rendered event cache. The previous cache bridges the filter change so rows do not blank for a frame while the new request resolves; dataset or loader identity changes still clear the cache.
+
+The default demo keeps the package contract unchanged but widens its own range-loader requests to the full selected calendar set while an external create/edit draft filters visible rows. This keeps hidden participant rows warm in the loaded cache so cancelling the popup can expand rows with content already available.
+
 The calendar renders event geometry, but product-specific card content belongs in `eventRenderer`. The renderer receives event data, status, lane metadata, overlap metadata, and a `style` object for full-size card layout.
 
 ## Module Boundaries
@@ -52,12 +56,16 @@ Both orientations share this date window. Horizontal mode measures variable day 
 
 Pointer hit-testing is limited to timeline grid space, not sticky labels or headers. Shared interaction coordination delegates to focused drag and draft lifecycle hooks:
 
-- Drag/drop previews call `onEventMoveRequest` and update the visible cache only after acceptance.
+- Drag/drop previews call `onEventMoveRequest` and update the visible cache only after acceptance. Parent demos also update their source event arrays without bumping `eventVersion`, because a move proposal already contains enough information for the calendar to patch loaded visible buckets without a full range reload.
 - Drawn ranges call `onEventDraftRequest` for parent-owned create flows, or `onEventCreateRequest` for immediate create flows.
 - Click activation calls `onEventActivate`.
 - Controlled active drafts use `activeDraft` plus `onActiveDraftMoveRequest`.
 
 Multi-calendar events render once per matching selected calendar. Hover focus is local to the rendered row or column instance; drag and drop-preview status is keyed by event id across all visible instances.
+
+When active-draft participant filtering temporarily removes every selected calendar, the view keeps the last non-empty draft layout mounted as hidden, inert placeholder rows or columns. The selected ids remain empty for event loading and hit-testing, but the placeholders preserve draft geometry until a participant is selected again or the draft closes.
+
+`Shift` + wheel zoom uses a native capture listener so zoom gestures do not scroll the calendar or page. Each gesture burst chooses one focused time-grid node and reuses it for subsequent wheel ticks, then captures a brief non-extending tail of follow-up wheel events after the Shift key is released so immediate trackpad momentum does not become calendar scroll.
 
 ## Styling
 
