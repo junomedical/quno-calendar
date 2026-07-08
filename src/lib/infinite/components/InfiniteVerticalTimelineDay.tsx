@@ -1,7 +1,14 @@
 import { format, parseISO } from "date-fns";
 import { useMemo, type MouseEvent as ReactMouseEvent, type PointerEvent as ReactPointerEvent } from "react";
 import { eventBelongsToCalendar } from "../../data/calendarEvents";
-import type { CalendarEvent, CalendarId, CalendarRow, EventRenderStatus, EventRenderer, TimelineSettings } from "../../core/types";
+import type {
+  CalendarEvent,
+  CalendarId,
+  CalendarRow,
+  EventRenderStatus,
+  EventRenderer,
+  TimelineSettings
+} from "../../core/types";
 import { layoutEventsForColumn, type EventColumnLayoutItem } from "../../layout/layout";
 import { minuteToY, minutesSinceStartOfDay } from "../../time/time";
 import { EventShell } from "./EventShell";
@@ -313,7 +320,8 @@ function VerticalCalendarColumn({
         const top = verticalMinuteToY(minutesSinceStartOfDay(event.start), settings);
         const height = Math.max(
           12,
-          minuteToY(minutesSinceStartOfDay(event.end), settings) - minuteToY(minutesSinceStartOfDay(event.start), settings)
+          minuteToY(minutesSinceStartOfDay(event.end), settings) -
+            minuteToY(minutesSinceStartOfDay(event.start), settings)
         );
 
         return (
@@ -347,7 +355,8 @@ function VerticalCalendarColumn({
       })}
       {positionedLayoutItems.map((item) => {
         const isDraggingOriginal = dragEventId === item.event.id;
-        const isHovered = !dragEventId && hoveredEvent?.eventId === item.event.id && hoveredEvent.calendarId === calendar.id;
+        const isHovered =
+          !dragEventId && hoveredEvent?.eventId === item.event.id && hoveredEvent.calendarId === calendar.id;
         const status = isDraggingOriginal ? "dragging" : isHovered ? "hovered" : "existing";
         const left = isHovered ? "0%" : `calc(${item.leftPercent}% + ${VERTICAL_COLUMN_GAP_PX}px)`;
         const width = isHovered ? "100%" : `calc(${item.widthPercent}% - ${VERTICAL_COLUMN_GAP_PX * 2}px)`;
@@ -400,7 +409,9 @@ function VerticalCalendarColumn({
           isOverlapping={false}
           testId="draft-event"
           renderedCalendarId={calendar.id}
-          className={draftEventIsDraggable ? "icv-event-shell ic-draft-shell is-draggable" : "icv-event-shell ic-draft-shell"}
+          className={
+            draftEventIsDraggable ? "icv-event-shell ic-draft-shell is-draggable" : "icv-event-shell ic-draft-shell"
+          }
           key={`draft-${draftEvent.id}-${calendar.id}`}
           eventRenderer={eventRenderer}
           disableDrag={!draftEventIsDraggable}

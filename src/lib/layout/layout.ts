@@ -49,7 +49,13 @@ export function laneCountForEvents(
   events: CalendarEvent[],
   settings: Pick<TimelineSettings, "startHour" | "endHour" | "zoom" | "rowHeight">
 ): number {
-  return Math.max(1, ...layoutEventsForRow(events.filter((event) => event.kind !== "availability"), settings).map((item) => item.laneCount));
+  return Math.max(
+    1,
+    ...layoutEventsForRow(
+      events.filter((event) => event.kind !== "availability"),
+      settings
+    ).map((item) => item.laneCount)
+  );
 }
 
 /** Computes a row height from event overlap depth. */
@@ -166,7 +172,10 @@ export function verticalLaneCountForEvents(
 ): number {
   return Math.max(
     1,
-    ...layoutEventsForColumn(events.filter((event) => event.kind !== "availability"), settings).map((item) => item.laneCount)
+    ...layoutEventsForColumn(
+      events.filter((event) => event.kind !== "availability"),
+      settings
+    ).map((item) => item.laneCount)
   );
 }
 
@@ -175,10 +184,18 @@ export function columnWidthForEvents(
   events: CalendarEvent[],
   settings: Pick<
     TimelineSettings,
-    "startHour" | "endHour" | "zoom" | "verticalColumnMinWidth" | "verticalColumnOverlapCapacity" | "verticalColumnOverlapGrowth"
+    | "startHour"
+    | "endHour"
+    | "zoom"
+    | "verticalColumnMinWidth"
+    | "verticalColumnOverlapCapacity"
+    | "verticalColumnOverlapGrowth"
   >
 ): number {
-  const extraLaneCount = Math.max(0, verticalLaneCountForEvents(events, settings) - settings.verticalColumnOverlapCapacity);
+  const extraLaneCount = Math.max(
+    0,
+    verticalLaneCountForEvents(events, settings) - settings.verticalColumnOverlapCapacity
+  );
   return settings.verticalColumnMinWidth + extraLaneCount * settings.verticalColumnOverlapGrowth;
 }
 

@@ -3,11 +3,11 @@ export type DraftScreenSnapshot = {
   left: number;
 };
 
-export function findRenderedDraftBox(eventId?: string): DraftScreenSnapshot | null {
+export function findRenderedDraftBox(eventId?: string, calendarId?: string): DraftScreenSnapshot | null {
   const viewport = document.querySelector<HTMLElement>(".ic-viewport");
   const draftElement = eventId
     ? Array.from(document.querySelectorAll<HTMLElement>('[data-testid="draft-event"]')).find(
-        (element) => element.dataset.eventId === eventId
+        (element) => element.dataset.eventId === eventId && (!calendarId || element.dataset.calendarId === calendarId)
       )
     : document.querySelector<HTMLElement>('[data-testid="draft-event"]');
   if (!viewport || !draftElement) {
@@ -21,11 +21,11 @@ export function findRenderedDraftBox(eventId?: string): DraftScreenSnapshot | nu
   };
 }
 
-export function findVisibleRenderedDraftBox(eventId?: string): DraftScreenSnapshot | null {
+export function findVisibleRenderedDraftBox(eventId?: string, calendarId?: string): DraftScreenSnapshot | null {
   const viewport = document.querySelector<HTMLElement>(".ic-viewport");
   const draftElements = eventId
     ? Array.from(document.querySelectorAll<HTMLElement>('[data-testid="draft-event"]')).filter(
-        (element) => element.dataset.eventId === eventId
+        (element) => element.dataset.eventId === eventId && (!calendarId || element.dataset.calendarId === calendarId)
       )
     : Array.from(document.querySelectorAll<HTMLElement>('[data-testid="draft-event"]'));
   if (!viewport || draftElements.length === 0) {

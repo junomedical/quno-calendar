@@ -1,13 +1,11 @@
 import {
   useCallback,
   useEffect,
-  useRef,
   useState,
   type MouseEvent as ReactMouseEvent,
   type PointerEvent as ReactPointerEvent
 } from "react";
-import { eventCalendarIds, replaceEventCalendarMembership } from "../../data/calendarEvents";
-import { buildDraftEvent, buildMoveProposal, type CalendarHit } from "../../interaction/interactions";
+import { type CalendarHit } from "../../interaction/interactions";
 import { minutesSinceStartOfDay } from "../../time/time";
 import {
   type ActiveEventDraft,
@@ -18,24 +16,12 @@ import {
   type EventMoveRequest,
   type TimelineSettings
 } from "../../core/types";
-import { sameMoveRequest } from "../utils/infiniteTimelineUtils";
+import { useTimelineDragInteraction } from "./useTimelineDragInteraction";
+import { useTimelineDraftInteraction } from "./useTimelineDraftInteraction";
 
 export type HoveredTimelineEvent = { eventId: string; calendarId: CalendarId } | null;
 
 type PointerLike = Pick<PointerEvent | MouseEvent | ReactPointerEvent | ReactMouseEvent, "clientX" | "clientY">;
-
-type DragState = {
-  event: CalendarEvent;
-  sourceCalendarId: CalendarId;
-  offsetMinutes: number;
-  preview: EventMoveRequest | null;
-};
-
-type DraftState = {
-  start: CalendarHit;
-  current: CalendarHit;
-  event: CalendarEvent;
-};
 
 type UseTimelineInteractionsArgs = {
   activeDraft?: ActiveEventDraft | null;
@@ -67,15 +53,27 @@ export function useTimelineInteractions({
   applyCreatedEventToLoadedEvents
 }: UseTimelineInteractionsArgs) {
   const [hoveredEvent, setHoveredEvent] = useState<HoveredTimelineEvent>(null);
-  const [dragState, setDragState] = useState<DragState | null>(null);
-  const [draftState, setDraftState] = useState<DraftState | null>(null);
-  const createdEventSequenceRef = useRef(0);
-  const pendingDraftClearFrameRef = useRef<number | null>(null);
-
   const isActiveDraftEvent = useCallback(
     (event: CalendarEvent) => Boolean(activeDraft && event.id === activeDraft.event.id),
     [activeDraft]
   );
+  const { dragState, draggingActiveDraft, dragPreviewEvent, startDrag, updateDragFromPoint, finishDrag } =
+    useTimelineDragInteraction({
+      settings,
+      getHit,
+      isActiveDraftEvent,
+      onEventMoveRequest,
+      onEventActivate,
+      onActiveDraftMoveRequest,
+      applyMoveToLoadedEvents
+    });
+  const { draftState, startDraft, updateDraftFromPoint, finishDraft } = useTimelineDraftInteraction({
+    interactionMode,
+    getHit,
+    onEventCreateRequest,
+    onEventDraftRequest,
+    applyCreatedEventToLoadedEvents
+  });
 
   const handleGridPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (activeDraft || (event.target as HTMLElement).closest("[data-event-id]") || !isTimelinePoint(event)) {
@@ -87,12 +85,18 @@ export function useTimelineInteractions({
     }
     event.preventDefault();
     event.currentTarget.setPointerCapture(event.pointerId);
-    setDraftState({ start: hit, current: hit, event: buildDraftEvent(hit, hit, interactionMode === "availability" ? "availability" : "draft") });
+    startDraft(hit);
     setHoveredEvent(null);
   };
 
   const handleGridMouseDown = (event: ReactMouseEvent<HTMLDivElement>) => {
-    if (activeDraft || (event.target as HTMLElement).closest("[data-event-id]") || dragState || draftState || !isTimelinePoint(event)) {
+    if (
+      activeDraft ||
+      (event.target as HTMLElement).closest("[data-event-id]") ||
+      dragState ||
+      draftState ||
+      !isTimelinePoint(event)
+    ) {
       return;
     }
     const hit = getHit(event);
@@ -100,7 +104,7 @@ export function useTimelineInteractions({
       return;
     }
     event.preventDefault();
-    setDraftState({ start: hit, current: hit, event: buildDraftEvent(hit, hit, interactionMode === "availability" ? "availability" : "draft") });
+    startDraft(hit);
     setHoveredEvent(null);
   };
 
@@ -120,12 +124,7 @@ export function useTimelineInteractions({
     pointerEvent.currentTarget.setPointerCapture(pointerEvent.pointerId);
     const hit = getHit(pointerEvent);
     const pointerMinute = hit?.minute ?? minutesSinceStartOfDay(event.start);
-    setDragState({
-      event,
-      sourceCalendarId: renderedCalendarId,
-      offsetMinutes: pointerMinute - minutesSinceStartOfDay(event.start),
-      preview: null
-    });
+    startDrag(event, renderedCalendarId, pointerMinute - minutesSinceStartOfDay(event.start));
     setHoveredEvent(null);
   };
 
@@ -144,139 +143,34 @@ export function useTimelineInteractions({
     mouseEvent.preventDefault();
     const hit = getHit(mouseEvent);
     const pointerMinute = hit?.minute ?? minutesSinceStartOfDay(event.start);
-    setDragState({
-      event,
-      sourceCalendarId: renderedCalendarId,
-      offsetMinutes: pointerMinute - minutesSinceStartOfDay(event.start),
-      preview: null
-    });
+    startDrag(event, renderedCalendarId, pointerMinute - minutesSinceStartOfDay(event.start));
     setHoveredEvent(null);
   };
 
   const updateInteractionFromPoint = useCallback(
     (event: PointerLike) => {
-      if (dragState) {
-        const hit = getHit(event);
-        if (!hit) {
-          return;
-        }
-        const baseProposal = buildMoveProposal(dragState.event, hit, dragState.offsetMinutes, settings);
-        const draggingActiveDraft = isActiveDraftEvent(dragState.event);
-        const currentCalendarIds = eventCalendarIds(dragState.event);
-        const proposal: EventMoveRequest = {
-          ...baseProposal,
-          proposedCalendarId: draggingActiveDraft && currentCalendarIds.length > 1 ? dragState.event.calendarId : baseProposal.proposedCalendarId,
-          sourceCalendarId: dragState.sourceCalendarId,
-          proposedCalendarIds:
-            draggingActiveDraft && currentCalendarIds.length > 1
-              ? currentCalendarIds
-              : replaceEventCalendarMembership(dragState.event, dragState.sourceCalendarId, baseProposal.proposedCalendarId)
-        };
-        if (draggingActiveDraft && !sameMoveRequest(proposal, dragState.preview)) {
-          onActiveDraftMoveRequest?.(proposal);
-        }
-        setDragState((current) => {
-          if (!current || sameMoveRequest(proposal, current.preview)) {
-            return current;
-          }
-          return { ...current, preview: proposal };
-        });
+      if (updateDragFromPoint(event)) {
         return;
       }
 
-      if (draftState) {
-        const hit = getHit(event);
-        if (!hit || hit.dateKey !== draftState.start.dateKey || hit.calendarId !== draftState.start.calendarId) {
-          return;
-        }
-        setDraftState({
-          start: draftState.start,
-          current: hit,
-          event: buildDraftEvent(draftState.start, hit, interactionMode === "availability" ? "availability" : "draft")
-        });
-      }
+      updateDraftFromPoint(event);
     },
-    [draftState, dragState, getHit, interactionMode, isActiveDraftEvent, onActiveDraftMoveRequest, settings]
+    [updateDraftFromPoint, updateDragFromPoint]
   );
 
   const finishInteraction = useCallback(async () => {
-    if (dragState) {
-      const proposal = dragState.preview;
-      if (isActiveDraftEvent(dragState.event)) {
-        setDragState(null);
-        return;
-      }
-      if (proposal && onEventMoveRequest) {
-        const accepted = await onEventMoveRequest(proposal);
-        if (accepted !== false) {
-          applyMoveToLoadedEvents(proposal);
-        }
-      } else if (!proposal && onEventActivate) {
-        onEventActivate({ event: dragState.event, renderedCalendarId: dragState.sourceCalendarId });
-      }
-      setDragState(null);
+    if (await finishDrag()) {
       return;
     }
 
-    if (draftState) {
-      if (pendingDraftClearFrameRef.current !== null) {
-        return;
-      }
-      const draft = draftState.event;
-      if (minutesSinceStartOfDay(draft.end) > minutesSinceStartOfDay(draft.start)) {
-        const request = {
-          start: draft.start,
-          end: draft.end,
-          calendarId: draft.calendarId,
-          kind: draft.kind
-        };
-        if (onEventDraftRequest) {
-          onEventDraftRequest(request);
-          pendingDraftClearFrameRef.current = window.requestAnimationFrame(() => {
-            pendingDraftClearFrameRef.current = null;
-            setDraftState(null);
-          });
-        } else if (onEventCreateRequest) {
-          setDraftState(null);
-          const createdEvent = await onEventCreateRequest(request);
-          createdEventSequenceRef.current += 1;
-          applyCreatedEventToLoadedEvents(
-            createdEvent ?? {
-              ...draft,
-              id: `created-local-${createdEventSequenceRef.current}`,
-              subtitle: "Created from drawn area"
-            }
-          );
-        }
-      } else {
-        setDraftState(null);
-      }
-    }
-  }, [
-    applyCreatedEventToLoadedEvents,
-    applyMoveToLoadedEvents,
-    draftState,
-    dragState,
-    onEventActivate,
-    onEventCreateRequest,
-    onEventDraftRequest,
-    isActiveDraftEvent,
-    onEventMoveRequest
-  ]);
+    await finishDraft();
+  }, [finishDraft, finishDrag]);
 
   const handlePointerMove = (event: ReactPointerEvent<HTMLDivElement>) => updateInteractionFromPoint(event);
   const handleMouseMove = (event: ReactMouseEvent<HTMLDivElement>) => updateInteractionFromPoint(event);
   const handlePointerUp = () => {
     void finishInteraction();
   };
-
-  useEffect(() => {
-    return () => {
-      if (pendingDraftClearFrameRef.current !== null) {
-        window.cancelAnimationFrame(pendingDraftClearFrameRef.current);
-      }
-    };
-  }, []);
 
   useEffect(() => {
     if (!dragState && !draftState) {
@@ -322,17 +216,11 @@ export function useTimelineInteractions({
     };
   }, [draftState, dragState]);
 
-  const draggingActiveDraft = Boolean(dragState && isActiveDraftEvent(dragState.event));
-  const dragPreviewEvent = dragState?.preview && !draggingActiveDraft
-    ? {
-        ...dragState.event,
-        calendarId: dragState.preview.proposedCalendarId,
-        calendarIds: dragState.preview.proposedCalendarIds,
-        start: dragState.preview.proposedStart,
-        end: dragState.preview.proposedEnd
-      }
-    : null;
-  const renderedDraftStatus: EventRenderStatus = draggingActiveDraft ? "dragging" : activeDraft?.mode === "edit" ? "existing" : "new";
+  const renderedDraftStatus: EventRenderStatus = draggingActiveDraft
+    ? "dragging"
+    : activeDraft?.mode === "edit"
+      ? "existing"
+      : "new";
 
   return {
     hoveredEvent,

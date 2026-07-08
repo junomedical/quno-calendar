@@ -1,6 +1,27 @@
 export { CalendarRoot } from "./core/CalendarRoot";
-export { InfiniteTimelineView } from "./infinite/InfiniteTimelineView";
-export { InfiniteVerticalTimelineView } from "./infinite/InfiniteVerticalTimelineView";
-export * from "./data/calendarEvents";
-export * from "./data/activeDrafts";
-export * from "./core/types";
+export {
+  applyEventMove,
+  eventBelongsToCalendar,
+  eventCalendarIds,
+  replaceEventCalendarMembership
+} from "./data/calendarEvents";
+export {
+  defaultTimelineSettings,
+  type ActiveEventDraft,
+  type CalendarEvent,
+  type CalendarId,
+  type CalendarNavigationHandle,
+  type CalendarRootProps,
+  type CalendarRow,
+  type CalendarViewComponentProps,
+  type EventActivateRequest,
+  type EventCreateRequest,
+  type EventId,
+  type EventMoveRequest,
+  type EventRenderer,
+  type EventRendererProps,
+  type EventRenderStatus,
+  type LoadEvents,
+  type LoadEventsArgs,
+  type TimelineSettings
+} from "./core/types";

@@ -9,7 +9,10 @@ export function activeDraftSourceEventId(activeDraft: ActiveEventDraft | null | 
 }
 
 /** Checks whether a loaded event should be hidden while an edit draft is active. */
-export function isActiveDraftSourceEvent(event: CalendarEvent, activeDraft: ActiveEventDraft | null | undefined): boolean {
+export function isActiveDraftSourceEvent(
+  event: CalendarEvent,
+  activeDraft: ActiveEventDraft | null | undefined
+): boolean {
   return event.id === activeDraftSourceEventId(activeDraft);
 }
 

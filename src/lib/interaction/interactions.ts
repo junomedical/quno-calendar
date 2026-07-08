@@ -21,7 +21,14 @@ export type HitTestInput = {
   selectedCalendarIds: CalendarId[];
   settings: Pick<
     TimelineSettings,
-    "labelWidth" | "dayHeaderHeight" | "rowHeight" | "startHour" | "endHour" | "zoom" | "snapMinutes" | "excludedWeekdays"
+    | "labelWidth"
+    | "dayHeaderHeight"
+    | "rowHeight"
+    | "startHour"
+    | "endHour"
+    | "zoom"
+    | "snapMinutes"
+    | "excludedWeekdays"
   >;
 };
 
@@ -82,7 +89,11 @@ export function buildMoveProposal(
 }
 
 /** Builds the externally rendered draft event for a drawn creation range. */
-export function buildDraftEvent(startHit: CalendarHit, endHit: CalendarHit, kind: CalendarEvent["kind"] = "draft"): CalendarEvent {
+export function buildDraftEvent(
+  startHit: CalendarHit,
+  endHit: CalendarHit,
+  kind: CalendarEvent["kind"] = "draft"
+): CalendarEvent {
   const startMinute = Math.min(startHit.minute, endHit.minute);
   const endMinute = Math.max(startHit.minute, endHit.minute);
   const isAvailability = kind === "availability";

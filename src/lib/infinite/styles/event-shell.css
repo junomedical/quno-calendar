@@ -1,0 +1,43 @@
+.ic-event-shell {
+  position: absolute;
+  min-width: 12px;
+  container-name: calendar-event;
+  container-type: size;
+  touch-action: none;
+  cursor: grab;
+}
+
+.ic-event-shell:active {
+  cursor: grabbing;
+}
+
+.ic-event-shell.is-hovered {
+  width: max-content !important;
+  min-width: var(--event-width);
+  max-width: var(--event-hover-width);
+}
+
+.ic-drag-preview {
+  pointer-events: none;
+}
+
+.ic-draft-shell {
+  pointer-events: none;
+}
+
+.ic-draft-shell.is-draggable {
+  pointer-events: auto;
+}
+
+.ic-availability-shell {
+  pointer-events: none;
+}
+
+.ic-availability-shell.is-active-layer {
+  pointer-events: auto;
+}
+
+.ic-background-event-shell {
+  pointer-events: none;
+  opacity: 0.42;
+}

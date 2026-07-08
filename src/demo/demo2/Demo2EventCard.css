@@ -15,8 +15,7 @@
   overflow: hidden;
   color: #172033;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.32)),
-    var(--event-accent-muted, #e7f0ff);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.32)), var(--event-accent-muted, #e7f0ff);
   border: 1px solid color-mix(in srgb, var(--event-accent, #2563eb) 44%, #ffffff);
   border-top: 4px solid var(--event-accent, #2563eb);
   border-radius: 7px;
@@ -96,9 +95,7 @@
 .demo2-event-card.kind-availability {
   align-content: start;
   color: #14532d;
-  background:
-    linear-gradient(180deg, rgba(240, 253, 244, 0.78), rgba(240, 253, 244, 0.52)),
-    rgba(187, 247, 208, 0.45);
+  background: linear-gradient(180deg, rgba(240, 253, 244, 0.78), rgba(240, 253, 244, 0.52)), rgba(187, 247, 208, 0.45);
   border-color: rgba(22, 163, 74, 0.28);
   border-top-color: rgba(22, 163, 74, 0.62);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.46);
@@ -119,7 +116,13 @@
 .demo2-event-card.kind-blocked {
   color: #4b5563;
   background:
-    repeating-linear-gradient(-45deg, rgba(239, 68, 68, 0.14), rgba(239, 68, 68, 0.14) 4px, transparent 4px, transparent 8px),
+    repeating-linear-gradient(
+      -45deg,
+      rgba(239, 68, 68, 0.14),
+      rgba(239, 68, 68, 0.14) 4px,
+      transparent 4px,
+      transparent 8px
+    ),
     #ffffff;
   border-color: rgba(239, 68, 68, 0.6);
   border-top-color: #ef4444;

@@ -1,6 +1,19 @@
 # Changelog
 
+## 0.2.0
+
+- Prepared for the release
+
 ## 0.1.0
+
+- Renamed the package to `quno-calendar`, added MIT licensing metadata, package exports, peer dependency declarations, ESM/UMD library build output, generated TypeScript declarations, and the `quno-calendar/styles.css` stylesheet subpath.
+- Narrowed the public package entrypoint to `CalendarRoot`, public types, `defaultTimelineSettings`, and event membership/move helpers.
+- Added `className`, `style`, `ariaLabel`, and `initialDateKey` props to the shared calendar surface.
+- Split shared timeline setup, hit-testing, wheel zoom anchoring, drag lifecycle, and draft lifecycle into focused hooks.
+- Split reusable infinite-calendar CSS into shell, horizontal layout, event-shell, and vertical layout files while preserving the existing import path.
+- Added release quality tooling for typecheck, ESLint, Prettier, library/demo builds, package verification, and GitHub Actions CI.
+- Added release-facing README, rewritten usage recipes, trimmed architecture overview, and public example routes under `/examples/*`.
+- Added source links to demo sidebars and Playwright coverage for example routes and demo source links.
 - Added parent-controlled external create/edit support with `activeDraft`, `onEventDraftRequest`, and `onEventActivate`.
 - Added a default-demo external event popup that edits title, date/time, duration, and participants while keeping the calendar scrollable.
 - Added active-draft dragging through `onActiveDraftMoveRequest`; popup time fields update during drag and multi-calendar drafts move as one participant block.
@@ -11,9 +24,12 @@
 - Smoothed the drawn-create handoff so the controlled external draft takes over without a one-frame position jump.
 - Changed popup field edits so visible drafts update without scrolling, while offscreen drafts are restored to their last seen viewport position.
 - Fixed same-anchor date navigation so popup field edits can focus an active draft even after the user scrolls elsewhere inside the current virtual window.
+- Fixed edit popup cancel anchoring so cancellation restores focus to the original first person's event instance and preserves its viewport-relative position even after draft participant changes.
 - Added simulated delayed external saves in the default demo, including deterministic validation failures that keep the popup editable with a bottom error message.
 - Fixed visible-calendar changes so reducing the calendar list keeps the active day visible instead of letting the old row offset jump into later dates.
 - Pinned the active draft date during virtual relayouts without replacing the current scroll anchor, so visible participant-row changes no longer park the draft in the viewport center.
+- Fixed create popup cancel anchoring so closing a draft preserves the drawn calendar row's viewport-relative position while internal virtualizer relayout scrolls are ignored.
+- Fixed repeated draw-after-cancel anchoring so a new draft on the same date/calendar row does not inherit a stale cancel restore and jump upward.
 - Changed `Shift` + wheel zoom to anchor around the rendered time-grid node closest to the mouse in both horizontal and vertical timeline views.
 - Fixed vertical `Shift` + wheel zoom near the bottom of a day so the anchor clamps to the configured timeline end instead of an off-hours node.
 - Added a horizontal render-time viewport-fill zoom floor so the timeline board does not become narrower than the available screen area even when the controlled zoom value is lower.
@@ -124,6 +140,7 @@
 - Split oversized timeline, demo, and Playwright files by responsibility: shared timeline gestures moved to `useTimelineInteractions`, external popup demo state moved to `useExternalEventDrafts` plus `ExternalEventPopup`, vertical day rendering moved to its own component, and e2e coverage moved into behavior-focused spec files.
 - Fixed external popup date edits so moving a draft to a future or past date refocuses the preview on the first date change instead of only after a second edit.
 - Fixed popup cancel positioning so visible create/edit cancels restore from the last event or draft anchor without falling back to date/time centering.
+- Fixed quick manual scrolling after popup cancel so delayed restore corrections no longer pull the viewport back to the cancelled event.
 - Fixed active edit draft layout so the replaced source event is excluded from row-height and vertical column-width metrics; draft previews no longer add another overlap lane while the popup is open.
 - De-duplicated async loaded event buckets by event id so popup handoff range reloads cannot duplicate committed events and grow overlap rows.
 - Kept two overlapping events at the compact row height; overlap-driven row growth now starts at three lanes.

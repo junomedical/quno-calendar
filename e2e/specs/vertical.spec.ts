@@ -1,5 +1,11 @@
 import { expect, test } from "@playwright/test";
-import { goToWorkday, selectPageText, topVisibleDayDate, topVisibleDayState, verticalTopVisibleGeometry } from "../helpers";
+import {
+  goToWorkday,
+  selectPageText,
+  topVisibleDayDate,
+  topVisibleDayState,
+  verticalTopVisibleGeometry
+} from "../helpers";
 
 test("switches to the vertical calendar view with sticky time pane and vertical zoom", async ({ page }) => {
   await page.goto("/");
@@ -9,9 +15,12 @@ test("switches to the vertical calendar view with sticky time pane and vertical 
   await expect(page.getByTestId("calendar-column").first()).toBeVisible();
   await expect(page.getByTestId("time-scale-header")).toHaveCount(0);
 
-  const firstColumnWidth = await page.getByTestId("calendar-column").first().evaluate((element) => {
-    return element.getBoundingClientRect().width;
-  });
+  const firstColumnWidth = await page
+    .getByTestId("calendar-column")
+    .first()
+    .evaluate((element) => {
+      return element.getBoundingClientRect().width;
+    });
   expect(firstColumnWidth).toBeGreaterThanOrEqual(240);
   const leftPaneMetrics = await page.evaluate(() => {
     const timePane = document.querySelector<HTMLElement>('[data-testid="vertical-time-pane"]');
@@ -23,8 +32,8 @@ test("switches to the vertical calendar view with sticky time pane and vertical 
     );
     const hourTicks = Array.from(document.querySelectorAll<HTMLElement>(".icv-time-tick.is-hour"));
     const lastHour = hourTicks.at(-1);
-    const minuteTick = Array.from(document.querySelectorAll<HTMLElement>(".icv-time-tick:not(.is-hour)")).find((element) =>
-      /^\d+$/.test(element.textContent ?? "")
+    const minuteTick = Array.from(document.querySelectorAll<HTMLElement>(".icv-time-tick:not(.is-hour)")).find(
+      (element) => /^\d+$/.test(element.textContent ?? "")
     );
     const board = document.querySelector<HTMLElement>('[data-testid="vertical-day-board"]');
     return timePane && dateLabel
@@ -59,9 +68,15 @@ test("switches to the vertical calendar view with sticky time pane and vertical 
   expect(leftPaneMetrics.firstHourText).toMatch(/^\d{1,2}:00$/);
   expect(leftPaneMetrics.minuteText).toMatch(/^\d+$/);
 
-  const firstBoardHeight = await page.getByTestId("vertical-day-board").first().evaluate((element) => element.getBoundingClientRect().height);
+  const firstBoardHeight = await page
+    .getByTestId("vertical-day-board")
+    .first()
+    .evaluate((element) => element.getBoundingClientRect().height);
   await page.getByTestId("zoom-slider").fill("2");
-  const zoomedBoardHeight = await page.getByTestId("vertical-day-board").first().evaluate((element) => element.getBoundingClientRect().height);
+  const zoomedBoardHeight = await page
+    .getByTestId("vertical-day-board")
+    .first()
+    .evaluate((element) => element.getBoundingClientRect().height);
   expect(zoomedBoardHeight).toBeGreaterThan(firstBoardHeight);
 
   await page.getByTestId("calendar-count").evaluate((element) => {
@@ -165,7 +180,12 @@ test("grows vertical columns after three overlap lanes and keeps headers aligned
 
     for (const column of Array.from(document.querySelectorAll<HTMLElement>('[data-testid="calendar-column"]'))) {
       const columnBox = column.getBoundingClientRect();
-      if (columnBox.bottom < viewport.y || columnBox.y > viewport.bottom || columnBox.right < viewport.x || columnBox.x > viewport.right) {
+      if (
+        columnBox.bottom < viewport.y ||
+        columnBox.y > viewport.bottom ||
+        columnBox.right < viewport.x ||
+        columnBox.x > viewport.right
+      ) {
         continue;
       }
       const event = Array.from(column.querySelectorAll<HTMLElement>('[data-testid="calendar-event"]')).find(
@@ -175,7 +195,9 @@ test("grows vertical columns after three overlap lanes and keeps headers aligned
         continue;
       }
       const eventBox = event.getBoundingClientRect();
-      const columnIndex = Array.from(column.parentElement?.querySelectorAll<HTMLElement>('[data-testid="calendar-column"]') ?? []).indexOf(column);
+      const columnIndex = Array.from(
+        column.parentElement?.querySelectorAll<HTMLElement>('[data-testid="calendar-column"]') ?? []
+      ).indexOf(column);
       const day = column.closest<HTMLElement>('[data-testid="calendar-day"]');
       const header = day?.querySelectorAll<HTMLElement>(".icv-calendar-header-cell")[columnIndex];
       const headerBox = header?.getBoundingClientRect();
@@ -259,7 +281,9 @@ test("keeps the vertical current date anchored when zoom changes", async ({ page
   await expect(page.getByTestId("zoom-value")).toHaveText("0.65");
   await expect.poll(async () => (await timelineNodeNearMouse())?.date ?? null).toBe(beforeGestureZoomIn?.date);
   await expect.poll(async () => (await timelineNodeNearMouse())?.minute ?? null).toBe(beforeGestureZoomIn?.minute);
-  await expect.poll(async () => (await timelineNodeNearMouse())?.screenY ?? Number.POSITIVE_INFINITY).toBeCloseTo(beforeGestureZoomIn?.screenY ?? 0, 0);
+  await expect
+    .poll(async () => (await timelineNodeNearMouse())?.screenY ?? Number.POSITIVE_INFINITY)
+    .toBeCloseTo(beforeGestureZoomIn?.screenY ?? 0, 0);
 
   const beforeGestureZoomOut = await timelineNodeNearMouse();
   expect(beforeGestureZoomOut).not.toBeNull();
@@ -269,7 +293,9 @@ test("keeps the vertical current date anchored when zoom changes", async ({ page
   await expect(page.getByTestId("zoom-value")).toHaveText("0.50");
   await expect.poll(async () => (await timelineNodeNearMouse())?.date ?? null).toBe(beforeGestureZoomOut?.date);
   await expect.poll(async () => (await timelineNodeNearMouse())?.minute ?? null).toBe(beforeGestureZoomOut?.minute);
-  await expect.poll(async () => (await timelineNodeNearMouse())?.screenY ?? Number.POSITIVE_INFINITY).toBeCloseTo(beforeGestureZoomOut?.screenY ?? 0, 0);
+  await expect
+    .poll(async () => (await timelineNodeNearMouse())?.screenY ?? Number.POSITIVE_INFINITY)
+    .toBeCloseTo(beforeGestureZoomOut?.screenY ?? 0, 0);
 });
 
 test("supports draft creation and dragging in the vertical view", async ({ page }) => {
@@ -282,11 +308,20 @@ test("supports draft creation and dragging in the vertical view", async ({ page 
     if (!viewportRect) return null;
     for (const column of Array.from(document.querySelectorAll<HTMLElement>('[data-testid="calendar-column"]'))) {
       const box = column.getBoundingClientRect();
-      if (box.bottom <= viewportRect.y + 120 || box.y >= viewportRect.bottom - 120 || box.x < viewportRect.x || box.x >= viewportRect.right) {
+      if (
+        box.bottom <= viewportRect.y + 120 ||
+        box.y >= viewportRect.bottom - 120 ||
+        box.x < viewportRect.x ||
+        box.x >= viewportRect.right
+      ) {
         continue;
       }
       const x = box.x + box.width / 2;
-      for (let y = Math.max(box.y + 80, viewportRect.y + 120); y < Math.min(box.bottom - 80, viewportRect.bottom - 80); y += 20) {
+      for (
+        let y = Math.max(box.y + 80, viewportRect.y + 120);
+        y < Math.min(box.bottom - 80, viewportRect.bottom - 80);
+        y += 20
+      ) {
         const target = document.elementFromPoint(x, y);
         if (target?.closest('[data-testid="calendar-column"]') === column && !target.closest("[data-event-id]")) {
           return { x, y };
@@ -300,9 +335,13 @@ test("supports draft creation and dragging in the vertical view", async ({ page 
 
   await page.evaluate(async ({ x, y }) => {
     const target = document.elementFromPoint(x, y);
-    target?.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, clientX: x, clientY: y, pointerId: 1, buttons: 1 }));
+    target?.dispatchEvent(
+      new PointerEvent("pointerdown", { bubbles: true, clientX: x, clientY: y, pointerId: 1, buttons: 1 })
+    );
     await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-    window.dispatchEvent(new PointerEvent("pointermove", { bubbles: true, clientX: x, clientY: y + 80, pointerId: 1, buttons: 1 }));
+    window.dispatchEvent(
+      new PointerEvent("pointermove", { bubbles: true, clientX: x, clientY: y + 80, pointerId: 1, buttons: 1 })
+    );
   }, drawPoint);
   await expect(page.getByTestId("draft-event")).toBeVisible();
   const draftBox = await page.getByTestId("draft-event").boundingBox();
@@ -320,7 +359,12 @@ test("supports draft creation and dragging in the vertical view", async ({ page 
     if (!viewportRect) return null;
     for (const event of Array.from(document.querySelectorAll<HTMLElement>('[data-testid="calendar-event"]'))) {
       const box = event.getBoundingClientRect();
-      if (box.y >= viewportRect.y + 90 && box.bottom <= viewportRect.bottom && box.x >= viewportRect.x && box.x < viewportRect.right) {
+      if (
+        box.y >= viewportRect.y + 90 &&
+        box.bottom <= viewportRect.bottom &&
+        box.x >= viewportRect.x &&
+        box.x < viewportRect.right
+      ) {
         return { x: box.x, y: box.y, width: box.width, height: box.height };
       }
     }
@@ -331,21 +375,24 @@ test("supports draft creation and dragging in the vertical view", async ({ page 
 
   await page.mouse.move(eventBox.x + Math.min(eventBox.width / 2, 20), eventBox.y + eventBox.height / 2);
   await expect(page.locator('[data-render-status="hovered"]').first()).toBeVisible();
-  const hoverMetrics = await page.locator('[data-testid="calendar-event"]:has([data-render-status="hovered"])').first().evaluate((element) => {
-    const box = element.getBoundingClientRect();
-    const column = element.closest<HTMLElement>('[data-testid="calendar-column"]')?.getBoundingClientRect();
-    const title = element.querySelector<HTMLElement>(".demo-event-title");
-    const titleStyle = title ? window.getComputedStyle(title) : null;
-    return column
-      ? {
-          eventWidth: box.width,
-          eventHeight: box.height,
-          columnWidth: column.width,
-          titleFontSize: titleStyle ? Number.parseFloat(titleStyle.fontSize) : 0,
-          titleLineHeight: titleStyle ? Number.parseFloat(titleStyle.lineHeight) : 0
-        }
-      : null;
-  });
+  const hoverMetrics = await page
+    .locator('[data-testid="calendar-event"]:has([data-render-status="hovered"])')
+    .first()
+    .evaluate((element) => {
+      const box = element.getBoundingClientRect();
+      const column = element.closest<HTMLElement>('[data-testid="calendar-column"]')?.getBoundingClientRect();
+      const title = element.querySelector<HTMLElement>(".demo-event-title");
+      const titleStyle = title ? window.getComputedStyle(title) : null;
+      return column
+        ? {
+            eventWidth: box.width,
+            eventHeight: box.height,
+            columnWidth: column.width,
+            titleFontSize: titleStyle ? Number.parseFloat(titleStyle.fontSize) : 0,
+            titleLineHeight: titleStyle ? Number.parseFloat(titleStyle.lineHeight) : 0
+          }
+        : null;
+    });
   expect(hoverMetrics).not.toBeNull();
   if (!hoverMetrics) return;
   expect(Math.abs(hoverMetrics.eventWidth - hoverMetrics.columnWidth)).toBeLessThanOrEqual(1);
@@ -378,11 +425,20 @@ test("allows manual vertical scrolling after a drawn draft opens the popup", asy
     if (!viewportRect) return null;
     for (const column of Array.from(document.querySelectorAll<HTMLElement>('[data-testid="calendar-column"]'))) {
       const box = column.getBoundingClientRect();
-      if (box.bottom <= viewportRect.y + 120 || box.y >= viewportRect.bottom - 120 || box.x < viewportRect.x || box.x >= viewportRect.right) {
+      if (
+        box.bottom <= viewportRect.y + 120 ||
+        box.y >= viewportRect.bottom - 120 ||
+        box.x < viewportRect.x ||
+        box.x >= viewportRect.right
+      ) {
         continue;
       }
       const x = box.x + box.width / 2;
-      for (let y = Math.max(box.y + 80, viewportRect.y + 120); y < Math.min(box.bottom - 80, viewportRect.bottom - 80); y += 20) {
+      for (
+        let y = Math.max(box.y + 80, viewportRect.y + 120);
+        y < Math.min(box.bottom - 80, viewportRect.bottom - 80);
+        y += 20
+      ) {
         const target = document.elementFromPoint(x, y);
         if (target?.closest('[data-testid="calendar-column"]') === column && !target.closest("[data-event-id]")) {
           return { x, y };
@@ -396,17 +452,26 @@ test("allows manual vertical scrolling after a drawn draft opens the popup", asy
 
   await page.evaluate(async ({ x, y }) => {
     const target = document.elementFromPoint(x, y);
-    target?.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, clientX: x, clientY: y, pointerId: 1, buttons: 1 }));
+    target?.dispatchEvent(
+      new PointerEvent("pointerdown", { bubbles: true, clientX: x, clientY: y, pointerId: 1, buttons: 1 })
+    );
     await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-    window.dispatchEvent(new PointerEvent("pointermove", { bubbles: true, clientX: x, clientY: y + 80, pointerId: 1, buttons: 1 }));
+    window.dispatchEvent(
+      new PointerEvent("pointermove", { bubbles: true, clientX: x, clientY: y + 80, pointerId: 1, buttons: 1 })
+    );
     window.dispatchEvent(new PointerEvent("pointerup", { bubbles: true, clientX: x, clientY: y + 80, pointerId: 1 }));
   }, drawPoint);
   await expect(page.getByTestId("external-event-popup")).toBeVisible();
 
-  await page.locator(".ic-viewport").evaluate((element) => {
-    const nextScrollTop = Math.max(0, element.scrollTop - 180);
-    element.scrollTop = nextScrollTop;
-  });
+  const viewportBox = await page.locator(".ic-viewport").boundingBox();
+  expect(viewportBox).not.toBeNull();
+  if (!viewportBox) return;
+  const scrollTopBeforeWheel = await page.locator(".ic-viewport").evaluate((element) => element.scrollTop);
+  await page.mouse.move(viewportBox.x + 48, viewportBox.y + Math.min(220, viewportBox.height / 2));
+  await page.mouse.wheel(0, -180);
+  await expect
+    .poll(async () => page.locator(".ic-viewport").evaluate((element) => element.scrollTop))
+    .not.toBe(scrollTopBeforeWheel);
   const visibleStateAfterScroll = await topVisibleDayState(page);
   await page.waitForTimeout(800);
   await expect
@@ -437,7 +502,12 @@ test("lets vertical hover pass through expanded cards to underlying overlap lane
 
     for (const column of Array.from(document.querySelectorAll<HTMLElement>('[data-testid="calendar-column"]'))) {
       const columnBox = column.getBoundingClientRect();
-      if (columnBox.bottom < viewport.y || columnBox.y > viewport.bottom || columnBox.right < viewport.x || columnBox.x > viewport.right) {
+      if (
+        columnBox.bottom < viewport.y ||
+        columnBox.y > viewport.bottom ||
+        columnBox.right < viewport.x ||
+        columnBox.x > viewport.right
+      ) {
         continue;
       }
 
@@ -465,7 +535,9 @@ test("lets vertical hover pass through expanded cards to underlying overlap lane
               height: box.height
             };
           })
-          .filter((item): item is { id: string; x: number; y: number; width: number; height: number } => Boolean(item.id))
+          .filter((item): item is { id: string; x: number; y: number; width: number; height: number } =>
+            Boolean(item.id)
+          )
           .sort((a, b) => a.x - b.x);
         if (sorted.length >= 2) {
           return { first: sorted[0], second: sorted[1] };
@@ -480,8 +552,14 @@ test("lets vertical hover pass through expanded cards to underlying overlap lane
   if (!lanePair) return;
 
   await page.mouse.move(lanePair.first.x, lanePair.first.y);
-  await expect(page.locator(`[data-testid="calendar-event"][data-event-id="${lanePair.first.id}"] [data-render-status="hovered"]`)).toBeVisible();
+  await expect(
+    page.locator(`[data-testid="calendar-event"][data-event-id="${lanePair.first.id}"] [data-render-status="hovered"]`)
+  ).toBeVisible();
   await page.mouse.move(lanePair.second.x, lanePair.second.y);
-  await expect(page.locator(`[data-testid="calendar-event"][data-event-id="${lanePair.second.id}"] [data-render-status="hovered"]`)).toBeVisible();
-  await expect(page.locator(`[data-testid="calendar-event"][data-event-id="${lanePair.first.id}"] [data-render-status="hovered"]`)).toHaveCount(0);
+  await expect(
+    page.locator(`[data-testid="calendar-event"][data-event-id="${lanePair.second.id}"] [data-render-status="hovered"]`)
+  ).toBeVisible();
+  await expect(
+    page.locator(`[data-testid="calendar-event"][data-event-id="${lanePair.first.id}"] [data-render-status="hovered"]`)
+  ).toHaveCount(0);
 });

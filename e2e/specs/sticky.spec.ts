@@ -14,13 +14,19 @@ test("keeps the time scale fixed and day dates css-sticky", async ({ page }) => 
   expect(await page.locator(".ic-now-pin").count()).toBe(1);
   expect(await page.getByTestId("current-time-line").count()).toBeGreaterThan(1);
   expect(await page.getByTestId("current-time-day-header-line").count()).toBeGreaterThan(1);
-  const referenceLineOpacity = await page.locator(".ic-now-line.is-reference").first().evaluate((element) => {
-    return window.getComputedStyle(element).opacity;
-  });
+  const referenceLineOpacity = await page
+    .locator(".ic-now-line.is-reference")
+    .first()
+    .evaluate((element) => {
+      return window.getComputedStyle(element).opacity;
+    });
   expect(referenceLineOpacity).toBe("0.5");
-  const referenceHeaderLineOpacity = await page.locator(".ic-now-day-header-line.is-reference").first().evaluate((element) => {
-    return window.getComputedStyle(element).opacity;
-  });
+  const referenceHeaderLineOpacity = await page
+    .locator(".ic-now-day-header-line.is-reference")
+    .first()
+    .evaluate((element) => {
+      return window.getComputedStyle(element).opacity;
+    });
   expect(referenceHeaderLineOpacity).toBe("0.5");
 
   const topDate = await topVisibleDayDate(page);
@@ -29,11 +35,16 @@ test("keeps the time scale fixed and day dates css-sticky", async ({ page }) => 
   if (!timeHeaderBox) return;
   expect(Math.abs(timeHeaderBox.y - viewportBox.y)).toBeLessThanOrEqual(2);
   await expect(page.locator(".ic-time-tick").first()).toBeVisible();
-  const firstTickAlignment = await page.locator(".ic-time-tick").first().evaluate((element) => {
-    const rect = element.getBoundingClientRect();
-    const headerRect = element.closest(".ic-time-header")?.getBoundingClientRect();
-    return headerRect ? Math.abs(rect.left - headerRect.left - Number.parseFloat((element as HTMLElement).style.left)) : Number.POSITIVE_INFINITY;
-  });
+  const firstTickAlignment = await page
+    .locator(".ic-time-tick")
+    .first()
+    .evaluate((element) => {
+      const rect = element.getBoundingClientRect();
+      const headerRect = element.closest(".ic-time-header")?.getBoundingClientRect();
+      return headerRect
+        ? Math.abs(rect.left - headerRect.left - Number.parseFloat((element as HTMLElement).style.left))
+        : Number.POSITIVE_INFINITY;
+    });
   expect(firstTickAlignment).toBeLessThanOrEqual(1);
 
   const topDateHeader = page.locator(`[data-testid="calendar-day-header"][data-date="${topDate}"]`);
@@ -53,7 +64,9 @@ test("keeps the time scale fixed and day dates css-sticky", async ({ page }) => 
   expect(pinBeforeScroll).not.toBeNull();
   expect(lineBeforeScroll).not.toBeNull();
   if (!pinBeforeScroll || !lineBeforeScroll) return;
-  expect(Math.abs(pinBeforeScroll.x + pinBeforeScroll.width / 2 - (lineBeforeScroll.x + lineBeforeScroll.width / 2))).toBeLessThanOrEqual(2);
+  expect(
+    Math.abs(pinBeforeScroll.x + pinBeforeScroll.width / 2 - (lineBeforeScroll.x + lineBeforeScroll.width / 2))
+  ).toBeLessThanOrEqual(2);
   await viewport.evaluate((element) => {
     element.scrollLeft += 60;
   });
@@ -63,7 +76,9 @@ test("keeps the time scale fixed and day dates css-sticky", async ({ page }) => 
   expect(lineAfterScroll).not.toBeNull();
   if (!pinAfterScroll || !lineAfterScroll) return;
   expect(pinAfterScroll.x).toBeLessThan(pinBeforeScroll.x);
-  expect(Math.abs(pinAfterScroll.x + pinAfterScroll.width / 2 - (lineAfterScroll.x + lineAfterScroll.width / 2))).toBeLessThanOrEqual(2);
+  expect(
+    Math.abs(pinAfterScroll.x + pinAfterScroll.width / 2 - (lineAfterScroll.x + lineAfterScroll.width / 2))
+  ).toBeLessThanOrEqual(2);
 
   const headerBackground = await topDateHeader.locator(".ic-date-label").evaluate((element) => {
     return window.getComputedStyle(element).backgroundColor;
@@ -162,9 +177,12 @@ test("keeps the time scale fixed and day dates css-sticky", async ({ page }) => 
   const dateLabelZIndex = await topDateHeader.locator(".ic-date-label").evaluate((element) => {
     return Number(window.getComputedStyle(element).zIndex);
   });
-  const rowLabelZIndex = await page.locator(".ic-row-label").first().evaluate((element) => {
-    return Number(window.getComputedStyle(element).zIndex);
-  });
+  const rowLabelZIndex = await page
+    .locator(".ic-row-label")
+    .first()
+    .evaluate((element) => {
+      return Number(window.getComputedStyle(element).zIndex);
+    });
   expect(dayBandStyles.backgroundColor).toBe("rgb(244, 247, 251)");
   expect(dayBandStyles.position).toBe("absolute");
   expect(dayBandStyles.pointerEvents).toBe("none");
@@ -233,7 +251,9 @@ test("keeps the time scale fixed and day dates css-sticky", async ({ page }) => 
       timeLayerZ: Number(window.getComputedStyle(timeHeader).zIndex),
       dateBackground: window.getComputedStyle(dateLabel).backgroundColor,
       timeHeaderClipPath: window.getComputedStyle(timeHeader).clipPath,
-      clipVariable: window.getComputedStyle(timeHeader.closest(".ic-viewport") ?? timeHeader).getPropertyValue("--ic-time-header-clip-left")
+      clipVariable: window
+        .getComputedStyle(timeHeader.closest(".ic-viewport") ?? timeHeader)
+        .getPropertyValue("--ic-time-header-clip-left")
     };
   });
   expect(stickyLayering).toEqual({
@@ -293,14 +313,18 @@ test("keeps the time scale fixed and day dates css-sticky", async ({ page }) => 
   expect(stickyDateBox).not.toBeNull();
   if (!stickyDateBox) return;
   expect(Math.abs(stickyDateBox.y - viewportBox.y)).toBeLessThanOrEqual(2);
-  const dayHeaderPaintsAfterRows = await page.locator(`[data-testid="calendar-day"][data-date="${topDate}"]`).evaluate((element) => {
-    return element.lastElementChild?.classList.contains("ic-day-header") ?? false;
-  });
+  const dayHeaderPaintsAfterRows = await page
+    .locator(`[data-testid="calendar-day"][data-date="${topDate}"]`)
+    .evaluate((element) => {
+      return element.lastElementChild?.classList.contains("ic-day-header") ?? false;
+    });
   expect(dayHeaderPaintsAfterRows).toBe(true);
 
   await page.getByTestId("zoom-slider").fill("4");
   await viewport.evaluate((element) => {
-    const currentLine = document.querySelector<HTMLElement>(".ic-now-line.is-current") ?? document.querySelector<HTMLElement>(".ic-now-line");
+    const currentLine =
+      document.querySelector<HTMLElement>(".ic-now-line.is-current") ??
+      document.querySelector<HTMLElement>(".ic-now-line");
     const rowLabel = document.querySelector<HTMLElement>(".ic-row-label");
     const rowGrid = currentLine?.closest<HTMLElement>(".ic-row-grid");
     if (!currentLine || !rowLabel || !rowGrid) {
@@ -316,17 +340,31 @@ test("keeps the time scale fixed and day dates css-sticky", async ({ page }) => 
   });
 
   const markerLayering = await page.evaluate(() => {
-    const currentLine = document.querySelector<HTMLElement>(".ic-now-line.is-current") ?? document.querySelector<HTMLElement>(".ic-now-line");
+    const currentLine =
+      document.querySelector<HTMLElement>(".ic-now-line.is-current") ??
+      document.querySelector<HTMLElement>(".ic-now-line");
     const rowLabel = document.querySelector<HTMLElement>(".ic-row-label");
     const rowGrid = document.querySelector<HTMLElement>(".ic-row-grid");
     const dayHeader = document.querySelector<HTMLElement>(".ic-day-header");
     const dateLabel = document.querySelector<HTMLElement>(".ic-date-label");
     const timeHeader = document.querySelector<HTMLElement>(".ic-time-header");
-    const eventShell = document.querySelector<HTMLElement>('[data-testid="calendar-event"], [data-testid="availability-event"]');
+    const eventShell = document.querySelector<HTMLElement>(
+      '[data-testid="calendar-event"], [data-testid="availability-event"]'
+    );
     const timeTick = document.querySelector<HTMLElement>(".ic-time-tick");
     const nowPin = document.querySelector<HTMLElement>(".ic-now-pin");
     const nowHeaderLine = document.querySelector<HTMLElement>(".ic-now-header-line");
-    if (!currentLine || !rowLabel || !rowGrid || !dayHeader || !dateLabel || !timeHeader || !timeTick || !nowPin || !nowHeaderLine) {
+    if (
+      !currentLine ||
+      !rowLabel ||
+      !rowGrid ||
+      !dayHeader ||
+      !dateLabel ||
+      !timeHeader ||
+      !timeTick ||
+      !nowPin ||
+      !nowHeaderLine
+    ) {
       return null;
     }
 
@@ -402,8 +440,14 @@ test("keeps sticky labels above the timeline after high-zoom horizontal scroll",
 
     const dateBox = dateLabel.getBoundingClientRect();
     const rowBox = rowLabel.getBoundingClientRect();
-    const topAtDate = document.elementFromPoint(dateBox.left + Math.min(dateBox.width / 2, 90), dateBox.top + dateBox.height / 2);
-    const topAtRowLabel = document.elementFromPoint(rowBox.left + Math.min(rowBox.width / 2, 90), rowBox.top + rowBox.height / 2);
+    const topAtDate = document.elementFromPoint(
+      dateBox.left + Math.min(dateBox.width / 2, 90),
+      dateBox.top + dateBox.height / 2
+    );
+    const topAtRowLabel = document.elementFromPoint(
+      rowBox.left + Math.min(rowBox.width / 2, 90),
+      rowBox.top + rowBox.height / 2
+    );
     const visibleTick = Array.from(document.querySelectorAll<HTMLElement>(".ic-time-tick")).find((tick) => {
       const tickBox = tick.getBoundingClientRect();
       const styles = window.getComputedStyle(tick);
@@ -478,12 +522,17 @@ test("keeps sticky labels above the timeline after high-zoom horizontal scroll",
       }
       const dateBox = dateLabel.getBoundingClientRect();
       const rowBox = firstRowLabel.getBoundingClientRect();
-      const isVisible = dateBox.bottom > viewport.top && dateBox.top < viewport.bottom && rowBox.bottom > viewport.top && rowBox.top < viewport.bottom;
+      const isVisible =
+        dateBox.bottom > viewport.top &&
+        dateBox.top < viewport.bottom &&
+        rowBox.bottom > viewport.top &&
+        rowBox.top < viewport.bottom;
       const isPinnedAtViewportTop = Math.abs(dateBox.top - viewport.top) <= 2;
       const overlapsFirstRow = dateBox.bottom > rowBox.top + 1;
-      return isVisible && !isPinnedAtViewportTop && overlapsFirstRow ? [`${date}: ${Math.round(dateBox.bottom - rowBox.top)}px`] : [];
+      return isVisible && !isPinnedAtViewportTop && overlapsFirstRow
+        ? [`${date}: ${Math.round(dateBox.bottom - rowBox.top)}px`]
+        : [];
     });
   });
   expect(dateRowOverlaps).toEqual([]);
 });
-

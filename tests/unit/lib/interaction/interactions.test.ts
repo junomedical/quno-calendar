@@ -10,7 +10,11 @@ const settings: TimelineSettings = {
   excludedWeekdays: [],
   rowHeight: 76,
   dayHeaderHeight: 42,
-  labelWidth: 230
+  labelWidth: 230,
+  verticalColumnMinWidth: 240,
+  verticalColumnOverlapCapacity: 3,
+  verticalColumnOverlapGrowth: 80,
+  verticalEventHoverMinHeight: 64
 };
 
 describe("calendar interaction math", () => {

@@ -1,10 +1,6 @@
 import { describe, expect, it } from "vitest";
-import {
-  activeDraftSourceEventId,
-  withoutActiveDraftSourceEvents,
-  type ActiveEventDraft,
-  type CalendarEvent
-} from "../../../src/lib";
+import { activeDraftSourceEventId, withoutActiveDraftSourceEvents } from "../../../src/lib/data/activeDrafts";
+import { type ActiveEventDraft, type CalendarEvent } from "../../../src/lib";
 
 const sourceEvent: CalendarEvent = {
   id: "event-1",

@@ -1,0 +1,10 @@
+dist
+dist-demo
+node_modules
+coverage
+playwright-report
+test-results
+work
+outputs
+*.tsbuildinfo
+package-lock.json

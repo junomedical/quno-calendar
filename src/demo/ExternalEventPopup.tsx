@@ -42,7 +42,13 @@ export function ExternalEventPopup({
     >
       <div className="external-event-popup-header">
         <strong>{activeDraft.mode === "edit" ? "Edit event" : "Create event"}</strong>
-        <button type="button" aria-label="Cancel event editing" onClick={onCancel} disabled={isSaving} data-testid="draft-cancel-button">
+        <button
+          type="button"
+          aria-label="Cancel event editing"
+          onClick={onCancel}
+          disabled={isSaving}
+          data-testid="draft-cancel-button"
+        >
           <X size={15} aria-hidden />
         </button>
       </div>

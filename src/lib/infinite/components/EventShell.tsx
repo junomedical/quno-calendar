@@ -1,10 +1,5 @@
 import { memo, type CSSProperties, type MouseEvent, type PointerEvent } from "react";
-import type {
-  CalendarEvent,
-  CalendarId,
-  EventRenderer,
-  EventRenderStatus
-} from "../../core/types";
+import type { CalendarEvent, CalendarId, EventRenderer, EventRenderStatus } from "../../core/types";
 
 type CssLength = number | string;
 type RgbColor = { red: number; green: number; blue: number };

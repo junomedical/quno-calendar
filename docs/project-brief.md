@@ -1,9 +1,11 @@
 # Infinite Calendar PoC Project Brief
 
 ## Goal
+
 Create a reusable React calendar component that can host multiple views. The first implemented view is an infinite vertical timeline where dates flow from top to bottom and selected calendars render as rows inside each date.
 
 ## Success Criteria
+
 - Dates can be reached by vertical virtual scrolling into past and future ranges.
 - Row and date labels stay fixed on the left while the timeline scrolls horizontally.
 - Events are positioned on a horizontal time axis and rendered through a caller-provided component.
@@ -19,6 +21,7 @@ Create a reusable React calendar component that can host multiple views. The fir
 - Tests cover the core math, rendering contract, and browser interactions.
 
 ## Out of Scope for PoC
+
 - Recurring events.
 - Timezone selection UI.
 - Server persistence.

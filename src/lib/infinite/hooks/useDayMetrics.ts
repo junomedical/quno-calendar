@@ -2,13 +2,7 @@ import { useCallback, useMemo } from "react";
 import { withoutActiveDraftSourceEvents } from "../../data/activeDrafts";
 import { eventBelongsToCalendar } from "../../data/calendarEvents";
 import { rowHeightForEvents } from "../../layout/layout";
-import type {
-  ActiveEventDraft,
-  CalendarEvent,
-  CalendarId,
-  CalendarRow,
-  TimelineSettings
-} from "../../core/types";
+import type { ActiveEventDraft, CalendarEvent, CalendarId, CalendarRow, TimelineSettings } from "../../core/types";
 
 /**
  * Computes per-date and per-row heights from loaded committed events.

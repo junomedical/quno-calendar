@@ -25,7 +25,13 @@ export function Demo2EventCard({ event, status, laneCount }: EventRendererProps)
     <article className={className} data-render-status={status}>
       <div className="demo2-event-header">
         <span className="demo2-event-badge">
-          {isBlocked ? <LockKeyhole size={13} aria-hidden /> : isConsultation ? <Video size={13} aria-hidden /> : <ClipboardList size={13} aria-hidden />}
+          {isBlocked ? (
+            <LockKeyhole size={13} aria-hidden />
+          ) : isConsultation ? (
+            <Video size={13} aria-hidden />
+          ) : (
+            <ClipboardList size={13} aria-hidden />
+          )}
           {isAvailability ? "Availability" : isConsultation ? "Virtual" : isBlocked ? "Locked" : "Visit"}
         </span>
         <span className="demo2-event-time">

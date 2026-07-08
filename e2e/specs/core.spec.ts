@@ -1,5 +1,14 @@
 import { expect, test } from "@playwright/test";
-import { firstViewportEventBox, goToWorkday, firstViewportEventForPrefix, topVisibleDayDate, topVisibleDayState, renderedDayOverscanFailures, visibleDayDates, verticalScrollRatio } from "../helpers";
+import {
+  firstViewportEventBox,
+  goToWorkday,
+  firstViewportEventForPrefix,
+  topVisibleDayDate,
+  topVisibleDayState,
+  renderedDayOverscanFailures,
+  visibleDayDates,
+  verticalScrollRatio
+} from "../helpers";
 
 test("renders, scrolls vertically, zooms, and changes dataset scale", async ({ page }) => {
   await page.goto("/");
@@ -20,9 +29,11 @@ test("renders, scrolls vertically, zooms, and changes dataset scale", async ({ p
       return Number.parseInt(text?.replace(/,/g, "") ?? "0", 10);
     })
     .toBeGreaterThan(0);
-  const compactRowHeights = await page.getByTestId("calendar-row").evaluateAll((rows) =>
-    rows.map((row) => Math.round(row.getBoundingClientRect().height)).filter((height) => height > 0)
-  );
+  const compactRowHeights = await page
+    .getByTestId("calendar-row")
+    .evaluateAll((rows) =>
+      rows.map((row) => Math.round(row.getBoundingClientRect().height)).filter((height) => height > 0)
+    );
   expect(Math.min(...compactRowHeights)).toBe(50);
 
   const viewport = page.locator(".ic-viewport");
@@ -31,9 +42,7 @@ test("renders, scrolls vertically, zooms, and changes dataset scale", async ({ p
     element.scrollTop += 1_800;
   });
   await page.waitForTimeout(150);
-  await expect
-    .poll(async () => topVisibleDayDate(page))
-    .not.toBe(firstDate);
+  await expect.poll(async () => topVisibleDayDate(page)).not.toBe(firstDate);
 
   await viewport.evaluate((element) => {
     element.scrollTop += 50_000;
@@ -48,11 +57,23 @@ test("renders, scrolls vertically, zooms, and changes dataset scale", async ({ p
   await expect(page.getByTestId("zoom-value")).toHaveText("2.00");
   await page.getByTestId("zoom-slider").fill("8");
   await expect(page.getByTestId("zoom-value")).toHaveText("8.00");
-  await expect(page.getByTestId("calendar-row").first().locator(".ic-row-grid")).toHaveCSS("background-size", "40px 100%");
-  await expect(page.getByTestId("calendar-row").first().locator(".ic-row-grid")).toHaveCSS("background-position-x", "8px");
-  await expect(page.getByTestId("calendar-row").first().locator(".ic-row-grid")).toHaveCSS("background-repeat", "repeat");
+  await expect(page.getByTestId("calendar-row").first().locator(".ic-row-grid")).toHaveCSS(
+    "background-size",
+    "40px 100%"
+  );
+  await expect(page.getByTestId("calendar-row").first().locator(".ic-row-grid")).toHaveCSS(
+    "background-position-x",
+    "8px"
+  );
+  await expect(page.getByTestId("calendar-row").first().locator(".ic-row-grid")).toHaveCSS(
+    "background-repeat",
+    "repeat"
+  );
   await page.getByTestId("zoom-slider").fill("6");
-  await expect(page.getByTestId("calendar-row").first().locator(".ic-row-grid")).toHaveCSS("background-size", "90px 100%");
+  await expect(page.getByTestId("calendar-row").first().locator(".ic-row-grid")).toHaveCSS(
+    "background-size",
+    "90px 100%"
+  );
   await page.getByTestId("zoom-slider").fill("0.5");
   await expect(page.getByTestId("zoom-value")).toHaveText("0.50");
   await page.getByTestId("zoom-slider").fill("2");
@@ -101,8 +122,12 @@ test("renders, scrolls vertically, zooms, and changes dataset scale", async ({ p
   await expect(page.getByTestId("zoom-value")).toHaveText("2.15");
   await expect.poll(async () => viewport.evaluate((element) => element.scrollTop)).toBe(scrollTopBeforeShiftWheel);
   await expect.poll(async () => (await timelineNodeNearPointer()).minute).toBe(anchoredNodeBeforeShiftWheel.minute);
-  await expect.poll(async () => (await timelineNodeNearPointer()).screenX).toBeCloseTo(anchoredNodeBeforeShiftWheel.screenX, 0);
-  await expect.poll(async () => page.evaluate(() => ({ x: window.scrollX, y: window.scrollY }))).toEqual(windowScrollBeforeShiftWheel);
+  await expect
+    .poll(async () => (await timelineNodeNearPointer()).screenX)
+    .toBeCloseTo(anchoredNodeBeforeShiftWheel.screenX, 0);
+  await expect
+    .poll(async () => page.evaluate(() => ({ x: window.scrollX, y: window.scrollY })))
+    .toEqual(windowScrollBeforeShiftWheel);
   await page.evaluate(() => {
     document.body.style.minHeight = "";
     window.scrollTo(0, 0);
@@ -126,9 +151,7 @@ test("renders, scrolls vertically, zooms, and changes dataset scale", async ({ p
     await page.mouse.wheel(0, 500);
   }
   await page.keyboard.up("Shift");
-  await expect
-    .poll(async () => Number(await page.getByTestId("zoom-value").textContent()))
-    .toBe(0.5);
+  await expect.poll(async () => Number(await page.getByTestId("zoom-value").textContent())).toBe(0.5);
   expect(0.5).toBeLessThan(horizontalZoomFloor);
   await expect
     .poll(async () =>
@@ -281,8 +304,12 @@ test("keeps large dataset events visible and hoverable", async ({ page }) => {
   await goToWorkday(page);
   const event5000 = await firstViewportEventForPrefix(page, "event-5000-");
   await page.mouse.move(event5000.x + Math.min(event5000.width / 2, 20), event5000.y + event5000.height / 2);
-  await expect(page.locator(`[data-testid="calendar-event"][data-event-id="${event5000.id}"]:has([data-render-status="hovered"])`)).toBeVisible();
-  const hoveredBox = await page.locator(`[data-testid="calendar-event"][data-event-id="${event5000.id}"]:has([data-render-status="hovered"])`).boundingBox();
+  await expect(
+    page.locator(`[data-testid="calendar-event"][data-event-id="${event5000.id}"]:has([data-render-status="hovered"])`)
+  ).toBeVisible();
+  const hoveredBox = await page
+    .locator(`[data-testid="calendar-event"][data-event-id="${event5000.id}"]:has([data-render-status="hovered"])`)
+    .boundingBox();
   expect(hoveredBox).not.toBeNull();
   expect(hoveredBox?.height ?? 0).toBeGreaterThan(0);
 
@@ -298,7 +325,9 @@ test("keeps large dataset events visible and hoverable", async ({ page }) => {
   expect(event20000.width).toBeGreaterThan(0);
   expect(event20000.height).toBeGreaterThan(0);
   await page.mouse.move(event20000.x + Math.min(event20000.width / 2, 20), event20000.y + event20000.height / 2);
-  await expect(page.locator(`[data-testid="calendar-event"][data-event-id="${event20000.id}"]:has([data-render-status="hovered"])`)).toBeVisible();
+  await expect(
+    page.locator(`[data-testid="calendar-event"][data-event-id="${event20000.id}"]:has([data-render-status="hovered"])`)
+  ).toBeVisible();
 
   const visibleRowHeights = await page.evaluate(() => {
     const viewport = document.querySelector(".ic-viewport")?.getBoundingClientRect();
@@ -325,7 +354,10 @@ test("keeps large dataset events visible and hoverable", async ({ page }) => {
           laneHeight: rowBox ? rowBox.height / Math.max(1, laneCount) : 0
         };
       })
-      .filter(({ box }) => box.y >= safeTop && box.y + box.height <= viewport.bottom && box.x >= viewport.x && box.x < viewport.right);
+      .filter(
+        ({ box }) =>
+          box.y >= safeTop && box.y + box.height <= viewport.bottom && box.x >= viewport.x && box.x < viewport.right
+      );
   });
   expect(Math.min(...visibleEventMetrics.map((metric) => metric.height))).toBeGreaterThanOrEqual(20);
   expect(Math.min(...visibleEventMetrics.map((metric) => metric.laneHeight))).toBeGreaterThanOrEqual(24);
@@ -340,7 +372,11 @@ test("keeps large dataset events visible and hoverable", async ({ page }) => {
       const box = element.getBoundingClientRect();
       const rowBox = row.getBoundingClientRect();
       const laneCount = Number(element.dataset.laneCount ?? "1");
-      const isVisible = box.y >= viewport.y + 92 && box.y + box.height <= viewport.bottom && box.x >= viewport.x && box.x < viewport.right;
+      const isVisible =
+        box.y >= viewport.y + 92 &&
+        box.y + box.height <= viewport.bottom &&
+        box.x >= viewport.x &&
+        box.x < viewport.right;
       const isBottomLane = rowBox.bottom - (box.y + box.height) <= 12 || box.y > rowBox.y + rowBox.height / 2;
       const canExpand = box.height < rowBox.height / 2;
       if (isVisible && isBottomLane && canExpand) {
@@ -360,9 +396,14 @@ test("keeps large dataset events visible and hoverable", async ({ page }) => {
   });
   expect(bottomLaneEvent).not.toBeNull();
   if (bottomLaneEvent) {
-    await page.mouse.move(bottomLaneEvent.x + Math.min(bottomLaneEvent.width / 2, 20), bottomLaneEvent.y + bottomLaneEvent.height / 2);
+    await page.mouse.move(
+      bottomLaneEvent.x + Math.min(bottomLaneEvent.width / 2, 20),
+      bottomLaneEvent.y + bottomLaneEvent.height / 2
+    );
     const expandedHeight = await page
-      .locator(`[data-testid="calendar-event"][data-event-id="${bottomLaneEvent.id}"]:has([data-render-status="hovered"])`)
+      .locator(
+        `[data-testid="calendar-event"][data-event-id="${bottomLaneEvent.id}"]:has([data-render-status="hovered"])`
+      )
       .evaluate((element) => element.getBoundingClientRect().height);
     expect(expandedHeight).toBeGreaterThan(bottomLaneEvent.height);
     expect(expandedHeight).toBeCloseTo(bottomLaneEvent.rowHeight, 0);
@@ -379,9 +420,9 @@ test("keeps large dataset events visible and hoverable", async ({ page }) => {
     const issues: string[] = [];
     for (const day of days) {
       const dayElement = document.querySelector<HTMLElement>(`[data-testid="calendar-day"][data-date="${day.date}"]`);
-      const rowBottoms = Array.from(dayElement?.querySelectorAll<HTMLElement>('[data-testid="calendar-row"]') ?? []).map(
-        (row) => row.getBoundingClientRect().bottom
-      );
+      const rowBottoms = Array.from(
+        dayElement?.querySelectorAll<HTMLElement>('[data-testid="calendar-row"]') ?? []
+      ).map((row) => row.getBoundingClientRect().bottom);
       if (rowBottoms.length > 0 && Math.max(...rowBottoms) > day.box.bottom + 1) {
         issues.push(`${day.date}: row exceeds day`);
       }
@@ -396,7 +437,9 @@ test("keeps large dataset events visible and hoverable", async ({ page }) => {
   expect(dayBoundaryIssues).toEqual([]);
 });
 
-test("limits vertical scrollbar to one month around the visible date and recenters after scroll end", async ({ page }) => {
+test("limits vertical scrollbar to one month around the visible date and recenters after scroll end", async ({
+  page
+}) => {
   await page.goto("/");
   await goToWorkday(page, "2026-07-06");
   const viewport = page.locator(".ic-viewport");

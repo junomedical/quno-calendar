@@ -110,7 +110,12 @@ export function InfiniteTimelineDay({
       data-date={dateKey}
       data-index={item.index}
       ref={measureElement}
-      style={{ top: item.start, height: dayHeight, width: "100%", minWidth: settings.labelWidth + TIMELINE_LEFT_GUTTER_PX + width }}
+      style={{
+        top: item.start,
+        height: dayHeight,
+        width: "100%",
+        minWidth: settings.labelWidth + TIMELINE_LEFT_GUTTER_PX + width
+      }}
     >
       {selectedCalendars.map((calendar) => {
         const top = rowTop;

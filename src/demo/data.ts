@@ -75,7 +75,10 @@ function seededNumber(seed: number): number {
   return value - Math.floor(value);
 }
 
-function availabilityWindowForCalendar(calendarId: CalendarId, weekday: number): { startMinute: number; endMinute: number } | null {
+function availabilityWindowForCalendar(
+  calendarId: CalendarId,
+  weekday: number
+): { startMinute: number; endMinute: number } | null {
   if (weekday === 0 || weekday === 6) {
     return null;
   }
@@ -95,7 +98,11 @@ function availabilityWindowForCalendar(calendarId: CalendarId, weekday: number):
   return { startMinute: 8 * 60, endMinute: 18 * 60 };
 }
 
-function availableDateForSeed(yearStart: Date, seed: number, calendarId: CalendarId): { dayOffset: number; window: { startMinute: number; endMinute: number } } {
+function availableDateForSeed(
+  yearStart: Date,
+  seed: number,
+  calendarId: CalendarId
+): { dayOffset: number; window: { startMinute: number; endMinute: number } } {
   let dayOffset = Math.floor(seededNumber(seed) * 365);
   for (let guard = 0; guard < 7; guard += 1) {
     const date = addDays(yearStart, dayOffset);
@@ -174,7 +181,11 @@ export function createRangeLoader(events: CalendarEvent[]): LoadEvents {
     await new Promise((resolve) => window.setTimeout(resolve, 8));
     return events.filter((event) => {
       const dateKey = event.start.slice(0, 10);
-      return dateKey >= startDate && dateKey <= endDate && Array.from(selected).some((calendarId) => eventBelongsToCalendar(event, calendarId));
+      return (
+        dateKey >= startDate &&
+        dateKey <= endDate &&
+        Array.from(selected).some((calendarId) => eventBelongsToCalendar(event, calendarId))
+      );
     });
   };
 }

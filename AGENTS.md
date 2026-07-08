@@ -1,9 +1,11 @@
 # Agent Notes
 
 ## Project Context
+
 This repository is a reusable React infinite-calendar PoC. Keep the implementation focused on the component/library surface first and the demo second.
 
 ## Documentation Discipline
+
 Behavioral, API, interaction, or architecture changes must update the relevant Markdown files in `docs/` during the same change:
 
 - `docs/architecture.md` for component contracts, data flow, layout, virtualization, and interaction architecture.
@@ -16,9 +18,11 @@ Behavioral, API, interaction, or architecture changes must update the relevant M
 Do not leave documentation updates as a follow-up when changing library behavior.
 
 ## Visual Verification
+
 Any visual calendar change must be backed by a Playwright test in the same change. Prefer assertions that verify geometry, layering, clipping, or computed styles over screenshots alone, and update `docs/test-plan.md` when the visual expectation changes.
 
 ## Implementation Notes
+
 - Prefer native CSS sticky positioning for fixed calendar labels and headers before adding synchronized overlay state.
 - Keep zoom controlled by the parent through `settings.zoom`; calendar gestures should request changes with `onZoomChange`.
 - Keep vertical virtualization bounded around the top visible date and recenter after scroll idle; date navigation should update that anchor rather than restoring an unbounded virtual list. Recenter operations must preserve the pixel offset inside the visible date so scroll end does not create a content jump.

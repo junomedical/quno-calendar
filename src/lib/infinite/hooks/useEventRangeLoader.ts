@@ -2,12 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { applyEventMove } from "../../data/calendarEvents";
 import { dateRangeFromKeys } from "../../date/dateVirtualization";
 import { eventDateKey } from "../utils/infiniteTimelineUtils";
-import type {
-  CalendarEvent,
-  CalendarId,
-  EventMoveRequest,
-  LoadEvents
-} from "../../core/types";
+import type { CalendarEvent, CalendarId, EventMoveRequest, LoadEvents } from "../../core/types";
 
 type UseEventRangeLoaderArgs = {
   loadEvents: LoadEvents;

@@ -25,11 +25,7 @@ export function normalizeAnchorDate(dateKey: string, excludedWeekdays: number[])
 }
 
 /** Returns the included date key at an offset from an anchor date. */
-export function dateAtVirtualOffset(
-  anchorDateKey: string,
-  offset: number,
-  excludedWeekdays: number[]
-): string {
+export function dateAtVirtualOffset(anchorDateKey: string, offset: number, excludedWeekdays: number[]): string {
   let date = fromDateKey(normalizeAnchorDate(anchorDateKey, excludedWeekdays));
   if (offset === 0) {
     return toDateKey(date);
@@ -47,11 +43,7 @@ export function dateAtVirtualOffset(
 }
 
 /** Returns the included-date offset between an anchor and target date key. */
-export function virtualOffsetForDate(
-  anchorDateKey: string,
-  targetDateKey: string,
-  excludedWeekdays: number[]
-): number {
+export function virtualOffsetForDate(anchorDateKey: string, targetDateKey: string, excludedWeekdays: number[]): number {
   const anchor = fromDateKey(normalizeAnchorDate(anchorDateKey, excludedWeekdays));
   const target = fromDateKey(targetDateKey);
   if (isSameDay(anchor, target)) {

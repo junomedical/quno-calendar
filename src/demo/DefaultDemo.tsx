@@ -10,6 +10,7 @@ import {
 } from "../lib";
 import { appendCreatedEvent, applyMove, createDemoEvents, createRangeLoader, demoCalendars } from "./data";
 import { DemoEventCard } from "./DemoEventCard";
+import { DemoSourceLinks } from "./DemoSourceLinks";
 import { ExternalEventPopup } from "./ExternalEventPopup";
 import { dateInputValue, timeInputValue } from "./draftFormUtils";
 import { useExternalEventDrafts } from "./useExternalEventDrafts";
@@ -47,7 +48,9 @@ function countVisibleEventNodes() {
   }
 
   return Array.from(
-    document.querySelectorAll<HTMLElement>('[data-testid="calendar-event"], [data-testid="availability-event"], [data-testid="draft-event"]')
+    document.querySelectorAll<HTMLElement>(
+      '[data-testid="calendar-event"], [data-testid="availability-event"], [data-testid="draft-event"]'
+    )
   ).filter((element) => {
     const box = element.getBoundingClientRect();
     return (
@@ -125,7 +128,12 @@ function DemoRouteNav({ routes }: DefaultDemoProps) {
   return (
     <nav className="demo-route-nav" aria-label="Demo variants">
       {routes.map((route) => (
-        <a aria-current={route.id === "default" ? "page" : undefined} data-testid={`demo-route-${route.id}`} href={route.path} key={route.id}>
+        <a
+          aria-current={route.id === "default" ? "page" : undefined}
+          data-testid={`demo-route-${route.id}`}
+          href={route.path}
+          key={route.id}
+        >
           {route.label}
         </a>
       ))}
@@ -280,30 +288,46 @@ export function DefaultDemo({ routes }: DefaultDemoProps) {
     cancelActiveDraft();
   }, [cancelActiveDraft, clearDraftSaveFeedback]);
 
-  const handleDraftUpdate = useCallback((updater: Parameters<typeof updateDraftEvent>[0]) => {
-    setDraftSaveState((current) => current.error ? { isSaving: false, error: null } : current);
-    updateDraftEvent(updater);
-  }, [updateDraftEvent]);
+  const handleDraftUpdate = useCallback(
+    (updater: Parameters<typeof updateDraftEvent>[0]) => {
+      setDraftSaveState((current) => (current.error ? { isSaving: false, error: null } : current));
+      updateDraftEvent(updater);
+    },
+    [updateDraftEvent]
+  );
 
-  const handleDraftParticipantToggle = useCallback((calendarId: CalendarId, checked: boolean) => {
-    setDraftSaveState((current) => current.error ? { isSaving: false, error: null } : current);
-    toggleDraftParticipant(calendarId, checked);
-  }, [toggleDraftParticipant]);
+  const handleDraftParticipantToggle = useCallback(
+    (calendarId: CalendarId, checked: boolean) => {
+      setDraftSaveState((current) => (current.error ? { isSaving: false, error: null } : current));
+      toggleDraftParticipant(calendarId, checked);
+    },
+    [toggleDraftParticipant]
+  );
 
-  const handleMove = useCallback((request: EventMoveRequest) => {
-    if (request.event.title.startsWith("Locked") || request.proposedCalendarId === "blocked-calendar") {
-      setMessage("Move rejected by parent validation");
-      return false;
-    }
-    commitEvents((current) => applyMove(current, request));
-    setMessage(request.event.kind === "availability" ? "Availability move accepted" : "Move accepted by parent validation");
-    return true;
-  }, [commitEvents]);
+  const handleMove = useCallback(
+    (request: EventMoveRequest) => {
+      if (request.event.title.startsWith("Locked") || request.proposedCalendarId === "blocked-calendar") {
+        setMessage("Move rejected by parent validation");
+        return false;
+      }
+      commitEvents((current) => applyMove(current, request));
+      setMessage(
+        request.event.kind === "availability" ? "Availability move accepted" : "Move accepted by parent validation"
+      );
+      return true;
+    },
+    [commitEvents]
+  );
 
-  const handleCreate = useCallback((request: EventCreateRequest) => {
-    commitEvents((current) => appendCreatedEvent(current, request));
-    setMessage(request.kind === "availability" ? "Created availability from drawn area" : "Created new event from drawn area");
-  }, [commitEvents]);
+  const handleCreate = useCallback(
+    (request: EventCreateRequest) => {
+      commitEvents((current) => appendCreatedEvent(current, request));
+      setMessage(
+        request.kind === "availability" ? "Created availability from drawn area" : "Created new event from drawn area"
+      );
+    },
+    [commitEvents]
+  );
 
   return (
     <main className="app-shell" data-demo-id="default">
@@ -317,10 +341,15 @@ export function DefaultDemo({ routes }: DefaultDemoProps) {
         </div>
 
         <DemoRouteNav routes={routes} />
+        <DemoSourceLinks sourcePath="src/demo/DefaultDemo.tsx" />
 
         <label>
           Dataset
-          <select value={scale} onChange={(event) => handleScaleChange(Number(event.target.value))} data-testid="scale-select">
+          <select
+            value={scale}
+            onChange={(event) => handleScaleChange(Number(event.target.value))}
+            data-testid="scale-select"
+          >
             {scales.map((value) => (
               <option value={value} key={value}>
                 {value.toLocaleString()} / year
@@ -357,21 +386,40 @@ export function DefaultDemo({ routes }: DefaultDemoProps) {
 
         <label>
           Calendars
-          <input data-testid="calendar-count" type="range" min="1" max={demoCalendars.length} value={calendarCount} onChange={(event) => setCalendarCount(Number(event.target.value))} />
+          <input
+            data-testid="calendar-count"
+            type="range"
+            min="1"
+            max={demoCalendars.length}
+            value={calendarCount}
+            onChange={(event) => setCalendarCount(Number(event.target.value))}
+          />
           <span>{calendarCount}</span>
         </label>
 
         <label>
           Zoom
           <div className="zoom-control">
-            <input data-testid="zoom-slider" type="range" min="0.5" max="8" step="0.1" value={zoom} onChange={(event) => setZoom(Number(event.target.value))} />
+            <input
+              data-testid="zoom-slider"
+              type="range"
+              min="0.5"
+              max="8"
+              step="0.1"
+              value={zoom}
+              onChange={(event) => setZoom(Number(event.target.value))}
+            />
             <output data-testid="zoom-value">{zoom.toFixed(2)}</output>
           </div>
         </label>
 
         <label>
           Snap
-          <select value={snapMinutes} onChange={(event) => setSnapMinutes(Number(event.target.value))} data-testid="snap-select">
+          <select
+            value={snapMinutes}
+            onChange={(event) => setSnapMinutes(Number(event.target.value))}
+            data-testid="snap-select"
+          >
             {[5, 10, 15, 30].map((value) => (
               <option value={value} key={value}>
                 {value} minutes
@@ -383,16 +431,33 @@ export function DefaultDemo({ routes }: DefaultDemoProps) {
         <div className="time-range">
           <label>
             Start
-            <input type="number" min="0" max="22" value={startHour} onChange={(event) => setStartHour(Number(event.target.value))} />
+            <input
+              type="number"
+              min="0"
+              max="22"
+              value={startHour}
+              onChange={(event) => setStartHour(Number(event.target.value))}
+            />
           </label>
           <label>
             End
-            <input type="number" min="1" max="24" value={endHour} onChange={(event) => setEndHour(Number(event.target.value))} />
+            <input
+              type="number"
+              min="1"
+              max="24"
+              value={endHour}
+              onChange={(event) => setEndHour(Number(event.target.value))}
+            />
           </label>
         </div>
 
         <label className="toggle">
-          <input type="checkbox" checked={excludeWeekends} onChange={(event) => setExcludeWeekends(event.target.checked)} data-testid="exclude-weekends" />
+          <input
+            type="checkbox"
+            checked={excludeWeekends}
+            onChange={(event) => setExcludeWeekends(event.target.checked)}
+            data-testid="exclude-weekends"
+          />
           Exclude weekends
         </label>
 
@@ -412,11 +477,21 @@ export function DefaultDemo({ routes }: DefaultDemoProps) {
         <div className="date-jump">
           <label className="date-jump-date">
             Go to date
-            <input type="date" value={jumpDate} onChange={(event) => setJumpDate(event.target.value)} data-testid="jump-date-input" />
+            <input
+              type="date"
+              value={jumpDate}
+              onChange={(event) => setJumpDate(event.target.value)}
+              data-testid="jump-date-input"
+            />
           </label>
           <label className="date-jump-time">
             Time
-            <input type="time" value={jumpTime} onChange={(event) => setJumpTime(event.target.value)} data-testid="jump-time-input" />
+            <input
+              type="time"
+              value={jumpTime}
+              onChange={(event) => setJumpTime(event.target.value)}
+              data-testid="jump-time-input"
+            />
           </label>
           <div className="date-jump-actions">
             <button
@@ -446,7 +521,12 @@ export function DefaultDemo({ routes }: DefaultDemoProps) {
           </div>
         </div>
 
-        <button type="button" className="external-add-button" onClick={handleExternalAdd} data-testid="external-add-button">
+        <button
+          type="button"
+          className="external-add-button"
+          onClick={handleExternalAdd}
+          data-testid="external-add-button"
+        >
           <Plus size={15} aria-hidden />
           Add event
         </button>

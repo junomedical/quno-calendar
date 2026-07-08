@@ -51,36 +51,24 @@ export function timelineHeight(geometry: Pick<TimelineGeometry, "startHour" | "e
 }
 
 /** Converts an absolute minute from midnight into a clamped x-position. */
-export function minuteToX(
-  minute: number,
-  geometry: Pick<TimelineGeometry, "startHour" | "endHour" | "zoom">
-): number {
+export function minuteToX(minute: number, geometry: Pick<TimelineGeometry, "startHour" | "endHour" | "zoom">): number {
   const clampedMinute = Math.min(timelineEndMinute(geometry), Math.max(timelineStartMinute(geometry), minute));
   return (clampedMinute - timelineStartMinute(geometry)) * pixelsPerMinute(geometry.zoom);
 }
 
 /** Converts a timeline x-position into a clamped minute from midnight. */
-export function xToMinute(
-  x: number,
-  geometry: Pick<TimelineGeometry, "startHour" | "endHour" | "zoom">
-): number {
+export function xToMinute(x: number, geometry: Pick<TimelineGeometry, "startHour" | "endHour" | "zoom">): number {
   const minute = timelineStartMinute(geometry) + x / pixelsPerMinute(geometry.zoom);
   return Math.min(timelineEndMinute(geometry), Math.max(timelineStartMinute(geometry), minute));
 }
 
 /** Converts an absolute minute from midnight into a clamped y-position. */
-export function minuteToY(
-  minute: number,
-  geometry: Pick<TimelineGeometry, "startHour" | "endHour" | "zoom">
-): number {
+export function minuteToY(minute: number, geometry: Pick<TimelineGeometry, "startHour" | "endHour" | "zoom">): number {
   return minuteToX(minute, geometry);
 }
 
 /** Converts a timeline y-position into a clamped minute from midnight. */
-export function yToMinute(
-  y: number,
-  geometry: Pick<TimelineGeometry, "startHour" | "endHour" | "zoom">
-): number {
+export function yToMinute(y: number, geometry: Pick<TimelineGeometry, "startHour" | "endHour" | "zoom">): number {
   return xToMinute(y, geometry);
 }
 

@@ -27,6 +27,8 @@ test("shows delayed external save errors in the edit popup", async ({ page }) =>
 test("renders a saved external create in the vertical view", async ({ page }) => {
   await page.goto("/");
   await page.getByTestId("view-infinite-vertical").check();
+  await page.getByRole("spinbutton", { name: "Start" }).fill("8");
+  await page.getByRole("spinbutton", { name: "End" }).fill("18");
   await goToWorkday(page, "2026-07-06");
 
   const draw = await page.evaluate(() => {

@@ -38,7 +38,9 @@ test("moves a draft to a visible date without scrolling", async ({ page }) => {
 
   await expect.poll(async () => draftDateInCalendar(page)).toBe("2026-07-07");
   await expect
-    .poll(async () => page.locator(".ic-viewport").evaluate((element, before) => Math.abs(element.scrollTop - before), scrollTopBefore))
+    .poll(async () =>
+      page.locator(".ic-viewport").evaluate((element, before) => Math.abs(element.scrollTop - before), scrollTopBefore)
+    )
     .toBeLessThanOrEqual(4);
 });
 
@@ -90,7 +92,9 @@ test("does not reuse stale offscreen focus after a draft moves back to a visible
   await page.waitForTimeout(800);
   await expect
     .poll(async () =>
-      page.locator(".ic-viewport").evaluate((element, before) => Math.abs(element.scrollTop - before), scrollTopAfterRecenter)
+      page
+        .locator(".ic-viewport")
+        .evaluate((element, before) => Math.abs(element.scrollTop - before), scrollTopAfterRecenter)
     )
     .toBeLessThanOrEqual(4);
 });

@@ -26,7 +26,9 @@ describe("demo event generator", () => {
     const availabilityEvents = events.filter((event) => event.kind === "availability");
 
     expect(availabilityEvents).toHaveLength(261 * demoCalendars.length);
-    expect(new Set(availabilityEvents.map((event) => event.calendarId))).toEqual(new Set(demoCalendars.map((calendar) => calendar.id)));
+    expect(new Set(availabilityEvents.map((event) => event.calendarId))).toEqual(
+      new Set(demoCalendars.map((calendar) => calendar.id))
+    );
     expect(availabilityEvents.every((event) => ![0, 6].includes(new Date(event.start).getDay()))).toBe(true);
   });
 

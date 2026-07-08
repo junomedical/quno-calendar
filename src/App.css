@@ -66,6 +66,23 @@
   background: #f7fbfc;
 }
 
+.demo-source-link {
+  display: grid;
+  place-items: center;
+  min-height: 32px;
+  padding: 0 10px;
+  color: #d9e8ef;
+  border: 1px solid #287284;
+  border-radius: 6px;
+  font-size: 12px;
+  text-decoration: none;
+}
+
+.demo-source-link:hover {
+  color: #10202b;
+  background: #f7fbfc;
+}
+
 .demo-sidebar select,
 .demo-sidebar input[type="number"],
 .demo-sidebar input[type="date"],
@@ -262,6 +279,12 @@
   min-width: 0;
   min-height: 0;
   padding: 18px;
+}
+
+.example-shell {
+  height: 100vh;
+  padding: 18px;
+  background: #eef3f7;
 }
 
 .external-event-popup {

@@ -152,7 +152,13 @@
   /* Blocked/locked events stay visible but visually communicate unavailable time. */
   color: #6b7280;
   background:
-    repeating-linear-gradient(-45deg, rgba(239, 68, 68, 0.14), rgba(239, 68, 68, 0.14) 3px, transparent 3px, transparent 7px),
+    repeating-linear-gradient(
+      -45deg,
+      rgba(239, 68, 68, 0.14),
+      rgba(239, 68, 68, 0.14) 3px,
+      transparent 3px,
+      transparent 7px
+    ),
     #ffffff;
   border-color: #ef4444;
   border-left-color: #ef4444;

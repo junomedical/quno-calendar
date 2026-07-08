@@ -1,24 +1,69 @@
 {
-  "name": "infinite-calendar-poc",
-  "private": true,
+  "name": "quno-calendar",
   "version": "0.1.0",
+  "description": "Reusable React infinite-calendar component with virtualized horizontal and vertical timelines.",
   "type": "module",
+  "license": "MIT",
+  "author": "",
+  "keywords": [
+    "calendar",
+    "scheduler",
+    "react",
+    "virtualization",
+    "timeline"
+  ],
+  "homepage": "https://github.com/quno-ai/quno-calendar#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/quno-ai/quno-calendar.git"
+  },
+  "bugs": {
+    "url": "https://github.com/quno-ai/quno-calendar/issues"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "main": "./dist/quno-calendar.umd.cjs",
+  "module": "./dist/quno-calendar.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/quno-calendar.js",
+      "require": "./dist/quno-calendar.umd.cjs"
+    },
+    "./styles.css": "./dist/index.css"
+  },
   "scripts": {
     "dev": "vite --host 127.0.0.1",
-    "build": "tsc -b && vite build",
+    "build": "npm run build:lib && npm run build:demo",
+    "build:lib": "vite build -c vite.lib.config.ts",
+    "build:demo": "vite build -c vite.config.ts --outDir dist-demo",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "format": "prettier --check .",
+    "format:write": "prettier --write .",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "preview": "vite preview --host 127.0.0.1"
+    "verify:package": "npm run build:lib && node scripts/verify-package.mjs",
+    "preview": "vite preview --host 127.0.0.1 --outDir dist-demo"
   },
   "dependencies": {
     "@tanstack/react-virtual": "^3.13.12",
-    "date-fns": "^4.1.0",
-    "lucide-react": "^0.468.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "date-fns": "^4.1.0"
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.4",
     "@playwright/test": "^1.54.1",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
@@ -27,9 +72,17 @@
     "@types/react": "^18.3.23",
     "@types/react-dom": "^18.3.7",
     "@vitejs/plugin-react": "^4.7.0",
+    "eslint": "^9.39.4",
+    "eslint-plugin-react-hooks": "^7.1.1",
     "jsdom": "^26.1.0",
+    "lucide-react": "^0.468.0",
+    "prettier": "^3.9.4",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "typescript": "^5.8.3",
+    "typescript-eslint": "^8.63.0",
     "vite": "^7.3.6",
+    "vite-plugin-dts": "^5.0.3",
     "vitest": "^3.2.6"
   }
 }

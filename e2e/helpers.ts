@@ -32,30 +32,41 @@ export async function goToWorkday(page: Page, date = "2026-07-06") {
 }
 
 export async function viewportRelativeEventBox(page: Page, selector: string, textIncludes?: string) {
-  return page.evaluate(({ eventSelector, text }) => {
-    const viewport = document.querySelector<HTMLElement>(".ic-viewport");
-    if (!viewport) {
-      return null;
-    }
-    const viewportBox = viewport.getBoundingClientRect();
-    const candidates = Array.from(document.querySelectorAll<HTMLElement>(eventSelector)).filter(
-      (candidate) => !text || candidate.textContent?.includes(text)
-    );
-    const element = candidates.find((candidate) => {
-      const box = candidate.getBoundingClientRect();
-      return box.width > 0 && box.height > 0 && box.right > viewportBox.left && box.left < viewportBox.right && box.bottom > viewportBox.top && box.top < viewportBox.bottom;
-    }) ?? candidates[0];
-    if (!element) {
-      return null;
-    }
-    const eventBox = element.getBoundingClientRect();
-    return {
-      x: eventBox.left - viewportBox.left,
-      y: eventBox.top - viewportBox.top,
-      width: eventBox.width,
-      height: eventBox.height
-    };
-  }, { eventSelector: selector, text: textIncludes });
+  return page.evaluate(
+    ({ eventSelector, text }) => {
+      const viewport = document.querySelector<HTMLElement>(".ic-viewport");
+      if (!viewport) {
+        return null;
+      }
+      const viewportBox = viewport.getBoundingClientRect();
+      const candidates = Array.from(document.querySelectorAll<HTMLElement>(eventSelector)).filter(
+        (candidate) => !text || candidate.textContent?.includes(text)
+      );
+      const element =
+        candidates.find((candidate) => {
+          const box = candidate.getBoundingClientRect();
+          return (
+            box.width > 0 &&
+            box.height > 0 &&
+            box.right > viewportBox.left &&
+            box.left < viewportBox.right &&
+            box.bottom > viewportBox.top &&
+            box.top < viewportBox.bottom
+          );
+        }) ?? candidates[0];
+      if (!element) {
+        return null;
+      }
+      const eventBox = element.getBoundingClientRect();
+      return {
+        x: eventBox.left - viewportBox.left,
+        y: eventBox.top - viewportBox.top,
+        width: eventBox.width,
+        height: eventBox.height
+      };
+    },
+    { eventSelector: selector, text: textIncludes }
+  );
 }
 
 export function todayDateKey() {
@@ -123,7 +134,9 @@ export async function firstCompactSingleLaneEvent(page: Page) {
     if (!viewport) return null;
     const safeTop = viewport.y + 92;
 
-    for (const element of Array.from(document.querySelectorAll<HTMLElement>('[data-testid="calendar-event"][data-lane-count="1"]'))) {
+    for (const element of Array.from(
+      document.querySelectorAll<HTMLElement>('[data-testid="calendar-event"][data-lane-count="1"]')
+    )) {
       const box = element.getBoundingClientRect();
       const rowBox = element.closest<HTMLElement>('[data-testid="calendar-row"]')?.getBoundingClientRect();
       const timeLine = element.querySelector<HTMLElement>(".demo-event-time");
@@ -214,19 +227,37 @@ export async function firstDuplicatedViewportEvent(page: Page) {
     if (!viewport) return null;
     const safeTop = viewport.y + 92;
 
-    const groups = new Map<string, { id: string; boxes: { x: number; y: number; width: number; height: number }[] }>();
+    const groups = new Map<
+      string,
+      { id: string; boxes: { x: number; y: number; width: number; height: number; calendarId: string }[] }
+    >();
     for (const element of Array.from(document.querySelectorAll<HTMLElement>('[data-testid="calendar-event"]'))) {
       const id = element.dataset.eventId;
       const box = element.getBoundingClientRect();
-      if (!id || box.y < safeTop || box.y + box.height > viewport.y + viewport.height || box.x < viewport.x || box.x > viewport.right) {
+      if (
+        !id ||
+        box.y < safeTop ||
+        box.y + box.height > viewport.y + viewport.height ||
+        box.x < viewport.x ||
+        box.x > viewport.right
+      ) {
         continue;
       }
       const group = groups.get(id) ?? { id, boxes: [] };
-      group.boxes.push({ x: box.x, y: box.y, width: box.width, height: box.height });
+      group.boxes.push({
+        x: box.x,
+        y: box.y,
+        width: box.width,
+        height: box.height,
+        calendarId: element.dataset.calendarId ?? ""
+      });
       groups.set(id, group);
     }
 
-    return Array.from(groups.values()).find((group) => group.boxes.length > 1) ?? null;
+    const duplicates = Array.from(groups.values()).filter((group) => group.boxes.length > 1);
+    return (
+      duplicates.find((group) => group.boxes.some((box) => !box.calendarId.includes("room"))) ?? duplicates[0] ?? null
+    );
   });
 
   if (!duplicate) {
@@ -315,7 +346,8 @@ export async function verticalTopVisibleGeometry(page: Page) {
       throw new Error("Calendar viewport not found");
     }
 
-    let best: { date: string; y: number; offsetWithinDate: number; dayHeight: number; headerHeight: number } | null = null;
+    let best: { date: string; y: number; offsetWithinDate: number; dayHeight: number; headerHeight: number } | null =
+      null;
     for (const element of Array.from(document.querySelectorAll<HTMLElement>('[data-testid="calendar-day"]'))) {
       const box = element.getBoundingClientRect();
       const date = element.dataset.date;
@@ -348,9 +380,7 @@ export async function selectPageText(page: Page) {
     selection?.removeAllRanges();
     selection?.addRange(range);
   });
-  await expect
-    .poll(async () => page.evaluate(() => window.getSelection()?.toString().length ?? 0))
-    .toBeGreaterThan(0);
+  await expect.poll(async () => page.evaluate(() => window.getSelection()?.toString().length ?? 0)).toBeGreaterThan(0);
 }
 
 export async function visibleDayDates(page: Page) {
@@ -408,7 +438,8 @@ export async function renderedDayOverscanFailures(page: Page, maxDistanceDays: n
         return ["missing rendered day date"];
       }
       const dayNumber = toDayNumber(dateKey);
-      const distance = dayNumber < firstVisibleDay ? firstVisibleDay - dayNumber : Math.max(0, dayNumber - lastVisibleDay);
+      const distance =
+        dayNumber < firstVisibleDay ? firstVisibleDay - dayNumber : Math.max(0, dayNumber - lastVisibleDay);
       return distance > distanceLimit ? [`${dateKey}: ${distance}d`] : [];
     });
   }, maxDistanceDays);

@@ -2,15 +2,8 @@ import { useMemo, type MouseEvent, type PointerEvent } from "react";
 import { eventBelongsToCalendar } from "../../data/calendarEvents";
 import { EventShell } from "./EventShell";
 import { layoutEventsForRow } from "../../layout/layout";
-import {
-  eventDateKey,
-  gridCadenceMinutes,
-  TIMELINE_LEFT_GUTTER_PX
-} from "../utils/infiniteTimelineUtils";
-import {
-  minuteToX,
-  minutesSinceStartOfDay
-} from "../../time/time";
+import { eventDateKey, gridCadenceMinutes, TIMELINE_LEFT_GUTTER_PX } from "../utils/infiniteTimelineUtils";
+import { minuteToX, minutesSinceStartOfDay } from "../../time/time";
 import type {
   CalendarEvent,
   CalendarId,
@@ -107,7 +100,12 @@ export function InfiniteTimelineRow({
   const gridCellWidth = Math.max(1, settings.zoom * gridCadenceMinutes(settings.zoom));
 
   return (
-    <div className="ic-row" data-testid="calendar-row" data-calendar-id={calendar.id} style={{ top, height: rowHeight }}>
+    <div
+      className="ic-row"
+      data-testid="calendar-row"
+      data-calendar-id={calendar.id}
+      style={{ top, height: rowHeight }}
+    >
       <div className="ic-left-label ic-row-label" style={{ width: settings.labelWidth }}>
         {calendar.name}
       </div>
@@ -178,7 +176,8 @@ export function InfiniteTimelineRow({
         })}
         {layoutItems.map((item) => {
           const isDraggingOriginal = dragEventId === item.event.id;
-          const isHovered = !dragEventId && hoveredEvent?.eventId === item.event.id && hoveredEvent.calendarId === calendar.id;
+          const isHovered =
+            !dragEventId && hoveredEvent?.eventId === item.event.id && hoveredEvent.calendarId === calendar.id;
           const status = isDraggingOriginal ? "dragging" : isHovered ? "hovered" : "existing";
           const expanded = isHovered;
           const itemLeft = TIMELINE_LEFT_GUTTER_PX + item.left;

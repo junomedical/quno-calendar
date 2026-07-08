@@ -60,11 +60,7 @@ export function InfiniteTimeScaleHeader({
         ) : null}
         {timeTicks.map((tick) => (
           <span
-            className={[
-              "ic-time-tick",
-              tick.isHour ? "is-hour" : "",
-              tick.showLabel ? "" : "is-label-hidden"
-            ]
+            className={["ic-time-tick", tick.isHour ? "is-hour" : "", tick.showLabel ? "" : "is-label-hidden"]
               .filter(Boolean)
               .join(" ")}
             key={`sticky-${tick.minute}`}

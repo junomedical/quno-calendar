@@ -7,11 +7,14 @@ test("supports dragging an event to another time", async ({ page }) => {
   const initialEventCount = await page.getByTestId("calendar-event").count();
   const duplicate = await firstDuplicatedViewportEvent(page);
   const [box] = duplicate.boxes;
-  const gridBox = await page.locator(`[data-testid="calendar-event"][data-event-id="${duplicate.id}"]`).first().evaluate((element) => {
-    const grid = element.closest(".ic-row-grid");
-    const rect = grid?.getBoundingClientRect();
-    return rect ? { left: rect.left, right: rect.right } : null;
-  });
+  const gridBox = await page
+    .locator(`[data-testid="calendar-event"][data-event-id="${duplicate.id}"]`)
+    .first()
+    .evaluate((element) => {
+      const grid = element.closest(".ic-row-grid");
+      const rect = grid?.getBoundingClientRect();
+      return rect ? { left: rect.left, right: rect.right } : null;
+    });
   expect(gridBox).not.toBeNull();
   if (!gridBox) return;
   const targetX = Math.max(gridBox.left + 12, Math.min(box.x + 80, gridBox.right - 12));
@@ -21,9 +24,9 @@ test("supports dragging an event to another time", async ({ page }) => {
   await page.mouse.down();
   await page.mouse.move(targetX, box.y + 12);
   await expect(page.getByTestId("drag-preview-event").first()).toBeVisible();
-  await expect(page.locator(`[data-testid="calendar-event"][data-event-id="${duplicate.id}"] [data-render-status="dragging"]`)).toHaveCount(
-    duplicate.boxes.length
-  );
+  await expect(
+    page.locator(`[data-testid="calendar-event"][data-event-id="${duplicate.id}"] [data-render-status="dragging"]`)
+  ).toHaveCount(duplicate.boxes.length);
   expect(await page.getByTestId("drag-preview-event").count()).toBeGreaterThanOrEqual(duplicate.boxes.length);
   await expect(page.locator('[data-render-status="dragging"]').first()).toHaveCSS("opacity", "0.5");
   await expect(page.locator(".ic-viewport")).toHaveCSS("user-select", "none");

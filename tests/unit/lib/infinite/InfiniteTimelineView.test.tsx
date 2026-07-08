@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { CalendarRoot, type CalendarEvent, type EventRendererProps } from "../../../../src/lib";
+import { CalendarRoot, type CalendarEvent, type EventRendererProps, type LoadEvents } from "../../../../src/lib";
 
 const calendars = [
   { id: "calendar-a", name: "Calendar A", color: "#0b6eff" },
@@ -8,6 +8,52 @@ const calendars = [
 ];
 
 describe("InfiniteTimelineView", () => {
+  it("passes className, style, and ariaLabel to the calendar surface", () => {
+    const loadEvents = vi.fn<LoadEvents>(async () => []);
+
+    render(
+      <CalendarRoot
+        ariaLabel="Public schedule"
+        className="custom-calendar"
+        style={{ minHeight: 320 }}
+        calendars={calendars}
+        selectedCalendarIds={["calendar-a"]}
+        loadEvents={loadEvents}
+        eventRenderer={({ event, style }) => <div style={style}>{event.title}</div>}
+        now={new Date("2026-07-04T09:30:00")}
+      />
+    );
+
+    const shell = screen.getByTestId("infinite-calendar");
+    expect(shell).toHaveAccessibleName("Public schedule");
+    expect(shell).toHaveClass("ic-shell", "custom-calendar");
+    expect(shell).toHaveStyle({ minHeight: "320px" });
+  });
+
+  it("uses initialDateKey as the initial virtual range anchor", async () => {
+    const loadEvents = vi.fn<LoadEvents>(async () => []);
+
+    render(
+      <CalendarRoot
+        calendars={calendars}
+        selectedCalendarIds={["calendar-a"]}
+        loadEvents={loadEvents}
+        eventRenderer={({ event, style }) => <div style={style}>{event.title}</div>}
+        initialDateKey="2026-08-12"
+        now={new Date("2026-07-04T09:30:00")}
+      />
+    );
+
+    await waitFor(() => expect(loadEvents).toHaveBeenCalled());
+    const request = loadEvents.mock.calls[0]?.[0];
+    expect(request).toBeDefined();
+    if (!request) {
+      throw new Error("Expected loadEvents request");
+    }
+    expect(request.startDate <= "2026-08-12").toBe(true);
+    expect(request.endDate >= "2026-08-12").toBe(true);
+  });
+
   it("renders fixed labels, events, and the current-time indicator", async () => {
     const renderer = vi.fn(({ event, status, style }: EventRendererProps) => (
       <div data-testid="custom-event" data-status={status} style={style}>

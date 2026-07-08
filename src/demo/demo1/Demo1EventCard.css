@@ -78,7 +78,13 @@
 .demo1-event-card.kind-blocked {
   color: #555f6f;
   background:
-    repeating-linear-gradient(135deg, rgba(239, 68, 68, 0.16), rgba(239, 68, 68, 0.16) 2px, transparent 2px, transparent 6px),
+    repeating-linear-gradient(
+      135deg,
+      rgba(239, 68, 68, 0.16),
+      rgba(239, 68, 68, 0.16) 2px,
+      transparent 2px,
+      transparent 6px
+    ),
     #ffffff;
   border-color: #ef4444;
   border-left-color: #ef4444;

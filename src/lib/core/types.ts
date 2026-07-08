@@ -27,12 +27,7 @@ export type CalendarEvent = {
 };
 
 /** Visual state passed to the external event renderer. */
-export type EventRenderStatus =
-  | "existing"
-  | "hovered"
-  | "dragging"
-  | "drop-preview"
-  | "new";
+export type EventRenderStatus = "existing" | "hovered" | "dragging" | "drop-preview" | "new";
 
 /** Shared geometry, interaction, and filtering settings for timeline views. */
 export type TimelineSettings = {
@@ -111,6 +106,10 @@ export type CalendarViewComponentProps = {
   loadEvents: LoadEvents;
   eventVersion?: number | string;
   eventRenderer: EventRenderer;
+  className?: string;
+  style?: CSSProperties;
+  ariaLabel?: string;
+  initialDateKey?: string;
   settings?: Partial<TimelineSettings>;
   now?: Date;
   interactionMode?: "events" | "availability";

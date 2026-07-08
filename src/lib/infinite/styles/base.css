@@ -1,0 +1,71 @@
+.ic-shell {
+  --ic-cell-border: #dfe5ec;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #ffffff;
+  border: 1px solid var(--ic-cell-border);
+  border-radius: 8px;
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.08);
+}
+
+.ic-viewport {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  overscroll-behavior: contain;
+  cursor: crosshair;
+}
+
+.ic-viewport,
+.ic-viewport * {
+  user-select: none;
+}
+
+.ic-virtual-space {
+  position: relative;
+}
+
+.ic-day {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.ic-day-header-band {
+  position: absolute;
+  z-index: 0;
+  background: #f4f7fb;
+  border-bottom: 1px solid var(--ic-cell-border);
+  pointer-events: none;
+}
+
+.ic-day-header {
+  position: sticky;
+  z-index: 280;
+  display: flex;
+  background: transparent;
+  pointer-events: none;
+}
+
+.ic-left-label {
+  position: sticky;
+  left: 0;
+  z-index: 260;
+  flex: 0 0 auto;
+  background: #ffffff;
+  border-right: 1px solid var(--ic-cell-border);
+}
+
+.ic-date-label {
+  z-index: 280;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  color: #101820;
+  background: #f4f7fb;
+  font-weight: 750;
+  pointer-events: auto;
+}

@@ -1,38 +1,44 @@
 import { expect, test } from "@playwright/test";
-import { firstCompactSingleLaneEvent, firstExpandableOverlappedEvent, firstDuplicatedViewportEvent, goToWorkday, mutedAccentColor } from "../helpers";
+import {
+  firstCompactSingleLaneEvent,
+  firstExpandableOverlappedEvent,
+  firstDuplicatedViewportEvent,
+  goToWorkday,
+  mutedAccentColor
+} from "../helpers";
 
 test("drops minor time labels at dense zoom levels", async ({ page }) => {
   await page.goto("/");
-  const minuteLabelsAtDefaultZoom = await page.locator(".ic-time-tick:not(.is-hour)").evaluateAll((elements) =>
-    elements.map((element) => element.textContent?.trim()).filter(Boolean)
-  );
+  const minuteLabelsAtDefaultZoom = await page
+    .locator(".ic-time-tick:not(.is-hour)")
+    .evaluateAll((elements) => elements.map((element) => element.textContent?.trim()).filter(Boolean));
   expect(minuteLabelsAtDefaultZoom).toContain("30");
   expect(minuteLabelsAtDefaultZoom).not.toContain("15");
   expect(minuteLabelsAtDefaultZoom).not.toContain("45");
   await expect(page.locator(".ic-time-tick sup").first()).toHaveText("30");
 
   await page.getByTestId("zoom-slider").fill("2");
-  const minuteLabelsAtReadableZoom = await page.locator(".ic-time-tick:not(.is-hour)").evaluateAll((elements) =>
-    elements.map((element) => element.textContent?.trim()).filter(Boolean)
-  );
+  const minuteLabelsAtReadableZoom = await page
+    .locator(".ic-time-tick:not(.is-hour)")
+    .evaluateAll((elements) => elements.map((element) => element.textContent?.trim()).filter(Boolean));
   expect(minuteLabelsAtReadableZoom).toContain("15");
   expect(minuteLabelsAtReadableZoom).toContain("30");
   expect(minuteLabelsAtReadableZoom).toContain("45");
 
   await page.getByTestId("zoom-slider").fill("0.5");
 
-  const minuteLabelsAtDenseZoom = await page.locator(".ic-time-tick:not(.is-hour)").evaluateAll((elements) =>
-    elements.map((element) => element.textContent?.trim()).filter(Boolean)
-  );
+  const minuteLabelsAtDenseZoom = await page
+    .locator(".ic-time-tick:not(.is-hour)")
+    .evaluateAll((elements) => elements.map((element) => element.textContent?.trim()).filter(Boolean));
   expect(minuteLabelsAtDenseZoom).toContain("30");
   expect(minuteLabelsAtDenseZoom).not.toContain("15");
   expect(minuteLabelsAtDenseZoom).not.toContain("45");
   await expect(page.locator(".ic-time-tick.is-hour").first()).toBeVisible();
 
   await page.getByTestId("zoom-slider").fill("8");
-  const highZoomLabels = await page.locator(".ic-time-tick").evaluateAll((elements) =>
-    elements.map((element) => element.textContent?.trim()).filter(Boolean)
-  );
+  const highZoomLabels = await page
+    .locator(".ic-time-tick")
+    .evaluateAll((elements) => elements.map((element) => element.textContent?.trim()).filter(Boolean));
   expect(highZoomLabels[0]).toMatch(/^\d{1,2}$/);
   expect(highZoomLabels.slice(1, 12)).toEqual(["5", "10", "15", "20", "25", "30", "35", "40", "45", "50", "55"]);
 });
@@ -76,15 +82,24 @@ test("lets external event renderers adapt content to short heights with CSS", as
     document.body.append(iconFixture);
   });
 
-  const patientDisplay = await page.locator(".demo-event-patient").last().evaluate((element) => {
-    return window.getComputedStyle(element).display;
-  });
-  const titleFontSize = await page.locator(".demo-event-title").last().evaluate((element) => {
-    return window.getComputedStyle(element).fontSize;
-  });
-  const timeDisplay = await page.locator(".demo-event-time").last().evaluate((element) => {
-    return window.getComputedStyle(element).display;
-  });
+  const patientDisplay = await page
+    .locator(".demo-event-patient")
+    .last()
+    .evaluate((element) => {
+      return window.getComputedStyle(element).display;
+    });
+  const titleFontSize = await page
+    .locator(".demo-event-title")
+    .last()
+    .evaluate((element) => {
+      return window.getComputedStyle(element).fontSize;
+    });
+  const timeDisplay = await page
+    .locator(".demo-event-time")
+    .last()
+    .evaluate((element) => {
+      return window.getComputedStyle(element).display;
+    });
 
   expect(patientDisplay).toBe("none");
   expect(timeDisplay).toBe("none");
@@ -119,17 +134,28 @@ test("expands compact single-lane events on hover so renderer details fit", asyn
     return window.getComputedStyle(element).justifyContent;
   });
 
-  await page.mouse.move(compactEvent.x + Math.min(20, compactEvent.width / 2), compactEvent.y + compactEvent.height / 2);
+  await page.mouse.move(
+    compactEvent.x + Math.min(20, compactEvent.width / 2),
+    compactEvent.y + compactEvent.height / 2
+  );
   await expect(page.locator(`${eventSelector}:has([data-render-status="hovered"])`)).toBeVisible();
-  await expect(page.locator(`${eventSelector}:has([data-render-status="hovered"]) .demo-event-time`)).toHaveCSS("display", "flex");
-  await expect(page.locator(`${eventSelector}:has([data-render-status="hovered"]) .demo-event-title`)).toHaveCSS("font-size", titleFontSizeBeforeHover);
+  await expect(page.locator(`${eventSelector}:has([data-render-status="hovered"]) .demo-event-time`)).toHaveCSS(
+    "display",
+    "flex"
+  );
+  await expect(page.locator(`${eventSelector}:has([data-render-status="hovered"]) .demo-event-title`)).toHaveCSS(
+    "font-size",
+    titleFontSizeBeforeHover
+  );
   await expect(page.locator(`${eventSelector}:has([data-render-status="hovered"]) .demo-event-card`)).toHaveCSS(
     "justify-content",
     justifyContentBeforeHover
   );
-  const hoveredHeight = await page.locator(`${eventSelector}:has([data-render-status="hovered"])`).evaluate((element) => {
-    return element.getBoundingClientRect().height;
-  });
+  const hoveredHeight = await page
+    .locator(`${eventSelector}:has([data-render-status="hovered"])`)
+    .evaluate((element) => {
+      return element.getBoundingClientRect().height;
+    });
   expect(hoveredHeight).toBeLessThanOrEqual(compactEvent.rowHeight);
   expect(hoveredHeight).toBe(compactEvent.laneHeight);
   expect(hoveredHeight).toBeGreaterThan(compactEvent.height);
@@ -145,9 +171,11 @@ test("expands overlapped event shells to the full row lane height on hover", asy
   await page.mouse.move(event.x + Math.min(20, event.width / 2), event.y + event.height / 2);
   await expect(page.locator(`${eventSelector}:has([data-render-status="hovered"])`)).toBeVisible();
 
-  const hoveredHeight = await page.locator(`${eventSelector}:has([data-render-status="hovered"])`).evaluate((element) => {
-    return element.getBoundingClientRect().height;
-  });
+  const hoveredHeight = await page
+    .locator(`${eventSelector}:has([data-render-status="hovered"])`)
+    .evaluate((element) => {
+      return element.getBoundingClientRect().height;
+    });
   expect(hoveredHeight).toBeGreaterThan(event.height);
   expect(hoveredHeight).toBeGreaterThan(event.laneHeight);
   expect(hoveredHeight).toBeCloseTo(event.rowHeight, 0);
@@ -158,20 +186,28 @@ test("uses card left accent borders without calendar row color strips", async ({
   await goToWorkday(page);
   await page.waitForSelector('[data-testid="calendar-event"]');
 
-  const rowBorderLeftWidth = await page.locator(".ic-row-label").first().evaluate((element) => {
-    return window.getComputedStyle(element).borderLeftWidth;
-  });
-  const cardBorderWidths = await page.getByTestId("calendar-event").first().evaluate((element) => {
-    const card = element.querySelector(".demo-event-card");
-    if (!card) return null;
-    const styles = window.getComputedStyle(card);
-    return {
-      left: styles.borderLeftWidth,
-      top: styles.borderTopWidth
-    };
-  });
+  const rowBorderLeftWidth = await page
+    .locator(".ic-row-label")
+    .first()
+    .evaluate((element) => {
+      return window.getComputedStyle(element).borderLeftWidth;
+    });
+  const cardBorderWidths = await page
+    .getByTestId("calendar-event")
+    .first()
+    .evaluate((element) => {
+      const card = element.querySelector(".demo-event-card");
+      if (!card) return null;
+      const styles = window.getComputedStyle(card);
+      return {
+        left: styles.borderLeftWidth,
+        top: styles.borderTopWidth
+      };
+    });
   const standardCardColors = await page.evaluate(() => {
-    const card = Array.from(document.querySelectorAll<HTMLElement>('[data-testid="calendar-event"] .demo-event-card')).find(
+    const card = Array.from(
+      document.querySelectorAll<HTMLElement>('[data-testid="calendar-event"] .demo-event-card')
+    ).find(
       (element) =>
         !element.classList.contains("kind-availability") &&
         !element.classList.contains("kind-blocked") &&
@@ -187,9 +223,12 @@ test("uses card left accent borders without calendar row color strips", async ({
       mutedAccentVariable: shellStyles?.getPropertyValue("--event-accent-muted").trim() ?? ""
     };
   });
-  const eventTransitionDuration = await page.getByTestId("calendar-event").first().evaluate((element) => {
-    return window.getComputedStyle(element).transitionDuration;
-  });
+  const eventTransitionDuration = await page
+    .getByTestId("calendar-event")
+    .first()
+    .evaluate((element) => {
+      return window.getComputedStyle(element).transitionDuration;
+    });
 
   expect(rowBorderLeftWidth).toBe("0px");
   expect(cardBorderWidths).toEqual({ left: "6px", top: "1px" });
@@ -208,9 +247,12 @@ test("supports availability editing mode", async ({ page }) => {
   await expect(page.getByTestId("availability-event").first()).toBeVisible();
   await expect(page.getByTestId("calendar-event").first()).toBeVisible();
 
-  const inactiveAvailabilityPointerEvents = await page.getByTestId("availability-event").first().evaluate((element) => {
-    return window.getComputedStyle(element).pointerEvents;
-  });
+  const inactiveAvailabilityPointerEvents = await page
+    .getByTestId("availability-event")
+    .first()
+    .evaluate((element) => {
+      return window.getComputedStyle(element).pointerEvents;
+    });
   expect(inactiveAvailabilityPointerEvents).toBe("none");
 
   await page.getByTestId("availability-mode").check();
@@ -222,7 +264,9 @@ test("supports availability editing mode", async ({ page }) => {
     const viewport = document.querySelector(".ic-viewport")?.getBoundingClientRect();
     if (!viewport) return null;
 
-    for (const availability of Array.from(document.querySelectorAll<HTMLElement>('[data-testid="availability-event"]'))) {
+    for (const availability of Array.from(
+      document.querySelectorAll<HTMLElement>('[data-testid="availability-event"]')
+    )) {
       const row = availability.closest<HTMLElement>('[data-testid="calendar-row"]');
       const grid = row?.querySelector<HTMLElement>(".ic-row-grid");
       if (!row || !grid) continue;
@@ -259,7 +303,9 @@ test("supports availability editing mode", async ({ page }) => {
   const availabilityBox = await page.evaluate(() => {
     const viewport = document.querySelector(".ic-viewport")?.getBoundingClientRect();
     if (!viewport) return null;
-    for (const availability of Array.from(document.querySelectorAll<HTMLElement>('[data-testid="availability-event"]'))) {
+    for (const availability of Array.from(
+      document.querySelectorAll<HTMLElement>('[data-testid="availability-event"]')
+    )) {
       const row = availability.closest<HTMLElement>('[data-testid="calendar-row"]');
       const grid = row?.querySelector<HTMLElement>(".ic-row-grid");
       const box = availability.getBoundingClientRect();
@@ -277,7 +323,9 @@ test("supports availability editing mode", async ({ page }) => {
   await page.mouse.down();
   await page.mouse.move(availabilityBox.x + 64, availabilityBox.y + availabilityBox.height / 2);
   await expect(page.getByTestId("drag-preview-event").first()).toBeVisible();
-  await expect(page.locator('[data-testid="availability-event"] [data-render-status="dragging"]').first()).toBeVisible();
+  await expect(
+    page.locator('[data-testid="availability-event"] [data-render-status="dragging"]').first()
+  ).toBeVisible();
   await page.mouse.up();
   await expect(page.getByTestId("demo-message")).toContainText("Availability move accepted");
 });
@@ -291,7 +339,9 @@ test("focuses only the hovered row instance of a multi-calendar event", async ({
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
   await page.waitForTimeout(180);
 
-  await expect(page.locator(`[data-testid="calendar-event"][data-event-id="${duplicate.id}"] [data-render-status="hovered"]`)).toHaveCount(1);
+  await expect(
+    page.locator(`[data-testid="calendar-event"][data-event-id="${duplicate.id}"] [data-render-status="hovered"]`)
+  ).toHaveCount(1);
 });
 
 test("does not widen hovered cards when their text already fits", async ({ page }) => {

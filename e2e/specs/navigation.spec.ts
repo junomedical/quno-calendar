@@ -35,7 +35,9 @@ test("keeps the active day when calendar count changes and supports date navigat
   await expect.poll(async () => topVisibleDayDate(page)).toBe(visibleDate);
   const visibleStateAfterIncrease = await topVisibleDayState(page);
   expect(visibleStateAfterIncrease.date).toBe(visibleStateBeforeIncrease.date);
-  expect(Math.abs(visibleStateAfterIncrease.offsetWithinDate - visibleStateBeforeIncrease.offsetWithinDate)).toBeLessThanOrEqual(2);
+  expect(
+    Math.abs(visibleStateAfterIncrease.offsetWithinDate - visibleStateBeforeIncrease.offsetWithinDate)
+  ).toBeLessThanOrEqual(2);
 
   await viewport.evaluate((element) => {
     element.scrollTop += 260;
@@ -45,9 +47,9 @@ test("keeps the active day when calendar count changes and supports date navigat
   await setCalendarCount(page, "1");
   await expect.poll(async () => topVisibleDayDate(page)).toBe(visibleStateBeforeReduction.date);
   const visibleStateAfterReduction = await topVisibleDayState(page);
-  const reducedDayHeight = await page.locator(`[data-testid="calendar-day"][data-date="${visibleStateBeforeReduction.date}"]`).evaluate(
-    (element) => element.getBoundingClientRect().height
-  );
+  const reducedDayHeight = await page
+    .locator(`[data-testid="calendar-day"][data-date="${visibleStateBeforeReduction.date}"]`)
+    .evaluate((element) => element.getBoundingClientRect().height);
   expect(visibleStateAfterReduction.date).toBe(visibleStateBeforeReduction.date);
   expect(visibleStateAfterReduction.offsetWithinDate).toBeLessThan(reducedDayHeight);
 

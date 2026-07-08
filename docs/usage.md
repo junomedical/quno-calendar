@@ -1,453 +1,144 @@
-# Library Usage Examples
+# Usage Recipes
 
-For canonical names of interface parts such as date header, calendar row, overlap lane, event shell, and event card, see [Interface Taxonomy](./taxonomy.md).
+Import the component and stylesheet from the package entrypoint:
 
-## Minimal Read-Only Infinite Calendar
 ```tsx
-import { CalendarRoot, type CalendarEvent, type LoadEvents } from "./lib";
+import { CalendarRoot, type EventRendererProps, type LoadEvents } from "quno-calendar";
+import "quno-calendar/styles.css";
+```
 
-const calendars = [{ id: "room-201", name: "Room 201" }];
+Local examples in this repository import from `src/lib`, but package consumers should use `quno-calendar`.
+
+## Read-Only Calendar
+
+Use `CalendarRoot` with calendars, selected ids, an async visible-range loader, and an event renderer.
+
+```tsx
+const calendars = [{ id: "provider-a", name: "Provider A" }];
 
 const loadEvents: LoadEvents = async ({ startDate, endDate, calendarIds }) => {
-  const events: CalendarEvent[] = await fetchEvents(startDate, endDate, calendarIds);
-  return events;
+  return api.events({ startDate, endDate, calendarIds });
 };
 
-function EventCard({ event, status, style }) {
+function EventCard({ event, status, style }: EventRendererProps) {
   return (
-    <div style={style} data-status={status}>
+    <article style={style} data-status={status}>
       <strong>{event.title}</strong>
-      <span>{event.subtitle}</span>
-    </div>
+      {event.subtitle ? <span>{event.subtitle}</span> : null}
+    </article>
   );
 }
 
-export function Calendar() {
-  return (
 <CalendarRoot
   calendars={calendars}
-  selectedCalendarIds={["room-201"]}
+  selectedCalendarIds={["provider-a"]}
   loadEvents={loadEvents}
   eventRenderer={EventCard}
   view="infinite-horizontal"
-  interactionMode="events"
-  settings={{ startHour: 8, endHour: 18, zoom: 1, snapMinutes: 15 }}
-/>
-  );
-}
+/>;
 ```
 
-Use `view="infinite-vertical"` when calendars should render left-to-right as columns and time should run top-to-bottom inside each day:
+Repository example: `src/examples/ReadOnlyCalendar.tsx`.
+
+## Vertical Planner
+
+Use `view="infinite-vertical"` for resource columns with time running vertically.
 
 ```tsx
 <CalendarRoot
-  calendars={calendars}
-  selectedCalendarIds={["dr-kirillov", "room-201"]}
-  loadEvents={loadEvents}
-  eventRenderer={EventCard}
+  {...calendarProps}
   view="infinite-vertical"
   settings={{
     startHour: 8,
     endHour: 18,
-    zoom: 1.2,
-    snapMinutes: 15,
+    zoom: 1.8,
     verticalColumnMinWidth: 280,
-    verticalColumnOverlapCapacity: 4,
-    verticalColumnOverlapGrowth: 90,
-    verticalEventHoverMinHeight: 76
+    verticalColumnOverlapCapacity: 3,
+    verticalColumnOverlapGrowth: 90
   }}
-/>;
+/>
 ```
 
-`view="infinite"` remains supported as a compatibility alias for `view="infinite-horizontal"`.
+Repository example: `src/examples/VerticalPlanner.tsx`.
 
-The same `CalendarRoot` contract can back multiple product treatments. Keep product-specific layout choices in parent-owned `settings`, selected calendar defaults, and the supplied `eventRenderer`; the demo routes `/demo1`, `/demo2`, and `/demo3` show compact horizontal, wide vertical, and availability-first compositions without changing library APIs.
+## Drag And Create
 
-## Calendar and Event Data
-Use `calendarId` for a single-row event. Use `calendarIds` when the same event should render in multiple selected rows, such as a doctor and a room:
+The calendar requests changes. Parent code validates and persists them.
+
+```tsx
+<CalendarRoot
+  {...calendarProps}
+  onEventMoveRequest={async (request) => {
+    await api.moveEvent(request);
+    return true;
+  }}
+  onEventCreateRequest={async (request) => {
+    return api.createEvent(request);
+  }}
+/>
+```
+
+Returning `false` from `onEventMoveRequest` rejects a drop. Returning a created event from `onEventCreateRequest` lets the visible cache show the committed event immediately.
+
+Repository example: `src/examples/DragCreateCalendar.tsx`.
+
+## Controlled Create/Edit Draft
+
+Use controlled drafts when create/edit UI lives outside the calendar.
+
+```tsx
+<CalendarRoot
+  {...calendarProps}
+  activeDraft={activeDraft}
+  onEventDraftRequest={(request) => openCreateForm(request)}
+  onEventActivate={(request) => openEditForm(request)}
+  onActiveDraftMoveRequest={(request) => updateDraftTimeAndCalendar(request)}
+/>
+```
+
+While an edit draft is active, the calendar hides the loaded source event and renders the controlled draft in its proposed position. Parent code decides how save, cancel, validation, and form fields work.
+
+Repository example: `src/examples/ControlledDraftCalendar.tsx`.
+
+## Availability Editing
+
+Availability uses normal events with `kind: "availability"`. In appointment mode, availability renders as background context. In availability mode, availability blocks become the active editable layer.
+
+```tsx
+<CalendarRoot
+  {...calendarProps}
+  interactionMode="availability"
+  onEventCreateRequest={(request) => createAvailability(request)}
+/>
+```
+
+Repository example: `src/examples/AvailabilityEditor.tsx`.
+
+## Data Shape
+
+Use `calendarId` for a single rendered calendar and `calendarIds` when one event should render in multiple selected calendars.
 
 ```tsx
 const event = {
-  id: "appt-1",
-  calendarId: "dr-kirillov",
-  calendarIds: ["dr-kirillov", "room-201"],
-  title: "Botox Injection",
-  subtitle: "Becky Norman",
-  start: "2026-07-04T09:00:00.000Z",
-  end: "2026-07-04T10:00:00.000Z",
-  color: "#0b6eff"
+  id: "event-a",
+  calendarId: "provider-a",
+  calendarIds: ["provider-a", "room-1"],
+  title: "Initial consultation",
+  start: "2026-07-04T09:00:00",
+  end: "2026-07-04T10:00:00"
 };
 ```
 
-Use `kind: "availability"` for row-height availability blocks. Availability is rendered through the same `eventRenderer`, but it is treated as a background layer: it does not affect overlap stacking or row height, and users can draw new events on top of it.
+## Navigation And Zoom
+
+Use the imperative handle for parent-owned navigation. Keep zoom controlled through `settings.zoom` and `onZoomChange`.
 
 ```tsx
-const availability = {
-  id: "availability-room-201-2026-07-04",
-  calendarId: "room-201",
-  title: "Available",
-  subtitle: "Room 201",
-  start: "2026-07-04T08:00:00.000Z",
-  end: "2026-07-04T18:00:00.000Z",
-  kind: "availability"
-};
+const calendarRef = useRef<CalendarNavigationHandle>(null);
+
+<CalendarRoot ref={calendarRef} {...calendarProps} settings={{ ...settings, zoom }} onZoomChange={setZoom} />;
+
+calendarRef.current?.scrollToDateTime("2026-07-04", "09:30");
 ```
 
-## Availability Editing Mode
-Set `interactionMode="availability"` when users should edit availability instead of appointments. Existing appointments stay visible as inactive background blocks, availability blocks become draggable, and drawn drafts are submitted as availability create requests:
-
-```tsx
-const [editAvailabilities, setEditAvailabilities] = useState(false);
-
-<label>
-  <input
-    type="checkbox"
-    checked={editAvailabilities}
-    onChange={(event) => setEditAvailabilities(event.target.checked)}
-  />
-  Availabilities
-</label>
-
-<CalendarRoot
-  {...calendarProps}
-  interactionMode={editAvailabilities ? "availability" : "events"}
-  onEventCreateRequest={(request) => {
-    if (request.kind === "availability") {
-      return createAvailability(request);
-    }
-    return createAppointment(request);
-  }}
-/>;
-```
-
-Availability moves still use `onEventMoveRequest`; check `request.event.kind === "availability"` for availability-specific validation.
-
-`loadEvents` should return an event if any selected calendar matches:
-
-```tsx
-const loadEvents: LoadEvents = async ({ startDate, endDate, calendarIds }) => {
-  const selected = new Set(calendarIds);
-  return allEvents.filter((event) => {
-    const eventCalendars = event.calendarIds?.length ? event.calendarIds : [event.calendarId];
-    return event.start.slice(0, 10) >= startDate
-      && event.start.slice(0, 10) <= endDate
-      && eventCalendars.some((calendarId) => selected.has(calendarId));
-  });
-};
-```
-
-## Date Navigation
-```tsx
-import { useRef } from "react";
-import { CalendarRoot, type CalendarNavigationHandle } from "./lib";
-
-function CalendarWithNavigation(props) {
-  const calendarRef = useRef<CalendarNavigationHandle>(null);
-
-  return (
-    <>
-      <button type="button" onClick={() => calendarRef.current?.scrollToToday()}>
-        Today
-      </button>
-      <button type="button" onClick={() => calendarRef.current?.scrollToDate("2026-08-12")}>
-        Go to Aug 12
-      </button>
-      <button type="button" onClick={() => calendarRef.current?.scrollToDateTime("2026-08-12", "14:30")}>
-        Go to Aug 12, 14:30
-      </button>
-      <CalendarRoot ref={calendarRef} {...props} />
-    </>
-  );
-}
-```
-
-`scrollToDateTime(dateKey, time)` accepts a `yyyy-MM-dd` date key and an `HH:mm` local time string. In the horizontal view, the calendar scrolls vertically to the date and horizontally to the requested time column. In the vertical view, it scrolls vertically to the date plus the requested time offset inside that date.
-
-The infinite view keeps vertical scrollbar dragging bounded to nearby dates. From the current top visible date, the scroll range covers one month before and one month after. After scrolling settles, the view waits for the idle recenter delay before recentering the scrollbar around the new top visible date and applying the same one-month bounds again, preserving the pixel offset inside that date so the visible content does not snap to the date header.
-
-## Controlled Zoom and Shift Wheel
-The view reads zoom from `settings.zoom`. Sliders and `Shift` + wheel should update the same parent state through `onZoomChange`. The PoC clamps zoom to `0.5-8` pixels per minute:
-
-```tsx
-function CalendarWithZoom(props) {
-  const [zoom, setZoom] = useState(1.2);
-
-  return (
-    <>
-      <input
-        type="range"
-        min="0.5"
-        max="5"
-        step="0.1"
-        value={zoom}
-        onChange={(event) => setZoom(Number(event.target.value))}
-      />
-      <CalendarRoot
-        {...props}
-        settings={{ ...props.settings, zoom }}
-        onZoomChange={setZoom}
-      />
-    </>
-  );
-}
-```
-
-When `onZoomChange` is provided, `Shift` + vertical wheel over the calendar viewport requests a zoom change and cancels the native scroll action before the calendar viewport or browser window can scroll. The gesture anchors around the rendered time-grid node closest to the mouse. Horizontal mode keeps that time node in place when the timeline can scroll, and vertical mode keeps the nearest date/time node in place. The horizontal view uses zoom as horizontal pixels per minute; the vertical view uses the same value as vertical pixels per minute.
-
-In horizontal mode, the timeline renders with an effective zoom large enough to fill the viewport area available after the sticky labels. `settings.zoom` remains the parent-owned logical value, so parent code may still pass lower values, including zero or negative values; the render scale prevents empty horizontal board space. The demo slider and built-in wheel gestures still stay within the `0.5-8` control range.
-
-Zoom changes keep the current visible date anchored. In the vertical view, the calendar scales the intra-day offset to the new day height so changing zoom does not jump to a different date.
-
-Time labels automatically thin out as zoom becomes dense. Quarter-hour labels render at normal scale, 15/45 labels disappear at medium density, and all minute labels disappear at the tightest scale so only hour labels remain.
-
-The grid uses 15-minute columns through zoom `6`. Above zoom `6`, the row grid and time header switch to 5-minute cadence, showing labels like `9 5 10 15 ... 55` for finer high-zoom positioning.
-
-In the vertical view, calendar columns fill available width from `settings.verticalColumnMinWidth`. `settings.verticalColumnOverlapCapacity` controls how many parallel overlapping events fit before a column grows, and `settings.verticalColumnOverlapGrowth` controls the added width for each extra lane. Hovered appointments expand to the full column width and use `settings.verticalEventHoverMinHeight` as a minimum readable height for richer cards.
-
-Vertical date/doctor headers stay sticky at the top. The date cell and time pane stay sticky on the left, with the vertical left pane 30% narrower than `settings.labelWidth`. Vertical time labels use `8:00` for hours and plain minute numbers such as `15` or `30` for minor ticks. The first and last hour positions include 8px of vertical padding inside each day board.
-
-## Custom Event Rendering
-```tsx
-function AppointmentCard({ event, status, style, isOverlapping }) {
-  return (
-    <article className={`appointment ${event.kind ?? "appointment"} ${status}`} style={style}>
-      <strong>{event.title}</strong>
-      <span>{event.subtitle}</span>
-      <time>{formatRange(event.start, event.end)}</time>
-      {isOverlapping ? <small>Overlapping</small> : null}
-    </article>
-  );
-}
-```
-
-The same renderer is used for persisted events, drag shadows, drag previews, and new-event drafts. Use `status === "dragging"` for the original shadow, `status === "drop-preview"` for the moving card, and `status === "new"` for the drawn creation state. The calendar only passes status; product renderers decide whether color, opacity, borders, or content should change.
-
-When an event has multiple `calendarIds`, hovering one visible instance focuses only that row instance. Dragging one visible instance gives every visible instance of that event `dragging` or `drop-preview` status so the multi-calendar move is represented across rows.
-
-Hover expansion grows from the event's original row slot. This keeps dense-dataset cards visible near sticky day bands and lets CSS min/max sizing decide whether a card needs extra width.
-
-Availability cards receive normal `existing` status and can branch on `event.kind === "availability"` for half-transparent background styling.
-
-The calendar wraps every event renderer in a CSS size container named `calendar-event`. A renderer can ignore the supplied `style` prop and size itself with CSS instead:
-
-Event shells expose `--event-accent` from `event.color` and `--event-accent-muted` as a softer background color derived from the same accent. Renderers can use those variables to keep card borders and backgrounds on the same hue.
-
-```css
-.appointment {
-  width: 100%;
-  height: 100%;
-  background: var(--event-accent-muted);
-  border-left: 6px solid var(--event-accent);
-}
-
-@container calendar-event (height < 40px) {
-  .appointment-time {
-    display: none;
-  }
-}
-
-@container calendar-event (height < 28px) {
-  .appointment-patient {
-    display: none;
-  }
-}
-
-@container calendar-event (height < 22px) {
-  .appointment-title {
-    font-size: 11px;
-  }
-}
-```
-
-This keeps content-priority decisions, such as hiding the time line before patient names and shrinking the event title, inside the external event component.
-
-The demo event card includes a third time-range line, formatted like `9:00–19:30`. If the compact card height cannot fit three lines, the time line is hidden and becomes visible again when hover expansion gives the card enough height.
-
-## Dragging Events Between Calendars
-```tsx
-async function handleMove(request) {
-  const allowed = await validateMove(request);
-  if (!allowed) return false;
-
-  setEvents((events) =>
-    events.map((event) =>
-      event.id === request.event.id
-        ? {
-            ...event,
-            calendarId: request.proposedCalendarId,
-            calendarIds: request.proposedCalendarIds,
-            start: request.proposedStart,
-            end: request.proposedEnd
-          }
-        : event
-    )
-  );
-  return true;
-}
-
-<CalendarRoot onEventMoveRequest={handleMove} {...calendarProps} />;
-```
-
-## Drawing a New Appointment
-```tsx
-function handleCreate(request) {
-  const event = {
-    id: crypto.randomUUID(),
-    calendarId: request.calendarId,
-    title: request.kind === "availability" ? "Available" : "New appointment",
-    start: request.start,
-    end: request.end,
-    kind: request.kind === "availability" ? "availability" : "draft"
-  };
-
-  setEvents((events) => [...events, event]);
-  return event;
-}
-
-<CalendarRoot onEventCreateRequest={handleCreate} {...calendarProps} />;
-```
-
-Returning the created event is optional, but useful. The infinite view adds the returned event to the currently loaded visible range immediately. If nothing is returned, the view keeps a local copy of the drawn draft so the user still sees the created appointment after mouse-up.
-
-## External Create and Edit Popup
-Use `onEventDraftRequest`, `onEventActivate`, and `activeDraft` when a product-owned popup should control event details. The popup is a sibling or portal outside the calendar; it should not use a blocking backdrop if the calendar must remain scrollable.
-
-```tsx
-function Scheduler() {
-  const [events, setEvents] = useState<CalendarEvent[]>([]);
-  const [eventVersion, setEventVersion] = useState(0);
-  const [activeDraft, setActiveDraft] = useState<ActiveEventDraft | null>(null);
-  const [participantsChanged, setParticipantsChanged] = useState(false);
-  const [popupBaseCalendarIds, setPopupBaseCalendarIds] = useState<string[]>([]);
-  const [normalSelectedIds, setNormalSelectedIds] = useState(["dr-kirillov", "room-201"]);
-
-  const participantIds = activeDraft
-    ? activeDraft.event.calendarIds ?? [activeDraft.event.calendarId]
-    : [];
-  const shouldFilterCalendars = activeDraft?.mode === "create" || participantsChanged;
-  const visibleCalendarIds = !activeDraft
-    ? normalSelectedIds
-    : !shouldFilterCalendars
-      ? normalSelectedIds
-      : participantIds.length > 0
-        ? participantIds
-        : popupBaseCalendarIds;
-
-  function openCreatePopup(request: EventCreateRequest) {
-    setPopupBaseCalendarIds(normalSelectedIds);
-    setParticipantsChanged(false);
-    setActiveDraft({
-      mode: "create",
-      event: {
-        id: crypto.randomUUID(),
-        calendarId: request.calendarId,
-        calendarIds: [request.calendarId],
-        title: "New appointment",
-        start: request.start,
-        end: request.end,
-        kind: request.kind === "availability" ? "availability" : "draft"
-      }
-    });
-  }
-
-  function openEditPopup({ event }: EventActivateRequest) {
-    setPopupBaseCalendarIds(normalSelectedIds);
-    setParticipantsChanged(false);
-    setActiveDraft({
-      mode: "edit",
-      sourceEventId: event.id,
-      event: { ...event, calendarIds: event.calendarIds?.length ? event.calendarIds : [event.calendarId] }
-    });
-  }
-
-  function updateDraft(updater: (event: CalendarEvent) => CalendarEvent) {
-    setActiveDraft((draft) => (draft ? { ...draft, event: updater(draft.event) } : draft));
-  }
-
-  function moveActiveDraft(request: EventMoveRequest) {
-    updateDraft((event) => ({
-      ...event,
-      calendarId: request.proposedCalendarId,
-      calendarIds: request.proposedCalendarIds,
-      start: request.proposedStart,
-      end: request.proposedEnd
-    }));
-  }
-
-  function saveDraft() {
-    if (!activeDraft) return;
-    if (participantIds.length === 0) return;
-    if (activeDraft.mode === "edit") {
-      const sourceId = activeDraft.sourceEventId ?? activeDraft.event.id;
-      setEvents((current) => current.map((event) => (event.id === sourceId ? { ...activeDraft.event, id: sourceId } : event)));
-    } else {
-      setEvents((current) => [...current, { ...activeDraft.event, kind: "appointment" }]);
-    }
-    setEventVersion((version) => version + 1);
-    setActiveDraft(null);
-  }
-
-  return (
-    <>
-      {activeDraft ? (
-        <EventPopup
-          event={activeDraft.event}
-          onChange={(event) => updateDraft(() => event)}
-          onParticipantsChange={(event) => {
-            setParticipantsChanged(true);
-            updateDraft(() => event);
-          }}
-          onSave={saveDraft}
-          onCancel={() => setActiveDraft(null)}
-          saveDisabled={participantIds.length === 0}
-        />
-      ) : null}
-      <CalendarRoot
-        calendars={calendars}
-        selectedCalendarIds={visibleCalendarIds}
-        loadEvents={loadEvents}
-        eventVersion={eventVersion}
-        eventRenderer={EventCard}
-        activeDraft={activeDraft}
-        onEventDraftRequest={openCreatePopup}
-        onEventActivate={openEditPopup}
-        onActiveDraftMoveRequest={moveActiveDraft}
-      />
-    </>
-  );
-}
-```
-
-When `onEventDraftRequest` is present, drawing on the grid delegates creation to the parent instead of committing through `onEventCreateRequest`. Edit drafts replace the source event visually until save or cancel. Draft overlays do not participate in overlap lane metrics: a create draft will not grow a horizontal row, and an edit draft filters its source event before row-height or vertical column-width calculation. While `activeDraft` is present, the grid will not start another drawn range; the active draft shell can still be dragged. Use `onActiveDraftMoveRequest` to copy proposed start, end, and participant calendar ids into popup state. If a draft has multiple `calendarIds`, dragging one visible instance moves the whole block and preserves the participant list.
-
-For popup field edits, first check whether the active draft is visible in the calendar viewport. If it is visible, update `activeDraft` without scrolling. For date edits, render the draft in the new date first; if that destination is visible, leave scroll untouched so the card moves to the visible date, and if it is offscreen, restore it to the last viewport-relative position where the user saw it. Use `calendarRef.current?.scrollToDateTime(date, time)` only as the fallback when no last-seen position exists. For calendar-list changes, save, and cancel, snapshot the draft's viewport-relative event position before updating popup state and restore the saved, cancelled, or replacement draft to that position after the batch. Cancel pending delayed restore corrections when the user manually scrolls the calendar or when a newer popup geometry edit supersedes an older offscreen refocus. In the default demo, edit popups keep the existing visible calendars until the participant list changes; participant filtering then limits visible rows to selected participants. If the participant list becomes empty, the previous calendar set remains visible and save is disabled.
-
-Async save belongs in the parent as well. Keep popup edits synchronous in `activeDraft`, then disable the popup while `saveDraft` awaits persistence. On success, update the event store and clear `activeDraft`. On failure, keep or restore the same `activeDraft`, re-enable the form, and show a small popup-level error. The default demo simulates this delay and fails when the draft title contains `fail`.
-
-If `loadEvents` reads from a stable cache or ref, bump `eventVersion` after persisting external create/edit changes. That invalidates the calendar's loaded visible-range cache without remounting the view, so a saved popup draft appears in the same horizontal row or vertical column after `activeDraft` is cleared.
-
-## Large Dataset Demo Configuration
-```tsx
-import { createDemoEvents, createRangeLoader } from "./demo/data";
-
-const events = createDemoEvents(20_000);
-const loadEvents = createRangeLoader(events);
-
-<CalendarRoot
-  calendars={demoCalendars}
-  selectedCalendarIds={demoCalendars.slice(0, 8).map((calendar) => calendar.id)}
-  loadEvents={loadEvents}
-  eventRenderer={DemoEventCard}
-  settings={{
-    startHour: 8,
-    endHour: 18,
-    zoom: 1.2,
-    snapMinutes: 15,
-    excludedWeekdays: [0, 6]
-  }}
-/>;
-```
-
-The deterministic demo generator spreads events across all demo calendars and gives each event two calendar memberships. This keeps large scales from concentrating into only the first few rows while still demonstrating doctor-plus-room style rendering.
-
-The demo generates weekday availability blocks for every calendar. Doctor/provider calendars use recurring weekday windows, such as morning or afternoon availability, and generated appointments are placed inside the primary calendar's availability window.
+`initialDateKey` sets the initial virtual range anchor. If omitted, the calendar starts around `now`.

@@ -2,6 +2,7 @@ import { Columns3, CalendarDays } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CalendarRoot, type CalendarNavigationHandle, type EventCreateRequest, type EventMoveRequest } from "../../lib";
 import { appendCreatedEvent, applyMove, createDemoEvents, createRangeLoader, demoCalendars } from "../data";
+import { DemoSourceLinks } from "../DemoSourceLinks";
 import { Demo2EventCard } from "./Demo2EventCard";
 import "./Demo2.css";
 
@@ -19,7 +20,12 @@ function Demo2RouteNav({ routes }: Demo2Props) {
   return (
     <nav className="demo2-route-nav" aria-label="Demo variants">
       {routes.map((route) => (
-        <a aria-current={route.id === "demo2" ? "page" : undefined} data-testid={`demo-route-${route.id}`} href={route.path} key={route.id}>
+        <a
+          aria-current={route.id === "demo2" ? "page" : undefined}
+          data-testid={`demo-route-${route.id}`}
+          href={route.path}
+          key={route.id}
+        >
           {route.label}
         </a>
       ))}
@@ -114,10 +120,15 @@ export function Demo2({ routes }: Demo2Props) {
         </div>
 
         <Demo2RouteNav routes={routes} />
+        <DemoSourceLinks sourcePath="src/demo/demo2/Demo2.tsx" />
 
         <label>
           Dataset
-          <select value={scale} onChange={(event) => handleScaleChange(Number(event.target.value))} data-testid="scale-select">
+          <select
+            value={scale}
+            onChange={(event) => handleScaleChange(Number(event.target.value))}
+            data-testid="scale-select"
+          >
             {[100, 1_000, 5_000, 20_000].map((value) => (
               <option value={value} key={value}>
                 {value.toLocaleString()} / year
@@ -152,21 +163,40 @@ export function Demo2({ routes }: Demo2Props) {
 
         <label>
           Calendars
-          <input data-testid="calendar-count" type="range" min="1" max={demoCalendars.length} value={calendarCount} onChange={(event) => setCalendarCount(Number(event.target.value))} />
+          <input
+            data-testid="calendar-count"
+            type="range"
+            min="1"
+            max={demoCalendars.length}
+            value={calendarCount}
+            onChange={(event) => setCalendarCount(Number(event.target.value))}
+          />
           <span>{calendarCount}</span>
         </label>
 
         <label>
           Zoom
           <div className="demo2-zoom-control">
-            <input data-testid="zoom-slider" type="range" min="0.5" max="8" step="0.1" value={zoom} onChange={(event) => setZoom(Number(event.target.value))} />
+            <input
+              data-testid="zoom-slider"
+              type="range"
+              min="0.5"
+              max="8"
+              step="0.1"
+              value={zoom}
+              onChange={(event) => setZoom(Number(event.target.value))}
+            />
             <output data-testid="zoom-value">{zoom.toFixed(2)}</output>
           </div>
         </label>
 
         <label>
           Snap
-          <select value={snapMinutes} onChange={(event) => setSnapMinutes(Number(event.target.value))} data-testid="snap-select">
+          <select
+            value={snapMinutes}
+            onChange={(event) => setSnapMinutes(Number(event.target.value))}
+            data-testid="snap-select"
+          >
             {[5, 10, 15, 30].map((value) => (
               <option value={value} key={value}>
                 {value} minutes
@@ -178,27 +208,54 @@ export function Demo2({ routes }: Demo2Props) {
         <div className="demo2-time-range">
           <label>
             Start
-            <input type="number" min="0" max="22" value={startHour} onChange={(event) => setStartHour(Number(event.target.value))} />
+            <input
+              type="number"
+              min="0"
+              max="22"
+              value={startHour}
+              onChange={(event) => setStartHour(Number(event.target.value))}
+            />
           </label>
           <label>
             End
-            <input type="number" min="1" max="24" value={endHour} onChange={(event) => setEndHour(Number(event.target.value))} />
+            <input
+              type="number"
+              min="1"
+              max="24"
+              value={endHour}
+              onChange={(event) => setEndHour(Number(event.target.value))}
+            />
           </label>
         </div>
 
         <label className="demo2-toggle">
-          <input type="checkbox" checked={excludeWeekends} onChange={(event) => setExcludeWeekends(event.target.checked)} data-testid="exclude-weekends" />
+          <input
+            type="checkbox"
+            checked={excludeWeekends}
+            onChange={(event) => setExcludeWeekends(event.target.checked)}
+            data-testid="exclude-weekends"
+          />
           Exclude weekends
         </label>
 
         <div className="demo2-date-jump">
           <label>
             Go to date
-            <input type="date" value={jumpDate} onChange={(event) => setJumpDate(event.target.value)} data-testid="jump-date-input" />
+            <input
+              type="date"
+              value={jumpDate}
+              onChange={(event) => setJumpDate(event.target.value)}
+              data-testid="jump-date-input"
+            />
           </label>
           <label>
             Time
-            <input type="time" value={jumpTime} onChange={(event) => setJumpTime(event.target.value)} data-testid="jump-time-input" />
+            <input
+              type="time"
+              value={jumpTime}
+              onChange={(event) => setJumpTime(event.target.value)}
+              data-testid="jump-time-input"
+            />
           </label>
           <button
             type="button"

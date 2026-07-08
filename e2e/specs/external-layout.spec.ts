@@ -4,6 +4,8 @@ import { goToWorkday } from "../helpers";
 async function createOverlappingEvent(page: import("@playwright/test").Page, title: string, time = "22:00") {
   await page.getByTestId("jump-date-input").fill("2026-07-06");
   await page.getByTestId("jump-time-input").fill(time);
+  await page.getByRole("spinbutton", { name: "Start" }).fill("8");
+  await page.getByRole("spinbutton", { name: "End" }).fill("24");
   await page.getByRole("button", { name: "Add event" }).click();
   await expect(page.getByTestId("external-event-popup")).toBeVisible();
   await page.getByTestId("draft-title-input").fill(title);
@@ -37,13 +39,13 @@ test("does not let an edit draft source increase overlap row height", async ({ p
   await expect
     .poll(async () =>
       page.evaluate(() => {
-        const draft = Array.from(document.querySelectorAll<HTMLElement>('[data-testid="draft-event"]')).find((element) =>
-          element.textContent?.includes("Overlap draft fixture C")
+        const draft = Array.from(document.querySelectorAll<HTMLElement>('[data-testid="draft-event"]')).find(
+          (element) => element.textContent?.includes("Overlap draft fixture C")
         );
         const row = draft?.closest<HTMLElement>('[data-testid="calendar-row"]');
         if (!row) return null;
-        const committedLaneCounts = Array.from(row.querySelectorAll<HTMLElement>('[data-testid="calendar-event"]')).map((event) =>
-          Number(event.dataset.laneCount ?? "1")
+        const committedLaneCounts = Array.from(row.querySelectorAll<HTMLElement>('[data-testid="calendar-event"]')).map(
+          (event) => Number(event.dataset.laneCount ?? "1")
         );
         return {
           rowHeight: row.getBoundingClientRect().height,
@@ -89,8 +91,8 @@ test("does not duplicate committed events or grow a two-overlap row when drawing
   await expect
     .poll(async () =>
       page.evaluate(() => {
-        const event = Array.from(document.querySelectorAll<HTMLElement>('[data-testid="calendar-event"]')).find((element) =>
-          element.textContent?.includes("Draw overlap fixture A")
+        const event = Array.from(document.querySelectorAll<HTMLElement>('[data-testid="calendar-event"]')).find(
+          (element) => element.textContent?.includes("Draw overlap fixture A")
         );
         return event?.closest<HTMLElement>('[data-testid="calendar-row"]')?.getBoundingClientRect().height ?? 0;
       })
@@ -103,13 +105,13 @@ test("does not duplicate committed events or grow a two-overlap row when drawing
   await expect
     .poll(async () =>
       page.evaluate(() => {
-        const savedEvent = Array.from(document.querySelectorAll<HTMLElement>('[data-testid="calendar-event"]')).find((event) =>
-          event.textContent?.includes("Draw overlap fixture A")
+        const savedEvent = Array.from(document.querySelectorAll<HTMLElement>('[data-testid="calendar-event"]')).find(
+          (event) => event.textContent?.includes("Draw overlap fixture A")
         );
         const row = savedEvent?.closest<HTMLElement>('[data-testid="calendar-row"]');
         if (!row) return null;
-        const committedIds = Array.from(row.querySelectorAll<HTMLElement>('[data-testid="calendar-event"]')).map((event) =>
-          event.dataset.eventId ?? ""
+        const committedIds = Array.from(row.querySelectorAll<HTMLElement>('[data-testid="calendar-event"]')).map(
+          (event) => event.dataset.eventId ?? ""
         );
         return {
           rowHeight: row.getBoundingClientRect().height,

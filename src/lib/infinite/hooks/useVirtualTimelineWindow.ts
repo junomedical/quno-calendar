@@ -1,11 +1,5 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef
-} from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import {
   dateAtVirtualOffset,
   normalizeAnchorDate,
@@ -135,7 +129,13 @@ export function useVirtualTimelineWindow({
       }
       setAnchorDateKey(() => normalizedDateKey);
     },
-    [clearScrollEndTimer, scrollToVisibleDateOffset, setAnchorDateKey, settings.excludedWeekdays, virtualWindow.anchorDateKey]
+    [
+      clearScrollEndTimer,
+      scrollToVisibleDateOffset,
+      setAnchorDateKey,
+      settings.excludedWeekdays,
+      virtualWindow.anchorDateKey
+    ]
   );
 
   const rememberVisibleDateOffset = useCallback(
@@ -222,15 +222,18 @@ export function useVirtualTimelineWindow({
 
   const virtualItems = virtualizer.getVirtualItems();
   const renderItems = useMemo(() => {
-    const baseItems = virtualItems.length > 0 ? virtualItems : Array.from({ length: 9 }, (_, index) => {
-      const dayIndex = Math.max(0, Math.min(virtualWindow.count - 1, virtualWindow.anchorIndex - 4 + index));
-      return {
-        key: `fallback-${dayIndex}`,
-        index: dayIndex,
-        start: dayIndex * baseDayHeight,
-        size: baseDayHeight
-      };
-    });
+    const baseItems =
+      virtualItems.length > 0
+        ? virtualItems
+        : Array.from({ length: 9 }, (_, index) => {
+            const dayIndex = Math.max(0, Math.min(virtualWindow.count - 1, virtualWindow.anchorIndex - 4 + index));
+            return {
+              key: `fallback-${dayIndex}`,
+              index: dayIndex,
+              start: dayIndex * baseDayHeight,
+              size: baseDayHeight
+            };
+          });
     if (!layoutAnchorDateKey) {
       return baseItems;
     }
@@ -248,29 +251,40 @@ export function useVirtualTimelineWindow({
         size: baseDayHeight
       }
     ].sort((left, right) => left.start - right.start);
-  }, [baseDayHeight, dateKeyToIndex, layoutAnchorDateKey, virtualItems, virtualWindow.anchorIndex, virtualWindow.count, virtualizer]);
+  }, [
+    baseDayHeight,
+    dateKeyToIndex,
+    layoutAnchorDateKey,
+    virtualItems,
+    virtualWindow.anchorIndex,
+    virtualWindow.count,
+    virtualizer
+  ]);
 
   const visibleDateKeys = useMemo(
     () => renderItems.map((item) => dateKeyForIndex(item.index)),
     [dateKeyForIndex, renderItems]
   );
 
-  const recenterVirtualWindow = useCallback((dateKey: string, offsetWithinDate: number) => {
-    const normalizedDateKey = normalizeAnchorDate(dateKey, settings.excludedWeekdays);
-    const normalizedOffset = Math.max(0, offsetWithinDate);
-    pendingScrollTargetRef.current = {
-      dateKey: normalizedDateKey,
-      offsetWithinDate: normalizedOffset
-    };
-    topVisibleDateRef.current = normalizedDateKey;
-    topVisibleOffsetRef.current = normalizedOffset;
-    if (normalizedDateKey === virtualWindow.anchorDateKey) {
-      pendingScrollTargetRef.current = null;
-      scrollToVisibleDateOffset(normalizedDateKey, normalizedOffset);
-      return;
-    }
-    setAnchorDateKey(() => normalizedDateKey);
-  }, [scrollToVisibleDateOffset, setAnchorDateKey, settings.excludedWeekdays, virtualWindow.anchorDateKey]);
+  const recenterVirtualWindow = useCallback(
+    (dateKey: string, offsetWithinDate: number) => {
+      const normalizedDateKey = normalizeAnchorDate(dateKey, settings.excludedWeekdays);
+      const normalizedOffset = Math.max(0, offsetWithinDate);
+      pendingScrollTargetRef.current = {
+        dateKey: normalizedDateKey,
+        offsetWithinDate: normalizedOffset
+      };
+      topVisibleDateRef.current = normalizedDateKey;
+      topVisibleOffsetRef.current = normalizedOffset;
+      if (normalizedDateKey === virtualWindow.anchorDateKey) {
+        pendingScrollTargetRef.current = null;
+        scrollToVisibleDateOffset(normalizedDateKey, normalizedOffset);
+        return;
+      }
+      setAnchorDateKey(() => normalizedDateKey);
+    },
+    [scrollToVisibleDateOffset, setAnchorDateKey, settings.excludedWeekdays, virtualWindow.anchorDateKey]
+  );
 
   const finishScrollRecenter = useCallback(() => {
     clearScrollEndTimer();
