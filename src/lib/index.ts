@@ -14,6 +14,7 @@ export {
   type CalendarNavigationHandle,
   type CalendarRootProps,
   type CalendarRow,
+  type CalendarVisibleEventCommitOptions,
   type CalendarViewportAnchor,
   type CalendarViewportAnchorRestoreOptions,
   type CalendarViewportAnchorTarget,

@@ -131,6 +131,12 @@ export type CalendarViewportAnchorRestoreOptions = {
   cancelOnManualScroll?: boolean;
 };
 
+/** Options for patching one committed event into the currently loaded visible cache. */
+export type CalendarVisibleEventCommitOptions = {
+  previousEventId?: EventId;
+  appearing?: boolean;
+};
+
 /** Common props passed from the shell to a concrete calendar view. */
 export type CalendarViewComponentProps = {
   calendars: CalendarRow[];
@@ -166,6 +172,7 @@ export type CalendarNavigationHandle = {
     options?: CalendarViewportAnchorRestoreOptions
   ) => void;
   cancelViewportAnchorRestore: () => void;
+  commitVisibleEvent: (event: CalendarEvent, options?: CalendarVisibleEventCommitOptions) => void;
   releaseActiveDraft: (options?: ActiveDraftReleaseOptions) => void;
 };
 

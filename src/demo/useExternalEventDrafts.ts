@@ -31,7 +31,6 @@ type UseExternalEventDraftsArgs = {
   editAvailabilities: boolean;
   setEvents: Dispatch<SetStateAction<CalendarEvent[]>>;
   setMessage: (message: string) => void;
-  onSavedEventCommit?: (event: CalendarEvent) => void;
 };
 
 const demoPersonCalendarIds = new Set(demoCalendars.slice(0, 3).map((calendar) => calendar.id));
@@ -71,8 +70,7 @@ export function useExternalEventDrafts({
   snapMinutes,
   editAvailabilities,
   setEvents,
-  setMessage,
-  onSavedEventCommit
+  setMessage
 }: UseExternalEventDraftsArgs) {
   const [activeDraft, setActiveDraft] = useState<ActiveEventDraft | null>(null);
   const [draftParticipantsChanged, setDraftParticipantsChanged] = useState(false);
@@ -378,26 +376,29 @@ export function useExternalEventDrafts({
         : activeDraft.event.kind === "blocked"
           ? "blocked"
           : "appointment";
+    const previousEventId =
+      activeDraft.mode === "edit" ? (activeDraft.sourceEventId ?? activeDraft.event.id) : undefined;
     const savedEvent: CalendarEvent = {
       ...activeDraft.event,
-      id: activeDraft.mode === "edit" ? (activeDraft.sourceEventId ?? activeDraft.event.id) : `created-${Date.now()}`,
+      id: previousEventId ?? `created-${Date.now()}`,
       calendarId: firstCalendarId,
       calendarIds: participantIds.length > 0 ? participantIds : [firstCalendarId],
       kind: savedKind
     };
     const anchor = captureEventAnchor(activeDraft.event);
-    calendarRef.current?.releaseActiveDraft({ animation: "fade-out", durationMs: 420 });
-    onSavedEventCommit?.(savedEvent);
 
     flushSync(() => {
       if (activeDraft.mode === "edit") {
-        const sourceEventId = activeDraft.sourceEventId ?? activeDraft.event.id;
-        setEvents((current) => current.map((event) => (event.id === sourceEventId ? savedEvent : event)));
+        setEvents((current) => current.map((event) => (event.id === previousEventId ? savedEvent : event)));
         setMessage("Saved external edit");
       } else {
         setEvents((current) => [...current, savedEvent]);
         setMessage("Saved external create");
       }
+      calendarRef.current?.commitVisibleEvent(savedEvent, {
+        previousEventId,
+        appearing: true
+      });
       clearActiveDraft();
     });
     if (anchor) {
@@ -412,7 +413,6 @@ export function useExternalEventDrafts({
     calendarRef,
     captureEventAnchor,
     clearActiveDraft,
-    onSavedEventCommit,
     restoreEventAnchor,
     setEvents,
     setMessage

@@ -156,11 +156,9 @@ export function DefaultDemo({ routes }: DefaultDemoProps) {
   const [jumpTime, setJumpTime] = useState("09:00");
   const [events, setEvents] = useState(() => createDemoEvents(1_000));
   const [eventVersion, setEventVersion] = useState(0);
-  const [appearingEventIds, setAppearingEventIds] = useState<string[]>([]);
   const [systemNow, setSystemNow] = useState(() => new Date());
   const eventsRef = useRef(events);
   const saveDelayRef = useRef<number | null>(null);
-  const appearingEventIdsTimerRef = useRef<number | null>(null);
   const [message, setMessage] = useState("Ready");
   const [draftSaveState, setDraftSaveState] = useState({ isSaving: false, error: null as string | null });
   const calendarRef = useRef<CalendarNavigationHandle>(null);
@@ -179,21 +177,7 @@ export function DefaultDemo({ routes }: DefaultDemoProps) {
       if (saveDelayRef.current !== null) {
         window.clearTimeout(saveDelayRef.current);
       }
-      if (appearingEventIdsTimerRef.current !== null) {
-        window.clearTimeout(appearingEventIdsTimerRef.current);
-      }
     };
-  }, []);
-
-  const requestAppearingEvent = useCallback((event: CalendarEvent) => {
-    if (appearingEventIdsTimerRef.current !== null) {
-      window.clearTimeout(appearingEventIdsTimerRef.current);
-    }
-    setAppearingEventIds([event.id]);
-    appearingEventIdsTimerRef.current = window.setTimeout(() => {
-      setAppearingEventIds([]);
-      appearingEventIdsTimerRef.current = null;
-    }, 1_500);
   }, []);
 
   const selectedCalendarIds = useMemo(
@@ -210,15 +194,6 @@ export function DefaultDemo({ routes }: DefaultDemoProps) {
   const loadEvents = useCallback((args: Parameters<ReturnType<typeof createRangeLoader>>[0]) => {
     const calendarIds = isExternalDraftOpenRef.current ? selectedCalendarIdsRef.current : args.calendarIds;
     return createRangeLoader(eventsRef.current)({ ...args, calendarIds });
-  }, []);
-
-  const commitEvents = useCallback((updater: SetStateAction<CalendarEvent[]>) => {
-    setEvents((current) => {
-      const next = typeof updater === "function" ? updater(current) : updater;
-      eventsRef.current = next;
-      return next;
-    });
-    setEventVersion((current) => current + 1);
   }, []);
 
   const updateEventsWithoutRangeInvalidation = useCallback((updater: SetStateAction<CalendarEvent[]>) => {
@@ -267,9 +242,8 @@ export function DefaultDemo({ routes }: DefaultDemoProps) {
     jumpTime,
     snapMinutes,
     editAvailabilities,
-    setEvents: commitEvents,
-    setMessage,
-    onSavedEventCommit: requestAppearingEvent
+    setEvents: updateEventsWithoutRangeInvalidation,
+    setMessage
   });
   isExternalDraftOpenRef.current = Boolean(activeDraft);
 
@@ -353,12 +327,12 @@ export function DefaultDemo({ routes }: DefaultDemoProps) {
 
   const handleCreate = useCallback(
     (request: EventCreateRequest) => {
-      commitEvents((current) => appendCreatedEvent(current, request));
+      updateEventsWithoutRangeInvalidation((current) => appendCreatedEvent(current, request));
       setMessage(
         request.kind === "availability" ? "Created availability from drawn area" : "Created new event from drawn area"
       );
     },
-    [commitEvents]
+    [updateEventsWithoutRangeInvalidation]
   );
 
   return (
@@ -591,7 +565,6 @@ export function DefaultDemo({ routes }: DefaultDemoProps) {
           selectedCalendarIds={visibleCalendarIds}
           loadEvents={loadEvents}
           eventVersion={eventVersion}
-          appearingEventIds={appearingEventIds}
           eventRenderer={DemoEventCard}
           activeDraft={activeDraft}
           onEventMoveRequest={handleMove}

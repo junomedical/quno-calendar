@@ -34,22 +34,18 @@ test("marks a saved external create as appearing with a glint animation", async 
   await page.getByTestId("draft-title-input").fill("Appearing appointment");
   await page.getByTestId("draft-save-button").click();
   await expect(page.getByTestId("demo-message")).toContainText("Saved external create");
-
-  const releasedDraft = page.getByTestId("draft-event").filter({ hasText: "Appearing appointment" });
-  await expect(releasedDraft).toBeVisible();
-  const releasedDraftAnimation = await releasedDraft.evaluate((draft) => ({
-    exiting: draft.getAttribute("data-exiting"),
-    animationDuration: window.getComputedStyle(draft).animationDuration
-  }));
-  expect(releasedDraftAnimation).toEqual({
-    exiting: "true",
-    animationDuration: "0.42s"
-  });
+  await expect(page.getByTestId("external-event-popup")).toHaveCount(0);
+  await expect(page.getByTestId("draft-event").filter({ hasText: "Appearing appointment" })).toHaveCount(0);
 
   const appearingEvent = page.locator(
     '[data-testid="calendar-event"][data-event-id^="created-"]:has([data-render-status="appearing"])'
   );
   await expect(appearingEvent.filter({ hasText: "Appearing appointment" })).toBeVisible();
+  await expect(
+    page.locator('[data-testid="draft-event"], [data-testid="calendar-event"]').filter({
+      hasText: "Appearing appointment"
+    })
+  ).toHaveCount(1);
   const glint = await appearingEvent
     .filter({ hasText: "Appearing appointment" })
     .locator(".demo-event-card")

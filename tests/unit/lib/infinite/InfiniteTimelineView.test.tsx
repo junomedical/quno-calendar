@@ -1,6 +1,13 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
+import { createRef } from "react";
 import { describe, expect, it, vi } from "vitest";
-import { CalendarRoot, type CalendarEvent, type EventRendererProps, type LoadEvents } from "../../../../src/lib";
+import {
+  CalendarRoot,
+  type CalendarEvent,
+  type CalendarNavigationHandle,
+  type EventRendererProps,
+  type LoadEvents
+} from "../../../../src/lib";
 
 const calendars = [
   { id: "calendar-a", name: "Calendar A", color: "#0b6eff" },
@@ -290,6 +297,57 @@ describe("InfiniteTimelineView", () => {
 
     expect(await screen.findByText("Requested Appearing")).toBeInTheDocument();
     expect(screen.getByTestId("custom-event-event-b")).toHaveAttribute("data-status", "existing");
+  });
+
+  it("patches a committed visible event without reloading the range", async () => {
+    const ref = createRef<CalendarNavigationHandle>();
+    const renderer = vi.fn(({ event, status, style }: EventRendererProps) => (
+      <div data-testid={`custom-event-${event.id}`} data-status={status} style={style}>
+        {event.title}
+      </div>
+    ));
+    const loadEvents = vi.fn(async () => [
+      {
+        id: "event-a",
+        calendarId: "calendar-a",
+        title: "Before Commit",
+        start: "2026-07-04T09:00:00",
+        end: "2026-07-04T10:00:00"
+      } satisfies CalendarEvent
+    ]);
+
+    render(
+      <CalendarRoot
+        ref={ref}
+        calendars={calendars}
+        selectedCalendarIds={["calendar-a"]}
+        loadEvents={loadEvents}
+        eventRenderer={renderer}
+        now={new Date("2026-07-04T09:30:00")}
+        settings={{ startHour: 8, endHour: 18, zoom: 1, excludedWeekdays: [] }}
+      />
+    );
+
+    expect(await screen.findByText("Before Commit")).toBeInTheDocument();
+    const callsBeforeCommit = loadEvents.mock.calls.length;
+
+    act(() => {
+      ref.current?.commitVisibleEvent(
+        {
+          id: "event-b",
+          calendarId: "calendar-a",
+          title: "After Commit",
+          start: "2026-07-04T09:30:00",
+          end: "2026-07-04T10:30:00"
+        },
+        { previousEventId: "event-a", appearing: true }
+      );
+    });
+
+    expect(loadEvents).toHaveBeenCalledTimes(callsBeforeCommit);
+    expect(screen.queryByText("Before Commit")).not.toBeInTheDocument();
+    expect(screen.getByText("After Commit")).toBeInTheDocument();
+    expect(screen.getByTestId("custom-event-event-b")).toHaveAttribute("data-status", "appearing");
   });
 
   it("renders an active edit draft in place of the loaded source event", async () => {

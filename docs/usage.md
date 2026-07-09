@@ -78,7 +78,7 @@ The calendar requests changes. Parent code validates and persists them.
 />
 ```
 
-Returning `false` from `onEventMoveRequest` rejects a drop. Returning a created event from `onEventCreateRequest` lets the visible cache show the committed event immediately. Newly committed visible events briefly receive `status: "appearing"` in `eventRenderer` props so product renderers can play a save/create highlight. For parent-owned save flows that reload through `eventVersion`, pass the committed ids in `appearingEventIds` so only those reloaded events receive the highlight once.
+Returning `false` from `onEventMoveRequest` rejects a drop. Returning a created event from `onEventCreateRequest` lets the visible cache show the committed event immediately. Newly committed visible events briefly receive `status: "appearing"` in `eventRenderer` props so product renderers can play a save/create highlight. For parent-owned save flows, update your own event store and call `commitVisibleEvent` so the loaded visible cache changes one record instead of reloading the range.
 
 Repository example: `src/examples/DragCreateCalendar.tsx`.
 
@@ -121,6 +121,21 @@ calendarRef.current?.restoreViewportAnchor(anchor, {
   cancelOnManualScroll: true
 });
 ```
+
+Patch the saved event into the loaded visible cache before clearing the controlled draft:
+
+```tsx
+setEvents((current) => current.map((event) => (event.id === previousEventId ? savedEvent : event)));
+
+calendarRef.current?.commitVisibleEvent(savedEvent, {
+  previousEventId,
+  appearing: true
+});
+
+setActiveDraft(null);
+```
+
+If a parent-owned flow intentionally reloads through `eventVersion`, pass the committed ids in `appearingEventIds` so only those reloaded events receive the highlight once.
 
 When cancelling a form, release the controlled draft before clearing parent state if the draft should fade out in place:
 
@@ -172,4 +187,4 @@ const calendarRef = useRef<CalendarNavigationHandle>(null);
 calendarRef.current?.scrollToDateTime("2026-07-04", "09:30");
 ```
 
-`initialDateKey` sets the initial virtual range anchor. If omitted, the calendar starts around `now`. The same handle also exposes viewport anchoring helpers for parent-owned forms: `captureViewportAnchor`, `restoreViewportAnchor`, and `cancelViewportAnchorRestore`. `releaseActiveDraft` lets a parent close controlled draft UI while the calendar keeps the last draft shell mounted briefly for a fadeout; `durationMs` controls both the retention window and fade duration.
+`initialDateKey` sets the initial virtual range anchor. If omitted, the calendar starts around `now`. The same handle also exposes viewport anchoring helpers for parent-owned forms: `captureViewportAnchor`, `restoreViewportAnchor`, and `cancelViewportAnchorRestore`. `commitVisibleEvent` patches one saved event into the currently loaded visible cache. `releaseActiveDraft` lets a parent close controlled draft UI while the calendar keeps the last draft shell mounted briefly for a fadeout; `durationMs` controls both the retention window and fade duration.

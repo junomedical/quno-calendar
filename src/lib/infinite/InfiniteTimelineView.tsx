@@ -154,6 +154,7 @@ export const InfiniteTimelineView = forwardRef<CalendarNavigationHandle, Calenda
       scrollToDateTime
     });
     const releaseActiveDraftRef = useRef<CalendarNavigationHandle["releaseActiveDraft"]>(() => undefined);
+    const commitVisibleEventRef = useRef<CalendarNavigationHandle["commitVisibleEvent"]>(() => undefined);
 
     useImperativeHandle(
       ref,
@@ -168,13 +169,19 @@ export const InfiniteTimelineView = forwardRef<CalendarNavigationHandle, Calenda
         captureViewportAnchor,
         restoreViewportAnchor,
         cancelViewportAnchorRestore,
+        commitVisibleEvent: (event, options) => commitVisibleEventRef.current(event, options),
         releaseActiveDraft: (options) => releaseActiveDraftRef.current(options)
       }),
       [cancelViewportAnchorRestore, captureViewportAnchor, now, restoreViewportAnchor, scrollToDate, scrollToDateTime]
     );
 
-    const { eventsByDate, appearingEventIds, applyMoveToLoadedEvents, applyCreatedEventToLoadedEvents } =
-      useEventRangeLoader({
+    const {
+      eventsByDate,
+      appearingEventIds,
+      applyMoveToLoadedEvents,
+      applyCommittedEventToLoadedEvents,
+      applyCreatedEventToLoadedEvents
+    } = useEventRangeLoader({
       loadEvents,
       eventVersion,
       requestedAppearingEventIds,
@@ -254,6 +261,7 @@ export const InfiniteTimelineView = forwardRef<CalendarNavigationHandle, Calenda
       applyCreatedEventToLoadedEvents
     });
     releaseActiveDraftRef.current = releaseActiveDraft;
+    commitVisibleEventRef.current = applyCommittedEventToLoadedEvents;
 
     useEffect(() => {
       setIsInteractionActive(currentInteractionActive);

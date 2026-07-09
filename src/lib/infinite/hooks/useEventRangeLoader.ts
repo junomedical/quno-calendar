@@ -2,7 +2,14 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { applyEventMove } from "../../data/calendarEvents";
 import { dateRangeFromKeys } from "../../date/dateVirtualization";
 import { eventDateKey } from "../utils/infiniteTimelineUtils";
-import type { CalendarEvent, CalendarId, EventId, EventMoveRequest, LoadEvents } from "../../core/types";
+import type {
+  CalendarEvent,
+  CalendarId,
+  CalendarVisibleEventCommitOptions,
+  EventId,
+  EventMoveRequest,
+  LoadEvents
+} from "../../core/types";
 
 type UseEventRangeLoaderArgs = {
   loadEvents: LoadEvents;
@@ -214,27 +221,51 @@ export function useEventRangeLoader({
     });
   }, []);
 
-  const applyCreatedEventToLoadedEvents = useCallback((event: CalendarEvent) => {
-    const createdDateKey = eventDateKey(event);
-    markEventsAppearing([event.id]);
-    setEventsByDate((current) => {
-      if (!Object.prototype.hasOwnProperty.call(current, createdDateKey)) {
-        return current;
+  const applyCommittedEventToLoadedEvents = useCallback(
+    (event: CalendarEvent, options: CalendarVisibleEventCommitOptions = {}) => {
+      const committedDateKey = eventDateKey(event);
+      const removedEventIds = new Set<EventId>([event.id]);
+      if (options.previousEventId) {
+        removedEventIds.add(options.previousEventId);
       }
-      if (current[createdDateKey].some((existingEvent) => existingEvent.id === event.id)) {
-        return current;
+      if (options.appearing) {
+        markEventsAppearing([event.id]);
       }
-      return {
-        ...current,
-        [createdDateKey]: appendUniqueEvent(current[createdDateKey], event)
-      };
-    });
-  }, [markEventsAppearing]);
+      setEventsByDate((current) => {
+        let changed = false;
+        const next: Record<string, CalendarEvent[]> = {};
+
+        for (const [dateKey, dateEvents] of Object.entries(current)) {
+          const filtered = dateEvents.filter((candidate) => !removedEventIds.has(candidate.id));
+          if (filtered.length !== dateEvents.length) {
+            changed = true;
+          }
+          next[dateKey] = filtered;
+        }
+
+        if (Object.prototype.hasOwnProperty.call(next, committedDateKey)) {
+          next[committedDateKey] = appendUniqueEvent(next[committedDateKey], event);
+          changed = true;
+        }
+
+        return changed ? next : current;
+      });
+    },
+    [markEventsAppearing]
+  );
+
+  const applyCreatedEventToLoadedEvents = useCallback(
+    (event: CalendarEvent) => {
+      applyCommittedEventToLoadedEvents(event, { appearing: true });
+    },
+    [applyCommittedEventToLoadedEvents]
+  );
 
   return {
     eventsByDate,
     appearingEventIds,
     applyMoveToLoadedEvents,
+    applyCommittedEventToLoadedEvents,
     applyCreatedEventToLoadedEvents
   };
 }

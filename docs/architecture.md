@@ -28,13 +28,13 @@ flowchart TD
   Shell --> Renderer["external eventRenderer"]
 ```
 
-The view requests missing visible dates through `loadEvents({ startDate, endDate, calendarIds })`. Loaded buckets are cached by date and can be invalidated with `eventVersion`.
+The view requests missing visible dates through `loadEvents({ startDate, endDate, calendarIds })`. Loaded buckets are cached by date and can be invalidated with `eventVersion`, or patched one committed record at a time through `commitVisibleEvent` on the imperative handle.
 
 Changing selected calendar ids invalidates in-flight range requests and schedules a refetch, but it does not immediately clear the rendered event cache. The previous cache bridges the filter change so rows do not blank for a frame while the new request resolves; dataset or loader identity changes still clear the cache.
 
 The default demo keeps the package contract unchanged but widens its own range-loader requests to the full selected calendar set while an external create/edit draft filters visible rows. This keeps hidden participant rows warm in the loaded cache so cancelling the popup can expand rows with content already available.
 
-The calendar renders event geometry, but product-specific card content belongs in `eventRenderer`. The renderer receives event data, status, lane metadata, overlap metadata, and a `style` object for full-size card layout. Newly committed visible events briefly receive the `appearing` status after immediate create or when their ids are passed through `appearingEventIds` during a save-triggered range reload.
+The calendar renders event geometry, but product-specific card content belongs in `eventRenderer`. The renderer receives event data, status, lane metadata, overlap metadata, and a `style` object for full-size card layout. Newly committed visible events briefly receive the `appearing` status after immediate create, after an imperative visible-event commit, or when their ids are passed through `appearingEventIds` during a save-triggered range reload.
 
 ## Module Boundaries
 
@@ -60,6 +60,7 @@ Pointer hit-testing is limited to timeline grid space, not sticky labels or head
 - Drawn ranges call `onEventDraftRequest` for parent-owned create flows, or `onEventCreateRequest` for immediate create flows.
 - Click activation calls `onEventActivate`.
 - Controlled active drafts use `activeDraft` plus `onActiveDraftMoveRequest`. When a parent closes a form, it can call `releaseActiveDraft({ animation: "fade-out", durationMs })` before clearing `activeDraft` so the calendar retains the last draft shell briefly as a visual anchor. The same duration controls the shell lifetime and fade animation.
+- Parent-owned save flows can update their canonical event store and call `commitVisibleEvent(savedEvent, { previousEventId, appearing: true })` before clearing `activeDraft`. This replaces or inserts the single saved event in any loaded visible date bucket without invalidating the whole range.
 - Parent create/edit surfaces can preserve a rendered event or calendar slot with `captureViewportAnchor`, `restoreViewportAnchor`, and `cancelViewportAnchorRestore` on the `CalendarRoot` imperative handle. Exact restore corrections can use an offscreen matching event element when layout changes moved it out of view; date/time navigation fallback remains separately controllable. The anchor implementation is library-owned so consumers do not need to query calendar DOM nodes or compute orientation-specific row/column coordinates.
 
 Multi-calendar events render once per matching selected calendar. Hover focus is local to the rendered row or column instance; drag and drop-preview status is keyed by event id across all visible instances.

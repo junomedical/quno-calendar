@@ -135,8 +135,13 @@ export const InfiniteVerticalTimelineView = forwardRef<CalendarNavigationHandle,
       }
     }, [baseDayHeight, dateKeyToIndex, virtualWindow.count, virtualizer, visibleDateKeys]);
 
-    const { eventsByDate, appearingEventIds, applyMoveToLoadedEvents, applyCreatedEventToLoadedEvents } =
-      useEventRangeLoader({
+    const {
+      eventsByDate,
+      appearingEventIds,
+      applyMoveToLoadedEvents,
+      applyCommittedEventToLoadedEvents,
+      applyCreatedEventToLoadedEvents
+    } = useEventRangeLoader({
       loadEvents,
       eventVersion,
       requestedAppearingEventIds,
@@ -230,6 +235,7 @@ export const InfiniteVerticalTimelineView = forwardRef<CalendarNavigationHandle,
       verticalTimelineGutterPx: VERTICAL_TIMELINE_GUTTER_PX
     });
     const releaseActiveDraftRef = useRef<CalendarNavigationHandle["releaseActiveDraft"]>(() => undefined);
+    const commitVisibleEventRef = useRef<CalendarNavigationHandle["commitVisibleEvent"]>(() => undefined);
 
     useImperativeHandle(
       ref,
@@ -244,6 +250,7 @@ export const InfiniteVerticalTimelineView = forwardRef<CalendarNavigationHandle,
         captureViewportAnchor,
         restoreViewportAnchor,
         cancelViewportAnchorRestore,
+        commitVisibleEvent: (event, options) => commitVisibleEventRef.current(event, options),
         releaseActiveDraft: (options) => releaseActiveDraftRef.current(options)
       }),
       [cancelViewportAnchorRestore, captureViewportAnchor, now, restoreViewportAnchor, scrollToDate, scrollToDateTime]
@@ -284,6 +291,7 @@ export const InfiniteVerticalTimelineView = forwardRef<CalendarNavigationHandle,
       applyCreatedEventToLoadedEvents
     });
     releaseActiveDraftRef.current = releaseActiveDraft;
+    commitVisibleEventRef.current = applyCommittedEventToLoadedEvents;
 
     useEffect(() => {
       setIsInteractionActive(currentInteractionActive);

@@ -17,10 +17,11 @@
 - Added parent-controlled external create/edit support with `activeDraft`, `onEventDraftRequest`, and `onEventActivate`.
 - Added public viewport-anchor helpers on `CalendarNavigationHandle` so parent forms can preserve event or slot position without demo-owned DOM anchoring.
 - Added `releaseActiveDraft` on `CalendarNavigationHandle` so parent forms can clear a controlled draft while the calendar fades out the last draft shell in place.
+- Added `commitVisibleEvent` on `CalendarNavigationHandle` so parent-owned saves can patch one committed event into the loaded visible cache without a range reload.
 - Added an `appearing` event renderer status for newly committed visible events and a demo save glint that sweeps a hard-edged diagonal white reflection across the card.
 - Added `appearingEventIds` so parent-owned save reloads can highlight only the committed event instead of every previously unseen created record in the reloaded range.
-- Changed released draft fadeout so `durationMs` controls the visual fade duration, and the default demo uses it to bridge the external-save redraw before the committed event appears.
-- Changed external-save anchor restoration to avoid delayed recenter corrections after save and sped up the demo appearing glint to 485ms.
+- Changed released draft fadeout so `durationMs` controls the visual fade duration for cancelled controlled drafts.
+- Changed external save to patch the saved event directly into the visible cache instead of invalidating and reloading the range, preventing duplicate save glints and follow-up jumps. The demo appearing glint now sweeps in 485ms.
 - Added a default-demo external event popup that edits title, date/time, duration, and participants while keeping the calendar scrollable.
 - Added active-draft dragging through `onActiveDraftMoveRequest`; popup time fields update during drag and multi-calendar drafts move as one participant block.
 - Changed drawn creation in the default demo to delegate to the external popup before saving, while preserving immediate-create fallback through `onEventCreateRequest`.
@@ -164,4 +165,4 @@
 - Refined popup date-edit focus: visible destination dates now move naturally without scrolling, offscreen destination dates keep the last screen position, and manual scrolling cancels delayed restore corrections after popup handoff.
 - Cancelled stale delayed offscreen restore corrections when a later popup edit moves the draft back to a visible date, preventing the draft from being thrown to an old edge position.
 - Delayed bounded vertical-scroll recentering after scroll stop or scrollbar release, so the scrollbar correction no longer fires immediately.
-- Added `eventVersion` cache invalidation and wired the default demo to refresh loaded visible events after external popup saves, fixing saved vertical create drafts disappearing after the popup closes.
+- Added `eventVersion` cache invalidation for broad dataset changes and later replaced external popup save reloads with single-event visible-cache commits, fixing saved vertical create drafts disappearing after the popup closes without forcing a range redraw.
