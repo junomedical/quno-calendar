@@ -1,5 +1,12 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 import { goToWorkday, selectPageText } from "../helpers";
+
+async function expectDraftFadeoutThenGone(page: Page) {
+  const exitingDraft = page.locator('[data-testid="draft-event"][data-exiting="true"]');
+  await expect(exitingDraft.first()).toBeVisible();
+  await expect(exitingDraft.first()).toHaveCSS("animation-name", "ic-draft-fade-out");
+  await expect(page.getByTestId("draft-event")).toHaveCount(0);
+}
 
 test("keeps the calendar row position when cancelling external create", async ({ page }) => {
   await page.goto("/");
@@ -28,8 +35,8 @@ test("keeps the calendar row position when cancelling external create", async ({
   if (possibleRowAnchor === null) return;
 
   await page.getByTestId("draft-cancel-button").click();
+  await expectDraftFadeoutThenGone(page);
   await expect(page.getByTestId("external-event-popup")).toHaveCount(0);
-  await expect(page.getByTestId("draft-event")).toHaveCount(0);
   await expect
     .poll(async () =>
       page.evaluate((before) => {
@@ -85,8 +92,8 @@ test("keeps a later participant calendar row anchored when cancelling external c
   if (possibleRowAnchor === null) return;
 
   await page.getByTestId("draft-cancel-button").click();
+  await expectDraftFadeoutThenGone(page);
   await expect(page.getByTestId("external-event-popup")).toHaveCount(0);
-  await expect(page.getByTestId("draft-event")).toHaveCount(0);
   await expect
     .poll(async () =>
       page.evaluate((before) => {
@@ -99,6 +106,192 @@ test("keeps a later participant calendar row anchored when cancelling external c
       }, possibleRowAnchor)
     )
     .toBeLessThanOrEqual(4);
+});
+
+test("keeps the drawn Marco date focused after adding participants and cancelling external create", async ({ page }) => {
+  await page.goto("/");
+  await page.getByTestId("scale-select").selectOption("5000");
+  await page.getByTestId("jump-date-input").fill("2026-06-22");
+  await page.getByTestId("jump-time-input").fill("12:00");
+  await page.getByTestId("go-date-button").click();
+
+  const drawTarget = await page.evaluate(() => {
+    const row = document.querySelector<HTMLElement>(
+      '[data-testid="calendar-day"][data-date="2026-06-22"] [data-testid="calendar-row"][data-calendar-id="marco-eggens"]'
+    );
+    const gridBox = row?.querySelector<HTMLElement>(".ic-row-grid")?.getBoundingClientRect();
+    const rowBox = row?.getBoundingClientRect();
+    if (!gridBox || !rowBox) {
+      return null;
+    }
+    return {
+      startX: gridBox.left + 50,
+      endX: gridBox.left + 250,
+      y: rowBox.top + rowBox.height / 2
+    };
+  });
+  expect(drawTarget).not.toBeNull();
+  if (!drawTarget) return;
+
+  await page.mouse.move(drawTarget.startX, drawTarget.y);
+  await page.mouse.down();
+  await page.mouse.move(drawTarget.endX, drawTarget.y, { steps: 8 });
+  await page.mouse.up();
+  await expect(page.getByTestId("external-event-popup")).toBeVisible();
+
+  await page.getByTestId("draft-participant-dr-kirillov").check();
+  await page.getByTestId("draft-participant-dr-thakker").check();
+  await expect(page.getByTestId("draft-event")).toHaveCount(3);
+
+  const marcoRowAnchor = await page.evaluate(() => {
+    const viewport = document.querySelector<HTMLElement>(".ic-viewport");
+    const row = document.querySelector<HTMLElement>(
+      '[data-testid="calendar-day"][data-date="2026-06-22"] [data-testid="calendar-row"][data-calendar-id="marco-eggens"]'
+    );
+    if (!viewport || !row) return null;
+    return row.getBoundingClientRect().top - viewport.getBoundingClientRect().top;
+  });
+  expect(marcoRowAnchor).not.toBeNull();
+  if (marcoRowAnchor === null) return;
+
+  await page.getByTestId("draft-cancel-button").click();
+  await expectDraftFadeoutThenGone(page);
+  await expect(page.getByTestId("external-event-popup")).toHaveCount(0);
+  await expect
+    .poll(async () =>
+      page.evaluate((before) => {
+        const viewport = document.querySelector<HTMLElement>(".ic-viewport");
+        const row = document.querySelector<HTMLElement>(
+          '[data-testid="calendar-day"][data-date="2026-06-22"] [data-testid="calendar-row"][data-calendar-id="marco-eggens"]'
+        );
+        if (!viewport || !row) return Number.POSITIVE_INFINITY;
+        return Math.abs(row.getBoundingClientRect().top - viewport.getBoundingClientRect().top - before);
+      }, marcoRowAnchor)
+    )
+    .toBeLessThanOrEqual(4);
+});
+
+test("keeps the drawn Bhuvin date focused after adding Marco and Surgery B then cancelling external create", async ({
+  page
+}) => {
+  await page.goto("/");
+  await page.getByTestId("scale-select").selectOption("5000");
+  await page.getByTestId("jump-date-input").fill("2026-05-23");
+  await page.getByTestId("jump-time-input").fill("08:30");
+  await page.getByTestId("go-date-button").click();
+
+  const drawTarget = await page.evaluate(() => {
+    const row = document.querySelector<HTMLElement>(
+      '[data-testid="calendar-day"][data-date="2026-05-23"] [data-testid="calendar-row"][data-calendar-id="dr-thakker"]'
+    );
+    const gridBox = row?.querySelector<HTMLElement>(".ic-row-grid")?.getBoundingClientRect();
+    const rowBox = row?.getBoundingClientRect();
+    if (!gridBox || !rowBox) {
+      return null;
+    }
+    return {
+      startX: gridBox.left + 45,
+      endX: gridBox.left + 330,
+      y: rowBox.top + rowBox.height / 2
+    };
+  });
+  expect(drawTarget).not.toBeNull();
+  if (!drawTarget) return;
+
+  await page.mouse.move(drawTarget.startX, drawTarget.y);
+  await page.mouse.down();
+  await page.mouse.move(drawTarget.endX, drawTarget.y, { steps: 8 });
+  await page.mouse.up();
+  await expect(page.getByTestId("external-event-popup")).toBeVisible();
+
+  await page.getByTestId("draft-participant-marco-eggens").check();
+  await page.getByTestId("draft-participant-surgery-b").check();
+  await expect(page.getByTestId("draft-event")).toHaveCount(3);
+
+  const bhuvinRowAnchor = await page.evaluate(() => {
+    const viewport = document.querySelector<HTMLElement>(".ic-viewport");
+    const row = document.querySelector<HTMLElement>(
+      '[data-testid="calendar-day"][data-date="2026-05-23"] [data-testid="calendar-row"][data-calendar-id="dr-thakker"]'
+    );
+    if (!viewport || !row) return null;
+    return row.getBoundingClientRect().top - viewport.getBoundingClientRect().top;
+  });
+  expect(bhuvinRowAnchor).not.toBeNull();
+  if (bhuvinRowAnchor === null) return;
+
+  await page.getByTestId("draft-cancel-button").click();
+  await expectDraftFadeoutThenGone(page);
+  await expect(page.getByTestId("external-event-popup")).toHaveCount(0);
+  await expect
+    .poll(async () =>
+      page.evaluate((before) => {
+        const viewport = document.querySelector<HTMLElement>(".ic-viewport");
+        const row = document.querySelector<HTMLElement>(
+          '[data-testid="calendar-day"][data-date="2026-05-23"] [data-testid="calendar-row"][data-calendar-id="dr-thakker"]'
+        );
+        if (!viewport || !row) return Number.POSITIVE_INFINITY;
+        return Math.abs(row.getBoundingClientRect().top - viewport.getBoundingClientRect().top - before);
+      }, bhuvinRowAnchor)
+    )
+    .toBeLessThanOrEqual(4);
+});
+
+test("does not transiently jump before recenter after cancelling a future multi-participant create", async ({ page }) => {
+  await page.goto("/");
+  await page.getByTestId("scale-select").selectOption("5000");
+  await page.getByTestId("jump-date-input").fill("2026-07-22");
+  await page.getByTestId("jump-time-input").fill("08:45");
+  await page.getByTestId("go-date-button").click();
+
+  const drawTarget = await page.evaluate(() => {
+    const row = document.querySelector<HTMLElement>(
+      '[data-testid="calendar-day"][data-date="2026-07-22"] [data-testid="calendar-row"][data-calendar-id="marco-eggens"]'
+    );
+    const gridBox = row?.querySelector<HTMLElement>(".ic-row-grid")?.getBoundingClientRect();
+    const rowBox = row?.getBoundingClientRect();
+    if (!gridBox || !rowBox) {
+      return null;
+    }
+    return {
+      startX: gridBox.left + 50,
+      endX: gridBox.left + 250,
+      y: rowBox.top + rowBox.height / 2
+    };
+  });
+  expect(drawTarget).not.toBeNull();
+  if (!drawTarget) return;
+
+  await page.mouse.move(drawTarget.startX, drawTarget.y);
+  await page.mouse.down();
+  await page.mouse.move(drawTarget.endX, drawTarget.y, { steps: 8 });
+  await page.mouse.up();
+  await expect(page.getByTestId("external-event-popup")).toBeVisible();
+
+  await page.getByTestId("draft-participant-room-202").check();
+  await page.getByTestId("draft-participant-surgery-a").check();
+  await expect(page.getByTestId("draft-event")).toHaveCount(3);
+
+  await page.getByTestId("draft-cancel-button").click();
+  const immediateFocus = await page.evaluate(() => {
+    const viewport = document.querySelector<HTMLElement>(".ic-viewport");
+    const day = document.querySelector<HTMLElement>('[data-testid="calendar-day"][data-date="2026-07-22"]');
+    const row = day?.querySelector<HTMLElement>('[data-testid="calendar-row"][data-calendar-id="marco-eggens"]');
+    if (!viewport || !day || !row) return null;
+    const viewportBox = viewport.getBoundingClientRect();
+    const dayBox = day.getBoundingClientRect();
+    const rowBox = row.getBoundingClientRect();
+    return {
+      dayVisible: dayBox.bottom > viewportBox.top && dayBox.top < viewportBox.bottom,
+      rowOffset: Math.round(rowBox.top - viewportBox.top)
+    };
+  });
+  expect(immediateFocus).not.toBeNull();
+  expect(immediateFocus?.dayVisible).toBe(true);
+  expect(immediateFocus?.rowOffset).toBeGreaterThanOrEqual(0);
+  expect(immediateFocus?.rowOffset).toBeLessThan(260);
+
+  await expectDraftFadeoutThenGone(page);
+  await expect(page.getByTestId("external-event-popup")).toHaveCount(0);
 });
 
 test("keeps the same calendar row anchored when drawing again after cancelling external create", async ({ page }) => {
@@ -162,8 +355,8 @@ test("keeps the same calendar row anchored when drawing again after cancelling e
     .toBeLessThanOrEqual(4);
 
   await page.getByTestId("draft-cancel-button").click();
+  await expectDraftFadeoutThenGone(page);
   await expect(page.getByTestId("external-event-popup")).toHaveCount(0);
-  await expect(page.getByTestId("draft-event")).toHaveCount(0);
   await expect
     .poll(async () => Math.abs(((await rowOffset()) ?? Number.POSITIVE_INFINITY) - firstRowAnchor))
     .toBeLessThanOrEqual(4);

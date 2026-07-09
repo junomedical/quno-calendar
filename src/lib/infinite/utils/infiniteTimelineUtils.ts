@@ -9,7 +9,7 @@ import {
 } from "../../core/types";
 
 /** Delay used before recentering the bounded virtual window after scroll settles. */
-export const SCROLL_RECENTER_DELAY_MS = 2500;
+export const SCROLL_RECENTER_DELAY_MS = 1200;
 /** Minimum supported zoom value for the timeline scale. */
 export const MIN_ZOOM = 0.5;
 /** Maximum supported zoom value for the timeline scale. */

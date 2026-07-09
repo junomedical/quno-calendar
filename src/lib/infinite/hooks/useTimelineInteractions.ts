@@ -1,6 +1,7 @@
 import {
   useCallback,
   useEffect,
+  useRef,
   useState,
   type MouseEvent as ReactMouseEvent,
   type PointerEvent as ReactPointerEvent
@@ -9,6 +10,7 @@ import { type CalendarHit } from "../../interaction/interactions";
 import { minutesSinceStartOfDay } from "../../time/time";
 import {
   type ActiveEventDraft,
+  type ActiveDraftReleaseOptions,
   type CalendarEvent,
   type CalendarId,
   type CalendarViewComponentProps,
@@ -20,6 +22,8 @@ import { useTimelineDragInteraction } from "./useTimelineDragInteraction";
 import { useTimelineDraftInteraction } from "./useTimelineDraftInteraction";
 
 export type HoveredTimelineEvent = { eventId: string; calendarId: CalendarId } | null;
+
+const DEFAULT_DRAFT_RELEASE_DURATION_MS = 220;
 
 type PointerLike = Pick<PointerEvent | MouseEvent | ReactPointerEvent | ReactMouseEvent, "clientX" | "clientY">;
 
@@ -53,6 +57,53 @@ export function useTimelineInteractions({
   applyCreatedEventToLoadedEvents
 }: UseTimelineInteractionsArgs) {
   const [hoveredEvent, setHoveredEvent] = useState<HoveredTimelineEvent>(null);
+  const [releasedDraft, setReleasedDraft] = useState<{
+    draft: ActiveEventDraft;
+    status: EventRenderStatus;
+  } | null>(null);
+  const activeDraftRef = useRef<ActiveEventDraft | null>(activeDraft ?? null);
+  const releaseTimerRef = useRef<number | null>(null);
+  activeDraftRef.current = activeDraft ?? null;
+
+  const clearReleaseTimer = useCallback(() => {
+    if (releaseTimerRef.current === null) {
+      return;
+    }
+    window.clearTimeout(releaseTimerRef.current);
+    releaseTimerRef.current = null;
+  }, []);
+
+  const releaseActiveDraft = useCallback(
+    (options: ActiveDraftReleaseOptions = {}) => {
+      const draft = activeDraftRef.current;
+      clearReleaseTimer();
+      if (!draft || options.animation === "none") {
+        setReleasedDraft(null);
+        return;
+      }
+
+      setReleasedDraft({
+        draft,
+        status: draft.mode === "edit" ? "existing" : "new"
+      });
+      releaseTimerRef.current = window.setTimeout(() => {
+        setReleasedDraft(null);
+        releaseTimerRef.current = null;
+      }, options.durationMs ?? DEFAULT_DRAFT_RELEASE_DURATION_MS);
+    },
+    [clearReleaseTimer]
+  );
+
+  useEffect(() => {
+    if (!activeDraft) {
+      return;
+    }
+    clearReleaseTimer();
+    setReleasedDraft(null);
+  }, [activeDraft, clearReleaseTimer]);
+
+  useEffect(() => clearReleaseTimer, [clearReleaseTimer]);
+
   const isActiveDraftEvent = useCallback(
     (event: CalendarEvent) => Boolean(activeDraft && event.id === activeDraft.event.id),
     [activeDraft]
@@ -218,9 +269,13 @@ export function useTimelineInteractions({
 
   const renderedDraftStatus: EventRenderStatus = draggingActiveDraft
     ? "dragging"
-    : activeDraft?.mode === "edit"
-      ? "existing"
-      : "new";
+    : activeDraft
+      ? activeDraft.mode === "edit"
+        ? "existing"
+        : "new"
+      : draftState
+        ? "new"
+        : (releasedDraft?.status ?? "new");
 
   return {
     hoveredEvent,
@@ -229,9 +284,11 @@ export function useTimelineInteractions({
     draftState,
     draggingActiveDraft,
     dragPreviewEvent,
-    renderedDraftEvent: activeDraft?.event ?? draftState?.event ?? null,
+    releaseActiveDraft,
+    renderedDraftEvent: activeDraft?.event ?? draftState?.event ?? releasedDraft?.draft.event ?? null,
     renderedDraftStatus,
     renderedDraftIsDraggable: Boolean(activeDraft),
+    renderedDraftIsExiting: Boolean(!activeDraft && !draftState && releasedDraft),
     isInteractionActive: Boolean(dragState || draftState),
     handleGridPointerDown,
     handleGridMouseDown,

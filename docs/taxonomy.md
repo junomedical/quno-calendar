@@ -64,6 +64,8 @@ This document defines the names used for visible calendar interface parts and th
 | Availability shell   | An event shell used for an availability event. It is pointer-transparent in event mode and active in availability mode.                                                       | `.ic-availability-shell`            |
 | Draft                | A temporary event shown while the user draws a new time range.                                                                                                                | `draft-new-event`, `status="new"`   |
 | Active draft         | A parent-owned create or edit preview rendered while an external popup is open. Create active drafts render as `new`; edit active drafts replace their source event visually. | `activeDraft`                       |
+| Exiting draft        | A released active draft shell retained briefly after parent state clears so cancellation can fade out without losing the visual anchor.                                       | `releaseActiveDraft`, `.is-exiting` |
+| Viewport anchor      | An opaque library-owned snapshot that lets parent UI preserve a rendered event or calendar slot across parent state changes.                                                  | `CalendarViewportAnchor`            |
 | Active draft move    | A drag proposal for the controlled active draft. The parent applies it to popup state instead of persisting loaded data.                                                      | `onActiveDraftMoveRequest`          |
 | Drag preview         | A temporary shell showing the proposed event position during drag/drop.                                                                                                       | `status="drop-preview"`             |
 

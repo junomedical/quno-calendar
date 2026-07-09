@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { goToWorkday } from "../helpers";
+import { goToWorkday, viewportRelativeEventBox } from "../helpers";
 
 async function createOverlappingEvent(page: import("@playwright/test").Page, title: string, time = "22:00") {
   await page.getByTestId("jump-date-input").fill("2026-07-06");
@@ -120,6 +120,34 @@ test("does not duplicate committed events or grow a two-overlap row when drawing
       })
     )
     .toEqual({ rowHeight: 50, duplicateCommittedIds: 0 });
+});
+
+test("keeps a drawn external draft focused with the 5,000 event dataset", async ({ page }) => {
+  await page.goto("/");
+  await page.getByTestId("scale-select").selectOption("5000");
+  await goToWorkday(page, "2026-07-06");
+
+  const viewport = page.locator(".ic-viewport");
+  const viewportBox = await viewport.boundingBox();
+  expect(viewportBox).not.toBeNull();
+  if (!viewportBox) return;
+
+  await page.mouse.move(viewportBox.x + 310, viewportBox.y + 130);
+  await page.mouse.down();
+  await page.mouse.move(viewportBox.x + 650, viewportBox.y + 130, { steps: 5 });
+  await expect(page.getByTestId("draft-event")).toBeVisible();
+  const drawnDraftBox = await viewportRelativeEventBox(page, '[data-testid="draft-event"]');
+  expect(drawnDraftBox).not.toBeNull();
+
+  await page.mouse.up();
+  await expect(page.getByTestId("external-event-popup")).toBeVisible();
+  if (!drawnDraftBox) return;
+  await expect
+    .poll(async () => {
+      const box = await viewportRelativeEventBox(page, '[data-testid="draft-event"]');
+      return box ? Math.abs(box.y - drawnDraftBox.y) : Number.POSITIVE_INFINITY;
+    })
+    .toBeLessThanOrEqual(4);
 });
 
 test("renders the external popup above the current-time marker", async ({ page }) => {

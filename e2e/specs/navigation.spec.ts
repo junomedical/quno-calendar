@@ -57,3 +57,45 @@ test("keeps the active day when calendar count changes and supports date navigat
   await expect(page.getByTestId("demo-message")).toContainText("today");
   await expect.poll(async () => topVisibleDayDate(page)).toBe(todayDateKey());
 });
+
+test("recenters the horizontal virtual window after a large date scroll", async ({ page }) => {
+  await page.goto("/");
+  const viewport = page.locator(".ic-viewport");
+
+  await page.getByTestId("jump-date-input").fill("2026-07-06");
+  await page.getByTestId("go-date-button").click();
+  await expect.poll(async () => topVisibleDayDate(page)).toBe("2026-07-06");
+
+  await viewport.evaluate((element) => {
+    element.scrollTop = element.scrollHeight - element.clientHeight - 5;
+  });
+  await expect
+    .poll(async () => {
+      try {
+        return await topVisibleDayDate(page);
+      } catch {
+        return null;
+      }
+    })
+    .not.toBeNull();
+
+  await expect
+    .poll(
+      async () =>
+        viewport.evaluate((element) => element.scrollTop / Math.max(1, element.scrollHeight - element.clientHeight)),
+      { timeout: 5_000 }
+    )
+    .toBeLessThan(0.75);
+  await expect
+    .poll(async () => viewport.evaluate((element) => element.scrollTop))
+    .toBeGreaterThan(1_000);
+  await expect
+    .poll(async () => {
+      try {
+        return await topVisibleDayDate(page);
+      } catch {
+        return null;
+      }
+    })
+    .not.toBeNull();
+});

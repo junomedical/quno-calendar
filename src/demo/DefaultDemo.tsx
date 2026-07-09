@@ -246,7 +246,6 @@ export function DefaultDemo({ routes }: DefaultDemoProps) {
     toggleDraftParticipant
   } = useExternalEventDrafts({
     selectedCalendarIds,
-    calendarSettings,
     calendarRef,
     jumpDate,
     jumpTime,

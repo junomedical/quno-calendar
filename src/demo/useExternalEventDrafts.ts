@@ -5,6 +5,8 @@ import {
   type CalendarEvent,
   type CalendarId,
   type CalendarNavigationHandle,
+  type CalendarViewportAnchor,
+  type CalendarViewportAnchorTarget,
   type EventActivateRequest,
   type EventCreateRequest,
   type EventMoveRequest
@@ -18,32 +20,10 @@ import {
   isoDateInputValue,
   isoTimeInputValue
 } from "./draftFormUtils";
-import { findRenderedDraftBox, findVisibleRenderedDraftBox, type DraftScreenSnapshot } from "./draftViewportUtils";
 import { buildExternalCreateDraft, calendarColor } from "./externalDraftEvents";
-import { useDraftRestoreCancellation } from "./useDraftRestoreCancellation";
-
-type PendingDraftRestore = {
-  snapshot: DraftScreenSnapshot;
-  event: CalendarEvent;
-  eventId?: string;
-  targetCalendarId?: CalendarId;
-  afterRecenter?: boolean;
-  allowNavigationFallback?: boolean;
-  cancelOnManualScroll?: boolean;
-};
-
-type DraftCalendarSettings = {
-  startHour: number;
-  endHour: number;
-  zoom: number;
-  excludedWeekdays: number[];
-  dayHeaderHeight: number;
-  rowHeight: number;
-};
 
 type UseExternalEventDraftsArgs = {
   selectedCalendarIds: CalendarId[];
-  calendarSettings: DraftCalendarSettings;
   calendarRef: RefObject<CalendarNavigationHandle | null>;
   jumpDate: string;
   jumpTime: string;
@@ -59,9 +39,31 @@ function firstPersonParticipantId(participantIds: CalendarId[]) {
   return participantIds.find((calendarId) => demoPersonCalendarIds.has(calendarId)) ?? participantIds[0];
 }
 
+function eventViewportTarget(
+  event: CalendarEvent,
+  calendarId?: CalendarId,
+  eventId = event.id,
+  requireVisible = false
+): CalendarViewportAnchorTarget {
+  return {
+    eventId,
+    calendarId,
+    dateKey: isoDateInputValue(event.start),
+    time: isoTimeInputValue(event.start),
+    requireVisible
+  };
+}
+
+function slotViewportTarget(event: CalendarEvent, calendarId?: CalendarId): CalendarViewportAnchorTarget {
+  return {
+    calendarId: calendarId ?? event.calendarId,
+    dateKey: isoDateInputValue(event.start),
+    time: isoTimeInputValue(event.start)
+  };
+}
+
 export function useExternalEventDrafts({
   selectedCalendarIds,
-  calendarSettings,
   calendarRef,
   jumpDate,
   jumpTime,
@@ -73,13 +75,13 @@ export function useExternalEventDrafts({
   const [activeDraft, setActiveDraft] = useState<ActiveEventDraft | null>(null);
   const [draftParticipantsChanged, setDraftParticipantsChanged] = useState(false);
   const draftSequenceRef = useRef(0);
-  const activeDraftLastSeenSnapshotRef = useRef<DraftScreenSnapshot | null>(null);
+  const activeDraftLastSeenAnchorRef = useRef<CalendarViewportAnchor | null>(null);
   const activeEditSourceEventRef = useRef<CalendarEvent | null>(null);
-  const restoreTokenRef = useRef(0);
-  const restoreManualScrollCleanupRef = useRef<(() => void) | null>(null);
-  const expectedProgrammaticScrollRef = useRef<{ top: number; left: number } | null>(null);
 
-  const activeDraftParticipants = activeDraft ? draftParticipantIds(activeDraft.event) : [];
+  const activeDraftParticipants = useMemo(
+    () => (activeDraft ? draftParticipantIds(activeDraft.event) : []),
+    [activeDraft]
+  );
   const visibleCalendarIds = useMemo(() => {
     if (!activeDraft) {
       return selectedCalendarIds;
@@ -92,278 +94,105 @@ export function useExternalEventDrafts({
   }, [activeDraft, activeDraftParticipants, draftParticipantsChanged, selectedCalendarIds]);
   const canSaveActiveDraft = !activeDraft || activeDraftParticipants.length > 0;
 
-  useDraftRestoreCancellation(activeDraft, restoreTokenRef, expectedProgrammaticScrollRef);
-
-  const findEventTargetBox = useCallback(
-    (pending: PendingDraftRestore, requireVisible = false): DraftScreenSnapshot | null => {
-      const viewport = document.querySelector<HTMLElement>(".ic-viewport");
-      if (!viewport) {
-        return null;
-      }
-      const dateKey = isoDateInputValue(pending.event.start);
-      const viewportBox = viewport.getBoundingClientRect();
-      const dayElement = document.querySelector<HTMLElement>(`[data-testid="calendar-day"][data-date="${dateKey}"]`);
-      const matchingEventElements = pending.eventId
-        ? Array.from(
-            document.querySelectorAll<HTMLElement>(
-              '[data-testid="draft-event"], [data-testid="calendar-event"], [data-testid="availability-event"]'
-            )
-          ).filter((element) => element.dataset.eventId === pending.eventId)
-        : [];
-      const targetCalendarEventElements = pending.targetCalendarId
-        ? matchingEventElements.filter((element) => element.dataset.calendarId === pending.targetCalendarId)
-        : [];
-      const eventElements =
-        targetCalendarEventElements.length > 0 ? targetCalendarEventElements : matchingEventElements;
-      const visibleEventElement = eventElements.find((element) => {
-        const box = element.getBoundingClientRect();
-        return (
-          box.width > 0 &&
-          box.height > 0 &&
-          box.right > viewportBox.left &&
-          box.left < viewportBox.right &&
-          box.bottom > viewportBox.top &&
-          box.top < viewportBox.bottom
-        );
-      });
-      const eventElement =
-        visibleEventElement ??
-        (pending.targetCalendarId ? (eventElements[0] ?? null) : requireVisible ? null : (eventElements[0] ?? null));
-      if (eventElement) {
-        const eventBox = eventElement.getBoundingClientRect();
-        return {
-          top: eventBox.top - viewportBox.top,
-          left: eventBox.left - viewportBox.left
-        };
-      }
-
-      const calendarId = pending.targetCalendarId ?? pending.event.calendarId;
-      const horizontalRow = dayElement?.querySelector<HTMLElement>(
-        `[data-testid="calendar-row"][data-calendar-id="${calendarId}"]`
-      );
-      if (horizontalRow) {
-        const rowBox = horizontalRow.getBoundingClientRect();
-        const minutes = new Date(pending.event.start).getHours() * 60 + new Date(pending.event.start).getMinutes();
-        const x = 8 + (minutes - calendarSettings.startHour * 60) * Math.max(0.5, calendarSettings.zoom);
-        const gridBox = horizontalRow.querySelector<HTMLElement>(".ic-row-grid")?.getBoundingClientRect();
-        return {
-          top: rowBox.top - viewportBox.top,
-          left: (gridBox?.left ?? rowBox.left) - viewportBox.left + x
-        };
-      }
-
-      const verticalColumn = dayElement?.querySelector<HTMLElement>(
-        `[data-testid="calendar-column"][data-calendar-id="${calendarId}"]`
-      );
-      if (verticalColumn) {
-        const columnBox = verticalColumn.getBoundingClientRect();
-        const minutes = new Date(pending.event.start).getHours() * 60 + new Date(pending.event.start).getMinutes();
-        const y = 8 + (minutes - calendarSettings.startHour * 60) * Math.max(0.5, calendarSettings.zoom);
-        return {
-          top: columnBox.top - viewportBox.top + y,
-          left: columnBox.left - viewportBox.left
-        };
-      }
-
-      return null;
-    },
-    [calendarSettings]
-  );
-
-  const restoreDraftScreenPositionNow = useCallback(
-    (pending: PendingDraftRestore | null) => {
-      if (!pending) {
-        return;
-      }
-      restoreManualScrollCleanupRef.current?.();
-      restoreManualScrollCleanupRef.current = null;
-      const restoreToken = (restoreTokenRef.current += 1);
-      const isCurrentRestore = () => restoreTokenRef.current === restoreToken;
-      const restoreViewport = document.querySelector<HTMLElement>(".ic-viewport");
-      let removeManualScrollListener: (() => void) | null = null;
-      if (restoreViewport && pending.cancelOnManualScroll) {
-        let lastObservedScroll = {
-          top: restoreViewport.scrollTop,
-          left: restoreViewport.scrollLeft
-        };
-        let hasUserScrollIntent = false;
-        const markUserScrollIntent = () => {
-          hasUserScrollIntent = true;
-        };
-        const cancelOnManualScroll = () => {
-          const expected = expectedProgrammaticScrollRef.current;
-          if (
-            expected &&
-            Math.abs(restoreViewport.scrollTop - expected.top) <= 1 &&
-            Math.abs(restoreViewport.scrollLeft - expected.left) <= 1
-          ) {
-            expectedProgrammaticScrollRef.current = null;
-            lastObservedScroll = {
-              top: restoreViewport.scrollTop,
-              left: restoreViewport.scrollLeft
-            };
-            return;
-          }
-          if (
-            Math.abs(restoreViewport.scrollTop - lastObservedScroll.top) <= 1 &&
-            Math.abs(restoreViewport.scrollLeft - lastObservedScroll.left) <= 1
-          ) {
-            return;
-          }
-          if (!hasUserScrollIntent) {
-            lastObservedScroll = {
-              top: restoreViewport.scrollTop,
-              left: restoreViewport.scrollLeft
-            };
-            return;
-          }
-          expectedProgrammaticScrollRef.current = null;
-          restoreTokenRef.current += 1;
-          removeManualScrollListener?.();
-        };
-        const markKeyboardScrollIntent = (event: KeyboardEvent) => {
-          if (
-            ["ArrowDown", "ArrowLeft", "ArrowRight", "ArrowUp", "End", "Home", "PageDown", "PageUp", " "].includes(
-              event.key
-            )
-          ) {
-            markUserScrollIntent();
-          }
-        };
-        removeManualScrollListener = () => {
-          restoreViewport.removeEventListener("scroll", cancelOnManualScroll);
-          restoreViewport.removeEventListener("pointerdown", markUserScrollIntent);
-          window.removeEventListener("wheel", markUserScrollIntent, true);
-          window.removeEventListener("touchmove", markUserScrollIntent, true);
-          window.removeEventListener("keydown", markKeyboardScrollIntent);
-          if (restoreManualScrollCleanupRef.current === removeManualScrollListener) {
-            restoreManualScrollCleanupRef.current = null;
-          }
-        };
-        restoreManualScrollCleanupRef.current = removeManualScrollListener;
-        restoreViewport.addEventListener("scroll", cancelOnManualScroll, { passive: true });
-        restoreViewport.addEventListener("pointerdown", markUserScrollIntent, { passive: true });
-        window.addEventListener("wheel", markUserScrollIntent, { passive: true, capture: true });
-        window.addEventListener("touchmove", markUserScrollIntent, { passive: true, capture: true });
-        window.addEventListener("keydown", markKeyboardScrollIntent);
-        window.setTimeout(() => removeManualScrollListener?.(), pending.afterRecenter ? 2800 : 120);
-      }
-      const applyScrollCorrection = (viewport: HTMLElement, target: DraftScreenSnapshot) => {
-        if (!isCurrentRestore()) {
-          return;
-        }
-        const nextTop = viewport.scrollTop + target.top - pending.snapshot.top;
-        const nextLeft = viewport.scrollLeft + target.left - pending.snapshot.left;
-        expectedProgrammaticScrollRef.current = { top: nextTop, left: nextLeft };
-        viewport.scrollTop = nextTop;
-        viewport.scrollLeft = nextLeft;
-      };
-      const fallbackToDateTime = () => {
-        if (!isCurrentRestore()) {
-          return;
-        }
-        if (findEventTargetBox(pending, pending.allowNavigationFallback === false)) {
-          applyExactCorrection();
-          return;
-        }
-        if (pending.allowNavigationFallback === false) {
-          return;
-        }
-        calendarRef.current?.scrollToDateTime(
-          isoDateInputValue(pending.event.start),
-          isoTimeInputValue(pending.event.start)
-        );
-        window.requestAnimationFrame(applyExactCorrection);
-      };
-      const applyExactCorrection = () => {
-        if (!isCurrentRestore()) {
-          return;
-        }
-        const nextViewport = document.querySelector<HTMLElement>(".ic-viewport");
-        const nextTarget = findEventTargetBox(pending, pending.allowNavigationFallback === false);
-        if (!nextViewport || !nextTarget) {
-          return;
-        }
-        applyScrollCorrection(nextViewport, nextTarget);
-      };
-      const viewport = document.querySelector<HTMLElement>(".ic-viewport");
-      const target = findEventTargetBox(pending, pending.allowNavigationFallback === false);
-      if (!viewport || !target) {
-        window.requestAnimationFrame(applyExactCorrection);
-        window.requestAnimationFrame(() => window.requestAnimationFrame(applyExactCorrection));
-        window.setTimeout(fallbackToDateTime, 50);
-        if (pending.afterRecenter) {
-          window.setTimeout(fallbackToDateTime, 100);
-          window.setTimeout(applyExactCorrection, 220);
-          window.setTimeout(applyExactCorrection, 500);
-          window.setTimeout(applyExactCorrection, 1000);
-          window.setTimeout(applyExactCorrection, 1500);
-          window.setTimeout(applyExactCorrection, 2500);
-        }
-        return;
-      }
-      applyScrollCorrection(viewport, target);
-      window.queueMicrotask(applyExactCorrection);
-      window.requestAnimationFrame(applyExactCorrection);
-      window.requestAnimationFrame(() => window.requestAnimationFrame(applyExactCorrection));
-      window.setTimeout(applyExactCorrection, 0);
-      window.setTimeout(applyExactCorrection, 50);
-      if (pending.afterRecenter) {
-        window.setTimeout(applyExactCorrection, 100);
-        window.setTimeout(applyExactCorrection, 220);
-        window.setTimeout(applyExactCorrection, 500);
-        window.setTimeout(applyExactCorrection, 1000);
-        window.setTimeout(applyExactCorrection, 1500);
-        window.setTimeout(applyExactCorrection, 2500);
-      }
-    },
-    [calendarRef, findEventTargetBox]
-  );
-
   const clearActiveDraft = useCallback(() => {
     setActiveDraft(null);
     setDraftParticipantsChanged(false);
-    activeDraftLastSeenSnapshotRef.current = null;
+    activeDraftLastSeenAnchorRef.current = null;
     activeEditSourceEventRef.current = null;
   }, []);
+
+  const captureEventAnchor = useCallback(
+    (event: CalendarEvent, calendarId?: CalendarId, requireVisible = false) =>
+      calendarRef.current?.captureViewportAnchor(eventViewportTarget(event, calendarId, event.id, requireVisible)) ??
+      null,
+    [calendarRef]
+  );
+
+  const restoreEventAnchor = useCallback(
+    (
+      anchor: CalendarViewportAnchor | null,
+      event: CalendarEvent,
+      {
+        eventId = event.id,
+        targetCalendarId,
+        afterRecenter = true,
+        allowNavigationFallback,
+        cancelOnManualScroll
+      }: {
+        eventId?: string;
+        targetCalendarId?: CalendarId;
+        afterRecenter?: boolean;
+        allowNavigationFallback?: boolean;
+        cancelOnManualScroll?: boolean;
+      } = {}
+    ) => {
+      calendarRef.current?.restoreViewportAnchor(anchor, {
+        target: eventViewportTarget(event, targetCalendarId, eventId),
+        afterRecenter,
+        allowNavigationFallback,
+        cancelOnManualScroll
+      });
+    },
+    [calendarRef]
+  );
+
+  const restoreSlotAnchor = useCallback(
+    (
+      anchor: CalendarViewportAnchor | null,
+      event: CalendarEvent,
+      {
+        targetCalendarId,
+        afterRecenter = true,
+        allowNavigationFallback,
+        cancelOnManualScroll
+      }: {
+        targetCalendarId?: CalendarId;
+        afterRecenter?: boolean;
+        allowNavigationFallback?: boolean;
+        cancelOnManualScroll?: boolean;
+      } = {}
+    ) => {
+      calendarRef.current?.restoreViewportAnchor(anchor, {
+        target: slotViewportTarget(event, targetCalendarId),
+        afterRecenter,
+        allowNavigationFallback,
+        cancelOnManualScroll
+      });
+    },
+    [calendarRef]
+  );
 
   const openCreateDraft = useCallback(
     (request: EventCreateRequest, source: "draw" | "button" = "draw") => {
       draftSequenceRef.current += 1;
       const draftId = `external-draft-${draftSequenceRef.current}`;
       const nextEvent = buildExternalCreateDraft(request, draftId, source);
-      const drawnDraftSnapshot =
+      const drawnDraftAnchor =
         source === "draw"
-          ? (findEventTargetBox({
-              snapshot: { top: 0, left: 0 },
-              event: nextEvent,
-              targetCalendarId: request.calendarId
-            }) ?? findRenderedDraftBox())
+          ? calendarRef.current?.captureViewportAnchor(slotViewportTarget(nextEvent, request.calendarId))
           : null;
-      if (drawnDraftSnapshot) {
+      if (drawnDraftAnchor) {
         activeEditSourceEventRef.current = null;
-        activeDraftLastSeenSnapshotRef.current = drawnDraftSnapshot;
+        activeDraftLastSeenAnchorRef.current = drawnDraftAnchor;
         flushSync(() => {
           setDraftParticipantsChanged(false);
           setActiveDraft({ mode: "create", event: nextEvent });
         });
-        restoreDraftScreenPositionNow({
-          snapshot: drawnDraftSnapshot,
+        restoreEventAnchor(drawnDraftAnchor, nextEvent, {
           eventId: draftId,
-          event: nextEvent,
           afterRecenter: true,
           allowNavigationFallback: false,
           cancelOnManualScroll: true
         });
       } else {
         activeEditSourceEventRef.current = null;
-        activeDraftLastSeenSnapshotRef.current = null;
+        activeDraftLastSeenAnchorRef.current = null;
         setDraftParticipantsChanged(false);
         setActiveDraft({ mode: "create", event: nextEvent });
       }
       setMessage(source === "button" ? "External create popup opened" : "Drawn range delegated to external popup");
     },
-    [findEventTargetBox, findRenderedDraftBox, restoreDraftScreenPositionNow, setMessage]
+    [calendarRef, restoreEventAnchor, setMessage]
   );
 
   const handleActivate = useCallback(
@@ -373,12 +202,10 @@ export function useExternalEventDrafts({
         calendarIds: eventParticipantIds(request.event)
       };
       activeEditSourceEventRef.current = draftEvent;
-      activeDraftLastSeenSnapshotRef.current = findEventTargetBox({
-        snapshot: { top: 0, left: 0 },
-        eventId: request.event.id,
-        event: draftEvent,
-        targetCalendarId: firstPersonParticipantId(eventParticipantIds(draftEvent)) ?? draftEvent.calendarId
-      });
+      activeDraftLastSeenAnchorRef.current = captureEventAnchor(
+        draftEvent,
+        firstPersonParticipantId(eventParticipantIds(draftEvent)) ?? draftEvent.calendarId
+      );
       setDraftParticipantsChanged(false);
       setActiveDraft({
         mode: "edit",
@@ -387,42 +214,44 @@ export function useExternalEventDrafts({
       });
       setMessage(`Editing ${request.event.title} in external popup`);
     },
-    [findEventTargetBox, setMessage]
+    [captureEventAnchor, setMessage]
   );
 
-  const handleActiveDraftMove = useCallback((request: EventMoveRequest) => {
-    expectedProgrammaticScrollRef.current = null;
-    restoreTokenRef.current += 1;
-    setActiveDraft((current) => {
-      if (!current || current.event.id !== request.event.id) {
-        return current;
-      }
-      const firstCalendarId = request.proposedCalendarIds[0] ?? request.proposedCalendarId;
-      const firstCalendar = demoCalendars.find((calendar) => calendar.id === firstCalendarId);
-      return {
-        ...current,
-        event: {
-          ...current.event,
-          calendarId: firstCalendarId,
-          calendarIds: request.proposedCalendarIds,
-          start: request.proposedStart,
-          end: request.proposedEnd,
-          color: firstCalendar?.color ?? current.event.color
+  const handleActiveDraftMove = useCallback(
+    (request: EventMoveRequest) => {
+      calendarRef.current?.cancelViewportAnchorRestore();
+      setActiveDraft((current) => {
+        if (!current || current.event.id !== request.event.id) {
+          return current;
         }
-      };
-    });
-  }, []);
+        const firstCalendarId = request.proposedCalendarIds[0] ?? request.proposedCalendarId;
+        const firstCalendar = demoCalendars.find((calendar) => calendar.id === firstCalendarId);
+        return {
+          ...current,
+          event: {
+            ...current.event,
+            calendarId: firstCalendarId,
+            calendarIds: request.proposedCalendarIds,
+            start: request.proposedStart,
+            end: request.proposedEnd,
+            color: firstCalendar?.color ?? current.event.color
+          }
+        };
+      });
+    },
+    [calendarRef]
+  );
 
   const focusDraftEvent = useCallback(
-    (event: CalendarEvent, snapshot: DraftScreenSnapshot | null) => {
-      const targetSnapshot = snapshot ?? activeDraftLastSeenSnapshotRef.current;
-      if (!targetSnapshot) {
+    (event: CalendarEvent, anchor: CalendarViewportAnchor | null) => {
+      const targetAnchor = anchor ?? activeDraftLastSeenAnchorRef.current;
+      if (!targetAnchor) {
         calendarRef.current?.scrollToDateTime(isoDateInputValue(event.start), isoTimeInputValue(event.start));
         return;
       }
-      restoreDraftScreenPositionNow({ snapshot: targetSnapshot, eventId: event.id, event, afterRecenter: true });
+      restoreEventAnchor(targetAnchor, event, { afterRecenter: true });
     },
-    [calendarRef, restoreDraftScreenPositionNow]
+    [calendarRef, restoreEventAnchor]
   );
 
   const updateDraftEvent = useCallback(
@@ -430,8 +259,8 @@ export function useExternalEventDrafts({
       if (!activeDraft) {
         return;
       }
-      const previousLastSeenSnapshot = activeDraftLastSeenSnapshotRef.current;
-      const visibleSnapshot = findVisibleRenderedDraftBox(activeDraft.event.id);
+      const previousLastSeenAnchor = activeDraftLastSeenAnchorRef.current;
+      const visibleAnchor = captureEventAnchor(activeDraft.event, undefined, true);
       const nextEvent = updater(activeDraft.event);
       const geometryChanged =
         nextEvent.start !== activeDraft.event.start ||
@@ -439,72 +268,38 @@ export function useExternalEventDrafts({
         nextEvent.calendarId !== activeDraft.event.calendarId ||
         (nextEvent.calendarIds ?? []).join("|") !== (activeDraft.event.calendarIds ?? []).join("|");
       const dateChanged = nextEvent.start.slice(0, 10) !== activeDraft.event.start.slice(0, 10);
-      expectedProgrammaticScrollRef.current = null;
-      restoreTokenRef.current += 1;
-      if (visibleSnapshot && dateChanged) {
-        activeDraftLastSeenSnapshotRef.current = visibleSnapshot;
+      calendarRef.current?.cancelViewportAnchorRestore();
+      if (visibleAnchor && dateChanged) {
+        activeDraftLastSeenAnchorRef.current = visibleAnchor;
         flushSync(() => {
           setActiveDraft({ ...activeDraft, event: nextEvent });
         });
-        const movedVisibleSnapshot = findVisibleRenderedDraftBox(nextEvent.id);
-        if (movedVisibleSnapshot) {
-          activeDraftLastSeenSnapshotRef.current = movedVisibleSnapshot;
+        const movedVisibleAnchor = captureEventAnchor(nextEvent, undefined, true);
+        if (movedVisibleAnchor) {
+          activeDraftLastSeenAnchorRef.current = movedVisibleAnchor;
           return;
         }
-        restoreDraftScreenPositionNow({
-          snapshot: visibleSnapshot,
-          eventId: nextEvent.id,
-          event: nextEvent,
+        restoreEventAnchor(visibleAnchor, nextEvent, {
           afterRecenter: true
         });
         return;
       }
-      if (visibleSnapshot && geometryChanged) {
-        activeDraftLastSeenSnapshotRef.current = visibleSnapshot;
-        const viewport = document.querySelector<HTMLElement>(".ic-viewport");
-        const scrollTop = viewport?.scrollTop ?? 0;
-        const scrollLeft = viewport?.scrollLeft ?? 0;
-        const restoreScroll = () => {
-          if (!viewport) {
-            return;
-          }
-          const viewportBox = viewport.getBoundingClientRect();
-          const draftElement = Array.from(document.querySelectorAll<HTMLElement>('[data-testid="draft-event"]')).find(
-            (element) => element.dataset.eventId === nextEvent.id
-          );
-          const draftBox = draftElement?.getBoundingClientRect();
-          if (
-            !draftBox ||
-            draftBox.width <= 0 ||
-            draftBox.height <= 0 ||
-            draftBox.right <= viewportBox.left ||
-            draftBox.left >= viewportBox.right ||
-            draftBox.bottom <= viewportBox.top ||
-            draftBox.top >= viewportBox.bottom
-          ) {
-            return;
-          }
-          viewport.scrollTop = scrollTop;
-          viewport.scrollLeft = scrollLeft;
-        };
+      if (visibleAnchor && geometryChanged) {
+        activeDraftLastSeenAnchorRef.current = visibleAnchor;
         setActiveDraft({ ...activeDraft, event: nextEvent });
-        window.queueMicrotask(restoreScroll);
-        window.requestAnimationFrame(restoreScroll);
-        window.setTimeout(restoreScroll, 0);
-        window.setTimeout(restoreScroll, 100);
-        window.setTimeout(restoreScroll, 220);
+        restoreEventAnchor(visibleAnchor, nextEvent, {
+          afterRecenter: false,
+          allowNavigationFallback: false
+        });
         return;
       }
-      if (visibleSnapshot && !geometryChanged) {
-        const targetSnapshot = previousLastSeenSnapshot ?? visibleSnapshot;
-        activeDraftLastSeenSnapshotRef.current = targetSnapshot;
+      if (visibleAnchor && !geometryChanged) {
+        const targetAnchor = previousLastSeenAnchor ?? visibleAnchor;
+        activeDraftLastSeenAnchorRef.current = targetAnchor;
         flushSync(() => {
           setActiveDraft({ ...activeDraft, event: nextEvent });
         });
-        restoreDraftScreenPositionNow({
-          snapshot: targetSnapshot,
-          eventId: nextEvent.id,
-          event: nextEvent,
+        restoreEventAnchor(targetAnchor, nextEvent, {
           afterRecenter: true
         });
         return;
@@ -512,9 +307,9 @@ export function useExternalEventDrafts({
       flushSync(() => {
         setActiveDraft({ ...activeDraft, event: nextEvent });
       });
-      focusDraftEvent(nextEvent, visibleSnapshot);
+      focusDraftEvent(nextEvent, visibleAnchor);
     },
-    [activeDraft, findVisibleRenderedDraftBox, focusDraftEvent, restoreDraftScreenPositionNow]
+    [activeDraft, calendarRef, captureEventAnchor, focusDraftEvent, restoreEventAnchor]
   );
 
   const updateDraftParticipants = useCallback(
@@ -527,22 +322,18 @@ export function useExternalEventDrafts({
         : [];
       const sourcePrimaryCalendarId =
         activeDraft.mode === "edit" ? firstPersonParticipantId(sourceParticipantIds) : undefined;
-      const snapshot =
-        (sourcePrimaryCalendarId ? findVisibleRenderedDraftBox(activeDraft.event.id, sourcePrimaryCalendarId) : null) ??
-        findVisibleRenderedDraftBox(activeDraft.event.id) ??
-        activeDraftLastSeenSnapshotRef.current;
+      const anchor =
+        (sourcePrimaryCalendarId ? captureEventAnchor(activeDraft.event, sourcePrimaryCalendarId, true) : null) ??
+        captureEventAnchor(activeDraft.event, undefined, true) ??
+        activeDraftLastSeenAnchorRef.current;
       const nextEvent = updater(activeDraft.event);
-      if (snapshot) {
-        activeDraftLastSeenSnapshotRef.current = snapshot;
-        document.querySelector<HTMLElement>(".ic-viewport")?.dispatchEvent(new Event("scroll"));
+      if (anchor) {
+        activeDraftLastSeenAnchorRef.current = anchor;
         flushSync(() => {
           setDraftParticipantsChanged(true);
           setActiveDraft({ ...activeDraft, event: nextEvent });
         });
-        restoreDraftScreenPositionNow({
-          snapshot,
-          eventId: nextEvent.id,
-          event: nextEvent,
+        restoreEventAnchor(anchor, nextEvent, {
           afterRecenter: true,
           allowNavigationFallback: false
         });
@@ -551,7 +342,7 @@ export function useExternalEventDrafts({
       setDraftParticipantsChanged(true);
       setActiveDraft({ ...activeDraft, event: nextEvent });
     },
-    [activeDraft, findVisibleRenderedDraftBox, restoreDraftScreenPositionNow]
+    [activeDraft, captureEventAnchor, restoreEventAnchor]
   );
 
   const handleExternalAdd = useCallback(() => {
@@ -592,7 +383,7 @@ export function useExternalEventDrafts({
       calendarIds: participantIds.length > 0 ? participantIds : [firstCalendarId],
       kind: savedKind
     };
-    const snapshot = findRenderedDraftBox(activeDraft.event.id);
+    const anchor = captureEventAnchor(activeDraft.event);
 
     flushSync(() => {
       if (activeDraft.mode === "edit") {
@@ -605,10 +396,10 @@ export function useExternalEventDrafts({
       }
       clearActiveDraft();
     });
-    if (snapshot) {
-      restoreDraftScreenPositionNow({ snapshot, eventId: savedEvent.id, event: savedEvent, afterRecenter: true });
+    if (anchor) {
+      restoreEventAnchor(anchor, savedEvent, { eventId: savedEvent.id, afterRecenter: true });
     }
-  }, [activeDraft, clearActiveDraft, findRenderedDraftBox, restoreDraftScreenPositionNow, setEvents, setMessage]);
+  }, [activeDraft, captureEventAnchor, clearActiveDraft, restoreEventAnchor, setEvents, setMessage]);
 
   const cancelActiveDraft = useCallback(() => {
     const sourceParticipantIds = activeEditSourceEventRef.current
@@ -618,13 +409,11 @@ export function useExternalEventDrafts({
       firstPersonParticipantId(sourceParticipantIds) ??
       activeEditSourceEventRef.current?.calendarId ??
       activeDraft?.event.calendarId;
-    const snapshot = activeDraft
-      ? ((activeDraft.mode === "edit" && sourcePrimaryCalendarId
-          ? findVisibleRenderedDraftBox(activeDraft.event.id, sourcePrimaryCalendarId)
-          : null) ??
-        (activeDraft.mode === "edit" ? activeDraftLastSeenSnapshotRef.current : null) ??
-        findVisibleRenderedDraftBox(activeDraft.event.id) ??
-        activeDraftLastSeenSnapshotRef.current)
+    const anchor = activeDraft
+      ? ((sourcePrimaryCalendarId ? captureEventAnchor(activeDraft.event, sourcePrimaryCalendarId, true) : null) ??
+        (activeDraft.mode === "edit" ? activeDraftLastSeenAnchorRef.current : null) ??
+        captureEventAnchor(activeDraft.event, undefined, true) ??
+        activeDraftLastSeenAnchorRef.current)
       : null;
     const cancelledEvent =
       activeDraft?.mode === "edit" && activeEditSourceEventRef.current && sourcePrimaryCalendarId
@@ -636,22 +425,37 @@ export function useExternalEventDrafts({
         : (activeDraft?.event ?? null);
     const sourceEventId =
       activeDraft?.mode === "edit" ? (activeDraft.sourceEventId ?? activeDraft.event.id) : undefined;
+    calendarRef.current?.releaseActiveDraft({ animation: "fade-out" });
     flushSync(() => {
       clearActiveDraft();
       setMessage("External popup cancelled");
     });
-    if (snapshot && cancelledEvent) {
-      restoreDraftScreenPositionNow({
-        snapshot,
-        eventId: sourceEventId,
-        event: cancelledEvent,
-        targetCalendarId: activeDraft?.mode === "edit" ? sourcePrimaryCalendarId : undefined,
+    if (anchor && cancelledEvent) {
+      if (activeDraft?.mode === "edit") {
+        restoreEventAnchor(anchor, cancelledEvent, {
+          eventId: sourceEventId,
+          targetCalendarId: sourcePrimaryCalendarId,
+          afterRecenter: true,
+          allowNavigationFallback: false,
+          cancelOnManualScroll: true
+        });
+        return;
+      }
+      restoreSlotAnchor(anchor, cancelledEvent, {
+        targetCalendarId: sourcePrimaryCalendarId,
         afterRecenter: true,
-        allowNavigationFallback: false,
         cancelOnManualScroll: true
       });
     }
-  }, [activeDraft, clearActiveDraft, findVisibleRenderedDraftBox, restoreDraftScreenPositionNow, setMessage]);
+  }, [
+    activeDraft,
+    calendarRef,
+    captureEventAnchor,
+    clearActiveDraft,
+    restoreEventAnchor,
+    restoreSlotAnchor,
+    setMessage
+  ]);
 
   const toggleDraftParticipant = useCallback(
     (calendarId: CalendarId, checked: boolean) => {

@@ -40,6 +40,7 @@ type VerticalTimelineDayProps = {
   draftEvent: CalendarEvent | null;
   draftEventStatus: EventRenderStatus;
   draftEventIsDraggable: boolean;
+  draftEventIsExiting: boolean;
   eventRenderer: EventRenderer;
   eventsForColumn: (dateKey: string, calendarId: CalendarId) => CalendarEvent[];
   columnWidthForDateCalendar: (dateKey: string, calendarId: CalendarId) => number;
@@ -97,6 +98,7 @@ export function VerticalTimelineDay({
   draftEvent,
   draftEventStatus,
   draftEventIsDraggable,
+  draftEventIsExiting,
   eventRenderer,
   eventsForColumn,
   columnWidthForDateCalendar,
@@ -217,6 +219,7 @@ export function VerticalTimelineDay({
               draftEvent={isHidden ? null : draftEvent}
               draftEventStatus={draftEventStatus}
               draftEventIsDraggable={draftEventIsDraggable}
+              draftEventIsExiting={draftEventIsExiting}
               eventRenderer={eventRenderer}
               onHoverMove={onHoverMove}
               onHoverLeave={onHoverLeave}
@@ -250,6 +253,7 @@ type VerticalCalendarColumnProps = {
   draftEvent: CalendarEvent | null;
   draftEventStatus: EventRenderStatus;
   draftEventIsDraggable: boolean;
+  draftEventIsExiting: boolean;
   eventRenderer: EventRenderer;
   onHoverMove: (
     event: ReactMouseEvent<HTMLDivElement> | ReactPointerEvent<HTMLDivElement>,
@@ -288,6 +292,7 @@ function VerticalCalendarColumn({
   draftEvent,
   draftEventStatus,
   draftEventIsDraggable,
+  draftEventIsExiting,
   eventRenderer,
   onHoverMove,
   onHoverLeave,
@@ -430,12 +435,18 @@ function VerticalCalendarColumn({
           isOverlapping={false}
           testId="draft-event"
           renderedCalendarId={calendar.id}
-          className={
-            draftEventIsDraggable ? "icv-event-shell ic-draft-shell is-draggable" : "icv-event-shell ic-draft-shell"
-          }
+          className={[
+            "icv-event-shell",
+            "ic-draft-shell",
+            draftEventIsDraggable ? "is-draggable" : "",
+            draftEventIsExiting ? "is-exiting" : ""
+          ]
+            .filter(Boolean)
+            .join(" ")}
           key={`draft-${draftEvent.id}-${calendar.id}`}
           eventRenderer={eventRenderer}
-          disableDrag={!draftEventIsDraggable}
+          disableDrag={!draftEventIsDraggable || draftEventIsExiting}
+          isExiting={draftEventIsExiting}
           onEventPointerDown={onEventPointerDown}
           onEventMouseDown={onEventMouseDown}
           onEventClick={onEventClick}

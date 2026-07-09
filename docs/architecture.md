@@ -48,7 +48,7 @@ The calendar renders event geometry, but product-specific card content belongs i
 
 ## Virtualization
 
-The timeline keeps a bounded date window around the visible anchor date. It mounts only the visible date sections plus overscan, then recenters after scroll idle while preserving the pixel offset inside the top visible date. This keeps the scrollbar usable while preserving the infinite-scroll illusion.
+The timeline keeps a bounded date window around the visible anchor date. It mounts only the visible date sections plus overscan, then recenters after scroll idle while preserving the pixel offset inside the top visible date. Scroll handling schedules the idle recenter even if the virtualizer has not mounted the newly scrolled-to items yet; the delayed snapshot lets the scrollbar reset after large wheel, thumb, or programmatic jumps. This keeps the scrollbar usable while preserving the infinite-scroll illusion.
 
 Both orientations share this date window. Horizontal mode measures variable day height from row overlap density. Vertical mode uses zoom-driven day height and column width growth for dense overlaps.
 
@@ -59,7 +59,8 @@ Pointer hit-testing is limited to timeline grid space, not sticky labels or head
 - Drag/drop previews call `onEventMoveRequest` and update the visible cache only after acceptance. Parent demos also update their source event arrays without bumping `eventVersion`, because a move proposal already contains enough information for the calendar to patch loaded visible buckets without a full range reload.
 - Drawn ranges call `onEventDraftRequest` for parent-owned create flows, or `onEventCreateRequest` for immediate create flows.
 - Click activation calls `onEventActivate`.
-- Controlled active drafts use `activeDraft` plus `onActiveDraftMoveRequest`.
+- Controlled active drafts use `activeDraft` plus `onActiveDraftMoveRequest`. When a parent closes a form, it can call `releaseActiveDraft({ animation: "fade-out" })` before clearing `activeDraft` so the calendar retains the last draft shell briefly as a visual anchor.
+- Parent create/edit surfaces can preserve a rendered event or calendar slot with `captureViewportAnchor`, `restoreViewportAnchor`, and `cancelViewportAnchorRestore` on the `CalendarRoot` imperative handle. Exact restore corrections can use an offscreen matching event element when layout changes moved it out of view; date/time navigation fallback remains separately controllable. The anchor implementation is library-owned so consumers do not need to query calendar DOM nodes or compute orientation-specific row/column coordinates.
 
 Multi-calendar events render once per matching selected calendar. Hover focus is local to the rendered row or column instance; drag and drop-preview status is keyed by event id across all visible instances.
 

@@ -295,9 +295,7 @@ export function useVirtualTimelineWindow({
   }, [clearScrollEndTimer, isInteractionActive, recenterVirtualWindow, updateTopVisibleSnapshot]);
 
   const scheduleScrollRecenter = useCallback(() => {
-    if (!updateTopVisibleSnapshot()) {
-      return;
-    }
+    updateTopVisibleSnapshot();
     clearScrollEndTimer();
     scrollEndTimerRef.current = window.setTimeout(finishScrollRecenter, SCROLL_RECENTER_DELAY_MS);
   }, [clearScrollEndTimer, finishScrollRecenter, updateTopVisibleSnapshot]);

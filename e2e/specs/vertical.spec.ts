@@ -315,7 +315,7 @@ test("keeps the vertical current date anchored when zoom changes", async ({ page
   await expect.poll(async () => viewport.evaluate((element) => element.scrollTop)).not.toBe(scrollTopBeforeManualWheel);
   const afterManualWheel = await topVisibleDayState(page);
 
-  await page.waitForTimeout(3200);
+  await page.waitForTimeout(1600);
   await expect
     .poll(async () => {
       const state = await topVisibleDayState(page);

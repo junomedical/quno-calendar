@@ -15,6 +15,8 @@
 - Added release-facing README, rewritten usage recipes, trimmed architecture overview, and public example routes under `/examples/*`.
 - Added source links to demo sidebars and Playwright coverage for example routes and demo source links.
 - Added parent-controlled external create/edit support with `activeDraft`, `onEventDraftRequest`, and `onEventActivate`.
+- Added public viewport-anchor helpers on `CalendarNavigationHandle` so parent forms can preserve event or slot position without demo-owned DOM anchoring.
+- Added `releaseActiveDraft` on `CalendarNavigationHandle` so parent forms can clear a controlled draft while the calendar fades out the last draft shell in place.
 - Added a default-demo external event popup that edits title, date/time, duration, and participants while keeping the calendar scrollable.
 - Added active-draft dragging through `onActiveDraftMoveRequest`; popup time fields update during drag and multi-calendar drafts move as one participant block.
 - Changed drawn creation in the default demo to delegate to the external popup before saving, while preserving immediate-create fallback through `onEventCreateRequest`.
@@ -30,10 +32,15 @@
 - Changed popup field edits so visible drafts update without scrolling, while offscreen drafts are restored to their last seen viewport position.
 - Fixed same-anchor date navigation so popup field edits can focus an active draft even after the user scrolls elsewhere inside the current virtual window.
 - Fixed edit popup cancel anchoring so cancellation restores focus to the original first person's event instance and preserves its viewport-relative position even after draft participant changes.
+- Changed bounded virtual scrolling to recenter after a 1.2s idle delay and to schedule that recenter even when the immediate scroll event fires before new virtual items are mounted.
+- Fixed dense 5,000-events/year draw-to-popup handoff so participant filtering does not move the controlled draft out of focus.
+- Fixed viewport-anchor restore so missing mounted targets navigate to their date/time immediately, preventing a visible wrong-date flash before delayed recenter correction.
 - Added simulated delayed external saves in the default demo, including deterministic validation failures that keep the popup editable with a bottom error message.
 - Fixed visible-calendar changes so reducing the calendar list keeps the active day visible instead of letting the old row offset jump into later dates.
 - Pinned the active draft date during virtual relayouts without replacing the current scroll anchor, so visible participant-row changes no longer park the draft in the viewport center.
 - Fixed create popup cancel anchoring so closing a draft preserves the drawn calendar row's viewport-relative position while internal virtualizer relayout scrolls are ignored.
+- Fixed create popup cancel anchoring after participant additions so the originally drawn calendar row remains the restore target instead of the first visible participant instance.
+- Fixed future-date create cancel after adding several participants so the viewport does not briefly jump to earlier dates before returning to the drawn date.
 - Fixed repeated draw-after-cancel anchoring so a new draft on the same date/calendar row does not inherit a stale cancel restore and jump upward.
 - Changed `Shift` + wheel zoom to anchor around the rendered time-grid node closest to the mouse in both horizontal and vertical timeline views.
 - Fixed vertical `Shift` + wheel zoom burst handling so the first focused time node remains anchored, stale delayed restores are ignored, immediate trackpad wheel momentum after releasing Shift is captured, and normal wheel scrolling resumes after the brief tail.

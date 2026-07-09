@@ -93,10 +93,42 @@ export type ActiveEventDraft = {
   sourceEventId?: EventId;
 };
 
+/** Options for releasing the currently rendered active draft from the calendar. */
+export type ActiveDraftReleaseOptions = {
+  animation?: "none" | "fade-out";
+  durationMs?: number;
+};
+
 /** Parent callback payload for activating an existing rendered event. */
 export type EventActivateRequest = {
   event: CalendarEvent;
   renderedCalendarId: CalendarId;
+};
+
+/** Target used for preserving a rendered event or calendar slot in the viewport. */
+export type CalendarViewportAnchorTarget = {
+  eventId?: EventId;
+  calendarId?: CalendarId;
+  dateKey?: string;
+  time?: string;
+  requireVisible?: boolean;
+};
+
+/** Opaque viewport anchor captured by `CalendarRoot` and restored after parent layout changes. */
+export type CalendarViewportAnchor = {
+  snapshot: {
+    top: number;
+    left: number;
+  };
+  target: CalendarViewportAnchorTarget;
+};
+
+/** Options for restoring a captured viewport anchor. */
+export type CalendarViewportAnchorRestoreOptions = {
+  target?: CalendarViewportAnchorTarget;
+  afterRecenter?: boolean;
+  allowNavigationFallback?: boolean;
+  cancelOnManualScroll?: boolean;
 };
 
 /** Common props passed from the shell to a concrete calendar view. */
@@ -127,6 +159,13 @@ export type CalendarNavigationHandle = {
   scrollToDate: (dateKey: string) => void;
   scrollToDateTime: (dateKey: string, time: string) => void;
   scrollToToday: () => void;
+  captureViewportAnchor: (target: CalendarViewportAnchorTarget) => CalendarViewportAnchor | null;
+  restoreViewportAnchor: (
+    anchor: CalendarViewportAnchor | null,
+    options?: CalendarViewportAnchorRestoreOptions
+  ) => void;
+  cancelViewportAnchorRestore: () => void;
+  releaseActiveDraft: (options?: ActiveDraftReleaseOptions) => void;
 };
 
 /** Public reusable calendar shell props. */

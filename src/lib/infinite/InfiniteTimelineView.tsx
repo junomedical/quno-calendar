@@ -5,6 +5,7 @@ import {
   useImperativeHandle,
   useLayoutEffect,
   useMemo,
+  useRef,
   useState,
   type MouseEvent as ReactMouseEvent,
   type PointerEvent as ReactPointerEvent
@@ -32,6 +33,7 @@ import { useTimelineViewSetup } from "./hooks/useTimelineViewSetup";
 import { useHorizontalTimelineHitTesting } from "./hooks/useTimelineHitTesting";
 import { useHorizontalShiftWheelZoom } from "./hooks/useShiftWheelZoom";
 import { useRetainedCalendarRows } from "./hooks/useRetainedCalendarRows";
+import { useViewportAnchoring } from "./hooks/useViewportAnchoring";
 import "./InfiniteTimelineView.css";
 
 /**
@@ -144,6 +146,13 @@ export const InfiniteTimelineView = forwardRef<CalendarNavigationHandle, Calenda
       },
       [scrollToDate, scrollToTime]
     );
+    const { captureViewportAnchor, restoreViewportAnchor, cancelViewportAnchorRestore } = useViewportAnchoring({
+      containerRef,
+      settings: effectiveSettings,
+      orientation: "horizontal",
+      scrollToDateTime
+    });
+    const releaseActiveDraftRef = useRef<CalendarNavigationHandle["releaseActiveDraft"]>(() => undefined);
 
     useImperativeHandle(
       ref,
@@ -154,9 +163,13 @@ export const InfiniteTimelineView = forwardRef<CalendarNavigationHandle, Calenda
           scrollToDateTime(
             toDateKey(now),
             `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`
-          )
+          ),
+        captureViewportAnchor,
+        restoreViewportAnchor,
+        cancelViewportAnchorRestore,
+        releaseActiveDraft: (options) => releaseActiveDraftRef.current(options)
       }),
-      [now, scrollToDate, scrollToDateTime]
+      [cancelViewportAnchorRestore, captureViewportAnchor, now, restoreViewportAnchor, scrollToDate, scrollToDateTime]
     );
 
     const { eventsByDate, applyMoveToLoadedEvents, applyCreatedEventToLoadedEvents } = useEventRangeLoader({
@@ -209,9 +222,11 @@ export const InfiniteTimelineView = forwardRef<CalendarNavigationHandle, Calenda
       dragState,
       draftState,
       dragPreviewEvent,
+      releaseActiveDraft,
       renderedDraftEvent,
       renderedDraftStatus,
       renderedDraftIsDraggable,
+      renderedDraftIsExiting,
       isInteractionActive: currentInteractionActive,
       handleGridPointerDown,
       handleGridMouseDown,
@@ -234,6 +249,7 @@ export const InfiniteTimelineView = forwardRef<CalendarNavigationHandle, Calenda
       applyMoveToLoadedEvents,
       applyCreatedEventToLoadedEvents
     });
+    releaseActiveDraftRef.current = releaseActiveDraft;
 
     useEffect(() => {
       setIsInteractionActive(currentInteractionActive);
@@ -286,7 +302,7 @@ export const InfiniteTimelineView = forwardRef<CalendarNavigationHandle, Calenda
         const preferred = candidates.find((item) => item.lane === preferredLane) ?? candidates[0];
         setHoveredEvent({ eventId: preferred.event.id, calendarId: renderedCalendarId });
       },
-      [draftState, dragState, interactionMode]
+      [draftState, dragState, interactionMode, setHoveredEvent]
     );
 
     const shellClassName = ["ic-shell", className].filter(Boolean).join(" ");
@@ -340,6 +356,7 @@ export const InfiniteTimelineView = forwardRef<CalendarNavigationHandle, Calenda
                   draftEvent={renderedDraftEvent}
                   draftEventStatus={renderedDraftStatus}
                   draftEventIsDraggable={renderedDraftIsDraggable}
+                  draftEventIsExiting={renderedDraftIsExiting}
                   eventRenderer={eventRenderer}
                   measureElement={virtualizer.measureElement}
                   getRowHeight={getRowHeight}

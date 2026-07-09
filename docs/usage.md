@@ -98,6 +98,37 @@ Use controlled drafts when create/edit UI lives outside the calendar.
 
 While an edit draft is active, the calendar hides the loaded source event and renders the controlled draft in its proposed position. Parent code decides how save, cancel, validation, and form fields work.
 
+Use the imperative handle to keep a draft, saved event, or fallback slot at the same viewport position while parent state changes:
+
+```tsx
+const anchor = calendarRef.current?.captureViewportAnchor({
+  eventId: draft.event.id,
+  calendarId: draft.event.calendarId,
+  dateKey: draft.event.start.slice(0, 10),
+  time: "09:30"
+});
+
+setActiveDraft(null);
+
+calendarRef.current?.restoreViewportAnchor(anchor, {
+  target: {
+    eventId: savedEvent.id,
+    calendarId: savedEvent.calendarId,
+    dateKey: savedEvent.start.slice(0, 10),
+    time: "09:30"
+  },
+  afterRecenter: true,
+  cancelOnManualScroll: true
+});
+```
+
+When cancelling a form, release the controlled draft before clearing parent state if the draft should fade out in place:
+
+```tsx
+calendarRef.current?.releaseActiveDraft({ animation: "fade-out" });
+setActiveDraft(null);
+```
+
 Repository example: `src/examples/ControlledDraftCalendar.tsx`.
 
 ## Availability Editing
@@ -141,4 +172,4 @@ const calendarRef = useRef<CalendarNavigationHandle>(null);
 calendarRef.current?.scrollToDateTime("2026-07-04", "09:30");
 ```
 
-`initialDateKey` sets the initial virtual range anchor. If omitted, the calendar starts around `now`.
+`initialDateKey` sets the initial virtual range anchor. If omitted, the calendar starts around `now`. The same handle also exposes viewport anchoring helpers for parent-owned forms: `captureViewportAnchor`, `restoreViewportAnchor`, and `cancelViewportAnchorRestore`. `releaseActiveDraft` lets a parent close controlled draft UI while the calendar keeps the last draft shell mounted briefly for a fadeout.

@@ -34,6 +34,7 @@ type InfiniteTimelineRowProps = {
   draftEvent: CalendarEvent | null;
   draftEventStatus: EventRenderStatus;
   draftEventIsDraggable: boolean;
+  draftEventIsExiting: boolean;
   eventRenderer: EventRenderer;
   onHoverMove: (
     event: MouseEvent<HTMLDivElement> | PointerEvent<HTMLDivElement>,
@@ -82,6 +83,7 @@ export function InfiniteTimelineRow({
   draftEvent,
   draftEventStatus,
   draftEventIsDraggable,
+  draftEventIsExiting,
   eventRenderer,
   onHoverMove,
   onHoverLeave,
@@ -247,10 +249,17 @@ export function InfiniteTimelineRow({
             isOverlapping={false}
             testId="draft-event"
             renderedCalendarId={calendar.id}
-            className={draftEventIsDraggable ? "ic-draft-shell is-draggable" : "ic-draft-shell"}
+            className={[
+              "ic-draft-shell",
+              draftEventIsDraggable ? "is-draggable" : "",
+              draftEventIsExiting ? "is-exiting" : ""
+            ]
+              .filter(Boolean)
+              .join(" ")}
             key={`draft-${draftEvent.id}-${calendar.id}`}
             eventRenderer={eventRenderer}
-            disableDrag={!draftEventIsDraggable}
+            disableDrag={!draftEventIsDraggable || draftEventIsExiting}
+            isExiting={draftEventIsExiting}
             onEventPointerDown={onEventPointerDown}
             onEventMouseDown={onEventMouseDown}
             onEventClick={onEventClick}

@@ -29,6 +29,11 @@
   pointer-events: auto;
 }
 
+.ic-draft-shell.is-exiting {
+  pointer-events: none;
+  animation: ic-draft-fade-out 180ms ease-out forwards;
+}
+
 .ic-availability-shell {
   pointer-events: none;
 }
@@ -40,4 +45,20 @@
 .ic-background-event-shell {
   pointer-events: none;
   opacity: 0.42;
+}
+
+@keyframes ic-draft-fade-out {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ic-draft-shell.is-exiting {
+    animation-duration: 1ms;
+  }
 }
