@@ -16,6 +16,9 @@ Vitest unit tests live in `tests/unit` and mirror the source module grouping.
 - Async range loading de-duplicates committed events by id when a range response includes already-loaded dates, so reloads do not add overlap lanes or grow rows.
 - Multi-calendar event membership and move application.
 - Active edit drafts replace their source event id while create drafts do not remove loaded events; draft overlays do not add overlap lanes, row-height growth, or vertical column-width growth.
+- Newly committed visible events receive `status="appearing"` briefly after save/create, and the default demo card renders a 70px hard-edged diagonal white glint over that appearing status with a 485ms sweep.
+- Save-triggered range reloads only mark ids provided in `appearingEventIds` as appearing; unrelated reloaded created events remain `existing`, and the same active requested id is consumed once rather than replaying on later range responses.
+- External save keeps the released draft shell visible with a controlled fade duration while the committed event reloads, avoiding a blank redraw frame between popup close and the appearing event. Manual scrolling immediately after save is not pulled back by delayed anchor corrections.
 - Deterministic demo event generation distributes events across every demo calendar.
 - Pointer hit-testing, move proposal calculation, and draft creation.
 - Public package entrypoint exports only the supported surface and does not expose concrete infinite view internals.

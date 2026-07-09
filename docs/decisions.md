@@ -38,6 +38,12 @@ Behavioral and API changes must update the relevant Markdown files: architecture
 
 The infinite view keeps a loaded visible-range cache, so parent state changes alone may not be visible until a reload. After `onEventCreateRequest` resolves, the view inserts the returned created event, or a local draft copy, into the loaded date bucket so the new event appears immediately. Parent-owned flows such as external popup save can bump `eventVersion` to invalidate the loaded cache after persistence without remounting or changing the `loadEvents` function identity. Loaded date buckets are keyed by event id on merge, because a missing-date range can include already-loaded dates and duplicate committed records would incorrectly add overlap lanes.
 
+Newly committed events receive a short-lived `appearing` renderer status when they first enter the loaded visible cache through immediate create or through parent-provided `appearingEventIds` during an `eventVersion` reload. Requested appearing ids are consumed once while the request remains active, so later range responses or reloads do not replay the same glint. Initial range loads, selected-calendar refetches, and unrelated reloaded records do not mark existing events as appearing. The demo renderer uses that status for a hard-edged diagonal white glint, while product renderers own their own visual treatment.
+
+The default demo releases the outgoing external-create draft shell during save before clearing the controlled popup state. That bridges the async range invalidation frame so the user sees the saved draft location until the committed event reloads and receives `appearing`; the demo passes only the saved event id in `appearingEventIds` so older created records in the same range do not replay the save highlight.
+
+External save restores its captured viewport anchor with immediate correction only and `cancelOnManualScroll`, not the delayed after-recenter correction sequence. This prevents save completion from pulling the viewport back after the user starts scrolling.
+
 ## 010 - Current-Time Marker Uses The Timeline Coordinate
 
 The sticky top pin and per-day current-time lines use the same natural timeline x-position. This keeps the red marker connected and moving at the same rate as the time grid when the timeline is horizontally scrolled.

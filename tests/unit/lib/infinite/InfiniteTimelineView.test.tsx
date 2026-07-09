@@ -206,6 +206,92 @@ describe("InfiniteTimelineView", () => {
     expect(screen.queryByText("Before Version")).not.toBeInTheDocument();
   });
 
+  it("marks only requested reloaded events as appearing", async () => {
+    const renderer = vi.fn(({ event, status, style }: EventRendererProps) => (
+      <div data-testid={`custom-event-${event.id}`} data-status={status} style={style}>
+        {event.title}
+      </div>
+    ));
+    let loaderEvents: CalendarEvent[] = [
+      {
+        id: "event-a",
+        calendarId: "calendar-a",
+        title: "Before Version",
+        start: "2026-07-04T09:00:00",
+        end: "2026-07-04T10:00:00"
+      }
+    ];
+    const loadEvents = vi.fn(async () => loaderEvents);
+
+    const { rerender } = render(
+      <CalendarRoot
+        calendars={calendars}
+        selectedCalendarIds={["calendar-a"]}
+        loadEvents={loadEvents}
+        eventVersion={0}
+        eventRenderer={renderer}
+        now={new Date("2026-07-04T09:30:00")}
+        settings={{ startHour: 8, endHour: 18, zoom: 1, excludedWeekdays: [] }}
+      />
+    );
+
+    expect(await screen.findByText("Before Version")).toBeInTheDocument();
+    loaderEvents = [
+      {
+        id: "event-b",
+        calendarId: "calendar-a",
+        title: "Requested Appearing",
+        start: "2026-07-04T09:00:00",
+        end: "2026-07-04T10:00:00"
+      },
+      {
+        id: "event-c",
+        calendarId: "calendar-a",
+        title: "Plain Reloaded",
+        start: "2026-07-04T10:00:00",
+        end: "2026-07-04T11:00:00"
+      }
+    ];
+
+    rerender(
+      <CalendarRoot
+        calendars={calendars}
+        selectedCalendarIds={["calendar-a"]}
+        loadEvents={loadEvents}
+        eventVersion={1}
+        appearingEventIds={["event-b"]}
+        eventRenderer={renderer}
+        now={new Date("2026-07-04T09:30:00")}
+        settings={{ startHour: 8, endHour: 18, zoom: 1, excludedWeekdays: [] }}
+      />
+    );
+
+    expect(await screen.findByText("Requested Appearing")).toBeInTheDocument();
+    expect(await screen.findByText("Plain Reloaded")).toBeInTheDocument();
+    expect(screen.getByTestId("custom-event-event-b")).toHaveAttribute("data-status", "appearing");
+    expect(screen.getByTestId("custom-event-event-c")).toHaveAttribute("data-status", "existing");
+
+    await waitFor(() => expect(screen.getByTestId("custom-event-event-b")).toHaveAttribute("data-status", "existing"), {
+      timeout: 1_200
+    });
+
+    rerender(
+      <CalendarRoot
+        calendars={calendars}
+        selectedCalendarIds={["calendar-a"]}
+        loadEvents={loadEvents}
+        eventVersion={2}
+        appearingEventIds={["event-b"]}
+        eventRenderer={renderer}
+        now={new Date("2026-07-04T09:30:00")}
+        settings={{ startHour: 8, endHour: 18, zoom: 1, excludedWeekdays: [] }}
+      />
+    );
+
+    expect(await screen.findByText("Requested Appearing")).toBeInTheDocument();
+    expect(screen.getByTestId("custom-event-event-b")).toHaveAttribute("data-status", "existing");
+  });
+
   it("renders an active edit draft in place of the loaded source event", async () => {
     const renderer = vi.fn(({ event, status, style }: EventRendererProps) => (
       <div data-testid="custom-event" data-status={status} style={style}>

@@ -56,6 +56,7 @@ This document defines the names used for visible calendar interface parts and th
 | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
 | Calendar event       | The data object returned by `loadEvents`. It may represent an appointment, availability, or another product-specific block.                                                   | `CalendarEvent`                     |
 | Event version        | Parent-controlled invalidation token for the loaded visible-range cache. Bump it after persisted event-store changes that should be reloaded through `loadEvents`.            | `eventVersion`                      |
+| Appearing event ids  | Parent-provided ids that receive `status="appearing"` when they are present in loaded visible events after a save or reload.                                                  | `appearingEventIds`                 |
 | Appointment          | A normal timed event that users move/create in `events` interaction mode.                                                                                                     | `kind` omitted or product-specific  |
 | Availability         | A background schedulable interval, usually full row height, shown with `kind: "availability"`.                                                                                | `kind: "availability"`              |
 | Multi-calendar event | One event that belongs to more than one calendar and renders once in each matching selected calendar row.                                                                     | `calendarIds`                       |
@@ -98,6 +99,7 @@ This document defines the names used for visible calendar interface parts and th
 | `dragging`     | Original event while a drag is active.                                               |
 | `drop-preview` | Proposed drag/drop position rendered as a preview.                                   |
 | `new`          | Creation draft rendered while drawing or immediately after create if needed.         |
+| `appearing`    | Newly committed event rendered briefly after save/create so renderers can highlight it. |
 
 ## Preferred Language
 

@@ -60,6 +60,7 @@ export function useTimelineInteractions({
   const [releasedDraft, setReleasedDraft] = useState<{
     draft: ActiveEventDraft;
     status: EventRenderStatus;
+    durationMs: number;
   } | null>(null);
   const activeDraftRef = useRef<ActiveEventDraft | null>(activeDraft ?? null);
   const releaseTimerRef = useRef<number | null>(null);
@@ -82,14 +83,16 @@ export function useTimelineInteractions({
         return;
       }
 
+      const durationMs = options.durationMs ?? DEFAULT_DRAFT_RELEASE_DURATION_MS;
       setReleasedDraft({
         draft,
-        status: draft.mode === "edit" ? "existing" : "new"
+        status: draft.mode === "edit" ? "existing" : "new",
+        durationMs
       });
       releaseTimerRef.current = window.setTimeout(() => {
         setReleasedDraft(null);
         releaseTimerRef.current = null;
-      }, options.durationMs ?? DEFAULT_DRAFT_RELEASE_DURATION_MS);
+      }, durationMs);
     },
     [clearReleaseTimer]
   );
@@ -289,6 +292,7 @@ export function useTimelineInteractions({
     renderedDraftStatus,
     renderedDraftIsDraggable: Boolean(activeDraft),
     renderedDraftIsExiting: Boolean(!activeDraft && !draftState && releasedDraft),
+    renderedDraftReleaseDurationMs: !activeDraft && !draftState ? releasedDraft?.durationMs : undefined,
     isInteractionActive: Boolean(dragState || draftState),
     handleGridPointerDown,
     handleGridMouseDown,

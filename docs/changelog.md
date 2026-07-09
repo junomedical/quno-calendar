@@ -17,6 +17,10 @@
 - Added parent-controlled external create/edit support with `activeDraft`, `onEventDraftRequest`, and `onEventActivate`.
 - Added public viewport-anchor helpers on `CalendarNavigationHandle` so parent forms can preserve event or slot position without demo-owned DOM anchoring.
 - Added `releaseActiveDraft` on `CalendarNavigationHandle` so parent forms can clear a controlled draft while the calendar fades out the last draft shell in place.
+- Added an `appearing` event renderer status for newly committed visible events and a demo save glint that sweeps a hard-edged diagonal white reflection across the card.
+- Added `appearingEventIds` so parent-owned save reloads can highlight only the committed event instead of every previously unseen created record in the reloaded range.
+- Changed released draft fadeout so `durationMs` controls the visual fade duration, and the default demo uses it to bridge the external-save redraw before the committed event appears.
+- Changed external-save anchor restoration to avoid delayed recenter corrections after save and sped up the demo appearing glint to 485ms.
 - Added a default-demo external event popup that edits title, date/time, duration, and participants while keeping the calendar scrollable.
 - Added active-draft dragging through `onActiveDraftMoveRequest`; popup time fields update during drag and multi-calendar drafts move as one participant block.
 - Changed drawn creation in the default demo to delegate to the external popup before saving, while preserving immediate-create fallback through `onEventCreateRequest`.

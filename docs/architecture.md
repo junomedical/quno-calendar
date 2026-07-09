@@ -34,7 +34,7 @@ Changing selected calendar ids invalidates in-flight range requests and schedule
 
 The default demo keeps the package contract unchanged but widens its own range-loader requests to the full selected calendar set while an external create/edit draft filters visible rows. This keeps hidden participant rows warm in the loaded cache so cancelling the popup can expand rows with content already available.
 
-The calendar renders event geometry, but product-specific card content belongs in `eventRenderer`. The renderer receives event data, status, lane metadata, overlap metadata, and a `style` object for full-size card layout.
+The calendar renders event geometry, but product-specific card content belongs in `eventRenderer`. The renderer receives event data, status, lane metadata, overlap metadata, and a `style` object for full-size card layout. Newly committed visible events briefly receive the `appearing` status after immediate create or when their ids are passed through `appearingEventIds` during a save-triggered range reload.
 
 ## Module Boundaries
 
@@ -59,7 +59,7 @@ Pointer hit-testing is limited to timeline grid space, not sticky labels or head
 - Drag/drop previews call `onEventMoveRequest` and update the visible cache only after acceptance. Parent demos also update their source event arrays without bumping `eventVersion`, because a move proposal already contains enough information for the calendar to patch loaded visible buckets without a full range reload.
 - Drawn ranges call `onEventDraftRequest` for parent-owned create flows, or `onEventCreateRequest` for immediate create flows.
 - Click activation calls `onEventActivate`.
-- Controlled active drafts use `activeDraft` plus `onActiveDraftMoveRequest`. When a parent closes a form, it can call `releaseActiveDraft({ animation: "fade-out" })` before clearing `activeDraft` so the calendar retains the last draft shell briefly as a visual anchor.
+- Controlled active drafts use `activeDraft` plus `onActiveDraftMoveRequest`. When a parent closes a form, it can call `releaseActiveDraft({ animation: "fade-out", durationMs })` before clearing `activeDraft` so the calendar retains the last draft shell briefly as a visual anchor. The same duration controls the shell lifetime and fade animation.
 - Parent create/edit surfaces can preserve a rendered event or calendar slot with `captureViewportAnchor`, `restoreViewportAnchor`, and `cancelViewportAnchorRestore` on the `CalendarRoot` imperative handle. Exact restore corrections can use an offscreen matching event element when layout changes moved it out of view; date/time navigation fallback remains separately controllable. The anchor implementation is library-owned so consumers do not need to query calendar DOM nodes or compute orientation-specific row/column coordinates.
 
 Multi-calendar events render once per matching selected calendar. Hover focus is local to the rendered row or column instance; drag and drop-preview status is keyed by event id across all visible instances.

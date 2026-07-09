@@ -36,11 +36,13 @@ type VerticalTimelineDayProps = {
   interactionMode: "events" | "availability";
   hoveredEvent: VerticalHoveredEvent;
   dragEventId?: string;
+  appearingEventIds: Set<string>;
   dragPreviewEvent: CalendarEvent | null;
   draftEvent: CalendarEvent | null;
   draftEventStatus: EventRenderStatus;
   draftEventIsDraggable: boolean;
   draftEventIsExiting: boolean;
+  draftEventReleaseDurationMs?: number;
   eventRenderer: EventRenderer;
   eventsForColumn: (dateKey: string, calendarId: CalendarId) => CalendarEvent[];
   columnWidthForDateCalendar: (dateKey: string, calendarId: CalendarId) => number;
@@ -94,11 +96,13 @@ export function VerticalTimelineDay({
   interactionMode,
   hoveredEvent,
   dragEventId,
+  appearingEventIds,
   dragPreviewEvent,
   draftEvent,
   draftEventStatus,
   draftEventIsDraggable,
   draftEventIsExiting,
+  draftEventReleaseDurationMs,
   eventRenderer,
   eventsForColumn,
   columnWidthForDateCalendar,
@@ -215,11 +219,13 @@ export function VerticalTimelineDay({
               interactionMode={interactionMode}
               hoveredEvent={hoveredEvent}
               dragEventId={dragEventId}
+              appearingEventIds={appearingEventIds}
               dragPreviewEvent={isHidden ? null : dragPreviewEvent}
               draftEvent={isHidden ? null : draftEvent}
               draftEventStatus={draftEventStatus}
               draftEventIsDraggable={draftEventIsDraggable}
               draftEventIsExiting={draftEventIsExiting}
+              draftEventReleaseDurationMs={draftEventReleaseDurationMs}
               eventRenderer={eventRenderer}
               onHoverMove={onHoverMove}
               onHoverLeave={onHoverLeave}
@@ -249,11 +255,13 @@ type VerticalCalendarColumnProps = {
   interactionMode: "events" | "availability";
   hoveredEvent: VerticalHoveredEvent;
   dragEventId?: string;
+  appearingEventIds: Set<string>;
   dragPreviewEvent: CalendarEvent | null;
   draftEvent: CalendarEvent | null;
   draftEventStatus: EventRenderStatus;
   draftEventIsDraggable: boolean;
   draftEventIsExiting: boolean;
+  draftEventReleaseDurationMs?: number;
   eventRenderer: EventRenderer;
   onHoverMove: (
     event: ReactMouseEvent<HTMLDivElement> | ReactPointerEvent<HTMLDivElement>,
@@ -288,11 +296,13 @@ function VerticalCalendarColumn({
   interactionMode,
   hoveredEvent,
   dragEventId,
+  appearingEventIds,
   dragPreviewEvent,
   draftEvent,
   draftEventStatus,
   draftEventIsDraggable,
   draftEventIsExiting,
+  draftEventReleaseDurationMs,
   eventRenderer,
   onHoverMove,
   onHoverLeave,
@@ -342,7 +352,8 @@ function VerticalCalendarColumn({
         const isDraft = event.id === "draft-new-event";
         const isDraggingOriginal = dragEventId === event.id;
         const isAvailabilityMode = interactionMode === "availability";
-        const status = isDraft ? "new" : isDraggingOriginal ? "dragging" : "existing";
+        const isAppearing = appearingEventIds.has(event.id);
+        const status = isDraft ? "new" : isDraggingOriginal ? "dragging" : isAppearing ? "appearing" : "existing";
         const top = verticalMinuteToY(minutesSinceStartOfDay(event.start), settings);
         const height = Math.max(
           12,
@@ -383,7 +394,8 @@ function VerticalCalendarColumn({
         const isDraggingOriginal = dragEventId === item.event.id;
         const isHovered =
           !dragEventId && hoveredEvent?.eventId === item.event.id && hoveredEvent.calendarId === calendar.id;
-        const status = isDraggingOriginal ? "dragging" : isHovered ? "hovered" : "existing";
+        const isAppearing = appearingEventIds.has(item.event.id);
+        const status = isDraggingOriginal ? "dragging" : isAppearing ? "appearing" : isHovered ? "hovered" : "existing";
         const left = isHovered ? "0%" : `calc(${item.leftPercent}% + ${VERTICAL_COLUMN_GAP_PX}px)`;
         const width = isHovered ? "100%" : `calc(${item.widthPercent}% - ${VERTICAL_COLUMN_GAP_PX * 2}px)`;
 
@@ -447,6 +459,7 @@ function VerticalCalendarColumn({
           eventRenderer={eventRenderer}
           disableDrag={!draftEventIsDraggable || draftEventIsExiting}
           isExiting={draftEventIsExiting}
+          releaseDurationMs={draftEventReleaseDurationMs}
           onEventPointerDown={onEventPointerDown}
           onEventMouseDown={onEventMouseDown}
           onEventClick={onEventClick}

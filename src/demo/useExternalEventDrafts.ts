@@ -31,6 +31,7 @@ type UseExternalEventDraftsArgs = {
   editAvailabilities: boolean;
   setEvents: Dispatch<SetStateAction<CalendarEvent[]>>;
   setMessage: (message: string) => void;
+  onSavedEventCommit?: (event: CalendarEvent) => void;
 };
 
 const demoPersonCalendarIds = new Set(demoCalendars.slice(0, 3).map((calendar) => calendar.id));
@@ -70,7 +71,8 @@ export function useExternalEventDrafts({
   snapMinutes,
   editAvailabilities,
   setEvents,
-  setMessage
+  setMessage,
+  onSavedEventCommit
 }: UseExternalEventDraftsArgs) {
   const [activeDraft, setActiveDraft] = useState<ActiveEventDraft | null>(null);
   const [draftParticipantsChanged, setDraftParticipantsChanged] = useState(false);
@@ -384,6 +386,8 @@ export function useExternalEventDrafts({
       kind: savedKind
     };
     const anchor = captureEventAnchor(activeDraft.event);
+    calendarRef.current?.releaseActiveDraft({ animation: "fade-out", durationMs: 420 });
+    onSavedEventCommit?.(savedEvent);
 
     flushSync(() => {
       if (activeDraft.mode === "edit") {
@@ -397,9 +401,22 @@ export function useExternalEventDrafts({
       clearActiveDraft();
     });
     if (anchor) {
-      restoreEventAnchor(anchor, savedEvent, { eventId: savedEvent.id, afterRecenter: true });
+      restoreEventAnchor(anchor, savedEvent, {
+        eventId: savedEvent.id,
+        afterRecenter: false,
+        cancelOnManualScroll: true
+      });
     }
-  }, [activeDraft, captureEventAnchor, clearActiveDraft, restoreEventAnchor, setEvents, setMessage]);
+  }, [
+    activeDraft,
+    calendarRef,
+    captureEventAnchor,
+    clearActiveDraft,
+    onSavedEventCommit,
+    restoreEventAnchor,
+    setEvents,
+    setMessage
+  ]);
 
   const cancelActiveDraft = useCallback(() => {
     const sourceParticipantIds = activeEditSourceEventRef.current

@@ -156,9 +156,11 @@ export function DefaultDemo({ routes }: DefaultDemoProps) {
   const [jumpTime, setJumpTime] = useState("09:00");
   const [events, setEvents] = useState(() => createDemoEvents(1_000));
   const [eventVersion, setEventVersion] = useState(0);
+  const [appearingEventIds, setAppearingEventIds] = useState<string[]>([]);
   const [systemNow, setSystemNow] = useState(() => new Date());
   const eventsRef = useRef(events);
   const saveDelayRef = useRef<number | null>(null);
+  const appearingEventIdsTimerRef = useRef<number | null>(null);
   const [message, setMessage] = useState("Ready");
   const [draftSaveState, setDraftSaveState] = useState({ isSaving: false, error: null as string | null });
   const calendarRef = useRef<CalendarNavigationHandle>(null);
@@ -177,7 +179,21 @@ export function DefaultDemo({ routes }: DefaultDemoProps) {
       if (saveDelayRef.current !== null) {
         window.clearTimeout(saveDelayRef.current);
       }
+      if (appearingEventIdsTimerRef.current !== null) {
+        window.clearTimeout(appearingEventIdsTimerRef.current);
+      }
     };
+  }, []);
+
+  const requestAppearingEvent = useCallback((event: CalendarEvent) => {
+    if (appearingEventIdsTimerRef.current !== null) {
+      window.clearTimeout(appearingEventIdsTimerRef.current);
+    }
+    setAppearingEventIds([event.id]);
+    appearingEventIdsTimerRef.current = window.setTimeout(() => {
+      setAppearingEventIds([]);
+      appearingEventIdsTimerRef.current = null;
+    }, 1_500);
   }, []);
 
   const selectedCalendarIds = useMemo(
@@ -252,7 +268,8 @@ export function DefaultDemo({ routes }: DefaultDemoProps) {
     snapMinutes,
     editAvailabilities,
     setEvents: commitEvents,
-    setMessage
+    setMessage,
+    onSavedEventCommit: requestAppearingEvent
   });
   isExternalDraftOpenRef.current = Boolean(activeDraft);
 
@@ -574,6 +591,7 @@ export function DefaultDemo({ routes }: DefaultDemoProps) {
           selectedCalendarIds={visibleCalendarIds}
           loadEvents={loadEvents}
           eventVersion={eventVersion}
+          appearingEventIds={appearingEventIds}
           eventRenderer={DemoEventCard}
           activeDraft={activeDraft}
           onEventMoveRequest={handleMove}

@@ -25,6 +25,7 @@ type EventShellProps = {
   eventRenderer: EventRenderer;
   disableDrag?: boolean;
   isExiting?: boolean;
+  releaseDurationMs?: number;
   onEventPointerDown?: (
     event: PointerEvent<HTMLDivElement>,
     calendarEvent: CalendarEvent,
@@ -65,6 +66,7 @@ export const EventShell = memo(function EventShell({
   eventRenderer,
   disableDrag = false,
   isExiting = false,
+  releaseDurationMs,
   onEventPointerDown,
   onEventMouseDown,
   onEventClick,
@@ -98,7 +100,8 @@ export const EventShell = memo(function EventShell({
           "--event-width": toCssLength(width),
           "--event-hover-width": toCssLength(hoverMaxWidth),
           "--event-accent": event.color ?? DEFAULT_EVENT_ACCENT,
-          "--event-accent-muted": mutedEventAccent(event.color ?? DEFAULT_EVENT_ACCENT)
+          "--event-accent-muted": mutedEventAccent(event.color ?? DEFAULT_EVENT_ACCENT),
+          "--draft-release-duration": releaseDurationMs ? `${releaseDurationMs}ms` : undefined
         } as CSSProperties
       }
     >
@@ -173,6 +176,7 @@ function areEventShellPropsEqual(previous: EventShellProps, next: EventShellProp
     previous.className === next.className &&
     previous.disableDrag === next.disableDrag &&
     previous.isExiting === next.isExiting &&
+    previous.releaseDurationMs === next.releaseDurationMs &&
     previous.eventRenderer === next.eventRenderer &&
     previous.onEventClick === next.onEventClick
   );

@@ -30,11 +30,13 @@ type InfiniteTimelineRowProps = {
   interactionMode: "events" | "availability";
   hoveredEvent: HoveredEvent;
   dragEventId?: string;
+  appearingEventIds: Set<string>;
   dragPreviewEvent: CalendarEvent | null;
   draftEvent: CalendarEvent | null;
   draftEventStatus: EventRenderStatus;
   draftEventIsDraggable: boolean;
   draftEventIsExiting: boolean;
+  draftEventReleaseDurationMs?: number;
   eventRenderer: EventRenderer;
   onHoverMove: (
     event: MouseEvent<HTMLDivElement> | PointerEvent<HTMLDivElement>,
@@ -79,11 +81,13 @@ export function InfiniteTimelineRow({
   interactionMode,
   hoveredEvent,
   dragEventId,
+  appearingEventIds,
   dragPreviewEvent,
   draftEvent,
   draftEventStatus,
   draftEventIsDraggable,
   draftEventIsExiting,
+  draftEventReleaseDurationMs,
   eventRenderer,
   onHoverMove,
   onHoverLeave,
@@ -150,7 +154,8 @@ export function InfiniteTimelineRow({
           const isDraft = event.id === "draft-new-event";
           const isDraggingOriginal = dragEventId === event.id;
           const isAvailabilityMode = interactionMode === "availability";
-          const status = isDraft ? "new" : isDraggingOriginal ? "dragging" : "existing";
+          const isAppearing = appearingEventIds.has(event.id);
+          const status = isDraft ? "new" : isDraggingOriginal ? "dragging" : isAppearing ? "appearing" : "existing";
           const startX = minuteToX(minutesSinceStartOfDay(event.start), settings);
           const endX = minuteToX(minutesSinceStartOfDay(event.end), settings);
           const left = TIMELINE_LEFT_GUTTER_PX + startX;
@@ -189,7 +194,8 @@ export function InfiniteTimelineRow({
           const isDraggingOriginal = dragEventId === item.event.id;
           const isHovered =
             !dragEventId && hoveredEvent?.eventId === item.event.id && hoveredEvent.calendarId === calendar.id;
-          const status = isDraggingOriginal ? "dragging" : isHovered ? "hovered" : "existing";
+          const isAppearing = appearingEventIds.has(item.event.id);
+          const status = isDraggingOriginal ? "dragging" : isAppearing ? "appearing" : isHovered ? "hovered" : "existing";
           const expanded = isHovered;
           const itemLeft = TIMELINE_LEFT_GUTTER_PX + item.left;
           const remainingRowWidth = Math.max(item.width, TIMELINE_LEFT_GUTTER_PX + width - itemLeft);
@@ -260,6 +266,7 @@ export function InfiniteTimelineRow({
             eventRenderer={eventRenderer}
             disableDrag={!draftEventIsDraggable || draftEventIsExiting}
             isExiting={draftEventIsExiting}
+            releaseDurationMs={draftEventReleaseDurationMs}
             onEventPointerDown={onEventPointerDown}
             onEventMouseDown={onEventMouseDown}
             onEventClick={onEventClick}

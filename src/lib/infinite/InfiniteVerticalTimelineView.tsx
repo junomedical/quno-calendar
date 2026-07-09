@@ -51,6 +51,7 @@ export const InfiniteVerticalTimelineView = forwardRef<CalendarNavigationHandle,
       selectedCalendarIds,
       loadEvents,
       eventVersion,
+      appearingEventIds: requestedAppearingEventIds,
       eventRenderer,
       className,
       style,
@@ -134,9 +135,11 @@ export const InfiniteVerticalTimelineView = forwardRef<CalendarNavigationHandle,
       }
     }, [baseDayHeight, dateKeyToIndex, virtualWindow.count, virtualizer, visibleDateKeys]);
 
-    const { eventsByDate, applyMoveToLoadedEvents, applyCreatedEventToLoadedEvents } = useEventRangeLoader({
+    const { eventsByDate, appearingEventIds, applyMoveToLoadedEvents, applyCreatedEventToLoadedEvents } =
+      useEventRangeLoader({
       loadEvents,
       eventVersion,
+      requestedAppearingEventIds,
       selectedIds,
       visibleDateKeys
     });
@@ -257,6 +260,7 @@ export const InfiniteVerticalTimelineView = forwardRef<CalendarNavigationHandle,
       renderedDraftStatus,
       renderedDraftIsDraggable,
       renderedDraftIsExiting,
+      renderedDraftReleaseDurationMs,
       isInteractionActive: currentInteractionActive,
       handleGridPointerDown,
       handleGridMouseDown,
@@ -387,11 +391,13 @@ export const InfiniteVerticalTimelineView = forwardRef<CalendarNavigationHandle,
                   interactionMode={interactionMode}
                   hoveredEvent={hoveredEvent}
                   dragEventId={dragState?.event.id}
+                  appearingEventIds={appearingEventIds}
                   dragPreviewEvent={dragPreviewEvent}
                   draftEvent={renderedDraftEvent}
                   draftEventStatus={renderedDraftStatus}
                   draftEventIsDraggable={renderedDraftIsDraggable}
                   draftEventIsExiting={renderedDraftIsExiting}
+                  draftEventReleaseDurationMs={renderedDraftReleaseDurationMs}
                   eventRenderer={eventRenderer}
                   eventsForColumn={renderEventsForColumn}
                   columnWidthForDateCalendar={columnWidthForDateCalendar}

@@ -14,7 +14,7 @@ function formatEventTime(value: string) {
  * Product code can replace this component without knowing about virtual days,
  * row heights, horizontal scroll, drag hit-testing, or overlap calculations. The
  * calendar passes the event plus interaction status (`existing`, `hovered`,
- * `dragging`, `drop-preview`, or `new`) and lane metadata. A real product card
+ * `dragging`, `drop-preview`, `new`, or `appearing`) and lane metadata. A real product card
  * can branch on event kind, appointment status, provider type, availability,
  * validation state, permissions, or remote data already attached to the event.
  *

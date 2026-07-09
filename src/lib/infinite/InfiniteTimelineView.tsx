@@ -50,6 +50,7 @@ export const InfiniteTimelineView = forwardRef<CalendarNavigationHandle, Calenda
       selectedCalendarIds,
       loadEvents,
       eventVersion,
+      appearingEventIds: requestedAppearingEventIds,
       eventRenderer,
       className,
       style,
@@ -172,9 +173,11 @@ export const InfiniteTimelineView = forwardRef<CalendarNavigationHandle, Calenda
       [cancelViewportAnchorRestore, captureViewportAnchor, now, restoreViewportAnchor, scrollToDate, scrollToDateTime]
     );
 
-    const { eventsByDate, applyMoveToLoadedEvents, applyCreatedEventToLoadedEvents } = useEventRangeLoader({
+    const { eventsByDate, appearingEventIds, applyMoveToLoadedEvents, applyCreatedEventToLoadedEvents } =
+      useEventRangeLoader({
       loadEvents,
       eventVersion,
+      requestedAppearingEventIds,
       selectedIds,
       visibleDateKeys
     });
@@ -227,6 +230,7 @@ export const InfiniteTimelineView = forwardRef<CalendarNavigationHandle, Calenda
       renderedDraftStatus,
       renderedDraftIsDraggable,
       renderedDraftIsExiting,
+      renderedDraftReleaseDurationMs,
       isInteractionActive: currentInteractionActive,
       handleGridPointerDown,
       handleGridMouseDown,
@@ -352,11 +356,13 @@ export const InfiniteTimelineView = forwardRef<CalendarNavigationHandle, Calenda
                   interactionMode={interactionMode}
                   hoveredEvent={hoveredEvent}
                   dragEventId={dragState?.event.id}
+                  appearingEventIds={appearingEventIds}
                   dragPreviewEvent={dragPreviewEvent}
                   draftEvent={renderedDraftEvent}
                   draftEventStatus={renderedDraftStatus}
                   draftEventIsDraggable={renderedDraftIsDraggable}
                   draftEventIsExiting={renderedDraftIsExiting}
+                  draftEventReleaseDurationMs={renderedDraftReleaseDurationMs}
                   eventRenderer={eventRenderer}
                   measureElement={virtualizer.measureElement}
                   getRowHeight={getRowHeight}

@@ -31,7 +31,7 @@
 
 .ic-draft-shell.is-exiting {
   pointer-events: none;
-  animation: ic-draft-fade-out 180ms ease-out forwards;
+  animation: ic-draft-fade-out var(--draft-release-duration, 180ms) ease-out forwards;
 }
 
 .ic-availability-shell {

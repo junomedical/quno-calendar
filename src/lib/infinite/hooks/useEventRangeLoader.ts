@@ -1,15 +1,19 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { applyEventMove } from "../../data/calendarEvents";
 import { dateRangeFromKeys } from "../../date/dateVirtualization";
 import { eventDateKey } from "../utils/infiniteTimelineUtils";
-import type { CalendarEvent, CalendarId, EventMoveRequest, LoadEvents } from "../../core/types";
+import type { CalendarEvent, CalendarId, EventId, EventMoveRequest, LoadEvents } from "../../core/types";
 
 type UseEventRangeLoaderArgs = {
   loadEvents: LoadEvents;
   eventVersion?: number | string;
+  requestedAppearingEventIds?: EventId[];
   selectedIds: CalendarId[];
   visibleDateKeys: string[];
 };
+
+const APPEARING_EVENT_DURATION_MS = 900;
+const EMPTY_REQUESTED_APPEARING_EVENT_IDS: EventId[] = [];
 
 function appendUniqueEvent(events: CalendarEvent[], event: CalendarEvent): CalendarEvent[] {
   const existingIndex = events.findIndex((candidate) => candidate.id === event.id);
@@ -32,14 +36,76 @@ function appendUniqueEvent(events: CalendarEvent[], event: CalendarEvent): Calen
 export function useEventRangeLoader({
   loadEvents,
   eventVersion,
+  requestedAppearingEventIds = EMPTY_REQUESTED_APPEARING_EVENT_IDS,
   selectedIds,
   visibleDateKeys
 }: UseEventRangeLoaderArgs) {
   const [eventsByDate, setEventsByDate] = useState<Record<string, CalendarEvent[]>>({});
+  const [appearingEventIds, setAppearingEventIds] = useState<Set<EventId>>(() => new Set());
   const loadedDatesRef = useRef<Set<string>>(new Set());
   const loadingDatesRef = useRef<Set<string>>(new Set());
   const requestGenerationRef = useRef(0);
+  const consumedRequestedAppearingEventIdsRef = useRef<Set<EventId>>(new Set());
+  const appearanceTimersRef = useRef<number[]>([]);
   const selectedIdsKey = selectedIds.join("|");
+  const requestedAppearingEventIdSet = useMemo(
+    () => new Set(requestedAppearingEventIds),
+    [requestedAppearingEventIds]
+  );
+
+  const markEventsAppearing = useCallback((eventIds: EventId[]) => {
+    if (eventIds.length === 0) {
+      return;
+    }
+    setAppearingEventIds((current) => {
+      const next = new Set(current);
+      for (const eventId of eventIds) {
+        next.add(eventId);
+      }
+      return next;
+    });
+    const timer = window.setTimeout(() => {
+      setAppearingEventIds((current) => {
+        const next = new Set(current);
+        for (const eventId of eventIds) {
+          next.delete(eventId);
+        }
+        return next;
+      });
+    }, APPEARING_EVENT_DURATION_MS);
+    appearanceTimersRef.current.push(timer);
+  }, []);
+
+  const markRequestedEventsAppearing = useCallback(
+    (events: CalendarEvent[]) => {
+      if (requestedAppearingEventIdSet.size === 0) {
+        return;
+      }
+      const nextAppearingEventIds: EventId[] = [];
+      const consumedIds = consumedRequestedAppearingEventIdsRef.current;
+      for (const event of events) {
+        if (!requestedAppearingEventIdSet.has(event.id) || consumedIds.has(event.id)) {
+          continue;
+        }
+        consumedIds.add(event.id);
+        nextAppearingEventIds.push(event.id);
+      }
+      markEventsAppearing(nextAppearingEventIds);
+    },
+    [markEventsAppearing, requestedAppearingEventIdSet]
+  );
+
+  useEffect(() => {
+    if (requestedAppearingEventIdSet.size === 0) {
+      consumedRequestedAppearingEventIdsRef.current = new Set();
+      return;
+    }
+    consumedRequestedAppearingEventIdsRef.current = new Set(
+      [...consumedRequestedAppearingEventIdsRef.current].filter((eventId) =>
+        requestedAppearingEventIdSet.has(eventId)
+      )
+    );
+  }, [requestedAppearingEventIdSet]);
 
   useEffect(() => {
     requestGenerationRef.current += 1;
@@ -47,6 +113,15 @@ export function useEventRangeLoader({
     loadingDatesRef.current = new Set();
     setEventsByDate({});
   }, [eventVersion, loadEvents]);
+
+  useEffect(() => {
+    return () => {
+      for (const timer of appearanceTimersRef.current) {
+        window.clearTimeout(timer);
+      }
+      appearanceTimersRef.current = [];
+    };
+  }, []);
 
   useEffect(() => {
     requestGenerationRef.current += 1;
@@ -85,6 +160,7 @@ export function useEventRangeLoader({
           }
           return next;
         });
+        markRequestedEventsAppearing(loadedEvents);
 
         for (const dateKey of missingDateKeys) {
           loadingDatesRef.current.delete(dateKey);
@@ -96,7 +172,22 @@ export function useEventRangeLoader({
           loadingDatesRef.current.delete(dateKey);
         }
       });
-  }, [loadEvents, selectedIds, visibleDateKeys]);
+  }, [loadEvents, markRequestedEventsAppearing, selectedIds, visibleDateKeys]);
+
+  useEffect(() => {
+    if (requestedAppearingEventIdSet.size === 0) {
+      return;
+    }
+    const visibleRequestedEvents: CalendarEvent[] = [];
+    for (const dateEvents of Object.values(eventsByDate)) {
+      for (const event of dateEvents) {
+        if (requestedAppearingEventIdSet.has(event.id)) {
+          visibleRequestedEvents.push(event);
+        }
+      }
+    }
+    markRequestedEventsAppearing(visibleRequestedEvents);
+  }, [eventsByDate, markRequestedEventsAppearing, requestedAppearingEventIdSet]);
 
   const applyMoveToLoadedEvents = useCallback((proposal: EventMoveRequest) => {
     const movedEvent = applyEventMove(proposal.event, proposal);
@@ -125,6 +216,7 @@ export function useEventRangeLoader({
 
   const applyCreatedEventToLoadedEvents = useCallback((event: CalendarEvent) => {
     const createdDateKey = eventDateKey(event);
+    markEventsAppearing([event.id]);
     setEventsByDate((current) => {
       if (!Object.prototype.hasOwnProperty.call(current, createdDateKey)) {
         return current;
@@ -137,10 +229,11 @@ export function useEventRangeLoader({
         [createdDateKey]: appendUniqueEvent(current[createdDateKey], event)
       };
     });
-  }, []);
+  }, [markEventsAppearing]);
 
   return {
     eventsByDate,
+    appearingEventIds,
     applyMoveToLoadedEvents,
     applyCreatedEventToLoadedEvents
   };

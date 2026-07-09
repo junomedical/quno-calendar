@@ -35,11 +35,13 @@ type InfiniteTimelineDayProps = {
   interactionMode: "events" | "availability";
   hoveredEvent: HoveredEvent;
   dragEventId?: string;
+  appearingEventIds: Set<string>;
   dragPreviewEvent: CalendarEvent | null;
   draftEvent: CalendarEvent | null;
   draftEventStatus: EventRenderStatus;
   draftEventIsDraggable: boolean;
   draftEventIsExiting: boolean;
+  draftEventReleaseDurationMs?: number;
   eventRenderer: EventRenderer;
   measureElement: RefCallback<HTMLDivElement>;
   getRowHeight: (dateKey: string, calendarId: CalendarId) => number;
@@ -86,11 +88,13 @@ export function InfiniteTimelineDay({
   interactionMode,
   hoveredEvent,
   dragEventId,
+  appearingEventIds,
   dragPreviewEvent,
   draftEvent,
   draftEventStatus,
   draftEventIsDraggable,
   draftEventIsExiting,
+  draftEventReleaseDurationMs,
   eventRenderer,
   measureElement,
   getRowHeight,
@@ -143,11 +147,13 @@ export function InfiniteTimelineDay({
             interactionMode={interactionMode}
             hoveredEvent={hoveredEvent}
             dragEventId={dragEventId}
+            appearingEventIds={appearingEventIds}
             dragPreviewEvent={isHidden ? null : dragPreviewEvent}
             draftEvent={isHidden ? null : draftEvent}
             draftEventStatus={draftEventStatus}
             draftEventIsDraggable={draftEventIsDraggable}
             draftEventIsExiting={draftEventIsExiting}
+            draftEventReleaseDurationMs={draftEventReleaseDurationMs}
             eventRenderer={eventRenderer}
             onHoverMove={onHoverMove}
             onHoverLeave={onHoverLeave}

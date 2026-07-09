@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { firstViewportEventBox, goToWorkday } from "../helpers";
+import { firstViewportEventBox, goToWorkday, topVisibleDayState } from "../helpers";
 
 test("shows delayed external save errors in the edit popup", async ({ page }) => {
   await page.goto("/");
@@ -22,6 +22,78 @@ test("shows delayed external save errors in the edit popup", async ({ page }) =>
   await page.getByTestId("draft-title-input").fill("Recovered delayed save");
   await expect(page.getByTestId("draft-save-error")).toHaveCount(0);
   await expect(page.getByTestId("draft-save-button")).toBeEnabled();
+});
+
+test("marks a saved external create as appearing with a glint animation", async ({ page }) => {
+  await page.goto("/");
+  await goToWorkday(page, "2026-07-06");
+  await expect(page.getByTestId("calendar-event").first()).toBeVisible();
+  await page.getByTestId("jump-time-input").fill("09:00");
+  await page.getByTestId("external-add-button").click();
+  await expect(page.getByTestId("external-event-popup")).toBeVisible();
+  await page.getByTestId("draft-title-input").fill("Appearing appointment");
+  await page.getByTestId("draft-save-button").click();
+  await expect(page.getByTestId("demo-message")).toContainText("Saved external create");
+
+  const releasedDraft = page.getByTestId("draft-event").filter({ hasText: "Appearing appointment" });
+  await expect(releasedDraft).toBeVisible();
+  const releasedDraftAnimation = await releasedDraft.evaluate((draft) => ({
+    exiting: draft.getAttribute("data-exiting"),
+    animationDuration: window.getComputedStyle(draft).animationDuration
+  }));
+  expect(releasedDraftAnimation).toEqual({
+    exiting: "true",
+    animationDuration: "0.42s"
+  });
+
+  const appearingEvent = page.locator(
+    '[data-testid="calendar-event"][data-event-id^="created-"]:has([data-render-status="appearing"])'
+  );
+  await expect(appearingEvent.filter({ hasText: "Appearing appointment" })).toBeVisible();
+  const glint = await appearingEvent
+    .filter({ hasText: "Appearing appointment" })
+    .locator(".demo-event-card")
+    .evaluate((card) => {
+      const style = window.getComputedStyle(card, "::before");
+      return {
+        animationName: style.animationName,
+        animationDuration: style.animationDuration,
+        width: style.width
+      };
+    });
+  expect(glint).toEqual({
+    animationName: "demo-event-appearing-glint",
+    animationDuration: "0.485s",
+    width: "70px"
+  });
+});
+
+test("does not pull the viewport back after manual scroll following external save", async ({ page }) => {
+  await page.goto("/");
+  await goToWorkday(page, "2026-07-06");
+  await page.getByTestId("jump-time-input").fill("09:00");
+  await page.getByTestId("external-add-button").click();
+  await expect(page.getByTestId("external-event-popup")).toBeVisible();
+  await page.getByTestId("draft-title-input").fill("Scroll after save");
+  await page.getByTestId("draft-save-button").click();
+  await expect(page.getByTestId("demo-message")).toContainText("Saved external create");
+
+  const viewport = page.locator(".ic-viewport");
+  await viewport.hover();
+  const beforeWheel = await viewport.evaluate((element) => element.scrollTop);
+  await page.mouse.wheel(0, 500);
+  await expect.poll(async () => viewport.evaluate((element) => element.scrollTop)).not.toBe(beforeWheel);
+  const afterWheel = await topVisibleDayState(page);
+
+  await page.waitForTimeout(1600);
+  await expect
+    .poll(async () => {
+      const state = await topVisibleDayState(page);
+      return state.date === afterWheel.date
+        ? Math.abs(state.offsetWithinDate - afterWheel.offsetWithinDate)
+        : Number.POSITIVE_INFINITY;
+    })
+    .toBeLessThanOrEqual(4);
 });
 
 test("renders a saved external create in the vertical view", async ({ page }) => {
