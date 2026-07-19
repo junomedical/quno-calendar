@@ -2,7 +2,31 @@
 
 ## 0.2.0
 
-- Prepared for the release
+- Moved the demo application and examples out of `src/`; `src/` is now library-only. Organized examples as one documented recipe per directory, added an in-app recipe catalog, and enforced README backlinks and public-package imports.
+- Rebuilt visible-range loading as a non-blocking stale-while-refresh pipeline with abort signals, out-of-order response protection, finite retries, a 120-date LRU, and indexed single-event patches.
+- Added policy-driven adjacent-date prefetching with an adaptive default, public `eventPrefetchPolicy` customization, loaded/in-flight deduplication, and separate requests around cached gaps.
+- Replaced repeated overlap scans with deterministic `O(n log n)` prepared cells shared by metrics and horizontal/vertical projection.
+- Added cross-axis resource virtualization so 50-resource dates mount only visible rows or columns plus two-resource overscan while preserving full scroll geometry and pinned drafts.
+- Replaced selector polling and restore timeout ladders with an instance geometry registry and one cancellable animation-frame restore scheduler.
+- Consolidated mouse/pointer interaction paths into Pointer Events with explicit pointer-cancel, Escape, callback-failure, and rejected-drop cleanup.
+- Split horizontal/vertical wheel zoom, interaction state, layout primitives, cache coordination, styles, demo controls, presets, routes, and external-draft responsibilities into focused modules.
+- Added `signal?: AbortSignal` to `LoadEventsArgs`; existing loaders remain source-compatible.
+- Removed `date-fns` from the shipped library runtime and replaced it with tested local-date and `Intl` helpers.
+- Changed packaging to emit explicit CSS without JavaScript style injection; Node/SSR ESM and CommonJS imports no longer access `document`.
+- Externalized the declared React virtualizer dependency from the library artifact, reducing ESM output below the 32KiB gzip budget without duplicating an installed runtime dependency.
+- Replaced repeated demo route/variant implementations with declarative route registries and shared preset shells while preserving all public examples and routes.
+- Added a copyable delayed/cancellable API example that demonstrates immediate grid rendering before events resolve.
+- Added focused cache, cancellation, membership-index, prepared-layout, resource-window, native-date, package-consumer, and SSR verification.
+- Made participant-driven draft anchor restores yield synchronously to manual pointer, wheel, touch, or scroll-key intent.
+- Pinned active restore targets across resource virtualization and normalized draft/date pins and demo range filtering through local calendar dates instead of raw timestamp prefixes.
+- Changed Pointer Events hit identity to use mounted date/resource grid metadata, preventing async variable-row measurement from targeting a neighboring resource.
+- Applied the interaction selection lock through standard and WebKit properties so drag/draw suppression is consistent in Safari.
+- Made horizontal slider/external zoom preserve the visible grid-center time before paint after horizontal scrolling (and the left edge at the timeline origin), retained prepared event models across zoom-only changes, and isolated product-card rendering from event-shell geometry updates.
+- Added an explicit late-data layout anchor: unloaded date navigation keeps the date header fixed, mid-date scrolling keeps the same resource/local-row point fixed as overlap rows grow, and newly arriving events never steal focus.
+- Added decomposed runtime flow guides with detailed diagrams for async loading and cache commits, semantic focus during metric changes, virtual scrolling/recentering, pointer interactions, and zoom subflows.
+- Reorganized the runtime into responsibility-owned `scroll`, `events`, `anchors`, `interactions`, `rendering`, and `views` domains; removed the generic hooks/utilities/component buckets without changing the public API.
+- Added domain ownership documents with a complete source-file map and source backlinks, plus an architecture check that rejects missing documentation, retired folders, and invalid dependency direction.
+- Added a local `POST /api/demo-events` mock transport, an abort-aware API-delay selector, and pending-request status to the main and preset demos. The main demo starts with a visible 1-second HTTP response; instant, 250ms, 1s, and 3s options demonstrate non-blocking rendering and cancellation.
 
 ## 0.1.0
 

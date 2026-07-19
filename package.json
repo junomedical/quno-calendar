@@ -37,13 +37,16 @@
       "import": "./dist/quno-calendar.js",
       "require": "./dist/quno-calendar.umd.cjs"
     },
-    "./styles.css": "./dist/index.css"
+    "./styles.css": "./dist/styles.css"
   },
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "build": "npm run build:lib && npm run build:demo",
     "build:lib": "vite build -c vite.lib.config.ts",
     "build:demo": "vite build -c vite.config.ts --outDir dist-demo",
+    "check:architecture": "node scripts/check-architecture.mjs && node scripts/check-domain-docs.mjs && node scripts/check-demo-boundaries.mjs",
+    "check:domains": "node scripts/check-domain-docs.mjs",
+    "check:bundle-size": "node scripts/check-bundle-size.mjs",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "format": "prettier --check .",
@@ -51,12 +54,11 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "verify:package": "npm run build:lib && node scripts/verify-package.mjs",
+    "verify:package": "npm run build:lib && npm run check:bundle-size && node scripts/verify-package.mjs",
     "preview": "vite preview --host 127.0.0.1 --outDir dist-demo"
   },
   "dependencies": {
-    "@tanstack/react-virtual": "^3.13.12",
-    "date-fns": "^4.1.0"
+    "@tanstack/react-virtual": "^3.13.12"
   },
   "peerDependencies": {
     "react": ">=18.0.0",
@@ -72,6 +74,7 @@
     "@types/react": "^18.3.23",
     "@types/react-dom": "^18.3.7",
     "@vitejs/plugin-react": "^4.7.0",
+    "date-fns": "^4.1.0",
     "eslint": "^9.39.4",
     "eslint-plugin-react-hooks": "^7.1.1",
     "jsdom": "^26.1.0",

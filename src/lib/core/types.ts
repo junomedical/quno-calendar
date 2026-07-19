@@ -1,3 +1,12 @@
+/**
+ * Domain: Foundation.
+ * Responsibility: Defines the public API, events, settings, renderers, navigation, and anchor contracts.
+ * Preserves: the public compatibility boundary and deterministic cross-domain primitives.
+ * Does not own: runtime feature coordination.
+ * Failure/cancellation: invalid inputs are normalized or rejected by the documented public contract.
+ *
+ * @see docs/domains/foundation.md#source-map
+ */
 import type { CSSProperties, ReactNode } from "react";
 
 /** Stable identifier for a rendered calendar row. */
@@ -63,10 +72,26 @@ export type LoadEventsArgs = {
   startDate: string;
   endDate: string;
   calendarIds: CalendarId[];
+  signal?: AbortSignal;
 };
 
 /** Async event loader used by calendar views. */
 export type LoadEvents = (args: LoadEventsArgs) => Promise<CalendarEvent[]>;
+
+/** Date buffer requested around the current rendered event window. */
+export type EventPrefetchWindow = {
+  beforeDays: number;
+  afterDays: number;
+};
+
+/** Inputs available to a caller-defined event prefetch policy. */
+export type EventPrefetchContext = {
+  visibleDateKeys: readonly string[];
+  selectedCalendarIds: readonly CalendarId[];
+};
+
+/** Selects how many adjacent days the event loader keeps warm. */
+export type EventPrefetchPolicy = (context: EventPrefetchContext) => EventPrefetchWindow;
 
 /** Parent-validation payload for a proposed event move. */
 export type EventMoveRequest = {
@@ -142,6 +167,7 @@ export type CalendarViewComponentProps = {
   calendars: CalendarRow[];
   selectedCalendarIds: CalendarId[];
   loadEvents: LoadEvents;
+  eventPrefetchPolicy?: EventPrefetchPolicy;
   eventVersion?: number | string;
   appearingEventIds?: EventId[];
   eventRenderer: EventRenderer;

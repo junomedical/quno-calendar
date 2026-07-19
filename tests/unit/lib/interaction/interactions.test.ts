@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { buildDraftEvent, buildMoveProposal, hitTestCalendar } from "../../../../src/lib/interaction/interactions";
+import {
+  buildDraftEvent,
+  buildMoveProposal,
+  hitTestCalendar
+} from "../../../../src/lib/infinite/interactions/timelineInteractionModel";
 import type { CalendarEvent, TimelineSettings } from "../../../../src/lib/core/types";
 
 const settings: TimelineSettings = {

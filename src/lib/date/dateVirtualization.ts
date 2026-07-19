@@ -1,13 +1,30 @@
-import { addDays, addMonths, format, isSameDay, parseISO, subMonths } from "date-fns";
+/**
+ * Domain: Foundation.
+ * Responsibility: Normalizes excluded dates and maps virtual offsets to date keys.
+ * Preserves: the public compatibility boundary and deterministic cross-domain primitives.
+ * Does not own: runtime feature coordination.
+ * Failure/cancellation: invalid inputs are normalized or rejected by the documented public contract.
+ *
+ * @see docs/domains/foundation.md#source-map
+ */
+import { addCalendarDays, addCalendarMonths, isSameLocalDate, parseIsoDate } from "./localDate";
 
 /** Formats a Date as the calendar's stable `yyyy-MM-dd` date key. */
 export function toDateKey(date: Date): string {
-  return format(date, "yyyy-MM-dd");
+  if (Number.isNaN(date.getTime())) {
+    throw new RangeError("Invalid time value");
+  }
+
+  return [
+    String(date.getFullYear()).padStart(4, "0"),
+    String(date.getMonth() + 1).padStart(2, "0"),
+    String(date.getDate()).padStart(2, "0")
+  ].join("-");
 }
 
 /** Parses a `yyyy-MM-dd` date key as a local midnight Date. */
 export function fromDateKey(dateKey: string): Date {
-  return parseISO(`${dateKey}T00:00:00`);
+  return parseIsoDate(dateKey);
 }
 
 /** Returns whether the date should be removed from the virtual date sequence. */
@@ -19,7 +36,7 @@ export function isWeekdayExcluded(date: Date, excludedWeekdays: number[]): boole
 export function normalizeAnchorDate(dateKey: string, excludedWeekdays: number[]): string {
   let date = fromDateKey(dateKey);
   for (let guard = 0; guard < 7 && isWeekdayExcluded(date, excludedWeekdays); guard += 1) {
-    date = addDays(date, 1);
+    date = addCalendarDays(date, 1);
   }
   return toDateKey(date);
 }
@@ -34,7 +51,7 @@ export function dateAtVirtualOffset(anchorDateKey: string, offset: number, exclu
   const direction = offset > 0 ? 1 : -1;
   let remaining = Math.abs(offset);
   while (remaining > 0) {
-    date = addDays(date, direction);
+    date = addCalendarDays(date, direction);
     if (!isWeekdayExcluded(date, excludedWeekdays)) {
       remaining -= 1;
     }
@@ -46,15 +63,15 @@ export function dateAtVirtualOffset(anchorDateKey: string, offset: number, exclu
 export function virtualOffsetForDate(anchorDateKey: string, targetDateKey: string, excludedWeekdays: number[]): number {
   const anchor = fromDateKey(normalizeAnchorDate(anchorDateKey, excludedWeekdays));
   const target = fromDateKey(targetDateKey);
-  if (isSameDay(anchor, target)) {
+  if (isSameLocalDate(anchor, target)) {
     return 0;
   }
 
   const direction = target > anchor ? 1 : -1;
   let date = anchor;
   let offset = 0;
-  while (!isSameDay(date, target)) {
-    date = addDays(date, direction);
+  while (!isSameLocalDate(date, target)) {
+    date = addCalendarDays(date, direction);
     if (!isWeekdayExcluded(date, excludedWeekdays)) {
       offset += direction;
     }
@@ -88,8 +105,8 @@ export function virtualDateWindowAround(
 ): VirtualDateWindow {
   const normalizedAnchorDateKey = normalizeAnchorDate(anchorDateKey, excludedWeekdays);
   const anchorDate = fromDateKey(normalizedAnchorDateKey);
-  const startDateKey = normalizeAnchorDate(toDateKey(subMonths(anchorDate, months)), excludedWeekdays);
-  const endDateKey = normalizeAnchorDate(toDateKey(addMonths(anchorDate, months)), excludedWeekdays);
+  const startDateKey = normalizeAnchorDate(toDateKey(addCalendarMonths(anchorDate, -months)), excludedWeekdays);
+  const endDateKey = normalizeAnchorDate(toDateKey(addCalendarMonths(anchorDate, months)), excludedWeekdays);
   const anchorIndex = Math.max(0, virtualOffsetForDate(startDateKey, normalizedAnchorDateKey, excludedWeekdays));
   const endIndex = Math.max(anchorIndex, virtualOffsetForDate(startDateKey, endDateKey, excludedWeekdays));
 

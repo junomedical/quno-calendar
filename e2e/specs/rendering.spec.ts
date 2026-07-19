@@ -308,11 +308,22 @@ test("supports availability editing mode", async ({ page }) => {
     )) {
       const row = availability.closest<HTMLElement>('[data-testid="calendar-row"]');
       const grid = row?.querySelector<HTMLElement>(".ic-row-grid");
+      const label = row?.querySelector<HTMLElement>(".ic-row-label");
       const box = availability.getBoundingClientRect();
       const gridBox = grid?.getBoundingClientRect();
-      const visibleLeft = gridBox ? Math.max(box.left, gridBox.left) : box.left;
-      if (box.y >= viewport.y + 90 && box.bottom <= viewport.bottom && gridBox && box.right > visibleLeft + 16) {
-        return { x: Math.min(visibleLeft + 16, box.right - 4), y: box.y, width: box.width, height: box.height };
+      const labelBox = label?.getBoundingClientRect();
+      if (!grid || !gridBox || !labelBox) continue;
+      const x = Math.max(box.left, gridBox.left, labelBox.right) + 16;
+      const y = box.y + box.height / 2;
+      const target = document.elementFromPoint(x, y) as HTMLElement | null;
+      if (
+        box.y >= viewport.y + 90 &&
+        box.bottom <= viewport.bottom &&
+        x + 64 < Math.min(box.right, viewport.right) &&
+        target?.closest('[data-testid="availability-event"]') === availability &&
+        target.closest(".ic-row-grid") === grid
+      ) {
+        return { x, y: box.y, width: box.width, height: box.height };
       }
     }
     return null;

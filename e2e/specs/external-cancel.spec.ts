@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { goToWorkday, selectPageText } from "../helpers";
+import { goToWorkday, horizontalDrawTarget, selectPageText } from "../helpers";
 
 async function expectDraftFadeoutThenGone(page: Page) {
   const exitingDraft = page.locator('[data-testid="draft-event"][data-exiting="true"]');
@@ -108,30 +108,20 @@ test("keeps a later participant calendar row anchored when cancelling external c
     .toBeLessThanOrEqual(4);
 });
 
-test("keeps the drawn Marco date focused after adding participants and cancelling external create", async ({ page }) => {
+test("keeps the drawn Marco date focused after adding participants and cancelling external create", async ({
+  page
+}) => {
   await page.goto("/");
   await page.getByTestId("scale-select").selectOption("5000");
   await page.getByTestId("jump-date-input").fill("2026-06-22");
   await page.getByTestId("jump-time-input").fill("12:00");
   await page.getByTestId("go-date-button").click();
 
-  const drawTarget = await page.evaluate(() => {
-    const row = document.querySelector<HTMLElement>(
-      '[data-testid="calendar-day"][data-date="2026-06-22"] [data-testid="calendar-row"][data-calendar-id="marco-eggens"]'
-    );
-    const gridBox = row?.querySelector<HTMLElement>(".ic-row-grid")?.getBoundingClientRect();
-    const rowBox = row?.getBoundingClientRect();
-    if (!gridBox || !rowBox) {
-      return null;
-    }
-    return {
-      startX: gridBox.left + 50,
-      endX: gridBox.left + 250,
-      y: rowBox.top + rowBox.height / 2
-    };
+  const drawTarget = await horizontalDrawTarget(page, {
+    calendarId: "marco-eggens",
+    dateKey: "2026-06-22",
+    distance: 200
   });
-  expect(drawTarget).not.toBeNull();
-  if (!drawTarget) return;
 
   await page.mouse.move(drawTarget.startX, drawTarget.y);
   await page.mouse.down();
@@ -180,23 +170,11 @@ test("keeps the drawn Bhuvin date focused after adding Marco and Surgery B then 
   await page.getByTestId("jump-time-input").fill("08:30");
   await page.getByTestId("go-date-button").click();
 
-  const drawTarget = await page.evaluate(() => {
-    const row = document.querySelector<HTMLElement>(
-      '[data-testid="calendar-day"][data-date="2026-05-23"] [data-testid="calendar-row"][data-calendar-id="dr-thakker"]'
-    );
-    const gridBox = row?.querySelector<HTMLElement>(".ic-row-grid")?.getBoundingClientRect();
-    const rowBox = row?.getBoundingClientRect();
-    if (!gridBox || !rowBox) {
-      return null;
-    }
-    return {
-      startX: gridBox.left + 45,
-      endX: gridBox.left + 330,
-      y: rowBox.top + rowBox.height / 2
-    };
+  const drawTarget = await horizontalDrawTarget(page, {
+    calendarId: "dr-thakker",
+    dateKey: "2026-05-23",
+    distance: 285
   });
-  expect(drawTarget).not.toBeNull();
-  if (!drawTarget) return;
 
   await page.mouse.move(drawTarget.startX, drawTarget.y);
   await page.mouse.down();
@@ -236,30 +214,20 @@ test("keeps the drawn Bhuvin date focused after adding Marco and Surgery B then 
     .toBeLessThanOrEqual(4);
 });
 
-test("does not transiently jump before recenter after cancelling a future multi-participant create", async ({ page }) => {
+test("does not transiently jump before recenter after cancelling a future multi-participant create", async ({
+  page
+}) => {
   await page.goto("/");
   await page.getByTestId("scale-select").selectOption("5000");
   await page.getByTestId("jump-date-input").fill("2026-07-22");
   await page.getByTestId("jump-time-input").fill("08:45");
   await page.getByTestId("go-date-button").click();
 
-  const drawTarget = await page.evaluate(() => {
-    const row = document.querySelector<HTMLElement>(
-      '[data-testid="calendar-day"][data-date="2026-07-22"] [data-testid="calendar-row"][data-calendar-id="marco-eggens"]'
-    );
-    const gridBox = row?.querySelector<HTMLElement>(".ic-row-grid")?.getBoundingClientRect();
-    const rowBox = row?.getBoundingClientRect();
-    if (!gridBox || !rowBox) {
-      return null;
-    }
-    return {
-      startX: gridBox.left + 50,
-      endX: gridBox.left + 250,
-      y: rowBox.top + rowBox.height / 2
-    };
+  const drawTarget = await horizontalDrawTarget(page, {
+    calendarId: "marco-eggens",
+    dateKey: "2026-07-22",
+    distance: 200
   });
-  expect(drawTarget).not.toBeNull();
-  if (!drawTarget) return;
 
   await page.mouse.move(drawTarget.startX, drawTarget.y);
   await page.mouse.down();

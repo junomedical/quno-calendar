@@ -1,0 +1,104 @@
+/**
+ * Domain: Rendering.
+ * Responsibility: Renders date headers, time labels, current-time chrome, and grid backdrop.
+ * Preserves: stable geometry, layering, clipping, and external renderer isolation.
+ * Does not own: requests, controlled settings, and scroll correction.
+ * Failure/cancellation: missing optional content leaves structural calendar geometry intact.
+ *
+ * @see docs/domains/rendering.md#source-map
+ */
+/**
+ * Vertical day chrome.
+ * date/ticks/resources -> sticky date header + resource header + time scale
+ */
+import { formatMonthDayOrdinal, formatWeekday } from "../../../date/dateLabels";
+import { fromDateKey } from "../../../date/dateVirtualization";
+import type { VerticalTimelineDayProps } from "./types";
+import { verticalMinuteToY } from "./verticalGeometry";
+
+type VerticalDayChromeProps = {
+  day: VerticalTimelineDayProps;
+  dayWidth: number;
+  gridTemplateColumns: string;
+  renderedColumnIndexes: number[];
+};
+
+/** Sticky date/resource header plus the sticky vertical time scale. */
+export function VerticalDayChrome({
+  day,
+  dayWidth,
+  gridTemplateColumns,
+  renderedColumnIndexes
+}: VerticalDayChromeProps) {
+  const date = fromDateKey(day.dateKey);
+
+  return (
+    <>
+      <div
+        className="icv-day-header"
+        data-testid="calendar-day-header"
+        data-date={day.dateKey}
+        style={{ height: day.settings.dayHeaderHeight, minWidth: dayWidth }}
+      >
+        <div className="ic-left-label ic-date-label icv-date-label" style={{ width: day.labelWidth }}>
+          <span className="icv-date-main">{formatMonthDayOrdinal(date)}</span>
+          <span className="icv-date-weekday">{formatWeekday(date)}</span>
+        </div>
+        <div
+          className="icv-calendar-header-grid"
+          data-testid="vertical-calendar-header"
+          style={{
+            left: day.labelWidth,
+            width: `calc(100% - ${day.labelWidth}px)`,
+            minWidth: day.boardMinWidth,
+            gridTemplateColumns
+          }}
+        >
+          {renderedColumnIndexes.map((resourceIndex) => {
+            const calendar = day.selectedCalendars[resourceIndex];
+            const isHidden = day.hiddenCalendarIds.has(calendar.id);
+            return (
+              <div
+                className="icv-calendar-header-cell"
+                data-retained-hidden={isHidden ? "true" : undefined}
+                aria-hidden={isHidden || undefined}
+                style={{
+                  visibility: isHidden ? "hidden" : undefined,
+                  pointerEvents: isHidden ? "none" : undefined,
+                  gridColumn: resourceIndex + 1
+                }}
+                key={calendar.id}
+              >
+                {calendar.name}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+      <div
+        className="icv-time-pane"
+        data-testid="vertical-time-pane"
+        style={{ width: day.labelWidth, height: day.boardHeight }}
+      >
+        <div className="icv-time-pane-content" style={{ width: day.labelWidth, height: day.boardHeight }}>
+          {day.timeTicks.map((tick) => (
+            <span
+              className={["icv-time-tick", tick.isHour ? "is-hour" : "", tick.showLabel ? "" : "is-label-hidden"]
+                .filter(Boolean)
+                .join(" ")}
+              key={`${day.dateKey}-time-${tick.minute}`}
+              aria-hidden={!tick.showLabel}
+              style={{ top: verticalMinuteToY(tick.minute, day.settings) }}
+            >
+              {tick.showLabel ? formatVerticalTimeTick(tick.minute, tick.isHour) : null}
+            </span>
+          ))}
+        </div>
+      </div>
+    </>
+  );
+}
+
+function formatVerticalTimeTick(minute: number, isHour: boolean): string {
+  return isHour ? `${Math.floor(minute / 60)}:00` : String(minute % 60);
+}

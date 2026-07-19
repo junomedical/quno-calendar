@@ -1,0 +1,67 @@
+/**
+ * Domain: Rendering.
+ * Responsibility: Derives vertical day size, layout signature, and date-offset translation.
+ * Preserves: stable geometry, layering, clipping, and external renderer isolation.
+ * Does not own: requests, controlled settings, and scroll correction.
+ * Failure/cancellation: missing optional content leaves structural calendar geometry intact.
+ *
+ * @see docs/domains/rendering.md#source-map
+ */
+/**
+ * Pure vertical-view geometry.
+ * settings + current clock -> day dimensions, layout identity, and now-line state
+ */
+import type { CalendarId, CalendarRow, TimelineSettings } from "../../../core/types";
+import { toDateKey } from "../../../date/dateVirtualization";
+import { timelineEndMinute, timelineHeight, timelineStartMinute } from "../../../time/time";
+import { VERTICAL_TIMELINE_GUTTER_PX } from "./VerticalTimelineDay";
+
+const VERTICAL_LEFT_PANE_WIDTH_RATIO = 0.7;
+
+export type VerticalViewGeometry = {
+  labelWidth: number;
+  timelineHeight: number;
+  dayHeight: number;
+};
+
+export function buildVerticalViewGeometry(settings: TimelineSettings): VerticalViewGeometry {
+  const labelWidth = Math.round(settings.labelWidth * VERTICAL_LEFT_PANE_WIDTH_RATIO);
+  const dayTimelineHeight = timelineHeight(settings) + VERTICAL_TIMELINE_GUTTER_PX * 2;
+  return {
+    labelWidth,
+    timelineHeight: dayTimelineHeight,
+    dayHeight: settings.dayHeaderHeight + dayTimelineHeight
+  };
+}
+
+export function buildVerticalLayoutSignature(
+  calendars: readonly CalendarRow[],
+  hiddenCalendarIds: ReadonlySet<CalendarId>,
+  settings: TimelineSettings
+): string {
+  return `${calendars.map((calendar) => calendar.id).join("|")}:${Array.from(hiddenCalendarIds).join("|")}:${settings.dayHeaderHeight}:${settings.startHour}:${settings.endHour}:${settings.zoom}:${settings.excludedWeekdays.join("|")}`;
+}
+
+export function resolveVerticalDateOffset(
+  offsetWithinDate: number,
+  previousDayHeight: number,
+  nextDayHeight: number,
+  dayHeaderHeight: number
+): number {
+  if (offsetWithinDate <= dayHeaderHeight) {
+    return Math.min(offsetWithinDate, Math.max(0, nextDayHeight - 1));
+  }
+  const previousTimelineHeight = Math.max(1, previousDayHeight - dayHeaderHeight);
+  const nextTimelineHeight = Math.max(1, nextDayHeight - dayHeaderHeight);
+  const relativeTimelineOffset = (offsetWithinDate - dayHeaderHeight) / previousTimelineHeight;
+  return Math.min(Math.max(0, nextDayHeight - 1), dayHeaderHeight + relativeTimelineOffset * nextTimelineHeight);
+}
+
+export function buildVerticalNowState(now: Date, settings: TimelineSettings) {
+  const minute = now.getHours() * 60 + now.getMinutes();
+  return {
+    dateKey: toDateKey(now),
+    minute,
+    showLine: minute >= timelineStartMinute(settings) && minute <= timelineEndMinute(settings)
+  };
+}

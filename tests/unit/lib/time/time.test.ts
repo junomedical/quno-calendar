@@ -1,8 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
   clampEventToTimeline,
+  dateKeyAndMinuteToIso,
+  formatHourLabel,
   minuteToX,
   minuteToY,
+  minutesSinceStartOfDay,
   snapMinute,
   timelineHeight,
   timelineWidth,
@@ -37,5 +40,15 @@ describe("timeline math", () => {
       startMinute: 17 * 60,
       endMinute: 18 * 60
     });
+  });
+
+  it("parses local ISO clock values without an external date runtime", () => {
+    expect(minutesSinceStartOfDay("2026-07-04T09:07:00")).toBe(9 * 60 + 7);
+    expect(formatHourLabel(9 * 60)).toBe("9");
+    expect(formatHourLabel(9 * 60 + 5)).toBe("05");
+  });
+
+  it("builds event timestamps from local date keys", () => {
+    expect(dateKeyAndMinuteToIso("2026-07-04", 9 * 60 + 30)).toBe(new Date(2026, 6, 4, 9, 30).toISOString());
   });
 });

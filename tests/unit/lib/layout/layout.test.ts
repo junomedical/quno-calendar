@@ -1,11 +1,18 @@
 import { describe, expect, it } from "vitest";
 import {
+  columnWidthForPreparedCell,
   columnWidthForEvents,
+  laneCountForPreparedCell,
+  layoutPreparedEventsForColumn,
+  layoutPreparedEventsForRow,
   layoutEventsForColumn,
   layoutEventsForRow,
+  prepareEventCell,
+  rowHeightForPreparedCell,
   rowHeightForEvents,
-  rowHeightForOverlapDepth
-} from "../../../../src/lib/layout/layout";
+  rowHeightForOverlapDepth,
+  verticalLaneCountForPreparedCell
+} from "../../../../src/lib/infinite/events/layout/layout";
 import type { CalendarEvent } from "../../../../src/lib/core/types";
 
 const settings = {
@@ -61,6 +68,29 @@ describe("event overlap layout", () => {
     expect(byId.get("event-4")?.height).toBeLessThan(settings.rowHeight);
   });
 
+  it("uses stable caller order for equal intervals and the lowest reusable lane", () => {
+    const equalEvents = [
+      event("first", "09:00", "10:00"),
+      event("second", "09:00", "10:00"),
+      event("third", "09:30", "09:45"),
+      event("later", "10:00", "11:00")
+    ];
+    const layout = layoutEventsForRow(equalEvents, settings);
+
+    expect(layout.map((item) => [item.event.id, item.lane])).toEqual([
+      ["first", 0],
+      ["second", 1],
+      ["third", 2],
+      ["later", 0]
+    ]);
+  });
+
+  it("assigns lanes by interval identity when event ids are duplicated", () => {
+    const duplicateIdEvents = [event("same-id", "09:00", "10:00"), event("same-id", "09:30", "10:30")];
+
+    expect(layoutEventsForRow(duplicateIdEvents, settings).map((item) => item.lane)).toEqual([0, 1]);
+  });
+
   it("uses the stepped row-height ladder for overlap depth", () => {
     expect(rowHeightForOverlapDepth(50, 1)).toBe(50);
     expect(rowHeightForOverlapDepth(50, 2)).toBe(50);
@@ -93,6 +123,55 @@ describe("event overlap layout", () => {
 
     expect(rowHeightForEvents([availability], settings)).toBe(settings.rowHeight);
     expect(layoutEventsForRow([availability], settings)).toHaveLength(1);
+  });
+
+  it("prepares a cell once for metrics and both geometry projections", () => {
+    const events = [
+      event("dense-a", "09:00", "10:00"),
+      event("dense-b", "09:00", "10:00"),
+      event("dense-c", "09:00", "10:00")
+    ];
+    const preparedCell = prepareEventCell(events, settings);
+    const rowHeight = rowHeightForPreparedCell(preparedCell, settings);
+
+    expect(preparedCell.items.map((item) => item.lane)).toEqual([0, 1, 2]);
+    expect(laneCountForPreparedCell(preparedCell)).toBe(3);
+    expect(verticalLaneCountForPreparedCell(preparedCell)).toBe(3);
+    expect(rowHeight).toBe(75);
+    expect(columnWidthForPreparedCell(preparedCell, settings)).toBe(240);
+    expect(layoutPreparedEventsForRow(preparedCell, { ...settings, rowHeight })).toEqual(
+      layoutEventsForRow(events, { ...settings, rowHeight })
+    );
+    expect(layoutPreparedEventsForColumn(preparedCell, settings)).toEqual(layoutEventsForColumn(events, settings));
+  });
+
+  it("keeps availability in prepared geometry but excludes it from prepared metrics", () => {
+    const availability = {
+      ...event("availability", "08:00", "18:00"),
+      kind: "availability" as const
+    };
+    const timedEvents = [
+      event("timed-a", "09:00", "10:00"),
+      event("timed-b", "09:00", "10:00"),
+      event("timed-c", "09:00", "10:00")
+    ];
+    const preparedCell = prepareEventCell([availability, ...timedEvents], settings);
+
+    expect(preparedCell.items).toHaveLength(4);
+    expect(preparedCell.laneCount).toBe(4);
+    expect(preparedCell.metricLaneCount).toBe(3);
+    expect(rowHeightForPreparedCell(preparedCell, settings)).toBe(75);
+    expect(columnWidthForPreparedCell(preparedCell, settings)).toBe(240);
+  });
+
+  it("keeps same-day clock semantics and clips geometry to the visible timeline", () => {
+    const crossDateClock = event("cross-date", "07:30", "19:15");
+    crossDateClock.start = "2026-07-06T07:30:00";
+    crossDateClock.end = "2026-07-07T19:15:00";
+    const preparedCell = prepareEventCell([crossDateClock], settings);
+
+    expect(preparedCell.items[0]).toMatchObject({ startMinute: 8 * 60, endMinute: 18 * 60 });
+    expect(layoutPreparedEventsForRow(preparedCell, settings)[0]).toMatchObject({ left: 0, width: 600 });
   });
 
   it("keeps dense overlap event shells at least 20px tall with 4px hover slack", () => {

@@ -12,7 +12,10 @@ export default defineConfig({
   ],
   build: {
     emptyOutDir: true,
-    cssCodeSplit: true,
+    // A single explicit stylesheet keeps both module formats safe to import in
+    // Node/SSR. Enabling CSS splitting for the UMD build makes Vite inject a
+    // <style> element at module evaluation time and therefore touches document.
+    cssCodeSplit: false,
     lib: {
       entry: "src/lib/index.ts",
       name: "QunoCalendar",
@@ -21,12 +24,16 @@ export default defineConfig({
       cssFileName: "styles"
     },
     rollupOptions: {
-      external: ["react", "react-dom", "react/jsx-runtime"],
+      // Runtime dependencies stay as package imports instead of being copied
+      // into the calendar bundle. Consumers already receive react-virtual via
+      // package.json, so embedding it here would ship the same engine twice.
+      external: ["react", "react-dom", "react/jsx-runtime", "@tanstack/react-virtual"],
       output: {
         globals: {
           react: "React",
           "react-dom": "ReactDOM",
-          "react/jsx-runtime": "React"
+          "react/jsx-runtime": "React",
+          "@tanstack/react-virtual": "ReactVirtual"
         }
       }
     }

@@ -49,27 +49,35 @@ This document defines the names used for visible calendar interface parts and th
 | Overlap lane       | A mini-lane inside a calendar row used to separate overlapping event shells at rest.                                                                                                                                                      | `lane`, `laneCount`                                   |
 | Lane slot          | The vertical allocation for one overlap lane. Dense rows keep each slot at least 24px.                                                                                                                                                    | `laneHeight`                                          |
 | Resting shell gap  | The 2px top and 2px bottom inset inside a lane slot, so neighboring resting event shells do not touch.                                                                                                                                    | `layoutEventsForRow`                                  |
+| Prepared cell      | Orientation-neutral timed-event intervals and overlap lanes for one date/calendar pair, reused by sizing and rendering.                                                                                                                   | `PreparedEventCell`                                   |
+| Resource window    | The visible cross-axis rows or columns plus two-resource overscan and explicitly pinned resources.                                                                                                                                        | `resourceIndexesInWindow`                             |
+| Resource extent    | A resource's original start, end, and size in the full cross-axis layout, retained even when that resource is not mounted.                                                                                                                | `ResourceExtent`                                      |
 
 ## Events And Availability
 
-| Term                 | Meaning                                                                                                                                                                       | Implementation reference            |
-| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
-| Calendar event       | The data object returned by `loadEvents`. It may represent an appointment, availability, or another product-specific block.                                                   | `CalendarEvent`                     |
-| Event version        | Parent-controlled invalidation token for the loaded visible-range cache. Bump it after persisted event-store changes that should be reloaded through `loadEvents`.            | `eventVersion`                      |
-| Appearing event ids  | Parent-provided ids that receive `status="appearing"` when they are present in loaded visible events after a save or reload.                                                  | `appearingEventIds`                 |
-| Visible event commit | Imperative patch that replaces or inserts one persisted event in loaded visible buckets without a full range reload.                                                          | `commitVisibleEvent`                |
-| Appointment          | A normal timed event that users move/create in `events` interaction mode.                                                                                                     | `kind` omitted or product-specific  |
-| Availability         | A background schedulable interval, usually full row height, shown with `kind: "availability"`.                                                                                | `kind: "availability"`              |
-| Multi-calendar event | One event that belongs to more than one calendar and renders once in each matching selected calendar row.                                                                     | `calendarIds`                       |
-| Event shell          | The calendar-owned positioned wrapper that controls geometry, hover size, z-index, and CSS variables.                                                                         | `EventShell`, `.ic-event-shell`     |
-| Event card           | The product-owned visual content rendered inside an event shell. The demo card is only one possible renderer.                                                                 | `eventRenderer`, `.demo-event-card` |
-| Availability shell   | An event shell used for an availability event. It is pointer-transparent in event mode and active in availability mode.                                                       | `.ic-availability-shell`            |
-| Draft                | A temporary event shown while the user draws a new time range.                                                                                                                | `draft-new-event`, `status="new"`   |
-| Active draft         | A parent-owned create or edit preview rendered while an external popup is open. Create active drafts render as `new`; edit active drafts replace their source event visually. | `activeDraft`                       |
-| Exiting draft        | A released active draft shell retained briefly after parent state clears so cancellation can fade out without losing the visual anchor.                                       | `releaseActiveDraft`, `.is-exiting` |
-| Viewport anchor      | An opaque library-owned snapshot that lets parent UI preserve a rendered event or calendar slot across parent state changes.                                                  | `CalendarViewportAnchor`            |
-| Active draft move    | A drag proposal for the controlled active draft. The parent applies it to popup state instead of persisting loaded data.                                                      | `onActiveDraftMoveRequest`          |
-| Drag preview         | A temporary shell showing the proposed event position during drag/drop.                                                                                                       | `status="drop-preview"`             |
+| Term                  | Meaning                                                                                                                                                                       | Implementation reference            |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
+| Calendar event        | The data object returned by `loadEvents`. It may represent an appointment, availability, or another product-specific block.                                                   | `CalendarEvent`                     |
+| Event version         | Parent-controlled invalidation token for the loaded visible-range cache. Bump it after persisted event-store changes that should be reloaded through `loadEvents`.            | `eventVersion`                      |
+| Event prefetch policy | Strategy that derives the adjacent before/after date buffer from the current rendered dates and selected calendars.                                                           | `eventPrefetchPolicy`               |
+| Event load window     | Rendered date keys plus the adjacent dates selected by the prefetch policy; fresh and in-flight dates are excluded from new requests.                                         | `eventLoadDateKeys`                 |
+| Appearing event ids   | Parent-provided ids that receive `status="appearing"` when they are present in loaded visible events after a save or reload.                                                  | `appearingEventIds`                 |
+| Visible event commit  | Imperative patch that replaces or inserts one persisted event in loaded visible buckets without a full range reload.                                                          | `commitVisibleEvent`                |
+| Appointment           | A normal timed event that users move/create in `events` interaction mode.                                                                                                     | `kind` omitted or product-specific  |
+| Availability          | A background schedulable interval, usually full row height, shown with `kind: "availability"`.                                                                                | `kind: "availability"`              |
+| Multi-calendar event  | One event that belongs to more than one calendar and renders once in each matching selected calendar row.                                                                     | `calendarIds`                       |
+| Event shell           | The calendar-owned positioned wrapper that controls geometry, hover size, z-index, and CSS variables.                                                                         | `EventShell`, `.ic-event-shell`     |
+| Event card            | The product-owned visual content rendered inside an event shell. The demo card is only one possible renderer.                                                                 | `eventRenderer`, `.demo-event-card` |
+| Availability shell    | An event shell used for an availability event. It is pointer-transparent in event mode and active in availability mode.                                                       | `.ic-availability-shell`            |
+| Draft                 | A temporary event shown while the user draws a new time range.                                                                                                                | `draft-new-event`, `status="new"`   |
+| Active draft          | A parent-owned create or edit preview rendered while an external popup is open. Create active drafts render as `new`; edit active drafts replace their source event visually. | `activeDraft`                       |
+| Exiting draft         | A released active draft shell retained briefly after parent state clears so cancellation can fade out without losing the visual anchor.                                       | `releaseActiveDraft`, `.is-exiting` |
+| Viewport anchor       | An opaque library-owned snapshot that lets parent UI preserve a rendered event or calendar slot across parent state changes.                                                  | `CalendarViewportAnchor`            |
+| Active draft move     | A drag proposal for the controlled active draft. The parent applies it to popup state instead of persisting loaded data.                                                      | `onActiveDraftMoveRequest`          |
+| Drag preview          | A temporary shell showing the proposed event position during drag/drop.                                                                                                       | `status="drop-preview"`             |
+| Event cache           | The bounded date buckets currently available for synchronous rendering, including stale buckets retained during refresh.                                                      | `EventDateCache`                    |
+| Request generation    | A monotonic async-request epoch used to reject responses from obsolete loader, selection, or version state.                                                                   | `EventRangeCoordinator`             |
+| Geometry registry     | Calendar-instance map of mounted day, resource, and event elements used by navigation and viewport anchoring.                                                                 | `ViewportGeometryRegistry`          |
 
 ## Interaction Terms
 
@@ -91,15 +99,27 @@ This document defines the names used for visible calendar interface parts and th
 | Nearest-node zoom anchor | `Shift` + wheel behavior that keeps the rendered time-grid node nearest the mouse visually fixed while zoom changes.                                             | `onZoomChange`                               |
 | Viewport-fill zoom floor | A horizontal render-scale floor that lets the timeline board fill the available viewport width after sticky labels without changing the parent-owned zoom value. | `settings.zoom`                              |
 
+## Viewport And Focus Anchors
+
+| Term                      | Meaning                                                                                                                                               | Owner                                   |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
+| Visual focus              | The semantic calendar location kept at the same viewport-relative coordinate. It is not browser DOM or keyboard focus.                                | Runtime policy                          |
+| Virtual-window anchor     | The normalized date around which the bounded month-before/month-after date model is built.                                                            | Date virtualizer                        |
+| Visible-position snapshot | The top visible `{ dateKey, offsetWithinDate }` captured during scrolling and used by idle recentering.                                               | Scroll runtime                          |
+| Data-layout anchor        | A one-commit grid anchor used when late events change metrics; horizontally it preserves a date header or `{ dateKey, calendarId, offsetWithinRow }`. | Horizontal day measurement bridge       |
+| Parent viewport anchor    | An explicit event or slot geometry snapshot captured/restored through `CalendarNavigationHandle` for product-owned UI changes.                        | Parent flow plus anchor restore runtime |
+| Zoom anchor               | The time at the visible grid center for external zoom, or the first pointer-nearest rendered time node for a `Shift` + wheel gesture burst.           | Zoom controller                         |
+| Fallback date offset      | The date-local pixel retained by a data-layout anchor in case its resource disappears before restoration.                                             | Data-layout anchor                      |
+
 ## Renderer Statuses
 
-| Status         | Meaning                                                                              |
-| -------------- | ------------------------------------------------------------------------------------ |
-| `existing`     | Persisted event at rest.                                                             |
-| `hovered`      | Row-local focused event. The shell expands and the renderer may reveal more content. |
-| `dragging`     | Original event while a drag is active.                                               |
-| `drop-preview` | Proposed drag/drop position rendered as a preview.                                   |
-| `new`          | Creation draft rendered while drawing or immediately after create if needed.         |
+| Status         | Meaning                                                                                 |
+| -------------- | --------------------------------------------------------------------------------------- |
+| `existing`     | Persisted event at rest.                                                                |
+| `hovered`      | Row-local focused event. The shell expands and the renderer may reveal more content.    |
+| `dragging`     | Original event while a drag is active.                                                  |
+| `drop-preview` | Proposed drag/drop position rendered as a preview.                                      |
+| `new`          | Creation draft rendered while drawing or immediately after create if needed.            |
 | `appearing`    | Newly committed event rendered briefly after save/create so renderers can highlight it. |
 
 ## Preferred Language
@@ -110,6 +130,17 @@ This document defines the names used for visible calendar interface parts and th
 - Use `date header` for the gray sticky day band and `date label` for its left text cell.
 - Use `time scale` for the sticky top header and `time label` for individual numbers.
 - Use `availability` for schedulable background intervals, not `free time` or `working hours`, unless product copy explicitly requires those words.
+
+## Architecture Language
+
+| Term                  | Meaning                                                                                                                                                  |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Responsibility domain | A stable source folder owning one category of state or decisions: foundation, scroll, events, anchors, interactions, rendering, or views.                |
+| Flow phase            | A runtime step such as settlement, recenter, prefetch, or restoration. Flow phases are modules inside an owning domain, not top-level ownership folders. |
+| Settlement            | The guarded `scrollend` or idle path previously described informally as “on pause”.                                                                      |
+| Recenter              | Rebuild the bounded date model around the visible date and restore its local offset. Prefer this over generic “reposition”.                              |
+| Event prefetch        | Policy-driven API range acquisition around rendered date keys. It belongs to events, not scroll.                                                         |
+| Source map            | The table in a domain document assigning each production file one precise responsibility.                                                                |
 
 ## Visual Map
 

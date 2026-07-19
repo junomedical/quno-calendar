@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { goToWorkday, viewportRelativeEventBox } from "../helpers";
+import { goToWorkday, horizontalDrawTarget, viewportRelativeEventBox } from "../helpers";
 
 async function createOverlappingEvent(page: import("@playwright/test").Page, title: string, time = "22:00") {
   await page.getByTestId("jump-date-input").fill("2026-07-06");
@@ -127,14 +127,10 @@ test("keeps a drawn external draft focused with the 5,000 event dataset", async 
   await page.getByTestId("scale-select").selectOption("5000");
   await goToWorkday(page, "2026-07-06");
 
-  const viewport = page.locator(".ic-viewport");
-  const viewportBox = await viewport.boundingBox();
-  expect(viewportBox).not.toBeNull();
-  if (!viewportBox) return;
-
-  await page.mouse.move(viewportBox.x + 310, viewportBox.y + 130);
+  const drawTarget = await horizontalDrawTarget(page, { distance: 340 });
+  await page.mouse.move(drawTarget.startX, drawTarget.y);
   await page.mouse.down();
-  await page.mouse.move(viewportBox.x + 650, viewportBox.y + 130, { steps: 5 });
+  await page.mouse.move(drawTarget.endX, drawTarget.y, { steps: 5 });
   await expect(page.getByTestId("draft-event")).toBeVisible();
   const drawnDraftBox = await viewportRelativeEventBox(page, '[data-testid="draft-event"]');
   expect(drawnDraftBox).not.toBeNull();

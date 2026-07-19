@@ -1,11 +1,12 @@
 import { execFileSync } from "node:child_process";
-import { mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { accessSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 
 const root = resolve(".");
 const workDir = join(root, "work", "package-verify");
 const packDir = join(workDir, "pack");
 const appDir = join(workDir, "app");
+const npmEnvironment = { ...process.env, npm_config_cache: join(workDir, "npm-cache") };
 
 rmSync(workDir, { recursive: true, force: true });
 mkdirSync(packDir, { recursive: true });
@@ -13,6 +14,7 @@ mkdirSync(join(appDir, "src"), { recursive: true });
 
 const packOutput = execFileSync("npm", ["pack", "--pack-destination", packDir], {
   cwd: root,
+  env: npmEnvironment,
   encoding: "utf8",
   stdio: ["ignore", "pipe", "inherit"]
 });
@@ -104,5 +106,40 @@ createRoot(document.getElementById("root")!).render(
 `
 );
 
-execFileSync("npm", ["install", "--no-audit", "--no-fund"], { cwd: appDir, stdio: "inherit" });
-execFileSync("npm", ["run", "build"], { cwd: appDir, stdio: "inherit" });
+execFileSync("npm", ["install", "--no-audit", "--no-fund"], {
+  cwd: appDir,
+  env: npmEnvironment,
+  stdio: "inherit"
+});
+
+const installedPackageRoot = join(appDir, "node_modules", "quno-calendar");
+const installedPackageJson = JSON.parse(readFileSync(join(installedPackageRoot, "package.json"), "utf8"));
+const installedStylesPath = join(installedPackageRoot, "dist", "styles.css");
+
+accessSync(installedStylesPath);
+if (installedPackageJson.dependencies?.["date-fns"]) {
+  throw new Error("Published runtime dependencies must not include date-fns.");
+}
+if (installedPackageJson.exports?.["./styles.css"] !== "./dist/styles.css") {
+  throw new Error("The public styles export does not target dist/styles.css.");
+}
+if (!readFileSync(installedStylesPath, "utf8").includes(".ic-shell")) {
+  throw new Error("The packaged stylesheet does not contain the calendar styles.");
+}
+
+execFileSync(
+  process.execPath,
+  ["--input-type=commonjs", "--eval", 'const api = require("quno-calendar"); if (!api.CalendarRoot) process.exit(1);'],
+  { cwd: appDir, stdio: "inherit" }
+);
+execFileSync(
+  process.execPath,
+  [
+    "--input-type=module",
+    "--eval",
+    'const api = await import("quno-calendar"); if (!api.CalendarRoot) process.exit(1);'
+  ],
+  { cwd: appDir, stdio: "inherit" }
+);
+
+execFileSync("npm", ["run", "build"], { cwd: appDir, env: npmEnvironment, stdio: "inherit" });

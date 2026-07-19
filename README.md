@@ -15,16 +15,16 @@ import { CalendarRoot, type EventRendererProps, type LoadEvents } from "quno-cal
 import "quno-calendar/styles.css";
 ```
 
-React and React DOM are peer dependencies. The package targets React 18-compatible ESM.
+React and React DOM are peer dependencies. The package ships React 18-compatible ESM and CommonJS plus an explicit stylesheet; JavaScript imports are safe in Node/SSR.
 
 ## Minimal Example
 
 ```tsx
 const calendars = [{ id: "room-1", name: "Room 1" }];
 
-const loadEvents: LoadEvents = async ({ startDate, endDate, calendarIds }) => {
-  return fetch(`/api/events?start=${startDate}&end=${endDate}&calendars=${calendarIds.join(",")}`).then((response) =>
-    response.json()
+const loadEvents: LoadEvents = async ({ startDate, endDate, calendarIds, signal }) => {
+  return fetch(`/api/events?start=${startDate}&end=${endDate}&calendars=${calendarIds.join(",")}`, { signal }).then(
+    (response) => response.json()
   );
 };
 
@@ -53,6 +53,8 @@ export function Schedule() {
 
 Use `view="infinite-vertical"` when calendars should render as columns and time should run top-to-bottom inside each date. `view="infinite"` remains a compatibility alias for the horizontal view.
 
+The date/resource grid renders without waiting for `loadEvents`. Cached events remain visible during delayed refreshes, and obsolete requests are cancelled or ignored. The optional abort signal is backward compatible with loaders that do not support cancellation. Adjacent dates are prefetched through an adaptive default; pass `eventPrefetchPolicy` to customize the before/after buffer.
+
 ## Interaction Model
 
 The calendar does not persist mutations. Drag/drop and drawn creation are proposed through callbacks:
@@ -74,18 +76,22 @@ For parent-owned create/edit forms, pass `activeDraft` and handle `onEventDraftR
 
 ## Examples
 
-- `src/examples/ReadOnlyCalendar.tsx`
-- `src/examples/DragCreateCalendar.tsx`
-- `src/examples/ControlledDraftCalendar.tsx`
-- `src/examples/VerticalPlanner.tsx`
-- `src/examples/AvailabilityEditor.tsx`
+- [Examples guide](./demo/examples/README.md)
+- [Read-only integration](./demo/examples/read-only/README.md)
+- [Drag and create](./demo/examples/drag-create/README.md)
+- [Controlled draft](./demo/examples/controlled-draft/README.md)
+- [Vertical planner](./demo/examples/vertical-planner/README.md)
+- [Availability editor](./demo/examples/availability/README.md)
+- [Delayed async API](./demo/examples/async-api/README.md)
 
-The demo app also exposes source links in the sidebar for the larger interactive variants.
+`src/` contains the reusable library only. The separately documented [`demo/`](./demo/README.md) application contains focused recipes and larger stress scenarios.
 
 ## Documentation
 
 - [Usage recipes](./docs/usage.md)
 - [Architecture overview](./docs/architecture.md)
+- [Responsibility domains and source maps](./docs/domains/README.md)
+- [Runtime flow guides and anchor taxonomy](./docs/flows/README.md)
 - [Interface taxonomy](./docs/taxonomy.md)
 - [Test plan](./docs/test-plan.md)
 - [Decision log](./docs/decisions.md)

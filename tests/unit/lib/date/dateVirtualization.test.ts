@@ -31,6 +31,13 @@ describe("date virtualization", () => {
     expect(dateAtVirtualOffset(window.startDateKey, window.anchorIndex, [])).toBe("2026-07-06");
   });
 
+  it("clamps month-end windows instead of rolling into an adjacent month", () => {
+    const window = virtualDateWindowAround("2026-03-31", []);
+
+    expect(window.startDateKey).toBe("2026-02-28");
+    expect(window.endDateKey).toBe("2026-04-30");
+  });
+
   it("removes excluded days from the one-month scroll window", () => {
     const window = virtualDateWindowAround("2026-07-04", [0, 6]);
 

@@ -10,7 +10,7 @@ The root component owns shared calendar inputs and delegates rendering to view c
 
 ## 003 - Async Range Loader
 
-The infinite view requests only visible date ranges. This better represents production-scale datasets than requiring all events upfront.
+The infinite view requests a bounded window around rendered dates rather than requiring all events upfront. Its default prefetch policy derives a small before/after buffer from the rendered-day count, and consumers can replace the policy for their own latency and navigation profile.
 
 ## 004 - Parent-Validated Mutations
 
@@ -36,7 +36,7 @@ Behavioral and API changes must update the relevant Markdown files: architecture
 
 ## 009 - Created Drafts Update The Visible Cache
 
-The infinite view keeps a loaded visible-range cache, so parent state changes alone may not be visible until a reload. After `onEventCreateRequest` resolves, the view inserts the returned created event, or a local draft copy, into the loaded date bucket so the new event appears immediately. Parent-owned flows such as external popup save should update their canonical data and call `commitVisibleEvent` to patch the single saved record into loaded visible buckets; they can still bump `eventVersion` when a broader event-store reload is required. Loaded date buckets are keyed by event id on merge, because a missing-date range can include already-loaded dates and duplicate committed records would incorrectly add overlap lanes.
+The infinite view keeps a loaded visible-range cache, so parent state changes alone may not be visible until a reload. After `onEventCreateRequest` resolves, the view inserts the returned created event, or a local draft copy, into the loaded date bucket so the new event appears immediately. Parent-owned flows such as external popup save should update their canonical data and call `commitVisibleEvent` to patch the single saved record into loaded visible buckets; they can still bump `eventVersion` when a broader event-store reload is required. Loaded date buckets are keyed by event id on merge so repeated backend records cannot incorrectly add overlap lanes.
 
 Newly committed events receive a short-lived `appearing` renderer status when they first enter the loaded visible cache through immediate create, through `commitVisibleEvent(..., { appearing: true })`, or through parent-provided `appearingEventIds` during an `eventVersion` reload. Requested appearing ids are consumed once while the request remains active, so later range responses or reloads do not replay the same glint. Initial range loads, selected-calendar refetches, and unrelated reloaded records do not mark existing events as appearing. The demo renderer uses that status for a hard-edged diagonal white glint, while product renderers own their own visual treatment.
 
@@ -176,8 +176,52 @@ The library builds to `dist` with ESM, UMD, generated TypeScript declarations, a
 
 ## 040 - View Orchestration Uses Focused Hooks
 
-Shared setup, hit-testing, wheel zoom anchoring, drag lifecycle, and draft lifecycle now live in focused hooks under `src/lib/infinite/hooks`. The orientation views still own projection-specific rendering, but coordinate conversion and gesture state are no longer embedded directly in the render coordinator.
+Shared setup, hit-testing, wheel zoom anchoring, drag lifecycle, and draft lifecycle live in focused modules rather than inside orientation render coordinators. Decision 050 supersedes the former technical `hooks` bucket with responsibility-domain ownership.
 
 ## 041 - Examples Are Public Recipes
 
-Small source examples live under `src/examples` and are mounted as `/examples/*` routes for verification. The larger demo variants remain useful stress scenarios and expose source links in their sidebars for reviewers.
+Small source examples live under `demo/examples/<recipe>` and are mounted as `/examples/*` routes for verification. Each recipe has a focused README, source backlink, public-package import, and shared support only where the support is not product state. Larger stress variants live under `demo/showcase`. The `src/` tree is reserved for reusable library code, and an architecture check rejects demo regressions into it.
+
+## 042 - Async Data Never Owns Calendar Geometry
+
+Dates, resources, scrolling, zoom, drafts, and hit-testing render independently from `loadEvents`. The range loader uses a policy-derived warm window, diffs it against loaded and in-flight dates, splits missing regions around cached gaps, retains a 120-date LRU cache, preserves stale buckets during refresh, supplies an optional abort signal, rejects stale generations, retries failures after 250ms and 1s, and commits prepared responses through a React transition. This makes API latency additive—events can arrive later—rather than blocking the calendar surface. Targeted move/create/commit patches use an event-id index instead of rescanning every cached date.
+
+## 043 - Event Cells Are Indexed And Prepared Once
+
+Events for one date are indexed by calendar membership in one pass. Timed events in each date/resource cell receive deterministic heap-based overlap lanes in `O(n log n)`. The resulting prepared cell is reused for row height or column width and for orientation-specific rectangles, avoiding separate sorting and lane assignment in metrics and rendering. Availability, drafts, and drop previews remain separate layers and do not change committed overlap metrics.
+
+The repository demo sends its locally selected fixture range through a Vite-only `POST /api/demo-events` mock endpoint. That endpoint delays and returns the JSON response so local DevTools and browser tests exercise an actual abortable HTTP request. This transport stays outside `src/lib`; consumers provide their own HTTP client behind the unchanged `LoadEvents` contract.
+
+## 044 - Virtualization Covers Both Axes
+
+Bounded date virtualization remains the primary axis. Each mounted date now also binary-searches variable-size resource prefix extents and mounts only the visible cross-axis resources plus two-resource overscan on both sides. Full extents remain in layout, so unmounted rows and columns do not compact scroll geometry. Draft and preview resources can be pinned outside the ordinary window.
+
+## 045 - Anchoring Uses An Instance Geometry Registry
+
+Days, resources, and event instances register their DOM elements with the owning calendar instance. Viewport capture/restore resolves this registry instead of querying global selectors. Event unregistration is element-identity-aware, preventing a stale unmount from removing a newer event instance with the same event/calendar key. Restore work shares one cancellable animation-frame slot, mutation observer, resize observer, registry subscription, and deadline. Pointer, wheel, touch, and keyboard intent can cancel delayed corrections. The interaction runtime likewise uses one Pointer Events pathway so mouse compatibility events cannot duplicate drag or draft transitions.
+
+## 046 - Package JavaScript Does Not Inject Styles
+
+The library emits an explicit `quno-calendar/styles.css` asset. ESM and CommonJS JavaScript imports do not touch `document`, which keeps package loading safe in Node and SSR environments. Library date operations use tested local-date and `Intl` helpers instead of a runtime `date-fns` dependency; the demo may keep development-only fixture utilities without increasing the consumer bundle. The declared `@tanstack/react-virtual` dependency remains an external package import instead of being copied into the library artifact, preventing duplicate virtualizer code in consumer applications.
+
+## 047 - Demo Variants Are Presets Over Shared Modules
+
+Routes are declared in registries, and related demo variants supply small preset objects to shared shells and controllers. Dataset controls, view controls, system time, rendering metrics, external-draft navigation, save simulation, and sidebar sections have focused ownership. Public examples remain isolated recipes rather than importing the larger demo application.
+
+## 048 - Zoom Reprojects Geometry Without Rebuilding Content
+
+Zoom necessarily changes event coordinates and browser paint, but it does not change event membership, overlap lanes, horizontal row metrics, or vertical column metrics. Those prepared models therefore depend only on event data and their actual metric settings, not on zoom. `EventShell` keeps geometry in the outer positioned element and memoizes product-renderer content separately, so an unchanged event card is not reconstructed when only its shell moves or resizes. Horizontal slider and other external zoom changes preserve the time at the visible grid center before paint once the user has scrolled horizontally, while the timeline origin preserves its left edge. `Shift` + wheel retains its more specific pointer anchor and suppresses the generic correction for that gesture.
+
+## 049 - Late Data Preserves A Semantic Grid Slot
+
+Async events may increase horizontal overlap depth after a date is already visible. Generic virtual-item compensation understands date rectangles but not which resource row the user was viewing, so late metric commits use a distinct data-layout anchor. Exact date navigation preserves the date header. Mid-date scrolling captures `{ dateKey, calendarId, offsetWithinRow, fallbackOffsetWithinDate }`, resizes affected dates, then translates the same resource-local point through the new row prefix extents before paint. A missing resource falls back to the clamped date-local offset. Horizontal time scroll is independent and remains unchanged. Newly mounted events never become focus merely because they arrived. Vertical overlap affects column width rather than date height, so date/time focus remains settings-owned. Explicit parent restores, active interactions, and pending navigation retain priority over this automatic correction.
+
+## 050 - Runtime Source Follows Responsibility Domains
+
+The infinite runtime is organized into `scroll`, `events`, `anchors`, `interactions`, `rendering`, and `views`. These are stable ownership boundaries; transient phases such as scroll pause or prefetch remain modules inside the owning domain. API prefetch belongs to events even though visible dates originate in scroll, and semantic visual focus belongs to anchors rather than a DOM “focused element”.
+
+Domain documents provide the ownership contract and complete source map, while flow documents remain authoritative for execution order. Each production source file links to one domain document. The architecture check verifies backlinks, source-map completeness, retired catch-all directories, and dependency direction so the documentation and tree cannot drift independently.
+
+## 051 - Event Prefetch Is Policy-Driven And Gap-Aware
+
+Event acquisition keeps adjacent dates warm before navigation reaches them, but the amount is not a fixed component constant. `eventPrefetchPolicy` receives rendered date keys and selected calendars; the default uses a square-root growth curve plus one day, giving small viewports a useful buffer without making wide viewports produce linearly larger requests. The coordinator remains authoritative for freshness: loaded and in-flight dates are removed before requests start, and non-contiguous missing regions are loaded independently so a cached middle range is not refetched merely to acquire dates on both sides. Policy changes expand or contract the desired warm window without invalidating fresh buckets.

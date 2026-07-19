@@ -1,5 +1,10 @@
 import { expect, type Page } from "@playwright/test";
 
+export async function waitForDemoEvents(page: Page) {
+  await expect(page.getByTestId("calendar-event").first()).toBeVisible({ timeout: 10_000 });
+  await expect(page.getByTestId("api-loading-status")).toHaveText("API idle", { timeout: 10_000 });
+}
+
 export async function firstViewportEventBox(page: Page) {
   await page.waitForSelector('[data-testid="calendar-event"]');
   const viewport = page.viewportSize() ?? { width: 1280, height: 720 };
@@ -29,6 +34,68 @@ export async function goToWorkday(page: Page, date = "2026-07-06") {
       }
     })
     .toBe(date);
+}
+
+type HorizontalDrawTargetOptions = {
+  calendarId?: string;
+  dateKey?: string;
+  distance?: number;
+};
+
+/** Finds empty, visibly exposed timeline grid space instead of sticky chrome or an event card. */
+export async function horizontalDrawTarget(page: Page, options: HorizontalDrawTargetOptions = {}) {
+  const daySelector = options.dateKey ? `[data-testid="calendar-day"][data-date="${options.dateKey}"] ` : "";
+  const calendarSelector = options.calendarId ? `[data-calendar-id="${options.calendarId}"]` : "";
+  const rowSelector = `${daySelector}[data-testid="calendar-row"]${calendarSelector}`;
+  await expect.poll(async () => page.locator(rowSelector).count()).toBeGreaterThan(0);
+  await page.evaluate(
+    () => new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())))
+  );
+  const target = await page.evaluate(({ calendarId, dateKey, distance = 120 }) => {
+    const viewport = document.querySelector<HTMLElement>(".ic-viewport");
+    if (!viewport) return null;
+    const viewportBox = viewport.getBoundingClientRect();
+    const rows = Array.from(document.querySelectorAll<HTMLElement>('[data-testid="calendar-row"]'));
+
+    for (const row of rows) {
+      const day = row.closest<HTMLElement>('[data-testid="calendar-day"]');
+      if (calendarId && row.dataset.calendarId !== calendarId) continue;
+      if (dateKey && day?.dataset.date !== dateKey) continue;
+
+      const grid = row.querySelector<HTMLElement>(".ic-row-grid");
+      const label = row.querySelector<HTMLElement>(".ic-row-label");
+      if (!grid || !label) continue;
+      const rowBox = row.getBoundingClientRect();
+      const gridBox = grid.getBoundingClientRect();
+      const labelBox = label.getBoundingClientRect();
+      const left = Math.max(gridBox.left, labelBox.right, viewportBox.left) + 8;
+      const right = Math.min(gridBox.right, viewportBox.right) - 8;
+      if (rowBox.bottom <= viewportBox.top + 80 || rowBox.top >= viewportBox.bottom || right - left < distance)
+        continue;
+
+      const visibleTop = Math.max(rowBox.top, viewportBox.top + 80) + 8;
+      const visibleBottom = Math.min(rowBox.bottom, viewportBox.bottom) - 8;
+      const centerY = Math.min(visibleBottom, Math.max(visibleTop, rowBox.top + rowBox.height / 2));
+      const yCandidates = [centerY];
+      for (let y = visibleTop; y < visibleBottom; y += 8) {
+        if (Math.abs(y - centerY) > 4) yCandidates.push(y);
+      }
+      for (const y of yCandidates) {
+        for (let x = left; x + distance <= right; x += 8) {
+          const pointElement = document.elementFromPoint(x, y) as HTMLElement | null;
+          if (pointElement?.closest(".ic-row-grid") === grid && !pointElement.closest("[data-event-id]")) {
+            return { startX: x, endX: x + distance, y };
+          }
+        }
+      }
+    }
+    return null;
+  }, options);
+
+  if (!target) {
+    throw new Error("No visible empty horizontal timeline grid space found");
+  }
+  return target;
 }
 
 export async function viewportRelativeEventBox(page: Page, selector: string, textIncludes?: string) {

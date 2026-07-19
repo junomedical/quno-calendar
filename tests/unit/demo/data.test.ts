@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { eventBelongsToCalendar } from "../../../src/lib";
-import { createDemoEvents, demoCalendars } from "../../../src/demo/data";
+import { createDemoEvents, createRangeLoader, demoCalendars } from "../../../demo/showcase/data";
+import { isoDateInputValue } from "../../../demo/showcase/draftFormUtils";
 
 function minutes(value: string) {
   const date = new Date(value);
@@ -54,5 +55,28 @@ describe("demo event generator", () => {
     const usedCalendarIds = new Set(events.flatMap((event) => event.calendarIds ?? [event.calendarId]));
 
     expect(usedCalendarIds).toEqual(new Set(demoCalendars.map((calendar) => calendar.id)));
+  });
+
+  it("loads an event by its local calendar date instead of its timestamp prefix", async () => {
+    const offsetTimestamps = ["2026-07-18T00:30:00+14:00", "2026-07-18T23:30:00-12:00"];
+    const start =
+      offsetTimestamps.find((value) => isoDateInputValue(value) !== value.slice(0, 10)) ?? offsetTimestamps[0];
+    const event = {
+      id: "offset-event",
+      calendarId: demoCalendars[0].id,
+      title: "Offset appointment",
+      start,
+      end: new Date(new Date(start).getTime() + 30 * 60_000).toISOString()
+    };
+    const dateKey = isoDateInputValue(event.start);
+
+    expect(dateKey).not.toBe(event.start.slice(0, 10));
+    await expect(
+      createRangeLoader([event])({
+        startDate: dateKey,
+        endDate: dateKey,
+        calendarIds: [event.calendarId]
+      })
+    ).resolves.toEqual([event]);
   });
 });

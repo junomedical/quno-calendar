@@ -1,0 +1,78 @@
+/**
+ * Domain: Views.
+ * Responsibility: Adapts the shared scroll runtime and viewport metrics to vertical geometry.
+ * Preserves: public horizontal and vertical behavior while composing feature domains.
+ * Does not own: feature-domain algorithms.
+ * Failure/cancellation: domain cancellation and fallback policies pass through without view-specific overrides.
+ *
+ * @see docs/domains/views.md#source-map
+ */
+/**
+ * Vertical virtual-window lifecycle.
+ * date anchor -> bounded virtual days -> measured viewport store + stable date offsets
+ */
+import { useCallback, useEffect, useLayoutEffect, useState, type Dispatch, type SetStateAction } from "react";
+import type { TimelineSettings } from "../../../core/types";
+import { useScrollRuntime } from "../../scroll/useScrollRuntime";
+import { useViewportMetricsStore } from "../../scroll/resources/viewportMetricsStore";
+import { resolveVerticalDateOffset } from "../../rendering/vertical/verticalViewGeometry";
+
+type VerticalViewportWindowArgs = {
+  initialAnchorDateKey: string;
+  settings: TimelineSettings;
+  dayHeight: number;
+  layoutSignature: string;
+  layoutAnchorDateKey?: string;
+};
+
+export function useVerticalViewportWindow({
+  initialAnchorDateKey,
+  settings,
+  dayHeight,
+  layoutSignature,
+  layoutAnchorDateKey
+}: VerticalViewportWindowArgs) {
+  const [windowAnchorDateKey, setWindowAnchorDateKey] = useState(initialAnchorDateKey);
+  const [isInteractionActive, setInteractionActive] = useState(false);
+  const resolveOffsetOnLayoutChange = useCallback(
+    (offsetWithinDate: number, previousDayHeight: number, nextDayHeight: number) =>
+      resolveVerticalDateOffset(offsetWithinDate, previousDayHeight, nextDayHeight, settings.dayHeaderHeight),
+    [settings.dayHeaderHeight]
+  );
+  const timeline = useScrollRuntime({
+    anchorDateKey: windowAnchorDateKey,
+    setAnchorDateKey: setWindowAnchorDateKey,
+    initialAnchorDateKey,
+    settings,
+    baseDayHeight: dayHeight,
+    verticalLayoutSignature: layoutSignature,
+    isInteractionActive,
+    layoutAnchorDateKey,
+    resolveOffsetOnLayoutChange
+  });
+  const { dateKeyToIndex, virtualWindow, virtualizer, visibleDateKeys } = timeline;
+  const viewportMetricsStore = useViewportMetricsStore(timeline.containerRef);
+
+  useLayoutEffect(() => {
+    for (const dateKey of visibleDateKeys) {
+      const index = dateKeyToIndex(dateKey);
+      if (index >= 0 && index < virtualWindow.count) {
+        virtualizer.resizeItem(index, dayHeight);
+      }
+    }
+  }, [dateKeyToIndex, dayHeight, virtualWindow.count, virtualizer, visibleDateKeys]);
+
+  return {
+    ...timeline,
+    viewportMetricsStore,
+    setInteractionActive
+  };
+}
+
+/** Bridges the interaction/window dependency without coupling hit testing back into virtualization. */
+export function useVerticalInteractionWindowSync(
+  setInteractionActive: Dispatch<SetStateAction<boolean>>,
+  interactionActive: boolean
+) {
+  useEffect(() => setInteractionActive(interactionActive), [interactionActive, setInteractionActive]);
+}

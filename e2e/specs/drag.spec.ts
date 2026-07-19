@@ -1,9 +1,10 @@
 import { expect, test } from "@playwright/test";
-import { firstDuplicatedViewportEvent, goToWorkday, selectPageText } from "../helpers";
+import { firstDuplicatedViewportEvent, goToWorkday, selectPageText, waitForDemoEvents } from "../helpers";
 
 test("supports dragging an event to another time", async ({ page }) => {
   await page.goto("/");
   await goToWorkday(page);
+  await waitForDemoEvents(page);
   const initialEventCount = await page.getByTestId("calendar-event").count();
   const duplicate = await firstDuplicatedViewportEvent(page);
   const [box] = duplicate.boxes;
@@ -29,9 +30,13 @@ test("supports dragging an event to another time", async ({ page }) => {
   ).toHaveCount(duplicate.boxes.length);
   expect(await page.getByTestId("drag-preview-event").count()).toBeGreaterThanOrEqual(duplicate.boxes.length);
   await expect(page.locator('[data-render-status="dragging"]').first()).toHaveCSS("opacity", "0.5");
-  await expect(page.locator(".ic-viewport")).toHaveCSS("user-select", "none");
-  await expect(page.locator("body")).toHaveCSS("user-select", "none");
-  await expect(page.locator("html")).toHaveCSS("user-select", "none");
+  for (const selector of [".ic-viewport", "body", "html"]) {
+    const selectionStyle = await page.locator(selector).evaluate((element) => {
+      const style = getComputedStyle(element);
+      return style.userSelect || style.webkitUserSelect;
+    });
+    expect(selectionStyle).toBe("none");
+  }
   expect(await page.evaluate(() => window.getSelection()?.toString() ?? "")).toBe("");
   expect(await page.locator('[data-render-status="hovered"]').count()).toBe(0);
   expect(await page.getByTestId("calendar-event").count()).toBe(initialEventCount);
@@ -42,6 +47,7 @@ test("supports dragging an event to another time", async ({ page }) => {
 test("keeps visible event cache populated after dropping on another day", async ({ page }) => {
   await page.goto("/");
   await goToWorkday(page);
+  await waitForDemoEvents(page);
 
   const dragTarget = await page.evaluate(() => {
     const viewportBox = document.querySelector<HTMLElement>(".ic-viewport")?.getBoundingClientRect();

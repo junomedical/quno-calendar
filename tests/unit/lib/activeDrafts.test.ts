@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { activeDraftSourceEventId, withoutActiveDraftSourceEvents } from "../../../src/lib/data/activeDrafts";
+import {
+  activeDraftSourceEventId,
+  withoutActiveDraftSourceEvents
+} from "../../../src/lib/infinite/events/metrics/activeDrafts";
 import { type ActiveEventDraft, type CalendarEvent } from "../../../src/lib";
 
 const sourceEvent: CalendarEvent = {

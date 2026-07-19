@@ -86,9 +86,7 @@ test("recenters the horizontal virtual window after a large date scroll", async 
       { timeout: 5_000 }
     )
     .toBeLessThan(0.75);
-  await expect
-    .poll(async () => viewport.evaluate((element) => element.scrollTop))
-    .toBeGreaterThan(1_000);
+  await expect.poll(async () => viewport.evaluate((element) => element.scrollTop)).toBeGreaterThan(1_000);
   await expect
     .poll(async () => {
       try {

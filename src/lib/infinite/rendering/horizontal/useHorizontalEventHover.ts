@@ -1,0 +1,61 @@
+/**
+ * Domain: Rendering.
+ * Responsibility: Resolves row-local horizontal hover expansion from prepared event geometry.
+ * Preserves: stable geometry, layering, clipping, and external renderer isolation.
+ * Does not own: requests, controlled settings, and scroll correction.
+ * Failure/cancellation: missing optional content leaves structural calendar geometry intact.
+ *
+ * @see docs/domains/rendering.md#source-map
+ */
+import { useCallback, type Dispatch, type PointerEvent, type SetStateAction } from "react";
+import type { CalendarId } from "../../../core/types";
+import type { EventLayoutItem } from "../../events/layout/layout";
+import type { HoveredTimelineEvent } from "../../interactions/useTimelineInteractions";
+import { TIMELINE_LEFT_GUTTER_PX } from "../../../time/timelineTicks";
+
+/**
+ * Row hover resolution.
+ *
+ * pointer x/y + overlapping lane geometry -> one row-local event instance
+ */
+type HorizontalEventHoverArgs = {
+  disabled: boolean;
+  setHoveredEvent: Dispatch<SetStateAction<HoveredTimelineEvent>>;
+};
+
+export function useHorizontalEventHover({ disabled, setHoveredEvent }: HorizontalEventHoverArgs) {
+  const clearHoveredEvent = useCallback(() => setHoveredEvent(null), [setHoveredEvent]);
+  const updateHoverFromRow = useCallback(
+    (
+      event: PointerEvent<HTMLDivElement>,
+      layoutItems: EventLayoutItem[],
+      renderedCalendarId: CalendarId,
+      rowHeight: number
+    ) => {
+      if (disabled) {
+        clearHoveredEvent();
+        return;
+      }
+      const rect = event.currentTarget.getBoundingClientRect();
+      const x = event.clientX - rect.left - TIMELINE_LEFT_GUTTER_PX;
+      const y = event.clientY - rect.top;
+      const candidates = layoutItems.filter(
+        (item) => x >= item.left && x <= item.left + item.width && y >= item.top && y <= item.top + item.height
+      );
+
+      if (candidates.length === 0) {
+        clearHoveredEvent();
+        return;
+      }
+
+      const maxLaneCount = Math.max(...candidates.map((item) => item.laneCount));
+      const laneHeight = rowHeight / maxLaneCount;
+      const preferredLane = Math.min(maxLaneCount - 1, Math.max(0, Math.floor(y / Math.max(1, laneHeight))));
+      const preferred = candidates.find((item) => item.lane === preferredLane) ?? candidates[0];
+      setHoveredEvent({ eventId: preferred.event.id, calendarId: renderedCalendarId });
+    },
+    [clearHoveredEvent, disabled, setHoveredEvent]
+  );
+
+  return { clearHoveredEvent, updateHoverFromRow };
+}

@@ -4,7 +4,8 @@ import {
   selectPageText,
   topVisibleDayDate,
   topVisibleDayState,
-  viewportRelativeEventBox
+  viewportRelativeEventBox,
+  waitForDemoEvents
 } from "../helpers";
 
 test("switches to the vertical calendar view with sticky time pane and vertical zoom", async ({ page }) => {
@@ -173,6 +174,7 @@ test("grows vertical columns after three overlap lanes and keeps headers aligned
   });
   await page.getByTestId("scale-select").selectOption("20000");
   await goToWorkday(page);
+  await waitForDemoEvents(page);
 
   const denseColumn = await page.evaluate(() => {
     const viewport = document.querySelector(".ic-viewport")?.getBoundingClientRect();
@@ -330,6 +332,7 @@ test("supports draft creation and dragging in the vertical view", async ({ page 
   await page.goto("/");
   await page.getByTestId("view-infinite-vertical").check();
   await goToWorkday(page);
+  await waitForDemoEvents(page);
   const viewport = page.locator(".ic-viewport");
   const drawPoint = await page.evaluate(() => {
     const viewportRect = document.querySelector(".ic-viewport")?.getBoundingClientRect();
@@ -557,6 +560,7 @@ test("lets vertical hover pass through expanded cards to underlying overlap lane
   });
   await page.getByTestId("scale-select").selectOption("20000");
   await goToWorkday(page);
+  await waitForDemoEvents(page);
 
   const lanePair = await page.evaluate(() => {
     const viewport = document.querySelector(".ic-viewport")?.getBoundingClientRect();

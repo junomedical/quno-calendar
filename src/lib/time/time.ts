@@ -1,4 +1,14 @@
-import { addMinutes, format, parseISO } from "date-fns";
+/**
+ * Domain: Foundation.
+ * Responsibility: Converts minutes, pixels, clock strings, and ISO timestamps.
+ * Preserves: the public compatibility boundary and deterministic cross-domain primitives.
+ * Does not own: runtime feature coordination.
+ * Failure/cancellation: invalid inputs are normalized or rejected by the documented public contract.
+ *
+ * @see docs/domains/foundation.md#source-map
+ */
+import { fromDateKey } from "../date/dateVirtualization";
+import { parseIsoDate } from "../date/localDate";
 
 /** Timeline geometry inputs used by pure pixel/time conversion helpers. */
 export type TimelineGeometry = {
@@ -16,7 +26,7 @@ export function parseClockToMinutes(clock: string): number {
 
 /** Returns the local minutes from midnight for an ISO string or Date. */
 export function minutesSinceStartOfDay(value: string | Date): number {
-  const date = typeof value === "string" ? parseISO(value) : value;
+  const date = typeof value === "string" ? parseIsoDate(value) : value;
   return date.getHours() * 60 + date.getMinutes();
 }
 
@@ -94,8 +104,9 @@ export function clampEventToTimeline(
 
 /** Builds an ISO timestamp for a date key plus a minute offset from midnight. */
 export function dateKeyAndMinuteToIso(dateKey: string, minute: number): string {
-  const date = parseISO(`${dateKey}T00:00:00`);
-  return addMinutes(date, minute).toISOString();
+  const date = fromDateKey(dateKey);
+  date.setTime(date.getTime() + minute * 60_000);
+  return date.toISOString();
 }
 
 /** Formats a timeline tick label as an hour or two-digit minute marker. */
@@ -105,5 +116,5 @@ export function formatHourLabel(minute: number): string {
   if (minutes === 0) {
     return String(hours);
   }
-  return format(new Date(2024, 0, 1, hours, minutes), "mm");
+  return String(minutes).padStart(2, "0");
 }

@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { goToWorkday, mutedAccentColor, topVisibleDayDate } from "../helpers";
+import { goToWorkday, topVisibleDayDate } from "../helpers";
 
 test("keeps the time scale fixed and day dates css-sticky", async ({ page }) => {
   await page.goto("/");

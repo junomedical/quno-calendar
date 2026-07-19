@@ -1,36 +1,39 @@
-# Refactor Plan
+# Responsibility-Domain Refactor
 
 ## Goal
 
-Keep reusable calendar modules small enough to read in one pass, with most files targeting 100-200 lines. Some render-only components can briefly exceed that range when their prop contract is explicit, but orchestration files should keep shrinking toward the target.
+Keep the reusable calendar readable by organizing source around stable ownership domains. Folders answer “who owns this?”, modules answer “which step does it perform?”, and [`docs/flows`](./flows/README.md) answers “in what order does it run?”.
 
-## Completed Split
+## Completed Structure
 
-- `src/lib/infinite/InfiniteTimelineView.tsx`: top-level orchestration for selected calendars, view state, interactions, and composition.
-- `src/lib/infinite/components/InfiniteTimeScaleHeader.tsx`: sticky time header, current-time pin, and tick labels.
-- `src/lib/infinite/components/InfiniteTimelineDay.tsx`: virtual day shell, sticky date header, current-time day line, and row composition.
-- `src/lib/infinite/components/InfiniteTimelineRow.tsx`: row grid, availability/event/drop-preview shells, hover expansion state mapping.
-- `src/lib/infinite/components/EventShell.tsx`: memoized external renderer host and event-shell CSS variables.
-- `src/lib/infinite/hooks/useEventRangeLoader.ts`: async visible-range loading cache and local cache updates for accepted moves/creates.
-- `src/lib/infinite/hooks/useVirtualTimelineWindow.ts`: bounded virtual date window, scroll recentering, scrollbar reset, visible date keys.
-- `src/lib/infinite/hooks/useDayMetrics.ts`: row/day height calculation from loaded committed events.
-- `src/lib/infinite/hooks/useTimelineViewSetup.ts`: shared settings, selected calendar, and initial anchor setup.
-- `src/lib/infinite/hooks/useTimelineHitTesting.ts`: horizontal and vertical pointer hit-testing.
-- `src/lib/infinite/hooks/useShiftWheelZoom.ts`: shared `Shift` + wheel zoom anchoring and scroll restoration.
-- `src/lib/infinite/hooks/useTimelineDragInteraction.ts`: drag/drop state, previews, validation, and cache commit.
-- `src/lib/infinite/hooks/useTimelineDraftInteraction.ts`: drawn draft state, delegation, immediate create, and local cache insert.
-- `src/lib/infinite/utils/infiniteTimelineUtils.ts`: view settings normalization, zoom bounds, time ticks, grid cadence, event date/request helpers.
-- `src/lib/core`, `data`, `date`, `interaction`, `layout`, and `time`: public API, data helpers, date sequencing, interaction math, overlap layout, and time conversion grouped by responsibility.
+```text
+src/lib/infinite/
+├── scroll/        bounded date and resource windows
+├── events/        loading, cache, indexing, layout, metrics
+├── anchors/       semantic viewport focus and restoration
+├── interactions/  pointer, hit testing, drag, draft, zoom
+├── rendering/     shared and orientation DOM/CSS projection
+└── views/         horizontal and vertical composition roots
+```
 
-## Remaining Split Targets
+The previous catch-all `hooks`, `utils`, `components`, `data`, `viewport`, `virtualization`, and `interaction` directories have been retired. Pure helpers were split by owner instead of moved into a replacement utility directory.
 
-- Extract hover lane targeting into `useTimelineHover`.
-- Split `InfiniteTimelineRow` into `AvailabilityLayer`, `TimedEventLayer`, and `DragPreviewLayer` if it continues growing.
-- Move demo-only rendering stats out of `App.tsx` if the demo shell grows beyond its current role.
+## Documentation Contract
 
-## Rules For Future Work
+- [`docs/domains`](./domains/README.md) defines ownership, dependency direction, invariants, and the complete source map.
+- [`docs/flows`](./flows/README.md) defines runtime sequences, branches, cancellation, and focus priority.
+- Every production source file links to exactly one domain document.
+- `scripts/check-domain-docs.mjs` verifies source-map completeness, backlinks, retired directories, and allowed dependency direction.
 
-- New behavior should start in a focused helper/hook/component instead of expanding `InfiniteTimelineView.tsx`.
-- Async event loading should go through `useEventRangeLoader` or a successor data hook, not direct effects in render components.
-- Rendering components should receive already-computed state and callbacks; they should not own virtualization or data loading.
-- Pure math/formatting should live in `time.ts`, `layout.ts`, `dateVirtualization.ts`, or `infiniteTimelineUtils.ts`.
+## Size And Composition Rules
+
+- Target 40–150 non-comment lines per production module.
+- Fail architecture checks above 200 non-comment module lines or 120 source lines per function.
+- Keep render-only components separate from stateful coordinators.
+- Keep pure transformations separate from React effects.
+- Add behavior to its owning domain instead of introducing `utils`, `common`, or generic `hooks` folders.
+- Keep the public facade in `src/lib/index.ts`; internal domain paths are not package exports.
+
+## Verification
+
+Responsibility moves are behavior-neutral and must pass TypeScript, ESLint, Prettier, architecture/domain checks, unit/performance tests, Chromium, focused WebKit coverage, library/demo builds, package-consumer verification, SSR, declarations, and bundle budgets.

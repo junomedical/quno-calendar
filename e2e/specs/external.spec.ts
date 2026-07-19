@@ -5,7 +5,8 @@ import {
   goToWorkday,
   selectPageText,
   topVisibleDayDate,
-  viewportRelativeEventBox
+  viewportRelativeEventBox,
+  waitForDemoEvents
 } from "../helpers";
 
 test("supports drawing a new event area", async ({ page }) => {
@@ -549,7 +550,7 @@ test("keeps expanded calendar rows populated immediately after create cancel", a
   await page.getByTestId("jump-time-input").fill("09:00");
   await page.getByTestId("go-date-button").click();
   await expect.poll(async () => topVisibleDayDate(page)).toBe("2026-04-27");
-  await page.waitForTimeout(120);
+  await waitForDemoEvents(page);
 
   await page.evaluate(() => {
     type CancelSample = {
@@ -677,6 +678,7 @@ test("keeps edit cancel anchored to the original first person", async ({ page })
 test("supports external event editing popup without blocking calendar scroll", async ({ page }) => {
   await page.goto("/");
   await goToWorkday(page);
+  await waitForDemoEvents(page);
   const editableEvent = await page.evaluate(() => {
     const viewport = document.querySelector<HTMLElement>(".ic-viewport")?.getBoundingClientRect();
     if (!viewport) return null;
