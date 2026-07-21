@@ -42,19 +42,34 @@ export function useHorizontalControlledZoomAnchor({
   isGestureZoomActive
 }: HorizontalControlledZoomAnchorArgs) {
   const previousZoomRef = useRef(effectiveZoom);
+  const lastScrollLeftRef = useRef(0);
+
+  useLayoutEffect(() => {
+    const viewport = containerRef.current;
+    if (!viewport) return;
+    const captureScrollLeft = () => {
+      lastScrollLeftRef.current = viewport.scrollLeft;
+    };
+    captureScrollLeft();
+    viewport.addEventListener("scroll", captureScrollLeft, { passive: true });
+    return () => viewport.removeEventListener("scroll", captureScrollLeft);
+  }, [containerRef]);
 
   useLayoutEffect(() => {
     const previousZoom = previousZoomRef.current;
     previousZoomRef.current = effectiveZoom;
     const viewport = containerRef.current;
     if (!viewport || previousZoom === effectiveZoom || isGestureZoomActive()) return;
+    const scrollLeftBeforeZoom =
+      effectiveZoom < previousZoom ? Math.max(lastScrollLeftRef.current, viewport.scrollLeft) : viewport.scrollLeft;
 
     viewport.scrollLeft = centeredScrollLeftAfterZoom(
-      viewport.scrollLeft,
+      scrollLeftBeforeZoom,
       viewport.clientWidth,
       labelWidth,
       previousZoom,
       effectiveZoom
     );
+    lastScrollLeftRef.current = viewport.scrollLeft;
   }, [containerRef, effectiveZoom, isGestureZoomActive, labelWidth]);
 }

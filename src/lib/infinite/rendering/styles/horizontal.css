@@ -28,6 +28,11 @@
   border-bottom: 1px solid var(--ic-cell-border);
 }
 
+.ic-time-tick-track {
+  position: absolute;
+  top: 0;
+}
+
 .ic-time-tick {
   position: absolute;
   top: 9px;
@@ -54,7 +59,7 @@
 }
 
 .ic-time-tick.is-label-hidden {
-  min-width: 0;
+  display: none;
 }
 
 .ic-row {

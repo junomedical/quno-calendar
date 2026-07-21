@@ -31,19 +31,19 @@ test("switches to the vertical calendar view with sticky time pane and vertical 
     const firstHour = Array.from(document.querySelectorAll<HTMLElement>(".icv-time-tick.is-hour")).find((element) =>
       element.textContent?.includes(":00")
     );
-    const hourTicks = Array.from(document.querySelectorAll<HTMLElement>(".icv-time-tick.is-hour"));
-    const lastHour = hourTicks.at(-1);
     const minuteTick = Array.from(document.querySelectorAll<HTMLElement>(".icv-time-tick:not(.is-hour)")).find(
       (element) => /^\d+$/.test(element.textContent ?? "")
     );
     const board = document.querySelector<HTMLElement>('[data-testid="vertical-day-board"]');
+    const timePaneContent = firstHour?.closest<HTMLElement>(".icv-time-pane-content")?.getBoundingClientRect();
+    const tickTrack = firstHour?.closest<HTMLElement>(".icv-time-tick-track")?.getBoundingClientRect();
     return timePane && dateLabel
       ? {
           timePaneWidth: timePane.getBoundingClientRect().width,
           dateLabelWidth: dateLabel.getBoundingClientRect().width,
           boardHeight: board?.getBoundingClientRect().height ?? 0,
-          firstHourTop: Number.parseFloat(firstHour?.style.top ?? "NaN"),
-          lastHourTop: Number.parseFloat(lastHour?.style.top ?? "NaN"),
+          firstHourTop: timePaneContent && tickTrack ? tickTrack.top - timePaneContent.top : Number.NaN,
+          lastHourTop: timePaneContent && tickTrack ? tickTrack.bottom - timePaneContent.top : Number.NaN,
           dateMainFontSize: dateMain ? Number.parseFloat(window.getComputedStyle(dateMain).fontSize) : 0,
           dateWeekdayFontSize: dateWeekday ? Number.parseFloat(window.getComputedStyle(dateWeekday).fontSize) : 0,
           dateMainY: dateMain?.getBoundingClientRect().y ?? 0,

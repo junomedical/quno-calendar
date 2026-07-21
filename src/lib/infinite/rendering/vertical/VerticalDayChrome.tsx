@@ -13,8 +13,8 @@
  */
 import { formatMonthDayOrdinal, formatWeekday } from "../../../date/dateLabels";
 import { fromDateKey } from "../../../date/dateVirtualization";
+import { VERTICAL_TIMELINE_GUTTER_PX } from "./VerticalTimelineDay";
 import type { VerticalTimelineDayProps } from "./types";
-import { verticalMinuteToY } from "./verticalGeometry";
 
 type VerticalDayChromeProps = {
   day: VerticalTimelineDayProps;
@@ -81,18 +81,26 @@ export function VerticalDayChrome({
         style={{ width: day.labelWidth, height: day.boardHeight }}
       >
         <div className="icv-time-pane-content" style={{ width: day.labelWidth, height: day.boardHeight }}>
-          {day.timeTicks.map((tick) => (
-            <span
-              className={["icv-time-tick", tick.isHour ? "is-hour" : "", tick.showLabel ? "" : "is-label-hidden"]
-                .filter(Boolean)
-                .join(" ")}
-              key={`${day.dateKey}-time-${tick.minute}`}
-              aria-hidden={!tick.showLabel}
-              style={{ top: verticalMinuteToY(tick.minute, day.settings) }}
-            >
-              {tick.showLabel ? formatVerticalTimeTick(tick.minute, tick.isHour) : null}
-            </span>
-          ))}
+          <div
+            className="icv-time-tick-track"
+            style={{
+              top: VERTICAL_TIMELINE_GUTTER_PX,
+              height: day.boardHeight - VERTICAL_TIMELINE_GUTTER_PX * 2
+            }}
+          >
+            {day.timeTicks.map((tick) => (
+              <span
+                className={["icv-time-tick", tick.isHour ? "is-hour" : "", tick.showLabel ? "" : "is-label-hidden"]
+                  .filter(Boolean)
+                  .join(" ")}
+                key={`${day.dateKey}-time-${tick.minute}`}
+                aria-hidden={!tick.showLabel}
+                style={{ top: `${tick.positionPercent}%` }}
+              >
+                {formatVerticalTimeTick(tick.minute, tick.isHour)}
+              </span>
+            ))}
+          </div>
         </div>
       </div>
     </>

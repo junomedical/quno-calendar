@@ -21,6 +21,7 @@ import {
   restoreAcrossFrames,
   restoreIsCurrent,
   useCapturedWheel,
+  useFrameCoalescedWheelZoom,
   type SharedZoomArgs
 } from "./shiftWheelZoomUtils";
 
@@ -36,6 +37,7 @@ export function useHorizontalShiftWheelZoom(args: HorizontalZoomArgs) {
   const gestureTailRef = useRef(0);
   const anchorRef = useRef<HorizontalAnchor | null>(null);
   const restoreVersionRef = useRef(0);
+  const scheduleWheelZoom = useFrameCoalescedWheelZoom(args.settings.zoom);
 
   const handleWheel = useCallback(
     (event: WheelEvent) => {
@@ -52,8 +54,7 @@ export function useHorizontalShiftWheelZoom(args: HorizontalZoomArgs) {
       }
 
       const viewport = args.containerRef.current;
-      const nextZoom = nextZoomFromWheel(args.settings, event);
-      if (!viewport || nextZoom === null) return;
+      if (!viewport || nextZoomFromWheel(args.settings, event) === null) return;
 
       const viewportBox = viewport.getBoundingClientRect();
       const pointerX = event.clientX - viewportBox.left;
@@ -78,24 +79,25 @@ export function useHorizontalShiftWheelZoom(args: HorizontalZoomArgs) {
 
       args.clearScrollEndTimer();
       captureWheelEvent(event);
-      const restoreVersion = nextRestoreVersion(restoreVersionRef);
       anchorRef.current = { minute, screenX };
       extendGestureTail(gestureTailRef);
-      if (nextZoom !== args.settings.zoom) flushSync(() => args.onZoomChange?.(nextZoom));
-
-      const nextSettings = {
-        ...args.effectiveSettings,
-        zoom: Math.max(nextZoom, args.horizontalRenderZoomFloor)
-      };
-      restoreAcrossFrames(() => {
-        if (!restoreIsCurrent(restoreVersionRef, restoreVersion)) return;
-        viewport.scrollTop = scrollTop;
-        viewport.scrollLeft =
-          args.settings.labelWidth + TIMELINE_LEFT_GUTTER_PX + minuteToX(minute, nextSettings) - screenX;
-        window.scrollTo(pageScroll.x, pageScroll.y);
-      }, 3);
+      scheduleWheelZoom(args.settings, event, (nextZoom) => {
+        const restoreVersion = nextRestoreVersion(restoreVersionRef);
+        if (nextZoom !== args.settings.zoom) flushSync(() => args.onZoomChange?.(nextZoom));
+        const nextSettings = {
+          ...args.effectiveSettings,
+          zoom: Math.max(nextZoom, args.horizontalRenderZoomFloor)
+        };
+        restoreAcrossFrames(() => {
+          if (!restoreIsCurrent(restoreVersionRef, restoreVersion)) return;
+          viewport.scrollTop = scrollTop;
+          viewport.scrollLeft =
+            args.settings.labelWidth + TIMELINE_LEFT_GUTTER_PX + minuteToX(minute, nextSettings) - screenX;
+          window.scrollTo(pageScroll.x, pageScroll.y);
+        }, 3);
+      });
     },
-    [args]
+    [args, scheduleWheelZoom]
   );
 
   useCapturedWheel(args.containerRef, handleWheel);

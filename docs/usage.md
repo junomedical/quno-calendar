@@ -63,7 +63,7 @@ const loadEvents: LoadEvents = async ({ startDate, endDate, calendarIds, signal 
 
 Keep `loadEvents` referentially stable with `useCallback` when it closes over application state. Change `eventVersion` only for broad persisted-data invalidation; accepted moves and individual saves can use the calendar's targeted cache patches. Obsolete and out-of-order responses are ignored even if an API client does not honor `signal`. Failed visible requests retry after 250 ms and 1 second, then become eligible again on a later invalidation or visibility change.
 
-By default, the loader also keeps an adaptive buffer of dates warm before and after the rendered window. The buffer is derived from the number of rendered dates, grows sublinearly for larger viewports, and only requests dates that are neither loaded nor already in flight. When missing dates sit on both sides of an already-loaded window, they are sent as separate ranges rather than refetching the cached middle.
+By default, the loader keeps seven calendar days warm before the first rendered date and seven after the last rendered date. It only requests dates that are neither loaded nor already in flight. When missing dates sit on both sides of an already-loaded window, they are sent as separate ranges rather than refetching the cached middle.
 
 Replace the policy when a product has a different latency or navigation profile:
 

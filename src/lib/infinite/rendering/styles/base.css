@@ -17,6 +17,7 @@
   border: 1px solid var(--ic-cell-border);
   border-radius: 8px;
   box-shadow: 0 8px 22px rgba(15, 23, 42, 0.08);
+  contain: paint;
 }
 
 .ic-viewport {

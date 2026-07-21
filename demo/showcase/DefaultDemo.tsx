@@ -1,6 +1,5 @@
 import { useCallback, useMemo, useRef, useState, type SetStateAction } from "react";
 import {
-  CalendarRoot,
   type CalendarEvent,
   type CalendarNavigationHandle,
   type EventCreateRequest,
@@ -17,6 +16,7 @@ import { useSimulatedApiLoader } from "./hooks/useSimulatedApiLoader";
 import { useSystemNow } from "./hooks/useSystemNow";
 import type { DemoRoute } from "./types";
 import { useExternalEventDrafts } from "./useExternalEventDrafts";
+import { DemoCalendarRoot, DemoZoomProvider } from "./zoom/DemoZoom";
 
 const defaultLayout: DemoLayoutSettings = {
   rowHeight: 50,
@@ -162,53 +162,54 @@ export function DefaultDemo({ routes }: { routes: DemoRoute[] }) {
   );
 
   return (
-    <main className="app-shell" data-demo-id="default">
-      <DefaultDemoSidebar
-        routes={routes}
-        scale={scale}
-        message={message}
-        controls={controls}
-        pendingApiRequestCount={simulatedApi.pendingRequestCount}
-        onScaleChange={handleScaleChange}
-        onAvailabilityModeChange={handleAvailabilityModeChange}
-        onToday={handleToday}
-        onGoToDate={handleGoToDate}
-        onExternalAdd={drafts.handleExternalAdd}
-      />
-      <section className="demo-calendar-panel">
-        {drafts.activeDraft ? (
-          <ExternalEventPopup
-            activeDraft={drafts.activeDraft}
-            canSave={drafts.canSaveActiveDraft}
-            isSaving={draftSave.saveState.isSaving}
-            saveError={draftSave.saveState.error}
-            onCancel={draftSave.handleCancel}
-            onSave={draftSave.handleSave}
-            onUpdateDraftEvent={draftSave.handleUpdate}
-            onToggleParticipant={draftSave.handleParticipantToggle}
-          />
-        ) : null}
-        <CalendarRoot
-          key={scale}
-          view={controls.calendarView}
-          ref={calendarRef}
-          calendars={demoCalendars}
-          selectedCalendarIds={drafts.visibleCalendarIds}
-          loadEvents={simulatedApi.loadEvents}
-          eventVersion={eventVersion}
-          eventRenderer={DemoEventCard}
-          activeDraft={drafts.activeDraft}
-          onEventMoveRequest={handleMove}
-          onEventCreateRequest={handleCreate}
-          onEventDraftRequest={drafts.openCreateDraft}
-          onEventActivate={drafts.handleActivate}
-          onActiveDraftMoveRequest={drafts.handleActiveDraftMove}
-          onZoomChange={controls.setZoom}
-          now={systemNow}
-          interactionMode={controls.editAvailabilities ? "availability" : "events"}
-          settings={controls.settings}
+    <DemoZoomProvider initialZoom={controlDefaults.zoom}>
+      <main className="app-shell" data-demo-id="default">
+        <DefaultDemoSidebar
+          routes={routes}
+          scale={scale}
+          message={message}
+          controls={controls}
+          pendingApiRequestCount={simulatedApi.pendingRequestCount}
+          onScaleChange={handleScaleChange}
+          onAvailabilityModeChange={handleAvailabilityModeChange}
+          onToday={handleToday}
+          onGoToDate={handleGoToDate}
+          onExternalAdd={drafts.handleExternalAdd}
         />
-      </section>
-    </main>
+        <section className="demo-calendar-panel">
+          {drafts.activeDraft ? (
+            <ExternalEventPopup
+              activeDraft={drafts.activeDraft}
+              canSave={drafts.canSaveActiveDraft}
+              isSaving={draftSave.saveState.isSaving}
+              saveError={draftSave.saveState.error}
+              onCancel={draftSave.handleCancel}
+              onSave={draftSave.handleSave}
+              onUpdateDraftEvent={draftSave.handleUpdate}
+              onToggleParticipant={draftSave.handleParticipantToggle}
+            />
+          ) : null}
+          <DemoCalendarRoot
+            key={scale}
+            view={controls.calendarView}
+            ref={calendarRef}
+            calendars={demoCalendars}
+            selectedCalendarIds={drafts.visibleCalendarIds}
+            loadEvents={simulatedApi.loadEvents}
+            eventVersion={eventVersion}
+            eventRenderer={DemoEventCard}
+            activeDraft={drafts.activeDraft}
+            onEventMoveRequest={handleMove}
+            onEventCreateRequest={handleCreate}
+            onEventDraftRequest={drafts.openCreateDraft}
+            onEventActivate={drafts.handleActivate}
+            onActiveDraftMoveRequest={drafts.handleActiveDraftMove}
+            now={systemNow}
+            interactionMode={controls.editAvailabilities ? "availability" : "events"}
+            settings={controls.settings}
+          />
+        </section>
+      </main>
+    </DemoZoomProvider>
   );
 }

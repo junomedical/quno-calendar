@@ -14,6 +14,15 @@
   background: #0d3b4a;
   border-right: 1px solid rgba(255, 255, 255, 0.12);
   overflow-y: auto;
+  isolation: isolate;
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+.demo-zoom-paint-boundary {
+  contain: layout paint;
+  transform: translateZ(0);
+  will-change: transform;
 }
 
 .demo-brand {
@@ -298,6 +307,9 @@
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 8px;
+  contain: layout paint;
+  transform: translateZ(0);
+  will-change: transform;
 }
 
 .demo-stats div {

@@ -29,6 +29,7 @@ import { createVirtualDateModel } from "./window/dateModel";
 import { useLayoutOffsetRestoration } from "./recenter/useLayoutOffsetRestoration";
 import type { ResolveOffsetOnLayoutChange } from "./recenter/useLayoutOffsetRestoration";
 import { useVirtualDateRenderItems } from "./window/useVirtualDateRenderItems";
+import { useVerticalProjectionRenderWindow } from "./window/useVerticalProjectionRenderWindow";
 import { useVirtualScrollPosition } from "./position/useVirtualScrollPosition";
 import { useVirtualWindowNavigation } from "./navigation/useVirtualWindowNavigation";
 import { useVisibleDateState } from "./position/useVisibleDateState";
@@ -45,6 +46,12 @@ type UseVirtualTimelineWindowArgs = {
   layoutAnchorDateKey?: string;
   resolveOffsetOnLayoutChange?: ResolveOffsetOnLayoutChange;
 };
+
+const shouldAdjustScrollPositionOnItemSizeChange = (
+  item: { end: number },
+  _delta: number,
+  instance: { scrollOffset: number | null }
+) => shouldAdjustForDateItemResize(item.end, instance.scrollOffset);
 
 export function useScrollRuntime({
   anchorDateKey,
@@ -66,11 +73,6 @@ export function useScrollRuntime({
     [anchorDateKey, settings.excludedWeekdays]
   );
   const { virtualWindow, dateKeyToIndex, dateKeyForIndex } = dateModel;
-  const shouldAdjustScrollPositionOnItemSizeChange = useCallback(
-    (item: { end: number }, _delta: number, instance: { scrollOffset: number | null }) =>
-      shouldAdjustForDateItemResize(item.end, instance.scrollOffset),
-    []
-  );
   const virtualizer = useVirtualizer({
     count: virtualWindow.count,
     getScrollElement: () => containerRef.current,
@@ -82,7 +84,7 @@ export function useScrollRuntime({
   });
   useLayoutEffect(() => {
     virtualizer.shouldAdjustScrollPositionOnItemSizeChange = shouldAdjustScrollPositionOnItemSizeChange;
-  }, [shouldAdjustScrollPositionOnItemSizeChange, virtualizer]);
+  }, [virtualizer]);
 
   const { scrollToVisibleDateOffset, updateVisibleSnapshot } = useVirtualScrollPosition({
     containerRef,
@@ -107,7 +109,14 @@ export function useScrollRuntime({
     setAnchorDateKey
   });
 
-  const measureVirtualizer = useCallback(() => virtualizer.measure(), [virtualizer]);
+  const measureVirtualizer = useCallback(() => {
+    virtualizer.measure();
+    if (resolveOffsetOnLayoutChange) {
+      for (let index = 0; index < virtualWindow.count; index += 1) {
+        virtualizer.resizeItem(index, baseDayHeight);
+      }
+    }
+  }, [baseDayHeight, resolveOffsetOnLayoutChange, virtualWindow.count, virtualizer]);
   useLayoutOffsetRestoration({
     baseDayHeight,
     verticalLayoutSignature,
@@ -125,6 +134,13 @@ export function useScrollRuntime({
   });
 
   const virtualItems = virtualizer.getVirtualItems();
+  const forcedBaseGeometryAnchorIndex = useVerticalProjectionRenderWindow({
+    enabled: Boolean(resolveOffsetOnLayoutChange),
+    baseDayHeight,
+    topVisibleDateKey: topVisibleDateRef.current,
+    itemCount: virtualWindow.count,
+    dateKeyToIndex
+  });
   const offsetForIndex = useCallback(
     (index: number) => virtualizer.getOffsetForIndex(index, "start")?.[0],
     [virtualizer]
@@ -133,6 +149,7 @@ export function useScrollRuntime({
     virtualItems,
     virtualWindow,
     baseDayHeight,
+    forcedBaseGeometryAnchorIndex,
     layoutAnchorDateKey,
     dateKeyToIndex,
     dateKeyForIndex,

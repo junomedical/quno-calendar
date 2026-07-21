@@ -1,6 +1,6 @@
 /**
  * Domain: Events.
- * Responsibility: Plans adaptive load windows and owns freshness, requests, and generations.
+ * Responsibility: Plans policy-derived load windows and owns freshness, requests, and generations.
  * Preserves: non-blocking rendering, request-generation safety, and deterministic layout.
  * Does not own: scroll writes and DOM projection.
  * Failure/cancellation: obsolete, aborted, or failed requests cannot replace a newer committed snapshot.

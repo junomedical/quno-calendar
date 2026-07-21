@@ -12,6 +12,7 @@ import {
   xToMinute,
   yToMinute
 } from "../../../../src/lib/time/time";
+import { buildTimeTicks } from "../../../../src/lib/time/timelineTicks";
 
 describe("timeline math", () => {
   const geometry = { startHour: 8, endHour: 18, zoom: 2, snapMinutes: 15 };
@@ -50,5 +51,30 @@ describe("timeline math", () => {
 
   it("builds event timestamps from local date keys", () => {
     expect(dateKeyAndMinuteToIso("2026-07-04", 9 * 60 + 30)).toBe(new Date(2026, 6, 4, 9, 30).toISOString());
+  });
+
+  it("keeps the same tick skeleton when fine labels become visible", () => {
+    const baseSettings = {
+      startHour: 8,
+      endHour: 18,
+      snapMinutes: 15,
+      excludedWeekdays: [],
+      rowHeight: 50,
+      dayHeaderHeight: 42,
+      labelWidth: 230,
+      verticalColumnMinWidth: 240,
+      verticalColumnOverlapCapacity: 3,
+      verticalColumnOverlapGrowth: 80,
+      verticalEventHoverMinHeight: 64
+    };
+    const coarseTicks = buildTimeTicks({ ...baseSettings, zoom: 5.9 });
+    const fineTicks = buildTimeTicks({ ...baseSettings, zoom: 6.1 });
+
+    expect(coarseTicks.map(({ minute }) => minute)).toEqual(fineTicks.map(({ minute }) => minute));
+    expect(coarseTicks.map(({ positionPercent }) => positionPercent)).toEqual(
+      fineTicks.map(({ positionPercent }) => positionPercent)
+    );
+    expect(coarseTicks.find(({ minute }) => minute === 8 * 60 + 5)?.showLabel).toBe(false);
+    expect(fineTicks.find(({ minute }) => minute === 8 * 60 + 5)?.showLabel).toBe(true);
   });
 });

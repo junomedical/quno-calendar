@@ -31,7 +31,7 @@ See [Async Loading And Layout](../flows/async-loading-and-layout.md) for request
 | ------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------- |
 | [`eventDateKey.ts`](../../src/lib/infinite/events/eventDateKey.ts)                                     | Normalizes an event start into its cache and layout date bucket.                  |
 | [`eventDateCache.ts`](../../src/lib/infinite/events/loading/eventDateCache.ts)                         | Stores bounded date buckets, event-id lookup, local patches, and LRU eviction.    |
-| [`eventRangeCoordinator.ts`](../../src/lib/infinite/events/loading/eventRangeCoordinator.ts)           | Plans adaptive load windows and owns freshness, requests, and generations.        |
+| [`eventRangeCoordinator.ts`](../../src/lib/infinite/events/loading/eventRangeCoordinator.ts)           | Plans policy-derived load windows and owns freshness, requests, and generations.  |
 | [`loadEventRange.ts`](../../src/lib/infinite/events/loading/loadEventRange.ts)                         | Executes one abort-aware API request with finite retry delays.                    |
 | [`useAppearingEvents.ts`](../../src/lib/infinite/events/loading/useAppearingEvents.ts)                 | Tracks newly published event ids for bounded appearance state.                    |
 | [`useEventRangeLoader.ts`](../../src/lib/infinite/events/loading/useEventRangeLoader.ts)               | Bridges visible date keys to the coordinator and publishes React event snapshots. |

@@ -21,7 +21,7 @@ flowchart LR
 | [`CalendarRoot.tsx`](../../src/lib/core/CalendarRoot.tsx)           | Selects horizontal or vertical projection from public props.                           |
 | [`types.ts`](../../src/lib/core/types.ts)                           | Defines the public API, events, settings, renderers, navigation, and anchor contracts. |
 | [`calendarEvents.ts`](../../src/lib/data/calendarEvents.ts)         | Implements exported event membership and immutable move helpers.                       |
-| [`eventPrefetch.ts`](../../src/lib/data/eventPrefetch.ts)           | Defines the exported adaptive event-prefetch policy.                                   |
+| [`eventPrefetch.ts`](../../src/lib/data/eventPrefetch.ts)           | Defines the exported default event-prefetch policy.                                    |
 | [`dateLabels.ts`](../../src/lib/date/dateLabels.ts)                 | Formats localized calendar date labels.                                                |
 | [`dateVirtualization.ts`](../../src/lib/date/dateVirtualization.ts) | Normalizes excluded dates and maps virtual offsets to date keys.                       |
 | [`localDate.ts`](../../src/lib/date/localDate.ts)                   | Parses and formats local dates without UTC drift.                                      |

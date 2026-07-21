@@ -152,7 +152,7 @@ sequenceDiagram
 
   User->>Parent: Change zoom prop
   Parent-->>Render: next settings.zoom
-  Anchor->>View: Read previous zoom and scrollLeft
+  Anchor->>View: Read previous zoom and pre-commit scrollLeft snapshot
   alt View is at timeline origin
     Anchor->>Anchor: Preserve left edge
   else View has horizontal scroll
@@ -160,10 +160,15 @@ sequenceDiagram
   end
   Render->>Render: Reproject ticks and event-shell coordinates
   Anchor->>View: Correct scrollLeft in layout effect before paint
-  Note over Render: Cache, memberships, lanes, row metrics, and unchanged product cards stay stable
+  Note over Anchor,View: Zoom-out uses the snapshot if the narrower DOM already clamped live scrollLeft
+  Note over Render: Tick nodes/text, cache, memberships, lanes, row metrics, and unchanged product cards stay stable
 ```
 
 ### Shift + Wheel Gesture Burst
+
+Raw mouse-wheel and touchpad events can arrive several times inside one paint interval. The gesture controller accumulates every `0.15` zoom step, retains the first pointer-nearest anchor, and performs one synchronous controlled commit plus one restore sequence on the next animation frame. If another external controlled value commits first, the stale queued wheel value is discarded.
+
+The showcase keeps gesture projection separate from its sidebar display. Each committed frame reaches the controlled calendar immediately, but the native range thumb and numeric output synchronize only once after the 300ms gesture tail. Direct range-input changes update both immediately. This prevents control layout and paint work from invalidating the menu during a wheel/touch burst.
 
 ```mermaid
 stateDiagram-v2

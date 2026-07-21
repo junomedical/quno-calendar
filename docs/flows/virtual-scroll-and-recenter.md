@@ -111,7 +111,7 @@ flowchart LR
   Read --> Translate{"Orientation supplied a translator?"}
   Translate -->|Yes| Semantic["Translate header/time-relative portion"]
   Translate -->|No| Clamp["Clamp raw offset inside next base height"]
-  Semantic --> Measure["Reset/re-measure virtualizer"]
+  Semantic --> Measure["Reset virtualizer to next uniform base geometry"]
   Clamp --> Measure
   Measure --> Same{"Top date is current window anchor?"}
   Same -->|Yes| Restore["Scroll directly to date + translated offset"]
@@ -120,6 +120,8 @@ flowchart LR
 ```
 
 This structural path is distinct from late horizontal event metrics. Async row-height commits use the data-layout anchor described in [Async Loading And Layout](./async-loading-and-layout.md#late-events-that-increase-horizontal-height).
+
+Vertical dates have one uniform settings-owned height, so a structural zoom restore resets every bounded date measurement to the new base height before writing the translated scroll offset. While those measurements settle, rendering stays pinned to a base-geometry window around the semantic top date. This prevents pre-commit virtualizer measurements from converting the saved date-local position through stale zoom geometry or exposing a transient blank/wrong-date window.
 
 ## Date Render Items
 

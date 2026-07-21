@@ -40,7 +40,7 @@ type UseLayoutOffsetRestorationArgs = {
   pendingScrollTargetRef: MutableRefObject<PendingScrollTarget | null>;
   clearScrollEndTimer: () => void;
   measureVirtualizer: () => void;
-  scrollToVisibleDateOffset: (dateKey: string, offsetWithinDate: number) => void;
+  scrollToVisibleDateOffset: (dateKey: string, offsetWithinDate: number, preferBaseGeometry?: boolean) => void;
   setAnchorDateKey: (updater: (current: string) => string) => void;
   resolveOffsetOnLayoutChange?: ResolveOffsetOnLayoutChange;
 };
@@ -96,7 +96,7 @@ export function useLayoutOffsetRestoration({
     if (topDateKey === currentWindowAnchorDateKey) {
       // Avoid rebuilding an already-correct date model; restore its local point now.
       pendingScrollTargetRef.current = null;
-      scrollToVisibleDateOffset(topDateKey, offsetWithinDate);
+      scrollToVisibleDateOffset(topDateKey, offsetWithinDate, Boolean(resolveOffsetOnLayoutChange));
       return;
     }
     // A different window consumes this target in useVirtualWindowNavigation's layout effect.

@@ -2,9 +2,11 @@
 
 ## 0.2.0
 
+- Changed the default event prefetch window from an adaptive rendered-day buffer to seven calendar days before and after the rendered dates; custom `eventPrefetchPolicy` behavior is unchanged.
+- Isolated controlled demo zoom projection from the sidebar readout, coalesced raw mouse-wheel/touchpad bursts to one accumulated projection per display frame, and deferred native slider/text updates until the gesture tail settles. Replaced full-sidebar paint containment with a stable sidebar compositor layer plus narrow zoom-control and stats child layers, stabilized time scales with always-mounted tick nodes on percentage tracks, and hardened horizontal and vertical zoom-out anchoring against pre-commit browser/virtualizer clamping. Vertical zoom now retains the semantic visible-date window while measurements settle, preventing a blank or wrong-date frame. Zoom no longer redraws surrounding settings UI or inserts a burst of tick elements when fine cadence activates. Added a repository zoom-stability check and Playwright child-list/DOM-identity regression coverage.
 - Moved the demo application and examples out of `src/`; `src/` is now library-only. Organized examples as one documented recipe per directory, added an in-app recipe catalog, and enforced README backlinks and public-package imports.
 - Rebuilt visible-range loading as a non-blocking stale-while-refresh pipeline with abort signals, out-of-order response protection, finite retries, a 120-date LRU, and indexed single-event patches.
-- Added policy-driven adjacent-date prefetching with an adaptive default, public `eventPrefetchPolicy` customization, loaded/in-flight deduplication, and separate requests around cached gaps.
+- Added policy-driven adjacent-date prefetching, public `eventPrefetchPolicy` customization, loaded/in-flight deduplication, and separate requests around cached gaps.
 - Replaced repeated overlap scans with deterministic `O(n log n)` prepared cells shared by metrics and horizontal/vertical projection.
 - Added cross-axis resource virtualization so 50-resource dates mount only visible rows or columns plus two-resource overscan while preserving full scroll geometry and pinned drafts.
 - Replaced selector polling and restore timeout ladders with an instance geometry registry and one cancellable animation-frame restore scheduler.

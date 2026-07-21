@@ -13,7 +13,7 @@ import { TIMELINE_LEFT_GUTTER_PX } from "../../../time/timelineTicks";
 
 type TimeTick = {
   minute: number;
-  x: number;
+  positionPercent: number;
   label: string;
   isHour: boolean;
   showLabel: boolean;
@@ -67,19 +67,20 @@ export function InfiniteTimeScaleHeader({
             style={{ left: TIMELINE_LEFT_GUTTER_PX + minuteToX(nowMinute, settings) }}
           />
         ) : null}
-        {timeTicks.map((tick) => (
-          <span
-            className={["ic-time-tick", tick.isHour ? "is-hour" : "", tick.showLabel ? "" : "is-label-hidden"]
-              .filter(Boolean)
-              .join(" ")}
-            key={`sticky-${tick.minute}`}
-            aria-hidden={!tick.showLabel}
-            style={{ left: TIMELINE_LEFT_GUTTER_PX + tick.x }}
-          >
-            {tick.showLabel && tick.isHour ? tick.label : null}
-            {tick.showLabel && !tick.isHour ? <sup>{tick.label}</sup> : null}
-          </span>
-        ))}
+        <div className="ic-time-tick-track" style={{ left: TIMELINE_LEFT_GUTTER_PX, width, height: "100%" }}>
+          {timeTicks.map((tick) => (
+            <span
+              className={["ic-time-tick", tick.isHour ? "is-hour" : "", tick.showLabel ? "" : "is-label-hidden"]
+                .filter(Boolean)
+                .join(" ")}
+              key={`sticky-${tick.minute}`}
+              aria-hidden={!tick.showLabel}
+              style={{ left: `${tick.positionPercent}%` }}
+            >
+              {tick.isHour ? tick.label : <sup>{tick.label}</sup>}
+            </span>
+          ))}
+        </div>
       </div>
     </div>
   );

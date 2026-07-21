@@ -8,7 +8,7 @@
  * @see docs/domains/foundation.md#source-map
  */
 import type { TimelineSettings } from "../core/types";
-import { formatHourLabel, minuteToX, pixelsPerMinute, timelineEndMinute, timelineStartMinute } from "./time";
+import { formatHourLabel, pixelsPerMinute, timelineEndMinute, timelineStartMinute } from "./time";
 
 /** Left gutter keeping time labels away from the resource-label border. */
 export const TIMELINE_LEFT_GUTTER_PX = 8;
@@ -17,6 +17,7 @@ const SHOW_ALL_TIME_LABELS_MIN_SPACING = 18;
 const SHOW_HALF_HOUR_TIME_LABELS_MIN_SPACING = 10;
 const FINE_GRID_ZOOM_THRESHOLD = 6;
 const SHOW_QUARTER_LABELS_MIN_ZOOM = 2;
+const STABLE_TICK_CADENCE_MINUTES = 5;
 
 /** Chooses the shared visual-grid and label cadence. */
 export function gridCadenceMinutes(zoom: number): number {
@@ -36,12 +37,14 @@ export function nearestTimeNodeMinute(
 /** Builds sticky-header ticks without allowing dense labels to overlap. */
 export function buildTimeTicks(settings: TimelineSettings) {
   const quarterHourSpacing = pixelsPerMinute(settings.zoom) * 15;
-  const cadenceMinutes = gridCadenceMinutes(settings.zoom);
-  const isFineCadence = cadenceMinutes === 5;
+  const isFineCadence = gridCadenceMinutes(settings.zoom) === STABLE_TICK_CADENCE_MINUTES;
+  const startMinute = timelineStartMinute(settings);
+  const endMinute = timelineEndMinute(settings);
+  const totalMinutes = Math.max(1, endMinute - startMinute);
   const ticks = [];
 
-  for (let minute = timelineStartMinute(settings); minute <= timelineEndMinute(settings); minute += cadenceMinutes) {
-    const relativeMinute = minute - timelineStartMinute(settings);
+  for (let minute = startMinute; minute <= endMinute; minute += STABLE_TICK_CADENCE_MINUTES) {
+    const relativeMinute = minute - startMinute;
     const isHour = minute % 60 === 0;
     const isHalfHour = relativeMinute % 30 === 0;
     const isQuarterHour = relativeMinute % 15 === 0;
@@ -55,8 +58,8 @@ export function buildTimeTicks(settings: TimelineSettings) {
 
     ticks.push({
       minute,
-      x: minuteToX(minute, settings),
-      label: isFineCadence && !isHour ? String(minute % 60) : formatHourLabel(minute),
+      positionPercent: (relativeMinute / totalMinutes) * 100,
+      label: isHour ? formatHourLabel(minute) : String(minute % 60),
       isHour,
       showLabel
     });

@@ -25,8 +25,10 @@ type BuildRenderItemsArgs = {
   anchorIndex: number;
   count: number;
   baseDayHeight: number;
+  forcedBaseGeometryAnchorIndex?: number;
   layoutAnchorDateKey?: string;
   dateKeyToIndex: (dateKey: string) => number;
+  itemKeyForIndex?: (index: number) => Key;
   offsetForIndex: (index: number) => number | undefined;
 };
 
@@ -38,17 +40,28 @@ export function buildVirtualDateRenderItems({
   anchorIndex,
   count,
   baseDayHeight,
+  forcedBaseGeometryAnchorIndex,
   layoutAnchorDateKey,
   dateKeyToIndex,
+  itemKeyForIndex,
   offsetForIndex
 }: BuildRenderItemsArgs): VirtualDateRenderItem[] {
+  const baseGeometryAnchorIndex = forcedBaseGeometryAnchorIndex ?? anchorIndex;
+  const baseGeometryItemCount = Math.min(
+    count,
+    Math.max(FALLBACK_ITEM_COUNT, forcedBaseGeometryAnchorIndex === undefined ? 0 : virtualItems.length)
+  );
+  const baseGeometryStartIndex = Math.max(
+    0,
+    Math.min(count - baseGeometryItemCount, baseGeometryAnchorIndex - FALLBACK_ITEMS_BEFORE_ANCHOR)
+  );
   const baseItems =
-    virtualItems.length > 0
+    virtualItems.length > 0 && forcedBaseGeometryAnchorIndex === undefined
       ? virtualItems
-      : Array.from({ length: FALLBACK_ITEM_COUNT }, (_, index) => {
-          const dayIndex = Math.max(0, Math.min(count - 1, anchorIndex - FALLBACK_ITEMS_BEFORE_ANCHOR + index));
+      : Array.from({ length: baseGeometryItemCount }, (_, index) => {
+          const dayIndex = baseGeometryStartIndex + index;
           return {
-            key: `fallback-${dayIndex}`,
+            key: itemKeyForIndex?.(dayIndex) ?? `fallback-${dayIndex}`,
             index: dayIndex,
             start: dayIndex * baseDayHeight,
             size: baseDayHeight

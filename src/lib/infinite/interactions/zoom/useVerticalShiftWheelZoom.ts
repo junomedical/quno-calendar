@@ -20,6 +20,7 @@ import {
   restoreAcrossFrames,
   restoreIsCurrent,
   useCapturedWheel,
+  useFrameCoalescedWheelZoom,
   type SharedZoomArgs
 } from "./shiftWheelZoomUtils";
 
@@ -36,6 +37,7 @@ export function useVerticalShiftWheelZoom(args: VerticalZoomArgs) {
   const gestureTailRef = useRef(0);
   const anchorRef = useRef<VerticalAnchor | null>(null);
   const restoreVersionRef = useRef(0);
+  const scheduleWheelZoom = useFrameCoalescedWheelZoom(args.settings.zoom);
 
   const handleWheel = useCallback(
     (event: WheelEvent) => {
@@ -52,8 +54,7 @@ export function useVerticalShiftWheelZoom(args: VerticalZoomArgs) {
       }
 
       const viewport = args.containerRef.current;
-      const nextZoom = nextZoomFromWheel(args.settings, event);
-      if (!viewport || nextZoom === null) return;
+      if (!viewport || nextZoomFromWheel(args.settings, event) === null) return;
 
       const viewportBox = viewport.getBoundingClientRect();
       const activeAnchor = gestureTailIsActive(gestureTailRef) ? anchorRef.current : null;
@@ -81,27 +82,28 @@ export function useVerticalShiftWheelZoom(args: VerticalZoomArgs) {
       args.updateTopVisibleDate();
       args.clearScrollEndTimer();
       captureWheelEvent(event);
-      const restoreVersion = nextRestoreVersion(restoreVersionRef);
       anchorRef.current = { dateKey, minute, screenY };
       extendGestureTail(gestureTailRef);
-      if (nextZoom !== args.settings.zoom) flushSync(() => args.onZoomChange?.(nextZoom));
-
-      const nextSettings = { ...args.settings, zoom: nextZoom };
-      restoreAcrossFrames(() => {
-        if (!restoreIsCurrent(restoreVersionRef, restoreVersion)) return;
-        const anchoredDay = dateKey ? dayForDate(viewport, dateKey) : null;
-        if (anchoredDay) {
-          const offset = args.settings.dayHeaderHeight + args.timelineGutterPx + minuteToY(minute, nextSettings);
-          const currentScreenY =
-            anchoredDay.getBoundingClientRect().top - viewport.getBoundingClientRect().top + offset;
-          args.rememberVisibleDateOffset(dateKey!, Math.max(0, offset - screenY));
-          viewport.scrollTop = Math.max(0, viewport.scrollTop + currentScreenY - screenY);
-        }
-        viewport.scrollLeft = scrollLeft;
-        window.scrollTo(pageScroll.x, pageScroll.y);
-      }, 9);
+      scheduleWheelZoom(args.settings, event, (nextZoom) => {
+        const restoreVersion = nextRestoreVersion(restoreVersionRef);
+        if (nextZoom !== args.settings.zoom) flushSync(() => args.onZoomChange?.(nextZoom));
+        const nextSettings = { ...args.settings, zoom: nextZoom };
+        restoreAcrossFrames(() => {
+          if (!restoreIsCurrent(restoreVersionRef, restoreVersion)) return;
+          const anchoredDay = dateKey ? dayForDate(viewport, dateKey) : null;
+          if (anchoredDay) {
+            const offset = args.settings.dayHeaderHeight + args.timelineGutterPx + minuteToY(minute, nextSettings);
+            const currentScreenY =
+              anchoredDay.getBoundingClientRect().top - viewport.getBoundingClientRect().top + offset;
+            args.rememberVisibleDateOffset(dateKey!, Math.max(0, offset - screenY));
+            viewport.scrollTop = Math.max(0, viewport.scrollTop + currentScreenY - screenY);
+          }
+          viewport.scrollLeft = scrollLeft;
+          window.scrollTo(pageScroll.x, pageScroll.y);
+        }, 9);
+      });
     },
-    [args]
+    [args, scheduleWheelZoom]
   );
 
   useCapturedWheel(args.containerRef, handleWheel);

@@ -19,6 +19,7 @@ type UseVirtualDateRenderItemsArgs = {
   virtualItems: VirtualDateRenderItem[];
   virtualWindow: VirtualDateWindow;
   baseDayHeight: number;
+  forcedBaseGeometryAnchorIndex?: number;
   layoutAnchorDateKey?: string;
   dateKeyToIndex: (dateKey: string) => number;
   dateKeyForIndex: (index: number) => string;
@@ -29,6 +30,7 @@ export function useVirtualDateRenderItems({
   virtualItems,
   virtualWindow,
   baseDayHeight,
+  forcedBaseGeometryAnchorIndex,
   layoutAnchorDateKey,
   dateKeyToIndex,
   dateKeyForIndex,
@@ -41,13 +43,17 @@ export function useVirtualDateRenderItems({
         anchorIndex: virtualWindow.anchorIndex,
         count: virtualWindow.count,
         baseDayHeight,
+        forcedBaseGeometryAnchorIndex,
         layoutAnchorDateKey,
         dateKeyToIndex,
+        itemKeyForIndex: dateKeyForIndex,
         offsetForIndex
       }),
     [
       baseDayHeight,
       dateKeyToIndex,
+      dateKeyForIndex,
+      forcedBaseGeometryAnchorIndex,
       layoutAnchorDateKey,
       offsetForIndex,
       virtualItems,

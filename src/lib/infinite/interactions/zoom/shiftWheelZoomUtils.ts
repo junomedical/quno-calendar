@@ -7,7 +7,7 @@
  *
  * @see docs/domains/interactions.md#source-map
  */
-import { useEffect, type MutableRefObject, type RefObject } from "react";
+import { useCallback, useEffect, useRef, type MutableRefObject, type RefObject } from "react";
 import type { CalendarViewComponentProps, TimelineSettings } from "../../../core/types";
 import { MAX_ZOOM, MIN_ZOOM } from "./zoomLimits";
 
@@ -25,6 +25,50 @@ export function nextZoomFromWheel(settings: TimelineSettings, event: WheelEvent)
   if (delta === 0) return null;
   const direction = delta < 0 ? 1 : -1;
   return Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, Number((settings.zoom + direction * 0.15).toFixed(2))));
+}
+
+type WheelZoomCommit = (zoom: number) => void;
+
+/** Accumulates raw wheel/touchpad steps and runs only the latest complete projection before a paint. */
+export function useFrameCoalescedWheelZoom(controlledZoom: number) {
+  const frameRef = useRef(0);
+  const pendingZoomRef = useRef<number | null>(null);
+  const pendingBaseZoomRef = useRef<number | null>(null);
+  const commitRef = useRef<WheelZoomCommit | null>(null);
+  const controlledZoomRef = useRef(controlledZoom);
+  controlledZoomRef.current = controlledZoom;
+
+  const schedule = useCallback((settings: TimelineSettings, event: WheelEvent, commit: WheelZoomCommit) => {
+    const sourceSettings = pendingZoomRef.current === null ? settings : { ...settings, zoom: pendingZoomRef.current };
+    const nextZoom = nextZoomFromWheel(sourceSettings, event);
+    if (nextZoom === null) return null;
+
+    if (pendingZoomRef.current === null) pendingBaseZoomRef.current = settings.zoom;
+    pendingZoomRef.current = nextZoom;
+    commitRef.current = commit;
+    if (!frameRef.current) {
+      frameRef.current = window.requestAnimationFrame(() => {
+        frameRef.current = 0;
+        const pendingZoom = pendingZoomRef.current;
+        const pendingBaseZoom = pendingBaseZoomRef.current;
+        const pendingCommit = commitRef.current;
+        pendingZoomRef.current = null;
+        pendingBaseZoomRef.current = null;
+        commitRef.current = null;
+        if (pendingZoom !== null && controlledZoomRef.current === pendingBaseZoom) pendingCommit?.(pendingZoom);
+      });
+    }
+    return nextZoom;
+  }, []);
+
+  useEffect(
+    () => () => {
+      if (frameRef.current) window.cancelAnimationFrame(frameRef.current);
+    },
+    []
+  );
+
+  return schedule;
 }
 
 export function captureWheelEvent(event: WheelEvent) {

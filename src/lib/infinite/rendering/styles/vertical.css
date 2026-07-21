@@ -92,6 +92,12 @@
   position: relative;
 }
 
+.icv-time-tick-track {
+  position: absolute;
+  right: 0;
+  left: 0;
+}
+
 .icv-time-tick {
   position: absolute;
   right: 12px;
@@ -107,8 +113,7 @@
 }
 
 .icv-time-tick.is-label-hidden {
-  width: 0;
-  overflow: hidden;
+  display: none;
 }
 
 .icv-day-board {

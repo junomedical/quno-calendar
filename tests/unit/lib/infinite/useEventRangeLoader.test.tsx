@@ -31,7 +31,7 @@ afterEach(() => {
 });
 
 describe("useEventRangeLoader", () => {
-  it("prefetches an adaptive window around visible dates and renders without awaiting the API", async () => {
+  it("prefetches one week around visible dates and renders without awaiting the API", async () => {
     const response = deferred<CalendarEvent[]>();
     const loadEvents = vi.fn<LoadEvents>(() => response.promise);
 
@@ -46,8 +46,8 @@ describe("useEventRangeLoader", () => {
     expect(result.current.eventsByDate).toEqual({});
     expect(loadEvents).toHaveBeenCalledTimes(1);
     expect(loadEvents.mock.calls[0][0]).toMatchObject({
-      startDate: "2026-07-15",
-      endDate: "2026-07-23",
+      startDate: "2026-07-11",
+      endDate: "2026-07-27",
       calendarIds: ["calendar-a"],
       signal: expect.any(AbortSignal)
     });

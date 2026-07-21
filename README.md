@@ -53,7 +53,7 @@ export function Schedule() {
 
 Use `view="infinite-vertical"` when calendars should render as columns and time should run top-to-bottom inside each date. `view="infinite"` remains a compatibility alias for the horizontal view.
 
-The date/resource grid renders without waiting for `loadEvents`. Cached events remain visible during delayed refreshes, and obsolete requests are cancelled or ignored. The optional abort signal is backward compatible with loaders that do not support cancellation. Adjacent dates are prefetched through an adaptive default; pass `eventPrefetchPolicy` to customize the before/after buffer.
+The date/resource grid renders without waiting for `loadEvents`. Cached events remain visible during delayed refreshes, and obsolete requests are cancelled or ignored. The optional abort signal is backward compatible with loaders that do not support cancellation. By default, seven calendar days are prefetched before and after the rendered dates; pass `eventPrefetchPolicy` to customize that buffer.
 
 ## Interaction Model
 

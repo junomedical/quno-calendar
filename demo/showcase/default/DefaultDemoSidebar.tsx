@@ -3,17 +3,12 @@ import { DemoRouteNav } from "../DemoRouteNav";
 import { DemoSourceLinks } from "../DemoSourceLinks";
 import { ApiLatencyControl } from "../controls/ApiLatencyControl";
 import { DatasetControl } from "../controls/DatasetControl";
-import {
-  CalendarCountControl,
-  SnapControl,
-  TimeRangeControl,
-  ToggleControl,
-  ZoomControl
-} from "../controls/TimelineControls";
+import { CalendarCountControl, SnapControl, TimeRangeControl, ToggleControl } from "../controls/TimelineControls";
 import { ViewControl } from "../controls/ViewControl";
 import { demoCalendars } from "../data";
 import type { DemoControls } from "../hooks/useDemoControls";
 import type { DemoRoute } from "../types";
+import { DemoZoomControl } from "../zoom/DemoZoom";
 import { DefaultDateJumpControl } from "./DefaultDateJumpControl";
 import { DemoStatsPanel } from "./DemoStatsPanel";
 
@@ -43,7 +38,7 @@ export function DefaultDemoSidebar({
   onExternalAdd
 }: DefaultDemoSidebarProps) {
   return (
-    <aside className="demo-sidebar" aria-label="Demo controls">
+    <aside className="demo-sidebar demo-control-pane" aria-label="Demo controls">
       <div className="demo-brand">
         <CalendarDays size={26} aria-hidden />
         <div>
@@ -70,7 +65,7 @@ export function DefaultDemoSidebar({
         maximum={demoCalendars.length}
         onChange={controls.setCalendarCount}
       />
-      <ZoomControl className="zoom-control" zoom={controls.zoom} onChange={controls.setZoom} />
+      <DemoZoomControl className="zoom-control" />
       <SnapControl minutes={controls.snapMinutes} onChange={controls.setSnapMinutes} />
       <TimeRangeControl
         className="time-range"

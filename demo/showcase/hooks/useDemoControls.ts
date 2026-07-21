@@ -1,6 +1,6 @@
 import { useMemo, useState, type Dispatch, type SetStateAction } from "react";
-import type { TimelineSettings } from "quno-calendar";
 import type { CalendarView } from "../types";
+import type { DemoTimelineSettings } from "../zoom/DemoZoom";
 
 export type DemoControlDefaults = {
   calendarView: CalendarView;
@@ -17,7 +17,7 @@ export type DemoControlDefaults = {
 };
 
 export type DemoLayoutSettings = Pick<
-  TimelineSettings,
+  DemoTimelineSettings,
   | "rowHeight"
   | "dayHeaderHeight"
   | "labelWidth"
@@ -32,8 +32,6 @@ export type DemoControls = {
   setCalendarView: Dispatch<SetStateAction<CalendarView>>;
   calendarCount: number;
   setCalendarCount: Dispatch<SetStateAction<number>>;
-  zoom: number;
-  setZoom: Dispatch<SetStateAction<number>>;
   snapMinutes: number;
   setSnapMinutes: Dispatch<SetStateAction<number>>;
   startHour: number;
@@ -50,13 +48,12 @@ export type DemoControls = {
   setJumpDate: Dispatch<SetStateAction<string>>;
   jumpTime: string;
   setJumpTime: Dispatch<SetStateAction<string>>;
-  settings: TimelineSettings;
+  settings: DemoTimelineSettings;
 };
 
 export function useDemoControls(defaults: DemoControlDefaults, layout: DemoLayoutSettings): DemoControls {
   const [calendarView, setCalendarView] = useState<CalendarView>(defaults.calendarView);
   const [calendarCount, setCalendarCount] = useState(defaults.calendarCount);
-  const [zoom, setZoom] = useState(defaults.zoom);
   const [snapMinutes, setSnapMinutes] = useState(defaults.snapMinutes);
   const [startHour, setStartHour] = useState(defaults.startHour);
   const [endHour, setEndHour] = useState(defaults.endHour);
@@ -66,16 +63,15 @@ export function useDemoControls(defaults: DemoControlDefaults, layout: DemoLayou
   const [jumpDate, setJumpDate] = useState(defaults.jumpDate ?? "2026-07-04");
   const [jumpTime, setJumpTime] = useState(defaults.jumpTime ?? "09:00");
 
-  const settings = useMemo<TimelineSettings>(
+  const settings = useMemo<DemoTimelineSettings>(
     () => ({
       ...layout,
       startHour,
       endHour,
-      zoom,
       snapMinutes,
       excludedWeekdays: excludeWeekends ? [0, 6] : []
     }),
-    [endHour, excludeWeekends, layout, snapMinutes, startHour, zoom]
+    [endHour, excludeWeekends, layout, snapMinutes, startHour]
   );
 
   return {
@@ -83,8 +79,6 @@ export function useDemoControls(defaults: DemoControlDefaults, layout: DemoLayou
     setCalendarView,
     calendarCount,
     setCalendarCount,
-    zoom,
-    setZoom,
     snapMinutes,
     setSnapMinutes,
     startHour,

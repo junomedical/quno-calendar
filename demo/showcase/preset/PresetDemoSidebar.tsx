@@ -3,17 +3,12 @@ import { DemoSourceLinks } from "../DemoSourceLinks";
 import { ApiLatencyControl } from "../controls/ApiLatencyControl";
 import { DateJumpControl } from "../controls/DateJumpControl";
 import { DatasetControl } from "../controls/DatasetControl";
-import {
-  CalendarCountControl,
-  SnapControl,
-  TimeRangeControl,
-  ToggleControl,
-  ZoomControl
-} from "../controls/TimelineControls";
+import { CalendarCountControl, SnapControl, TimeRangeControl, ToggleControl } from "../controls/TimelineControls";
 import { ViewControl } from "../controls/ViewControl";
 import { demoCalendars } from "../data";
 import type { DemoControls } from "../hooks/useDemoControls";
 import type { DemoRoute } from "../types";
+import { DemoZoomControl } from "../zoom/DemoZoom";
 import type { DemoPreset } from "./types";
 
 type PresetDemoSidebarProps = {
@@ -43,7 +38,7 @@ export function PresetDemoSidebar({
   const BrandIcon = preset.brandIcon;
 
   return (
-    <aside className={className("sidebar")} aria-label="Demo controls">
+    <aside className={`${className("sidebar")} demo-control-pane`} aria-label="Demo controls">
       <div className={className("brand")}>
         <BrandIcon size={24} aria-hidden />
         <div>
@@ -71,7 +66,7 @@ export function PresetDemoSidebar({
         maximum={demoCalendars.length}
         onChange={controls.setCalendarCount}
       />
-      <ZoomControl className={className("zoom-control")} zoom={controls.zoom} onChange={controls.setZoom} />
+      <DemoZoomControl className={className("zoom-control")} />
       <SnapControl minutes={controls.snapMinutes} onChange={controls.setSnapMinutes} />
       <TimeRangeControl
         className={className("time-range")}

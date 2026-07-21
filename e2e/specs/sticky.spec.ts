@@ -41,8 +41,9 @@ test("keeps the time scale fixed and day dates css-sticky", async ({ page }) => 
     .evaluate((element) => {
       const rect = element.getBoundingClientRect();
       const headerRect = element.closest(".ic-time-header")?.getBoundingClientRect();
-      return headerRect
-        ? Math.abs(rect.left - headerRect.left - Number.parseFloat((element as HTMLElement).style.left))
+      const trackRect = element.closest(".ic-time-tick-track")?.getBoundingClientRect();
+      return headerRect && trackRect
+        ? Math.max(Math.abs(trackRect.left - headerRect.left - 8), Math.abs(rect.left - trackRect.left))
         : Number.POSITIVE_INFINITY;
     });
   expect(firstTickAlignment).toBeLessThanOrEqual(1);

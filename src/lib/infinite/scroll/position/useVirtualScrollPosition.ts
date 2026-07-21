@@ -47,13 +47,21 @@ export function useVirtualScrollPosition({
   topVisibleOffsetRef
 }: UseVirtualScrollPositionArgs) {
   const scrollToVisibleDateOffset = useCallback(
-    (dateKey: string, offsetWithinDate: number) => {
+    (dateKey: string, offsetWithinDate: number, preferBaseGeometry = false) => {
       const index = clampVirtualDateIndex(dateKeyToIndex(dateKey), virtualWindow.count);
-      // Estimated geometry is only a mount-time fallback; known item offsets always win.
-      const baseOffset = virtualizer.getOffsetForIndex(index, "start")?.[0] ?? index * baseDayHeight;
-      virtualizer.scrollToOffset(baseOffset + Math.max(0, offsetWithinDate), { align: "start" });
+      // A structural vertical resize must not reuse the virtualizer's pre-commit
+      // measurements; uniform base geometry is authoritative for that restore.
+      const baseOffset = preferBaseGeometry
+        ? index * baseDayHeight
+        : (virtualizer.getOffsetForIndex(index, "start")?.[0] ?? index * baseDayHeight);
+      const targetOffset = baseOffset + Math.max(0, offsetWithinDate);
+      if (preferBaseGeometry && containerRef.current) {
+        containerRef.current.scrollTop = targetOffset;
+      } else {
+        virtualizer.scrollToOffset(targetOffset, { align: "start" });
+      }
     },
-    [baseDayHeight, dateKeyToIndex, virtualWindow.count, virtualizer]
+    [baseDayHeight, containerRef, dateKeyToIndex, virtualWindow.count, virtualizer]
   );
 
   const updateVisibleSnapshot = useCallback(() => {

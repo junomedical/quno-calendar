@@ -9,38 +9,75 @@ import {
 
 test("drops minor time labels at dense zoom levels", async ({ page }) => {
   await page.goto("/");
-  const minuteLabelsAtDefaultZoom = await page
-    .locator(".ic-time-tick:not(.is-hour)")
-    .evaluateAll((elements) => elements.map((element) => element.textContent?.trim()).filter(Boolean));
+  const minuteLabelsAtDefaultZoom = await page.locator(".ic-time-tick:not(.is-hour)").evaluateAll((elements) =>
+    elements
+      .filter((element) => element.getAttribute("aria-hidden") !== "true")
+      .map((element) => element.textContent?.trim())
+      .filter(Boolean)
+  );
   expect(minuteLabelsAtDefaultZoom).toContain("30");
   expect(minuteLabelsAtDefaultZoom).not.toContain("15");
   expect(minuteLabelsAtDefaultZoom).not.toContain("45");
-  await expect(page.locator(".ic-time-tick sup").first()).toHaveText("30");
+  await expect(page.locator('.ic-time-tick:not([aria-hidden="true"]) sup').first()).toHaveText("30");
 
   await page.getByTestId("zoom-slider").fill("2");
-  const minuteLabelsAtReadableZoom = await page
-    .locator(".ic-time-tick:not(.is-hour)")
-    .evaluateAll((elements) => elements.map((element) => element.textContent?.trim()).filter(Boolean));
+  const minuteLabelsAtReadableZoom = await page.locator(".ic-time-tick:not(.is-hour)").evaluateAll((elements) =>
+    elements
+      .filter((element) => element.getAttribute("aria-hidden") !== "true")
+      .map((element) => element.textContent?.trim())
+      .filter(Boolean)
+  );
   expect(minuteLabelsAtReadableZoom).toContain("15");
   expect(minuteLabelsAtReadableZoom).toContain("30");
   expect(minuteLabelsAtReadableZoom).toContain("45");
 
   await page.getByTestId("zoom-slider").fill("0.5");
 
-  const minuteLabelsAtDenseZoom = await page
-    .locator(".ic-time-tick:not(.is-hour)")
-    .evaluateAll((elements) => elements.map((element) => element.textContent?.trim()).filter(Boolean));
+  const minuteLabelsAtDenseZoom = await page.locator(".ic-time-tick:not(.is-hour)").evaluateAll((elements) =>
+    elements
+      .filter((element) => element.getAttribute("aria-hidden") !== "true")
+      .map((element) => element.textContent?.trim())
+      .filter(Boolean)
+  );
   expect(minuteLabelsAtDenseZoom).toContain("30");
   expect(minuteLabelsAtDenseZoom).not.toContain("15");
   expect(minuteLabelsAtDenseZoom).not.toContain("45");
   await expect(page.locator(".ic-time-tick.is-hour").first()).toBeVisible();
 
   await page.getByTestId("zoom-slider").fill("8");
-  const highZoomLabels = await page
-    .locator(".ic-time-tick")
-    .evaluateAll((elements) => elements.map((element) => element.textContent?.trim()).filter(Boolean));
+  const highZoomLabels = await page.locator(".ic-time-tick").evaluateAll((elements) =>
+    elements
+      .filter((element) => element.getAttribute("aria-hidden") !== "true")
+      .map((element) => element.textContent?.trim())
+      .filter(Boolean)
+  );
   expect(highZoomLabels[0]).toMatch(/^\d{1,2}$/);
   expect(highZoomLabels.slice(1, 12)).toEqual(["5", "10", "15", "20", "25", "30", "35", "40", "45", "50", "55"]);
+
+  await page.getByTestId("zoom-slider").fill("5.9");
+  const stableTickCount = await page.locator(".ic-time-tick").count();
+  await page.locator(".ic-time-tick").evaluateAll((ticks) => {
+    ticks.forEach((tick) => tick.setAttribute("data-stable-tick", "true"));
+  });
+  await page.locator(".ic-time-tick-track").evaluate((track) => {
+    const state = window as typeof window & { tickChildMutations?: number; tickObserver?: MutationObserver };
+    state.tickChildMutations = 0;
+    state.tickObserver = new MutationObserver((records) => {
+      state.tickChildMutations =
+        (state.tickChildMutations ?? 0) + records.filter((record) => record.type === "childList").length;
+    });
+    state.tickObserver.observe(track, { childList: true, subtree: true });
+  });
+  await page.getByTestId("zoom-slider").fill("6.1");
+  await expect(page.locator(".ic-time-tick")).toHaveCount(stableTickCount);
+  await expect(page.locator('.ic-time-tick[data-stable-tick="true"]')).toHaveCount(stableTickCount);
+  expect(
+    await page.evaluate(() => {
+      const state = window as typeof window & { tickChildMutations?: number; tickObserver?: MutationObserver };
+      state.tickObserver?.disconnect();
+      return state.tickChildMutations ?? -1;
+    })
+  ).toBe(0);
 });
 
 test("lets external event renderers adapt content to short heights with CSS", async ({ page }) => {

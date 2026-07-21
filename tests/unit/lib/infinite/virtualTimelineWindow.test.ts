@@ -48,6 +48,28 @@ describe("virtual timeline render items", () => {
     expect(items[0]).toMatchObject({ key: "layout-anchor-2026-07-03", start: 230, size: 100 });
   });
 
+  it("uses stable base geometry around the visible date during a vertical projection resize", () => {
+    const items = buildVirtualDateRenderItems({
+      virtualItems: Array.from({ length: 11 }, (_, index) => ({
+        key: `old-date-${index + 20}`,
+        index: index + 20,
+        start: (index + 20) * 100,
+        size: 100
+      })),
+      anchorIndex: 15,
+      count: 40,
+      baseDayHeight: 200,
+      forcedBaseGeometryAnchorIndex: 15,
+      dateKeyToIndex: () => 0,
+      itemKeyForIndex: (index) => `date-${index}`,
+      offsetForIndex: () => undefined
+    });
+
+    expect(items.map((item) => item.index)).toEqual([11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]);
+    expect(items.map((item) => item.key)).toEqual(items.map((item) => `date-${item.index}`));
+    expect(items.map((item) => item.start)).toEqual(items.map((item) => item.index * 200));
+  });
+
   it("does not duplicate a measured or out-of-window pinned date", () => {
     const virtualItems = [{ key: "visible", index: 14, start: 1400, size: 100 }];
     const build = (pinnedIndex: number) =>
