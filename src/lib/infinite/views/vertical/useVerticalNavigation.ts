@@ -1,13 +1,4 @@
 /**
- * Domain: Views.
- * Responsibility: Adapts generic date scrolling, multi-frame vertical time positioning, and parent anchors.
- * Preserves: public horizontal and vertical behavior while composing feature domains.
- * Does not own: feature-domain algorithms.
- * Failure/cancellation: domain cancellation and fallback policies pass through without view-specific overrides.
- *
- * @see docs/domains/views.md#source-map
- */
-/**
  * Vertical navigation and public imperative API.
  * date/time requests + geometry registry -> scroll operations and anchor-safe ref methods
  */

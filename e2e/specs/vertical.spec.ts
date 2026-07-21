@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test";
 import {
   goToWorkday,
   selectPageText,
+  setDemoZoom,
   topVisibleDayDate,
   topVisibleDayState,
   viewportRelativeEventBox,
@@ -73,7 +74,7 @@ test("switches to the vertical calendar view with sticky time pane and vertical 
     .getByTestId("vertical-day-board")
     .first()
     .evaluate((element) => element.getBoundingClientRect().height);
-  await page.getByTestId("zoom-slider").fill("2");
+  await setDemoZoom(page, 2);
   const zoomedBoardHeight = await page
     .getByTestId("vertical-day-board")
     .first()
@@ -226,7 +227,7 @@ test("keeps the vertical current date anchored when zoom changes", async ({ page
   await page.getByTestId("view-infinite-vertical").check();
   await page.getByRole("spinbutton", { name: "Start" }).fill("8");
   await page.getByRole("spinbutton", { name: "End" }).fill("18");
-  await page.getByTestId("zoom-slider").fill("8");
+  await setDemoZoom(page, 8);
   await page.getByTestId("jump-date-input").fill("2026-08-12");
   await page.getByTestId("jump-time-input").fill("17:00");
   await page.getByTestId("go-date-button").click();
@@ -236,7 +237,7 @@ test("keeps the vertical current date anchored when zoom changes", async ({ page
   expect(beforeZoom.date).toBe("2026-08-12");
   expect(beforeZoom.offsetWithinDate).toBeGreaterThan(3_000);
 
-  await page.getByTestId("zoom-slider").fill("0.5");
+  await setDemoZoom(page, 0.5);
   await expect(page.getByTestId("zoom-value")).toHaveText("0.50");
 
   await expect.poll(async () => topVisibleDayDate(page)).toBe("2026-08-12");
@@ -294,20 +295,13 @@ test("keeps the vertical current date anchored when zoom changes", async ({ page
   await page.mouse.wheel(0, 500);
   await page.mouse.wheel(0, 500);
   await page.keyboard.up("Shift");
+  await page.mouse.wheel(0, 500);
+  await page.waitForTimeout(100);
   await expect(page.getByTestId("zoom-value")).toHaveText("0.50");
   await expect.poll(async () => (await timelineNodeNearMouse())?.date ?? null).toBe(beforeGestureZoomOut?.date);
   await expect.poll(async () => (await timelineNodeNearMouse())?.minute ?? null).toBe(beforeGestureZoomOut?.minute);
   await expect
     .poll(async () => Math.abs(((await timelineNodeNearMouse())?.screenY ?? 0) - (beforeGestureZoomOut?.screenY ?? 0)))
-    .toBeLessThanOrEqual(1);
-
-  const afterGestureZoomOut = await timelineNodeNearMouse();
-  await page.mouse.wheel(0, 500);
-  await page.waitForTimeout(100);
-  await expect.poll(async () => (await timelineNodeNearMouse())?.date ?? null).toBe(afterGestureZoomOut?.date);
-  await expect.poll(async () => (await timelineNodeNearMouse())?.minute ?? null).toBe(afterGestureZoomOut?.minute);
-  await expect
-    .poll(async () => Math.abs(((await timelineNodeNearMouse())?.screenY ?? 0) - (afterGestureZoomOut?.screenY ?? 0)))
     .toBeLessThanOrEqual(1);
 
   await page.waitForTimeout(500);

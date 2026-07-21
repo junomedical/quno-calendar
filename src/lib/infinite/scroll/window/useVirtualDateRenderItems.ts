@@ -1,12 +1,3 @@
-/**
- * Domain: Scroll.
- * Responsibility: Memoizes render items from virtualizer output and optional pins.
- * Preserves: the visible date and local pixel offset across bounded-window maintenance.
- * Does not own: event fetching and semantic layout-focus policy.
- * Failure/cancellation: missing geometry retains the newest valid snapshot for the next settled pass.
- *
- * @see docs/domains/scroll.md#source-map
- */
 import { useMemo } from "react";
 import type { VirtualDateWindow } from "../../../date/dateVirtualization";
 import { buildVirtualDateRenderItems, type VirtualDateRenderItem } from "./renderItems";

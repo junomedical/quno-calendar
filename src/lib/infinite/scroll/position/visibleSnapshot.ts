@@ -1,13 +1,4 @@
 /**
- * Domain: Scroll.
- * Responsibility: Resolves visible date snapshots and generic fully-above resize compensation.
- * Preserves: the visible date and local pixel offset across bounded-window maintenance.
- * Does not own: event fetching and semantic layout-focus policy.
- * Failure/cancellation: missing geometry retains the newest valid snapshot for the next settled pass.
- *
- * @see docs/domains/scroll.md#source-map
- */
-/**
  * Data flow: scrollTop -> containing virtual item -> date plus intra-day offset.
  * Invariant: the one-pixel probe assigns exact item boundaries to the next date.
  */

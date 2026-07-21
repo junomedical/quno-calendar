@@ -3,7 +3,6 @@ import { PresetDemo } from "../preset/PresetDemo";
 import type { DemoPreset } from "../preset/types";
 import type { DemoRoute } from "../types";
 import { Demo3EventCard } from "./Demo3EventCard";
-import "./Demo3.css";
 
 const availabilityPreset: DemoPreset = {
   id: "demo3",

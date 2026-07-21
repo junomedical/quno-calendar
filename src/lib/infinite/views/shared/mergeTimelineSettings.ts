@@ -1,12 +1,3 @@
-/**
- * Domain: Views.
- * Responsibility: Merges defaults and clamps caller-supplied timeline settings.
- * Preserves: public horizontal and vertical behavior while composing feature domains.
- * Does not own: feature-domain algorithms.
- * Failure/cancellation: domain cancellation and fallback policies pass through without view-specific overrides.
- *
- * @see docs/domains/views.md#source-map
- */
 import { defaultTimelineSettings, type TimelineSettings } from "../../../core/types";
 import { MAX_ZOOM } from "../../interactions/zoom/zoomLimits";
 

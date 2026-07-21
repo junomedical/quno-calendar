@@ -1,13 +1,4 @@
 /**
- * Domain: Events.
- * Responsibility: Produces the deterministic overlap model shared by sizing and rendering.
- * Preserves: non-blocking rendering, request-generation safety, and deterministic layout.
- * Does not own: scroll writes and DOM projection.
- * Failure/cancellation: obsolete, aborted, or failed requests cannot replace a newer committed snapshot.
- *
- * @see docs/domains/events.md#source-map
- */
-/**
  * Responsibility: prepare one orientation-neutral date/resource event cell.
  *
  * Flow: clipped intervals -> overlap groups -> lowest reusable lanes -> one

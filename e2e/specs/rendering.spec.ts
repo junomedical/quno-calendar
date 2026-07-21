@@ -4,7 +4,8 @@ import {
   firstExpandableOverlappedEvent,
   firstDuplicatedViewportEvent,
   goToWorkday,
-  mutedAccentColor
+  mutedAccentColor,
+  setDemoZoom
 } from "../helpers";
 
 test("drops minor time labels at dense zoom levels", async ({ page }) => {
@@ -20,7 +21,7 @@ test("drops minor time labels at dense zoom levels", async ({ page }) => {
   expect(minuteLabelsAtDefaultZoom).not.toContain("45");
   await expect(page.locator('.ic-time-tick:not([aria-hidden="true"]) sup').first()).toHaveText("30");
 
-  await page.getByTestId("zoom-slider").fill("2");
+  await setDemoZoom(page, 2);
   const minuteLabelsAtReadableZoom = await page.locator(".ic-time-tick:not(.is-hour)").evaluateAll((elements) =>
     elements
       .filter((element) => element.getAttribute("aria-hidden") !== "true")
@@ -31,7 +32,7 @@ test("drops minor time labels at dense zoom levels", async ({ page }) => {
   expect(minuteLabelsAtReadableZoom).toContain("30");
   expect(minuteLabelsAtReadableZoom).toContain("45");
 
-  await page.getByTestId("zoom-slider").fill("0.5");
+  await setDemoZoom(page, 0.5);
 
   const minuteLabelsAtDenseZoom = await page.locator(".ic-time-tick:not(.is-hour)").evaluateAll((elements) =>
     elements
@@ -44,7 +45,7 @@ test("drops minor time labels at dense zoom levels", async ({ page }) => {
   expect(minuteLabelsAtDenseZoom).not.toContain("45");
   await expect(page.locator(".ic-time-tick.is-hour").first()).toBeVisible();
 
-  await page.getByTestId("zoom-slider").fill("8");
+  await setDemoZoom(page, 8);
   const highZoomLabels = await page.locator(".ic-time-tick").evaluateAll((elements) =>
     elements
       .filter((element) => element.getAttribute("aria-hidden") !== "true")
@@ -54,7 +55,7 @@ test("drops minor time labels at dense zoom levels", async ({ page }) => {
   expect(highZoomLabels[0]).toMatch(/^\d{1,2}$/);
   expect(highZoomLabels.slice(1, 12)).toEqual(["5", "10", "15", "20", "25", "30", "35", "40", "45", "50", "55"]);
 
-  await page.getByTestId("zoom-slider").fill("5.9");
+  await setDemoZoom(page, 5.9);
   const stableTickCount = await page.locator(".ic-time-tick").count();
   await page.locator(".ic-time-tick").evaluateAll((ticks) => {
     ticks.forEach((tick) => tick.setAttribute("data-stable-tick", "true"));
@@ -68,7 +69,7 @@ test("drops minor time labels at dense zoom levels", async ({ page }) => {
     });
     state.tickObserver.observe(track, { childList: true, subtree: true });
   });
-  await page.getByTestId("zoom-slider").fill("6.1");
+  await setDemoZoom(page, 6.1);
   await expect(page.locator(".ic-time-tick")).toHaveCount(stableTickCount);
   await expect(page.locator('.ic-time-tick[data-stable-tick="true"]')).toHaveCount(stableTickCount);
   expect(

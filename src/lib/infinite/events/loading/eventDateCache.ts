@@ -1,13 +1,4 @@
 /**
- * Domain: Events.
- * Responsibility: Stores bounded date buckets, event-id lookup, local patches, and LRU eviction.
- * Preserves: non-blocking rendering, request-generation safety, and deterministic layout.
- * Does not own: scroll writes and DOM projection.
- * Failure/cancellation: obsolete, aborted, or failed requests cannot replace a newer committed snapshot.
- *
- * @see docs/domains/events.md#source-map
- */
-/**
  * Responsibility: store bounded date buckets plus the event-id index used by
  * range replacement and targeted mutation paths.
  *

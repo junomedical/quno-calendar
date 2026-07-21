@@ -1,12 +1,3 @@
-/**
- * Domain: Rendering.
- * Responsibility: Defines event shell containment, states, and renderer isolation.
- * Preserves: stable geometry, layering, clipping, and external renderer isolation.
- * Does not own: requests, controlled settings, and scroll correction.
- * Failure/cancellation: missing optional content leaves structural calendar geometry intact.
- *
- * @see docs/domains/rendering.md#source-map
- */
 .ic-event-shell {
   position: absolute;
   min-width: 12px;

@@ -4,6 +4,7 @@ import { DemoCalendarRoot, DemoZoomProvider } from "../zoom/DemoZoom";
 import { PresetDemoSidebar } from "./PresetDemoSidebar";
 import type { DemoPreset } from "./types";
 import { usePresetDemo } from "./usePresetDemo";
+import "./PresetDemo.css";
 
 type PresetDemoProps = {
   preset: DemoPreset;
@@ -15,7 +16,7 @@ export function PresetDemo({ preset, routes }: PresetDemoProps) {
 
   return (
     <DemoZoomProvider initialZoom={preset.controls.zoom}>
-      <main className={`${preset.id}-shell`} data-demo-id={preset.id}>
+      <main className={`${preset.id}-shell preset-shell`} data-demo-id={preset.id}>
         <PresetDemoSidebar
           preset={preset}
           routes={routes}
@@ -27,7 +28,7 @@ export function PresetDemo({ preset, routes }: PresetDemoProps) {
           onAvailabilityModeChange={demo.setAvailabilityMode}
           onGoToDate={demo.goToDate}
         />
-        <section className={`${preset.id}-calendar-panel`}>
+        <section className={`${preset.id}-calendar-panel preset-calendar-panel`}>
           <DemoCalendarRoot
             key={demo.scale}
             view={demo.controls.calendarView}

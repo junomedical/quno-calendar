@@ -1,13 +1,4 @@
 /**
- * Domain: Interactions.
- * Responsibility: Continues active pointer gestures through window-level pointer events.
- * Preserves: mounted-grid hit testing and controlled parent ownership.
- * Does not own: product rendering and direct settings mutation.
- * Failure/cancellation: cancelled or invalid gestures clear transient state without committing.
- *
- * @see docs/domains/interactions.md#source-map
- */
-/**
  * Continues a Pointer Events interaction when a pointer leaves calendar DOM.
  * Captured events already bubble through the React viewport and are ignored
  * here; window-targeted events cover lost capture and synthetic integrations.

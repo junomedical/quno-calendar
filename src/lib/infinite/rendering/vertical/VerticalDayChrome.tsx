@@ -1,13 +1,4 @@
 /**
- * Domain: Rendering.
- * Responsibility: Renders date headers, time labels, current-time chrome, and grid backdrop.
- * Preserves: stable geometry, layering, clipping, and external renderer isolation.
- * Does not own: requests, controlled settings, and scroll correction.
- * Failure/cancellation: missing optional content leaves structural calendar geometry intact.
- *
- * @see docs/domains/rendering.md#source-map
- */
-/**
  * Vertical day chrome.
  * date/ticks/resources -> sticky date header + resource header + time scale
  */

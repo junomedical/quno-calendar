@@ -1,12 +1,3 @@
-/**
- * Domain: Rendering.
- * Responsibility: Defines shared viewport, date, resource, and interaction styling.
- * Preserves: stable geometry, layering, clipping, and external renderer isolation.
- * Does not own: requests, controlled settings, and scroll correction.
- * Failure/cancellation: missing optional content leaves structural calendar geometry intact.
- *
- * @see docs/domains/rendering.md#source-map
- */
 .ic-shell {
   --ic-cell-border: #dfe5ec;
   position: relative;
@@ -17,7 +8,7 @@
   border: 1px solid var(--ic-cell-border);
   border-radius: 8px;
   box-shadow: 0 8px 22px rgba(15, 23, 42, 0.08);
-  contain: paint;
+  isolation: isolate;
 }
 
 .ic-viewport {

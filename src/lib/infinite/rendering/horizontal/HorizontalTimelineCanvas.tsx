@@ -1,12 +1,3 @@
-/**
- * Domain: Rendering.
- * Responsibility: Renders the scroll container, sticky time scale, and virtual date items.
- * Preserves: stable geometry, layering, clipping, and external renderer isolation.
- * Does not own: requests, controlled settings, and scroll correction.
- * Failure/cancellation: missing optional content leaves structural calendar geometry intact.
- *
- * @see docs/domains/rendering.md#source-map
- */
 import type { PointerEventHandler, RefObject, UIEventHandler } from "react";
 import type { CalendarViewComponentProps } from "../../../core/types";
 import { InfiniteTimeScaleHeader } from "../shared/TimeScaleHeader";

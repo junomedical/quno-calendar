@@ -1,12 +1,3 @@
-/**
- * Domain: Rendering.
- * Responsibility: Resolves visible/pinned row indexes for one rendered date.
- * Preserves: stable geometry, layering, clipping, and external renderer isolation.
- * Does not own: requests, controlled settings, and scroll correction.
- * Failure/cancellation: missing optional content leaves structural calendar geometry intact.
- *
- * @see docs/domains/rendering.md#source-map
- */
 import { useMemo } from "react";
 import { eventCalendarIds } from "../../../data/calendarEvents";
 import type { CalendarEvent, CalendarId, CalendarRow, CalendarViewportAnchorTarget } from "../../../core/types";

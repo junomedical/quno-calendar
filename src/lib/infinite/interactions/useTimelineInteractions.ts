@@ -1,12 +1,3 @@
-/**
- * Domain: Interactions.
- * Responsibility: Composes drag, draft, pointer continuation, selection locking, and public render state.
- * Preserves: mounted-grid hit testing and controlled parent ownership.
- * Does not own: product rendering and direct settings mutation.
- * Failure/cancellation: cancelled or invalid gestures clear transient state without committing.
- *
- * @see docs/domains/interactions.md#source-map
- */
 import { useCallback, useState, type PointerEvent as ReactPointerEvent } from "react";
 import type { CalendarHit } from "./timelineInteractionModel";
 import { minutesSinceStartOfDay } from "../../time/time";

@@ -1,12 +1,3 @@
-/**
- * Domain: Anchors.
- * Responsibility: Exposes capture/restore operations and geometry registration to a view.
- * Preserves: the current semantic calendar location across geometry changes.
- * Does not own: browser DOM focus and gesture recognition.
- * Failure/cancellation: unresolved targets retry, fall back, or yield according to anchor priority.
- *
- * @see docs/domains/anchors.md#source-map
- */
 import { useCallback, useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import { minuteToX, minuteToY, parseClockToMinutes } from "../../../time/time";
 import type {

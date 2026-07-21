@@ -1,25 +1,11 @@
 import { ClipboardList, LockKeyhole, UserRound, Video } from "lucide-react";
 import type { EventRendererProps } from "quno-calendar";
+import { eventCardModel } from "../eventCardModel";
 import "./Demo2EventCard.css";
 
-function formatEventTime(value: string) {
-  const date = new Date(value);
-  return `${date.getHours()}:${String(date.getMinutes()).padStart(2, "0")}`;
-}
-
-export function Demo2EventCard({ event, status, laneCount }: EventRendererProps) {
-  const isAvailability = event.kind === "availability";
-  const isConsultation = event.kind === "consultation";
-  const isBlocked = event.kind === "blocked" || event.title.startsWith("Locked");
-  const className = [
-    "demo2-event-card",
-    `status-${status}`,
-    isAvailability ? "kind-availability" : "",
-    isConsultation ? "kind-consultation" : "",
-    isBlocked ? "kind-blocked" : ""
-  ]
-    .filter(Boolean)
-    .join(" ");
+export function Demo2EventCard(props: EventRendererProps) {
+  const { event, status, laneCount } = props;
+  const { className, isAvailability, isBlocked, isConsultation, timeRange } = eventCardModel("demo2", props);
 
   return (
     <article className={className} data-render-status={status}>
@@ -34,9 +20,7 @@ export function Demo2EventCard({ event, status, laneCount }: EventRendererProps)
           )}
           {isAvailability ? "Availability" : isConsultation ? "Virtual" : isBlocked ? "Locked" : "Visit"}
         </span>
-        <span className="demo2-event-time">
-          {formatEventTime(event.start)}-{formatEventTime(event.end)}
-        </span>
+        <span className="demo2-event-time">{timeRange()}</span>
       </div>
       <strong className="demo2-event-title">{event.title}</strong>
       {event.subtitle ? (

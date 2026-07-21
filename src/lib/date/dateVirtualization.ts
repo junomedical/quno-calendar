@@ -1,12 +1,3 @@
-/**
- * Domain: Foundation.
- * Responsibility: Normalizes excluded dates and maps virtual offsets to date keys.
- * Preserves: the public compatibility boundary and deterministic cross-domain primitives.
- * Does not own: runtime feature coordination.
- * Failure/cancellation: invalid inputs are normalized or rejected by the documented public contract.
- *
- * @see docs/domains/foundation.md#source-map
- */
 import { addCalendarDays, addCalendarMonths, isSameLocalDate, parseIsoDate } from "./localDate";
 
 /** Formats a Date as the calendar's stable `yyyy-MM-dd` date key. */

@@ -1,13 +1,4 @@
 /**
- * Domain: Rendering.
- * Responsibility: Defines vertical render contracts shared by boards and layers.
- * Preserves: stable geometry, layering, clipping, and external renderer isolation.
- * Does not own: requests, controlled settings, and scroll correction.
- * Failure/cancellation: missing optional content leaves structural calendar geometry intact.
- *
- * @see docs/domains/rendering.md#source-map
- */
-/**
  * Vertical render contracts.
  * view coordinator -> day contract -> column and interaction contracts
  */

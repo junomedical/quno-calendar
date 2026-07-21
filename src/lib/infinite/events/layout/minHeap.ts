@@ -1,12 +1,3 @@
-/**
- * Domain: Events.
- * Responsibility: Reuses the earliest available overlap lane in logarithmic time.
- * Preserves: non-blocking rendering, request-generation safety, and deterministic layout.
- * Does not own: scroll writes and DOM projection.
- * Failure/cancellation: obsolete, aborted, or failed requests cannot replace a newer committed snapshot.
- *
- * @see docs/domains/events.md#source-map
- */
 /** Minimal binary min-heap used by the interval partitioning sweep. */
 export class MinHeap<T> {
   private readonly values: T[] = [];

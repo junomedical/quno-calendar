@@ -1,9 +1,9 @@
 import { expect, test } from "@playwright/test";
-import { goToWorkday, topVisibleDayDate } from "../helpers";
+import { goToWorkday, setDemoZoom, topVisibleDayDate } from "../helpers";
 
 test("keeps the time scale fixed and day dates css-sticky", async ({ page }) => {
   await page.goto("/");
-  await page.getByTestId("zoom-slider").fill("1.7");
+  await setDemoZoom(page, 1.7);
   const viewport = page.locator(".ic-viewport");
   const viewportBox = await viewport.boundingBox();
   expect(viewportBox).not.toBeNull();
@@ -321,7 +321,7 @@ test("keeps the time scale fixed and day dates css-sticky", async ({ page }) => 
     });
   expect(dayHeaderPaintsAfterRows).toBe(true);
 
-  await page.getByTestId("zoom-slider").fill("4");
+  await setDemoZoom(page, 4);
   await viewport.evaluate((element) => {
     const currentLine =
       document.querySelector<HTMLElement>(".ic-now-line.is-current") ??
@@ -409,7 +409,7 @@ test("keeps the time scale fixed and day dates css-sticky", async ({ page }) => 
 
 test("keeps sticky labels above the timeline after high-zoom horizontal scroll", async ({ page }) => {
   await page.goto("/");
-  await page.getByTestId("zoom-slider").fill("8");
+  await setDemoZoom(page, 8);
   await goToWorkday(page, "2026-07-06");
 
   const viewport = page.locator(".ic-viewport");

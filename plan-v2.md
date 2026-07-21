@@ -30,7 +30,7 @@ The implementation targets 50 selected resources and 20,000 total events per yea
 - Unit and performance: 128/128 Vitest tests passed across 28 files.
 - Static checks: TypeScript, ESLint, Prettier, architecture budgets, and the production demo build passed.
 - Layout scaling: the 10x input benchmark remains below the 25x execution-time ceiling.
-- Architecture: all 104 production modules stay at or below 200 non-comment lines and every function at or below 120 source lines; 109 TypeScript, TSX, and runtime CSS files have verified domain ownership and backlinks.
+- Architecture: all production modules stay at or below 200 non-comment lines and every function at or below 120 source lines; folder placement identifies domain ownership without per-file generated banners.
 - Demo boundary: `src/` contains reusable library code only; all six focused recipes have a dedicated guide, source backlink, and public-package import verified by the architecture gate.
 - Package: isolated packed React consumer, TypeScript, Vite, Node ESM, CommonJS, SSR, declarations, and explicit CSS export passed.
 - Bundle: ESM 27.86 KiB gzip (32 KiB limit); CSS 1.45 KiB gzip (2 KiB limit).
@@ -112,7 +112,7 @@ The implemented ownership tree and every source module are catalogued in [`docs/
 
 - Target 40-150 lines for production modules; fail architecture checks above 200 non-comment lines or 120 lines per function.
 - Enforce acyclic dependency direction between foundation, scroll, events, interactions, anchors, rendering, views, and the demo application.
-- Put a short responsibility, input/output, invariant, and valid documentation link header on every non-trivial module.
+- Use focused folder and module names for source-level ownership; keep cross-module invariants in the domain and flow guides rather than repeating generated file banners.
 - Keep the dependency overview in `docs/architecture.md`, ownership contracts and complete source maps in `docs/domains/`, and request, cache, layout, navigation, recenter, interaction, zoom, failure, and anchor execution sequences in `docs/flows/`.
 - Verify that every runtime source file links to exactly one domain source map and that retired catch-all directories cannot return.
 - Update `docs/architecture.md`, `docs/taxonomy.md`, `docs/usage.md`, `docs/decisions.md`, `docs/test-plan.md`, and `docs/changelog.md` in the same cutover. Reconcile stale project-brief and refactor-plan claims.

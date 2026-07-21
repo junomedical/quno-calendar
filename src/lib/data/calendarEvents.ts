@@ -1,12 +1,3 @@
-/**
- * Domain: Foundation.
- * Responsibility: Implements exported event membership and immutable move helpers.
- * Preserves: the public compatibility boundary and deterministic cross-domain primitives.
- * Does not own: runtime feature coordination.
- * Failure/cancellation: invalid inputs are normalized or rejected by the documented public contract.
- *
- * @see docs/domains/foundation.md#source-map
- */
 import type { CalendarEvent, CalendarId, EventMoveRequest } from "../core/types";
 
 /** Returns all calendar ids an event should render in. */

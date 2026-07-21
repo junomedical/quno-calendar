@@ -1,13 +1,4 @@
 /**
- * Domain: Views.
- * Responsibility: Adapts the shared scroll runtime and viewport metrics to vertical geometry.
- * Preserves: public horizontal and vertical behavior while composing feature domains.
- * Does not own: feature-domain algorithms.
- * Failure/cancellation: domain cancellation and fallback policies pass through without view-specific overrides.
- *
- * @see docs/domains/views.md#source-map
- */
-/**
  * Vertical virtual-window lifecycle.
  * date anchor -> bounded virtual days -> measured viewport store + stable date offsets
  */

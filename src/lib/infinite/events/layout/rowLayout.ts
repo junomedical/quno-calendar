@@ -1,12 +1,3 @@
-/**
- * Domain: Events.
- * Responsibility: Projects a prepared cell into horizontal lanes and row height.
- * Preserves: non-blocking rendering, request-generation safety, and deterministic layout.
- * Does not own: scroll writes and DOM projection.
- * Failure/cancellation: obsolete, aborted, or failed requests cannot replace a newer committed snapshot.
- *
- * @see docs/domains/events.md#source-map
- */
 import type { CalendarEvent, TimelineSettings } from "../../../core/types";
 import { minuteToX } from "../../../time/time";
 import type { PreparedEventCell } from "./preparedCell";

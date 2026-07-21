@@ -1,12 +1,7 @@
 import { Video, Lock } from "lucide-react";
 import type { EventRendererProps } from "quno-calendar";
+import { eventCardModel } from "./eventCardModel";
 import "./DemoEventCard.css";
-
-/** Formats ISO event times for the demo card's compact third line. */
-function formatEventTime(value: string) {
-  const date = new Date(value);
-  return `${date.getHours()}:${String(date.getMinutes()).padStart(2, "0")}`;
-}
 
 /**
  * Demo implementation of the external event renderer contract.
@@ -26,20 +21,9 @@ function formatEventTime(value: string) {
  * @see docs/architecture.md#event-renderer-contract
  * @see docs/usage.md#custom-event-rendering
  */
-export function DemoEventCard({ event, status, isOverlapping }: EventRendererProps) {
-  const isAvailability = event.kind === "availability";
-  const isConsultation = event.kind === "consultation";
-  const isBlocked = event.kind === "blocked" || event.title.startsWith("Locked");
-  const className = [
-    "demo-event-card",
-    `status-${status}`,
-    isAvailability ? "kind-availability" : "",
-    isConsultation ? "kind-consultation" : "",
-    isBlocked ? "kind-blocked" : "",
-    isOverlapping ? "is-overlapping" : ""
-  ]
-    .filter(Boolean)
-    .join(" ");
+export function DemoEventCard(props: EventRendererProps) {
+  const { event, status } = props;
+  const { className, isBlocked, isConsultation, timeRange } = eventCardModel("demo", props);
 
   return (
     <article className={className} data-render-status={status}>
@@ -49,9 +33,7 @@ export function DemoEventCard({ event, status, isOverlapping }: EventRendererPro
         {event.title}
       </strong>
       {event.subtitle ? <span className="demo-event-patient">{event.subtitle}</span> : null}
-      <span className="demo-event-time">
-        {formatEventTime(event.start)}–{formatEventTime(event.end)}
-      </span>
+      <span className="demo-event-time">{timeRange("–")}</span>
     </article>
   );
 }

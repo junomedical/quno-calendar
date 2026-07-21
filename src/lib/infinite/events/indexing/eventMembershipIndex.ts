@@ -1,13 +1,4 @@
 /**
- * Domain: Events.
- * Responsibility: Indexes cached events by calendar while preserving multi-calendar semantics.
- * Preserves: non-blocking rendering, request-generation safety, and deterministic layout.
- * Does not own: scroll writes and DOM projection.
- * Failure/cancellation: obsolete, aborted, or failed requests cannot replace a newer committed snapshot.
- *
- * @see docs/domains/events.md#source-map
- */
-/**
  * Event membership index for one date.
  *
  * date events -> event calendar ids -> resource buckets

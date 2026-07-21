@@ -1,12 +1,3 @@
-/**
- * Domain: Foundation.
- * Responsibility: Defines shared time-grid cadence, adaptive labels, and timeline gutter geometry.
- * Preserves: the public compatibility boundary and deterministic cross-domain primitives.
- * Does not own: runtime feature coordination.
- * Failure/cancellation: invalid inputs are normalized or rejected by the documented public contract.
- *
- * @see docs/domains/foundation.md#source-map
- */
 import type { TimelineSettings } from "../core/types";
 import { formatHourLabel, pixelsPerMinute, timelineEndMinute, timelineStartMinute } from "./time";
 

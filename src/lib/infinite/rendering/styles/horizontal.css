@@ -1,12 +1,3 @@
-/**
- * Domain: Rendering.
- * Responsibility: Defines horizontal sticky and timeline geometry.
- * Preserves: stable geometry, layering, clipping, and external renderer isolation.
- * Does not own: requests, controlled settings, and scroll correction.
- * Failure/cancellation: missing optional content leaves structural calendar geometry intact.
- *
- * @see docs/domains/rendering.md#source-map
- */
 .ic-time-scale-header {
   position: sticky;
   top: 0;

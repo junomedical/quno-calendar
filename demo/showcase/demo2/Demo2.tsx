@@ -3,7 +3,6 @@ import { PresetDemo } from "../preset/PresetDemo";
 import type { DemoPreset } from "../preset/types";
 import type { DemoRoute } from "../types";
 import { Demo2EventCard } from "./Demo2EventCard";
-import "./Demo2.css";
 
 const plannerPreset: DemoPreset = {
   id: "demo2",

@@ -1,12 +1,3 @@
-/**
- * Domain: Scroll.
- * Responsibility: Keeps the semantic vertical date window mounted while uniform day measurements settle.
- * Preserves: the visible date and local pixel offset across bounded-window maintenance.
- * Does not own: event fetching and semantic layout-focus policy.
- * Failure/cancellation: a newer day-height change replaces and reschedules the pending release.
- *
- * @see docs/domains/scroll.md#source-map
- */
 import { useLayoutEffect, useRef, useState } from "react";
 import { clampVirtualDateIndex } from "./dateModel";
 

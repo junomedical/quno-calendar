@@ -1,12 +1,3 @@
-/**
- * Domain: Rendering.
- * Responsibility: Derives effective horizontal viewport width and timeline scale geometry.
- * Preserves: stable geometry, layering, clipping, and external renderer isolation.
- * Does not own: requests, controlled settings, and scroll correction.
- * Failure/cancellation: missing optional content leaves structural calendar geometry intact.
- *
- * @see docs/domains/rendering.md#source-map
- */
 import { useLayoutEffect, useMemo, useState, type RefObject } from "react";
 import type { TimelineSettings } from "../../../core/types";
 import { timelineTotalMinutes, timelineWidth } from "../../../time/time";

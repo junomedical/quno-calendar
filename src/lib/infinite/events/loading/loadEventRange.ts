@@ -1,13 +1,4 @@
 /**
- * Domain: Events.
- * Responsibility: Executes one abort-aware API request with finite retry delays.
- * Preserves: non-blocking rendering, request-generation safety, and deterministic layout.
- * Does not own: scroll writes and DOM projection.
- * Failure/cancellation: obsolete, aborted, or failed requests cannot replace a newer committed snapshot.
- *
- * @see docs/domains/events.md#source-map
- */
-/**
  * Responsibility: execute one loader request with a finite, abort-aware retry
  * policy.
  *

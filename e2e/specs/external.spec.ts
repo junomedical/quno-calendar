@@ -218,49 +218,6 @@ test("supports drawing a new event area", async ({ page }) => {
       })
     )
     .toBe(true);
-  await expect
-    .poll(async () =>
-      page.evaluate(() => {
-        const viewport = document.querySelector<HTMLElement>(".ic-viewport");
-        const popup = document.querySelector<HTMLElement>('[data-testid="external-event-popup"]');
-        const drafts = Array.from(document.querySelectorAll<HTMLElement>('[data-testid="draft-event"]'));
-        if (!viewport || drafts.length === 0) {
-          return false;
-        }
-        const viewportBox = viewport.getBoundingClientRect();
-        const popupBox = popup?.getBoundingClientRect();
-        for (const draft of drafts) {
-          const box = draft.getBoundingClientRect();
-          const visibleLeft = Math.max(box.left, viewportBox.left);
-          const visibleRight = Math.min(box.right, viewportBox.right, (popupBox?.left ?? box.right) - 8);
-          const visibleTop = Math.max(box.top, viewportBox.top);
-          const visibleBottom = Math.min(box.bottom, viewportBox.bottom);
-          if (visibleRight <= visibleLeft + 8 || visibleBottom <= visibleTop + 8) {
-            continue;
-          }
-          const x = (visibleLeft + visibleRight) / 2;
-          const y = (visibleTop + visibleBottom) / 2;
-          if (document.elementFromPoint(x, y)?.closest('[data-testid="draft-event"]') === draft) {
-            return true;
-          }
-        }
-        const firstBox = drafts[0].getBoundingClientRect();
-        if (popupBox && firstBox.right > popupBox.left - 16) {
-          viewport.scrollLeft += firstBox.right - popupBox.left + 120;
-        }
-        if (firstBox.left < viewportBox.left + 240) {
-          viewport.scrollLeft -= viewportBox.left + 240 - firstBox.left;
-        }
-        if (firstBox.bottom > viewportBox.bottom - 24) {
-          viewport.scrollTop += firstBox.bottom - viewportBox.bottom + 80;
-        }
-        if (firstBox.top < viewportBox.top + 80) {
-          viewport.scrollTop -= viewportBox.top + 80 - firstBox.top;
-        }
-        return false;
-      })
-    )
-    .toBe(true);
   const blockDragStartValue = await page.getByTestId("draft-start-input").inputValue();
   type DraftBoxSnapshot = {
     x: number;

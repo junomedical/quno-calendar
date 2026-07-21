@@ -1,13 +1,4 @@
 /**
- * Domain: Scroll.
- * Responsibility: Publishes frame-batched viewport metrics to resource-window subscribers.
- * Preserves: the visible date and local pixel offset across bounded-window maintenance.
- * Does not own: event fetching and semantic layout-focus policy.
- * Failure/cancellation: missing geometry retains the newest valid snapshot for the next settled pass.
- *
- * @see docs/domains/scroll.md#source-map
- */
-/**
  * Viewport read scheduler.
  *
  * native scroll/resize -> one animation-frame read -> immutable snapshot

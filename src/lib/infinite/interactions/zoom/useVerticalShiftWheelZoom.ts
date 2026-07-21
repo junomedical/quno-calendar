@@ -1,12 +1,3 @@
-/**
- * Domain: Interactions.
- * Responsibility: Anchors vertical shift-wheel zoom to the pointer date/time location.
- * Preserves: mounted-grid hit testing and controlled parent ownership.
- * Does not own: product rendering and direct settings mutation.
- * Failure/cancellation: cancelled or invalid gestures clear transient state without committing.
- *
- * @see docs/domains/interactions.md#source-map
- */
 import { useCallback, useRef } from "react";
 import { flushSync } from "react-dom";
 import { minuteToY, yToMinute } from "../../../time/time";

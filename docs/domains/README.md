@@ -39,4 +39,4 @@ flowchart LR
 - Views are the composition root and may import every runtime domain.
 - There are no generic `hooks`, `utils`, `common`, or `helpers` runtime directories.
 
-Every source file links to one domain document with `@see docs/domains/<domain>.md#source-map`. The architecture check verifies both directions.
+The folder containing a source file identifies its domain. The source maps in these guides are maintained as navigation aids rather than duplicated as banners in every module.

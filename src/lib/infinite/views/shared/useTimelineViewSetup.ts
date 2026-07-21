@@ -1,12 +1,3 @@
-/**
- * Domain: Views.
- * Responsibility: Normalizes settings, selected calendars, and the initial date anchor.
- * Preserves: public horizontal and vertical behavior while composing feature domains.
- * Does not own: feature-domain algorithms.
- * Failure/cancellation: domain cancellation and fallback policies pass through without view-specific overrides.
- *
- * @see docs/domains/views.md#source-map
- */
 import { useMemo } from "react";
 import { normalizeAnchorDate, toDateKey } from "../../../date/dateVirtualization";
 import {

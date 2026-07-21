@@ -8,6 +8,33 @@ async function expectDraftFadeoutThenGone(page: Page) {
   await expect(page.getByTestId("draft-event")).toHaveCount(0);
 }
 
+async function cancelAndKeepRowAnchored(page: Page, selector: string, before: number) {
+  await page.getByTestId("draft-cancel-button").click();
+  await expectDraftFadeoutThenGone(page);
+  await expect(page.getByTestId("external-event-popup")).toHaveCount(0);
+  await expect
+    .poll(() =>
+      page.evaluate(
+        ({ selector, before }) => {
+          const viewport = document.querySelector<HTMLElement>(".ic-viewport");
+          const row = document.querySelector<HTMLElement>(selector);
+          return viewport && row
+            ? Math.abs(row.getBoundingClientRect().top - viewport.getBoundingClientRect().top - before)
+            : Number.POSITIVE_INFINITY;
+        },
+        { selector, before }
+      )
+    )
+    .toBeLessThanOrEqual(4);
+}
+
+const rowViewportOffset = (page: Page, selector: string) =>
+  page.evaluate((selector) => {
+    const viewport = document.querySelector<HTMLElement>(".ic-viewport");
+    const row = document.querySelector<HTMLElement>(selector);
+    return viewport && row ? row.getBoundingClientRect().top - viewport.getBoundingClientRect().top : null;
+  }, selector);
+
 test("keeps the calendar row position when cancelling external create", async ({ page }) => {
   await page.goto("/");
   await goToWorkday(page);
@@ -24,30 +51,18 @@ test("keeps the calendar row position when cancelling external create", async ({
   await page.mouse.up();
   await expect(page.getByTestId("external-event-popup")).toBeVisible();
 
-  const possibleRowAnchor = await page.evaluate(() => {
-    const viewport = document.querySelector<HTMLElement>(".ic-viewport");
-    const draft = document.querySelector<HTMLElement>('[data-testid="draft-event"]');
-    const row = draft?.closest<HTMLElement>('[data-testid="calendar-row"]');
-    if (!viewport || !row) return null;
-    return row.getBoundingClientRect().top - viewport.getBoundingClientRect().top;
-  });
+  const possibleRowAnchor = await rowViewportOffset(
+    page,
+    '[data-testid="calendar-row"]:has([data-testid="draft-event"])'
+  );
   expect(possibleRowAnchor).not.toBeNull();
   if (possibleRowAnchor === null) return;
 
-  await page.getByTestId("draft-cancel-button").click();
-  await expectDraftFadeoutThenGone(page);
-  await expect(page.getByTestId("external-event-popup")).toHaveCount(0);
-  await expect
-    .poll(async () =>
-      page.evaluate((before) => {
-        const viewport = document.querySelector<HTMLElement>(".ic-viewport");
-        const day = document.querySelector<HTMLElement>('[data-testid="calendar-day"][data-date="2026-07-06"]');
-        const row = day?.querySelector<HTMLElement>('[data-testid="calendar-row"][data-calendar-id="dr-kirillov"]');
-        if (!viewport || !row) return Number.POSITIVE_INFINITY;
-        return Math.abs(row.getBoundingClientRect().top - viewport.getBoundingClientRect().top - before);
-      }, possibleRowAnchor)
-    )
-    .toBeLessThanOrEqual(4);
+  await cancelAndKeepRowAnchored(
+    page,
+    '[data-testid="calendar-day"][data-date="2026-07-06"] [data-testid="calendar-row"][data-calendar-id="dr-kirillov"]',
+    possibleRowAnchor
+  );
 });
 
 test("keeps a later participant calendar row anchored when cancelling external create", async ({ page }) => {
@@ -81,31 +96,18 @@ test("keeps a later participant calendar row anchored when cancelling external c
   await page.mouse.up();
   await expect(page.getByTestId("external-event-popup")).toBeVisible();
 
-  const possibleRowAnchor = await page.evaluate(() => {
-    const viewport = document.querySelector<HTMLElement>(".ic-viewport");
-    const draft = document.querySelector<HTMLElement>('[data-testid="draft-event"][data-calendar-id="room-203"]');
-    const row = draft?.closest<HTMLElement>('[data-testid="calendar-row"]');
-    if (!viewport || !row) return null;
-    return row.getBoundingClientRect().top - viewport.getBoundingClientRect().top;
-  });
+  const possibleRowAnchor = await rowViewportOffset(
+    page,
+    '[data-testid="calendar-row"]:has([data-testid="draft-event"][data-calendar-id="room-203"])'
+  );
   expect(possibleRowAnchor).not.toBeNull();
   if (possibleRowAnchor === null) return;
 
-  await page.getByTestId("draft-cancel-button").click();
-  await expectDraftFadeoutThenGone(page);
-  await expect(page.getByTestId("external-event-popup")).toHaveCount(0);
-  await expect
-    .poll(async () =>
-      page.evaluate((before) => {
-        const viewport = document.querySelector<HTMLElement>(".ic-viewport");
-        const row = document.querySelector<HTMLElement>(
-          '[data-testid="calendar-day"][data-date="2026-07-08"] [data-testid="calendar-row"][data-calendar-id="room-203"]'
-        );
-        if (!viewport || !row) return Number.POSITIVE_INFINITY;
-        return Math.abs(row.getBoundingClientRect().top - viewport.getBoundingClientRect().top - before);
-      }, possibleRowAnchor)
-    )
-    .toBeLessThanOrEqual(4);
+  await cancelAndKeepRowAnchored(
+    page,
+    '[data-testid="calendar-day"][data-date="2026-07-08"] [data-testid="calendar-row"][data-calendar-id="room-203"]',
+    possibleRowAnchor
+  );
 });
 
 test("keeps the drawn Marco date focused after adding participants and cancelling external create", async ({
@@ -133,32 +135,18 @@ test("keeps the drawn Marco date focused after adding participants and cancellin
   await page.getByTestId("draft-participant-dr-thakker").check();
   await expect(page.getByTestId("draft-event")).toHaveCount(3);
 
-  const marcoRowAnchor = await page.evaluate(() => {
-    const viewport = document.querySelector<HTMLElement>(".ic-viewport");
-    const row = document.querySelector<HTMLElement>(
-      '[data-testid="calendar-day"][data-date="2026-06-22"] [data-testid="calendar-row"][data-calendar-id="marco-eggens"]'
-    );
-    if (!viewport || !row) return null;
-    return row.getBoundingClientRect().top - viewport.getBoundingClientRect().top;
-  });
+  const marcoRowAnchor = await rowViewportOffset(
+    page,
+    '[data-testid="calendar-day"][data-date="2026-06-22"] [data-testid="calendar-row"][data-calendar-id="marco-eggens"]'
+  );
   expect(marcoRowAnchor).not.toBeNull();
   if (marcoRowAnchor === null) return;
 
-  await page.getByTestId("draft-cancel-button").click();
-  await expectDraftFadeoutThenGone(page);
-  await expect(page.getByTestId("external-event-popup")).toHaveCount(0);
-  await expect
-    .poll(async () =>
-      page.evaluate((before) => {
-        const viewport = document.querySelector<HTMLElement>(".ic-viewport");
-        const row = document.querySelector<HTMLElement>(
-          '[data-testid="calendar-day"][data-date="2026-06-22"] [data-testid="calendar-row"][data-calendar-id="marco-eggens"]'
-        );
-        if (!viewport || !row) return Number.POSITIVE_INFINITY;
-        return Math.abs(row.getBoundingClientRect().top - viewport.getBoundingClientRect().top - before);
-      }, marcoRowAnchor)
-    )
-    .toBeLessThanOrEqual(4);
+  await cancelAndKeepRowAnchored(
+    page,
+    '[data-testid="calendar-day"][data-date="2026-06-22"] [data-testid="calendar-row"][data-calendar-id="marco-eggens"]',
+    marcoRowAnchor
+  );
 });
 
 test("keeps the drawn Bhuvin date focused after adding Marco and Surgery B then cancelling external create", async ({
@@ -186,46 +174,35 @@ test("keeps the drawn Bhuvin date focused after adding Marco and Surgery B then 
   await page.getByTestId("draft-participant-surgery-b").check();
   await expect(page.getByTestId("draft-event")).toHaveCount(3);
 
-  const bhuvinRowAnchor = await page.evaluate(() => {
-    const viewport = document.querySelector<HTMLElement>(".ic-viewport");
-    const row = document.querySelector<HTMLElement>(
-      '[data-testid="calendar-day"][data-date="2026-05-23"] [data-testid="calendar-row"][data-calendar-id="dr-thakker"]'
-    );
-    if (!viewport || !row) return null;
-    return row.getBoundingClientRect().top - viewport.getBoundingClientRect().top;
-  });
+  const bhuvinRowAnchor = await rowViewportOffset(
+    page,
+    '[data-testid="calendar-day"][data-date="2026-05-23"] [data-testid="calendar-row"][data-calendar-id="dr-thakker"]'
+  );
   expect(bhuvinRowAnchor).not.toBeNull();
   if (bhuvinRowAnchor === null) return;
 
-  await page.getByTestId("draft-cancel-button").click();
-  await expectDraftFadeoutThenGone(page);
-  await expect(page.getByTestId("external-event-popup")).toHaveCount(0);
-  await expect
-    .poll(async () =>
-      page.evaluate((before) => {
-        const viewport = document.querySelector<HTMLElement>(".ic-viewport");
-        const row = document.querySelector<HTMLElement>(
-          '[data-testid="calendar-day"][data-date="2026-05-23"] [data-testid="calendar-row"][data-calendar-id="dr-thakker"]'
-        );
-        if (!viewport || !row) return Number.POSITIVE_INFINITY;
-        return Math.abs(row.getBoundingClientRect().top - viewport.getBoundingClientRect().top - before);
-      }, bhuvinRowAnchor)
-    )
-    .toBeLessThanOrEqual(4);
+  await cancelAndKeepRowAnchored(
+    page,
+    '[data-testid="calendar-day"][data-date="2026-05-23"] [data-testid="calendar-row"][data-calendar-id="dr-thakker"]',
+    bhuvinRowAnchor
+  );
 });
 
 test("does not transiently jump before recenter after cancelling a future multi-participant create", async ({
   page
 }) => {
+  const future = new Date();
+  future.setDate(future.getDate() + 22);
+  const futureDate = `${future.getFullYear()}-${String(future.getMonth() + 1).padStart(2, "0")}-${String(future.getDate()).padStart(2, "0")}`;
   await page.goto("/");
   await page.getByTestId("scale-select").selectOption("5000");
-  await page.getByTestId("jump-date-input").fill("2026-07-22");
+  await page.getByTestId("jump-date-input").fill(futureDate);
   await page.getByTestId("jump-time-input").fill("08:45");
   await page.getByTestId("go-date-button").click();
 
   const drawTarget = await horizontalDrawTarget(page, {
     calendarId: "marco-eggens",
-    dateKey: "2026-07-22",
+    dateKey: futureDate,
     distance: 200
   });
 
@@ -240,9 +217,9 @@ test("does not transiently jump before recenter after cancelling a future multi-
   await expect(page.getByTestId("draft-event")).toHaveCount(3);
 
   await page.getByTestId("draft-cancel-button").click();
-  const immediateFocus = await page.evaluate(() => {
+  const immediateFocus = await page.evaluate((futureDate) => {
     const viewport = document.querySelector<HTMLElement>(".ic-viewport");
-    const day = document.querySelector<HTMLElement>('[data-testid="calendar-day"][data-date="2026-07-22"]');
+    const day = document.querySelector<HTMLElement>(`[data-testid="calendar-day"][data-date="${futureDate}"]`);
     const row = day?.querySelector<HTMLElement>('[data-testid="calendar-row"][data-calendar-id="marco-eggens"]');
     if (!viewport || !day || !row) return null;
     const viewportBox = viewport.getBoundingClientRect();
@@ -252,7 +229,7 @@ test("does not transiently jump before recenter after cancelling a future multi-
       dayVisible: dayBox.bottom > viewportBox.top && dayBox.top < viewportBox.bottom,
       rowOffset: Math.round(rowBox.top - viewportBox.top)
     };
-  });
+  }, futureDate);
   expect(immediateFocus).not.toBeNull();
   expect(immediateFocus?.dayVisible).toBe(true);
   expect(immediateFocus?.rowOffset).toBeGreaterThanOrEqual(0);

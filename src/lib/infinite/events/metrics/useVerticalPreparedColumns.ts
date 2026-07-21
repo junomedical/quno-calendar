@@ -1,13 +1,4 @@
 /**
- * Domain: Events.
- * Responsibility: Builds vertical prepared cells, column widths, and lookup functions.
- * Preserves: non-blocking rendering, request-generation safety, and deterministic layout.
- * Does not own: scroll writes and DOM projection.
- * Failure/cancellation: obsolete, aborted, or failed requests cannot replace a newer committed snapshot.
- *
- * @see docs/domains/events.md#source-map
- */
-/**
  * Prepared vertical-column model.
  * cached date events -> calendar membership -> prepared lanes -> width/read lookups
  */

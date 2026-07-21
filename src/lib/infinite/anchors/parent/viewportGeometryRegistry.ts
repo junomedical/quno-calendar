@@ -1,12 +1,3 @@
-/**
- * Domain: Anchors.
- * Responsibility: Indexes mounted date, resource, and event elements for semantic resolution.
- * Preserves: the current semantic calendar location across geometry changes.
- * Does not own: browser DOM focus and gesture recognition.
- * Failure/cancellation: unresolved targets retry, fall back, or yield according to anchor priority.
- *
- * @see docs/domains/anchors.md#source-map
- */
 import type { CalendarId, CalendarViewportAnchorTarget, EventId } from "../../../core/types";
 
 type Listener = () => void;

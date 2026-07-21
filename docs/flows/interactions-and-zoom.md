@@ -168,7 +168,7 @@ sequenceDiagram
 
 Raw mouse-wheel and touchpad events can arrive several times inside one paint interval. The gesture controller accumulates every `0.15` zoom step, retains the first pointer-nearest anchor, and performs one synchronous controlled commit plus one restore sequence on the next animation frame. If another external controlled value commits first, the stale queued wheel value is discarded.
 
-The showcase keeps gesture projection separate from its sidebar display. Each committed frame reaches the controlled calendar immediately, but the native range thumb and numeric output synchronize only once after the 300ms gesture tail. Direct range-input changes update both immediately. This prevents control layout and paint work from invalidating the menu during a wheel/touch burst.
+The showcase keeps gesture projection separate from its sidebar display. Each committed wheel/touch frame reaches the controlled calendar immediately, but the native range thumb and numeric output synchronize only once after the 300ms gesture tail. Direct range input updates the thumb/readout immediately and coalesces calendar projection to the latest value once per animation frame. This prevents either input path from scheduling multiple calendar rasters inside one paint interval.
 
 ```mermaid
 stateDiagram-v2
@@ -236,8 +236,7 @@ Horizontal wheel zoom preserves a time node on X. Vertical wheel zoom preserves 
 - `src/lib/infinite/interactions/drag/useTimelineDragInteraction.ts`: drag candidate, proposal, validation, and cache patch.
 - `src/lib/infinite/interactions/draft/useTimelineDraftInteraction.ts`: drawn range and internal/external create paths.
 - `src/lib/infinite/interactions/hit-testing/timelineHitTarget.ts`: mounted grid ownership.
-- `src/lib/infinite/interactions/hit-testing/useHorizontalTimelineHitTesting.ts`: horizontal coordinate projection.
-- `src/lib/infinite/interactions/hit-testing/useVerticalTimelineHitTesting.ts`: vertical coordinate projection.
+- `src/lib/infinite/interactions/hit-testing/useTimelineHitTesting.ts`: shared mounted-grid resolution with horizontal and vertical coordinate projections.
 - `src/lib/infinite/interactions/zoom/shiftWheelZoomUtils.ts`: shared gesture tail, versioning, and captured wheel utilities.
 - `src/lib/infinite/interactions/zoom/useHorizontalShiftWheelZoom.ts`: pointer-nearest horizontal time anchor.
 - `src/lib/infinite/interactions/zoom/useVerticalShiftWheelZoom.ts`: date/time vertical anchor.

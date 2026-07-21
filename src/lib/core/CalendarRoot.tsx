@@ -1,12 +1,3 @@
-/**
- * Domain: Foundation.
- * Responsibility: Selects horizontal or vertical projection from public props.
- * Preserves: the public compatibility boundary and deterministic cross-domain primitives.
- * Does not own: runtime feature coordination.
- * Failure/cancellation: invalid inputs are normalized or rejected by the documented public contract.
- *
- * @see docs/domains/foundation.md#source-map
- */
 import { forwardRef } from "react";
 import { InfiniteTimelineView } from "../infinite/views/horizontal/HorizontalTimelineView";
 import { InfiniteVerticalTimelineView } from "../infinite/views/vertical/VerticalTimelineView";

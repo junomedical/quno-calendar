@@ -1,10 +1,11 @@
 import { act, render, screen, waitFor } from "@testing-library/react";
-import { createRef } from "react";
+import { createRef, type Ref } from "react";
 import { describe, expect, it, vi } from "vitest";
 import {
   CalendarRoot,
   type CalendarEvent,
   type CalendarNavigationHandle,
+  type CalendarRootProps,
   type EventRendererProps,
   type LoadEvents
 } from "../../../../src/lib";
@@ -13,23 +14,36 @@ const calendars = [
   { id: "calendar-a", name: "Calendar A", color: "#0b6eff" },
   { id: "calendar-b", name: "Calendar B", color: "#d946ef" }
 ];
+const now = new Date("2026-07-04T09:30:00");
+const settings = { startHour: 8, endHour: 18, zoom: 1, excludedWeekdays: [] };
+const defaultRenderer = ({ event, style }: EventRendererProps) => <div style={style}>{event.title}</div>;
+type TestCalendarProps = Partial<CalendarRootProps> &
+  Pick<CalendarRootProps, "loadEvents"> & { ref?: Ref<CalendarNavigationHandle> };
+
+function calendar(props: TestCalendarProps) {
+  return (
+    <CalendarRoot
+      calendars={calendars}
+      selectedCalendarIds={["calendar-a"]}
+      eventRenderer={defaultRenderer}
+      now={now}
+      {...props}
+    />
+  );
+}
+
+const renderCalendar = (props: TestCalendarProps) => render(calendar(props));
 
 describe("InfiniteTimelineView", () => {
   it("passes className, style, and ariaLabel to the calendar surface", () => {
     const loadEvents = vi.fn<LoadEvents>(async () => []);
 
-    render(
-      <CalendarRoot
-        ariaLabel="Public schedule"
-        className="custom-calendar"
-        style={{ minHeight: 320 }}
-        calendars={calendars}
-        selectedCalendarIds={["calendar-a"]}
-        loadEvents={loadEvents}
-        eventRenderer={({ event, style }) => <div style={style}>{event.title}</div>}
-        now={new Date("2026-07-04T09:30:00")}
-      />
-    );
+    renderCalendar({
+      ariaLabel: "Public schedule",
+      className: "custom-calendar",
+      style: { minHeight: 320 },
+      loadEvents
+    });
 
     const shell = screen.getByTestId("infinite-calendar");
     expect(shell).toHaveAccessibleName("Public schedule");
@@ -40,16 +54,10 @@ describe("InfiniteTimelineView", () => {
   it("uses initialDateKey as the initial virtual range anchor", async () => {
     const loadEvents = vi.fn<LoadEvents>(async () => []);
 
-    render(
-      <CalendarRoot
-        calendars={calendars}
-        selectedCalendarIds={["calendar-a"]}
-        loadEvents={loadEvents}
-        eventRenderer={({ event, style }) => <div style={style}>{event.title}</div>}
-        initialDateKey="2026-08-12"
-        now={new Date("2026-07-04T09:30:00")}
-      />
-    );
+    renderCalendar({
+      loadEvents,
+      initialDateKey: "2026-08-12"
+    });
 
     await waitFor(() => expect(loadEvents).toHaveBeenCalled());
     const request = loadEvents.mock.calls[0]?.[0];
@@ -78,16 +86,12 @@ describe("InfiniteTimelineView", () => {
       } satisfies CalendarEvent
     ]);
 
-    render(
-      <CalendarRoot
-        calendars={calendars}
-        selectedCalendarIds={["calendar-a", "calendar-b"]}
-        loadEvents={loadEvents}
-        eventRenderer={renderer}
-        now={new Date("2026-07-04T09:30:00")}
-        settings={{ startHour: 8, endHour: 18, zoom: 1, excludedWeekdays: [] }}
-      />
-    );
+    renderCalendar({
+      selectedCalendarIds: ["calendar-a", "calendar-b"],
+      loadEvents,
+      eventRenderer: renderer,
+      settings
+    });
 
     expect((await screen.findAllByText("Calendar A")).length).toBeGreaterThan(1);
     expect(screen.getAllByTestId("current-time-line").length).toBeGreaterThan(0);
@@ -106,16 +110,7 @@ describe("InfiniteTimelineView", () => {
     ));
     const loadEvents = vi.fn(async () => []);
 
-    render(
-      <CalendarRoot
-        view="infinite"
-        calendars={calendars}
-        selectedCalendarIds={["calendar-a"]}
-        loadEvents={loadEvents}
-        eventRenderer={renderer}
-        now={new Date("2026-07-04T09:30:00")}
-      />
-    );
+    renderCalendar({ view: "infinite", loadEvents, eventRenderer: renderer });
 
     expect(screen.getByTestId("time-scale-header")).toBeInTheDocument();
     await waitFor(() => expect(loadEvents).toHaveBeenCalled());
@@ -137,17 +132,13 @@ describe("InfiniteTimelineView", () => {
       } satisfies CalendarEvent
     ]);
 
-    render(
-      <CalendarRoot
-        view="infinite-vertical"
-        calendars={calendars}
-        selectedCalendarIds={["calendar-a", "calendar-b"]}
-        loadEvents={loadEvents}
-        eventRenderer={renderer}
-        now={new Date("2026-07-04T09:30:00")}
-        settings={{ startHour: 8, endHour: 18, zoom: 1, excludedWeekdays: [] }}
-      />
-    );
+    renderCalendar({
+      view: "infinite-vertical",
+      selectedCalendarIds: ["calendar-a", "calendar-b"],
+      loadEvents,
+      eventRenderer: renderer,
+      settings
+    });
 
     expect(screen.getAllByTestId("vertical-time-pane").length).toBeGreaterThan(0);
     expect(screen.getAllByTestId("vertical-calendar-header").length).toBeGreaterThan(0);
@@ -174,17 +165,7 @@ describe("InfiniteTimelineView", () => {
     ];
     const loadEvents = vi.fn(async () => loaderEvents);
 
-    const { rerender } = render(
-      <CalendarRoot
-        calendars={calendars}
-        selectedCalendarIds={["calendar-a"]}
-        loadEvents={loadEvents}
-        eventVersion={0}
-        eventRenderer={renderer}
-        now={new Date("2026-07-04T09:30:00")}
-        settings={{ startHour: 8, endHour: 18, zoom: 1, excludedWeekdays: [] }}
-      />
-    );
+    const { rerender } = renderCalendar({ loadEvents, eventVersion: 0, eventRenderer: renderer, settings });
 
     expect(await screen.findByText("Before Version")).toBeInTheDocument();
     loaderEvents = [
@@ -197,17 +178,7 @@ describe("InfiniteTimelineView", () => {
       }
     ];
 
-    rerender(
-      <CalendarRoot
-        calendars={calendars}
-        selectedCalendarIds={["calendar-a"]}
-        loadEvents={loadEvents}
-        eventVersion={1}
-        eventRenderer={renderer}
-        now={new Date("2026-07-04T09:30:00")}
-        settings={{ startHour: 8, endHour: 18, zoom: 1, excludedWeekdays: [] }}
-      />
-    );
+    rerender(calendar({ loadEvents, eventVersion: 1, eventRenderer: renderer, settings }));
 
     expect(await screen.findByText("After Version")).toBeInTheDocument();
     expect(screen.queryByText("Before Version")).not.toBeInTheDocument();
@@ -230,17 +201,7 @@ describe("InfiniteTimelineView", () => {
     ];
     const loadEvents = vi.fn(async () => loaderEvents);
 
-    const { rerender } = render(
-      <CalendarRoot
-        calendars={calendars}
-        selectedCalendarIds={["calendar-a"]}
-        loadEvents={loadEvents}
-        eventVersion={0}
-        eventRenderer={renderer}
-        now={new Date("2026-07-04T09:30:00")}
-        settings={{ startHour: 8, endHour: 18, zoom: 1, excludedWeekdays: [] }}
-      />
-    );
+    const { rerender } = renderCalendar({ loadEvents, eventVersion: 0, eventRenderer: renderer, settings });
 
     expect(await screen.findByText("Before Version")).toBeInTheDocument();
     loaderEvents = [
@@ -261,16 +222,7 @@ describe("InfiniteTimelineView", () => {
     ];
 
     rerender(
-      <CalendarRoot
-        calendars={calendars}
-        selectedCalendarIds={["calendar-a"]}
-        loadEvents={loadEvents}
-        eventVersion={1}
-        appearingEventIds={["event-b"]}
-        eventRenderer={renderer}
-        now={new Date("2026-07-04T09:30:00")}
-        settings={{ startHour: 8, endHour: 18, zoom: 1, excludedWeekdays: [] }}
-      />
+      calendar({ loadEvents, eventVersion: 1, appearingEventIds: ["event-b"], eventRenderer: renderer, settings })
     );
 
     expect(await screen.findByText("Requested Appearing")).toBeInTheDocument();
@@ -283,16 +235,7 @@ describe("InfiniteTimelineView", () => {
     });
 
     rerender(
-      <CalendarRoot
-        calendars={calendars}
-        selectedCalendarIds={["calendar-a"]}
-        loadEvents={loadEvents}
-        eventVersion={2}
-        appearingEventIds={["event-b"]}
-        eventRenderer={renderer}
-        now={new Date("2026-07-04T09:30:00")}
-        settings={{ startHour: 8, endHour: 18, zoom: 1, excludedWeekdays: [] }}
-      />
+      calendar({ loadEvents, eventVersion: 2, appearingEventIds: ["event-b"], eventRenderer: renderer, settings })
     );
 
     expect(await screen.findByText("Requested Appearing")).toBeInTheDocument();
@@ -316,17 +259,7 @@ describe("InfiniteTimelineView", () => {
       } satisfies CalendarEvent
     ]);
 
-    render(
-      <CalendarRoot
-        ref={ref}
-        calendars={calendars}
-        selectedCalendarIds={["calendar-a"]}
-        loadEvents={loadEvents}
-        eventRenderer={renderer}
-        now={new Date("2026-07-04T09:30:00")}
-        settings={{ startHour: 8, endHour: 18, zoom: 1, excludedWeekdays: [] }}
-      />
-    );
+    renderCalendar({ ref, loadEvents, eventRenderer: renderer, settings });
 
     expect(await screen.findByText("Before Commit")).toBeInTheDocument();
     const callsBeforeCommit = loadEvents.mock.calls.length;
@@ -366,27 +299,22 @@ describe("InfiniteTimelineView", () => {
       } satisfies CalendarEvent
     ]);
 
-    render(
-      <CalendarRoot
-        calendars={calendars}
-        selectedCalendarIds={["calendar-a"]}
-        loadEvents={loadEvents}
-        eventRenderer={renderer}
-        now={new Date("2026-07-04T09:30:00")}
-        activeDraft={{
-          mode: "edit",
-          sourceEventId: "event-a",
-          event: {
-            id: "event-a",
-            calendarId: "calendar-a",
-            title: "Edited Event",
-            start: "2026-07-04T09:30:00",
-            end: "2026-07-04T10:30:00"
-          }
-        }}
-        settings={{ startHour: 8, endHour: 18, zoom: 1, excludedWeekdays: [] }}
-      />
-    );
+    renderCalendar({
+      loadEvents,
+      eventRenderer: renderer,
+      activeDraft: {
+        mode: "edit",
+        sourceEventId: "event-a",
+        event: {
+          id: "event-a",
+          calendarId: "calendar-a",
+          title: "Edited Event",
+          start: "2026-07-04T09:30:00",
+          end: "2026-07-04T10:30:00"
+        }
+      },
+      settings
+    });
 
     await waitFor(() => expect(loadEvents).toHaveBeenCalled());
     expect(screen.queryByText("Original Event")).not.toBeInTheDocument();
@@ -424,27 +352,22 @@ describe("InfiniteTimelineView", () => {
       } satisfies CalendarEvent
     ]);
 
-    render(
-      <CalendarRoot
-        calendars={calendars}
-        selectedCalendarIds={["calendar-a"]}
-        loadEvents={loadEvents}
-        eventRenderer={renderer}
-        now={new Date("2026-07-04T09:30:00")}
-        activeDraft={{
-          mode: "edit",
-          sourceEventId: "event-c",
-          event: {
-            id: "event-c",
-            calendarId: "calendar-a",
-            title: "Draft Replacement",
-            start: "2026-07-04T09:00:00",
-            end: "2026-07-04T10:00:00"
-          }
-        }}
-        settings={{ startHour: 8, endHour: 18, zoom: 1, rowHeight: 50, excludedWeekdays: [] }}
-      />
-    );
+    renderCalendar({
+      loadEvents,
+      eventRenderer: renderer,
+      activeDraft: {
+        mode: "edit",
+        sourceEventId: "event-c",
+        event: {
+          id: "event-c",
+          calendarId: "calendar-a",
+          title: "Draft Replacement",
+          start: "2026-07-04T09:00:00",
+          end: "2026-07-04T10:00:00"
+        }
+      },
+      settings: { ...settings, rowHeight: 50 }
+    });
 
     await waitFor(() => expect(loadEvents).toHaveBeenCalled());
     await screen.findByText("Draft Replacement");

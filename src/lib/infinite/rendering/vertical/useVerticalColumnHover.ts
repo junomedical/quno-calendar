@@ -1,13 +1,4 @@
 /**
- * Domain: Rendering.
- * Responsibility: Resolves hover expansion within one prepared vertical calendar column.
- * Preserves: stable geometry, layering, clipping, and external renderer isolation.
- * Does not own: requests, controlled settings, and scroll correction.
- * Failure/cancellation: missing optional content leaves structural calendar geometry intact.
- *
- * @see docs/domains/rendering.md#source-map
- */
-/**
  * Column hover resolver.
  * pointer coordinates + prepared lane boxes -> one row-local hovered event identity
  */

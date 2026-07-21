@@ -1,13 +1,4 @@
 /**
- * Domain: Views.
- * Responsibility: Composes the complete vertical projection and render canvas.
- * Preserves: public horizontal and vertical behavior while composing feature domains.
- * Does not own: feature-domain algorithms.
- * Failure/cancellation: domain cancellation and fallback policies pass through without view-specific overrides.
- *
- * @see docs/domains/views.md#source-map
- */
-/**
  * Vertical projection coordinator.
  * public props -> virtual/cache/interaction models -> navigation + canvas
  */

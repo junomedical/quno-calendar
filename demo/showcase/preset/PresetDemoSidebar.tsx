@@ -34,7 +34,7 @@ export function PresetDemoSidebar({
   onAvailabilityModeChange,
   onGoToDate
 }: PresetDemoSidebarProps) {
-  const className = (suffix: string) => `${preset.id}-${suffix}`;
+  const className = (suffix: string) => `${preset.id}-${suffix} preset-${suffix}`;
   const BrandIcon = preset.brandIcon;
 
   return (

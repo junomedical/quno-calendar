@@ -1,23 +1,42 @@
 /**
- * Domain: Rendering.
- * Responsibility: Composes one calendar column and registers its semantic geometry.
- * Preserves: stable geometry, layering, clipping, and external renderer isolation.
- * Does not own: requests, controlled settings, and scroll correction.
- * Failure/cancellation: missing optional content leaves structural calendar geometry intact.
- *
- * @see docs/domains/rendering.md#source-map
- */
-/**
  * Resource column coordinator.
  * prepared cell -> grid chrome -> availability -> committed events -> transients
  */
 import { memo, useCallback, useMemo } from "react";
-import { layoutPreparedEventsForColumn } from "../../events/layout/layout";
-import { VerticalAvailabilityLayer } from "./VerticalAvailabilityLayer";
-import { VerticalCommittedEventsLayer } from "./VerticalCommittedEventsLayer";
-import { VerticalTransientEventsLayer } from "./VerticalTransientEventsLayer";
+import type { CalendarEvent } from "../../../core/types";
+import { layoutPreparedEventsForColumn, type EventColumnLayoutItem } from "../../events/layout/layout";
+import { AvailabilityLayer, CommittedLayer, TransientLayer } from "../shared/EventLayers";
 import type { VerticalCalendarColumnProps } from "./types";
-import { positionColumnLayoutItems, VERTICAL_TIMELINE_GUTTER_PX } from "./verticalGeometry";
+import {
+  positionColumnLayoutItems,
+  verticalEventBox,
+  VERTICAL_COLUMN_GAP_PX,
+  VERTICAL_TIMELINE_GUTTER_PX
+} from "./verticalGeometry";
+
+function useEventProjections(settings: VerticalCalendarColumnProps["settings"]) {
+  const event = useCallback(
+    (calendarEvent: CalendarEvent) => {
+      const box = verticalEventBox(calendarEvent, settings);
+      return { left: 0, top: box.top, width: "100%", hoverMaxWidth: "100%", height: box.height };
+    },
+    [settings]
+  );
+  const committed = useCallback(
+    (item: EventColumnLayoutItem, hovered: boolean) => {
+      const width = hovered ? "100%" : `calc(${item.widthPercent}% - ${VERTICAL_COLUMN_GAP_PX * 2}px)`;
+      return {
+        left: hovered ? "0%" : `calc(${item.leftPercent}% + ${VERTICAL_COLUMN_GAP_PX}px)`,
+        top: item.top,
+        width,
+        hoverMaxWidth: width,
+        height: hovered ? Math.max(item.height, settings.verticalEventHoverMinHeight) : item.height
+      };
+    },
+    [settings.verticalEventHoverMinHeight]
+  );
+  return { event, committed };
+}
 
 export const VerticalCalendarColumn = memo(function VerticalCalendarColumn({
   calendar,
@@ -51,6 +70,7 @@ export const VerticalCalendarColumn = memo(function VerticalCalendarColumn({
     () => positionColumnLayoutItems(layoutPreparedEventsForColumn(preparedCell, settings)),
     [preparedCell, settings]
   );
+  const project = useEventProjections(settings);
   const setResourceElement = useCallback(
     (element: HTMLDivElement | null) => geometryRegistration.registerResourceElement(dateKey, calendar.id, element),
     [calendar.id, dateKey, geometryRegistration]
@@ -78,21 +98,21 @@ export const VerticalCalendarColumn = memo(function VerticalCalendarColumn({
         backgroundPosition: `0 ${VERTICAL_TIMELINE_GUTTER_PX}px`
       }}
     >
-      <VerticalAvailabilityLayer
+      <AvailabilityLayer
         events={availabilityEvents}
         calendarId={calendar.id}
-        settings={settings}
         interactionMode={interactionMode}
         dragEventId={dragEventId}
         appearingEventIds={appearingEventIds}
         eventRenderer={eventRenderer}
         geometryRegistration={geometryRegistration}
         onEventPointerDown={onEventPointerDown}
+        project={project.event}
+        shellClassName="icv-event-shell"
       />
-      <VerticalCommittedEventsLayer
+      <CommittedLayer
         items={layoutItems}
         calendarId={calendar.id}
-        settings={settings}
         interactionMode={interactionMode}
         hoveredEvent={hoveredEvent}
         dragEventId={dragEventId}
@@ -100,11 +120,12 @@ export const VerticalCalendarColumn = memo(function VerticalCalendarColumn({
         eventRenderer={eventRenderer}
         geometryRegistration={geometryRegistration}
         onEventPointerDown={onEventPointerDown}
+        project={project.committed}
+        shellClassName="icv-event-shell"
       />
-      <VerticalTransientEventsLayer
+      <TransientLayer
         dateKey={dateKey}
         calendarId={calendar.id}
-        settings={settings}
         draftEvent={draftEvent}
         draftEventStatus={draftEventStatus}
         draftEventIsDraggable={draftEventIsDraggable}
@@ -114,6 +135,8 @@ export const VerticalCalendarColumn = memo(function VerticalCalendarColumn({
         eventRenderer={eventRenderer}
         geometryRegistration={geometryRegistration}
         onEventPointerDown={onEventPointerDown}
+        project={project.event}
+        shellClassName="icv-event-shell"
       />
     </div>
   );

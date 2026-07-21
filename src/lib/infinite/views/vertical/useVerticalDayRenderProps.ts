@@ -1,13 +1,4 @@
 /**
- * Domain: Views.
- * Responsibility: Assembles stable render props shared by vertical date items.
- * Preserves: public horizontal and vertical behavior while composing feature domains.
- * Does not own: feature-domain algorithms.
- * Failure/cancellation: domain cancellation and fallback policies pass through without view-specific overrides.
- *
- * @see docs/domains/views.md#source-map
- */
-/**
  * Vertical day projection adapter.
  * view/cache/interaction models -> stable props consumed by every virtual date
  */

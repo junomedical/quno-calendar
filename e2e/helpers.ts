@@ -5,6 +5,15 @@ export async function waitForDemoEvents(page: Page) {
   await expect(page.getByTestId("api-loading-status")).toHaveText("API idle", { timeout: 10_000 });
 }
 
+/** Waits until the frame-coalesced demo slider value has reached calendar geometry. */
+export async function setDemoZoom(page: Page, zoom: number) {
+  await page.getByTestId("zoom-slider").fill(String(zoom));
+  await expect(page.getByTestId("zoom-value")).toHaveText(zoom.toFixed(2));
+  await page.evaluate(
+    () => new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())))
+  );
+}
+
 export async function firstViewportEventBox(page: Page) {
   await page.waitForSelector('[data-testid="calendar-event"]');
   const viewport = page.viewportSize() ?? { width: 1280, height: 720 };
@@ -403,38 +412,6 @@ export async function topVisibleDayState(page: Page) {
       date: best.date,
       offsetWithinDate: Math.round(best.offsetWithinDate)
     };
-  });
-}
-
-export async function verticalTopVisibleGeometry(page: Page) {
-  return page.evaluate(() => {
-    const viewport = document.querySelector(".ic-viewport")?.getBoundingClientRect();
-    if (!viewport) {
-      throw new Error("Calendar viewport not found");
-    }
-
-    let best: { date: string; y: number; offsetWithinDate: number; dayHeight: number; headerHeight: number } | null =
-      null;
-    for (const element of Array.from(document.querySelectorAll<HTMLElement>('[data-testid="calendar-day"]'))) {
-      const box = element.getBoundingClientRect();
-      const date = element.dataset.date;
-      if (!date || box.y > viewport.y + 2 || box.bottom <= viewport.y) {
-        continue;
-      }
-      if (!best || box.y > best.y) {
-        best = {
-          date,
-          y: box.y,
-          offsetWithinDate: viewport.y - box.y,
-          dayHeight: box.height,
-          headerHeight: element.querySelector<HTMLElement>(".icv-day-header")?.getBoundingClientRect().height ?? 0
-        };
-      }
-    }
-    if (!best) {
-      throw new Error("No top visible vertical day found");
-    }
-    return best;
   });
 }
 

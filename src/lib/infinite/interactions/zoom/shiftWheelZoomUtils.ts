@@ -1,12 +1,3 @@
-/**
- * Domain: Interactions.
- * Responsibility: Shares wheel-burst capture, gesture-tail timing, and version guards.
- * Preserves: mounted-grid hit testing and controlled parent ownership.
- * Does not own: product rendering and direct settings mutation.
- * Failure/cancellation: cancelled or invalid gestures clear transient state without committing.
- *
- * @see docs/domains/interactions.md#source-map
- */
 import { useCallback, useEffect, useRef, type MutableRefObject, type RefObject } from "react";
 import type { CalendarViewComponentProps, TimelineSettings } from "../../../core/types";
 import { MAX_ZOOM, MIN_ZOOM } from "./zoomLimits";

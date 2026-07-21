@@ -1,26 +1,11 @@
 import { CalendarCheck2, Lock, Sparkles, Stethoscope } from "lucide-react";
 import type { EventRendererProps } from "quno-calendar";
+import { eventCardModel } from "../eventCardModel";
 import "./Demo3EventCard.css";
 
-function formatEventTime(value: string) {
-  const date = new Date(value);
-  return `${date.getHours()}:${String(date.getMinutes()).padStart(2, "0")}`;
-}
-
-export function Demo3EventCard({ event, status, isOverlapping }: EventRendererProps) {
-  const isAvailability = event.kind === "availability";
-  const isConsultation = event.kind === "consultation";
-  const isBlocked = event.kind === "blocked" || event.title.startsWith("Locked");
-  const className = [
-    "demo3-event-card",
-    `status-${status}`,
-    isAvailability ? "kind-availability" : "",
-    isConsultation ? "kind-consultation" : "",
-    isBlocked ? "kind-blocked" : "",
-    isOverlapping ? "is-overlapping" : ""
-  ]
-    .filter(Boolean)
-    .join(" ");
+export function Demo3EventCard(props: EventRendererProps) {
+  const { event, status } = props;
+  const { className, isAvailability, isBlocked, isConsultation, timeRange } = eventCardModel("demo3", props);
 
   return (
     <article className={className} data-render-status={status}>
@@ -38,7 +23,7 @@ export function Demo3EventCard({ event, status, isOverlapping }: EventRendererPr
       </span>
       <strong className="demo3-event-title">{event.title}</strong>
       <span className="demo3-event-detail">
-        {formatEventTime(event.start)}-{formatEventTime(event.end)}
+        {timeRange()}
         {event.subtitle ? ` / ${event.subtitle}` : ""}
       </span>
     </article>

@@ -1,13 +1,4 @@
 /**
- * Domain: Scroll.
- * Responsibility: Promotes settled or imperative targets into the bounded date window.
- * Preserves: the visible date and local pixel offset across bounded-window maintenance.
- * Does not own: event fetching and semantic layout-focus policy.
- * Failure/cancellation: missing geometry retains the newest valid snapshot for the next settled pass.
- *
- * @see docs/domains/scroll.md#source-map
- */
-/**
  * Responsibility: promote an imperative or settled visible date into the
  * bounded virtual window and restore its exact date-local position.
  *

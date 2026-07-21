@@ -1,13 +1,4 @@
 /**
- * Domain: Rendering.
- * Responsibility: Resolves visible/pinned columns and vertical grid-line cadence.
- * Preserves: stable geometry, layering, clipping, and external renderer isolation.
- * Does not own: requests, controlled settings, and scroll correction.
- * Failure/cancellation: missing optional content leaves structural calendar geometry intact.
- *
- * @see docs/domains/rendering.md#source-map
- */
-/**
  * Cross-axis resource window.
  * widths + viewport + interaction pins -> mounted column indexes
  */

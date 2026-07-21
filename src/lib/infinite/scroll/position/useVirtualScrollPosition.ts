@@ -1,13 +1,4 @@
 /**
- * Domain: Scroll.
- * Responsibility: Translates date-local positions to absolute offsets and observes the current viewport.
- * Preserves: the visible date and local pixel offset across bounded-window maintenance.
- * Does not own: event fetching and semantic layout-focus policy.
- * Failure/cancellation: missing geometry retains the newest valid snapshot for the next settled pass.
- *
- * @see docs/domains/scroll.md#source-map
- */
-/**
  * Responsibility: translate between semantic date-local positions and the
  * virtualizer's absolute scroll offsets.
  *

@@ -1,12 +1,3 @@
-/**
- * Domain: Interactions.
- * Responsibility: Builds calendar-membership-aware drag previews and move proposals.
- * Preserves: mounted-grid hit testing and controlled parent ownership.
- * Does not own: product rendering and direct settings mutation.
- * Failure/cancellation: cancelled or invalid gestures clear transient state without committing.
- *
- * @see docs/domains/interactions.md#source-map
- */
 /** Pure proposal/preview transforms for the React drag lifecycle. */
 import { eventCalendarIds, replaceEventCalendarMembership } from "../../../data/calendarEvents";
 import { buildMoveProposal, type CalendarHit } from "../timelineInteractionModel";

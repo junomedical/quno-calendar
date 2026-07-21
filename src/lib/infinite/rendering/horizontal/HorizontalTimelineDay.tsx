@@ -1,12 +1,3 @@
-/**
- * Domain: Rendering.
- * Responsibility: Renders one measured date header and its windowed resource rows.
- * Preserves: stable geometry, layering, clipping, and external renderer isolation.
- * Does not own: requests, controlled settings, and scroll correction.
- * Failure/cancellation: missing optional content leaves structural calendar geometry intact.
- *
- * @see docs/domains/rendering.md#source-map
- */
 import { useCallback } from "react";
 import { TIMELINE_LEFT_GUTTER_PX } from "../../../time/timelineTicks";
 import { HorizontalDayHeader } from "./HorizontalDayHeader";

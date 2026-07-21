@@ -1,12 +1,3 @@
-/**
- * Domain: Rendering.
- * Responsibility: Resolves row-local horizontal hover expansion from prepared event geometry.
- * Preserves: stable geometry, layering, clipping, and external renderer isolation.
- * Does not own: requests, controlled settings, and scroll correction.
- * Failure/cancellation: missing optional content leaves structural calendar geometry intact.
- *
- * @see docs/domains/rendering.md#source-map
- */
 import { useCallback, type Dispatch, type PointerEvent, type SetStateAction } from "react";
 import type { CalendarId } from "../../../core/types";
 import type { EventLayoutItem } from "../../events/layout/layout";

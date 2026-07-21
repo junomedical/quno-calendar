@@ -1,13 +1,4 @@
 /**
- * Domain: Views.
- * Responsibility: Composes horizontal setup, event loading, metrics, scroll runtime, measurement, and navigation.
- * Preserves: public horizontal and vertical behavior while composing feature domains.
- * Does not own: feature-domain algorithms.
- * Failure/cancellation: domain cancellation and fallback policies pass through without view-specific overrides.
- *
- * @see docs/domains/views.md#source-map
- */
-/**
  * Responsibility: compose the horizontal view's stable data, date-window,
  * navigation, sizing, async cache, and prepared metric foundations.
  *

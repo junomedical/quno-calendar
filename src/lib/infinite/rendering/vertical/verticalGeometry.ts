@@ -1,13 +1,4 @@
 /**
- * Domain: Rendering.
- * Responsibility: Converts column layout results into event and hover geometry.
- * Preserves: stable geometry, layering, clipping, and external renderer isolation.
- * Does not own: requests, controlled settings, and scroll correction.
- * Failure/cancellation: missing optional content leaves structural calendar geometry intact.
- *
- * @see docs/domains/rendering.md#source-map
- */
-/**
  * Pure vertical geometry.
  * event/time input -> clamped timeline pixels + fixed visual gutter
  */

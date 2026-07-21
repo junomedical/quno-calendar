@@ -3,6 +3,7 @@ import {
   firstViewportEventBox,
   goToWorkday,
   firstViewportEventForPrefix,
+  setDemoZoom,
   topVisibleDayDate,
   topVisibleDayState,
   renderedDayOverscanFailures,
@@ -52,10 +53,10 @@ test("renders, scrolls vertically, zooms, and changes dataset scale", async ({ p
   expect(await renderedDayOverscanFailures(page, 5)).toEqual([]);
 
   const beforeZoom = await page.getByTestId("zoom-value").textContent();
-  await page.getByTestId("zoom-slider").fill("2");
+  await setDemoZoom(page, 2);
   await expect(page.getByTestId("zoom-value")).not.toHaveText(beforeZoom ?? "");
   await expect(page.getByTestId("zoom-value")).toHaveText("2.00");
-  await page.getByTestId("zoom-slider").fill("8");
+  await setDemoZoom(page, 8);
   await expect(page.getByTestId("zoom-value")).toHaveText("8.00");
   await expect(page.getByTestId("calendar-row").first().locator(".ic-row-grid")).toHaveCSS(
     "background-size",
@@ -69,14 +70,14 @@ test("renders, scrolls vertically, zooms, and changes dataset scale", async ({ p
     "background-repeat",
     "repeat"
   );
-  await page.getByTestId("zoom-slider").fill("6");
+  await setDemoZoom(page, 6);
   await expect(page.getByTestId("calendar-row").first().locator(".ic-row-grid")).toHaveCSS(
     "background-size",
     "90px 100%"
   );
-  await page.getByTestId("zoom-slider").fill("0.5");
+  await setDemoZoom(page, 0.5);
   await expect(page.getByTestId("zoom-value")).toHaveText("0.50");
-  await page.getByTestId("zoom-slider").fill("2");
+  await setDemoZoom(page, 2);
   await expect(page.getByTestId("zoom-value")).toHaveText("2.00");
   const afterButtonZoom = await page.getByTestId("zoom-value").textContent();
   const viewportBox = await viewport.boundingBox();
@@ -133,7 +134,7 @@ test("renders, scrolls vertically, zooms, and changes dataset scale", async ({ p
     window.scrollTo(0, 0);
   });
 
-  await page.getByTestId("zoom-slider").fill("3");
+  await setDemoZoom(page, 3);
   await expect(page.getByTestId("zoom-value")).toHaveText("3.00");
   const horizontalZoomFloor = await viewport.evaluate((element) => {
     const labelWidth = 230;

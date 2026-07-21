@@ -1,12 +1,3 @@
-/**
- * Domain: Views.
- * Responsibility: Adapts generic date scrolling, horizontal time positioning, and parent-anchor operations.
- * Preserves: public horizontal and vertical behavior while composing feature domains.
- * Does not own: feature-domain algorithms.
- * Failure/cancellation: domain cancellation and fallback policies pass through without view-specific overrides.
- *
- * @see docs/domains/views.md#source-map
- */
 import { useCallback, useImperativeHandle, useRef, type ForwardedRef, type RefObject } from "react";
 import { toDateKey } from "../../../date/dateVirtualization";
 import type { CalendarNavigationHandle, TimelineSettings } from "../../../core/types";

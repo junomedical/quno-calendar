@@ -1,25 +1,11 @@
 import { Clock3, Lock, Video } from "lucide-react";
 import type { EventRendererProps } from "quno-calendar";
+import { eventCardModel } from "../eventCardModel";
 import "./Demo1EventCard.css";
 
-function formatEventTime(value: string) {
-  const date = new Date(value);
-  return `${date.getHours()}:${String(date.getMinutes()).padStart(2, "0")}`;
-}
-
-export function Demo1EventCard({ event, status }: EventRendererProps) {
-  const isAvailability = event.kind === "availability";
-  const isConsultation = event.kind === "consultation";
-  const isBlocked = event.kind === "blocked" || event.title.startsWith("Locked");
-  const className = [
-    "demo1-event-card",
-    `status-${status}`,
-    isAvailability ? "kind-availability" : "",
-    isConsultation ? "kind-consultation" : "",
-    isBlocked ? "kind-blocked" : ""
-  ]
-    .filter(Boolean)
-    .join(" ");
+export function Demo1EventCard(props: EventRendererProps) {
+  const { event, status } = props;
+  const { className, isBlocked, isConsultation, timeRange } = eventCardModel("demo1", props);
 
   return (
     <article className={className} data-render-status={status}>
@@ -29,7 +15,7 @@ export function Demo1EventCard({ event, status }: EventRendererProps) {
       </span>
       <span className="demo1-event-time">
         <Clock3 size={11} aria-hidden />
-        {formatEventTime(event.start)}-{formatEventTime(event.end)}
+        {timeRange()}
       </span>
     </article>
   );

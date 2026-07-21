@@ -58,14 +58,6 @@ When mechanisms overlap, use this order:
 
 Manual pointer, wheel, touch, or scroll-key intent cancels an opted-in restore immediately. Async event content never becomes an anchor merely because it arrived.
 
-## Module Comment Convention
+## Documentation Convention
 
-Non-trivial production modules document the same five questions at the top of the file:
-
-- **Responsibility:** the state or transformation the module owns.
-- **Flow:** its inputs, decisions, writes, and outputs.
-- **Preserves:** invariants that downstream code may rely on.
-- **Does not own:** neighboring responsibilities that must remain elsewhere.
-- **Failure/cancellation:** how incomplete or obsolete work exits.
-
-Detailed diagrams stay in this directory so source headers can remain short and link to one authoritative flow.
+Folder names and focused module names communicate ownership in source. Cross-module invariants, cancellation behavior, and longer execution narratives stay in these guides so they are stated once instead of copied into every file.

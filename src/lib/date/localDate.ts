@@ -1,12 +1,3 @@
-/**
- * Domain: Foundation.
- * Responsibility: Parses and formats local dates without UTC drift.
- * Preserves: the public compatibility boundary and deterministic cross-domain primitives.
- * Does not own: runtime feature coordination.
- * Failure/cancellation: invalid inputs are normalized or rejected by the documented public contract.
- *
- * @see docs/domains/foundation.md#source-map
- */
 const DATE_KEY_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
 
 function invalidDate(): Date {

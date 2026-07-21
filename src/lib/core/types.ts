@@ -1,12 +1,3 @@
-/**
- * Domain: Foundation.
- * Responsibility: Defines the public API, events, settings, renderers, navigation, and anchor contracts.
- * Preserves: the public compatibility boundary and deterministic cross-domain primitives.
- * Does not own: runtime feature coordination.
- * Failure/cancellation: invalid inputs are normalized or rejected by the documented public contract.
- *
- * @see docs/domains/foundation.md#source-map
- */
 import type { CSSProperties, ReactNode } from "react";
 
 /** Stable identifier for a rendered calendar row. */

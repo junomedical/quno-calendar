@@ -37,12 +37,19 @@ export function DemoZoomProvider({ initialZoom, children }: { initialZoom: numbe
   const [zoom, setZoom] = useState(initialZoom);
   const [displayedZoom, setDisplayedZoom] = useState(initialZoom);
   const readoutTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const sliderFrameRef = useRef(0);
+  const pendingSliderZoomRef = useRef(initialZoom);
   const clearReadoutTimer = useCallback(() => {
     if (readoutTimerRef.current) clearTimeout(readoutTimerRef.current);
     readoutTimerRef.current = null;
   }, []);
+  const cancelSliderFrame = useCallback(() => {
+    if (sliderFrameRef.current) cancelAnimationFrame(sliderFrameRef.current);
+    sliderFrameRef.current = 0;
+  }, []);
   const requestZoom = useCallback(
     (nextZoom: number) => {
+      cancelSliderFrame();
       setZoom(nextZoom);
       clearReadoutTimer();
       readoutTimerRef.current = setTimeout(() => {
@@ -50,20 +57,32 @@ export function DemoZoomProvider({ initialZoom, children }: { initialZoom: numbe
         setDisplayedZoom(nextZoom);
       }, GESTURE_READOUT_SETTLE_MS);
     },
-    [clearReadoutTimer]
+    [cancelSliderFrame, clearReadoutTimer]
   );
   const setZoomFromControl = useCallback(
     (nextZoom: number) => {
       clearReadoutTimer();
-      setZoom(nextZoom);
       setDisplayedZoom(nextZoom);
+      pendingSliderZoomRef.current = nextZoom;
+      if (!sliderFrameRef.current) {
+        sliderFrameRef.current = requestAnimationFrame(() => {
+          sliderFrameRef.current = 0;
+          setZoom(pendingSliderZoomRef.current);
+        });
+      }
     },
     [clearReadoutTimer]
   );
   const calendarValue = useMemo(() => ({ zoom, requestZoom }), [requestZoom, zoom]);
   const controlValue = useMemo(() => ({ displayedZoom, setZoomFromControl }), [displayedZoom, setZoomFromControl]);
 
-  useEffect(() => clearReadoutTimer, [clearReadoutTimer]);
+  useEffect(
+    () => () => {
+      clearReadoutTimer();
+      cancelSliderFrame();
+    },
+    [cancelSliderFrame, clearReadoutTimer]
+  );
 
   return (
     <DemoCalendarZoomContext.Provider value={calendarValue}>

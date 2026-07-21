@@ -1,12 +1,3 @@
-/**
- * Domain: Rendering.
- * Responsibility: Defines prepared render contracts shared by horizontal layers.
- * Preserves: stable geometry, layering, clipping, and external renderer isolation.
- * Does not own: requests, controlled settings, and scroll correction.
- * Failure/cancellation: missing optional content leaves structural calendar geometry intact.
- *
- * @see docs/domains/rendering.md#source-map
- */
 import type { Key, PointerEvent, RefCallback } from "react";
 import type {
   CalendarEvent,
@@ -111,8 +102,3 @@ export type HorizontalTimelineRowProps = {
   onHoverLeave: () => void;
   onEventPointerDown: HorizontalEventPointerDown;
 };
-
-export type HorizontalEventLayerSharedProps = Pick<
-  HorizontalTimelineRowProps,
-  "calendar" | "rowHeight" | "settings" | "eventRenderer" | "geometryRegistration" | "onEventPointerDown"
->;

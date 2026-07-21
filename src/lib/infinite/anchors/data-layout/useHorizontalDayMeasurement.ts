@@ -1,13 +1,4 @@
 /**
- * Domain: Anchors.
- * Responsibility: Measures changed days and restores the current semantic slot before paint.
- * Preserves: the current semantic calendar location across geometry changes.
- * Does not own: browser DOM focus and gesture recognition.
- * Failure/cancellation: unresolved targets retry, fall back, or yield according to anchor priority.
- *
- * @see docs/domains/anchors.md#source-map
- */
-/**
  * Responsibility: commit horizontal event-driven day sizes without moving the
  * semantic grid slot currently at the viewport's top edge.
  *

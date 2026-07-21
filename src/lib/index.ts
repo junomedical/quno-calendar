@@ -1,12 +1,3 @@
-/**
- * Domain: Foundation.
- * Responsibility: Defines the supported package exports and public compatibility boundary.
- * Preserves: the public compatibility boundary and deterministic cross-domain primitives.
- * Does not own: runtime feature coordination.
- * Failure/cancellation: invalid inputs are normalized or rejected by the documented public contract.
- *
- * @see docs/domains/foundation.md#source-map
- */
 export { CalendarRoot } from "./core/CalendarRoot";
 export { defaultEventPrefetchPolicy } from "./data/eventPrefetch";
 export {

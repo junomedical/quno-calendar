@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { todayDateKey, topVisibleDayDate, topVisibleDayState } from "../helpers";
+import { setDemoZoom, todayDateKey, topVisibleDayDate, topVisibleDayState } from "../helpers";
 
 function setCalendarCount(page: Page, count: string) {
   return page.getByTestId("calendar-count").evaluate((element, nextCount) => {
@@ -14,7 +14,7 @@ test("keeps the active day when calendar count changes and supports date navigat
   await page.goto("/");
   const viewport = page.locator(".ic-viewport");
 
-  await page.getByTestId("zoom-slider").fill("4");
+  await setDemoZoom(page, 4);
   await page.getByTestId("jump-date-input").fill("2026-08-12");
   await page.getByTestId("jump-time-input").fill("15:30");
   await page.getByTestId("go-date-button").click();

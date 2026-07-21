@@ -1,13 +1,4 @@
 /**
- * Domain: Events.
- * Responsibility: Exposes the layout-domain facade and compatibility helpers.
- * Preserves: non-blocking rendering, request-generation safety, and deterministic layout.
- * Does not own: scroll writes and DOM projection.
- * Failure/cancellation: obsolete, aborted, or failed requests cannot replace a newer committed snapshot.
- *
- * @see docs/domains/events.md#source-map
- */
-/**
  * Event-cell layout pipeline.
  *
  * events -> clipped intervals -> overlap lanes -> prepared cell
@@ -43,14 +34,6 @@ export function laneCountForPreparedCell(preparedCell: PreparedEventCell): numbe
   return preparedCell.metricLaneCount;
 }
 
-/** Computes the maximum lane count needed to render non-availability events. */
-export function laneCountForEvents(
-  events: CalendarEvent[],
-  settings: Pick<TimelineSettings, "startHour" | "endHour" | "zoom" | "rowHeight">
-): number {
-  return laneCountForPreparedCell(prepareEventCell(events, settings));
-}
-
 /** Computes row height without preparing or assigning the cell again. */
 export function rowHeightForPreparedCell(
   preparedCell: PreparedEventCell,
@@ -78,14 +61,6 @@ export function layoutEventsForRow(
 /** Reads vertical non-availability overlap depth from an already prepared cell. */
 export function verticalLaneCountForPreparedCell(preparedCell: PreparedEventCell): number {
   return preparedCell.metricLaneCount;
-}
-
-/** Computes the maximum vertical overlap lane count needed for non-availability events. */
-export function verticalLaneCountForEvents(
-  events: CalendarEvent[],
-  settings: Pick<TimelineSettings, "startHour" | "endHour" | "zoom">
-): number {
-  return verticalLaneCountForPreparedCell(prepareEventCell(events, settings));
 }
 
 type ColumnMetricSettings = Pick<

@@ -1,20 +1,47 @@
-/**
- * Domain: Rendering.
- * Responsibility: Composes one resource grid and its event layers.
- * Preserves: stable geometry, layering, clipping, and external renderer isolation.
- * Does not own: requests, controlled settings, and scroll correction.
- * Failure/cancellation: missing optional content leaves structural calendar geometry intact.
- *
- * @see docs/domains/rendering.md#source-map
- */
 import { memo, useMemo } from "react";
-import { layoutPreparedEventsForRow } from "../../events/layout/layout";
-import { gridCadenceMinutes } from "../../../time/timelineTicks";
-import { AvailabilityEventsLayer } from "./AvailabilityEventsLayer";
-import { CommittedEventsLayer } from "./CommittedEventsLayer";
+import type { CalendarEvent } from "../../../core/types";
+import { layoutPreparedEventsForRow, type EventLayoutItem } from "../../events/layout/layout";
+import { gridCadenceMinutes, TIMELINE_LEFT_GUTTER_PX } from "../../../time/timelineTicks";
+import { AvailabilityLayer, CommittedLayer, TransientLayer } from "../shared/EventLayers";
 import { HorizontalRowFrame } from "./HorizontalRowFrame";
-import { InteractionEventsLayer } from "./InteractionEventsLayer";
+import { committedEventHoverWidth, horizontalEventGeometry } from "./horizontalEventGeometry";
 import type { HorizontalTimelineRowProps } from "./types";
+
+function useEventProjections(settings: HorizontalTimelineRowProps["settings"], rowHeight: number, width: number) {
+  const availability = useMemo(
+    () => (event: CalendarEvent) => {
+      const geometry = horizontalEventGeometry(event, settings);
+      return { ...geometry, top: 0, hoverMaxWidth: geometry.width, height: rowHeight };
+    },
+    [rowHeight, settings]
+  );
+  const transient = useMemo(
+    () => (event: CalendarEvent, preview: boolean) => {
+      const geometry = horizontalEventGeometry(event, settings);
+      return {
+        ...geometry,
+        top: preview ? 6 : 0,
+        hoverMaxWidth: geometry.width,
+        height: preview ? rowHeight - 12 : rowHeight
+      };
+    },
+    [rowHeight, settings]
+  );
+  const committed = useMemo(
+    () => (item: EventLayoutItem, hovered: boolean) => {
+      const left = TIMELINE_LEFT_GUTTER_PX + item.left;
+      return {
+        left,
+        top: hovered ? 0 : item.top,
+        width: item.width,
+        hoverMaxWidth: committedEventHoverWidth(left, item.width, width),
+        height: hovered ? rowHeight : item.height
+      };
+    },
+    [rowHeight, width]
+  );
+  return { availability, transient, committed };
+}
 
 /**
  * Horizontal resource-row coordinator.
@@ -58,10 +85,9 @@ export const InfiniteTimelineRow = memo(function InfiniteTimelineRow({
   const rowSettings = useMemo(() => ({ ...settings, rowHeight }), [rowHeight, settings]);
   const availabilityEvents = useMemo(() => rowEvents.filter((event) => event.kind === "availability"), [rowEvents]);
   const layoutItems = useMemo(() => layoutPreparedEventsForRow(preparedCell, rowSettings), [preparedCell, rowSettings]);
+  const project = useEventProjections(settings, rowHeight, width);
   const sharedLayerProps = {
-    calendar,
-    rowHeight,
-    settings,
+    calendarId: calendar.id,
     eventRenderer,
     geometryRegistration,
     onEventPointerDown
@@ -86,23 +112,24 @@ export const InfiniteTimelineRow = memo(function InfiniteTimelineRow({
       onHoverMove={onHoverMove}
       onHoverLeave={onHoverLeave}
     >
-      <AvailabilityEventsLayer
+      <AvailabilityLayer
         {...sharedLayerProps}
         events={availabilityEvents}
         interactionMode={interactionMode}
         dragEventId={dragEventId}
         appearingEventIds={appearingEventIds}
+        project={project.availability}
       />
-      <CommittedEventsLayer
+      <CommittedLayer
         {...sharedLayerProps}
         items={layoutItems}
-        timelineWidth={width}
         interactionMode={interactionMode}
         hoveredEvent={hoveredEvent}
         dragEventId={dragEventId}
         appearingEventIds={appearingEventIds}
+        project={project.committed}
       />
-      <InteractionEventsLayer
+      <TransientLayer
         {...sharedLayerProps}
         dateKey={dateKey}
         draftEvent={draftEvent}
@@ -111,6 +138,7 @@ export const InfiniteTimelineRow = memo(function InfiniteTimelineRow({
         draftEventIsExiting={draftEventIsExiting}
         draftEventReleaseDurationMs={draftEventReleaseDurationMs}
         dragPreviewEvent={dragPreviewEvent}
+        project={project.transient}
       />
     </HorizontalRowFrame>
   );

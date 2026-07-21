@@ -1,13 +1,4 @@
 /**
- * Domain: Anchors.
- * Responsibility: Schedules, retries, cancels, and completes one parent-owned restoration.
- * Preserves: the current semantic calendar location across geometry changes.
- * Does not own: browser DOM focus and gesture recognition.
- * Failure/cancellation: unresolved targets retry, fall back, or yield according to anchor priority.
- *
- * @see docs/domains/anchors.md#source-map
- */
-/**
  * One cancellable viewport-anchor restoration session.
  *
  * registry/layout notifications -> one rAF read/write -> corrected scroll

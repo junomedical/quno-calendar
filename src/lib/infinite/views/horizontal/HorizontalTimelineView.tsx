@@ -1,12 +1,3 @@
-/**
- * Domain: Views.
- * Responsibility: Exposes the horizontal projection and passes its runtime into the render-only canvas.
- * Preserves: public horizontal and vertical behavior while composing feature domains.
- * Does not own: feature-domain algorithms.
- * Failure/cancellation: domain cancellation and fallback policies pass through without view-specific overrides.
- *
- * @see docs/domains/views.md#source-map
- */
 import { forwardRef } from "react";
 import type { CalendarNavigationHandle, CalendarViewComponentProps } from "../../../core/types";
 import { HorizontalTimelineCanvas } from "../../rendering/horizontal/HorizontalTimelineCanvas";

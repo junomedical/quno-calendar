@@ -1,12 +1,3 @@
-/**
- * Domain: Scroll.
- * Responsibility: Owns refs for the newest valid date, local offset, and pending target.
- * Preserves: the visible date and local pixel offset across bounded-window maintenance.
- * Does not own: event fetching and semantic layout-focus policy.
- * Failure/cancellation: missing geometry retains the newest valid snapshot for the next settled pass.
- *
- * @see docs/domains/scroll.md#source-map
- */
 import { useCallback, useEffect, useRef } from "react";
 import { normalizeAnchorDate } from "../../../date/dateVirtualization";
 import type { PendingScrollTarget } from "./scrollPositionTypes";

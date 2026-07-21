@@ -1,23 +1,14 @@
-/**
- * Domain: Rendering.
- * Responsibility: Hosts the external renderer inside geometry- and status-controlled shell layers.
- * Preserves: stable geometry, layering, clipping, and external renderer isolation.
- * Does not own: requests, controlled settings, and scroll correction.
- * Failure/cancellation: missing optional content leaves structural calendar geometry intact.
- *
- * @see docs/domains/rendering.md#source-map
- */
 import { memo, useCallback, useRef, type CSSProperties, type PointerEvent } from "react";
 import type { CalendarEvent, CalendarId, EventRenderer, EventRenderStatus } from "../../../core/types";
 import type { ViewportGeometryRegistration } from "../../anchors/parent/viewportAnchorTypes";
 
-type CssLength = number | string;
+export type CssLength = number | string;
 type RgbColor = { red: number; green: number; blue: number };
 
 const DEFAULT_EVENT_ACCENT = "#0b6eff";
 const MUTED_EVENT_ACCENT_MIX = 0.14;
 
-type EventShellProps = {
+export type EventShellProps = {
   event: CalendarEvent;
   status: EventRenderStatus;
   left: CssLength;
@@ -159,26 +150,14 @@ function blendWithWhite(channel: number): number {
 }
 
 function parseHexColor(color: string): RgbColor | null {
-  const normalized = color.trim();
-  const shortMatch = /^#([0-9a-f]{3})$/i.exec(normalized);
-  if (shortMatch) {
-    const [, value] = shortMatch;
-    return {
-      red: Number.parseInt(value[0] + value[0], 16),
-      green: Number.parseInt(value[1] + value[1], 16),
-      blue: Number.parseInt(value[2] + value[2], 16)
-    };
-  }
-
-  const longMatch = /^#([0-9a-f]{6})$/i.exec(normalized);
-  if (!longMatch) {
-    return null;
-  }
-  const [, value] = longMatch;
+  const match = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(color.trim());
+  if (!match) return null;
+  const hex = match[1].length === 3 ? [...match[1]].map((character) => character.repeat(2)).join("") : match[1];
+  const value = Number.parseInt(hex, 16);
   return {
-    red: Number.parseInt(value.slice(0, 2), 16),
-    green: Number.parseInt(value.slice(2, 4), 16),
-    blue: Number.parseInt(value.slice(4, 6), 16)
+    red: value >> 16,
+    green: (value >> 8) & 0xff,
+    blue: value & 0xff
   };
 }
 

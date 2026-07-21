@@ -1,13 +1,4 @@
 /**
- * Domain: Anchors.
- * Responsibility: Captures and resolves date/resource offsets across horizontal metric changes.
- * Preserves: the current semantic calendar location across geometry changes.
- * Does not own: browser DOM focus and gesture recognition.
- * Failure/cancellation: unresolved targets retry, fall back, or yield according to anchor priority.
- *
- * @see docs/domains/anchors.md#source-map
- */
-/**
  * Horizontal late-data focus model.
  *
  * previous date metrics + viewport offset -> semantic date/resource anchor

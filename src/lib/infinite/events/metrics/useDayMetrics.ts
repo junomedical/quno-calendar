@@ -1,13 +1,4 @@
 /**
- * Domain: Events.
- * Responsibility: Builds horizontal prepared cells and cached resource/day heights.
- * Preserves: non-blocking rendering, request-generation safety, and deterministic layout.
- * Does not own: scroll writes and DOM projection.
- * Failure/cancellation: obsolete, aborted, or failed requests cannot replace a newer committed snapshot.
- *
- * @see docs/domains/events.md#source-map
- */
-/**
  * Responsibility: build the horizontal date/resource preparation model from
  * the last accepted event snapshot.
  *

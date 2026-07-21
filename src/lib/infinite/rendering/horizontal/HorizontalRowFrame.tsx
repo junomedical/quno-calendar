@@ -1,12 +1,3 @@
-/**
- * Domain: Rendering.
- * Responsibility: Owns row grid geometry, sticky resource label, and geometry registration.
- * Preserves: stable geometry, layering, clipping, and external renderer isolation.
- * Does not own: requests, controlled settings, and scroll correction.
- * Failure/cancellation: missing optional content leaves structural calendar geometry intact.
- *
- * @see docs/domains/rendering.md#source-map
- */
 import { useCallback, type PropsWithChildren, type PointerEvent } from "react";
 import type { CalendarId, CalendarRow, TimelineSettings } from "../../../core/types";
 import { minuteToX } from "../../../time/time";

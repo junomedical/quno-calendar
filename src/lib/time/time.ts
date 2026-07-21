@@ -1,12 +1,3 @@
-/**
- * Domain: Foundation.
- * Responsibility: Converts minutes, pixels, clock strings, and ISO timestamps.
- * Preserves: the public compatibility boundary and deterministic cross-domain primitives.
- * Does not own: runtime feature coordination.
- * Failure/cancellation: invalid inputs are normalized or rejected by the documented public contract.
- *
- * @see docs/domains/foundation.md#source-map
- */
 import { fromDateKey } from "../date/dateVirtualization";
 import { parseIsoDate } from "../date/localDate";
 

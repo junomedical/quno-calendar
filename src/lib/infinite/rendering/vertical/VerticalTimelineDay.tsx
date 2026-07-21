@@ -1,13 +1,4 @@
 /**
- * Domain: Rendering.
- * Responsibility: Composes one vertical date’s chrome, board, and windowed columns.
- * Preserves: stable geometry, layering, clipping, and external renderer isolation.
- * Does not own: requests, controlled settings, and scroll correction.
- * Failure/cancellation: missing optional content leaves structural calendar geometry intact.
- *
- * @see docs/domains/rendering.md#source-map
- */
-/**
  * Vertical day coordinator.
  * day props -> resource window -> sticky chrome + layered board
  */

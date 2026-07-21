@@ -1,13 +1,4 @@
 /**
- * Domain: Scroll.
- * Responsibility: Restores or translates the top date after structural settings changes.
- * Preserves: the visible date and local pixel offset across bounded-window maintenance.
- * Does not own: event fetching and semantic layout-focus policy.
- * Failure/cancellation: missing geometry retains the newest valid snapshot for the next settled pass.
- *
- * @see docs/domains/scroll.md#source-map
- */
-/**
  * Responsibility: preserve the top visible date through structural layout
  * changes identified by the caller's layout signature.
  *

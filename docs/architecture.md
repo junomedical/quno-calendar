@@ -90,7 +90,7 @@ Primary ownership folders are:
 - `demo/examples`: one documented, focused public-API recipe per directory.
 - `demo/showcase`: application-only presets, dense stress data, and product-style interactions.
 
-[`docs/domains`](./domains/README.md) documents every library ownership contract and source file. [`docs/flows`](./flows/README.md) documents execution order. [`demo/examples`](../demo/examples/README.md) documents consumer recipes. Source headers link back to their owning documentation, and `check:architecture` verifies domain maps, dependency direction, a library-only `src/`, and example documentation backlinks.
+[`docs/domains`](./domains/README.md) documents the library ownership contracts and source map. [`docs/flows`](./flows/README.md) documents execution order. [`demo/examples`](../demo/examples/README.md) documents consumer recipes. Folder names are the source-level ownership signal; `check:architecture` enforces readable module/function sizes and keeps demo code outside the library.
 
 ## Async Event Loading
 
@@ -198,7 +198,7 @@ flowchart LR
   Translate --> Paint["paint event shells in stable viewport"]
 ```
 
-Sizing and rendering reuse the same prepared cell. Availability remains a full-cell background layer and never increases overlap metrics. Draft and drop-preview layers are overlays and do not perturb committed layout.
+Sizing and rendering reuse the same prepared cell. Availability remains a full-cell background layer and never increases overlap metrics. One shared state layer assigns availability, draft, and drop-preview statuses; horizontal and vertical views provide their own geometry adapters. These overlays never perturb committed layout.
 
 ## Date And Resource Virtualization
 
@@ -252,7 +252,7 @@ Hit-testing rejects sticky labels and headers. Multi-calendar hover remains loca
 
 Zoom stays controlled by `settings.zoom`. `Shift` + wheel requests `onZoomChange`, keeps the first focused time node for a gesture burst, and restores scroll on an animation frame. Slider or other external horizontal zoom changes preserve the time at the visible grid center in a layout effect before paint after the user has scrolled horizontally; at the timeline origin, they preserve the left edge instead. The wheel path suppresses that generic correction and retains its pointer-specific anchor. Horizontal rendering may apply a viewport-fill zoom floor without mutating the parent-owned value.
 
-The showcase keeps the controlled projection value and displayed control value in separate narrow contexts. A gesture zoom request updates only the calendar wrapper immediately; the range thumb and numeric readout catch up once after the 300ms gesture tail. Direct slider changes still update both values immediately. The route shell, settings sections, popup, and other demo controls do not render again. The calendar shell owns the broad calendar paint boundary, while the zoom control and live stats panel own small local layout, paint, and compositor boundaries. The full control pane must not use paint containment: a changing child would otherwise invalidate the full-sidebar paint layer despite stable React and DOM identity. The static sidebar is isolated on a parent compositor layer, and its changing child layers rerasterize independently, so neither a calendar frame nor a settled zoom-output update clears and repaints the menu surface.
+The showcase keeps the controlled projection value and displayed control value in separate narrow contexts. A gesture zoom request updates only the calendar wrapper immediately; the range thumb and numeric readout catch up once after the 300ms gesture tail. Direct slider input updates its thumb/readout immediately and coalesces calendar projection to the latest value once per animation frame. The route shell, settings sections, popup, and other demo controls do not render again. The calendar shell owns a stacking boundary but deliberately avoids broad paint containment around its changing scroll surface; its existing overflow clip still bounds visible content without encouraging mixed old/new raster tiles during rapid zoom. The zoom control and live stats panel own small local layout, paint, and compositor boundaries. The full control pane must not use paint containment: a changing child would otherwise invalidate the full-sidebar paint layer despite stable React and DOM identity. The static sidebar is isolated on a parent compositor layer, and its changing child layers rerasterize independently, so neither a calendar frame nor a settled zoom-output update clears and repaints the menu surface.
 
 Time scales keep a stable five-minute DOM skeleton across every zoom level. Coarser zooms hide minor labels without removing their nodes or text, while a single horizontal or vertical percentage track absorbs the changing timeline extent. Crossing the fine-grid threshold therefore changes label visibility and grid cadence without inserting a burst of tick elements across the visible dates.
 
@@ -262,13 +262,13 @@ Zoom is a geometry update, not a calendar-content lifecycle. Changes in `setting
 
 - Never key the calendar, a date, a resource row or column, an event shell, or time ticks by zoom. Mounted semantic nodes must retain identity while their position and size styles change.
 - Keep controlled zoom state as close as possible to the calendar and its zoom input. Unrelated application chrome, settings, popups, and data controllers must not subscribe to it.
-- Do not write sidebar control DOM on every gesture frame. Keep the calendar projection immediate, then synchronize the thumb and readout once the wheel/touch burst settles; direct input changes remain immediate.
+- Do not write sidebar control DOM on every gesture frame. Keep wheel/touch projection immediate, then synchronize its thumb and readout once the gesture settles. Direct slider display stays immediate while its calendar projection is limited to the latest value once per animation frame.
 - Keep prepared membership, overlap, and resource metrics independent of zoom. An unchanged external `eventRenderer` must not run again merely because its event shell moved or resized.
 - Keep tick cadence in the DOM independent of visual grid cadence. Hide labels with attributes/classes; do not add, remove, or replace label children at a zoom threshold.
 - Apply scroll-anchor correction in a layout effect before paint. Do not blank, fade, skeletonize, or remount the calendar during correction.
 - Accumulate raw mouse-wheel and touchpad zoom steps within a display frame, then perform one controlled projection and anchor restore using the first focused node. A newer external controlled value must cancel the queued wheel commit.
 - During a vertical day-height change, render the semantic top-date window from the new uniform base-day geometry until virtualizer measurements settle. Never expose a window selected from the new scroll offset and stale item sizes.
-- Contain the necessary calendar repaint at the calendar surface. Put frequently changing neighboring controls in the smallest practical paint boundary; never use a full menu or sidebar paint boundary for one changing value. Keep stable adjacent chrome on its own compositor layer when continuous calendar reprojection would otherwise share a raster surface with it.
+- Isolate calendar stacking without applying broad paint containment to the changing scroll surface. Put frequently changing neighboring controls in the smallest practical paint boundary; never use a full menu or sidebar paint boundary for one changing value. Keep stable adjacent chrome on its own compositor layer when continuous calendar reprojection would otherwise share a raster surface with it.
 - Any zoom rendering change must update the Playwright continuity coverage with DOM-identity or child-list-mutation assertions plus geometry/anchor assertions. Screenshot comparison alone is not sufficient.
 
 ## Render Layers

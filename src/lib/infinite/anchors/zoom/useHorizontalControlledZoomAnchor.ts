@@ -1,12 +1,3 @@
-/**
- * Domain: Anchors.
- * Responsibility: Preserves horizontal center time across controlled zoom prop changes.
- * Preserves: the current semantic calendar location across geometry changes.
- * Does not own: browser DOM focus and gesture recognition.
- * Failure/cancellation: unresolved targets retry, fall back, or yield according to anchor priority.
- *
- * @see docs/domains/anchors.md#source-map
- */
 import { useLayoutEffect, useRef, type RefObject } from "react";
 import { TIMELINE_LEFT_GUTTER_PX } from "../../../time/timelineTicks";
 

@@ -1,12 +1,3 @@
-/**
- * Domain: Interactions.
- * Responsibility: Temporarily disables text selection while drawing or dragging.
- * Preserves: mounted-grid hit testing and controlled parent ownership.
- * Does not own: product rendering and direct settings mutation.
- * Failure/cancellation: cancelled or invalid gestures clear transient state without committing.
- *
- * @see docs/domains/interactions.md#source-map
- */
 import { useEffect } from "react";
 
 /** Prevents browser text selection while a calendar pointer gesture is active. */

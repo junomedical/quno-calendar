@@ -1,13 +1,4 @@
 /**
- * Domain: Rendering.
- * Responsibility: Places visible calendar columns at their full-layout offsets.
- * Preserves: stable geometry, layering, clipping, and external renderer isolation.
- * Does not own: requests, controlled settings, and scroll correction.
- * Failure/cancellation: missing optional content leaves structural calendar geometry intact.
- *
- * @see docs/domains/rendering.md#source-map
- */
-/**
  * Vertical day board.
  * visible resource indexes -> now indicator + independent resource columns
  */

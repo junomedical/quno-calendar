@@ -1,0 +1,292 @@
+.preset-shell {
+  display: grid;
+  grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+  height: 100vh;
+  background: var(--page-background);
+}
+
+[data-demo-id="demo1"] {
+  --sidebar-width: 252px;
+  --page-background: #f0f4f8;
+  --sidebar-background: #17324a;
+  --sidebar-color: #d9e8ef;
+  --muted-color: #b8d2df;
+  --control-color: #142033;
+  --control-background: #f8fbfd;
+  --control-border: #3a7892;
+  --input-border: #adc1cf;
+  --sidebar-gap: 14px;
+  --sidebar-padding: 14px;
+  --control-gap: 8px;
+  --view-gap: 4px;
+  --view-padding: 3px;
+  --control-height: 30px;
+  --input-height: 34px;
+  --input-margin: 6px;
+  --input-padding: 8px;
+  --radius: 5px;
+  --label-size: 12px;
+  --option-size: 11px;
+  --zoom-output-width: 54px;
+  --zoom-output-height: 32px;
+  --date-action-width: 92px;
+  --message-height: 48px;
+  --message-padding: 10px;
+  --message-border: rgba(255, 255, 255, 0.16);
+  --message-color: #e7f7fb;
+  --message-radius: 6px;
+  --panel-padding: 12px;
+}
+
+[data-demo-id="demo2"],
+[data-demo-id="demo3"] {
+  --sidebar-color: #e2e8f0;
+  --muted-color: #b9c6d6;
+  --control-color: #111827;
+  --control-background: #f8fafc;
+  --control-border: #52667d;
+  --input-border: #b8c4d2;
+  --sidebar-gap: 16px;
+  --sidebar-padding: 18px;
+  --control-gap: 6px;
+  --view-gap: 5px;
+  --view-padding: 4px;
+  --control-height: 34px;
+  --input-height: 38px;
+  --input-margin: 7px;
+  --input-padding: 10px;
+  --radius: 6px;
+  --label-size: 13px;
+  --option-size: 12px;
+  --zoom-output-width: 58px;
+  --zoom-output-height: 36px;
+  --date-action-width: 112px;
+  --message-height: 52px;
+  --message-padding: 12px;
+  --message-border: rgba(255, 255, 255, 0.14);
+  --message-color: var(--sidebar-color);
+  --message-radius: 8px;
+}
+
+[data-demo-id="demo2"] {
+  --sidebar-width: 300px;
+  --page-background: #eef2f6;
+  --sidebar-background: #233143;
+  --message-background: rgba(255, 255, 255, 0.08);
+  --panel-padding: 22px;
+}
+
+[data-demo-id="demo3"] {
+  --sidebar-width: 292px;
+  --page-background: #eef6f1;
+  --sidebar-background: #17382d;
+  --sidebar-color: #e7f8ed;
+  --muted-color: #b7dbc7;
+  --control-color: #102018;
+  --control-background: #f5fbf7;
+  --control-border: #3f7a64;
+  --input-border: #aac8b6;
+  --message-background: rgba(255, 255, 255, 0.1);
+  --panel-padding: 20px;
+}
+
+.preset-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sidebar-gap);
+  padding: var(--sidebar-padding);
+  color: var(--sidebar-color);
+  background: var(--sidebar-background);
+  border-right: 1px solid rgba(255, 255, 255, 0.12);
+  overflow-y: auto;
+}
+
+.demo1-sidebar {
+  border-right-color: rgba(255, 255, 255, 0.14);
+}
+
+.preset-brand,
+.preset-route-nav,
+.preset-zoom-control,
+.preset-time-range,
+.preset-date-jump {
+  display: grid;
+  gap: var(--control-gap);
+}
+
+.preset-brand {
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--control-gap);
+}
+
+.demo2-brand,
+.demo3-brand {
+  gap: 11px;
+}
+
+.preset-brand strong,
+.preset-brand span,
+.preset-sidebar label {
+  display: block;
+}
+
+.preset-brand strong {
+  color: #fff;
+}
+
+.preset-brand span,
+.preset-sidebar label,
+.preset-view-switch legend {
+  color: var(--muted-color);
+  font-size: var(--label-size);
+}
+
+.preset-route-nav {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.preset-route-nav a,
+.preset-date-jump button {
+  display: grid;
+  place-items: center;
+  min-height: var(--control-height);
+  color: var(--sidebar-color);
+  background: transparent;
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius);
+  font-size: 12px;
+  text-decoration: none;
+}
+
+.preset-route-nav a[aria-current="page"],
+.preset-date-jump button {
+  color: var(--control-color);
+  background: var(--control-background);
+}
+
+.preset-sidebar :is(select, input[type="number"], input[type="date"], input[type="time"]) {
+  width: 100%;
+  height: var(--input-height);
+  margin-top: var(--input-margin);
+  padding: 0 var(--input-padding);
+  color: var(--control-color);
+  background: var(--control-background);
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius);
+}
+
+.preset-sidebar input[type="range"] {
+  width: 100%;
+  margin-top: calc(var(--input-margin) + 2px);
+}
+
+.preset-view-switch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--view-gap);
+  margin: 0;
+  padding: var(--view-padding);
+  border: 1px solid var(--control-border);
+  border-radius: calc(var(--radius) + 2px);
+}
+
+.preset-view-switch legend {
+  grid-column: 1 / -1;
+}
+
+.preset-view-switch label {
+  position: relative;
+  display: grid;
+}
+
+.preset-view-switch input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+}
+
+.preset-view-switch span {
+  display: grid;
+  place-items: center;
+  min-height: var(--control-height);
+  border-radius: var(--radius);
+  font-size: var(--option-size);
+}
+
+.preset-view-switch input:checked + span {
+  color: var(--control-color);
+  background: var(--control-background);
+}
+
+.preset-zoom-control {
+  grid-template-columns: minmax(0, 1fr) var(--zoom-output-width);
+  align-items: center;
+}
+
+.demo2-zoom-control,
+.demo3-zoom-control {
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.preset-zoom-control output {
+  display: grid;
+  place-items: center;
+  height: var(--zoom-output-height);
+  color: var(--control-color);
+  background: var(--control-background);
+  border-radius: var(--radius);
+}
+
+.preset-date-jump {
+  grid-template-columns: minmax(0, 1fr) var(--date-action-width);
+}
+
+.preset-time-range {
+  grid-template-columns: 1fr 1fr;
+}
+
+.demo2-time-range,
+.demo3-time-range {
+  gap: 10px;
+}
+
+.demo2-date-jump,
+.demo3-date-jump {
+  gap: 8px;
+}
+
+.preset-date-jump label:first-child {
+  grid-column: 1 / -1;
+}
+
+.demo2-date-jump button,
+.demo3-date-jump button {
+  align-self: end;
+  grid-template-columns: auto auto;
+  gap: 6px;
+}
+
+.preset-toggle {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.preset-message {
+  min-height: var(--message-height);
+  margin: auto 0 0;
+  padding: var(--message-padding);
+  color: var(--message-color);
+  background: var(--message-background, rgba(255, 255, 255, 0.1));
+  border: 1px solid var(--message-border);
+  border-radius: var(--message-radius);
+  font-size: var(--label-size);
+}
+
+.preset-calendar-panel {
+  min-width: 0;
+  min-height: 0;
+  padding: var(--panel-padding);
+}

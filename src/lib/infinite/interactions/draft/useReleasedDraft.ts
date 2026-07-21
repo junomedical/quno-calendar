@@ -1,12 +1,3 @@
-/**
- * Domain: Interactions.
- * Responsibility: Keeps a released draft rendered through its optional exit duration.
- * Preserves: mounted-grid hit testing and controlled parent ownership.
- * Does not own: product rendering and direct settings mutation.
- * Failure/cancellation: cancelled or invalid gestures clear transient state without committing.
- *
- * @see docs/domains/interactions.md#source-map
- */
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ActiveDraftReleaseOptions, ActiveEventDraft, EventRenderStatus } from "../../../core/types";
 

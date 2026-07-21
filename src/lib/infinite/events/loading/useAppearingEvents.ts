@@ -1,13 +1,4 @@
 /**
- * Domain: Events.
- * Responsibility: Tracks newly published event ids for bounded appearance state.
- * Preserves: non-blocking rendering, request-generation safety, and deterministic layout.
- * Does not own: scroll writes and DOM projection.
- * Failure/cancellation: obsolete, aborted, or failed requests cannot replace a newer committed snapshot.
- *
- * @see docs/domains/events.md#source-map
- */
-/**
  * Short-lived renderer status for newly committed events.
  *
  * requested ids / targeted commits -> independent timers -> appearing id set

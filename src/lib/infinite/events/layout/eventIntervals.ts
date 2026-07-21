@@ -1,12 +1,3 @@
-/**
- * Domain: Events.
- * Responsibility: Converts events into clipped, sortable timeline intervals.
- * Preserves: non-blocking rendering, request-generation safety, and deterministic layout.
- * Does not own: scroll writes and DOM projection.
- * Failure/cancellation: obsolete, aborted, or failed requests cannot replace a newer committed snapshot.
- *
- * @see docs/domains/events.md#source-map
- */
 import type { CalendarEvent, TimelineSettings } from "../../../core/types";
 import { minutesSinceStartOfDay, timelineEndMinute, timelineStartMinute } from "../../../time/time";
 

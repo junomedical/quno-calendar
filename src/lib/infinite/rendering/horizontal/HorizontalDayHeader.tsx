@@ -1,12 +1,3 @@
-/**
- * Domain: Rendering.
- * Responsibility: Renders sticky date chrome and current-date state.
- * Preserves: stable geometry, layering, clipping, and external renderer isolation.
- * Does not own: requests, controlled settings, and scroll correction.
- * Failure/cancellation: missing optional content leaves structural calendar geometry intact.
- *
- * @see docs/domains/rendering.md#source-map
- */
 import { formatHorizontalDateLabel } from "../../../date/dateLabels";
 import { fromDateKey } from "../../../date/dateVirtualization";
 import { minuteToX } from "../../../time/time";

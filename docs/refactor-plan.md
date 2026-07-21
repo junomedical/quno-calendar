@@ -22,8 +22,8 @@ The previous catch-all `hooks`, `utils`, `components`, `data`, `viewport`, `virt
 
 - [`docs/domains`](./domains/README.md) defines ownership, dependency direction, invariants, and the complete source map.
 - [`docs/flows`](./flows/README.md) defines runtime sequences, branches, cancellation, and focus priority.
-- Every production source file links to exactly one domain document.
-- `scripts/check-domain-docs.mjs` verifies source-map completeness, backlinks, retired directories, and allowed dependency direction.
+- Folder placement identifies each production file's domain; source files do not repeat documentation banners.
+- The architecture guard enforces module/function size while TypeScript and tests verify dependency contracts through actual use.
 
 ## Size And Composition Rules
 
@@ -36,4 +36,4 @@ The previous catch-all `hooks`, `utils`, `components`, `data`, `viewport`, `virt
 
 ## Verification
 
-Responsibility moves are behavior-neutral and must pass TypeScript, ESLint, Prettier, architecture/domain checks, unit/performance tests, Chromium, focused WebKit coverage, library/demo builds, package-consumer verification, SSR, declarations, and bundle budgets.
+Responsibility moves are behavior-neutral and must pass TypeScript, ESLint, Prettier, architecture checks, unit/performance tests, Chromium, focused WebKit coverage, library/demo builds, package-consumer verification, SSR, declarations, and bundle budgets.

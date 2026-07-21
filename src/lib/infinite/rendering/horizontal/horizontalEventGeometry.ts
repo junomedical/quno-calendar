@@ -1,12 +1,3 @@
-/**
- * Domain: Rendering.
- * Responsibility: Converts layout lanes and time intervals into horizontal CSS geometry.
- * Preserves: stable geometry, layering, clipping, and external renderer isolation.
- * Does not own: requests, controlled settings, and scroll correction.
- * Failure/cancellation: missing optional content leaves structural calendar geometry intact.
- *
- * @see docs/domains/rendering.md#source-map
- */
 import type { CalendarEvent, TimelineSettings } from "../../../core/types";
 import { minuteToX, minutesSinceStartOfDay } from "../../../time/time";
 import { TIMELINE_LEFT_GUTTER_PX } from "../../../time/timelineTicks";

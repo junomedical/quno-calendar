@@ -1,13 +1,4 @@
 /**
- * Domain: Scroll.
- * Responsibility: Builds prefix extents and finds visible resource indexes with overscan and pins.
- * Preserves: the visible date and local pixel offset across bounded-window maintenance.
- * Does not own: event fetching and semantic layout-focus policy.
- * Failure/cancellation: missing geometry retains the newest valid snapshot for the next settled pass.
- *
- * @see docs/domains/scroll.md#source-map
- */
-/**
  * Cross-axis resource window.
  *
  * sizes -> stable prefix extents -> binary-searched visible indexes

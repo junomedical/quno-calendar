@@ -83,7 +83,8 @@ test("keeps horizontal slider zoom continuous without replacing rendered content
   const statsPaintBoundary = page.locator(".demo-stats");
   const controlPaneBox = await controlPane.boundingBox();
   const brandBox = await page.locator(".demo-brand").boundingBox();
-  await expect(page.locator(".ic-shell")).toHaveCSS("contain", "paint");
+  await expect(page.locator(".ic-shell")).toHaveCSS("contain", "none");
+  await expect(page.locator(".ic-shell")).toHaveCSS("isolation", "isolate");
   await expect(controlPane).toHaveCSS("contain", "none");
   await expect(controlPane).toHaveCSS("will-change", "transform");
   expect(await controlPane.evaluate((element) => getComputedStyle(element).transform)).not.toBe("none");
@@ -95,15 +96,36 @@ test("keeps horizontal slider zoom continuous without replacing rendered content
   expect(await statsPaintBoundary.evaluate((element) => getComputedStyle(element).transform)).not.toBe("none");
   await zoom.fill("2");
   await expect(page.getByTestId("zoom-value")).toHaveText("2.00");
+  await page.evaluate(
+    () => new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())))
+  );
   await viewport.evaluate((element) => {
     element.scrollLeft = 360;
+    const viewportBox = element.getBoundingClientRect();
     const event = Array.from(element.querySelectorAll<HTMLElement>('[data-testid="calendar-event"]')).find(
       (candidate) => candidate.getBoundingClientRect().width > 0
     );
+    const availability = Array.from(element.querySelectorAll<HTMLElement>('[data-testid="availability-event"]')).find(
+      (candidate) => {
+        const box = candidate.getBoundingClientRect();
+        return (
+          box.width > 0 &&
+          box.right > viewportBox.left &&
+          box.left < viewportBox.right &&
+          box.bottom > viewportBox.top + 80 &&
+          box.top < viewportBox.bottom
+        );
+      }
+    );
     const content = event?.firstElementChild;
-    if (!event || !(content instanceof HTMLElement)) throw new Error("Missing event content to track");
+    const availabilityContent = availability?.firstElementChild;
+    if (!event || !(content instanceof HTMLElement) || !availability || !(availabilityContent instanceof HTMLElement)) {
+      throw new Error("Missing event content to track");
+    }
     event.dataset.zoomStableShell = "true";
     content.dataset.zoomStableContent = "true";
+    availability.dataset.zoomStableAvailabilityShell = "true";
+    availabilityContent.dataset.zoomStableAvailabilityContent = "true";
 
     const virtualSpace = element.querySelector<HTMLElement>(".ic-virtual-space");
     if (!virtualSpace) throw new Error("Missing virtual space to observe");
@@ -114,7 +136,7 @@ test("keeps horizontal slider zoom continuous without replacing rendered content
     };
     state.zoomStableNodes = Array.from(
       virtualSpace.querySelectorAll(
-        '[data-testid="calendar-day"], [data-testid="calendar-row"], [data-testid="calendar-event"], .ic-time-tick'
+        '[data-testid="calendar-day"], [data-testid="calendar-row"], [data-testid="calendar-event"], [data-testid="availability-event"], .ic-time-tick'
       )
     );
     state.zoomChildListMutations = 0;
@@ -134,11 +156,47 @@ test("keeps horizontal slider zoom continuous without replacing rendered content
       .toBeLessThanOrEqual(1);
     await expect(page.locator('[data-zoom-stable-shell="true"]')).toHaveCount(1);
     await expect(page.locator('[data-zoom-stable-content="true"]')).toHaveCount(1);
+    await expect(page.locator('[data-zoom-stable-availability-shell="true"]')).toHaveCount(1);
+    await expect(page.locator('[data-zoom-stable-availability-content="true"]')).toHaveCount(1);
     await expect(page.getByTestId("calendar-day")).not.toHaveCount(0);
     await expect(page.getByTestId("calendar-event")).not.toHaveCount(0);
     expect(await controlPane.boundingBox()).toEqual(controlPaneBox);
     expect(await page.locator(".demo-brand").boundingBox()).toEqual(brandBox);
   }
+
+  await zoom.fill("0.5");
+  await expect(page.getByTestId("zoom-value")).toHaveText("0.50");
+  await page.evaluate(
+    () => new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())))
+  );
+  await expect(page.locator('[data-zoom-stable-availability-shell="true"]')).toHaveCount(1);
+  await expect(page.locator('[data-zoom-stable-availability-content="true"]')).toHaveCount(1);
+  expect(
+    await page.evaluate(() => {
+      const viewport = document.querySelector<HTMLElement>(".ic-viewport");
+      if (!viewport) return false;
+      const viewportBox = viewport.getBoundingClientRect();
+      return Array.from(viewport.querySelectorAll<HTMLElement>('[data-testid="availability-event"]')).some((shell) => {
+        const shellBox = shell.getBoundingClientRect();
+        const card = shell.firstElementChild;
+        if (!(card instanceof HTMLElement)) return false;
+        const shellStyle = getComputedStyle(shell);
+        const cardStyle = getComputedStyle(card);
+        return (
+          shellBox.width > 0 &&
+          shellBox.height > 0 &&
+          shellBox.right > viewportBox.left &&
+          shellBox.left < viewportBox.right &&
+          shellBox.bottom > viewportBox.top + 80 &&
+          shellBox.top < viewportBox.bottom &&
+          shellStyle.display !== "none" &&
+          shellStyle.visibility === "visible" &&
+          Number(shellStyle.opacity) > 0 &&
+          cardStyle.backgroundColor !== "rgba(0, 0, 0, 0)"
+        );
+      });
+    })
+  ).toBe(true);
 
   expect(
     await page.evaluate(() => {

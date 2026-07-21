@@ -26,10 +26,11 @@ flowchart LR
 
 ### Shared
 
-| Source file                                                                          | Responsibility                                                                   |
-| ------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------- |
-| [`EventShell.tsx`](../../src/lib/infinite/rendering/shared/EventShell.tsx)           | Hosts the external renderer inside geometry- and status-controlled shell layers. |
-| [`TimeScaleHeader.tsx`](../../src/lib/infinite/rendering/shared/TimeScaleHeader.tsx) | Renders the sticky horizontal time scale, tick labels, and current-time pin.     |
+| Source file                                                                          | Responsibility                                                                        |
+| ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------- |
+| [`EventShell.tsx`](../../src/lib/infinite/rendering/shared/EventShell.tsx)           | Hosts the external renderer inside geometry- and status-controlled shell layers.      |
+| [`EventLayers.tsx`](../../src/lib/infinite/rendering/shared/EventLayers.tsx)         | Shares committed, availability, draft, and preview state while views supply geometry. |
+| [`TimeScaleHeader.tsx`](../../src/lib/infinite/rendering/shared/TimeScaleHeader.tsx) | Renders the sticky horizontal time scale, tick labels, and current-time pin.          |
 
 ### Horizontal
 
@@ -40,9 +41,6 @@ flowchart LR
 | [`HorizontalTimelineRow.tsx`](../../src/lib/infinite/rendering/horizontal/HorizontalTimelineRow.tsx)                 | Composes one resource grid and its event layers.                            |
 | [`HorizontalDayHeader.tsx`](../../src/lib/infinite/rendering/horizontal/HorizontalDayHeader.tsx)                     | Renders sticky date chrome and current-date state.                          |
 | [`HorizontalRowFrame.tsx`](../../src/lib/infinite/rendering/horizontal/HorizontalRowFrame.tsx)                       | Owns row grid geometry, sticky resource label, and geometry registration.   |
-| [`AvailabilityEventsLayer.tsx`](../../src/lib/infinite/rendering/horizontal/AvailabilityEventsLayer.tsx)             | Projects availability intervals into non-product event shells.              |
-| [`CommittedEventsLayer.tsx`](../../src/lib/infinite/rendering/horizontal/CommittedEventsLayer.tsx)                   | Projects prepared committed events and row-local hover geometry.            |
-| [`InteractionEventsLayer.tsx`](../../src/lib/infinite/rendering/horizontal/InteractionEventsLayer.tsx)               | Projects drag previews and draft instances above committed events.          |
 | [`horizontalEventGeometry.ts`](../../src/lib/infinite/rendering/horizontal/horizontalEventGeometry.ts)               | Converts layout lanes and time intervals into horizontal CSS geometry.      |
 | [`useHorizontalEventHover.ts`](../../src/lib/infinite/rendering/horizontal/useHorizontalEventHover.ts)               | Resolves row-local horizontal hover expansion from prepared event geometry. |
 | [`useHorizontalDayResourceWindow.ts`](../../src/lib/infinite/rendering/horizontal/useHorizontalDayResourceWindow.ts) | Resolves visible/pinned row indexes for one rendered date.                  |
@@ -51,21 +49,18 @@ flowchart LR
 
 ### Vertical
 
-| Source file                                                                                                      | Responsibility                                                             |
-| ---------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| [`VerticalTimelineCanvas.tsx`](../../src/lib/infinite/rendering/vertical/VerticalTimelineCanvas.tsx)             | Renders vertical virtual dates and forwards grid interaction callbacks.    |
-| [`VerticalTimelineDay.tsx`](../../src/lib/infinite/rendering/vertical/VerticalTimelineDay.tsx)                   | Composes one vertical date’s chrome, board, and windowed columns.          |
-| [`VerticalDayChrome.tsx`](../../src/lib/infinite/rendering/vertical/VerticalDayChrome.tsx)                       | Renders date headers, time labels, current-time chrome, and grid backdrop. |
-| [`VerticalDayBoard.tsx`](../../src/lib/infinite/rendering/vertical/VerticalDayBoard.tsx)                         | Places visible calendar columns at their full-layout offsets.              |
-| [`VerticalCalendarColumn.tsx`](../../src/lib/infinite/rendering/vertical/VerticalCalendarColumn.tsx)             | Composes one calendar column and registers its semantic geometry.          |
-| [`VerticalAvailabilityLayer.tsx`](../../src/lib/infinite/rendering/vertical/VerticalAvailabilityLayer.tsx)       | Projects vertical availability intervals.                                  |
-| [`VerticalCommittedEventsLayer.tsx`](../../src/lib/infinite/rendering/vertical/VerticalCommittedEventsLayer.tsx) | Projects prepared committed event columns.                                 |
-| [`VerticalTransientEventsLayer.tsx`](../../src/lib/infinite/rendering/vertical/VerticalTransientEventsLayer.tsx) | Projects vertical drag previews and draft instances.                       |
-| [`useVerticalDayWindow.ts`](../../src/lib/infinite/rendering/vertical/useVerticalDayWindow.ts)                   | Resolves visible/pinned columns and vertical grid-line cadence.            |
-| [`verticalGeometry.ts`](../../src/lib/infinite/rendering/vertical/verticalGeometry.ts)                           | Converts column layout results into event and hover geometry.              |
-| [`verticalViewGeometry.ts`](../../src/lib/infinite/rendering/vertical/verticalViewGeometry.ts)                   | Derives vertical day size, layout signature, and date-offset translation.  |
-| [`useVerticalColumnHover.ts`](../../src/lib/infinite/rendering/vertical/useVerticalColumnHover.ts)               | Resolves hover expansion within one prepared vertical calendar column.     |
-| [`types.ts`](../../src/lib/infinite/rendering/vertical/types.ts)                                                 | Defines vertical render contracts shared by boards and layers.             |
+| Source file                                                                                          | Responsibility                                                             |
+| ---------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| [`VerticalTimelineCanvas.tsx`](../../src/lib/infinite/rendering/vertical/VerticalTimelineCanvas.tsx) | Renders vertical virtual dates and forwards grid interaction callbacks.    |
+| [`VerticalTimelineDay.tsx`](../../src/lib/infinite/rendering/vertical/VerticalTimelineDay.tsx)       | Composes one vertical date’s chrome, board, and windowed columns.          |
+| [`VerticalDayChrome.tsx`](../../src/lib/infinite/rendering/vertical/VerticalDayChrome.tsx)           | Renders date headers, time labels, current-time chrome, and grid backdrop. |
+| [`VerticalDayBoard.tsx`](../../src/lib/infinite/rendering/vertical/VerticalDayBoard.tsx)             | Places visible calendar columns at their full-layout offsets.              |
+| [`VerticalCalendarColumn.tsx`](../../src/lib/infinite/rendering/vertical/VerticalCalendarColumn.tsx) | Composes one calendar column and registers its semantic geometry.          |
+| [`useVerticalDayWindow.ts`](../../src/lib/infinite/rendering/vertical/useVerticalDayWindow.ts)       | Resolves visible/pinned columns and vertical grid-line cadence.            |
+| [`verticalGeometry.ts`](../../src/lib/infinite/rendering/vertical/verticalGeometry.ts)               | Converts column layout results into event and hover geometry.              |
+| [`verticalViewGeometry.ts`](../../src/lib/infinite/rendering/vertical/verticalViewGeometry.ts)       | Derives vertical day size, layout signature, and date-offset translation.  |
+| [`useVerticalColumnHover.ts`](../../src/lib/infinite/rendering/vertical/useVerticalColumnHover.ts)   | Resolves hover expansion within one prepared vertical calendar column.     |
+| [`types.ts`](../../src/lib/infinite/rendering/vertical/types.ts)                                     | Defines vertical render contracts shared by boards and layers.             |
 
 ### Styles
 

@@ -3,7 +3,6 @@ import { PresetDemo } from "../preset/PresetDemo";
 import type { DemoPreset } from "../preset/types";
 import type { DemoRoute } from "../types";
 import { Demo1EventCard } from "./Demo1EventCard";
-import "./Demo1.css";
 
 const compactPreset: DemoPreset = {
   id: "demo1",

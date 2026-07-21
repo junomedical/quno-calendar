@@ -1,12 +1,3 @@
-/**
- * Domain: Rendering.
- * Responsibility: Renders the sticky horizontal time scale, tick labels, and current-time pin.
- * Preserves: stable geometry, layering, clipping, and external renderer isolation.
- * Does not own: requests, controlled settings, and scroll correction.
- * Failure/cancellation: missing optional content leaves structural calendar geometry intact.
- *
- * @see docs/domains/rendering.md#source-map
- */
 import { minuteToX } from "../../../time/time";
 import type { TimelineSettings } from "../../../core/types";
 import { TIMELINE_LEFT_GUTTER_PX } from "../../../time/timelineTicks";
