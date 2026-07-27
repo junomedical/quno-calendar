@@ -124,7 +124,10 @@ export function useExternalDraftCommit({
       clearActiveDraft();
       setMessage("External popup cancelled");
     });
-    if (!anchor || !cancelledEvent) return;
+    if (!anchor || !cancelledEvent) {
+      setMessage("Scroll reset skipped: no captured popup anchor");
+      return;
+    }
     if (activeDraft?.mode === "edit") {
       restoreEventAnchor(anchor, cancelledEvent, {
         eventId: sourceEventId,
@@ -133,6 +136,7 @@ export function useExternalDraftCommit({
         allowNavigationFallback: false,
         cancelOnManualScroll: true
       });
+      setMessage("Scroll reset requested for original event");
       return;
     }
     restoreSlotAnchor(anchor, cancelledEvent, {
@@ -140,6 +144,7 @@ export function useExternalDraftCommit({
       afterRecenter: true,
       cancelOnManualScroll: true
     });
+    setMessage("Scroll reset requested for drawn slot");
   }, [
     activeDraft,
     activeEditSourceEventRef,

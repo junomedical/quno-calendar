@@ -17,6 +17,10 @@
   height: 100%;
   overflow: auto;
   overscroll-behavior: contain;
+  cursor: default;
+}
+
+.ic-viewport.is-create-enabled {
   cursor: crosshair;
 }
 

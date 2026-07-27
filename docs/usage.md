@@ -11,6 +11,10 @@ Local examples in this repository import from `src/lib`, but package consumers s
 
 The stylesheet is an explicit package asset; JavaScript does not inject it. This keeps both ESM imports and CommonJS `require("quno-calendar")` safe in Node/SSR code. Import the stylesheet from the browser application entrypoint once.
 
+For a concept-first introduction with live examples, read
+[`Inside an infinite calendar`](../demo/examples/integration-walkthrough/README.md). It combines the same public
+contracts below into a single editorial walkthrough without introducing a second API layer.
+
 ## Read-Only Calendar
 
 Use `CalendarRoot` with calendars, selected ids, an async visible-range loader, and an event renderer.
@@ -40,7 +44,9 @@ function EventCard({ event, status, style }: EventRendererProps) {
 />;
 ```
 
-Repository example: [`ReadOnlyCalendar.tsx`](../demo/examples/read-only/ReadOnlyCalendar.tsx) and its [recipe guide](../demo/examples/read-only/README.md).
+Repository example: the read-only chapter in
+[`ArticleRecipeDemos.tsx`](../demo/examples/integration-walkthrough/ArticleRecipeDemos.tsx) and the
+[integration field guide](../demo/examples/integration-walkthrough/README.md).
 
 ## Delayed Or Cancellable APIs
 
@@ -89,7 +95,9 @@ When navigation reaches a date before its events load, the date/resource grid is
 
 In the vertical view, event overlap can widen resource columns but does not change the settings-owned date/time height, so the visible date and time stay fixed. See [Async Loading And Layout](./flows/async-loading-and-layout.md) for the complete request, cache, measurement, and focus diagrams.
 
-Repository example: [`AsyncApiCalendar.tsx`](../demo/examples/async-api/AsyncApiCalendar.tsx) and its [late-data guide](../demo/examples/async-api/README.md).
+Repository example: the preloading and late-data chapters in
+[`ArticleRecipeDemos.tsx`](../demo/examples/integration-walkthrough/ArticleRecipeDemos.tsx) and
+[`ArticleDemos.tsx`](../demo/examples/integration-walkthrough/ArticleDemos.tsx).
 
 The repository demo starts with a visible 1-second response from its local `POST /api/demo-events` mock endpoint and exposes an **API delay** selector with instant, 250ms, 1s, and 3s responses. A sidebar status reports pending requests even when stale events remain visible. Changing latency creates a new abort-aware loader generation; selecting a dataset or navigating while delayed demonstrates immediate grid rendering, stale-data retention, and obsolete-request cancellation. The HTTP adapter belongs to the demo; the library remains transport-agnostic through `LoadEvents`.
 
@@ -112,11 +120,16 @@ Use `view="infinite-vertical"` for resource columns with time running vertically
 />
 ```
 
-Repository example: [`VerticalPlanner.tsx`](../demo/examples/vertical-planner/VerticalPlanner.tsx) and its [recipe guide](../demo/examples/vertical-planner/README.md).
+Repository example: the horizontal/vertical overlap comparison in
+[`ArticleDemos.tsx`](../demo/examples/integration-walkthrough/ArticleDemos.tsx).
 
 ## Drag And Create
 
 The calendar requests changes. Parent code validates and persists them.
+
+Callbacks opt into their interaction families. Without a create callback, empty-grid pointer gestures remain inert.
+Without a move or activate callback, existing event cards cannot start a drag/press interaction. A calendar with none of
+these callbacks is read-only.
 
 ```tsx
 <CalendarRoot
@@ -133,7 +146,8 @@ The calendar requests changes. Parent code validates and persists them.
 
 Returning `false` from `onEventMoveRequest` rejects a drop. Returning a created event from `onEventCreateRequest` lets the visible cache show the committed event immediately. Newly committed visible events briefly receive `status: "appearing"` in `eventRenderer` props so product renderers can play a save/create highlight. For parent-owned save flows, update your own event store and call `commitVisibleEvent` so the loaded visible cache changes one record instead of reloading the range.
 
-Repository example: [`DragCreateCalendar.tsx`](../demo/examples/drag-create/DragCreateCalendar.tsx) and its [recipe guide](../demo/examples/drag-create/README.md).
+Repository example: the parent-owned mutation chapter in
+[`ArticleRecipeDemos.tsx`](../demo/examples/integration-walkthrough/ArticleRecipeDemos.tsx).
 
 ## Controlled Create/Edit Draft
 
@@ -175,6 +189,10 @@ calendarRef.current?.restoreViewportAnchor(anchor, {
 });
 ```
 
+The target is semantic rather than lane-index based. If a save introduces collisions, participant changes, or new
+metrics that move the event into another overlap lane, restoration resolves the new event geometry and keeps that event
+at the captured viewport position.
+
 Patch the saved event into the loaded visible cache before clearing the controlled draft:
 
 ```tsx
@@ -197,11 +215,15 @@ calendarRef.current?.releaseActiveDraft({ animation: "fade-out", durationMs: 420
 setActiveDraft(null);
 ```
 
-Repository example: [`ControlledDraftCalendar.tsx`](../demo/examples/controlled-draft/ControlledDraftCalendar.tsx) and its [recipe guide](../demo/examples/controlled-draft/README.md).
+Repository example: the focused creation, visual-focus, and motion chapters in
+[`ArticleDemos.tsx`](../demo/examples/integration-walkthrough/ArticleDemos.tsx) and
+[`ArticleSystemDemos.tsx`](../demo/examples/integration-walkthrough/ArticleSystemDemos.tsx).
 
 ## Availability Editing
 
-Availability uses normal events with `kind: "availability"`. In appointment mode, availability renders as background context. In availability mode, availability blocks become the active editable layer.
+Availability uses normal events with `kind: "availability"`. In appointment mode, availability renders as
+pointer-transparent background context. In availability mode, normal appointment cards remain visible but become
+pointer-transparent, and only availability blocks participate in move/draw hit-testing.
 
 ```tsx
 <CalendarRoot
@@ -211,7 +233,8 @@ Availability uses normal events with `kind: "availability"`. In appointment mode
 />
 ```
 
-Repository example: [`AvailabilityEditor.tsx`](../demo/examples/availability/AvailabilityEditor.tsx) and its [recipe guide](../demo/examples/availability/README.md).
+Repository example: the availability interaction-layer chapter in
+[`ArticleSystemDemos.tsx`](../demo/examples/integration-walkthrough/ArticleSystemDemos.tsx).
 
 ## Data Shape
 
@@ -239,6 +262,60 @@ const calendarRef = useRef<CalendarNavigationHandle>(null);
 
 calendarRef.current?.scrollToDateTime("2026-07-04", "09:30");
 ```
+
+## Reveal And Focus An Event
+
+Pass the complete event when the application already knows it. The calendar requests all known participant calendars,
+navigates to the event, preserves its semantic viewport position while selection/layout changes, and briefly reports
+`status: "focused"` to the targeted row or column instance.
+
+```tsx
+const [selectedCalendarIds, setSelectedCalendarIds] = useState(["provider-a"]);
+const calendarRef = useRef<CalendarNavigationHandle>(null);
+
+<CalendarRoot
+  ref={calendarRef}
+  {...calendarProps}
+  selectedCalendarIds={selectedCalendarIds}
+  onCalendarVisibilityRequest={({ calendarIds }) => setSelectedCalendarIds(calendarIds)}
+/>;
+
+await calendarRef.current?.focusEvent(event, { preferredCalendarId: "room-1" });
+```
+
+For controlled navigation, pass a unique request id. Re-rendering the same id does not repeat the focus operation.
+
+```tsx
+<CalendarRoot
+  {...calendarProps}
+  focusRequest={{ requestId: selectionVersion, event, preferredCalendarId: "room-1" }}
+  onCalendarVisibilityRequest={({ calendarIds }) => setSelectedCalendarIds(calendarIds)}
+  onFocusRequestComplete={(result) => reportFocusResult(result)}
+/>
+```
+
+Focus means semantic viewport focus and a temporary visual highlight, not DOM/keyboard focus or a persistent scroll lock.
+Manual pointer, wheel, touch, or scroll-key intent cancels an active request. Participant ids absent from `calendars`
+cannot be revealed. An event whose weekday is present in `settings.excludedWeekdays` resolves with
+`status: "unavailable"` and does not move the viewport. Repeating a request for an already-visible preferred
+participant is stable: the coordinator captures that same local instance before restoring it, so repeated “reveal room”
+or “reveal provider” actions do not accumulate viewport drift.
+
+## Targeted Edit And Delete
+
+Persist edits in the parent data source, then call `commitVisibleEvent`. Persist deletion first, then remove all visible
+instances without reloading the range:
+
+```tsx
+const saved = await api.updateEvent(updatedEvent);
+calendarRef.current?.commitVisibleEvent(saved, { previousEventId: updatedEvent.id });
+
+await api.deleteEvent(saved.id);
+calendarRef.current?.removeVisibleEvent(saved.id);
+```
+
+These methods only patch loaded calendar cache. The parent remains responsible for persistence and for keeping future
+`loadEvents` responses consistent.
 
 `initialDateKey` sets the initial virtual range anchor. If omitted, the calendar starts around `now`. The same handle also exposes viewport anchoring helpers for parent-owned forms: `captureViewportAnchor`, `restoreViewportAnchor`, and `cancelViewportAnchorRestore`. `commitVisibleEvent` patches one saved event into the currently loaded visible cache. `releaseActiveDraft` lets a parent close controlled draft UI while the calendar keeps the last draft shell mounted briefly for a fadeout; `durationMs` controls both the retention window and fade duration.
 

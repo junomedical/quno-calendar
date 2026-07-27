@@ -90,6 +90,8 @@ export function InfiniteTimelineDay(props: HorizontalTimelineDayProps) {
             hoveredEvent={props.hoveredEvent}
             dragEventId={props.dragEventId}
             appearingEventIds={props.appearingEventIds}
+            focusedEventTarget={props.focusedEventTarget}
+            eventInteractionEnabled={props.eventInteractionEnabled}
             dragPreviewEvent={isHidden ? null : props.dragPreviewEvent}
             draftEvent={isHidden ? null : props.draftEvent}
             draftEventStatus={props.draftEventStatus}

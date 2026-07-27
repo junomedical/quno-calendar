@@ -70,6 +70,8 @@ export const InfiniteTimelineRow = memo(function InfiniteTimelineRow({
   hoveredEvent,
   dragEventId,
   appearingEventIds,
+  focusedEventTarget,
+  eventInteractionEnabled,
   dragPreviewEvent,
   draftEvent,
   draftEventStatus,
@@ -90,6 +92,7 @@ export const InfiniteTimelineRow = memo(function InfiniteTimelineRow({
     calendarId: calendar.id,
     eventRenderer,
     geometryRegistration,
+    eventInteractionEnabled,
     onEventPointerDown
   };
 
@@ -118,6 +121,7 @@ export const InfiniteTimelineRow = memo(function InfiniteTimelineRow({
         interactionMode={interactionMode}
         dragEventId={dragEventId}
         appearingEventIds={appearingEventIds}
+        focusedEventTarget={focusedEventTarget}
         project={project.availability}
       />
       <CommittedLayer
@@ -127,6 +131,7 @@ export const InfiniteTimelineRow = memo(function InfiniteTimelineRow({
         hoveredEvent={hoveredEvent}
         dragEventId={dragEventId}
         appearingEventIds={appearingEventIds}
+        focusedEventTarget={focusedEventTarget}
         project={project.committed}
       />
       <TransientLayer

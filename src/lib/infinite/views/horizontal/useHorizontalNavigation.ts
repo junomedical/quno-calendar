@@ -1,6 +1,7 @@
 import { useCallback, useImperativeHandle, useRef, type ForwardedRef, type RefObject } from "react";
 import { toDateKey } from "../../../date/dateVirtualization";
 import type { CalendarNavigationHandle, TimelineSettings } from "../../../core/types";
+import type { CalendarViewHandle } from "../../../core/internalTypes";
 import { minuteToX, parseClockToMinutes } from "../../../time/time";
 import { useViewportAnchoring } from "../../anchors/parent/useViewportAnchoring";
 import { TIMELINE_LEFT_GUTTER_PX } from "../../../time/timelineTicks";
@@ -12,7 +13,7 @@ import { TIMELINE_LEFT_GUTTER_PX } from "../../../time/timelineTicks";
  * interaction/cache committers --^ (late-bound refs avoid coordinator cycles)
  */
 type HorizontalNavigationArgs = {
-  forwardedRef: ForwardedRef<CalendarNavigationHandle>;
+  forwardedRef: ForwardedRef<CalendarViewHandle>;
   containerRef: RefObject<HTMLDivElement>;
   effectiveSettings: TimelineSettings;
   now: Date;
@@ -52,6 +53,7 @@ export function useHorizontalNavigation({
   const { captureViewportAnchor, restoreViewportAnchor, cancelViewportAnchorRestore } = anchoring;
   const releaseActiveDraftRef = useRef<CalendarNavigationHandle["releaseActiveDraft"]>(() => undefined);
   const commitVisibleEventRef = useRef<CalendarNavigationHandle["commitVisibleEvent"]>(() => undefined);
+  const removeVisibleEventRef = useRef<CalendarNavigationHandle["removeVisibleEvent"]>(() => undefined);
 
   useImperativeHandle(
     forwardedRef,
@@ -67,6 +69,7 @@ export function useHorizontalNavigation({
       restoreViewportAnchor,
       cancelViewportAnchorRestore,
       commitVisibleEvent: (event, options) => commitVisibleEventRef.current(event, options),
+      removeVisibleEvent: (eventId) => removeVisibleEventRef.current(eventId),
       releaseActiveDraft: (options) => releaseActiveDraftRef.current(options)
     }),
     [cancelViewportAnchorRestore, captureViewportAnchor, now, restoreViewportAnchor, scrollToDate, scrollToDateTime]
@@ -76,6 +79,7 @@ export function useHorizontalNavigation({
     activeRestoreTarget: anchoring.activeRestoreTarget,
     commitVisibleEventRef,
     registration: anchoring.registration,
-    releaseActiveDraftRef
+    releaseActiveDraftRef,
+    removeVisibleEventRef
   };
 }

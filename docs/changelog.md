@@ -2,11 +2,44 @@
 
 ## 0.2.0
 
+- Fixed calendar show/hide relayout to preserve the top visible date and align its date header after resource geometry
+  settles.
+- Gated drawing and dragging by their parent callbacks, preventing orphan interactions in read-only, vertical planner,
+  responsive sizing, and create-only availability examples.
+- Added declarative and imperative event focus coordinated by `CalendarRoot`, automatic requests to reveal known
+  participant calendars, local `focused` renderer status, and cancellation on manual navigation.
+- Fixed event focus with excluded weekdays so a hidden target resolves unavailable without jumping to the next
+  included date or reporting a false focused state.
+- Fixed repeated focus of an already-visible preferred participant so it anchors from that local instance rather than
+  repeatedly translating another participant’s position and drifting the target out of view.
+- Changed the default demo status pane into a bounded six-entry activity log and added popup-cancel scroll-reset
+  requested/skipped entries plus coalesced viewport scrolled/repositioned telemetry.
+- Removed the `View example source` link from the default and preset showcase sidebars.
+- Placed dataset size and simulated API delay controls on one shared row in every showcase sidebar.
+- Consolidated the former standalone example routes into the editorial integration field guide, added a 14-chapter
+  table of contents, and linked the guide from the main demo. Rewrote the article narrative to lead with the product
+  value of stable memory, explicit data ownership, renderer extensibility, safe interaction layers, and visual
+  continuity before explaining each live control.
+- Added `removeVisibleEvent(eventId)` for immediate multi-calendar cache deletion without a range refresh.
+- Replaced the eight-step integration walkthrough with a Medium-style interactive article covering settled infinite
+  scrolling, external event cards, controlled and pointer-anchored zoom, overlap lanes and hover handoff, delayed stable
+  loading, single-doctor creation, progressive React usage, and renderer-owned add/cancel motion. The route is
+  unchanged, legacy `?step=` parameters are ignored, date labels are compact and single-line, a settlement chip reports
+  scrolled/repositioned state, and every live calendar expands without remounting through a shared viewport overlay.
+- Expanded the editorial field guide with replayable added-event and cancelled-draft card specimens, a live
+  availability-layer switch that makes normal cards inert during availability editing, and an event-relative
+  visual-focus lab that preserves a saved card through draft replacement and five-lane overlap recomputation.
+- Fixed narrow event shells in the editorial examples so short-duration events switch to a wrapped title-only
+  presentation instead of clipping four metadata lines inside the shell.
+- Embedded read-only and drag/create recipes directly in the editorial guide, added a delayed warm-window preloading
+  lab with visible request ranges, and changed the covered-event hover exhibit to the vertical resource-column
+  direction.
 - Prevented transient white/missing availability tiles during rapid zoom by coalescing direct slider projection to one latest-value update per animation frame and replacing broad calendar paint containment with stacking isolation plus the existing overflow clip. Availability shells and renderer content now have explicit minimum-zoom DOM/layering regression coverage.
 - Removed repeated source ownership banners and retired source-text policy scripts in favor of folder-owned domains plus executable type, unit, browser, and architecture checks. Shared availability/draft/preview projection now uses one state layer with small orientation geometry adapters. Runtime behavior and the public API are unchanged.
 - Changed the default event prefetch window from an adaptive rendered-day buffer to seven calendar days before and after the rendered dates; custom `eventPrefetchPolicy` behavior is unchanged.
 - Isolated controlled demo zoom projection from the sidebar readout, coalesced raw mouse-wheel/touchpad bursts to one accumulated projection per display frame, and deferred native slider/text updates until the gesture tail settles. Replaced full-sidebar paint containment with a stable sidebar compositor layer plus narrow zoom-control and stats child layers, stabilized time scales with always-mounted tick nodes on percentage tracks, and hardened horizontal and vertical zoom-out anchoring against pre-commit browser/virtualizer clamping. Vertical zoom now retains the semantic visible-date window while measurements settle, preventing a blank or wrong-date frame. Zoom no longer redraws surrounding settings UI or inserts a burst of tick elements when fine cadence activates. Added a repository zoom-stability check and Playwright child-list/DOM-identity regression coverage.
-- Moved the demo application and examples out of `src/`; `src/` is now library-only. Organized examples as one documented recipe per directory, added an in-app recipe catalog, and enforced README backlinks and public-package imports.
+- Moved the demo application and examples out of `src/`; `src/` is now library-only. The historical per-recipe catalog
+  has since been consolidated into one documented editorial field guide with public-package imports.
 - Rebuilt visible-range loading as a non-blocking stale-while-refresh pipeline with abort signals, out-of-order response protection, finite retries, a 120-date LRU, and indexed single-event patches.
 - Added policy-driven adjacent-date prefetching, public `eventPrefetchPolicy` customization, loaded/in-flight deduplication, and separate requests around cached gaps.
 - Replaced repeated overlap scans with deterministic `O(n log n)` prepared cells shared by metrics and horizontal/vertical projection.
@@ -40,8 +73,9 @@
 - Split shared timeline setup, hit-testing, wheel zoom anchoring, drag lifecycle, and draft lifecycle into focused hooks.
 - Split reusable infinite-calendar CSS into shell, horizontal layout, event-shell, and vertical layout files while preserving the existing import path.
 - Added release quality tooling for typecheck, ESLint, Prettier, library/demo builds, package verification, and GitHub Actions CI.
-- Added release-facing README, rewritten usage recipes, trimmed architecture overview, and public example routes under `/examples/*`.
-- Added source links to demo sidebars and Playwright coverage for example routes and demo source links.
+- Added release-facing README, rewritten usage recipes, a trimmed architecture overview, and the public integration
+  field guide under `/examples/integration-walkthrough`.
+- Added Playwright coverage for the integration field guide and its link from the main demo.
 - Added parent-controlled external create/edit support with `activeDraft`, `onEventDraftRequest`, and `onEventActivate`.
 - Added public viewport-anchor helpers on `CalendarNavigationHandle` so parent forms can preserve event or slot position without demo-owned DOM anchoring.
 - Added `releaseActiveDraft` on `CalendarNavigationHandle` so parent forms can clear a controlled draft while the calendar fades out the last draft shell in place.

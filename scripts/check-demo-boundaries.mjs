@@ -6,12 +6,10 @@ const root = resolve(".");
 const failures = [];
 const allowedSourceEntries = new Set(["lib"]);
 const recipeComponents = {
-  "read-only": "ReadOnlyCalendar.tsx",
-  "drag-create": "DragCreateCalendar.tsx",
-  "vertical-planner": "VerticalPlanner.tsx",
-  availability: "AvailabilityEditor.tsx",
-  "controlled-draft": "ControlledDraftCalendar.tsx",
-  "async-api": "AsyncApiCalendar.tsx"
+  "integration-walkthrough": {
+    component: "IntegrationWalkthrough.tsx",
+    publicEntry: "ArticleDemos.tsx"
+  }
 };
 
 for (const entry of readdirSync(resolve(root, "src"), { withFileTypes: true })) {
@@ -20,7 +18,8 @@ for (const entry of readdirSync(resolve(root, "src"), { withFileTypes: true })) 
     failures.push(`src/${entry.name}: src must contain reusable library code only`);
 }
 
-for (const [directory, componentName] of Object.entries(recipeComponents)) {
+for (const [directory, recipe] of Object.entries(recipeComponents)) {
+  const { component: componentName, publicEntry = componentName } = recipe;
   const recipeRoot = resolve(root, "demo/examples", directory);
   const readme = resolve(recipeRoot, "README.md");
   const component = resolve(recipeRoot, componentName);
@@ -30,12 +29,18 @@ for (const [directory, componentName] of Object.entries(recipeComponents)) {
     continue;
   }
   const source = readFileSync(component, "utf8");
+  const publicSourcePath = resolve(recipeRoot, publicEntry);
+  if (!existsSync(publicSourcePath)) {
+    failures.push(`demo/examples/${directory}: missing ${publicEntry}`);
+    continue;
+  }
+  const publicSource = readFileSync(publicSourcePath, "utf8");
   if (!source.includes("@see ./README.md"))
     failures.push(`demo/examples/${directory}/${componentName}: missing README backlink`);
-  if (!source.includes('from "quno-calendar"'))
-    failures.push(`demo/examples/${directory}/${componentName}: use the public package import`);
-  if (/src\/lib|\.\.\/lib/.test(source))
-    failures.push(`demo/examples/${directory}/${componentName}: imports library internals`);
+  if (!publicSource.includes('from "quno-calendar"'))
+    failures.push(`demo/examples/${directory}/${publicEntry}: use the public package import`);
+  if (/src\/lib|\.\.\/lib/.test(source) || /src\/lib|\.\.\/lib/.test(publicSource))
+    failures.push(`demo/examples/${directory}: imports library internals`);
 }
 
 if (failures.length) {
@@ -43,5 +48,5 @@ if (failures.length) {
   console.error(`Demo boundary check failed with ${failures.length} problem(s).`);
   process.exitCode = 1;
 } else {
-  console.log(`Demo boundary check passed for ${Object.keys(recipeComponents).length} documented recipes.`);
+  console.log("Demo boundary check passed for the editorial walkthrough.");
 }

@@ -17,6 +17,7 @@ type HorizontalTimelineCanvasProps = {
   style?: CalendarViewComponentProps["style"];
   containerRef: RefObject<HTMLDivElement>;
   isDragging: boolean;
+  canStartDraft: boolean;
   onScroll: UIEventHandler<HTMLDivElement>;
   onPointerDown: PointerEventHandler<HTMLDivElement>;
   onPointerMove: PointerEventHandler<HTMLDivElement>;
@@ -38,6 +39,7 @@ export function HorizontalTimelineCanvas({
   style,
   containerRef,
   isDragging,
+  canStartDraft,
   onScroll,
   onPointerDown,
   onPointerMove,
@@ -55,9 +57,17 @@ export function HorizontalTimelineCanvas({
   const shellClassName = ["ic-shell", className].filter(Boolean).join(" ");
 
   return (
-    <section aria-label={ariaLabel} className={shellClassName} data-testid="infinite-calendar" style={style}>
+    <section
+      aria-label={ariaLabel}
+      className={shellClassName}
+      data-testid="infinite-calendar"
+      data-view="infinite-horizontal"
+      style={style}
+    >
       <div
-        className={isDragging ? "ic-viewport is-dragging" : "ic-viewport"}
+        className={["ic-viewport", isDragging ? "is-dragging" : "", canStartDraft ? "is-create-enabled" : ""]
+          .filter(Boolean)
+          .join(" ")}
         ref={containerRef}
         onScroll={onScroll}
         onPointerDown={onPointerDown}

@@ -57,6 +57,8 @@ export function VerticalDayBoard({
             hoveredEvent={day.hoveredEvent}
             dragEventId={day.dragEventId}
             appearingEventIds={day.appearingEventIds}
+            focusedEventTarget={day.focusedEventTarget}
+            eventInteractionEnabled={day.eventInteractionEnabled}
             dragPreviewEvent={isHidden ? null : day.dragPreviewEvent}
             draftEvent={isHidden ? null : day.draftEvent}
             draftEventStatus={day.draftEventStatus}

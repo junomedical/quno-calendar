@@ -283,6 +283,33 @@ describe("InfiniteTimelineView", () => {
     expect(screen.getByTestId("custom-event-event-b")).toHaveAttribute("data-status", "appearing");
   });
 
+  it("removes every visible instance without reloading the range", async () => {
+    const ref = createRef<CalendarNavigationHandle>();
+    const sharedEvent: CalendarEvent = {
+      id: "event-shared",
+      calendarId: "calendar-a",
+      calendarIds: ["calendar-a", "calendar-b"],
+      title: "Shared Event",
+      start: "2026-07-04T09:00:00",
+      end: "2026-07-04T10:00:00"
+    };
+    const loadEvents = vi.fn(async () => [sharedEvent]);
+
+    renderCalendar({
+      ref,
+      selectedCalendarIds: ["calendar-a", "calendar-b"],
+      loadEvents,
+      settings
+    });
+
+    expect((await screen.findAllByText("Shared Event")).length).toBe(2);
+    const callsBeforeRemove = loadEvents.mock.calls.length;
+    act(() => ref.current?.removeVisibleEvent(sharedEvent.id));
+
+    expect(screen.queryByText("Shared Event")).not.toBeInTheDocument();
+    expect(loadEvents).toHaveBeenCalledTimes(callsBeforeRemove);
+  });
+
   it("renders an active edit draft in place of the loaded source event", async () => {
     const renderer = vi.fn(({ event, status, style }: EventRendererProps) => (
       <div data-testid="custom-event" data-status={status} style={style}>

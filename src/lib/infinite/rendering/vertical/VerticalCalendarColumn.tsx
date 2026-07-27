@@ -51,6 +51,8 @@ export const VerticalCalendarColumn = memo(function VerticalCalendarColumn({
   hoveredEvent,
   dragEventId,
   appearingEventIds,
+  focusedEventTarget,
+  eventInteractionEnabled,
   dragPreviewEvent,
   draftEvent,
   draftEventStatus,
@@ -104,6 +106,8 @@ export const VerticalCalendarColumn = memo(function VerticalCalendarColumn({
         interactionMode={interactionMode}
         dragEventId={dragEventId}
         appearingEventIds={appearingEventIds}
+        focusedEventTarget={focusedEventTarget}
+        eventInteractionEnabled={eventInteractionEnabled}
         eventRenderer={eventRenderer}
         geometryRegistration={geometryRegistration}
         onEventPointerDown={onEventPointerDown}
@@ -117,6 +121,8 @@ export const VerticalCalendarColumn = memo(function VerticalCalendarColumn({
         hoveredEvent={hoveredEvent}
         dragEventId={dragEventId}
         appearingEventIds={appearingEventIds}
+        focusedEventTarget={focusedEventTarget}
+        eventInteractionEnabled={eventInteractionEnabled}
         eventRenderer={eventRenderer}
         geometryRegistration={geometryRegistration}
         onEventPointerDown={onEventPointerDown}
@@ -132,6 +138,7 @@ export const VerticalCalendarColumn = memo(function VerticalCalendarColumn({
         draftEventIsExiting={draftEventIsExiting}
         draftEventReleaseDurationMs={draftEventReleaseDurationMs}
         dragPreviewEvent={dragPreviewEvent}
+        eventInteractionEnabled={eventInteractionEnabled}
         eventRenderer={eventRenderer}
         geometryRegistration={geometryRegistration}
         onEventPointerDown={onEventPointerDown}

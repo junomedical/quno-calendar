@@ -27,7 +27,7 @@ export type CalendarEvent = {
 };
 
 /** Visual state passed to the external event renderer. */
-export type EventRenderStatus = "existing" | "hovered" | "dragging" | "drop-preview" | "new" | "appearing";
+export type EventRenderStatus = "existing" | "hovered" | "dragging" | "drop-preview" | "new" | "appearing" | "focused";
 
 /** Shared geometry, interaction, and filtering settings for timeline views. */
 export type TimelineSettings = {
@@ -153,6 +153,36 @@ export type CalendarVisibleEventCommitOptions = {
   appearing?: boolean;
 };
 
+/** One declarative request to reveal and focus a known event. */
+export type CalendarFocusRequest = {
+  requestId: string | number;
+  event: CalendarEvent;
+  preferredCalendarId?: CalendarId;
+};
+
+/** Options accepted by the imperative event-focus command. */
+export type CalendarFocusOptions = {
+  preferredCalendarId?: CalendarId;
+};
+
+/** Result of a declarative or imperative event-focus request. */
+export type CalendarFocusResult = {
+  eventId: EventId;
+  renderedCalendarId?: CalendarId;
+  status: "focused" | "unavailable" | "cancelled";
+};
+
+/** Parent-owned calendar visibility update requested by calendar behavior. */
+export type CalendarVisibilityRequest = {
+  calendarIds: CalendarId[];
+  reason: "focus-event";
+};
+
+/** Declarative focus result correlated to its request id. */
+export type CalendarFocusRequestResult = CalendarFocusResult & {
+  requestId: CalendarFocusRequest["requestId"];
+};
+
 /** Common props passed from the shell to a concrete calendar view. */
 export type CalendarViewComponentProps = {
   calendars: CalendarRow[];
@@ -176,6 +206,9 @@ export type CalendarViewComponentProps = {
   onEventActivate?: (request: EventActivateRequest) => void;
   onActiveDraftMoveRequest?: (request: EventMoveRequest) => void;
   onZoomChange?: (zoom: number) => void;
+  focusRequest?: CalendarFocusRequest | null;
+  onCalendarVisibilityRequest?: (request: CalendarVisibilityRequest) => void;
+  onFocusRequestComplete?: (result: CalendarFocusRequestResult) => void;
 };
 
 /** Imperative navigation methods exposed by `CalendarRoot`. */
@@ -190,7 +223,9 @@ export type CalendarNavigationHandle = {
   ) => void;
   cancelViewportAnchorRestore: () => void;
   commitVisibleEvent: (event: CalendarEvent, options?: CalendarVisibleEventCommitOptions) => void;
+  removeVisibleEvent: (eventId: EventId) => void;
   releaseActiveDraft: (options?: ActiveDraftReleaseOptions) => void;
+  focusEvent: (event: CalendarEvent, options?: CalendarFocusOptions) => Promise<CalendarFocusResult>;
 };
 
 /** Public reusable calendar shell props. */

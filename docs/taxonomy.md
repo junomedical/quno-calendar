@@ -15,6 +15,13 @@ This document defines the names used for visible calendar interface parts and th
 | Timeline board               | The scrollable grid area to the right of labels, including the time scale and row grids.             | `.ic-time-header`, `.ic-row-grid`                 |
 | Label column                 | The sticky left column that contains date labels and calendar row labels.                            | `.ic-left-label`                                  |
 
+## Demo Surface
+
+| Term          | Meaning                                                                                                                                                          | Implementation reference      |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- |
+| Activity pane | The default showcase's bounded recent-history log for parent actions, settled viewport scrolling/repositioning, popup cancellation, and requested scroll resets. | `.demo-message`, `role="log"` |
+| Data/API row  | The shared showcase sidebar row that places dataset size and simulated API delay controls side by side.                                                          | `.data-api-control-row`       |
+
 ## Axes And Headers
 
 | Term                   | Meaning                                                                                                                                            | Implementation reference                                                        |
@@ -108,6 +115,7 @@ This document defines the names used for visible calendar interface parts and th
 | Visible-position snapshot | The top visible `{ dateKey, offsetWithinDate }` captured during scrolling and used by idle recentering.                                               | Scroll runtime                          |
 | Data-layout anchor        | A one-commit grid anchor used when late events change metrics; horizontally it preserves a date header or `{ dateKey, calendarId, offsetWithinRow }`. | Horizontal day measurement bridge       |
 | Parent viewport anchor    | An explicit event or slot geometry snapshot captured/restored through `CalendarNavigationHandle` for product-owned UI changes.                        | Parent flow plus anchor restore runtime |
+| Event focus request       | A one-shot request that reveals known participants, positions one preferred event instance, and briefly highlights it without taking DOM focus.       | `CalendarRoot` focus coordinator        |
 | Zoom anchor               | The time at the visible grid center for external zoom, or the first pointer-nearest rendered time node for a `Shift` + wheel gesture burst.           | Zoom controller                         |
 | Fallback date offset      | The date-local pixel retained by a data-layout anchor in case its resource disappears before restoration.                                             | Data-layout anchor                      |
 
@@ -121,6 +129,7 @@ This document defines the names used for visible calendar interface parts and th
 | `drop-preview` | Proposed drag/drop position rendered as a preview.                                      |
 | `new`          | Creation draft rendered while drawing or immediately after create if needed.            |
 | `appearing`    | Newly committed event rendered briefly after save/create so renderers can highlight it. |
+| `focused`      | Preferred local event instance targeted by a transient event-focus request.             |
 
 ## Preferred Language
 

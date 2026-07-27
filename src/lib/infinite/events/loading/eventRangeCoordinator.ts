@@ -156,6 +156,10 @@ export class EventRangeCoordinator {
     return this.cache.patchCommittedEvent(event, previousEventId);
   }
 
+  removeEvent(eventId: EventId): boolean {
+    return this.cache.deleteEvent(eventId);
+  }
+
   toRecord(): Record<string, CalendarEvent[]> {
     return this.cache.toRecord();
   }

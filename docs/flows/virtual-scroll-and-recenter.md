@@ -103,7 +103,8 @@ The repeated frame is a mount/measurement bridge, not polling. The bounded model
 Two translations use date-local offsets:
 
 1. **Window recenter:** preserve the exact raw offset inside the top date while date indexes are rebuilt.
-2. **Structural layout change:** translate or clamp the saved offset when settings or resource composition changes the base day height.
+2. **Structural layout change:** align the preserved date header for calendar membership changes; translate or clamp
+   the saved offset for settings-driven geometry changes such as zoom.
 
 ```mermaid
 flowchart LR

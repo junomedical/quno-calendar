@@ -96,7 +96,7 @@ The virtual scroll spacer keeps the month-before/month-after range, but mounted 
 
 ## 022 - Recenter Preserves Intra-Day Offset
 
-Rebuilding the virtual window must preserve both the top visible date and the pixel offset inside that date. Snapping back to the date header makes scroll-end recentering visible, so pending scroll targets store `{ dateKey, offsetWithinDate }` and restore the exact offset after the month window is rebuilt. When a layout change makes the day shorter, such as reducing the visible calendar list, the restored offset is clamped inside the resized day so the active date remains visible. During an active draft, the draft date is temporarily pinned into the rendered virtual items so popup-driven participant filtering can restore the draft by DOM geometry without replacing the current scroll anchor.
+Rebuilding the virtual window after ordinary scrolling must preserve both the top visible date and the pixel offset inside that date. Pending scroll targets therefore store `{ dateKey, offsetWithinDate }` and restore the exact offset after the month window is rebuilt. Explicit calendar membership changes use a different structural policy: preserve the top visible date, but align its date header to the viewport top after rows or columns settle. This gives show/hide controls a predictable date boundary instead of retaining an arbitrary row-local offset. During an active draft, the draft date is temporarily pinned into the rendered virtual items so explicit event/slot restoration can retain its stronger geometry target.
 
 Native scrollbar-thumb dragging can complete without another React scroll callback after release, so the view also listens for the browser `scrollend` event and schedules the same 1.2s idle-delay recenter used by scroll debouncing. Large wheel, thumb, or imperative jumps can arrive before the virtualizer has mounted the new edge items, so scroll handling still schedules the delayed recenter when the immediate top-date snapshot is unavailable. Even if the date is already the current anchor, the delayed recenter still scrolls back to the anchor's centered offset so the scrollbar thumb resets without correcting immediately after release.
 
@@ -178,9 +178,11 @@ The library builds to `dist` with ESM, UMD, generated TypeScript declarations, a
 
 Shared setup, hit-testing, wheel zoom anchoring, drag lifecycle, and draft lifecycle live in focused modules rather than inside orientation render coordinators. Decision 050 supersedes the former technical `hooks` bucket with responsibility-domain ownership.
 
-## 041 - Examples Are Public Recipes
+## 041 - The Example Is A Public Integration Field Guide
 
-Small source examples live under `demo/examples/<recipe>` and are mounted as `/examples/*` routes for verification. Each recipe has a focused README, source backlink, public-package import, and shared support only where the support is not product state. Larger stress variants live under `demo/showcase`. The `src/` tree is reserved for reusable library code, and an architecture check rejects demo regressions into it.
+The single `/examples/integration-walkthrough` route connects product needs to recipe-sized live exhibits. Its source
+imports the public package and stays separate from the larger stress variants under `demo/showcase`. The `src/` tree is
+reserved for reusable library code, and an architecture check rejects demo regressions into it.
 
 ## 042 - Async Data Never Owns Calendar Geometry
 
@@ -206,7 +208,10 @@ The library emits an explicit `quno-calendar/styles.css` asset. ESM and CommonJS
 
 ## 047 - Demo Variants Are Presets Over Shared Modules
 
-Routes are declared in registries, and related demo variants supply small preset objects to shared shells and controllers. Dataset controls, view controls, system time, rendering metrics, external-draft navigation, save simulation, and sidebar sections have focused ownership. Public examples remain isolated recipes rather than importing the larger demo application.
+Showcase routes are declared in a registry, and related demo variants supply small preset objects to shared shells and
+controllers. Dataset controls, view controls, system time, rendering metrics, external-draft navigation, save
+simulation, and sidebar sections have focused ownership. The integration field guide remains independent from the
+larger demo application.
 
 ## 048 - Zoom Reprojects Geometry Without Rebuilding Content
 
@@ -233,3 +238,51 @@ The showcase remains a controlled calendar consumer, but its zoom state lives in
 ## 053 - Executable Tests Replace Source-Text Policy Checks
 
 Architecture automation keeps objective size limits and the library/demo boundary. Behavioral structure such as stable zoom DOM identity, narrow render subscriptions, and compositor containment is verified through unit and Playwright assertions instead of scripts that search implementation text. Domain ownership is documented once in the folder structure and domain guides rather than repeated in generated file banners. This removes maintenance-only code while preserving the same runtime and release behavior.
+
+## 054 - Event Focus Is A One-Shot Root Coordination
+
+Event focus is exposed both as a keyed `focusRequest` and as `CalendarNavigationHandle.focusEvent`; both use one
+`CalendarRoot` coordinator above the orientation views. The caller supplies a complete event, avoiding an event-id
+lookup contract. The coordinator requests every known participant calendar, waits for the controlled selection, then
+uses the existing instance geometry registry to restore the preferred local instance. Focus is semantic viewport focus
+plus a temporary `focused` renderer status, not DOM focus or a permanent scroll constraint. Manual intent and newer
+requests cancel older work. An event on an excluded weekday is unavailable rather than normalized onto another date,
+which avoids reporting a false focus or moving the viewport to a date where the event cannot render.
+
+## 055 - Visible Cache Deletion Is Targeted And Parent-Owned
+
+`removeVisibleEvent(eventId)` removes the indexed record from its loaded date bucket, which removes every horizontal or
+vertical projection of a multi-calendar event without reloading a range. It does not call an API or create tombstones;
+the parent must persist deletion before patching the visible cache and ensure later loader responses omit the event.
+
+## 056 - Interaction Callbacks Opt In To Gesture Families
+
+The calendar must not enter drawing or dragging state unless the parent provides a callback capable of completing that
+gesture. Create callbacks enable empty-grid drawing, move or activate callbacks enable persisted event presses, and the
+active-draft move callback enables controlled-draft dragging. This keeps read-only recipes genuinely inert and prevents
+orphan drafts or drag states in examples that intentionally demonstrate only loading, layout, or creation.
+
+## 057 - Viewport Activity Telemetry Is Demo-Owned And Settled
+
+Viewport scroll/reposition messages are showcase instrumentation rather than a reusable calendar callback. The default
+demo observes its rendered viewport and reports only after a 180ms quiet period so wheel bursts do not consume the
+bounded activity history. Recent wheel, touch, scroll-key, or native-scrollbar intent classifies movement as manual
+scrolling; movement without that intent is classified as programmatic repositioning, including date navigation, idle
+virtual-window recentering, and anchor corrections. This keeps the library API focused while making its scroll behavior
+visible in the PoC.
+
+## 058 - The Integration Guide Is One Editorial Surface
+
+The integration route teaches concepts in one scrolling article instead of mounting one numbered step at a time. Each
+chapter owns a focused public-API exhibit for virtualization, event rendering, zoom, overlap, delayed loading, or
+appearance state; later exhibits mount near the article viewport and remain mounted after first reveal. Every calendar
+uses one accessible full-screen shell around the same React instance, preserving its visible date, intra-date offset,
+and loaded cache. The article scopes smaller, single-line date typography to its examples, reports scroll settlement as
+`scrolled` then `repositioned`, demonstrates hover handoff through expanded cards, and shows parent-owned single-doctor
+creation plus renderer-owned add/cancel motion. The card specimen grid includes replayable save and cancellation
+treatments. Additional labs expose the existing availability-layer switch and event-relative viewport anchoring across
+draft replacement and overlap-lane recomputation. The stability lab also makes multi-calendar identity explicit: one
+shared event is projected into doctor and room calendars while focus remains local to the requested instance. This
+presentation behavior stays in `demo/examples` and does not add reusable calendar props or state. Read-only,
+drag/create, availability, vertical comparison, delayed loading, and preloading are article chapters rather than
+standalone routes. A table of contents makes the long-form surface directly navigable, and the main demo links to it.

@@ -64,4 +64,16 @@ describe("EventDateCache", () => {
       "2026-07-21": [event("event-d", "2026-07-21")]
     });
   });
+
+  it("deletes an indexed event without discarding its loaded date bucket", () => {
+    const cache = new EventDateCache();
+    cache.replaceDates(["2026-07-18"], [event("event-a", "2026-07-18"), event("event-b", "2026-07-18")]);
+
+    expect(cache.deleteEvent("event-a")).toBe(true);
+    expect(cache.deleteEvent("missing")).toBe(false);
+    expect(cache.hasDate("2026-07-18")).toBe(true);
+    expect(cache.toRecord()).toEqual({
+      "2026-07-18": [event("event-b", "2026-07-18")]
+    });
+  });
 });

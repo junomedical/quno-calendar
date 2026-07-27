@@ -16,6 +16,7 @@ import type { EventColumnLayoutItem, PreparedEventCell } from "../../events/layo
 import type { buildTimeTicks } from "../../../time/timelineTicks";
 import type { ViewportGeometryRegistration } from "../../anchors/parent/viewportAnchorTypes";
 import type { ViewportMetricsStore } from "../../scroll/resources/viewportMetricsStore";
+import type { CalendarFocusedEventTarget } from "../../../core/internalTypes";
 
 export type VerticalHoveredEvent = { eventId: string; calendarId: CalendarId } | null;
 
@@ -52,6 +53,8 @@ export type VerticalTimelineDayProps = {
   hoveredEvent: VerticalHoveredEvent;
   dragEventId?: string;
   appearingEventIds: Set<string>;
+  focusedEventTarget?: CalendarFocusedEventTarget | null;
+  eventInteractionEnabled: boolean;
   dragPreviewEvent: CalendarEvent | null;
   draftEvent: CalendarEvent | null;
   activeRestoreTarget: CalendarViewportAnchorTarget | null;
@@ -84,6 +87,8 @@ export type VerticalCalendarColumnProps = {
   hoveredEvent: VerticalHoveredEvent;
   dragEventId?: string;
   appearingEventIds: Set<string>;
+  focusedEventTarget?: CalendarFocusedEventTarget | null;
+  eventInteractionEnabled: boolean;
   dragPreviewEvent: CalendarEvent | null;
   draftEvent: CalendarEvent | null;
   draftEventStatus: EventRenderStatus;

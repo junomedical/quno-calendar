@@ -51,6 +51,15 @@ flowchart LR
 
 `LoadEventsArgs` includes `signal?: AbortSignal`; existing loaders remain valid and cancellation-aware loaders can stop obsolete requests early. `eventPrefetchPolicy` receives the rendered date keys and selected calendar ids and returns `{ beforeDays, afterDays }`. The exported `defaultEventPrefetchPolicy` requests seven calendar days before the first rendered date and seven after the last rendered date.
 
+`CalendarRoot` also coordinates declarative `focusRequest` values and imperative `focusEvent` calls above both
+orientation views. A focus request contains a complete event, asks the parent to reveal all known participant calendars
+through `onCalendarVisibilityRequest`, and delegates date/time navigation plus exact geometry restoration to the
+selected view. A target on a weekday removed by `settings.excludedWeekdays` resolves unavailable before navigation,
+because no event instance can exist in that date model. `removeVisibleEvent` deletes one id from the loaded date cache;
+neither focus nor deletion persists data. When the preferred participant instance is already visible, subsequent focus
+requests capture that same instance as their source anchor; this makes repeated focus idempotent instead of repeatedly
+mapping another participant’s coordinate onto the preferred one.
+
 ## Dependency Direction
 
 ```mermaid
@@ -86,11 +95,23 @@ Primary ownership folders are:
 - `src/lib/infinite/interactions`: pointer, hit-testing, drag, draft, and wheel-zoom state.
 - `src/lib/infinite/rendering`: shared/orientation DOM layers, geometry, and styles.
 - `src/lib/infinite/views`: horizontal and vertical composition roots.
-- `demo/app`: application entrypoint, route catalog, and recipe navigation.
-- `demo/examples`: one documented, focused public-API recipe per directory.
+- `demo/app`: application entrypoint and the retained showcase routes.
+- `demo/examples`: the single documented public-API field guide and its recipe-sized live exhibits.
 - `demo/showcase`: application-only presets, dense stress data, and product-style interactions.
 
-[`docs/domains`](./domains/README.md) documents the library ownership contracts and source map. [`docs/flows`](./flows/README.md) documents execution order. [`demo/examples`](../demo/examples/README.md) documents consumer recipes. Folder names are the source-level ownership signal; `check:architecture` enforces readable module/function sizes and keeps demo code outside the library.
+[`docs/domains`](./domains/README.md) documents the library ownership contracts and source map.
+[`docs/flows`](./flows/README.md) documents execution order. [`demo/examples`](../demo/examples/README.md) documents the
+consumer field guide. Folder names are the source-level ownership signal; `check:architecture` enforces readable
+module/function sizes and keeps demo code outside the library.
+
+The `/examples/integration-walkthrough` route owns the complete example surface. It owns a document-height article
+scroller and table of contents, mounts later calendar exhibits only when they approach the viewport, and keeps
+each exhibit mounted afterward. Every exhibit uses the same demo-owned full-screen shell, which places its existing
+mounted `CalendarRoot` in a fixed viewport overlay; it does not invoke the browser Fullscreen API or move calendar state
+into the reusable library. Its system-design labs also expose two existing library boundaries without adding article
+state to the runtime: `interactionMode` switches pointer ownership between committed event and availability layers, and
+the public viewport-anchor handle carries visual focus from a controlled draft to its saved replacement or through
+overlap-lane recomputation.
 
 ## Async Event Loading
 
@@ -230,6 +251,11 @@ Async event metrics use a separate one-commit data-layout anchor; they do not re
 
 The viewport uses one Pointer Events pathway. Pointer ownership comes from the mounted grid's date and resource metadata, so a just-measured variable row cannot be mistaken for a neighbor when async data changes layout. Resource cells add local hover resolution, while the shared controller owns press, draw, drag, completion, rejection, callback failure, pointer cancellation, and Escape cancellation.
 
+Interaction callbacks are capabilities, not only completion notifications. Empty-grid drawing starts only when
+`onEventCreateRequest` or `onEventDraftRequest` exists. Persisted event dragging/activation starts only when
+`onEventMoveRequest` or `onEventActivate` exists, and controlled drafts are draggable only with
+`onActiveDraftMoveRequest`. Unsupported gestures stay idle rather than creating an interaction that cannot commit.
+
 ```mermaid
 stateDiagram-v2
   [*] --> Idle
@@ -253,6 +279,14 @@ Hit-testing rejects sticky labels and headers. Multi-calendar hover remains loca
 Zoom stays controlled by `settings.zoom`. `Shift` + wheel requests `onZoomChange`, keeps the first focused time node for a gesture burst, and restores scroll on an animation frame. Slider or other external horizontal zoom changes preserve the time at the visible grid center in a layout effect before paint after the user has scrolled horizontally; at the timeline origin, they preserve the left edge instead. The wheel path suppresses that generic correction and retains its pointer-specific anchor. Horizontal rendering may apply a viewport-fill zoom floor without mutating the parent-owned value.
 
 The showcase keeps the controlled projection value and displayed control value in separate narrow contexts. A gesture zoom request updates only the calendar wrapper immediately; the range thumb and numeric readout catch up once after the 300ms gesture tail. Direct slider input updates its thumb/readout immediately and coalesces calendar projection to the latest value once per animation frame. The route shell, settings sections, popup, and other demo controls do not render again. The calendar shell owns a stacking boundary but deliberately avoids broad paint containment around its changing scroll surface; its existing overflow clip still bounds visible content without encouraging mixed old/new raster tiles during rapid zoom. The zoom control and live stats panel own small local layout, paint, and compositor boundaries. The full control pane must not use paint containment: a changing child would otherwise invalidate the full-sidebar paint layer despite stable React and DOM identity. The static sidebar is isolated on a parent compositor layer, and its changing child layers rerasterize independently, so neither a calendar frame nor a settled zoom-output update clears and repaints the menu surface.
+
+The default showcase activity pane retains the six most recent parent/demo lifecycle messages instead of replacing the
+previous message. External-popup cancellation adds a second entry describing whether viewport scroll restoration was
+requested for the original event/drawn slot or skipped because no anchor was captured. This instrumentation remains
+demo-only and does not add a reusable calendar callback. A demo-owned observer coalesces viewport scroll bursts after
+180ms: recent wheel, touch, scroll-key, or scrollbar intent is reported as `Viewport scrolled`, while navigation,
+virtual-window recentering, and anchor corrections without recent manual intent are reported as
+`Viewport repositioned`.
 
 Time scales keep a stable five-minute DOM skeleton across every zoom level. Coarser zooms hide minor labels without removing their nodes or text, while a single horizontal or vertical percentage track absorbs the changing timeline extent. Crossing the fine-grid threshold therefore changes label visibility and grid cadence without inserting a burst of tick elements across the visible dates.
 
@@ -308,6 +342,12 @@ sequenceDiagram
 ```
 
 One mutation observer, one resize observer, registry notifications, and one animation-frame slot replace selector polling and timeout ladders. Restores that opt into `cancelOnManualScroll` cancel synchronously on pointer, wheel, touch, or scroll-key intent so a queued correction cannot consume the user's first movement. Navigation fallback remains available when a target is not mounted.
+
+Event focus is a transient coordinator above this primitive. It captures an existing local instance when possible,
+requests the complete controlled calendar selection, then restores the preferred participant instance or navigates to
+the event slot. The focused key is `{ eventId, calendarId }`, so only one multi-calendar instance receives
+`status: "focused"`. Once that preferred instance is visible it becomes the source for later requests, preventing
+cross-participant anchor drift. Request ids are processed once; a newer request or manual input cancels older work.
 
 Anchor names describe different owners rather than interchangeable snapshots: parent viewport restore, active gesture, pending navigation, automatic data-layout correction, and idle virtual-window recenter. Higher-priority owners suppress lower-priority scroll writes. See the [anchor taxonomy and priority diagram](./flows/README.md#anchor-taxonomy).
 

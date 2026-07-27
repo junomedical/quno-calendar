@@ -4,10 +4,20 @@
   container-name: calendar-event;
   container-type: size;
   touch-action: none;
+  cursor: default;
+}
+
+.ic-event-shell.is-focused {
+  outline: 3px solid color-mix(in srgb, var(--event-accent) 72%, white);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 5px color-mix(in srgb, var(--event-accent) 20%, transparent);
+}
+
+.ic-event-shell.is-interactive {
   cursor: grab;
 }
 
-.ic-event-shell:active {
+.ic-event-shell.is-interactive:active {
   cursor: grabbing;
 }
 

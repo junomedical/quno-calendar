@@ -9,7 +9,6 @@ const plannerPreset: DemoPreset = {
   brandIcon: Columns3,
   title: "Resource Planner",
   subtitle: "Wide vertical columns",
-  sourcePath: "demo/showcase/demo2/Demo2.tsx",
   initialScale: 1_000,
   controls: {
     calendarView: "infinite-vertical",

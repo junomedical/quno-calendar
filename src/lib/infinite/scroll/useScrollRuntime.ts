@@ -33,6 +33,7 @@ type UseVirtualTimelineWindowArgs = {
   settings: TimelineSettings;
   baseDayHeight: number;
   verticalLayoutSignature: string;
+  topDateAlignmentKey: string;
   isInteractionActive: boolean;
   layoutAnchorDateKey?: string;
   resolveOffsetOnLayoutChange?: ResolveOffsetOnLayoutChange;
@@ -51,6 +52,7 @@ export function useScrollRuntime({
   settings,
   baseDayHeight,
   verticalLayoutSignature,
+  topDateAlignmentKey,
   isInteractionActive,
   layoutAnchorDateKey,
   resolveOffsetOnLayoutChange
@@ -111,6 +113,7 @@ export function useScrollRuntime({
   useLayoutOffsetRestoration({
     baseDayHeight,
     verticalLayoutSignature,
+    topDateAlignmentKey,
     layoutAnchorDateKey,
     excludedWeekdays: settings.excludedWeekdays,
     currentWindowAnchorDateKey: virtualWindow.anchorDateKey,

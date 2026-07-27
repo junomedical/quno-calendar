@@ -135,11 +135,21 @@ export function useEventRangeLoader({
     [applyCommittedEventToLoadedEvents]
   );
 
+  const removeEventFromLoadedEvents = useCallback(
+    (eventId: EventId) => {
+      if (coordinator.removeEvent(eventId)) {
+        setEventsByDate(coordinator.toRecord());
+      }
+    },
+    [coordinator]
+  );
+
   return {
     eventsByDate,
     appearingEventIds,
     applyMoveToLoadedEvents,
     applyCommittedEventToLoadedEvents,
-    applyCreatedEventToLoadedEvents
+    applyCreatedEventToLoadedEvents,
+    removeEventFromLoadedEvents
   };
 }

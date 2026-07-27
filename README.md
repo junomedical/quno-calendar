@@ -74,17 +74,17 @@ The calendar does not persist mutations. Drag/drop and drawn creation are propos
 
 For parent-owned create/edit forms, pass `activeDraft` and handle `onEventDraftRequest`, `onEventActivate`, and `onActiveDraftMoveRequest`.
 
+Use `calendarRef.current.focusEvent(event)` to reveal known participant calendars and position an event, and
+`removeVisibleEvent(eventId)` after parent-owned deletion to remove all loaded projections immediately.
+
 ## Examples
 
+- [Step-by-step integration walkthrough](./demo/examples/integration-walkthrough/README.md)
 - [Examples guide](./demo/examples/README.md)
-- [Read-only integration](./demo/examples/read-only/README.md)
-- [Drag and create](./demo/examples/drag-create/README.md)
-- [Controlled draft](./demo/examples/controlled-draft/README.md)
-- [Vertical planner](./demo/examples/vertical-planner/README.md)
-- [Availability editor](./demo/examples/availability/README.md)
-- [Delayed async API](./demo/examples/async-api/README.md)
+- [Interactive integration field guide](./demo/examples/integration-walkthrough/README.md)
 
-`src/` contains the reusable library only. The separately documented [`demo/`](./demo/README.md) application contains focused recipes and larger stress scenarios.
+`src/` contains the reusable library only. The separately documented [`demo/`](./demo/README.md) application contains
+the editorial integration guide and larger stress scenarios.
 
 ## Documentation
 

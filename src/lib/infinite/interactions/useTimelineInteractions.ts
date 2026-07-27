@@ -59,12 +59,19 @@ export function useTimelineInteractions(args: UseTimelineInteractionsArgs) {
     applyCreatedEventToLoadedEvents: args.applyCreatedEventToLoadedEvents
   });
   const isInteractionActive = Boolean(drag.dragState || draft.draftState);
+  const canStartDraft = Boolean(args.onEventCreateRequest || args.onEventDraftRequest);
+  const canInteractWithPersistedEvents = Boolean(args.onEventMoveRequest || args.onEventActivate);
   useInteractionSelectionLock(isInteractionActive);
   const { updateDragFromPoint, finishDrag, cancelDrag } = drag;
   const { updateDraftFromPoint, finishDraft, cancelDraft } = draft;
 
   const handleGridPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (args.activeDraft || (event.target as HTMLElement).closest("[data-event-id]") || !args.isTimelinePoint(event)) {
+    if (
+      !canStartDraft ||
+      args.activeDraft ||
+      (event.target as HTMLElement).closest("[data-event-id]") ||
+      !args.isTimelinePoint(event)
+    ) {
       return;
     }
     const hit = args.getHit(event);
@@ -83,6 +90,10 @@ export function useTimelineInteractions(args: UseTimelineInteractionsArgs) {
     event.stopPropagation();
     if (args.activeDraft && !isActiveDraftEvent(calendarEvent)) return;
     if ((args.interactionMode === "availability") !== (calendarEvent.kind === "availability")) return;
+    const canInteract = isActiveDraftEvent(calendarEvent)
+      ? Boolean(args.onActiveDraftMoveRequest)
+      : Boolean(args.onEventMoveRequest || args.onEventActivate);
+    if (!canInteract) return;
     event.preventDefault();
     event.currentTarget.setPointerCapture(event.pointerId);
     const pointerMinute = args.getHit(event)?.minute ?? minutesSinceStartOfDay(calendarEvent.start);
@@ -131,10 +142,12 @@ export function useTimelineInteractions(args: UseTimelineInteractionsArgs) {
     releaseActiveDraft,
     renderedDraftEvent: args.activeDraft?.event ?? draft.draftState?.event ?? releasedDraft?.draft.event ?? null,
     renderedDraftStatus,
-    renderedDraftIsDraggable: Boolean(args.activeDraft),
+    renderedDraftIsDraggable: Boolean(args.activeDraft && args.onActiveDraftMoveRequest),
     renderedDraftIsExiting: Boolean(!args.activeDraft && !draft.draftState && releasedDraft),
     renderedDraftReleaseDurationMs: !args.activeDraft && !draft.draftState ? releasedDraft?.durationMs : undefined,
     isInteractionActive,
+    canStartDraft,
+    canInteractWithPersistedEvents,
     handleGridPointerDown,
     handleEventPointerDown,
     handlePointerMove: (event: ReactPointerEvent<HTMLDivElement>) => updateInteraction(event),

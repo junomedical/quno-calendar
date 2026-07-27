@@ -23,6 +23,7 @@ export type ResolveOffsetOnLayoutChange = (
 type UseLayoutOffsetRestorationArgs = {
   baseDayHeight: number;
   verticalLayoutSignature: string;
+  topDateAlignmentKey: string;
   layoutAnchorDateKey?: string;
   excludedWeekdays: number[];
   currentWindowAnchorDateKey: string;
@@ -39,6 +40,7 @@ type UseLayoutOffsetRestorationArgs = {
 export function useLayoutOffsetRestoration({
   baseDayHeight,
   verticalLayoutSignature,
+  topDateAlignmentKey,
   layoutAnchorDateKey,
   excludedWeekdays,
   currentWindowAnchorDateKey,
@@ -52,6 +54,7 @@ export function useLayoutOffsetRestoration({
   resolveOffsetOnLayoutChange
 }: UseLayoutOffsetRestorationArgs) {
   const previousLayoutSignatureRef = useRef("");
+  const previousTopDateAlignmentKeyRef = useRef(topDateAlignmentKey);
   const previousBaseDayHeightRef = useRef(baseDayHeight);
 
   useLayoutEffect(() => {
@@ -60,6 +63,7 @@ export function useLayoutOffsetRestoration({
     if (!previousLayoutSignatureRef.current) {
       // Mount establishes comparison state; the virtualizer already owns initialOffset.
       previousLayoutSignatureRef.current = verticalLayoutSignature;
+      previousTopDateAlignmentKeyRef.current = topDateAlignmentKey;
       previousBaseDayHeightRef.current = baseDayHeight;
       return;
     }
@@ -69,30 +73,49 @@ export function useLayoutOffsetRestoration({
     }
 
     const topDateKey = normalizeAnchorDate(topVisibleDateRef.current, excludedWeekdays);
+    const alignTopVisibleDate = previousTopDateAlignmentKeyRef.current !== topDateAlignmentKey;
     // Vertical views translate the time-relative portion; horizontal structural
     // changes use a conservative date-local clamp. Async row metrics use another path.
     const offsetWithinDate = Math.max(
       0,
-      resolveOffsetOnLayoutChange
-        ? resolveOffsetOnLayoutChange(topVisibleOffsetRef.current, previousBaseDayHeightRef.current, baseDayHeight)
-        : Math.min(topVisibleOffsetRef.current, Math.max(0, baseDayHeight - 1))
+      alignTopVisibleDate
+        ? 0
+        : resolveOffsetOnLayoutChange
+          ? resolveOffsetOnLayoutChange(topVisibleOffsetRef.current, previousBaseDayHeightRef.current, baseDayHeight)
+          : Math.min(topVisibleOffsetRef.current, Math.max(0, baseDayHeight - 1))
     );
     clearScrollEndTimer();
     previousLayoutSignatureRef.current = verticalLayoutSignature;
+    previousTopDateAlignmentKeyRef.current = topDateAlignmentKey;
     previousBaseDayHeightRef.current = baseDayHeight;
     measureVirtualizer();
     topVisibleDateRef.current = topDateKey;
     topVisibleOffsetRef.current = offsetWithinDate;
 
+    const scheduleSettledDateAlignment = () => {
+      if (!alignTopVisibleDate) return undefined;
+      let settledFrame = 0;
+      const layoutFrame = window.requestAnimationFrame(() => {
+        settledFrame = window.requestAnimationFrame(() => {
+          scrollToVisibleDateOffset(topDateKey, 0, Boolean(resolveOffsetOnLayoutChange));
+        });
+      });
+      return () => {
+        window.cancelAnimationFrame(layoutFrame);
+        window.cancelAnimationFrame(settledFrame);
+      };
+    };
+
     if (topDateKey === currentWindowAnchorDateKey) {
       // Avoid rebuilding an already-correct date model; restore its local point now.
       pendingScrollTargetRef.current = null;
       scrollToVisibleDateOffset(topDateKey, offsetWithinDate, Boolean(resolveOffsetOnLayoutChange));
-      return;
+      return scheduleSettledDateAlignment();
     }
     // A different window consumes this target in useVirtualWindowNavigation's layout effect.
     pendingScrollTargetRef.current = { dateKey: topDateKey, offsetWithinDate };
     setAnchorDateKey(() => topDateKey);
+    return scheduleSettledDateAlignment();
   }, [
     baseDayHeight,
     clearScrollEndTimer,
@@ -106,6 +129,7 @@ export function useLayoutOffsetRestoration({
     setAnchorDateKey,
     topVisibleDateRef,
     topVisibleOffsetRef,
+    topDateAlignmentKey,
     verticalLayoutSignature
   ]);
 }

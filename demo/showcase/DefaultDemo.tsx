@@ -14,6 +14,7 @@ import { ExternalEventPopup } from "./ExternalEventPopup";
 import { useDemoControls, type DemoControlDefaults, type DemoLayoutSettings } from "./hooks/useDemoControls";
 import { useSimulatedApiLoader } from "./hooks/useSimulatedApiLoader";
 import { useSystemNow } from "./hooks/useSystemNow";
+import { useViewportActivityLog } from "./hooks/useViewportActivityLog";
 import type { DemoRoute } from "./types";
 import { useExternalEventDrafts } from "./useExternalEventDrafts";
 import { DemoCalendarRoot, DemoZoomProvider } from "./zoom/DemoZoom";
@@ -27,6 +28,8 @@ const defaultLayout: DemoLayoutSettings = {
   verticalColumnOverlapGrowth: 80,
   verticalEventHoverMinHeight: 64
 };
+
+const MAX_ACTIVITY_ENTRIES = 6;
 
 function defaultControls(): DemoControlDefaults {
   const hour = new Date().getHours();
@@ -52,11 +55,20 @@ export function DefaultDemo({ routes }: { routes: DemoRoute[] }) {
   const [scale, setScale] = useState(1_000);
   const [events, setEvents] = useState(() => createDemoEvents(1_000));
   const [eventVersion, setEventVersion] = useState(0);
-  const [message, setMessage] = useState("Ready");
+  const [activityEntries, setActivityEntries] = useState(["Ready"]);
   const eventsRef = useRef(events);
   const selectedCalendarIdsRef = useRef<string[]>([]);
   const isExternalDraftOpenRef = useRef(false);
   const calendarRef = useRef<CalendarNavigationHandle>(null);
+  const calendarPanelRef = useRef<HTMLElement>(null);
+  const setMessage = useCallback((message: string) => {
+    setActivityEntries((current) => [...current.slice(-(MAX_ACTIVITY_ENTRIES - 1)), message]);
+  }, []);
+  useViewportActivityLog({
+    containerRef: calendarPanelRef,
+    resetKey: `${controls.calendarView}:${scale}`,
+    onActivity: setMessage
+  });
 
   const selectedCalendarIds = useMemo(
     () => demoCalendars.slice(0, controls.calendarCount).map((calendar) => calendar.id),
@@ -113,7 +125,7 @@ export function DefaultDemo({ routes }: { routes: DemoRoute[] }) {
       resetSaveFeedback();
       setMessage(`Loaded deterministic ${nextScale.toLocaleString()} events/year dataset`);
     },
-    [resetActiveDraft, resetSaveFeedback]
+    [resetActiveDraft, resetSaveFeedback, setMessage]
   );
 
   const handleMove = useCallback(
@@ -128,7 +140,7 @@ export function DefaultDemo({ routes }: { routes: DemoRoute[] }) {
       );
       return true;
     },
-    [updateEvents]
+    [setMessage, updateEvents]
   );
 
   const handleCreate = useCallback(
@@ -138,7 +150,7 @@ export function DefaultDemo({ routes }: { routes: DemoRoute[] }) {
         request.kind === "availability" ? "Created availability from drawn area" : "Created new event from drawn area"
       );
     },
-    [updateEvents]
+    [setMessage, updateEvents]
   );
 
   const handleToday = useCallback(() => {
@@ -146,19 +158,19 @@ export function DefaultDemo({ routes }: { routes: DemoRoute[] }) {
     setJumpDate(dateInputValue(systemNow));
     setJumpTime(timeInputValue(systemNow));
     setMessage("Scrolled to today");
-  }, [setJumpDate, setJumpTime, systemNow]);
+  }, [setJumpDate, setJumpTime, setMessage, systemNow]);
 
   const handleGoToDate = useCallback(() => {
     calendarRef.current?.scrollToDateTime(jumpDate, jumpTime);
     setMessage(`Scrolled to ${jumpDate} ${jumpTime}`);
-  }, [jumpDate, jumpTime]);
+  }, [jumpDate, jumpTime, setMessage]);
 
   const handleAvailabilityModeChange = useCallback(
     (checked: boolean) => {
       setEditAvailabilities(checked);
       setMessage(checked ? "Availability editing enabled" : "Appointment editing enabled");
     },
-    [setEditAvailabilities]
+    [setEditAvailabilities, setMessage]
   );
 
   return (
@@ -167,7 +179,7 @@ export function DefaultDemo({ routes }: { routes: DemoRoute[] }) {
         <DefaultDemoSidebar
           routes={routes}
           scale={scale}
-          message={message}
+          activityEntries={activityEntries}
           controls={controls}
           pendingApiRequestCount={simulatedApi.pendingRequestCount}
           onScaleChange={handleScaleChange}
@@ -176,7 +188,7 @@ export function DefaultDemo({ routes }: { routes: DemoRoute[] }) {
           onGoToDate={handleGoToDate}
           onExternalAdd={drafts.handleExternalAdd}
         />
-        <section className="demo-calendar-panel">
+        <section ref={calendarPanelRef} className="demo-calendar-panel">
           {drafts.activeDraft ? (
             <ExternalEventPopup
               activeDraft={drafts.activeDraft}

@@ -68,9 +68,9 @@ export class EventDateCache {
   }
 
   patchCommittedEvent(event: CalendarEvent, previousEventId?: EventId): boolean {
-    let changed = this.removeEvent(event.id);
+    let changed = this.deleteEvent(event.id);
     if (previousEventId && previousEventId !== event.id) {
-      changed = this.removeEvent(previousEventId) || changed;
+      changed = this.deleteEvent(previousEventId) || changed;
     }
 
     const destinationLoaded = this.hasDate(eventDateKey(event));
@@ -78,6 +78,10 @@ export class EventDateCache {
       this.upsert(event);
     }
     return changed || destinationLoaded;
+  }
+
+  deleteEvent(eventId: EventId): boolean {
+    return this.removeEvent(eventId);
   }
 
   touchDates(dateKeys: Iterable<string>): void {

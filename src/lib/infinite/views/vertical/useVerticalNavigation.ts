@@ -4,19 +4,21 @@
  */
 import { useCallback, useImperativeHandle, type ForwardedRef, type RefObject } from "react";
 import type { CalendarNavigationHandle, TimelineSettings } from "../../../core/types";
+import type { CalendarViewHandle } from "../../../core/internalTypes";
 import { toDateKey } from "../../../date/dateVirtualization";
 import { parseClockToMinutes } from "../../../time/time";
 import { verticalMinuteToY, VERTICAL_TIMELINE_GUTTER_PX } from "../../rendering/vertical/VerticalTimelineDay";
 import { useViewportAnchoring } from "../../anchors/parent/useViewportAnchoring";
 
 type VerticalNavigationArgs = {
-  ref: ForwardedRef<CalendarNavigationHandle>;
+  ref: ForwardedRef<CalendarViewHandle>;
   containerRef: RefObject<HTMLDivElement>;
   settings: TimelineSettings;
   now: Date;
   scrollToDate: CalendarNavigationHandle["scrollToDate"];
   rememberVisibleDateOffset: (dateKey: string, offsetWithinDate: number) => void;
   commitVisibleEvent: CalendarNavigationHandle["commitVisibleEvent"];
+  removeVisibleEvent: CalendarNavigationHandle["removeVisibleEvent"];
   releaseActiveDraft: CalendarNavigationHandle["releaseActiveDraft"];
 };
 
@@ -28,6 +30,7 @@ export function useVerticalNavigation({
   scrollToDate,
   rememberVisibleDateOffset,
   commitVisibleEvent,
+  removeVisibleEvent,
   releaseActiveDraft
 }: VerticalNavigationArgs) {
   const scrollToTimeInDate = useCallback(
@@ -79,9 +82,10 @@ export function useVerticalNavigation({
       restoreViewportAnchor: anchoring.restoreViewportAnchor,
       cancelViewportAnchorRestore: anchoring.cancelViewportAnchorRestore,
       commitVisibleEvent,
+      removeVisibleEvent,
       releaseActiveDraft
     }),
-    [anchoring, commitVisibleEvent, now, releaseActiveDraft, scrollToDate, scrollToDateTime]
+    [anchoring, commitVisibleEvent, now, releaseActiveDraft, removeVisibleEvent, scrollToDate, scrollToDateTime]
   );
 
   return {

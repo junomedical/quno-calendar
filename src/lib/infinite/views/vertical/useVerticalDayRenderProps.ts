@@ -19,6 +19,7 @@ import type { VerticalDayRenderProps } from "../../rendering/vertical/VerticalTi
 import type { useVerticalColumnHover } from "../../rendering/vertical/useVerticalColumnHover";
 import type { VerticalPreparedColumns } from "../../events/metrics/useVerticalPreparedColumns";
 import { buildVerticalNowState, type VerticalViewGeometry } from "../../rendering/vertical/verticalViewGeometry";
+import type { CalendarFocusedEventTarget } from "../../../core/internalTypes";
 
 type VerticalDayRenderPropsArgs = {
   geometry: VerticalViewGeometry;
@@ -30,6 +31,7 @@ type VerticalDayRenderPropsArgs = {
   interactionMode: NonNullable<CalendarViewComponentProps["interactionMode"]>;
   interactions: ReturnType<typeof useTimelineInteractions>;
   appearingEventIds: Set<string>;
+  focusedEventTarget?: CalendarFocusedEventTarget | null;
   eventRenderer: EventRenderer;
   geometryRegistration: ViewportGeometryRegistration;
   activeRestoreTarget: CalendarViewportAnchorTarget | null;
@@ -47,6 +49,7 @@ export function useVerticalDayRenderProps({
   interactionMode,
   interactions,
   appearingEventIds,
+  focusedEventTarget,
   eventRenderer,
   geometryRegistration,
   activeRestoreTarget,
@@ -70,6 +73,8 @@ export function useVerticalDayRenderProps({
     hoveredEvent: interactions.hoveredEvent,
     dragEventId: interactions.dragState?.event.id,
     appearingEventIds,
+    focusedEventTarget,
+    eventInteractionEnabled: interactions.canInteractWithPersistedEvents,
     dragPreviewEvent: interactions.dragPreviewEvent,
     draftEvent: interactions.renderedDraftEvent,
     draftEventStatus: interactions.renderedDraftStatus,

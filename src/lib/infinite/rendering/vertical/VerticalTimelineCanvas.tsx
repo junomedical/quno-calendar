@@ -19,6 +19,7 @@ type VerticalTimelineCanvasProps = {
   style?: CalendarViewComponentProps["style"];
   containerRef: RefObject<HTMLDivElement>;
   isDragging: boolean;
+  canStartDraft: boolean;
   onScroll: () => void;
   onPointerDown: PointerEventHandler<HTMLDivElement>;
   onPointerMove: PointerEventHandler<HTMLDivElement>;
@@ -40,6 +41,7 @@ export function VerticalTimelineCanvas({
   style,
   containerRef,
   isDragging,
+  canStartDraft,
   onScroll,
   onPointerDown,
   onPointerMove,
@@ -64,7 +66,14 @@ export function VerticalTimelineCanvas({
       style={style}
     >
       <div
-        className={isDragging ? "ic-viewport icv-viewport is-dragging" : "ic-viewport icv-viewport"}
+        className={[
+          "ic-viewport",
+          "icv-viewport",
+          isDragging ? "is-dragging" : "",
+          canStartDraft ? "is-create-enabled" : ""
+        ]
+          .filter(Boolean)
+          .join(" ")}
         ref={containerRef}
         onScroll={onScroll}
         onPointerDown={onPointerDown}

@@ -107,6 +107,43 @@ export async function horizontalDrawTarget(page: Page, options: HorizontalDrawTa
   return target;
 }
 
+/** Finds empty, visibly exposed timeline space inside a vertical resource column. */
+export async function verticalDrawTarget(page: Page) {
+  const target = await page.evaluate(() => {
+    const viewport = document.querySelector<HTMLElement>(".ic-viewport");
+    if (!viewport) return null;
+    const viewportBox = viewport.getBoundingClientRect();
+    for (const column of Array.from(document.querySelectorAll<HTMLElement>('[data-testid="calendar-column"]'))) {
+      const box = column.getBoundingClientRect();
+      if (
+        box.bottom <= viewportBox.top + 100 ||
+        box.top >= viewportBox.bottom - 80 ||
+        box.right <= viewportBox.left ||
+        box.left >= viewportBox.right
+      ) {
+        continue;
+      }
+      const x = Math.min(viewportBox.right - 8, Math.max(viewportBox.left + 8, box.left + box.width / 2));
+      for (
+        let y = Math.max(box.top + 70, viewportBox.top + 100);
+        y < Math.min(box.bottom - 70, viewportBox.bottom - 70);
+        y += 12
+      ) {
+        const pointElement = document.elementFromPoint(x, y);
+        if (
+          pointElement?.closest('[data-testid="calendar-column"]') === column &&
+          !pointElement.closest("[data-event-id]")
+        ) {
+          return { x, y };
+        }
+      }
+    }
+    return null;
+  });
+  if (!target) throw new Error("No visible empty vertical timeline grid space found");
+  return target;
+}
+
 export async function viewportRelativeEventBox(page: Page, selector: string, textIncludes?: string) {
   return page.evaluate(
     ({ eventSelector, text }) => {

@@ -1,5 +1,5 @@
 import { forwardRef } from "react";
-import type { CalendarNavigationHandle, CalendarViewComponentProps } from "../../../core/types";
+import type { CalendarInternalViewProps, CalendarViewHandle } from "../../../core/internalTypes";
 import { HorizontalTimelineCanvas } from "../../rendering/horizontal/HorizontalTimelineCanvas";
 import { useHorizontalTimelineRuntime } from "./useHorizontalTimelineRuntime";
 import "../../rendering/styles/calendar.css";
@@ -12,7 +12,7 @@ import "../../rendering/styles/calendar.css";
  * Async data, virtual geometry, interactions, and navigation are composed by
  * focused hooks so this public component stays a readable projection boundary.
  */
-export const InfiniteTimelineView = forwardRef<CalendarNavigationHandle, CalendarViewComponentProps>(
+export const InfiniteTimelineView = forwardRef<CalendarViewHandle, CalendarInternalViewProps>(
   function InfiniteTimelineView(props, ref) {
     const runtime = useHorizontalTimelineRuntime(props, ref);
     return (
@@ -22,6 +22,7 @@ export const InfiniteTimelineView = forwardRef<CalendarNavigationHandle, Calenda
         style={props.style}
         containerRef={runtime.virtualTimeline.containerRef}
         isDragging={Boolean(runtime.interactions.dragState)}
+        canStartDraft={runtime.interactions.canStartDraft}
         onScroll={runtime.virtualTimeline.updateTopVisibleDate}
         onPointerDown={runtime.interactions.handleGridPointerDown}
         onPointerMove={runtime.interactions.handlePointerMove}
@@ -46,6 +47,8 @@ export const InfiniteTimelineView = forwardRef<CalendarNavigationHandle, Calenda
           hoveredEvent: runtime.interactions.hoveredEvent,
           dragEventId: runtime.interactions.dragState?.event.id,
           appearingEventIds: runtime.eventRange.appearingEventIds,
+          focusedEventTarget: props.focusedEventTarget,
+          eventInteractionEnabled: runtime.interactions.canInteractWithPersistedEvents,
           dragPreviewEvent: runtime.interactions.dragPreviewEvent,
           draftEvent: runtime.interactions.renderedDraftEvent,
           activeRestoreTarget: runtime.navigation.activeRestoreTarget,

@@ -9,7 +9,6 @@ const availabilityPreset: DemoPreset = {
   brandIcon: CalendarCheck2,
   title: "Availability Board",
   subtitle: "Availability-first editing",
-  sourcePath: "demo/showcase/demo3/Demo3.tsx",
   initialScale: 5_000,
   controls: {
     calendarView: "infinite-vertical",

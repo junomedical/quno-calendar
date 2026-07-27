@@ -98,9 +98,18 @@ export const EventShell = memo(function EventShell({
 
   return (
     <div
-      className={["ic-event-shell", status === "hovered" ? "is-hovered" : "", className].filter(Boolean).join(" ")}
+      className={[
+        "ic-event-shell",
+        status === "hovered" ? "is-hovered" : "",
+        status === "focused" ? "is-focused" : "",
+        !disableDrag ? "is-interactive" : "",
+        className
+      ]
+        .filter(Boolean)
+        .join(" ")}
       data-event-id={event.id}
       data-calendar-id={renderedCalendarId}
+      data-status={status}
       data-lane-count={laneCount}
       data-exiting={isExiting ? "true" : undefined}
       data-testid={testId}

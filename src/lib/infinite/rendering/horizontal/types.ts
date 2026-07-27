@@ -11,6 +11,7 @@ import type {
 import type { PreparedEventCell, layoutPreparedEventsForRow } from "../../events/layout/layout";
 import type { ViewportGeometryRegistration } from "../../anchors/parent/viewportAnchorTypes";
 import type { ViewportMetricsStore } from "../../scroll/resources/viewportMetricsStore";
+import type { CalendarFocusedEventTarget } from "../../../core/internalTypes";
 
 /** Shared horizontal-render contracts: view coordinator -> day -> row -> event layers. */
 
@@ -44,6 +45,8 @@ export type HorizontalTimelineDayProps = {
   hoveredEvent: HoveredEvent;
   dragEventId?: string;
   appearingEventIds: Set<string>;
+  focusedEventTarget?: CalendarFocusedEventTarget | null;
+  eventInteractionEnabled: boolean;
   dragPreviewEvent: CalendarEvent | null;
   draftEvent: CalendarEvent | null;
   activeRestoreTarget: CalendarViewportAnchorTarget | null;
@@ -85,6 +88,8 @@ export type HorizontalTimelineRowProps = {
   hoveredEvent: HoveredEvent;
   dragEventId?: string;
   appearingEventIds: Set<string>;
+  focusedEventTarget?: CalendarFocusedEventTarget | null;
+  eventInteractionEnabled: boolean;
   dragPreviewEvent: CalendarEvent | null;
   draftEvent: CalendarEvent | null;
   draftEventStatus: EventRenderStatus;

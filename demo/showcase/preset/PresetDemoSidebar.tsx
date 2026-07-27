@@ -1,5 +1,4 @@
 import { DemoRouteNav } from "../DemoRouteNav";
-import { DemoSourceLinks } from "../DemoSourceLinks";
 import { ApiLatencyControl } from "../controls/ApiLatencyControl";
 import { DateJumpControl } from "../controls/DateJumpControl";
 import { DatasetControl } from "../controls/DatasetControl";
@@ -48,13 +47,14 @@ export function PresetDemoSidebar({
       </div>
 
       <DemoRouteNav activeRouteId={preset.id} className={className("route-nav")} routes={routes} />
-      <DemoSourceLinks sourcePath={preset.sourcePath} />
-      <DatasetControl scale={scale} onChange={onScaleChange} />
-      <ApiLatencyControl
-        latencyMs={controls.apiLatencyMs}
-        pendingRequestCount={pendingApiRequestCount}
-        onChange={controls.setApiLatencyMs}
-      />
+      <div className="data-api-control-row" data-testid="data-api-control-row">
+        <DatasetControl scale={scale} onChange={onScaleChange} />
+        <ApiLatencyControl
+          latencyMs={controls.apiLatencyMs}
+          pendingRequestCount={pendingApiRequestCount}
+          onChange={controls.setApiLatencyMs}
+        />
+      </div>
       <ViewControl
         className={className("view-switch")}
         inputName={`${preset.id}-view`}

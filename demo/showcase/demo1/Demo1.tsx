@@ -9,7 +9,6 @@ const compactPreset: DemoPreset = {
   brandIcon: CalendarDays,
   title: "Compact Board",
   subtitle: "Horizontal clinic throughput",
-  sourcePath: "demo/showcase/demo1/Demo1.tsx",
   initialScale: 1_000,
   controls: {
     calendarView: "infinite-horizontal",

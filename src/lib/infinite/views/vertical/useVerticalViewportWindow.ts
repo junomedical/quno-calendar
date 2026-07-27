@@ -13,6 +13,7 @@ type VerticalViewportWindowArgs = {
   settings: TimelineSettings;
   dayHeight: number;
   layoutSignature: string;
+  topDateAlignmentKey: string;
   layoutAnchorDateKey?: string;
 };
 
@@ -21,6 +22,7 @@ export function useVerticalViewportWindow({
   settings,
   dayHeight,
   layoutSignature,
+  topDateAlignmentKey,
   layoutAnchorDateKey
 }: VerticalViewportWindowArgs) {
   const [windowAnchorDateKey, setWindowAnchorDateKey] = useState(initialAnchorDateKey);
@@ -37,6 +39,7 @@ export function useVerticalViewportWindow({
     settings,
     baseDayHeight: dayHeight,
     verticalLayoutSignature: layoutSignature,
+    topDateAlignmentKey,
     isInteractionActive,
     layoutAnchorDateKey,
     resolveOffsetOnLayoutChange

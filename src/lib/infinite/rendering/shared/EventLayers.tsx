@@ -3,6 +3,7 @@ import type { CalendarEvent, CalendarId, EventRenderer, EventRenderStatus } from
 import type { ViewportGeometryRegistration } from "../../anchors/parent/viewportAnchorTypes";
 import { eventDateKey } from "../../events/eventDateKey";
 import { EventShell, type EventShellProps } from "./EventShell";
+import type { CalendarFocusedEventTarget } from "../../../core/internalTypes";
 
 export type EventProjection = Pick<EventShellProps, "left" | "top" | "width" | "hoverMaxWidth" | "height">;
 
@@ -13,6 +14,7 @@ type SharedLayerProps = {
   eventRenderer: EventRenderer;
   geometryRegistration: ViewportGeometryRegistration;
   onEventPointerDown: NonNullable<EventShellProps["onEventPointerDown"]>;
+  eventInteractionEnabled: boolean;
   shellClassName?: string;
 };
 
@@ -22,6 +24,7 @@ type CommittedLayerProps<Item extends CommittedItem> = SharedLayerProps & {
   hoveredEvent: { eventId: string; calendarId: CalendarId } | null;
   dragEventId?: string;
   appearingEventIds: Set<string>;
+  focusedEventTarget?: CalendarFocusedEventTarget | null;
   project: (item: Item, hovered: boolean) => EventProjection;
 };
 
@@ -32,6 +35,8 @@ export function CommittedLayer<Item extends CommittedItem>({
   hoveredEvent,
   dragEventId,
   appearingEventIds,
+  focusedEventTarget,
+  eventInteractionEnabled,
   project,
   shellClassName,
   ...shellProps
@@ -39,13 +44,16 @@ export function CommittedLayer<Item extends CommittedItem>({
   return items.map((item) => {
     const isDragging = dragEventId === item.event.id;
     const isHovered = !dragEventId && hoveredEvent?.eventId === item.event.id && hoveredEvent.calendarId === calendarId;
+    const isFocused = focusedEventTarget?.eventId === item.event.id && focusedEventTarget.calendarId === calendarId;
     const status = isDragging
       ? "dragging"
-      : appearingEventIds.has(item.event.id)
-        ? "appearing"
-        : isHovered
-          ? "hovered"
-          : "existing";
+      : isFocused
+        ? "focused"
+        : appearingEventIds.has(item.event.id)
+          ? "appearing"
+          : isHovered
+            ? "hovered"
+            : "existing";
 
     return (
       <EventShell
@@ -63,7 +71,7 @@ export function CommittedLayer<Item extends CommittedItem>({
           .filter(Boolean)
           .join(" ")}
         key={item.event.id}
-        disableDrag={interactionMode === "availability" || isDragging}
+        disableDrag={!eventInteractionEnabled || interactionMode === "availability" || isDragging}
       />
     );
   });
@@ -74,6 +82,7 @@ type AvailabilityLayerProps = SharedLayerProps & {
   interactionMode: "events" | "availability";
   dragEventId?: string;
   appearingEventIds: Set<string>;
+  focusedEventTarget?: CalendarFocusedEventTarget | null;
   project: (event: CalendarEvent) => EventProjection;
 };
 
@@ -83,21 +92,25 @@ export function AvailabilityLayer({
   interactionMode,
   dragEventId,
   appearingEventIds,
+  focusedEventTarget,
+  eventInteractionEnabled,
   project,
   shellClassName,
   ...shellProps
 }: AvailabilityLayerProps) {
-  const isAvailabilityMode = interactionMode === "availability";
   return events.map((event) => {
     const isDraft = event.id === "draft-new-event";
     const isDragging = dragEventId === event.id;
+    const isFocused = focusedEventTarget?.eventId === event.id && focusedEventTarget.calendarId === calendarId;
     const status = isDraft
       ? "new"
       : isDragging
         ? "dragging"
-        : appearingEventIds.has(event.id)
-          ? "appearing"
-          : "existing";
+        : isFocused
+          ? "focused"
+          : appearingEventIds.has(event.id)
+            ? "appearing"
+            : "existing";
 
     return (
       <EventShell
@@ -105,17 +118,17 @@ export function AvailabilityLayer({
         {...project(event)}
         event={event}
         status={status}
-        zIndex={isAvailabilityMode || isDraft ? 40 : 1}
+        zIndex={interactionMode === "availability" || isDraft ? 40 : 1}
         lane={0}
         laneCount={1}
         isOverlapping={false}
         testId={isDraft ? "draft-event" : "availability-event"}
         renderedCalendarId={calendarId}
-        className={[shellClassName, "ic-availability-shell", isAvailabilityMode && "is-active-layer"]
+        className={[shellClassName, "ic-availability-shell", interactionMode === "availability" && "is-active-layer"]
           .filter(Boolean)
           .join(" ")}
         key={event.id}
-        disableDrag={!isAvailabilityMode || isDraft || isDragging}
+        disableDrag={!eventInteractionEnabled || interactionMode !== "availability" || isDraft || isDragging}
       />
     );
   });
@@ -141,6 +154,7 @@ export function TransientLayer({
   draftEventIsExiting,
   draftEventReleaseDurationMs,
   dragPreviewEvent,
+  eventInteractionEnabled: _eventInteractionEnabled,
   project,
   shellClassName,
   ...shellProps

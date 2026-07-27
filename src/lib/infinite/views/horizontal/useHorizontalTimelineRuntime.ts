@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ForwardedRef } from "react";
 import { toDateKey } from "../../../date/dateVirtualization";
-import type { CalendarNavigationHandle, CalendarViewComponentProps } from "../../../core/types";
+import type { CalendarInternalViewProps, CalendarViewHandle } from "../../../core/internalTypes";
 import { timelineEndMinute, timelineStartMinute } from "../../../time/time";
 import { useHorizontalShiftWheelZoom } from "../../interactions/zoom/useShiftWheelZoom";
 import { useTimelineInteractions } from "../../interactions/useTimelineInteractions";
@@ -17,8 +17,8 @@ import { useHorizontalTimelineFoundation } from "./useHorizontalTimelineFoundati
  *                            zoom requests and public committers --^
  */
 export function useHorizontalTimelineRuntime(
-  props: CalendarViewComponentProps,
-  forwardedRef: ForwardedRef<CalendarNavigationHandle>
+  props: CalendarInternalViewProps,
+  forwardedRef: ForwardedRef<CalendarViewHandle>
 ) {
   const now = props.now ?? new Date();
   const interactionMode = props.interactionMode ?? "events";
@@ -46,6 +46,7 @@ export function useHorizontalTimelineRuntime(
   });
   foundation.navigation.releaseActiveDraftRef.current = interactions.releaseActiveDraft;
   foundation.navigation.commitVisibleEventRef.current = foundation.eventRange.applyCommittedEventToLoadedEvents;
+  foundation.navigation.removeVisibleEventRef.current = foundation.eventRange.removeEventFromLoadedEvents;
   useEffect(() => setIsInteractionActive(interactions.isInteractionActive), [interactions.isInteractionActive]);
   const shiftWheelZoom = useHorizontalShiftWheelZoom({
     containerRef: foundation.virtualTimeline.containerRef,

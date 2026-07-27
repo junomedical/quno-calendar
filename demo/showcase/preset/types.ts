@@ -7,7 +7,6 @@ export type DemoPreset = {
   brandIcon: LucideIcon;
   title: string;
   subtitle: string;
-  sourcePath: string;
   initialScale: number;
   controls: DemoControlDefaults;
   layout: DemoLayoutSettings;

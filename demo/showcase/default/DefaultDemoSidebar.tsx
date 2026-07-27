@@ -1,6 +1,6 @@
-import { CalendarDays, Plus } from "lucide-react";
+import { BookOpenText, CalendarDays, Plus } from "lucide-react";
+import { useEffect, useRef } from "react";
 import { DemoRouteNav } from "../DemoRouteNav";
-import { DemoSourceLinks } from "../DemoSourceLinks";
 import { ApiLatencyControl } from "../controls/ApiLatencyControl";
 import { DatasetControl } from "../controls/DatasetControl";
 import { CalendarCountControl, SnapControl, TimeRangeControl, ToggleControl } from "../controls/TimelineControls";
@@ -15,7 +15,7 @@ import { DemoStatsPanel } from "./DemoStatsPanel";
 type DefaultDemoSidebarProps = {
   routes: DemoRoute[];
   scale: number;
-  message: string;
+  activityEntries: string[];
   controls: DemoControls;
   pendingApiRequestCount: number;
   onScaleChange: (scale: number) => void;
@@ -28,7 +28,7 @@ type DefaultDemoSidebarProps = {
 export function DefaultDemoSidebar({
   routes,
   scale,
-  message,
+  activityEntries,
   controls,
   pendingApiRequestCount,
   onScaleChange,
@@ -37,6 +37,12 @@ export function DefaultDemoSidebar({
   onGoToDate,
   onExternalAdd
 }: DefaultDemoSidebarProps) {
+  const activityPaneRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const pane = activityPaneRef.current;
+    if (pane) pane.scrollTop = pane.scrollHeight;
+  }, [activityEntries]);
+
   return (
     <aside className="demo-sidebar demo-control-pane" aria-label="Demo controls">
       <div className="demo-brand">
@@ -47,13 +53,18 @@ export function DefaultDemoSidebar({
         </div>
       </div>
       <DemoRouteNav activeRouteId="default" className="demo-route-nav" routes={routes} />
-      <DemoSourceLinks sourcePath="demo/showcase/DefaultDemo.tsx" />
-      <DatasetControl scale={scale} onChange={onScaleChange} />
-      <ApiLatencyControl
-        latencyMs={controls.apiLatencyMs}
-        pendingRequestCount={pendingApiRequestCount}
-        onChange={controls.setApiLatencyMs}
-      />
+      <a className="walkthrough-link" href="/examples/integration-walkthrough">
+        <BookOpenText size={15} aria-hidden />
+        Read the integration field guide
+      </a>
+      <div className="data-api-control-row" data-testid="data-api-control-row">
+        <DatasetControl scale={scale} onChange={onScaleChange} />
+        <ApiLatencyControl
+          latencyMs={controls.apiLatencyMs}
+          pendingRequestCount={pendingApiRequestCount}
+          onChange={controls.setApiLatencyMs}
+        />
+      </div>
       <ViewControl
         className="view-switch"
         inputName="calendar-view"
@@ -100,9 +111,21 @@ export function DefaultDemoSidebar({
         <Plus size={15} aria-hidden />
         Add event
       </button>
-      <p className="demo-message" data-testid="demo-message">
-        {message}
-      </p>
+      <section
+        ref={activityPaneRef}
+        className="demo-message"
+        data-testid="demo-message"
+        aria-label="Demo activity"
+        role="log"
+      >
+        <ol>
+          {activityEntries.map((entry, index) => (
+            <li key={`${index}-${entry}`} data-testid="demo-activity-entry">
+              {entry}
+            </li>
+          ))}
+        </ol>
+      </section>
       <DemoStatsPanel />
     </aside>
   );

@@ -9,6 +9,42 @@ import {
   waitForDemoEvents
 } from "../helpers";
 
+test("keeps popup cancellation and scroll reset visible in the activity pane", async ({ page }) => {
+  await page.goto("/");
+  await goToWorkday(page);
+  await waitForDemoEvents(page);
+  const eventBox = await firstViewportEventBox(page);
+
+  await page.mouse.click(eventBox.x + Math.min(20, eventBox.width / 2), eventBox.y + eventBox.height / 2);
+  await expect(page.getByTestId("external-event-popup")).toBeVisible();
+  await page.getByTestId("draft-cancel-button").click();
+
+  await expect(page.getByRole("log", { name: "Demo activity" })).toBeVisible();
+  const cancelledEntry = page.getByTestId("demo-activity-entry").filter({ hasText: "External popup cancelled" });
+  const resetEntry = page
+    .getByTestId("demo-activity-entry")
+    .filter({ hasText: "Scroll reset requested for original event" });
+  await expect(cancelledEntry).toBeVisible();
+  await expect(resetEntry).toBeVisible();
+  await expect.poll(async () => page.getByTestId("demo-activity-entry").count()).toBeLessThanOrEqual(6);
+  const geometry = await page.evaluate(() => {
+    const pane = document.querySelector<HTMLElement>('[data-testid="demo-message"]');
+    const lastEntry = pane?.querySelector<HTMLElement>("li:last-child");
+    if (!pane || !lastEntry) return null;
+    const paneBox = pane.getBoundingClientRect();
+    const entryBox = lastEntry.getBoundingClientRect();
+    return {
+      overflowY: getComputedStyle(pane).overflowY,
+      paneHeight: paneBox.height,
+      latestVisible: entryBox.top >= paneBox.top && entryBox.bottom <= paneBox.bottom
+    };
+  });
+  expect(geometry?.overflowY).toBe("auto");
+  expect(geometry?.paneHeight ?? 0).toBeGreaterThanOrEqual(72);
+  expect(geometry?.paneHeight ?? Number.POSITIVE_INFINITY).toBeLessThanOrEqual(126);
+  expect(geometry?.latestVisible).toBe(true);
+});
+
 test("supports drawing a new event area", async ({ page }) => {
   await page.goto("/");
   await goToWorkday(page);

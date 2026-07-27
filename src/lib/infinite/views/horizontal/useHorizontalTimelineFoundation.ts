@@ -12,7 +12,7 @@
  * @see docs/flows/async-loading-and-layout.md
  */
 import { useMemo, useState, type ForwardedRef } from "react";
-import type { CalendarNavigationHandle, CalendarViewComponentProps } from "../../../core/types";
+import type { CalendarInternalViewProps, CalendarViewHandle } from "../../../core/internalTypes";
 import { useDayMetrics } from "../../events/metrics/useDayMetrics";
 import { useEventRangeLoader } from "../../events/loading/useEventRangeLoader";
 import { useRetainedCalendarRows } from "../../events/metrics/useRetainedCalendarRows";
@@ -25,8 +25,8 @@ import { useHorizontalNavigation } from "./useHorizontalNavigation";
 import { useHorizontalViewportSizing } from "../../rendering/horizontal/useHorizontalViewportSizing";
 
 type HorizontalTimelineFoundationArgs = {
-  props: CalendarViewComponentProps;
-  forwardedRef: ForwardedRef<CalendarNavigationHandle>;
+  props: CalendarInternalViewProps;
+  forwardedRef: ForwardedRef<CalendarViewHandle>;
   now: Date;
   isInteractionActive: boolean;
 };
@@ -56,6 +56,7 @@ export function useHorizontalTimelineFoundation({
     settings,
     baseDayHeight,
     verticalLayoutSignature,
+    topDateAlignmentKey: renderedCalendarIds.join("|"),
     isInteractionActive,
     layoutAnchorDateKey: props.activeDraft ? eventDateKey(props.activeDraft.event) : undefined
   });
