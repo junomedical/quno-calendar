@@ -160,15 +160,22 @@ test("editorial time precision progressively reveals minute labels without repla
   const visibleMinorTicks = demo.locator(".ic-time-tick:not(.is-hour):not(.is-label-hidden)");
   const stableTickCount = await ticks.count();
   const overviewCount = await visibleMinorTicks.count();
-  await expect(page.getByTestId("article-precision-level")).toHaveText("Hours + half hours");
+  const precisionLabel = demo.getByTestId("article-precision-level");
+  const precisionControls = demo.getByLabel("Time-label precision");
+  await expect(precisionLabel).toHaveText("Hours + half hours");
+  const [labelBox, controlsBox] = await Promise.all([precisionLabel.boundingBox(), precisionControls.boundingBox()]);
+  expect(labelBox).not.toBeNull();
+  expect(controlsBox).not.toBeNull();
+  expect(labelBox?.x ?? 0).toBeLessThan(controlsBox?.x ?? 0);
+  expect((labelBox?.x ?? 0) + (labelBox?.width ?? 0)).toBeLessThanOrEqual(controlsBox?.x ?? 0);
 
   await demo.getByRole("button", { name: "Quarter hour" }).click();
-  await expect(page.getByTestId("article-precision-level")).toHaveText("Quarter hours");
+  await expect(precisionLabel).toHaveText("Quarter hours");
   await expect.poll(() => visibleMinorTicks.count()).toBeGreaterThan(overviewCount);
   const quarterCount = await visibleMinorTicks.count();
 
   await demo.getByRole("button", { name: "5 minutes" }).click();
-  await expect(page.getByTestId("article-precision-level")).toHaveText("Every 5 minutes");
+  await expect(precisionLabel).toHaveText("Every 5 minutes");
   await expect.poll(() => visibleMinorTicks.count()).toBeGreaterThan(quarterCount);
   await expect(demo.locator(".ic-time-tick:not(.is-hour):not(.is-label-hidden) sup").first()).toHaveText("5");
   await expect(ticks).toHaveCount(stableTickCount);

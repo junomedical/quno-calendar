@@ -30,6 +30,7 @@
 - Stopped article event-card spans from clipping their own line boxes. Short shells now remove time and subtitle lines
   progressively, preserving complete visible lines inside the card.
 - Added selectable TSX syntax coloring to the article code blocks while preserving plain-text clipboard output.
+- Moved the progressive time-precision label to the left of its overview, quarter-hour, and five-minute controls.
 - Expanded the editorial field guide to 23 chapters with a four-to-hundreds-of-events performance design envelope,
   60–120fps scrolling target, CSS-native sticky-chrome exhibit, dedicated current-time reference, immediate date/time
   inputs with previous/next/Today controls, progressively revealed time-label precision, three settings-plus-CSS

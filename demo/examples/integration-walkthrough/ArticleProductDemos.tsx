@@ -231,6 +231,9 @@ export function ProgressiveTimeRevealDemo() {
       note="The DOM stays stable while readable time labels progressively appear"
       tools={
         <div className="article-precision-controls">
+          <span className="article-toolbar-badge" data-testid="article-precision-level">
+            {precisionLabel[level]}
+          </span>
           <div className="article-segmented-control" aria-label="Time-label precision">
             {(Object.keys(precisionZoom) as PrecisionLevel[]).map((option) => (
               <button aria-pressed={level === option} key={option} onClick={() => setLevel(option)} type="button">
@@ -238,9 +241,6 @@ export function ProgressiveTimeRevealDemo() {
               </button>
             ))}
           </div>
-          <span className="article-toolbar-badge" data-testid="article-precision-level">
-            {precisionLabel[level]}
-          </span>
         </div>
       }
     >

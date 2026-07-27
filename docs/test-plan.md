@@ -88,7 +88,8 @@ Vitest unit tests live in `tests/unit` and mirror the source module grouping.
 - Date/time inputs navigate immediately on change without a separate submit action; previous and next controls move one
   day at a time, and Today returns to the visible current-time marker.
 - The progressive-precision lab keeps one stable set of five-minute ticks while zoom reveals half-hour, quarter-hour,
-  and five-minute labels only when their spacing is readable.
+  and five-minute labels only when their spacing is readable. Its active precision label sits to the left of the
+  overview/quarter-hour/five-minute controls at article width.
 - Clinical, compact, and night presets change settings-owned geometry and scoped CSS color through the same public
   surface. The final composition combines controlled zoom, theme selection, navigation, mutation, animated insertion,
   and the shared full-screen shell.
