@@ -46,6 +46,11 @@ export class ViewportGeometryRegistry {
     );
   }
 
+  eventFullyVisible(target: CalendarViewportAnchorTarget, viewportBox: DOMRect) {
+    const event = this.event({ ...target, requireVisible: true }, viewportBox);
+    return event ? isFullyVisible(event, viewportBox) : false;
+  }
+
   subscribe(listener: Listener) {
     this.listeners.add(listener);
     return () => this.listeners.delete(listener);
@@ -105,6 +110,19 @@ export function isVisible(element: HTMLElement, viewportBox: DOMRect) {
     box.left < viewportBox.right &&
     box.bottom > viewportBox.top &&
     box.top < viewportBox.bottom
+  );
+}
+
+export function isFullyVisible(element: HTMLElement, viewportBox: DOMRect) {
+  const box = element.getBoundingClientRect();
+  const tolerance = 0.5;
+  return (
+    box.width > 0 &&
+    box.height > 0 &&
+    box.left >= viewportBox.left - tolerance &&
+    box.right <= viewportBox.right + tolerance &&
+    box.top >= viewportBox.top - tolerance &&
+    box.bottom <= viewportBox.bottom + tolerance
   );
 }
 

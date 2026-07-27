@@ -48,6 +48,9 @@ export function useHorizontalTimelineRuntime(
   foundation.navigation.commitVisibleEventRef.current = foundation.eventRange.applyCommittedEventToLoadedEvents;
   foundation.navigation.removeVisibleEventRef.current = foundation.eventRange.removeEventFromLoadedEvents;
   useEffect(() => setIsInteractionActive(interactions.isInteractionActive), [interactions.isInteractionActive]);
+  const nowMinute = now.getHours() * 60 + now.getMinutes();
+  const showNowLine =
+    nowMinute >= timelineStartMinute(foundation.settings) && nowMinute <= timelineEndMinute(foundation.settings);
   const shiftWheelZoom = useHorizontalShiftWheelZoom({
     containerRef: foundation.virtualTimeline.containerRef,
     settings: foundation.settings,
@@ -59,7 +62,11 @@ export function useHorizontalTimelineRuntime(
   useHorizontalControlledZoomAnchor({
     containerRef: foundation.virtualTimeline.containerRef,
     effectiveZoom: foundation.sizing.effectiveSettings.zoom,
+    endHour: foundation.sizing.effectiveSettings.endHour,
     labelWidth: foundation.sizing.effectiveSettings.labelWidth,
+    nowMinute,
+    showNowLine,
+    startHour: foundation.sizing.effectiveSettings.startHour,
     isGestureZoomActive: shiftWheelZoom.isGestureZoomActive
   });
 
@@ -67,9 +74,6 @@ export function useHorizontalTimelineRuntime(
     () => buildTimeTicks(foundation.sizing.effectiveSettings),
     [foundation.sizing.effectiveSettings]
   );
-  const nowMinute = now.getHours() * 60 + now.getMinutes();
-  const showNowLine =
-    nowMinute >= timelineStartMinute(foundation.settings) && nowMinute <= timelineEndMinute(foundation.settings);
   const hover = useHorizontalEventHover({
     disabled: Boolean(interactions.dragState || interactions.draftState || interactionMode === "availability"),
     setHoveredEvent: interactions.setHoveredEvent

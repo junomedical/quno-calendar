@@ -48,9 +48,13 @@ export function useHorizontalNavigation({
     containerRef,
     settings: effectiveSettings,
     orientation: "horizontal",
-    scrollToDateTime
+    scrollToDateTime,
+    visibilityInsets: {
+      left: effectiveSettings.labelWidth,
+      top: effectiveSettings.dayHeaderHeight
+    }
   });
-  const { captureViewportAnchor, restoreViewportAnchor, cancelViewportAnchorRestore } = anchoring;
+  const { captureViewportAnchor, isEventFullyVisible, restoreViewportAnchor, cancelViewportAnchorRestore } = anchoring;
   const releaseActiveDraftRef = useRef<CalendarNavigationHandle["releaseActiveDraft"]>(() => undefined);
   const commitVisibleEventRef = useRef<CalendarNavigationHandle["commitVisibleEvent"]>(() => undefined);
   const removeVisibleEventRef = useRef<CalendarNavigationHandle["removeVisibleEvent"]>(() => undefined);
@@ -66,13 +70,22 @@ export function useHorizontalNavigation({
           `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`
         ),
       captureViewportAnchor,
+      isEventFullyVisible,
       restoreViewportAnchor,
       cancelViewportAnchorRestore,
       commitVisibleEvent: (event, options) => commitVisibleEventRef.current(event, options),
       removeVisibleEvent: (eventId) => removeVisibleEventRef.current(eventId),
       releaseActiveDraft: (options) => releaseActiveDraftRef.current(options)
     }),
-    [cancelViewportAnchorRestore, captureViewportAnchor, now, restoreViewportAnchor, scrollToDate, scrollToDateTime]
+    [
+      cancelViewportAnchorRestore,
+      captureViewportAnchor,
+      isEventFullyVisible,
+      now,
+      restoreViewportAnchor,
+      scrollToDate,
+      scrollToDateTime
+    ]
   );
 
   return {

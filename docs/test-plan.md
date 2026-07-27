@@ -39,7 +39,8 @@ Vitest unit tests live in `tests/unit` and mirror the source module grouping.
 ## React Tests
 
 - Declarative focus request ids execute once, imperative and declarative focus share behavior, participant reveal
-  requests contain the complete desired selection, and unknown or excluded-weekday targets resolve unavailable.
+  requests contain the complete desired selection, fully visible event shells skip scrolling, clipped/offscreen shells
+  are revealed, and unknown or excluded-weekday targets resolve unavailable.
 - `removeVisibleEvent` removes every rendered multi-calendar instance without invoking `loadEvents`.
 
 - Calendar root renders the infinite horizontal view, the infinite vertical view, and the legacy `view="infinite"` alias.
@@ -57,8 +58,19 @@ Vitest unit tests live in `tests/unit` and mirror the source module grouping.
 
 - The editorial integration article scrolls independently from the document, ignores legacy `?step=` parameters, and
   renders as the only example route without the former recipe header/navigation.
-- The main demo exposes a visible link to the field guide. Its 14-entry table of contents targets stable chapter ids
+- The main demo exposes a visible link to the field guide. Its 23-entry table of contents targets stable chapter ids
   and scrolls the internal article viewport to the selected section.
+- Chapter 00 explains the horizontal-first information architecture before the implementation chapters: time and text
+  flow left to right, resource rows and days move top to bottom, and ordinary vertical scrolling advances days without
+  a separate navigation control.
+- The performance chapter presents the four-to-hundreds-of-events design envelope and 60–120fps scrolling target as a
+  target rather than a universal guarantee. Its 4/40/400 density cards share one row at article width and stack at the
+  mobile breakpoint; algorithmic performance remains covered by the scaling test and explicit budgets below.
+- The CSS-native chapter verifies computed `position: sticky` ownership for day, date, and resource labels, then checks
+  that date and resource X geometry remains fixed during horizontal timeline scrolling without synchronized React
+  scroll state.
+- Article code blocks preserve selectable plain source and apply distinct TSX colors to keywords, strings, JSX tags,
+  types, properties, functions, literals, numbers, operators, and comments.
 - Every article calendar exposes the shared full-screen control. Expansion fills the viewport without replacing the
   calendar DOM, changing its scroll offset, or losing the visible date; Escape closes the overlay and restores focus.
 - Article date labels use compact single-line typography that fits the configured label width. The first chapter’s chip
@@ -71,22 +83,36 @@ Vitest unit tests live in `tests/unit` and mirror the source module grouping.
 - The embedded read-only recipe cannot begin drag or creation. The embedded mutation recipe accepts a drag through
   parent state and returns a committed event after drawing.
 - Article zoom controls remain parent-controlled while Shift + mouse-wheel/touchpad requests a gesture update.
+- The current-time chapter renders one aligned marker through the header and resource rows, permits horizontal
+  exploration, and restores the marker to the viewport through a product-owned control.
+- Date/time inputs navigate immediately on change without a separate submit action; previous and next controls move one
+  day at a time, and Today returns to the visible current-time marker.
+- The progressive-precision lab keeps one stable set of five-minute ticks while zoom reveals half-hour, quarter-hour,
+  and five-minute labels only when their spacing is readable.
+- Clinical, compact, and night presets change settings-owned geometry and scoped CSS color through the same public
+  surface. The final composition combines controlled zoom, theme selection, navigation, mutation, animated insertion,
+  and the shared full-screen shell.
+- The closing package-footprint chapter exposes the verified raw/gzip ESM and CSS sizes plus one direct runtime
+  dependency, two React peers, and zero bundled third-party packages.
 - The lane comparison proves local horizontal row growth, hover expansion, vertical projection, and dense-column width
   growth.
-- The vertical-column hover chapter moves horizontally between original overlap-lane hit regions even while the first
+- The horizontal-row hover chapter moves vertically between original overlap-lane hit regions even while the first
   hovered card is expanded over its neighbors.
 - The preloading lab exposes its requested warm range and reveals an event on a prefetched date before the next delayed
   range request can settle.
 - The stability lab retains stale events during its delayed refresh, preserves the visible room/local-row point as an
-  earlier row grows, and reveals/focuses the shared participant calendar. Repeating the room focus action keeps its
-  local event instance at the same viewport coordinate and inside the viewport. Narrow two-lane event shells hide
+  earlier row grows, and reveals/focuses the shared participant calendar. Repeating the room focus action leaves both
+  scroll axes untouched once the local event instance is fully inside the uncovered viewport. Narrow two-lane event shells hide
   secondary metadata, wrap the title, and keep both renderer and title bounds inside the shell.
 - The creation chapter narrows two doctor rows to one selected row and renders its controlled draft with
-  `data-lane-count="1"` while saved events and availability remain visible.
+  `data-lane-count="1"` while saved events and availability remain visible. Appointments for the selected doctor stay
+  visible across Monday through Thursday, while the other doctor’s adjacent-day events leave the projection. Visible
+  card text lines use unclipped vertical overflow and remain geometrically contained; short shells progressively remove
+  the time and subtitle as whole lines.
 - The visual-focus lab replaces a controlled draft with its saved event, then introduces four collisions. The saved
-  event moves to a five-lane layout without changing its viewport-relative position.
-- The motion chapter commits an added draft with `appearing`, then releases a second draft through the exiting fade
-  before removal.
+  event remains visible in the five-lane layout without an unnecessary scroll write.
+- The motion chapter commits an added draft with `appearing`, navigates its date/time into view, then releases a second
+  draft through the exiting fade before removal.
 
 Playwright coverage is split by behavior under `e2e/specs`: core navigation and interaction smoke tests, sticky/layering tests, event rendering tests, external popup draft tests, and vertical-orientation tests. Shared browser helpers live in `e2e/helpers.ts`.
 
@@ -102,16 +128,20 @@ orientation, availability, loading, visual-focus, and motion assertions formerly
   date/time navigation and automatic corrections produce `Viewport repositioned` with the final scroll coordinates.
 - Vertical virtual scrolling changes visible dates.
 - Rendered day DOM nodes are pruned to the visible viewport plus five day sections of overscan.
-- Vertical scrollbar dragging is bounded to one month before/after the visible date and recenters around the new visible date only after the idle recenter delay following scroll end.
+- Vertical scrollbar dragging is bounded to one month before/after the visible date. Interior positions keep the
+  1.2-second idle delay, while the absolute top and bottom use the 240 ms edge delay before recentering around the new
+  visible date.
 - Scroll-end recentering preserves the intra-day pixel offset, so a user scrolled partway into a date stays partway into that same date.
-- Native scrollbar-thumb completion leaves the scrollbar thumb near the released edge briefly, then resets it near the center of the rebuilt virtual window after the 1.2s idle recenter delay. Large horizontal-view date jumps also recenter after idle when the immediate scroll event fires before new virtual items are mounted.
+- Native scrollbar-thumb completion at an absolute edge leaves the thumb there for the shortened 240 ms deadline, then
+  resets it near the center of the rebuilt virtual window. Large interior horizontal-view date jumps retain the 1.2
+  second deadline and still recenter when the immediate scroll event fires before new virtual items are mounted.
 - The `0.5-8` zoom slider and `Shift` + wheel change timeline scale without also scrolling the browser window; a multi-wheel `Shift` gesture keeps the first focused rendered time-grid node anchored when scroll range allows it, captures immediate trailing wheel momentum after Shift is released, and then allows normal wheel scrolling again.
 - A same-frame mouse-wheel/touchpad burst accumulates all zoom steps but produces exactly one controlled calendar projection and one timeline-track style change; a newer external controlled zoom cancels the queued wheel value. During projection the sidebar produces no attribute, character-data, or child-list mutations and disconnects no existing descendant. Its range thumb and numeric readout synchronize once after the 300ms gesture tail.
-- A same-frame slider burst updates its thumb/readout immediately but performs one calendar projection with the latest value. Sequential horizontal slider zoom steps, including the `0.5` minimum and zoom-out commits that first narrow and clamp the live scroll range, preserve the time at the visible grid center after horizontal scrolling, while zoom at the timeline origin preserves the left edge; the observed calendar subtree records no child-list mutations, and all initially mounted date, row, event-shell, availability-shell, product-card, and time-tick nodes retain identity. A viewport-visible availability shell retains positive geometry, visible computed styles, and a non-transparent renderer background at minimum zoom. The calendar computes to `contain: none` and `isolation: isolate`; the full control pane computes to `contain: none`, the stable sidebar owns a compositor layer, and only the changing zoom control and live stats use narrow child paint/compositor boundaries. Control-pane and brand geometry do not move, and provider updates render only the zoom consumers rather than static demo-shell content.
+- A same-frame slider burst updates its thumb/readout immediately but performs one calendar projection with the latest value. Sequential horizontal slider zoom steps preserve a viewport-visible current-time marker within 2px. When the marker is outside the viewport, the same steps—including the `0.5` minimum and zoom-out commits that first narrow and clamp the live scroll range—preserve the time at the visible grid center after horizontal scrolling, while zoom at the timeline origin preserves the left edge. The observed calendar subtree records no child-list mutations, and all initially mounted date, row, event-shell, availability-shell, product-card, and time-tick nodes retain identity. A viewport-visible availability shell retains positive geometry, visible computed styles, and a non-transparent renderer background at minimum zoom. The calendar computes to `contain: none` and `isolation: isolate`; the full control pane computes to `contain: none`, the stable sidebar owns a compositor layer, and only the changing zoom control and live stats use narrow child paint/compositor boundaries. Control-pane and brand geometry do not move, and provider updates render only the zoom consumers rather than static demo-shell content.
 - Horizontal rendering applies a viewport-fill floor so the timeline board does not become narrower than the available viewport width even when an incoming prop value falls below that floor; wheel gestures still stop at the slider minimum.
 - Zoom values above `6` switch the timeline row grid and time labels from 15-minute to 5-minute cadence.
 - Dense zoom levels progressively hide minor time labels so 15/45 disappear first and minute labels disappear entirely before labels overlap. Crossing the `6` fine-grid threshold retains the same tick elements and text children while the percentage-based tick track changes extent; it does not add or replace tick DOM nodes.
-- Sticky-header visual artefacts are covered: dates stay pinned to the top, the absolute day-header band does not create an extra visual row or overlap the first calendar row, day header background fills across the timeline below the time scale, sticky date labels and calendar row labels cover horizontally scrolled timeline content through CSS layering instead of JavaScript clipping, visible hour/minute labels remain painted above the day band at high zoom, current-time markers stay out of date/calendar names while layering above calendar data and the gray day band, and calendar cells share one 1px gray border color without doubled sticky-label seams.
+- Sticky-header visual artefacts are covered: dates stay pinned to the top, the absolute day-header band does not create an extra visual row or overlap the first calendar row, day header background fills across the timeline below the time scale, sticky date labels and calendar row labels cover horizontally scrolled timeline content through CSS layering instead of JavaScript clipping, visible hour/minute labels remain painted above the day band at high zoom, the header marker stem begins at the bottom of its pin and per-day marker segments remain below the sticky time-scale context, current-time markers stay out of date/calendar names while layering above calendar data and the gray day band, and calendar cells share one 1px gray border color without doubled sticky-label seams.
 - Dataset scale can switch to 20,000 events per year.
 - Delayed, rejected, aborted, never-resolving, and out-of-order loaders leave scroll, zoom, draw, and drag interactions responsive; delayed commits preserve the captured viewport anchor within 1px and do not flash empty rows.
 - Large dataset scales keep events visible and hoverable instead of clustering into a few calendars.

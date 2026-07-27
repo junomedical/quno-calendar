@@ -24,7 +24,7 @@ The event renderer handles `existing`, `hovered`, `drop-preview`, and `new` stat
 
 ## 006 - Controlled Zoom Changes
 
-Zoom remains parent-controlled through settings, and the infinite view requests changes with `onZoomChange`. This keeps wheel gestures, sliders, and any future external zoom controls synchronized without making the view own application state. The PoC slider and built-in wheel gestures clamp their control range to `0.5-8`, while the calendar preserves lower incoming prop values and applies pixel lower bounds during rendering. `Shift` + wheel anchors to the rendered time-grid node nearest the mouse, clamped to the configured timeline bounds, so zooming feels aligned to the visible timeline structure rather than an arbitrary fractional minute. A multi-event wheel burst keeps the first focused node instead of reselecting a nearby hour on every tick. Immediate trackpad wheel momentum can continue briefly after Shift is released, so the zoom handler captures a short non-extending gesture tail and prevents those first trailing events from becoming ordinary calendar scroll. Delayed scroll restores are versioned so older wheel ticks cannot rewrite scroll after newer inertial ticks or cancellation-tail events. Horizontal rendering also has a viewport-fill floor so the board does not shrink below the available scroll viewport width even when the controlled zoom value is lower. High zoom should reveal finer timing, so the grid and time labels switch from 15-minute to 5-minute cadence only after zoom is greater than `6`.
+Zoom remains parent-controlled through settings, and the infinite view requests changes with `onZoomChange`. This keeps wheel gestures, sliders, and any future external zoom controls synchronized without making the view own application state. The PoC slider and built-in wheel gestures clamp their control range to `0.5-8`, while the calendar preserves lower incoming prop values and applies pixel lower bounds during rendering. External horizontal zoom preserves a visible current-time marker by default, then falls back to the visible grid center or the timeline origin when that marker cannot anchor the viewport. `Shift` + wheel anchors to the rendered time-grid node nearest the mouse, clamped to the configured timeline bounds, so zooming feels aligned to the visible timeline structure rather than an arbitrary fractional minute. A multi-event wheel burst keeps the first focused node instead of reselecting a nearby hour on every tick. Immediate trackpad wheel momentum can continue briefly after Shift is released, so the zoom handler captures a short non-extending gesture tail and prevents those first trailing events from becoming ordinary calendar scroll. Delayed scroll restores are versioned so older wheel ticks cannot rewrite scroll after newer inertial ticks or cancellation-tail events. Horizontal rendering also has a viewport-fill floor so the board does not shrink below the available scroll viewport width even when the controlled zoom value is lower. High zoom should reveal finer timing, so the grid and time labels switch from 15-minute to 5-minute cadence only after zoom is greater than `6`.
 
 ## 007 - Sticky Labels Use Native CSS
 
@@ -62,7 +62,7 @@ Compact rows default to 50px. One or two overlap lanes keep that compact height;
 
 ## 014 - Date Headers Overlay The Time Scale
 
-The time scale is sticky only on the top axis. Day date headers are sticky on the top axis, but only the left date label stacks above the time scale; the full-width gray day band stays below it so hour and minute labels remain visible. Calendar row labels also stack above horizontally scrolled timeline content. This lets native CSS sticky positioning make left labels cover scrolled timeline content instead of using JavaScript-driven clipping.
+The time scale is sticky only on the top axis. Day date headers are sticky on the top axis, but only the left date label stacks above the time scale; the full-width gray day band stays below it so hour and minute labels remain visible. The time-scale stacking context also sits above per-day current-time header segments, preventing a red stem from appearing above the global pin while retaining the marker through lower day headers. Calendar row labels stack above horizontally scrolled timeline content. This lets native CSS sticky positioning make left labels cover scrolled timeline content instead of using JavaScript-driven clipping.
 
 ## 015 - Demo Data Is Spread Across All Calendars
 
@@ -98,7 +98,14 @@ The virtual scroll spacer keeps the month-before/month-after range, but mounted 
 
 Rebuilding the virtual window after ordinary scrolling must preserve both the top visible date and the pixel offset inside that date. Pending scroll targets therefore store `{ dateKey, offsetWithinDate }` and restore the exact offset after the month window is rebuilt. Explicit calendar membership changes use a different structural policy: preserve the top visible date, but align its date header to the viewport top after rows or columns settle. This gives show/hide controls a predictable date boundary instead of retaining an arbitrary row-local offset. During an active draft, the draft date is temporarily pinned into the rendered virtual items so explicit event/slot restoration can retain its stronger geometry target.
 
-Native scrollbar-thumb dragging can complete without another React scroll callback after release, so the view also listens for the browser `scrollend` event and schedules the same 1.2s idle-delay recenter used by scroll debouncing. Large wheel, thumb, or imperative jumps can arrive before the virtualizer has mounted the new edge items, so scroll handling still schedules the delayed recenter when the immediate top-date snapshot is unavailable. Even if the date is already the current anchor, the delayed recenter still scrolls back to the anchor's centered offset so the scrollbar thumb resets without correcting immediately after release.
+Native scrollbar-thumb dragging can complete without another React scroll callback after release, so the view also
+listens for the browser `scrollend` event and schedules the same settled recenter used by scroll debouncing. Interior
+positions retain the 1.2-second idle delay so ordinary pauses do not churn the bounded model. At the absolute top or
+bottom, the delay is reduced by 80% to 240 ms because the user cannot continue until a new bounded range is centered.
+Large wheel, thumb, or imperative jumps can arrive before the virtualizer has mounted the new edge items, so scroll
+handling still schedules the delayed recenter when the immediate top-date snapshot is unavailable. Even if the date is
+already the current anchor, the delayed recenter still scrolls back to the anchor's centered offset so the scrollbar
+thumb resets without correcting immediately after release.
 
 Vertical zoom changes are layout changes, not user scrolls. Slider zoom snapshots the current top visible date before requesting the parent-owned zoom change, cancels pending recenter timers, and restores a proportional intra-day offset after the virtual day height changes instead of writing the old raw `scrollTop` back into the resized list. That structural restore uses the new uniform base-day geometry directly rather than a virtualizer offset cached before the commit. `Shift` + wheel zoom instead anchors the nearest rendered date/time node and flushes the controlled zoom update before restoring scroll, so the restore uses committed layout measurements.
 
@@ -200,7 +207,15 @@ Bounded date virtualization remains the primary axis. Each mounted date now also
 
 ## 045 - Anchoring Uses An Instance Geometry Registry
 
-Days, resources, and event instances register their DOM elements with the owning calendar instance. Viewport capture/restore resolves this registry instead of querying global selectors. Event unregistration is element-identity-aware, preventing a stale unmount from removing a newer event instance with the same event/calendar key. Restore work shares one cancellable animation-frame slot, mutation observer, resize observer, registry subscription, and deadline. Pointer, wheel, touch, and keyboard intent can cancel delayed corrections. The interaction runtime likewise uses one Pointer Events pathway so mouse compatibility events cannot duplicate drag or draft transitions.
+Days, resources, and event instances register their DOM elements with the owning calendar instance. Viewport
+capture/restore and event-visibility checks resolve this registry instead of querying global selectors. Event focus
+treats the viewport area covered by sticky time/date/resource chrome as occluded: it scrolls only when the requested
+shell is clipped or offscreen, and leaves both axes untouched when the shell is already fully visible. Event
+unregistration is element-identity-aware, preventing a stale unmount from removing a newer event instance with the same
+event/calendar key. Restore work shares one cancellable animation-frame slot, mutation observer, resize observer,
+registry subscription, and deadline. Pointer, wheel, touch, and keyboard intent can cancel delayed corrections. The
+interaction runtime likewise uses one Pointer Events pathway so mouse compatibility events cannot duplicate drag or
+draft transitions.
 
 ## 046 - Package JavaScript Does Not Inject Styles
 
@@ -215,7 +230,7 @@ larger demo application.
 
 ## 048 - Zoom Reprojects Geometry Without Rebuilding Content
 
-Zoom necessarily changes event coordinates and browser paint, but it does not change event membership, overlap lanes, horizontal row metrics, or vertical column metrics. Those prepared models therefore depend only on event data and their actual metric settings, not on zoom. `EventShell` keeps geometry in the outer positioned element and memoizes product-renderer content separately, so an unchanged event card is not reconstructed when only its shell moves or resizes. Horizontal slider and other external zoom changes preserve the time at the visible grid center before paint once the user has scrolled horizontally, while the timeline origin preserves its left edge. The anchor keeps a pre-commit scroll snapshot because the browser may clamp the live `scrollLeft` as a zoom-out commit narrows the timeline. Vertical zoom keeps a temporary render-window override centered on the semantic top date and projects it with the new uniform day height while virtualizer measurements settle; this prevents a frame selected from the new scroll offset and stale item sizes from showing blank or wrong dates. Time labels use an always-mounted five-minute skeleton and percentage-based track; coarse modes hide minor labels instead of creating or removing nodes when fine cadence activates. The modest fixed node cost avoids a large mutation and paint burst at the zoom threshold. `Shift` + wheel retains its more specific pointer anchor, accumulates raw mouse/touchpad steps into one controlled commit per display frame, and suppresses the generic correction for that gesture. A direct external zoom change wins over and cancels an older queued wheel frame.
+Zoom necessarily changes event coordinates and browser paint, but it does not change event membership, overlap lanes, horizontal row metrics, or vertical column metrics. Those prepared models therefore depend only on event data and their actual metric settings, not on zoom. `EventShell` keeps geometry in the outer positioned element and memoizes product-renderer content separately, so an unchanged event card is not reconstructed when only its shell moves or resizes. Horizontal slider and other external zoom changes preserve a visible current-time marker before paint. If the marker is outside the viewport, they preserve the time at the visible grid center once the user has scrolled horizontally, while the timeline origin preserves its left edge. The anchor keeps a pre-commit scroll snapshot because the browser may clamp the live `scrollLeft` as a zoom-out commit narrows the timeline. Vertical zoom keeps a temporary render-window override centered on the semantic top date and projects it with the new uniform day height while virtualizer measurements settle; this prevents a frame selected from the new scroll offset and stale item sizes from showing blank or wrong dates. Time labels use an always-mounted five-minute skeleton and percentage-based track; coarse modes hide minor labels instead of creating or removing nodes when fine cadence activates. The modest fixed node cost avoids a large mutation and paint burst at the zoom threshold. `Shift` + wheel retains its more specific pointer anchor, accumulates raw mouse/touchpad steps into one controlled commit per display frame, and suppresses the generic correction for that gesture. A direct external zoom change wins over and cancels an older queued wheel frame.
 
 ## 049 - Late Data Preserves A Semantic Grid Slot
 
@@ -280,9 +295,28 @@ uses one accessible full-screen shell around the same React instance, preserving
 and loaded cache. The article scopes smaller, single-line date typography to its examples, reports scroll settlement as
 `scrolled` then `repositioned`, demonstrates hover handoff through expanded cards, and shows parent-owned single-doctor
 creation plus renderer-owned add/cancel motion. The card specimen grid includes replayable save and cancellation
-treatments. Additional labs expose the existing availability-layer switch and event-relative viewport anchoring across
-draft replacement and overlap-lane recomputation. The stability lab also makes multi-calendar identity explicit: one
-shared event is projected into doctor and room calendars while focus remains local to the requested instance. This
-presentation behavior stays in `demo/examples` and does not add reusable calendar props or state. Read-only,
-drag/create, availability, vertical comparison, delayed loading, and preloading are article chapters rather than
-standalone routes. A table of contents makes the long-form surface directly navigable, and the main demo links to it.
+treatments. Additional labs expose the existing availability-layer switch, current-time reference, imperative
+date/time navigation, scoped CSS plus settings presets, CSS-native sticky chrome, and event-relative viewport anchoring
+across draft replacement and overlap-lane recomputation. Date and time fields navigate as their values change, with
+previous, next, and Today as equally direct product controls. The chapter sequence moves from the current-time
+reference through direct navigation and controlled zoom into progressive label precision: the stable five-minute tick
+structure reveals more labels only when zoom creates readable space. The sticky-chrome lab explicitly separates
+browser-positioned static labels from React-owned events and interaction state. The stability lab also makes
+multi-calendar identity explicit: one shared event is projected into doctor and room calendars while focus remains
+local to the requested instance. A final lab composes navigation, zoom, styling, overlap, mutation, and motion through
+the same public API. The closing footprint chapter reports verified production ESM and CSS sizes separately from the
+one direct runtime dependency and two React peer dependencies. This presentation behavior stays in `demo/examples` and
+does not add reusable calendar props or state. Read-only, drag/create, availability, vertical comparison, delayed
+loading, and preloading are article chapters rather than standalone routes. A table of contents makes the long-form
+surface directly navigable, and the main demo links to it.
+
+## 059 - Performance Is Expressed As A Design Envelope
+
+The field guide states the intended operating range—roughly four to hundreds of events per day—and a smooth 60–120fps
+scrolling target without presenting either as a universal runtime guarantee. Total history does not define frame cost:
+date and resource virtualization bound mounted geometry, loaded dates live in a bounded cache, event membership and
+overlap cells are indexed and prepared once, unchanged renderer content is memoized, scroll chrome uses native sticky
+positioning, and pointer/zoom work is coalesced to animation frames. Actual frame rate still depends on the browser,
+hardware, viewport, event collision shape, and consumer `eventRenderer`. Stable algorithmic scaling, DOM/cache ceilings,
+and scripting/layout budgets remain executable tests; the article’s 4/40/400 cards communicate the range rather than
+claiming benchmark results from a reader’s device.

@@ -146,14 +146,16 @@ The calendar never owns the canonical zoom value. A gesture calculates a request
 sequenceDiagram
   actor User
   participant Parent as Controlled settings owner
-  participant Anchor as Center-time anchor hook
+  participant Anchor as External zoom anchor hook
   participant View as Horizontal viewport
   participant Render as Timeline projection
 
   User->>Parent: Change zoom prop
   Parent-->>Render: next settings.zoom
   Anchor->>View: Read previous zoom and pre-commit scrollLeft snapshot
-  alt View is at timeline origin
+  alt Current-time marker is visible
+    Anchor->>Anchor: Preserve marker viewport position
+  else View is at timeline origin
     Anchor->>Anchor: Preserve left edge
   else View has horizontal scroll
     Anchor->>Anchor: Derive time at visible grid center
@@ -240,6 +242,6 @@ Horizontal wheel zoom preserves a time node on X. Vertical wheel zoom preserves 
 - `src/lib/infinite/interactions/zoom/shiftWheelZoomUtils.ts`: shared gesture tail, versioning, and captured wheel utilities.
 - `src/lib/infinite/interactions/zoom/useHorizontalShiftWheelZoom.ts`: pointer-nearest horizontal time anchor.
 - `src/lib/infinite/interactions/zoom/useVerticalShiftWheelZoom.ts`: date/time vertical anchor.
-- `src/lib/infinite/anchors/zoom/useHorizontalControlledZoomAnchor.ts`: slider/external center-time correction.
+- `src/lib/infinite/anchors/zoom/useHorizontalControlledZoomAnchor.ts`: slider/external visible-now-marker correction with center/origin fallback.
 
 The complete ownership map is in [`docs/domains/interactions.md`](../domains/interactions.md) and [`docs/domains/anchors.md`](../domains/anchors.md).

@@ -1,10 +1,12 @@
 import { expect, test, type Page } from "@playwright/test";
 
 async function revealLazyArticleDemo(page: Page, label: string, testId: string) {
-  const placeholder = page.getByLabel(`Loading ${label}`);
-  if (await placeholder.count()) {
-    await placeholder.scrollIntoViewIfNeeded();
-  }
+  const lazyRoot = page.locator(`.article-lazy-demo[data-demo-label="${label}"]`);
+  await lazyRoot.evaluate((element) => {
+    const article = element.closest<HTMLElement>(".calendar-article");
+    if (article) article.style.scrollBehavior = "auto";
+    element.scrollIntoView({ block: "center", inline: "nearest" });
+  });
   const demo = page.getByTestId(testId);
   await expect(demo).toBeVisible();
   return demo;
@@ -20,7 +22,12 @@ test("main demo links to the single example field guide", async ({ page }) => {
 test("editorial table of contents navigates the internal article scroller", async ({ page }) => {
   await page.goto("/examples/integration-walkthrough");
   const contents = page.getByRole("navigation", { name: "Table of contents" });
-  await expect(contents.getByRole("link")).toHaveCount(14);
+  await expect(contents.getByRole("link")).toHaveCount(23);
+  await expect(contents.getByRole("link", { name: /Why the primary view runs horizontally/ })).toHaveAttribute(
+    "href",
+    "#horizontal-first"
+  );
+  await expect(page.getByRole("heading", { name: "Why the primary view runs horizontally" })).toBeVisible();
   const motionLink = contents.getByRole("link", { name: /Motion is part of the renderer/ });
   await expect(motionLink).toHaveAttribute("href", "#motion");
   await motionLink.click();
@@ -28,6 +35,196 @@ test("editorial table of contents navigates the internal article scroller", asyn
   await expect
     .poll(() => page.getByTestId("calendar-article").evaluate((element) => element.scrollTop))
     .toBeGreaterThan(0);
+});
+
+test("editorial performance range explains and responsively presents its design envelope", async ({ page }) => {
+  await page.goto("/examples/integration-walkthrough");
+  const section = page.locator("#performance");
+  await section.scrollIntoViewIfNeeded();
+  await expect(section).toContainText("60–120fps");
+  await expect(section).toContainText("design envelope rather than a universal guarantee");
+  const range = page.getByTestId("article-performance-range");
+  const cards = range.locator("article");
+  await expect(cards).toHaveCount(3);
+  await expect(cards.locator("strong")).toHaveText(["4", "40", "400"]);
+  const desktopBoxes = await cards.evaluateAll((elements) =>
+    elements.map((element) => {
+      const box = element.getBoundingClientRect();
+      return { top: box.top, bottom: box.bottom };
+    })
+  );
+  expect(
+    Math.max(...desktopBoxes.map((box) => box.top)) - Math.min(...desktopBoxes.map((box) => box.top))
+  ).toBeLessThan(2);
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  const mobileBoxes = await cards.evaluateAll((elements) =>
+    elements.map((element) => {
+      const box = element.getBoundingClientRect();
+      return { top: box.top, bottom: box.bottom };
+    })
+  );
+  expect(mobileBoxes[1].top).toBeGreaterThan(mobileBoxes[0].bottom);
+  expect(mobileBoxes[2].top).toBeGreaterThan(mobileBoxes[1].bottom);
+});
+
+test("editorial CSS-native exhibit keeps stable chrome browser-positioned", async ({ page }) => {
+  await page.goto("/examples/integration-walkthrough");
+  const demo = await revealLazyArticleDemo(page, "CSS-native sticky calendar example", "article-css-native-demo");
+  const viewport = demo.locator(".ic-viewport");
+  const dateHeader = demo.locator(".ic-day-header").first();
+  const dateLabel = demo.locator(".ic-date-label").first();
+  const resourceLabel = demo.locator(".ic-row-label").first();
+  await expect(dateHeader).toHaveCSS("position", "sticky");
+  await expect(dateLabel).toHaveCSS("position", "sticky");
+  await expect(resourceLabel).toHaveCSS("position", "sticky");
+  const [dateXBefore, resourceXBefore] = await Promise.all([
+    dateLabel.evaluate((element) => element.getBoundingClientRect().x),
+    resourceLabel.evaluate((element) => element.getBoundingClientRect().x)
+  ]);
+
+  await viewport.evaluate((element) => {
+    element.scrollLeft = Math.min(320, element.scrollWidth - element.clientWidth);
+  });
+  await expect
+    .poll(async () =>
+      Math.abs((await dateLabel.evaluate((element) => element.getBoundingClientRect().x)) - dateXBefore)
+    )
+    .toBeLessThanOrEqual(1);
+  await expect
+    .poll(async () =>
+      Math.abs((await resourceLabel.evaluate((element) => element.getBoundingClientRect().x)) - resourceXBefore)
+    )
+    .toBeLessThanOrEqual(1);
+});
+
+test("editorial footprint reports raw, gzip, and dependency costs", async ({ page }) => {
+  await page.goto("/examples/integration-walkthrough");
+  const footprint = page.getByTestId("article-package-footprint");
+  await footprint.scrollIntoViewIfNeeded();
+  await expect(footprint.locator("dt").filter({ hasText: "Calendar ESM" })).toBeVisible();
+  await expect(footprint).toContainText("123.00 KiB");
+  await expect(footprint).toContainText("30.52 KiB gzip");
+  await expect(footprint.locator("dt").filter({ hasText: "Direct runtime" })).toBeVisible();
+  await expect(footprint).toContainText("@tanstack/react-virtual");
+  await expect(footprint).toContainText("React + React DOM");
+  await expect(footprint.locator("dt").filter({ hasText: "Bundled third-party" })).toBeVisible();
+});
+
+test("editorial current-time marker provides a shared reference and can be restored", async ({ page }) => {
+  await page.goto("/examples/integration-walkthrough");
+  const demo = await revealLazyArticleDemo(page, "current-time marker example", "article-time-marker-demo");
+  const viewport = demo.locator(".ic-viewport");
+  const marker = demo.locator(".ic-now-pin.is-current");
+  const currentRowLine = demo.locator(".ic-now-line.is-current").first();
+  await expect(marker).toBeInViewport();
+  const [markerBox, lineBox] = await Promise.all([marker.boundingBox(), currentRowLine.boundingBox()]);
+  expect(markerBox).not.toBeNull();
+  expect(lineBox).not.toBeNull();
+  expect(Math.abs((markerBox?.x ?? 0) + (markerBox?.width ?? 0) / 2 - ((lineBox?.x ?? 0) + 1))).toBeLessThanOrEqual(2);
+  expect(lineBox?.height ?? 0).toBeGreaterThan(20);
+
+  await viewport.evaluate((element) => {
+    element.scrollLeft = 0;
+  });
+  await expect(marker).not.toBeInViewport();
+  await demo.getByRole("button", { name: "Keep current time visible" }).click();
+  await expect(marker).toBeInViewport();
+});
+
+test("editorial product controls navigate directly to a selected date and time", async ({ page }) => {
+  await page.goto("/examples/integration-walkthrough");
+  const demo = await revealLazyArticleDemo(page, "date and time navigation example", "article-navigation-demo");
+  await expect(demo.getByRole("button", { name: "Go", exact: true })).toHaveCount(0);
+  await demo.getByLabel("Destination date").fill("2026-07-08");
+  await demo.getByLabel("Destination time").fill("15:00");
+  await expect(demo.getByText("Showing 2026-07-08 at 15:00")).toBeVisible();
+  await expect(demo.getByText("Wednesday procedure")).toBeInViewport();
+  await expect(demo.locator('[data-testid="calendar-day"][data-date="2026-07-08"]')).toBeInViewport();
+
+  await demo.getByRole("button", { name: "Next day" }).click();
+  await expect(demo.getByLabel("Destination date")).toHaveValue("2026-07-09");
+  await expect(demo.getByText("Showing 2026-07-09 at 15:00")).toBeVisible();
+  await demo.getByRole("button", { name: "Previous day" }).click();
+  await expect(demo.getByLabel("Destination date")).toHaveValue("2026-07-08");
+  await expect(demo.getByText("Wednesday procedure")).toBeInViewport();
+
+  await demo.getByRole("button", { name: "Today", exact: true }).click();
+  await expect(demo.locator(".ic-now-pin.is-current")).toBeInViewport();
+});
+
+test("editorial time precision progressively reveals minute labels without replacing ticks", async ({ page }) => {
+  await page.goto("/examples/integration-walkthrough");
+  const demo = await revealLazyArticleDemo(page, "progressive time precision example", "article-time-precision-demo");
+  const ticks = demo.locator(".ic-time-tick");
+  const visibleMinorTicks = demo.locator(".ic-time-tick:not(.is-hour):not(.is-label-hidden)");
+  const stableTickCount = await ticks.count();
+  const overviewCount = await visibleMinorTicks.count();
+  await expect(page.getByTestId("article-precision-level")).toHaveText("Hours + half hours");
+
+  await demo.getByRole("button", { name: "Quarter hour" }).click();
+  await expect(page.getByTestId("article-precision-level")).toHaveText("Quarter hours");
+  await expect.poll(() => visibleMinorTicks.count()).toBeGreaterThan(overviewCount);
+  const quarterCount = await visibleMinorTicks.count();
+
+  await demo.getByRole("button", { name: "5 minutes" }).click();
+  await expect(page.getByTestId("article-precision-level")).toHaveText("Every 5 minutes");
+  await expect.poll(() => visibleMinorTicks.count()).toBeGreaterThan(quarterCount);
+  await expect(demo.locator(".ic-time-tick:not(.is-hour):not(.is-label-hidden) sup").first()).toHaveText("5");
+  await expect(ticks).toHaveCount(stableTickCount);
+});
+
+test("editorial styling presets change both settings geometry and scoped CSS", async ({ page }) => {
+  await page.goto("/examples/integration-walkthrough");
+  const demo = await revealLazyArticleDemo(page, "calendar styling presets", "article-styling-demo");
+  const calendar = demo.getByTestId("infinite-calendar");
+  const rowLabel = demo
+    .locator(
+      '[data-testid="calendar-day"][data-date="2026-07-06"] [data-testid="calendar-row"][data-calendar-id="room-1"] .ic-row-label'
+    )
+    .first();
+  await expect(calendar).toHaveClass(/theme-clinical/);
+  await expect(rowLabel).toBeVisible();
+  const clinicalWidth = (await rowLabel.boundingBox())?.width ?? 0;
+
+  await demo.getByRole("button", { name: "Compact" }).click();
+  await expect(calendar).toHaveClass(/theme-compact/);
+  await expect.poll(async () => (await rowLabel.boundingBox())?.width ?? 0).toBeLessThan(clinicalWidth);
+
+  await demo.getByRole("button", { name: "Night" }).click();
+  await expect(calendar).toHaveClass(/theme-night/);
+  await expect(demo.locator(".ic-row-grid").first()).toHaveCSS("background-color", "rgb(27, 41, 37)");
+  await expect(demo.locator(".ic-time-tick").first()).toHaveCSS("color", "rgb(220, 233, 227)");
+});
+
+test("editorial final calendar composes navigation, zoom, styling, and animated insertion", async ({ page }) => {
+  await page.goto("/examples/integration-walkthrough");
+  const demo = await revealLazyArticleDemo(page, "complete calendar system example", "article-summary-demo");
+  await expect(demo.locator(".ic-now-pin.is-current")).toBeInViewport();
+  await demo.getByRole("button", { name: "Summary zoom in" }).click();
+  await expect(page.getByTestId("article-summary-zoom")).toHaveText("1.50×");
+
+  await demo.getByLabel("Summary calendar theme").selectOption("night");
+  await expect(demo.getByTestId("infinite-calendar")).toHaveClass(/theme-night/);
+  await demo.getByRole("button", { name: "Insert event" }).click();
+  await expect(demo.getByText("Priority consultation")).toBeInViewport();
+  await expect(demo.getByText("Inserted an event without rebuilding the calendar")).toBeVisible();
+});
+
+test("editorial code blocks use selectable TSX syntax colors", async ({ page }) => {
+  await page.goto("/examples/integration-walkthrough");
+  const source = page.getByLabel("Complete minimal integration TSX source");
+  await source.scrollIntoViewIfNeeded();
+  await expect(source).toContainText('import { useState } from "react"');
+  await expect(source.locator(".syntax-keyword").first()).toBeVisible();
+  await expect(source.locator(".syntax-string").first()).toBeVisible();
+  await expect(source.locator(".syntax-tag").first()).toBeVisible();
+  await expect(source.locator(".syntax-type").first()).toBeVisible();
+  const colors = await source
+    .locator('[class^="syntax-"]')
+    .evaluateAll((tokens) => [...new Set(tokens.map((token) => getComputedStyle(token).color))]);
+  expect(colors.length).toBeGreaterThanOrEqual(6);
+  await expect(source).toHaveCSS("user-select", "auto");
 });
 
 test("editorial article preserves its inline calendar through full-screen expansion", async ({ page }) => {
@@ -254,8 +451,14 @@ test("editorial zoom controls and gesture requests keep zoom parent-controlled",
   const demo = await revealLazyArticleDemo(page, "controlled zoom example", "article-zoom-demo");
   const slider = page.getByTestId("article-zoom-slider");
   const output = page.getByTestId("article-zoom-value");
+  const marker = demo.locator(".ic-now-pin.is-current");
+  await expect(marker).toBeVisible();
+  const markerXBefore = (await marker.boundingBox())?.x ?? 0;
   await slider.fill("2");
   await expect(output).toHaveText("2.00×");
+  await expect
+    .poll(async () => Math.abs(((await marker.boundingBox())?.x ?? 0) - markerXBefore))
+    .toBeLessThanOrEqual(2);
 
   const viewport = demo.locator(".ic-viewport");
   const box = await viewport.boundingBox();
@@ -309,7 +512,7 @@ test("editorial lane comparison grows only the dense resource and supports verti
 test("editorial hover demo reveals underlying overlap lanes in turn", async ({ page }) => {
   await page.goto("/examples/integration-walkthrough");
   const demo = await revealLazyArticleDemo(page, "underlying event hover example", "article-hover-demo");
-  await expect(demo.getByTestId("infinite-calendar")).toHaveAttribute("data-view", "infinite-vertical");
+  await expect(demo.getByTestId("infinite-calendar")).toHaveAttribute("data-view", "infinite-horizontal");
   await expect(demo.getByText("Pre-op check")).toBeVisible();
 
   const lanePair = await demo.evaluate((element) => {
@@ -325,7 +528,7 @@ test("editorial hover demo reveals underlying overlap lanes in turn", async ({ p
           box.left >= viewport.left &&
           box.right <= viewport.right
       )
-      .sort((a, b) => a.box.left - b.box.left);
+      .sort((a, b) => a.box.top - b.box.top);
     if (events.length < 2) return null;
     return events.slice(0, 2).map(({ event, box }) => ({
       id: event.dataset.eventId,
@@ -444,10 +647,26 @@ test("editorial stability lab reveals and focuses a shared participant", async (
     .locator('[data-event-id="stability-shared-event"][data-calendar-id="room-1"][data-status="focused"]')
     .first();
   await expect(focused).toBeVisible({ timeout: 10_000 });
+  const [focusedBox, viewportBox, timeHeaderBox] = await Promise.all([
+    focused.boundingBox(),
+    demo.locator(".ic-viewport").boundingBox(),
+    demo.locator(".ic-time-header").boundingBox()
+  ]);
+  expect(focusedBox).not.toBeNull();
+  expect(viewportBox).not.toBeNull();
+  expect(timeHeaderBox).not.toBeNull();
+  expect(focusedBox?.x ?? 0).toBeGreaterThanOrEqual(timeHeaderBox?.x ?? 0);
+  expect(focusedBox?.y ?? 0).toBeGreaterThanOrEqual((timeHeaderBox?.y ?? 0) + (timeHeaderBox?.height ?? 0));
+  expect((focusedBox?.x ?? 0) + (focusedBox?.width ?? 0)).toBeLessThanOrEqual(
+    (viewportBox?.x ?? 0) + (viewportBox?.width ?? 0)
+  );
+  expect((focusedBox?.y ?? 0) + (focusedBox?.height ?? 0)).toBeLessThanOrEqual(
+    (viewportBox?.y ?? 0) + (viewportBox?.height ?? 0)
+  );
   await expect(demo.getByText("Focus request focused")).toBeVisible();
 });
 
-test("repeated shared-room focus remains inside the viewport without accumulating drift", async ({ page }) => {
+test("repeated focus leaves a fully visible shared-room event and viewport in place", async ({ page }) => {
   await page.goto("/examples/integration-walkthrough");
   const demo = await revealLazyArticleDemo(page, "delayed loading stability example", "article-stability-demo");
   await expect(demo.getByText("Shared consultation").first()).toBeVisible({ timeout: 10_000 });
@@ -459,22 +678,35 @@ test("repeated shared-room focus remains inside the viewport without accumulatin
   await expect(roomEvent).toBeVisible({ timeout: 10_000 });
   const firstBox = await roomEvent.boundingBox();
   expect(firstBox).not.toBeNull();
+  const viewport = demo.locator(".ic-viewport");
 
   for (let attempt = 0; attempt < 4; attempt += 1) {
+    const scrollBefore = await viewport.evaluate((element) => ({
+      left: element.scrollLeft,
+      top: element.scrollTop
+    }));
     await reveal.click();
     await expect(roomEvent).toBeVisible();
     await page.evaluate(
       () => new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())))
     );
-    const [eventBox, viewportBox] = await Promise.all([
+    const [eventBox, viewportBox, timeHeaderBox, scrollAfter] = await Promise.all([
       roomEvent.boundingBox(),
-      demo.locator(".ic-viewport").boundingBox()
+      viewport.boundingBox(),
+      demo.locator(".ic-time-header").boundingBox(),
+      viewport.evaluate((element) => ({ left: element.scrollLeft, top: element.scrollTop }))
     ]);
     expect(eventBox).not.toBeNull();
     expect(viewportBox).not.toBeNull();
+    expect(timeHeaderBox).not.toBeNull();
+    expect(scrollAfter).toEqual(scrollBefore);
     expect(Math.abs((eventBox?.x ?? 0) - (firstBox?.x ?? 0))).toBeLessThanOrEqual(2);
     expect(Math.abs((eventBox?.y ?? 0) - (firstBox?.y ?? 0))).toBeLessThanOrEqual(2);
-    expect(eventBox?.y ?? 0).toBeGreaterThanOrEqual(viewportBox?.y ?? 0);
+    expect(eventBox?.x ?? 0).toBeGreaterThanOrEqual(timeHeaderBox?.x ?? 0);
+    expect(eventBox?.y ?? 0).toBeGreaterThanOrEqual((timeHeaderBox?.y ?? 0) + (timeHeaderBox?.height ?? 0));
+    expect((eventBox?.x ?? 0) + (eventBox?.width ?? 0)).toBeLessThanOrEqual(
+      (viewportBox?.x ?? 0) + (viewportBox?.width ?? 0)
+    );
     expect((eventBox?.y ?? 0) + (eventBox?.height ?? 0)).toBeLessThanOrEqual(
       (viewportBox?.y ?? 0) + (viewportBox?.height ?? 0)
     );
@@ -496,31 +728,61 @@ test("editorial creation demo narrows to one doctor lane without adding an overl
   await expect(draft).toBeVisible();
   await expect(draft).toHaveAttribute("data-lane-count", "1");
   await expect(demo.getByText("Available", { exact: true }).first()).toBeVisible();
+  await expect(demo.getByText("Tuesday review")).toBeInViewport();
+  await expect(demo.getByText("Wednesday treatment")).toBeInViewport();
+  await expect(demo.getByText("Thursday procedure")).toBeInViewport();
+  await expect(demo.getByText("Post-op clinic")).toHaveCount(0);
+  const visibleCardLines = await demo
+    .locator('[data-event-id="creation-maya-tuesday"] .article-event-card')
+    .evaluate((card) => {
+      const cardBox = card.getBoundingClientRect();
+      return Array.from(card.querySelectorAll<HTMLElement>("span, strong"))
+        .filter((line) => getComputedStyle(line).display !== "none")
+        .map((line) => {
+          const lineBox = line.getBoundingClientRect();
+          return {
+            contained: lineBox.top >= cardBox.top && lineBox.bottom <= cardBox.bottom,
+            overflowY: getComputedStyle(line).overflowY
+          };
+        });
+    });
+  expect(visibleCardLines).toEqual([
+    { contained: true, overflowY: "visible" },
+    { contained: true, overflowY: "visible" },
+    { contained: true, overflowY: "visible" }
+  ]);
   await demo.getByRole("button", { name: "Cancel", exact: true }).click();
   await expect(draft).toHaveCount(0);
   await expect(page.getByTestId("article-visible-lane-count")).toHaveText("2 lanes");
 });
 
-test("editorial visual focus follows a saved event through overlap lane changes", async ({ page }) => {
+test("editorial event focus preserves a visible card through save and lane changes", async ({ page }) => {
   await page.goto("/examples/integration-walkthrough");
   const demo = await revealLazyArticleDemo(page, "visual focus lane-change example", "article-event-focus-demo");
   await expect(demo.getByTestId("draft-event")).toBeVisible();
+  const viewport = demo.locator(".ic-viewport");
+  const beforeSaveScroll = await viewport.evaluate((element) => ({ left: element.scrollLeft, top: element.scrollTop }));
   await demo.getByRole("button", { name: "Save draft" }).click();
 
   const saved = demo.locator('[data-event-id="article-focus-event"]');
   await expect(saved).toBeVisible();
   await expect(saved).toHaveAttribute("data-status", "focused");
-  const before = await saved.boundingBox();
-  expect(before).not.toBeNull();
+  await expect
+    .poll(() => viewport.evaluate((element) => ({ left: element.scrollLeft, top: element.scrollTop })))
+    .toEqual(beforeSaveScroll);
 
+  const beforeCollisionsScroll = await viewport.evaluate((element) => ({
+    left: element.scrollLeft,
+    top: element.scrollTop
+  }));
   await demo.getByRole("button", { name: "Add collisions" }).click();
   await expect(saved).toHaveAttribute("data-lane-count", "5");
   await expect(saved).toHaveAttribute("data-status", "focused");
   await expect(page.getByTestId("article-focus-state")).toHaveText("5 overlap lanes");
-  const after = await saved.boundingBox();
-  expect(after).not.toBeNull();
-  expect(Math.abs((after?.x ?? 0) - (before?.x ?? 0))).toBeLessThanOrEqual(2);
-  expect(Math.abs((after?.y ?? 0) - (before?.y ?? 0))).toBeLessThanOrEqual(2);
+  await expect(saved).toBeInViewport();
+  await expect
+    .poll(() => viewport.evaluate((element) => ({ left: element.scrollLeft, top: element.scrollTop })))
+    .toEqual(beforeCollisionsScroll);
 });
 
 test("editorial motion demo animates both add and cancel outcomes", async ({ page }) => {
@@ -528,9 +790,12 @@ test("editorial motion demo animates both add and cancel outcomes", async ({ pag
   const demo = await revealLazyArticleDemo(page, "appearing event example", "article-motion-demo");
   await expect(demo.getByText("Treatment consultation")).toBeVisible();
   await expect(demo.getByTestId("draft-event")).toBeVisible();
+  await demo.locator(".ic-viewport").evaluate((element) => {
+    element.scrollTop += 900;
+  });
   await demo.getByRole("button", { name: "Add event" }).click();
   const inserted = demo.locator('[data-event-id^="article-appearing-"]').first();
-  await expect(inserted).toBeVisible();
+  await expect(inserted).toBeInViewport();
   await expect(inserted).toHaveAttribute("data-status", "appearing");
   await expect(inserted.locator(".article-event-card")).toHaveAttribute("data-render-status", "appearing");
   await expect(inserted).toHaveAttribute("data-status", "existing", { timeout: 3_000 });

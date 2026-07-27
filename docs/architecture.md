@@ -16,7 +16,11 @@ flowchart LR
   Layers --> Renderer["external eventRenderer"]
 ```
 
-The central performance rule is simple: network work can add or refresh event shells, but it never owns the grid. Dates, resources, scrolling, sticky labels, zoom, hit-testing, and drafts render from settings and the last cache snapshot without awaiting `loadEvents`.
+The central performance rule is simple: network work can add or refresh event shells, but it never owns the grid.
+Dates, resources, scrolling, sticky labels, zoom, hit-testing, and drafts render from settings and the last cache
+snapshot without awaiting `loadEvents`. The runtime is designed for schedules ranging from roughly four to hundreds of
+events per day and targets smooth 60–120fps scrolling. That frame-rate range is an engineering target, not a guarantee
+across every browser, device, viewport, data shape, or consumer-provided event renderer.
 
 For local development, the demo wraps its fixture range loader with a Vite-only `POST /api/demo-events` mock transport. It exists to make latency, cancellation, and concurrent requests observable in browser tooling; it is not part of the package or runtime dependency graph.
 
@@ -53,12 +57,13 @@ flowchart LR
 
 `CalendarRoot` also coordinates declarative `focusRequest` values and imperative `focusEvent` calls above both
 orientation views. A focus request contains a complete event, asks the parent to reveal all known participant calendars
-through `onCalendarVisibilityRequest`, and delegates date/time navigation plus exact geometry restoration to the
-selected view. A target on a weekday removed by `settings.excludedWeekdays` resolves unavailable before navigation,
-because no event instance can exist in that date model. `removeVisibleEvent` deletes one id from the loaded date cache;
-neither focus nor deletion persists data. When the preferred participant instance is already visible, subsequent focus
-requests capture that same instance as their source anchor; this makes repeated focus idempotent instead of repeatedly
-mapping another participant’s coordinate onto the preferred one.
+through `onCalendarVisibilityRequest`, and asks the selected view whether the preferred event shell is fully inside its
+uncovered content viewport. A fully visible target is highlighted without a scroll write; a clipped or offscreen target
+uses date/time navigation or geometry restoration to enter the view. A target on a weekday removed by
+`settings.excludedWeekdays` resolves unavailable before navigation, because no event instance can exist in that date
+model. `removeVisibleEvent` deletes one id from the loaded date cache; neither focus nor deletion persists data. When
+the preferred participant instance is already visible, subsequent focus requests use that same local instance and
+remain idempotent.
 
 ## Dependency Direction
 
@@ -111,7 +116,12 @@ mounted `CalendarRoot` in a fixed viewport overlay; it does not invoke the brows
 into the reusable library. Its system-design labs also expose two existing library boundaries without adding article
 state to the runtime: `interactionMode` switches pointer ownership between committed event and availability layers, and
 the public viewport-anchor handle carries visual focus from a controlled draft to its saved replacement or through
-overlap-lane recomputation.
+overlap-lane recomputation. A CSS-native lab demonstrates that sticky days and resource names remain browser-positioned
+instead of entering high-frequency React scroll state. Product-control labs use the existing navigation handle,
+controlled settings, and scoped `className` styling. Date/time fields navigate immediately, adjacent-day controls call
+the same handle, and a progressive-precision lab changes only controlled zoom while the existing stable tick DOM reveals
+readable minute labels. A final composition demonstrates those boundaries together without adding an article-specific
+library surface.
 
 ## Async Event Loading
 
@@ -223,7 +233,11 @@ Sizing and rendering reuse the same prepared cell. Availability remains a full-c
 
 ## Date And Resource Virtualization
 
-The date scrollbar represents a bounded month-before/month-after window. Only viewport dates plus five date sections of overscan on each side are mounted. When scrolling settles, the top visible date becomes the next window anchor while its exact intra-day pixel offset is preserved.
+The date scrollbar represents a bounded month-before/month-after window. Only viewport dates plus five date sections
+of overscan on each side are mounted. Ordinary scrolling uses a 1.2-second idle deadline; reaching the absolute top or
+bottom uses a 240 ms edge deadline so the bounded range extends before the user waits at a hard stop. When either
+deadline settles, the top visible date becomes the next window anchor while its exact intra-day pixel offset is
+preserved.
 
 ```mermaid
 stateDiagram-v2
@@ -276,7 +290,7 @@ stateDiagram-v2
 
 Hit-testing rejects sticky labels and headers. Multi-calendar hover remains local to one rendered resource instance; drag and preview status stays keyed by event id across instances.
 
-Zoom stays controlled by `settings.zoom`. `Shift` + wheel requests `onZoomChange`, keeps the first focused time node for a gesture burst, and restores scroll on an animation frame. Slider or other external horizontal zoom changes preserve the time at the visible grid center in a layout effect before paint after the user has scrolled horizontally; at the timeline origin, they preserve the left edge instead. The wheel path suppresses that generic correction and retains its pointer-specific anchor. Horizontal rendering may apply a viewport-fill zoom floor without mutating the parent-owned value.
+Zoom stays controlled by `settings.zoom`. `Shift` + wheel requests `onZoomChange`, keeps the first focused time node for a gesture burst, and restores scroll on an animation frame. Slider or other external horizontal zoom changes first preserve a visible current-time marker at its viewport position in a layout effect before paint. When the marker is outside the configured hours or viewport, a horizontally scrolled view preserves its grid-center time and the timeline origin preserves its left edge. The wheel path suppresses that generic correction and retains its pointer-specific anchor. Horizontal rendering may apply a viewport-fill zoom floor without mutating the parent-owned value.
 
 The showcase keeps the controlled projection value and displayed control value in separate narrow contexts. A gesture zoom request updates only the calendar wrapper immediately; the range thumb and numeric readout catch up once after the 300ms gesture tail. Direct slider input updates its thumb/readout immediately and coalesces calendar projection to the latest value once per animation frame. The route shell, settings sections, popup, and other demo controls do not render again. The calendar shell owns a stacking boundary but deliberately avoids broad paint containment around its changing scroll surface; its existing overflow clip still bounds visible content without encouraging mixed old/new raster tiles during rapid zoom. The zoom control and live stats panel own small local layout, paint, and compositor boundaries. The full control pane must not use paint containment: a changing child would otherwise invalidate the full-sidebar paint layer despite stable React and DOM identity. The static sidebar is isolated on a parent compositor layer, and its changing child layers rerasterize independently, so neither a calendar frame nor a settled zoom-output update clears and repaints the menu surface.
 
@@ -343,16 +357,19 @@ sequenceDiagram
 
 One mutation observer, one resize observer, registry notifications, and one animation-frame slot replace selector polling and timeout ladders. Restores that opt into `cancelOnManualScroll` cancel synchronously on pointer, wheel, touch, or scroll-key intent so a queued correction cannot consume the user's first movement. Navigation fallback remains available when a target is not mounted.
 
-Event focus is a transient coordinator above this primitive. It captures an existing local instance when possible,
-requests the complete controlled calendar selection, then restores the preferred participant instance or navigates to
-the event slot. The focused key is `{ eventId, calendarId }`, so only one multi-calendar instance receives
-`status: "focused"`. Once that preferred instance is visible it becomes the source for later requests, preventing
-cross-participant anchor drift. Request ids are processed once; a newer request or manual input cancels older work.
+Event focus is a transient coordinator above this primitive. It requests the complete controlled calendar selection,
+then tests the preferred participant instance against the content viewport after sticky headers and labels are
+excluded. A fully visible shell receives `status: "focused"` without scrolling; only a clipped or offscreen shell is
+restored or navigated into view. The focused key is `{ eventId, calendarId }`, so only one multi-calendar instance
+receives the status. Request ids are processed once; a newer request or manual input cancels older work.
 
 Anchor names describe different owners rather than interchangeable snapshots: parent viewport restore, active gesture, pending navigation, automatic data-layout correction, and idle virtual-window recenter. Higher-priority owners suppress lower-priority scroll writes. See the [anchor taxonomy and priority diagram](./flows/README.md#anchor-taxonomy).
 
 ## Styling And Packaging
 
-Native CSS sticky positioning owns date, resource, and time labels. Reusable CSS is split into base, horizontal, vertical, and event-shell ownership files.
+Native CSS sticky positioning owns date, resource, and time labels. The sticky time-scale stacking context sits above
+per-day header marker segments, so its opaque header and pin expose only the marker stem below the circle while sticky
+date/resource labels remain above both. Reusable CSS is split into base, horizontal, vertical, and event-shell ownership
+files.
 
 Package builds emit JavaScript and an explicit `quno-calendar/styles.css`; JavaScript does not inject CSS or access `document` during import. Both ESM import and CommonJS `require` are safe in Node/SSR environments. Library date parsing and labels use small local/`Intl` helpers, so `date-fns` is not a runtime dependency of consumers.

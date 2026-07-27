@@ -18,7 +18,28 @@ type AnchoringArgs = {
   orientation: "horizontal" | "vertical";
   scrollToDateTime: CalendarNavigationHandle["scrollToDateTime"];
   verticalTimelineGutterPx?: number;
+  visibilityInsets?: { left?: number; top?: number };
 };
+
+function insetViewportBox(viewport: HTMLElement, leftInset = 0, topInset = 0) {
+  const box = viewport.getBoundingClientRect();
+  return {
+    left: box.left + leftInset,
+    top: box.top + topInset,
+    right: box.right,
+    bottom: box.bottom,
+    width: Math.max(0, box.width - leftInset),
+    height: Math.max(0, box.height - topInset)
+  } as DOMRect;
+}
+
+function captureAnchor(
+  target: CalendarViewportAnchorTarget,
+  resolveSnapshot: (target: CalendarViewportAnchorTarget) => CalendarViewportAnchor["snapshot"] | null
+) {
+  const snapshot = resolveSnapshot(target);
+  return snapshot ? { snapshot, target } : null;
+}
 
 /** Captures and restores event/slot geometry through an instance-owned registry. */
 export function useViewportAnchoring(args: AnchoringArgs) {
@@ -34,9 +55,7 @@ export function useViewportAnchoring(args: AnchoringArgs) {
     setActiveRestoreTarget(null);
   }, []);
 
-  useEffect(() => {
-    registry.invalidate();
-  }, [args.orientation, args.settings, registry]);
+  useEffect(() => registry.invalidate(), [args.orientation, args.settings, registry]);
   useEffect(
     () => () => {
       cancelViewportAnchorRestore();
@@ -81,11 +100,20 @@ export function useViewportAnchoring(args: AnchoringArgs) {
   );
 
   const captureViewportAnchor = useCallback(
-    (target: CalendarViewportAnchorTarget): CalendarViewportAnchor | null => {
-      const snapshot = resolveSnapshot(target);
-      return snapshot ? { snapshot, target } : null;
-    },
+    (target: CalendarViewportAnchorTarget): CalendarViewportAnchor | null => captureAnchor(target, resolveSnapshot),
     [resolveSnapshot]
+  );
+
+  const isEventFullyVisible = useCallback(
+    (target: CalendarViewportAnchorTarget) => {
+      const viewport = args.containerRef.current;
+      if (!viewport) return false;
+      return registry.eventFullyVisible(
+        target,
+        insetViewportBox(viewport, args.visibilityInsets?.left, args.visibilityInsets?.top)
+      );
+    },
+    [args.containerRef, args.visibilityInsets?.left, args.visibilityInsets?.top, registry]
   );
 
   const restoreViewportAnchor = useCallback(
@@ -127,6 +155,7 @@ export function useViewportAnchoring(args: AnchoringArgs) {
   return {
     activeRestoreTarget,
     captureViewportAnchor,
+    isEventFullyVisible,
     restoreViewportAnchor,
     cancelViewportAnchorRestore,
     registration

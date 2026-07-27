@@ -108,16 +108,16 @@ This document defines the names used for visible calendar interface parts and th
 
 ## Viewport And Focus Anchors
 
-| Term                      | Meaning                                                                                                                                               | Owner                                   |
-| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
-| Visual focus              | The semantic calendar location kept at the same viewport-relative coordinate. It is not browser DOM or keyboard focus.                                | Runtime policy                          |
-| Virtual-window anchor     | The normalized date around which the bounded month-before/month-after date model is built.                                                            | Date virtualizer                        |
-| Visible-position snapshot | The top visible `{ dateKey, offsetWithinDate }` captured during scrolling and used by idle recentering.                                               | Scroll runtime                          |
-| Data-layout anchor        | A one-commit grid anchor used when late events change metrics; horizontally it preserves a date header or `{ dateKey, calendarId, offsetWithinRow }`. | Horizontal day measurement bridge       |
-| Parent viewport anchor    | An explicit event or slot geometry snapshot captured/restored through `CalendarNavigationHandle` for product-owned UI changes.                        | Parent flow plus anchor restore runtime |
-| Event focus request       | A one-shot request that reveals known participants, positions one preferred event instance, and briefly highlights it without taking DOM focus.       | `CalendarRoot` focus coordinator        |
-| Zoom anchor               | The time at the visible grid center for external zoom, or the first pointer-nearest rendered time node for a `Shift` + wheel gesture burst.           | Zoom controller                         |
-| Fallback date offset      | The date-local pixel retained by a data-layout anchor in case its resource disappears before restoration.                                             | Data-layout anchor                      |
+| Term                      | Meaning                                                                                                                                                                | Owner                                   |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
+| Visual focus              | The semantic calendar location kept at the same viewport-relative coordinate. It is not browser DOM or keyboard focus.                                                 | Runtime policy                          |
+| Virtual-window anchor     | The normalized date around which the bounded month-before/month-after date model is built.                                                                             | Date virtualizer                        |
+| Visible-position snapshot | The top visible `{ dateKey, offsetWithinDate }` captured during scrolling and used by idle recentering.                                                                | Scroll runtime                          |
+| Data-layout anchor        | A one-commit grid anchor used when late events change metrics; horizontally it preserves a date header or `{ dateKey, calendarId, offsetWithinRow }`.                  | Horizontal day measurement bridge       |
+| Parent viewport anchor    | An explicit event or slot geometry snapshot captured/restored through `CalendarNavigationHandle` for product-owned UI changes.                                         | Parent flow plus anchor restore runtime |
+| Event focus request       | A one-shot request that reveals known participants, positions one preferred event instance, and briefly highlights it without taking DOM focus.                        | `CalendarRoot` focus coordinator        |
+| Zoom anchor               | A visible current-time marker for external zoom, its grid-center/origin fallback, or the first pointer-nearest rendered time node for a `Shift` + wheel gesture burst. | Zoom controller                         |
+| Fallback date offset      | The date-local pixel retained by a data-layout anchor in case its resource disappears before restoration.                                                              | Data-layout anchor                      |
 
 ## Renderer Statuses
 

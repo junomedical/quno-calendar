@@ -8,6 +8,7 @@ import type { CalendarViewHandle } from "../../../core/internalTypes";
 import { toDateKey } from "../../../date/dateVirtualization";
 import { parseClockToMinutes } from "../../../time/time";
 import { verticalMinuteToY, VERTICAL_TIMELINE_GUTTER_PX } from "../../rendering/vertical/VerticalTimelineDay";
+import { buildVerticalViewGeometry } from "../../rendering/vertical/verticalViewGeometry";
 import { useViewportAnchoring } from "../../anchors/parent/useViewportAnchoring";
 
 type VerticalNavigationArgs = {
@@ -65,7 +66,11 @@ export function useVerticalNavigation({
     settings,
     orientation: "vertical",
     scrollToDateTime,
-    verticalTimelineGutterPx: VERTICAL_TIMELINE_GUTTER_PX
+    verticalTimelineGutterPx: VERTICAL_TIMELINE_GUTTER_PX,
+    visibilityInsets: {
+      left: buildVerticalViewGeometry(settings).labelWidth,
+      top: settings.dayHeaderHeight
+    }
   });
 
   useImperativeHandle(
@@ -79,6 +84,7 @@ export function useVerticalNavigation({
           `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`
         ),
       captureViewportAnchor: anchoring.captureViewportAnchor,
+      isEventFullyVisible: anchoring.isEventFullyVisible,
       restoreViewportAnchor: anchoring.restoreViewportAnchor,
       cancelViewportAnchorRestore: anchoring.cancelViewportAnchorRestore,
       commitVisibleEvent,

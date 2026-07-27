@@ -448,7 +448,7 @@ test("limits vertical scrollbar to one month around the visible date and recente
   await viewport.evaluate((element) => {
     element.scrollTop = 0;
   });
-  await page.waitForTimeout(260);
+  await page.waitForTimeout(100);
   const topBoundDate = await topVisibleDayDate(page);
   expect(topBoundDate >= "2026-06-06").toBe(true);
   expect(topBoundDate <= "2026-06-08").toBe(true);
@@ -458,18 +458,15 @@ test("limits vertical scrollbar to one month around the visible date and recente
     element.scrollTop = element.scrollHeight;
     element.dispatchEvent(new Event("scrollend"));
   });
-  await page.waitForTimeout(300);
+  await page.waitForTimeout(120);
   expect(await verticalScrollRatio(page)).toBeGreaterThan(0.85);
 
-  await page.waitForTimeout(1400);
+  await expect.poll(() => verticalScrollRatio(page), { timeout: 900 }).toBeGreaterThan(0.35);
+  await expect.poll(() => verticalScrollRatio(page), { timeout: 900 }).toBeLessThan(0.65);
   const bottomDates = await visibleDayDates(page);
   expect(bottomDates.length).toBeGreaterThan(0);
   expect(bottomDates[bottomDates.length - 1] >= "2026-08-01").toBe(true);
   expect(bottomDates[bottomDates.length - 1] <= "2026-08-06").toBe(true);
-
-  const recenteredRatio = await verticalScrollRatio(page);
-  expect(recenteredRatio).toBeGreaterThan(0.35);
-  expect(recenteredRatio).toBeLessThan(0.65);
 });
 
 test("keeps intra-day scroll offset when the virtual window recenters", async ({ page }) => {

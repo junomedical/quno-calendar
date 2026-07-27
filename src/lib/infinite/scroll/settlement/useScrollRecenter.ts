@@ -12,7 +12,7 @@
  * @see docs/flows/virtual-scroll-and-recenter.md#settled-scroll-lifecycle
  */
 import { useCallback, useEffect, useRef, type RefObject } from "react";
-import { SCROLL_RECENTER_DELAY_MS } from "../scrollConstants";
+import { SCROLL_RECENTER_DELAY_MS, scrollRecenterDelayMs } from "../scrollConstants";
 
 type UseScrollRecenterArgs = {
   containerRef: RefObject<HTMLDivElement | null>;
@@ -48,8 +48,10 @@ export function useScrollRecenter({
     // The eager snapshot keeps refs useful even if a later jump has no mounted item yet.
     updateVisibleSnapshot();
     clearScrollEndTimer();
-    scrollEndTimerRef.current = window.setTimeout(finishScrollRecenter, SCROLL_RECENTER_DELAY_MS);
-  }, [clearScrollEndTimer, finishScrollRecenter, updateVisibleSnapshot]);
+    const container = containerRef.current;
+    const delayMs = container ? scrollRecenterDelayMs(container) : SCROLL_RECENTER_DELAY_MS;
+    scrollEndTimerRef.current = window.setTimeout(finishScrollRecenter, delayMs);
+  }, [clearScrollEndTimer, containerRef, finishScrollRecenter, updateVisibleSnapshot]);
 
   useEffect(() => clearScrollEndTimer, [clearScrollEndTimer]);
 

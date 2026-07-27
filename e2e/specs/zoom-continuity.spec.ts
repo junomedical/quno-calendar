@@ -71,6 +71,7 @@ test("coalesces a touchpad wheel burst into one anchored timeline projection", a
 });
 
 test("keeps horizontal slider zoom continuous without replacing rendered content", async ({ page }) => {
+  await page.clock.install({ time: new Date("2026-07-06T03:00:00") });
   await page.goto("/");
   await goToWorkday(page);
   await waitForDemoEvents(page);

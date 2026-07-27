@@ -34,6 +34,65 @@ import {
 } from "./articleSupport";
 
 const visibleCalendarIds = articleCalendars.map((calendar) => calendar.id);
+const articleZoomNow = new Date("2026-07-06T13:30:00");
+const creationLaneEvents: CalendarEvent[] = [
+  ...articleEvents,
+  {
+    id: "creation-maya-tuesday",
+    calendarId: "provider-a",
+    title: "Tuesday review",
+    subtitle: "Dr. Maya Chen",
+    start: "2026-07-07T09:15:00",
+    end: "2026-07-07T11:15:00",
+    color: "#246b5d"
+  },
+  {
+    id: "creation-leo-tuesday",
+    calendarId: "provider-b",
+    title: "Recovery planning",
+    subtitle: "Dr. Leo Hart",
+    start: "2026-07-07T13:00:00",
+    end: "2026-07-07T15:00:00",
+    color: "#7d8244"
+  },
+  {
+    id: "creation-maya-wednesday",
+    calendarId: "provider-a",
+    title: "Wednesday treatment",
+    subtitle: "Dr. Maya Chen",
+    start: "2026-07-08T11:30:00",
+    end: "2026-07-08T13:30:00",
+    color: "#246b5d"
+  },
+  {
+    id: "creation-leo-wednesday",
+    calendarId: "provider-b",
+    title: "Consultation block",
+    subtitle: "Dr. Leo Hart",
+    start: "2026-07-08T15:00:00",
+    end: "2026-07-08T17:00:00",
+    color: "#7d8244"
+  },
+  {
+    id: "creation-maya-thursday",
+    calendarId: "provider-a",
+    title: "Thursday procedure",
+    subtitle: "Dr. Maya Chen",
+    start: "2026-07-09T10:00:00",
+    end: "2026-07-09T12:00:00",
+    color: "#246b5d"
+  },
+  {
+    id: "creation-leo-thursday",
+    calendarId: "provider-b",
+    title: "Post-op clinic",
+    subtitle: "Dr. Leo Hart",
+    start: "2026-07-09T14:00:00",
+    end: "2026-07-09T16:00:00",
+    color: "#7d8244"
+  }
+];
+const loadCreationLaneEvents: LoadEvents = async (request) => filterEvents(creationLaneEvents, request);
 
 export function InfiniteCalendarDemo() {
   const activityRootRef = useRef<HTMLDivElement>(null);
@@ -226,6 +285,7 @@ export function ZoomCalendarDemo() {
           eventRenderer={ArticleEventCard}
           initialDateKey={articleDateKey}
           loadEvents={loadArticleEvents}
+          now={articleZoomNow}
           onZoomChange={changeZoom}
           selectedCalendarIds={visibleCalendarIds}
           settings={settings}
@@ -405,6 +465,15 @@ export function MotionDemo() {
     ];
     setActiveDraft(null);
     calendarRef.current?.commitVisibleEvent(event, { appearing: true, previousEventId });
+    calendarRef.current?.scrollToDateTime(event.start.slice(0, 10), event.start.slice(11, 16));
+  };
+
+  const showNewDraft = () => {
+    const draft = createMotionDraft(sequenceRef.current + 1);
+    setActiveDraft(draft);
+    window.requestAnimationFrame(() => {
+      calendarRef.current?.scrollToDateTime(draft.event.start.slice(0, 10), draft.event.start.slice(11, 16));
+    });
   };
 
   const cancelEvent = () => {
@@ -423,12 +492,7 @@ export function MotionDemo() {
       }
       tools={
         <div className="article-motion-controls">
-          <button
-            className="article-button"
-            disabled={Boolean(activeDraft)}
-            onClick={() => setActiveDraft(createMotionDraft(sequenceRef.current + 1))}
-            type="button"
-          >
+          <button className="article-button" disabled={Boolean(activeDraft)} onClick={showNewDraft} type="button">
             New draft
           </button>
           <button
@@ -466,7 +530,7 @@ export function HoverRevealDemo() {
   return (
     <CalendarDemoShell
       data-testid="article-hover-demo"
-      note="Move horizontally through the 13:00 stack; every covered mini-lane remains reachable"
+      note="Move vertically through the 13:00 stack; every mini-lane covered by the expanded card remains reachable"
       tools={<span className="article-toolbar-badge">Original lane hit-testing</span>}
     >
       <div className="article-calendar-frame">
@@ -481,12 +545,10 @@ export function HoverRevealDemo() {
             ...articleSettings,
             startHour: 12,
             endHour: 16,
-            verticalColumnMinWidth: 360,
-            verticalColumnOverlapCapacity: 5,
-            verticalEventHoverMinHeight: 84,
-            zoom: 1.35
+            rowHeight: 64,
+            zoom: 1.3
           }}
-          view="infinite-vertical"
+          view="infinite-horizontal"
         />
       </div>
     </CalendarDemoShell>
@@ -494,13 +556,14 @@ export function HoverRevealDemo() {
 }
 
 export function CreationLaneDemo() {
+  const calendarRef = useRef<CalendarNavigationHandle>(null);
   const doctorIds = ["provider-a", "provider-b"];
   const [selectedDoctorId, setSelectedDoctorId] = useState(doctorIds[0]);
   const [activeDraft, setActiveDraft] = useState<ActiveEventDraft | null>(null);
   const selectedCalendarIds = activeDraft ? [selectedDoctorId] : doctorIds;
 
   const beginCreation = () => {
-    setActiveDraft({
+    const draft: ActiveEventDraft = {
       mode: "create",
       event: {
         id: `article-creation-draft-${selectedDoctorId}`,
@@ -513,6 +576,10 @@ export function CreationLaneDemo() {
         color: articleCalendars.find((calendar) => calendar.id === selectedDoctorId)?.color,
         kind: "draft"
       }
+    };
+    setActiveDraft(draft);
+    window.requestAnimationFrame(() => {
+      calendarRef.current?.scrollToDateTime(draft.event.start.slice(0, 10), draft.event.start.slice(11, 16));
     });
   };
 
@@ -521,8 +588,8 @@ export function CreationLaneDemo() {
       data-testid="article-creation-lane-demo"
       note={
         activeDraft
-          ? "One selected doctor lane; availability and saved events remain readable below the draft"
-          : "Two doctor lanes; choose one before starting the creation flow"
+          ? "One selected doctor lane across several days; availability and saved events remain readable below the draft"
+          : "Two doctor lanes across the week; choose one before starting the creation flow"
       }
       tools={
         <div className="article-creation-controls">
@@ -557,12 +624,13 @@ export function CreationLaneDemo() {
     >
       <div className="article-calendar-frame">
         <CalendarRoot
+          ref={calendarRef}
           activeDraft={activeDraft}
           ariaLabel="Single-lane event creation calendar"
           calendars={articleCalendars}
           eventRenderer={ArticleEventCard}
           initialDateKey={articleDateKey}
-          loadEvents={loadArticleEvents}
+          loadEvents={loadCreationLaneEvents}
           selectedCalendarIds={selectedCalendarIds}
           settings={{ ...articleSettings, rowHeight: 62 }}
         />

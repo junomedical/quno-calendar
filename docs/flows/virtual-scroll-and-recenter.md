@@ -54,6 +54,9 @@ sequenceDiagram
 ```
 
 The one-pixel probe makes an exact item boundary belong to the following date rather than the date that ends at that coordinate.
+The scheduler uses the ordinary 1.2-second deadline inside the bounded range. When `scrollTop` reaches the absolute top
+or bottom within one device-independent pixel, it uses a 240 ms deadline instead. More scroll always replaces the
+pending timer and recalculates which deadline applies.
 
 ## Recenter State Machine
 
@@ -184,6 +187,7 @@ flowchart TD
 | Target date is excluded                           | Normalize to the nearest permitted date before storing refs or indexes.                    |
 | Saved offset is negative                          | Clamp it to zero.                                                                          |
 | Structural change makes a date shorter            | Clamp or orientation-translate the offset so the same date remains visible.                |
+| Viewport reaches the absolute top or bottom       | Reduce the recenter deadline from 1.2 seconds to 240 ms.                                   |
 | More scroll arrives before idle deadline          | Clear the old timer, update the snapshot, and schedule once.                               |
 | Component unmounts                                | Clear the fallback timer; no deferred scroll survives.                                     |
 | Interaction remains active at deadline            | Do not rebuild the window; the next settled path uses the newest snapshot.                 |

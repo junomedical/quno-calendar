@@ -8,6 +8,8 @@
   responsive sizing, and create-only availability examples.
 - Added declarative and imperative event focus coordinated by `CalendarRoot`, automatic requests to reveal known
   participant calendars, local `focused` renderer status, and cancellation on manual navigation.
+- Refined event focus as a visibility guarantee: fully visible shells are highlighted without scrolling, while clipped
+  or offscreen shells are brought into the uncovered calendar viewport.
 - Fixed event focus with excluded weekdays so a hidden target resolves unavailable without jumping to the next
   included date or reporting a false focused state.
 - Fixed repeated focus of an already-visible preferred participant so it anchors from that local instance rather than
@@ -20,6 +22,22 @@
   table of contents, and linked the guide from the main demo. Rewrote the article narrative to lead with the product
   value of stable memory, explicit data ownership, renderer extensibility, safe interaction layers, and visual
   continuity before explaining each live control.
+- Populated the single-doctor creation exhibit across adjacent weekdays so narrowing to one doctor reveals more of that
+  doctor’s schedule instead of leaving later dates empty.
+- Made article add/draft actions navigate their newly inserted event into view, and raised the sticky time-scale context
+  above per-day marker segments so the current-time line begins below its circular pin instead of showing a stem above
+  it.
+- Stopped article event-card spans from clipping their own line boxes. Short shells now remove time and subtitle lines
+  progressively, preserving complete visible lines inside the card.
+- Added selectable TSX syntax coloring to the article code blocks while preserving plain-text clipboard output.
+- Expanded the editorial field guide to 23 chapters with a four-to-hundreds-of-events performance design envelope,
+  60–120fps scrolling target, CSS-native sticky-chrome exhibit, dedicated current-time reference, immediate date/time
+  inputs with previous/next/Today controls, progressively revealed time-label precision, three settings-plus-CSS
+  styling presets, and a final composed calendar combining navigation, zoom, overlap, mutations, animation, theming,
+  and full-screen use. Added a closing production-footprint summary with raw and gzip ESM/CSS sizes plus direct, peer,
+  and bundled dependency counts.
+- Added a chapter 00 overview explaining why the primary calendar maps time and event text horizontally while days and
+  resources move vertically: denser readable cards, local overlap growth, and lower-effort day navigation.
 - Added `removeVisibleEvent(eventId)` for immediate multi-calendar cache deletion without a range refresh.
 - Replaced the eight-step integration walkthrough with a Medium-style interactive article covering settled infinite
   scrolling, external event cards, controlled and pointer-anchored zoom, overlap lanes and hover handoff, delayed stable
@@ -27,12 +45,12 @@
   unchanged, legacy `?step=` parameters are ignored, date labels are compact and single-line, a settlement chip reports
   scrolled/repositioned state, and every live calendar expands without remounting through a shared viewport overlay.
 - Expanded the editorial field guide with replayable added-event and cancelled-draft card specimens, a live
-  availability-layer switch that makes normal cards inert during availability editing, and an event-relative
-  visual-focus lab that preserves a saved card through draft replacement and five-lane overlap recomputation.
+  availability-layer switch that makes normal cards inert during availability editing, and an event-focus lab that
+  keeps saved cards visible through draft replacement and five-lane overlap recomputation without unnecessary scroll.
 - Fixed narrow event shells in the editorial examples so short-duration events switch to a wrapped title-only
   presentation instead of clipping four metadata lines inside the shell.
 - Embedded read-only and drag/create recipes directly in the editorial guide, added a delayed warm-window preloading
-  lab with visible request ranges, and changed the covered-event hover exhibit to the vertical resource-column
+  lab with visible request ranges, and changed the covered-event hover exhibit to the horizontal resource-row
   direction.
 - Prevented transient white/missing availability tiles during rapid zoom by coalescing direct slider projection to one latest-value update per animation frame and replacing broad calendar paint containment with stacking isolation plus the existing overflow clip. Availability shells and renderer content now have explicit minimum-zoom DOM/layering regression coverage.
 - Removed repeated source ownership banners and retired source-text policy scripts in favor of folder-owned domains plus executable type, unit, browser, and architecture checks. Shared availability/draft/preview projection now uses one state layer with small orientation geometry adapters. Runtime behavior and the public API are unchanged.
@@ -58,7 +76,7 @@
 - Pinned active restore targets across resource virtualization and normalized draft/date pins and demo range filtering through local calendar dates instead of raw timestamp prefixes.
 - Changed Pointer Events hit identity to use mounted date/resource grid metadata, preventing async variable-row measurement from targeting a neighboring resource.
 - Applied the interaction selection lock through standard and WebKit properties so drag/draw suppression is consistent in Safari.
-- Made horizontal slider/external zoom preserve the visible grid-center time before paint after horizontal scrolling (and the left edge at the timeline origin), retained prepared event models across zoom-only changes, and isolated product-card rendering from event-shell geometry updates.
+- Made horizontal slider/external zoom preserve a visible current-time marker before paint, falling back to the visible grid-center time after horizontal scrolling (or the left edge at the timeline origin); retained prepared event models across zoom-only changes and isolated product-card rendering from event-shell geometry updates.
 - Added an explicit late-data layout anchor: unloaded date navigation keeps the date header fixed, mid-date scrolling keeps the same resource/local-row point fixed as overlap rows grow, and newly arriving events never steal focus.
 - Added decomposed runtime flow guides with detailed diagrams for async loading and cache commits, semantic focus during metric changes, virtual scrolling/recentering, pointer interactions, and zoom subflows.
 - Reorganized the runtime into responsibility-owned `scroll`, `events`, `anchors`, `interactions`, `rendering`, and `views` domains; removed the generic hooks/utilities/component buckets without changing the public API.
@@ -100,6 +118,8 @@
 - Fixed same-anchor date navigation so popup field edits can focus an active draft even after the user scrolls elsewhere inside the current virtual window.
 - Fixed edit popup cancel anchoring so cancellation restores focus to the original first person's event instance and preserves its viewport-relative position even after draft participant changes.
 - Changed bounded virtual scrolling to recenter after a 1.2s idle delay and to schedule that recenter even when the immediate scroll event fires before new virtual items are mounted.
+- Reduced bounded-window recenter delay by 80% at the absolute scroll top and bottom, from 1.2 seconds to 240 ms, while
+  preserving the ordinary interior delay and exact visible-date offset.
 - Fixed dense 5,000-events/year draw-to-popup handoff so participant filtering does not move the controlled draft out of focus.
 - Fixed viewport-anchor restore so missing mounted targets navigate to their date/time immediately, preventing a visible wrong-date flash before delayed recenter correction.
 - Added simulated delayed external saves in the default demo, including deterministic validation failures that keep the popup editable with a bottom error message.

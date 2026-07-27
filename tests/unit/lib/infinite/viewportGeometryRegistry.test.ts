@@ -23,6 +23,19 @@ describe("ViewportGeometryRegistry", () => {
     expect(registry.event({ eventId: "shared" }, viewport)).toBe(visible);
   });
 
+  it("distinguishes a fully visible event from one clipped by the content viewport", () => {
+    const registry = new ViewportGeometryRegistry();
+    const fullyVisible = elementAt(20, 20, 30, 30);
+    const clipped = elementAt(80, 20, 30, 30);
+    const viewport = { left: 10, top: 10, right: 100, bottom: 100, width: 90, height: 90 } as DOMRect;
+
+    registry.registerEvent("fully-visible", "a", fullyVisible);
+    registry.registerEvent("clipped", "a", clipped);
+
+    expect(registry.eventFullyVisible({ eventId: "fully-visible", calendarId: "a" }, viewport)).toBe(true);
+    expect(registry.eventFullyVisible({ eventId: "clipped", calendarId: "a" }, viewport)).toBe(false);
+  });
+
   it("notifies subscribers for mounts and unregisters empty nested maps", () => {
     const registry = new ViewportGeometryRegistry();
     const listener = vi.fn();

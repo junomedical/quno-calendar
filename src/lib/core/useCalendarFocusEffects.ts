@@ -83,14 +83,16 @@ export function useCalendarFocusEffects({
       time
     };
     setFocusedEventTarget({ eventId: pendingFocus.event.id, calendarId: pendingFocus.targetCalendarId });
-    if (pendingFocus.anchor) {
-      viewRef.current?.restoreViewportAnchor(pendingFocus.anchor, {
-        target,
-        afterRecenter: true,
-        cancelOnManualScroll: true
-      });
-    } else {
-      viewRef.current?.scrollToDateTime(dateKey, time);
+    if (!viewRef.current?.isEventFullyVisible(target)) {
+      if (pendingFocus.anchor) {
+        viewRef.current?.restoreViewportAnchor(pendingFocus.anchor, {
+          target,
+          afterRecenter: true,
+          cancelOnManualScroll: true
+        });
+      } else {
+        viewRef.current?.scrollToDateTime(dateKey, time);
+      }
     }
     finishPending({
       eventId: pendingFocus.event.id,

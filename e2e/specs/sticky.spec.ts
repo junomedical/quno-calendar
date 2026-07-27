@@ -353,8 +353,10 @@ test("keeps the time scale fixed and day dates css-sticky", async ({ page }) => 
       '[data-testid="calendar-event"], [data-testid="availability-event"]'
     );
     const timeTick = document.querySelector<HTMLElement>(".ic-time-tick");
+    const timeScaleHeader = document.querySelector<HTMLElement>(".ic-time-scale-header");
     const nowPin = document.querySelector<HTMLElement>(".ic-now-pin");
     const nowHeaderLine = document.querySelector<HTMLElement>(".ic-now-header-line");
+    const nowDayHeaderLine = document.querySelector<HTMLElement>(".ic-now-day-header-line");
     if (
       !currentLine ||
       !rowLabel ||
@@ -363,8 +365,10 @@ test("keeps the time scale fixed and day dates css-sticky", async ({ page }) => 
       !dateLabel ||
       !timeHeader ||
       !timeTick ||
+      !timeScaleHeader ||
       !nowPin ||
-      !nowHeaderLine
+      !nowHeaderLine ||
+      !nowDayHeaderLine
     ) {
       return null;
     }
@@ -372,6 +376,8 @@ test("keeps the time scale fixed and day dates css-sticky", async ({ page }) => 
     const currentLineBox = currentLine.getBoundingClientRect();
     const rowLabelBox = rowLabel.getBoundingClientRect();
     const dateLabelBox = dateLabel.getBoundingClientRect();
+    const nowPinBox = nowPin.getBoundingClientRect();
+    const nowHeaderLineBox = nowHeaderLine.getBoundingClientRect();
     const zIndex = (element: Element) => {
       const parsed = Number.parseInt(window.getComputedStyle(element).zIndex || "0", 10);
       return Number.isFinite(parsed) ? parsed : 0;
@@ -389,6 +395,10 @@ test("keeps the time scale fixed and day dates css-sticky", async ({ page }) => 
       eventShellZ: eventShell ? zIndex(eventShell) : 0,
       nowPinZ: zIndex(nowPin),
       nowHeaderLineZ: zIndex(nowHeaderLine),
+      nowDayHeaderLineZ: zIndex(nowDayHeaderLine),
+      timeScaleHeaderZ: zIndex(timeScaleHeader),
+      nowPinBottom: nowPinBox.bottom,
+      nowHeaderLineTop: nowHeaderLineBox.top,
       timeTickZ: zIndex(timeTick)
     };
   });
@@ -405,6 +415,8 @@ test("keeps the time scale fixed and day dates css-sticky", async ({ page }) => 
   expect(markerLayering.nowHeaderLineZ).toBeLessThan(markerLayering.rowLabelZ);
   expect(markerLayering.nowPinZ).toBeGreaterThan(markerLayering.timeTickZ);
   expect(markerLayering.nowHeaderLineZ).toBeGreaterThan(markerLayering.timeTickZ);
+  expect(markerLayering.timeScaleHeaderZ).toBeGreaterThan(markerLayering.nowDayHeaderLineZ);
+  expect(markerLayering.nowHeaderLineTop).toBeGreaterThanOrEqual(markerLayering.nowPinBottom - 1);
 });
 
 test("keeps sticky labels above the timeline after high-zoom horizontal scroll", async ({ page }) => {

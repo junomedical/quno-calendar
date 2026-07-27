@@ -1,7 +1,7 @@
 .ic-time-scale-header {
   position: sticky;
   top: 0;
-  z-index: 220;
+  z-index: 240;
   display: flex;
   overflow: visible;
   background: transparent;

@@ -26,7 +26,7 @@ These documents use **visual focus** to mean the semantic calendar location that
 | Visible-position snapshot | `{ dateKey, offsetWithinDate }`                                                                       | Scroll runtime            | Updated while scrolling            | Remembers the top visible date and exact local pixel offset.                      |
 | Data-layout anchor        | A date snapshot, or `{ dateKey, calendarId, offsetWithinRow, fallbackOffsetWithinDate }` horizontally | Layout measurement bridge | One late metric commit             | Preserves the viewed date or resource row when async data changes row/day height. |
 | Parent viewport anchor    | Event or date/resource/time target plus viewport-relative geometry                                    | Public imperative API     | Explicit capture/restore session   | Preserves product-owned create, edit, save, cancel, or participant-change focus.  |
-| Zoom anchor               | Time at grid center or the rendered time node nearest the pointer                                     | Zoom controller           | One prop change or one wheel burst | Preserves temporal focus while scale changes.                                     |
+| Zoom anchor               | Visible current-time marker, grid-center time fallback, or rendered time node nearest the pointer     | Zoom controller           | One prop change or one wheel burst | Preserves temporal focus while scale changes.                                     |
 
 The same date may participate in several anchors, but only one mechanism should write scroll position for a particular change.
 
@@ -41,7 +41,7 @@ flowchart TD
   Navigation -->|No| Cause{"What changed?"}
   Cause -->|Late horizontal row metrics| DataAnchor["Data-layout anchor preserves date/resource position"]
   Cause -->|Settled date scroll| WindowAnchor["Visible snapshot becomes virtual-window anchor"]
-  Cause -->|External horizontal zoom| CenterTime["Visible grid-center time stays fixed"]
+  Cause -->|External horizontal zoom| CenterTime["Visible now marker stays fixed; otherwise center/origin"]
   Cause -->|Shift + wheel zoom| PointerTime["First pointer-nearest time node stays fixed"]
   Manual["New manual scroll intent"] --> Cancel["Cancel scheduled non-gesture corrections"]
 ```

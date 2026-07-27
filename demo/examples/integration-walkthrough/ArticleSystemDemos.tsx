@@ -146,31 +146,16 @@ export function EventFocusDemo() {
   }));
   const [saved, setSaved] = useState(false);
   const [hasCollisions, setHasCollisions] = useState(false);
-  const [status, setStatus] = useState("The draft is the visual anchor");
+  const [status, setStatus] = useState("The draft is visible in its selected doctor lane");
   const [focusRequest, setFocusRequest] = useState<CalendarFocusRequest | null>(null);
   const loadEvents = useCallback<LoadEvents>(async (request) => filterEvents(eventsRef.current, request), []);
 
-  const restoreSavedEventAnchor = (eventId: string, nextEvent: CalendarEvent) => {
-    const anchor = calendarRef.current?.captureViewportAnchor({
-      eventId,
-      calendarId: "provider-a",
-      dateKey: articleDateKey,
-      time: "13:00"
-    });
+  const focusCommittedEvent = (eventId: string, nextEvent: CalendarEvent) => {
     calendarRef.current?.commitVisibleEvent(nextEvent, {
       appearing: true,
       previousEventId: eventId
     });
     window.requestAnimationFrame(() => {
-      calendarRef.current?.restoreViewportAnchor(anchor ?? null, {
-        target: {
-          eventId: nextEvent.id,
-          calendarId: "provider-a",
-          dateKey: articleDateKey,
-          time: "13:00"
-        },
-        afterRecenter: true
-      });
       setFocusRequest({
         requestId: `save-${Date.now()}`,
         event: nextEvent,
@@ -182,31 +167,16 @@ export function EventFocusDemo() {
   const saveDraft = () => {
     if (!activeDraft) return;
     eventsRef.current = [...eventsRef.current, focusEvent];
-    restoreSavedEventAnchor(activeDraft.event.id, focusEvent);
+    focusCommittedEvent(activeDraft.event.id, focusEvent);
     setActiveDraft(null);
     setSaved(true);
-    setStatus("Saved event replaced the draft at the same visual anchor");
+    setStatus("The saved event is already visible, so focus does not scroll");
   };
 
   const addCollisions = () => {
-    const anchor = calendarRef.current?.captureViewportAnchor({
-      eventId: focusEvent.id,
-      calendarId: "provider-a",
-      dateKey: articleDateKey,
-      time: "13:00"
-    });
     eventsRef.current = [...eventsRef.current, ...focusCollisions];
     focusCollisions.forEach((event) => calendarRef.current?.commitVisibleEvent(event));
     window.requestAnimationFrame(() => {
-      calendarRef.current?.restoreViewportAnchor(anchor ?? null, {
-        target: {
-          eventId: focusEvent.id,
-          calendarId: "provider-a",
-          dateKey: articleDateKey,
-          time: "13:00"
-        },
-        afterRecenter: true
-      });
       setFocusRequest({
         requestId: `collisions-${Date.now()}`,
         event: focusEvent,
@@ -214,7 +184,7 @@ export function EventFocusDemo() {
       });
     });
     setHasCollisions(true);
-    setStatus("Lane geometry changed; the event stayed at the viewport anchor");
+    setStatus("Lane geometry changed; focus keeps the event visible");
   };
 
   return (

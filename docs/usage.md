@@ -263,11 +263,19 @@ const calendarRef = useRef<CalendarNavigationHandle>(null);
 calendarRef.current?.scrollToDateTime("2026-07-04", "09:30");
 ```
 
+Date pickers, search results, command palettes, and “Today” controls can call the same handle without knowing the
+calendar’s virtual-window geometry. Use `settings` for density and dimensions, then scope product CSS through
+`className`; changing either preserves the same calendar integration and renderer contract.
+
+Product controls do not need a separate submit step. A date or time field can call `scrollToDateTime` from its change
+handler, while previous and next buttons can shift the selected date and call the same method. Keep the five-minute time
+scale structure stable and let controlled zoom progressively reveal finer labels instead of replacing tick nodes.
+
 ## Reveal And Focus An Event
 
-Pass the complete event when the application already knows it. The calendar requests all known participant calendars,
-navigates to the event, preserves its semantic viewport position while selection/layout changes, and briefly reports
-`status: "focused"` to the targeted row or column instance.
+Pass the complete event when the application already knows it. The calendar requests all known participant calendars
+and briefly reports `status: "focused"` to the targeted row or column instance. If that card is already fully visible,
+focus does not change either scroll axis. A partially clipped or offscreen target is brought into view.
 
 ```tsx
 const [selectedCalendarIds, setSelectedCalendarIds] = useState(["provider-a"]);
@@ -294,8 +302,9 @@ For controlled navigation, pass a unique request id. Re-rendering the same id do
 />
 ```
 
-Focus means semantic viewport focus and a temporary visual highlight, not DOM/keyboard focus or a persistent scroll lock.
-Manual pointer, wheel, touch, or scroll-key intent cancels an active request. Participant ids absent from `calendars`
+Focus means a visibility guarantee and temporary visual highlight, not DOM/keyboard focus or a persistent scroll lock.
+Sticky headers and labels do not count as visible space: a card covered by them is revealed. Manual pointer, wheel,
+touch, or scroll-key intent cancels an active request. Participant ids absent from `calendars`
 cannot be revealed. An event whose weekday is present in `settings.excludedWeekdays` resolves with
 `status: "unavailable"` and does not move the viewport. Repeating a request for an already-visible preferred
 participant is stable: the coordinator captures that same local instance before restoring it, so repeated “reveal room”
@@ -319,7 +328,11 @@ These methods only patch loaded calendar cache. The parent remains responsible f
 
 `initialDateKey` sets the initial virtual range anchor. If omitted, the calendar starts around `now`. The same handle also exposes viewport anchoring helpers for parent-owned forms: `captureViewportAnchor`, `restoreViewportAnchor`, and `cancelViewportAnchorRestore`. `commitVisibleEvent` patches one saved event into the currently loaded visible cache. `releaseActiveDraft` lets a parent close controlled draft UI while the calendar keeps the last draft shell mounted briefly for a fadeout; `durationMs` controls both the retention window and fade duration.
 
-After horizontal scrolling, slider or external prop zoom keeps the time at the center of the visible grid stationary. At the timeline origin it keeps the left edge stationary. `Shift` + wheel instead preserves the time node under the pointer. Zoom reprojects event-shell geometry without reloading events, rebuilding prepared overlap cells, or rerunning an unchanged external event renderer.
+The date range is bounded and recenters automatically without a consumer setting. Ordinary scroll pauses use a
+1.2-second idle delay; reaching the absolute top or bottom uses a 240 ms delay so the next bounded range becomes
+available sooner. Both paths preserve the visible date and its date-local pixel offset.
+
+Slider or external prop zoom keeps a visible current-time marker stationary by default. If that marker is outside the viewport, horizontal scrolling uses the time at the center of the visible grid, while the timeline origin keeps its left edge stationary. `Shift` + wheel instead preserves the time node under the pointer. Zoom reprojects event-shell geometry without reloading events, rebuilding prepared overlap cells, or rerunning an unchanged external event renderer.
 
 ## Finding The Owning Implementation
 
