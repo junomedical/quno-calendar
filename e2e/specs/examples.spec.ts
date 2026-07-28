@@ -620,11 +620,16 @@ test("editorial drag/create exhibit stages parent-owned changes for accept or ca
   await page.mouse.up();
   await expect(mutationState).toHaveText("New event pending");
   await expect(demo.getByText("Review the new appointment. Saved data is unchanged.")).toBeVisible();
-  await expect(demo.locator('[data-testid="calendar-event"][data-event-id^="article-created-"]')).toHaveCount(0);
+  const committedCreatedEvents = demo.locator(
+    '[data-testid="calendar-event"][data-event-id^="article-created-"], [data-testid="calendar-event"][data-event-id^="created-local-"]'
+  );
+  await expect(committedCreatedEvents).toHaveCount(0);
   await acceptButton.click();
   await expect(mutationState).toHaveText("No pending change");
   const acceptedEvent = demo.locator('[data-testid="calendar-event"][data-event-id^="article-created-"]');
-  await expect(acceptedEvent).toBeVisible();
+  await expect(committedCreatedEvents).toHaveCount(1);
+  await expect(acceptedEvent).toHaveCount(1);
+  await expect(demo.getByTestId("draft-event")).toHaveCount(0);
   await expect(acceptedEvent).toHaveAttribute("data-status", "appearing");
   const acceptedCard = acceptedEvent.locator(".article-event-card");
   await expect(acceptedCard).toHaveAttribute("data-render-status", "appearing");

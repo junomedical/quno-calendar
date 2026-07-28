@@ -90,8 +90,10 @@ Vitest unit tests live in `tests/unit` and mirror the source module grouping.
 - The embedded read-only recipe cannot begin drag or creation. The embedded mutation recipe accepts a drag through
   a parent-owned edit draft and stages a drawn create draft. Both show Accept/Cancel controls with the proposal state
   to their left; cancel restores untouched saved data, while accept commits the draft into parent state and the visible
-  cache. Cancel first exposes an exiting draft shell for the 320ms fade, while Accept exposes the committed card’s
-  transient `appearing` renderer status before it settles to `existing`.
+  cache exactly once. Drawing through the draft-only callback leaves zero committed create shells during review;
+  acceptance replaces the draft with one committed shell and no local fallback event. Cancel first exposes an exiting
+  draft shell for the 320ms fade, while Accept exposes the committed card’s transient `appearing` renderer status
+  before it settles to `existing`.
 - Article zoom controls remain parent-controlled while Shift + mouse-wheel/touchpad requests a gesture update.
 - The zoom chapter explains the user-facing purpose of scale changes: zoom out for daily context, zoom in for precise
   reading or placement, and preserve the time being examined throughout the continuous transition.

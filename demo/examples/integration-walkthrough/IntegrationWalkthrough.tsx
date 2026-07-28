@@ -78,7 +78,7 @@ const cssNativeSnippet = `.calendar-date-header {
 
 const mutationSnippet = `const [pendingDraft, setPendingDraft] = useState(null);
 
-const onEventCreateRequest = (range) => {
+const onEventDraftRequest = (range) => {
   setPendingDraft(toCreateDraft(range));
 };
 

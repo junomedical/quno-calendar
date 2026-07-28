@@ -2,6 +2,8 @@
 
 ## 0.2.0
 
+- Fixed the walkthrough parent-owned mutation exhibit so drawing uses the draft-only callback. Reviewing a new
+  appointment no longer inserts a local fallback event, and accepting it now produces exactly one committed card.
 - Removed completed rewrite and refactor plans, the superseded initial project brief, empty retired example/test
   directories, and local generated artifacts. Maintained architecture guidance remains in `docs/architecture.md`,
   `docs/domains`, and `docs/flows`.

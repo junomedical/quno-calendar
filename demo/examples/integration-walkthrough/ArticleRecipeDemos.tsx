@@ -67,7 +67,7 @@ export function DragCreateArticleDemo() {
     setActivity(`Review the move for “${request.event.title}”. Saved data is unchanged.`);
     return false;
   }, []);
-  const createEvent = useCallback((request: EventCreateRequest) => {
+  const stageCreateDraft = useCallback((request: EventCreateRequest) => {
     createdSequenceRef.current += 1;
     const event: CalendarEvent = {
       id: `article-created-${createdSequenceRef.current}`,
@@ -147,7 +147,7 @@ export function DragCreateArticleDemo() {
           eventRenderer={ArticleEventCard}
           initialDateKey={articleDateKey}
           loadEvents={loadEvents}
-          onEventCreateRequest={createEvent}
+          onEventDraftRequest={stageCreateDraft}
           onEventMoveRequest={moveEvent}
           selectedCalendarIds={introductoryCalendarIds}
           settings={articleSettings}
