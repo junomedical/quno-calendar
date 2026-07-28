@@ -1,4 +1,5 @@
 import type { CSSProperties, ReactNode } from "react";
+import type { DayNameGenerator } from "../date/dateLabels";
 
 /** Stable identifier for a rendered calendar row. */
 export type CalendarId = string;
@@ -36,6 +37,10 @@ export type TimelineSettings = {
   zoom: number;
   snapMinutes: number;
   excludedWeekdays: number[];
+  /** Locale used by date labels. The runtime locale is used when omitted. */
+  dateLocale?: string | readonly string[];
+  /** Optional replacement for the complete rendered date label. */
+  dayNameGenerator?: DayNameGenerator;
   rowHeight: number;
   dayHeaderHeight: number;
   labelWidth: number;

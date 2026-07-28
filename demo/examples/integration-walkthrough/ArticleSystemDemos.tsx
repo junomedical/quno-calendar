@@ -1,9 +1,11 @@
 import {
   CalendarRoot,
+  applyEventMove,
   type ActiveEventDraft,
   type CalendarEvent,
   type CalendarFocusRequest,
   type CalendarNavigationHandle,
+  type EventMoveRequest,
   type LoadEvents
 } from "quno-calendar";
 import { useCallback, useRef, useState } from "react";
@@ -29,8 +31,19 @@ const availabilityEvents = articleEvents
 export function AvailabilityLayerDemo() {
   const [mode, setMode] = useState<"events" | "availability">("events");
   const [activity, setActivity] = useState("Appointment cards receive pointer input");
+  const [events, setEvents] = useState(availabilityEvents);
+  const eventsRef = useRef(events);
   const createdSequenceRef = useRef(0);
-  const loadEvents = useCallback<LoadEvents>(async (request) => filterEvents(availabilityEvents, request), []);
+  eventsRef.current = events;
+
+  const loadEvents = useCallback<LoadEvents>(async (request) => filterEvents(eventsRef.current, request), []);
+  const moveEvent = useCallback((request: EventMoveRequest) => {
+    setEvents((current) =>
+      current.map((event) => (event.id === request.event.id ? applyEventMove(event, request) : event))
+    );
+    setActivity(request.event.kind === "availability" ? "Availability moved" : "Appointment moved");
+    return true;
+  }, []);
 
   return (
     <CalendarDemoShell
@@ -38,6 +51,9 @@ export function AvailabilityLayerDemo() {
       note={activity}
       tools={
         <div className="article-layer-controls">
+          <span className="article-toolbar-badge" data-testid="article-active-layer">
+            {mode === "events" ? "Appointments active" : "Availability active"}
+          </span>
           <div className="article-segmented-control" aria-label="Editable calendar layer">
             <button aria-pressed={mode === "events"} onClick={() => setMode("events")} type="button">
               Appointments
@@ -46,9 +62,6 @@ export function AvailabilityLayerDemo() {
               Edit availability
             </button>
           </div>
-          <span className="article-toolbar-badge" data-testid="article-active-layer">
-            {mode === "events" ? "Appointments active" : "Availability active"}
-          </span>
         </div>
       }
     >
@@ -56,29 +69,31 @@ export function AvailabilityLayerDemo() {
         <CalendarRoot
           ariaLabel="Availability editing layer calendar"
           calendars={availabilityCalendars}
+          className={`article-availability-calendar${mode === "availability" ? " is-editing-availability" : ""}`}
           eventRenderer={ArticleEventCard}
           initialDateKey={articleDateKey}
           interactionMode={mode}
           loadEvents={loadEvents}
           onEventActivate={() => setActivity("Appointment card opened")}
           onEventCreateRequest={(request) => {
+            const isAvailability = mode === "availability";
             createdSequenceRef.current += 1;
-            setActivity("New availability drawn; appointments were ignored");
-            return {
-              id: `article-availability-created-${createdSequenceRef.current}`,
+            const event: CalendarEvent = {
+              id: `article-${isAvailability ? "availability" : "appointment"}-created-${createdSequenceRef.current}`,
               calendarId: request.calendarId,
-              title: "Available",
-              subtitle: "New availability",
+              calendarIds: [request.calendarId],
+              title: isAvailability ? "Available" : "New appointment",
+              subtitle: isAvailability ? "New availability" : "Created in appointment mode",
               start: request.start,
               end: request.end,
-              color: "#4b9b7d",
-              kind: "availability"
+              color: isAvailability ? "#4b9b7d" : "#246b5d",
+              kind: isAvailability ? "availability" : "appointment"
             };
+            setEvents((current) => [...current, event]);
+            setActivity(isAvailability ? "New availability drawn" : "New appointment drawn");
+            return event;
           }}
-          onEventMoveRequest={({ event }) => {
-            setActivity(event.kind === "availability" ? "Availability edit proposed" : "Appointment ignored");
-            return false;
-          }}
+          onEventMoveRequest={moveEvent}
           selectedCalendarIds={["provider-a"]}
           settings={{ ...articleSettings, startHour: 8, endHour: 16, rowHeight: 74 }}
         />

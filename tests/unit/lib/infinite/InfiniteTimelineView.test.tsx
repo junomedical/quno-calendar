@@ -102,6 +102,19 @@ describe("InfiniteTimelineView", () => {
     expect(renderer).not.toHaveBeenCalledWith(expect.objectContaining({ dateKey: expect.any(String) }));
   });
 
+  it("applies localized date labels and a custom day-name generator", () => {
+    const dayNameGenerator = vi.fn((date: Date) => `Day ${date.getDay()}`);
+
+    renderCalendar({
+      loadEvents: async () => [],
+      initialDateKey: "2026-07-04",
+      settings: { dateLocale: "de-DE", dayNameGenerator }
+    });
+
+    expect(screen.getAllByText(/Day \d/).length).toBeGreaterThan(0);
+    expect(dayNameGenerator).toHaveBeenCalled();
+  });
+
   it("preserves the legacy infinite alias for the horizontal view", async () => {
     const renderer = vi.fn(({ event, status, style }: EventRendererProps) => (
       <div data-testid="custom-event" data-status={status} style={style}>

@@ -5,6 +5,8 @@
 Vitest unit tests live in `tests/unit` and mirror the source module grouping.
 
 - Date virtualization with excluded weekdays.
+- Date labels localize month/day and weekday text for explicit and runtime locales, preserve English ordinal ordering,
+  and let a custom day-name generator replace the complete label using the local date and configured locale.
 - Variable-size resource prefix extents, binary-searched windows across 50 logical resources, two-resource overscan,
   offscreen pruning, and pinned resource indexes.
 - Date/calendar membership indexing preserves multi-calendar object identity and ignores unselected memberships.
@@ -58,11 +60,11 @@ Vitest unit tests live in `tests/unit` and mirror the source module grouping.
 
 - The editorial integration article scrolls independently from the document, ignores legacy `?step=` parameters, and
   renders as the only example route without the former recipe header/navigation.
-- The main demo exposes a visible link to the field guide. Its 23-entry table of contents targets stable chapter ids
+- The main demo exposes a visible link to the field guide. Its 25-entry table of contents targets stable chapter ids
   and scrolls the internal article viewport to the selected section.
 - Chapter 00 explains the horizontal-first information architecture before the implementation chapters: time and text
-  flow left to right, resource rows and days move top to bottom, and ordinary vertical scrolling advances days without
-  a separate navigation control.
+  flow left to right for a denser view of people, resources, rooms, and appointments; those rows and days move top to
+  bottom so a mouse wheel or touchpad provides the lowest-effort repeated navigation without a separate control.
 - The performance chapter presents the four-to-hundreds-of-events design envelope and 60–120fps scrolling target as a
   target rather than a universal guarantee. Its 4/40/400 density cards share one row at article width and stack at the
   mobile breakpoint; algorithmic performance remains covered by the scaling test and explicit budgets below.
@@ -77,12 +79,22 @@ Vitest unit tests live in `tests/unit` and mirror the source module grouping.
   reports `scrolled` after manual movement and `repositioned` after settlement.
 - Card specimens and live events use the same external renderer, compact specimens hide secondary content, and the
   replay controls exercise added-event glint and cancelled-draft fade treatments; reduced-motion preferences collapse
-  the card animation duration.
-- The availability lab proves that event mode leaves availability pointer-transparent, while availability mode makes
-  appointment shells faded/inert and availability shells the only active event layer.
+  the card animation duration. The live motion exhibit uses a focused 09:00–14:00 range, `2.4` zoom, and a taller row;
+  its active draft remains at least 90px wide and 55px tall so the transition is legible.
+- The custom-card structure exhibit promotes product group, patient name, or room number through the external renderer.
+  Switching the primary field preserves every event shell’s DOM identity and exact geometry, keeps the active grouping
+  label left of its controls, and prevents the promoted room label from clipping.
+- The availability lab proves that event mode leaves availability pointer-transparent and creates appointments, while
+  availability mode visibly emphasizes availability, makes appointment shells faded/inert, accepts availability
+  drag/drop, and creates availability. Its active-layer label sits to the left of the layer buttons.
 - The embedded read-only recipe cannot begin drag or creation. The embedded mutation recipe accepts a drag through
-  parent state and returns a committed event after drawing.
+  a parent-owned edit draft and stages a drawn create draft. Both show Accept/Cancel controls with the proposal state
+  to their left; cancel restores untouched saved data, while accept commits the draft into parent state and the visible
+  cache. Cancel first exposes an exiting draft shell for the 320ms fade, while Accept exposes the committed card’s
+  transient `appearing` renderer status before it settles to `existing`.
 - Article zoom controls remain parent-controlled while Shift + mouse-wheel/touchpad requests a gesture update.
+- The zoom chapter explains the user-facing purpose of scale changes: zoom out for daily context, zoom in for precise
+  reading or placement, and preserve the time being examined throughout the continuous transition.
 - The current-time chapter renders one aligned marker through the header and resource rows, permits horizontal
   exploration, and restores the marker to the viewport through a product-owned control.
 - Date/time inputs navigate immediately on change without a separate submit action; previous and next controls move one
@@ -90,17 +102,25 @@ Vitest unit tests live in `tests/unit` and mirror the source module grouping.
 - The progressive-precision lab keeps one stable set of five-minute ticks while zoom reveals half-hour, quarter-hour,
   and five-minute labels only when their spacing is readable. Its active precision label sits to the left of the
   overview/quarter-hour/five-minute controls at article width.
+- Walkthrough toolbars place status and active-state labels before their related buttons, including availability,
+  loading stability, and creation-lane controls.
 - Clinical, compact, and night presets change settings-owned geometry and scoped CSS color through the same public
   surface. The final composition combines controlled zoom, theme selection, navigation, mutation, animated insertion,
   and the shared full-screen shell.
+- The localization exhibit compares English and Japanese labels with human-relative and binary robot generators,
+  updates adjacent-day sequences without remounting its viewport, and keeps the longest custom label unclipped. Custom
+  horizontal labels match their specimen text without a redundant default prefix; vertical custom labels use one
+  primary line.
 - The closing package-footprint chapter exposes the verified raw/gzip ESM and CSS sizes plus one direct runtime
   dependency, two React peers, and zero bundled third-party packages.
 - The lane comparison proves local horizontal row growth, hover expansion, vertical projection, and dense-column width
-  growth.
+  growth. Switching orientation aligns both projections to the same 13:00 collision cluster, which remains inside the
+  calendar viewport.
 - The horizontal-row hover chapter moves vertically between original overlap-lane hit regions even while the first
   hovered card is expanded over its neighbors.
-- The preloading lab exposes its requested warm range and reveals an event on a prefetched date before the next delayed
-  range request can settle.
+- The preloading lab exposes its requested warm range and every event returned into the warm cache. The July 13
+  consultation appears in the loaded-events strip while its calendar shell is still unmounted, then renders immediately
+  after navigation before the next delayed range request can settle.
 - The stability lab retains stale events during its delayed refresh, preserves the visible room/local-row point as an
   earlier row grows, and reveals/focuses the shared participant calendar. Repeating the room focus action leaves both
   scroll axes untouched once the local event instance is fully inside the uncovered viewport. Narrow two-lane event shells hide
@@ -173,6 +193,8 @@ orientation, availability, loading, visual-focus, and motion assertions formerly
 - Infinite vertical columns fill available space, follow `verticalColumnMinWidth`, `verticalColumnOverlapCapacity`, and `verticalColumnOverlapGrowth`, and keep default 240px/three-lane/+80px behavior when callers do not override those settings.
 - Infinite vertical date/doctor headers remain sticky at the top, and widened date/calendar columns keep their doctor-name header cells aligned.
 - Infinite vertical date labels render about 25% smaller than horizontal date labels, with weekday on a second line.
+- A German browser locale renders localized horizontal and vertical date chrome without horizontal or vertical label
+  overflow.
 - Infinite vertical time pane and date cell remain sticky on the left during horizontal scroll, with the left pane 30% narrower than the horizontal-view label width.
 - Infinite vertical time labels move vertically at the same pace as event columns and do not stick independently from the grid.
 - Infinite vertical time labels render hours as `H:00` and minor labels as minute numbers.

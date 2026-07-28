@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
-import { formatHorizontalDateLabel, formatMonthDayOrdinal } from "../../../../src/lib/date/dateLabels";
+import { describe, expect, it, vi } from "vitest";
+import { formatHorizontalDateLabel, formatMonthDayOrdinal, formatWeekday } from "../../../../src/lib/date/dateLabels";
 import { fromDateKey, toDateKey } from "../../../../src/lib/date/dateVirtualization";
 import { addCalendarMonths, parseIsoDate } from "../../../../src/lib/date/localDate";
 
@@ -32,6 +32,24 @@ describe("local date helpers", () => {
   });
 
   it("preserves the existing complete horizontal label", () => {
-    expect(formatHorizontalDateLabel(fromDateKey("2026-07-04"))).toBe("July 4th, Saturday");
+    expect(formatHorizontalDateLabel(fromDateKey("2026-07-04"), { dateLocale: "en-US" })).toBe("July 4th, Saturday");
+  });
+
+  it("localizes month, day, and weekday labels", () => {
+    const date = fromDateKey("2026-07-04");
+
+    expect(formatHorizontalDateLabel(date, { dateLocale: "de-DE" })).toBe("4. Juli, Samstag");
+    expect(formatMonthDayOrdinal(date, { dateLocale: "en-GB" })).toBe("4th July");
+  });
+
+  it("uses a custom day-name generator with the configured locale", () => {
+    const date = fromDateKey("2026-07-04");
+    const dayNameGenerator = vi.fn((value: Date, locale?: string | readonly string[]) => {
+      return `${value.getDay()}-${String(locale)}`;
+    });
+
+    expect(formatWeekday(date, { dateLocale: "de-DE", dayNameGenerator })).toBe("6-de-DE");
+    expect(formatHorizontalDateLabel(date, { dateLocale: "de-DE", dayNameGenerator })).toBe("6-de-DE");
+    expect(dayNameGenerator).toHaveBeenCalledWith(date, "de-DE");
   });
 });

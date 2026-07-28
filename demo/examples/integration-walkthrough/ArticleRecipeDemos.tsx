@@ -1,6 +1,7 @@
 import {
   CalendarRoot,
   applyEventMove,
+  type ActiveEventDraft,
   type CalendarEvent,
   type CalendarNavigationHandle,
   type EventCreateRequest,
@@ -46,19 +47,25 @@ export function ReadOnlyArticleDemo() {
 }
 
 export function DragCreateArticleDemo() {
+  const calendarRef = useRef<CalendarNavigationHandle>(null);
   const [events, setEvents] = useState(articleEvents);
   const eventsRef = useRef(events);
   const createdSequenceRef = useRef(0);
-  const [activity, setActivity] = useState("Drag a card, or draw on empty timeline space");
+  const [pendingDraft, setPendingDraft] = useState<ActiveEventDraft | null>(null);
+  const [activity, setActivity] = useState(
+    "Drag a saved card or draw a range. Nothing changes until the parent accepts the proposal."
+  );
   eventsRef.current = events;
 
   const loadEvents = useCallback<LoadEvents>(async (request) => filterEvents(eventsRef.current, request), []);
   const moveEvent = useCallback((request: EventMoveRequest) => {
-    setEvents((current) =>
-      current.map((event) => (event.id === request.event.id ? applyEventMove(event, request) : event))
-    );
-    setActivity(`Moved “${request.event.title}”`);
-    return true;
+    setPendingDraft({
+      mode: "edit",
+      event: applyEventMove(request.event, request),
+      sourceEventId: request.event.id
+    });
+    setActivity(`Review the move for “${request.event.title}”. Saved data is unchanged.`);
+    return false;
   }, []);
   const createEvent = useCallback((request: EventCreateRequest) => {
     createdSequenceRef.current += 1;
@@ -67,25 +74,74 @@ export function DragCreateArticleDemo() {
       calendarId: request.calendarId,
       calendarIds: [request.calendarId],
       title: "New appointment",
-      subtitle: "Committed by the parent",
+      subtitle: "Pending parent approval",
       start: request.start,
       end: request.end,
       color: "#246b5d",
       kind: "appointment"
     };
-    setEvents((current) => [...current, event]);
-    setActivity("Parent accepted the drawn range and returned a saved event");
-    return event;
+    setPendingDraft({ mode: "create", event });
+    setActivity("Review the new appointment. Saved data is unchanged.");
   }, []);
+  const acceptPendingDraft = () => {
+    if (!pendingDraft) return;
+    const committedEvent: CalendarEvent = {
+      ...pendingDraft.event,
+      subtitle: pendingDraft.mode === "create" ? "Accepted by the parent" : pendingDraft.event.subtitle
+    };
+    setEvents((current) =>
+      pendingDraft.mode === "create"
+        ? [...current, committedEvent]
+        : current.map((event) => (event.id === pendingDraft.sourceEventId ? committedEvent : event))
+    );
+    setPendingDraft(null);
+    calendarRef.current?.commitVisibleEvent(committedEvent, {
+      appearing: true,
+      previousEventId: pendingDraft.sourceEventId
+    });
+    setActivity(
+      pendingDraft.mode === "create"
+        ? "Accepted the new appointment. Parent state and the visible calendar now match."
+        : `Accepted the move for “${pendingDraft.event.title}”. Parent state and the visible calendar now match.`
+    );
+  };
+  const cancelPendingDraft = () => {
+    if (!pendingDraft) return;
+    calendarRef.current?.releaseActiveDraft({ animation: "fade-out", durationMs: 320 });
+    setActivity(
+      pendingDraft.mode === "create"
+        ? "Cancelled the new appointment. Saved data was left untouched."
+        : `Cancelled the move for “${pendingDraft.event.title}”. Saved data was left untouched.`
+    );
+    setPendingDraft(null);
+  };
 
   return (
     <CalendarDemoShell
       data-testid="article-drag-create-demo"
       note={activity}
-      tools={<span className="article-toolbar-badge">Parent-owned mutations</span>}
+      tools={
+        <div className="article-mutation-controls">
+          <span className="article-toolbar-badge" data-testid="article-mutation-state">
+            {pendingDraft ? `${pendingDraft.mode === "create" ? "New event" : "Move"} pending` : "No pending change"}
+          </span>
+          {pendingDraft ? (
+            <>
+              <button className="article-button article-button--primary" onClick={acceptPendingDraft} type="button">
+                Accept change
+              </button>
+              <button className="article-button" onClick={cancelPendingDraft} type="button">
+                Cancel change
+              </button>
+            </>
+          ) : null}
+        </div>
+      }
     >
       <div className="article-calendar-frame">
         <CalendarRoot
+          ref={calendarRef}
+          activeDraft={pendingDraft}
           ariaLabel="Drag and create article calendar"
           calendars={articleCalendars}
           eventRenderer={ArticleEventCard}
@@ -123,6 +179,7 @@ export function PrefetchLoadingDemo() {
   const [requestCount, setRequestCount] = useState(0);
   const [range, setRange] = useState("Waiting for the first range");
   const [status, setStatus] = useState("Calendar chrome is available before the event API");
+  const [loadedEvents, setLoadedEvents] = useState<CalendarEvent[]>([]);
 
   const loadEvents = useCallback<LoadEvents>(async (request) => {
     latestRequestRef.current += 1;
@@ -135,7 +192,13 @@ export function PrefetchLoadingDemo() {
     if (requestId === latestRequestRef.current) {
       setStatus("Warm window accepted and cached");
     }
-    return filterEvents(preloadEvents, request);
+    const events = filterEvents(preloadEvents, request);
+    setLoadedEvents((current) => {
+      const eventsById = new Map(current.map((event) => [event.id, event]));
+      events.forEach((event) => eventsById.set(event.id, event));
+      return [...eventsById.values()].sort((left, right) => left.start.localeCompare(right.start));
+    });
+    return events;
   }, []);
 
   return (
@@ -164,6 +227,30 @@ export function PrefetchLoadingDemo() {
         <span>Requested event range</span>
         <output data-testid="article-prefetch-range">{range}</output>
       </div>
+      <section
+        aria-label="Events returned into the warm cache"
+        className="article-prefetch-loaded"
+        data-testid="article-prefetch-loaded-events"
+      >
+        <header>
+          <span>Loaded events</span>
+          <output>{loadedEvents.length}</output>
+        </header>
+        <div className="article-prefetch-loaded__items">
+          {loadedEvents.length ? (
+            loadedEvents.map((event) => (
+              <article data-loaded-event-id={event.id} key={event.id}>
+                <strong>{event.title}</strong>
+                <time dateTime={event.start}>
+                  {event.start.slice(0, 10)} · {event.start.slice(11, 16)}–{event.end.slice(11, 16)}
+                </time>
+              </article>
+            ))
+          ) : (
+            <span className="article-prefetch-loaded__empty">Waiting for returned events…</span>
+          )}
+        </div>
+      </section>
       <div className="article-calendar-frame">
         <CalendarRoot
           ref={calendarRef}

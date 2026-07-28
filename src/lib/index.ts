@@ -1,4 +1,5 @@
 export { CalendarRoot } from "./core/CalendarRoot";
+export type { DayNameGenerator } from "./date/dateLabels";
 export { defaultEventPrefetchPolicy } from "./data/eventPrefetch";
 export {
   applyEventMove,

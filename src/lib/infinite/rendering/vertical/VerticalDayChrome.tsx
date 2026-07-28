@@ -22,6 +22,7 @@ export function VerticalDayChrome({
   renderedColumnIndexes
 }: VerticalDayChromeProps) {
   const date = fromDateKey(day.dateKey);
+  const customDayName = day.settings.dayNameGenerator ? formatWeekday(date, day.settings) : null;
 
   return (
     <>
@@ -32,8 +33,14 @@ export function VerticalDayChrome({
         style={{ height: day.settings.dayHeaderHeight, minWidth: dayWidth }}
       >
         <div className="ic-left-label ic-date-label icv-date-label" style={{ width: day.labelWidth }}>
-          <span className="icv-date-main">{formatMonthDayOrdinal(date)}</span>
-          <span className="icv-date-weekday">{formatWeekday(date)}</span>
+          {customDayName === null ? (
+            <>
+              <span className="icv-date-main">{formatMonthDayOrdinal(date, day.settings)}</span>
+              <span className="icv-date-weekday">{formatWeekday(date, day.settings)}</span>
+            </>
+          ) : (
+            <span className="icv-date-main">{customDayName}</span>
+          )}
         </div>
         <div
           className="icv-calendar-header-grid"

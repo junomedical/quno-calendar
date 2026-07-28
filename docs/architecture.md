@@ -1,6 +1,8 @@
 # Calendar V2 Architecture
 
-The calendar is a reusable rendering library first and a demo application second. Interface vocabulary follows the [Interface Taxonomy](./taxonomy.md); the execution checklist lives in [`plan-v2.md`](../plan-v2.md).
+The calendar is a reusable rendering library first and a demo application second. Interface vocabulary follows the
+[Interface Taxonomy](./taxonomy.md); maintained responsibility maps and execution sequences live in
+[`docs/domains`](./domains/README.md) and [`docs/flows`](./flows/README.md).
 
 ```mermaid
 flowchart LR
@@ -52,6 +54,12 @@ flowchart LR
 - `view="infinite-horizontal"`: dates flow down, calendars are rows, time runs left-to-right.
 - `view="infinite-vertical"`: dates flow down, calendars are columns, time runs top-to-bottom.
 - `view="infinite"`: compatibility alias for the horizontal view.
+
+Date-header text is also settings-owned. `settings.dateLocale` flows directly to the date-label formatter in both
+orientations, while `settings.dayNameGenerator` can replace the complete displayed label without changing date
+virtualization or date-key identity. Generated vertical labels use one primary line; default vertical labels retain
+their month/day and weekday lines. When no locale is supplied, `Intl.DateTimeFormat` uses the current runtime locale;
+server-rendered applications should pass an explicit locale when server and browser defaults may differ.
 
 `LoadEventsArgs` includes `signal?: AbortSignal`; existing loaders remain valid and cancellation-aware loaders can stop obsolete requests early. `eventPrefetchPolicy` receives the rendered date keys and selected calendar ids and returns `{ beforeDays, afterDays }`. The exported `defaultEventPrefetchPolicy` requests seven calendar days before the first rendered date and seven after the last rendered date.
 

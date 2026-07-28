@@ -51,7 +51,7 @@ export function HorizontalDayHeader({
         style={{ top: 0, height: settings.dayHeaderHeight, width: "100%", minWidth: headerWidth }}
       >
         <div className="ic-left-label ic-date-label" style={{ width: settings.labelWidth }}>
-          {formatHorizontalDateLabel(fromDateKey(dateKey))}
+          {formatHorizontalDateLabel(fromDateKey(dateKey), settings)}
         </div>
       </div>
     </>

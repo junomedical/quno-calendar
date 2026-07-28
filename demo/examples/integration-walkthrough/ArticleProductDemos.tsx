@@ -3,8 +3,10 @@ import {
   applyEventMove,
   type CalendarEvent,
   type CalendarNavigationHandle,
+  type DayNameGenerator,
   type EventCreateRequest,
   type EventMoveRequest,
+  type EventRendererProps,
   type LoadEvents,
   type TimelineSettings
 } from "quno-calendar";
@@ -46,6 +48,144 @@ const navigationEvents: CalendarEvent[] = [
   }
 ];
 const loadNavigationEvents: LoadEvents = async (request) => filterEvents(navigationEvents, request);
+
+type CardGrouping = "product" | "patient" | "room";
+type StructuredArticleEvent = CalendarEvent & {
+  patientName: string;
+  productGroup: string;
+  roomNumber: string;
+};
+
+const structuredCardEvents: StructuredArticleEvent[] = [
+  {
+    id: "structured-iv-drip",
+    calendarId: "provider-a",
+    title: "IV Drip",
+    subtitle: "Maya Green · Room 2",
+    patientName: "Maya Green",
+    productGroup: "IV Drip",
+    roomNumber: "Room 2",
+    start: `${articleDateKey}T09:00:00`,
+    end: `${articleDateKey}T10:30:00`,
+    color: "#246b5d",
+    kind: "appointment"
+  },
+  {
+    id: "structured-botox",
+    calendarId: "provider-a",
+    title: "Botox",
+    subtitle: "Noah Schneider · Room 4",
+    patientName: "Noah Schneider",
+    productGroup: "Botox",
+    roomNumber: "Room 4",
+    start: `${articleDateKey}T10:45:00`,
+    end: `${articleDateKey}T12:15:00`,
+    color: "#c77b45",
+    kind: "appointment"
+  },
+  {
+    id: "structured-sculptra",
+    calendarId: "provider-a",
+    title: "Sculptra",
+    subtitle: "Ava Miller · Room 6",
+    patientName: "Ava Miller",
+    productGroup: "Sculptra",
+    roomNumber: "Room 6",
+    start: `${articleDateKey}T12:30:00`,
+    end: `${articleDateKey}T14:00:00`,
+    color: "#6372a7",
+    kind: "appointment"
+  },
+  {
+    id: "structured-skin-treatment",
+    calendarId: "provider-a",
+    title: "Skin treatment",
+    subtitle: "Lina Hoffmann · Room 3",
+    patientName: "Lina Hoffmann",
+    productGroup: "Skin treatment",
+    roomNumber: "Room 3",
+    start: `${articleDateKey}T14:15:00`,
+    end: `${articleDateKey}T16:00:00`,
+    color: "#9b6a9e",
+    kind: "appointment"
+  }
+];
+const loadStructuredCardEvents: LoadEvents = async (request) => filterEvents(structuredCardEvents, request);
+const cardGroupingLabels: Record<CardGrouping, string> = {
+  product: "Product group",
+  patient: "Patient name",
+  room: "Room number"
+};
+
+export function CustomCardStructureDemo() {
+  const [grouping, setGrouping] = useState<CardGrouping>("product");
+  const eventRenderer = useCallback(
+    (props: EventRendererProps) => <StructuredEventCard {...props} grouping={grouping} />,
+    [grouping]
+  );
+
+  return (
+    <CalendarDemoShell
+      data-testid="article-card-structure-demo"
+      note="The calendar keeps the same event geometry while the product renderer changes its information hierarchy"
+      tools={
+        <div className="article-card-structure-controls">
+          <span className="article-toolbar-badge" data-testid="article-card-grouping">
+            Grouped by {grouping}
+          </span>
+          <div className="article-segmented-control" aria-label="Card primary field">
+            {(Object.keys(cardGroupingLabels) as CardGrouping[]).map((option) => (
+              <button aria-pressed={grouping === option} key={option} onClick={() => setGrouping(option)} type="button">
+                {cardGroupingLabels[option]}
+              </button>
+            ))}
+          </div>
+        </div>
+      }
+    >
+      <div className="article-calendar-frame">
+        <CalendarRoot
+          ariaLabel="Calendar with switchable product card structure"
+          calendars={articleCalendars}
+          className="article-card-structure-calendar"
+          eventRenderer={eventRenderer}
+          initialDateKey={articleDateKey}
+          loadEvents={loadStructuredCardEvents}
+          selectedCalendarIds={["provider-a"]}
+          settings={{ ...articleSettings, startHour: 8, endHour: 17, rowHeight: 72, zoom: 1.4 }}
+        />
+      </div>
+    </CalendarDemoShell>
+  );
+}
+
+function StructuredEventCard({ event, grouping, status, style }: EventRendererProps & { grouping: CardGrouping }) {
+  const structuredEvent = event as StructuredArticleEvent;
+  const values: Record<CardGrouping, string> = {
+    product: structuredEvent.productGroup,
+    patient: structuredEvent.patientName,
+    room: structuredEvent.roomNumber
+  };
+  const supportingValues = (Object.keys(values) as CardGrouping[])
+    .filter((field) => field !== grouping)
+    .map((field) => values[field]);
+
+  return (
+    <article
+      className={`article-structured-event-card status-${status}`}
+      data-card-primary={grouping}
+      data-primary-value={values[grouping]}
+      style={style}
+    >
+      <span className="article-structured-event-card__kicker">{cardGroupingLabels[grouping]}</span>
+      <strong>{values[grouping]}</strong>
+      <span className="article-structured-event-card__details">{supportingValues.join(" · ")}</span>
+      <span className="article-structured-event-card__time">
+        {event.start.slice(11, 16)}–{event.end.slice(11, 16)}
+      </span>
+    </article>
+  );
+}
 
 export function CssNativeDemo() {
   return (
@@ -297,6 +437,130 @@ export function StylingDemo() {
       </div>
     </CalendarDemoShell>
   );
+}
+
+type DateLabelMode = "english" | "japanese" | "human" | "robot";
+
+const articleReferenceDate = new Date("2026-07-06T12:00:00");
+const englishWeekdayFormatter = new Intl.DateTimeFormat("en-US", { weekday: "long" });
+const dayMonthFormatter = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short" });
+
+const humanDayName: DayNameGenerator = (date) => {
+  const distance = localCalendarDayNumber(date) - localCalendarDayNumber(articleReferenceDate);
+  if (distance === -1) return "Yesterday";
+  if (distance === 0) return "Today";
+  if (distance === 1) return "Tomorrow";
+
+  const weekStart = (value: Date) => localCalendarDayNumber(value) - ((value.getDay() + 6) % 7);
+  if (weekStart(date) === weekStart(articleReferenceDate)) return englishWeekdayFormatter.format(date);
+  return dayMonthFormatter.format(date);
+};
+
+const robotDayName: DayNameGenerator = (date) => {
+  const sequence = ((localCalendarDayNumber(date) % 64) + 64) % 64;
+  return sequence.toString(2).padStart(6, "0");
+};
+
+const dateLabelOptions: Array<{
+  id: DateLabelMode;
+  label: string;
+  locale: string;
+  sample: string;
+  sampleLanguage: string;
+  dayNameGenerator?: DayNameGenerator;
+}> = [
+  { id: "english", label: "English", locale: "en-US", sample: "July 6th, Monday", sampleLanguage: "en" },
+  { id: "japanese", label: "日本語", locale: "ja-JP", sample: "7月6日, 月曜日", sampleLanguage: "ja" },
+  {
+    id: "human",
+    label: "Human",
+    locale: "en-US",
+    sample: "Yesterday · Today · Tomorrow",
+    sampleLanguage: "en",
+    dayNameGenerator: humanDayName
+  },
+  {
+    id: "robot",
+    label: "Robot",
+    locale: "en-US",
+    sample: "011111 · 100000 · 100001",
+    sampleLanguage: "en",
+    dayNameGenerator: robotDayName
+  }
+];
+
+export function DateLocalizationDemo() {
+  const [mode, setMode] = useState<DateLabelMode>("english");
+  const [view, setView] = useState<"infinite-horizontal" | "infinite-vertical">("infinite-horizontal");
+  const activeOption = dateLabelOptions.find((option) => option.id === mode) ?? dateLabelOptions[0];
+  const settings = useMemo(
+    () => ({
+      ...articleSettings,
+      dateLocale: activeOption.locale,
+      dayNameGenerator: activeOption.dayNameGenerator,
+      labelWidth: 205,
+      zoom: 1.1
+    }),
+    [activeOption]
+  );
+
+  return (
+    <CalendarDemoShell
+      className="article-calendar-demo--localization"
+      data-testid="article-date-localization-demo"
+      note="Localized, human-relative, and machine labels over one date model"
+      tools={
+        <div className="article-localization-tools">
+          <div className="article-segmented-control article-localization-controls" aria-label="Date label strategy">
+            {dateLabelOptions.map((option) => (
+              <button
+                aria-pressed={mode === option.id}
+                key={option.id}
+                onClick={() => setMode(option.id)}
+                type="button"
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+          <select
+            aria-label="Date label orientation"
+            onChange={(event) => setView(event.target.value as typeof view)}
+            value={view}
+          >
+            <option value="infinite-horizontal">Horizontal</option>
+            <option value="infinite-vertical">Vertical</option>
+          </select>
+        </div>
+      }
+    >
+      <div className="article-language-specimens" aria-label="Day-name strategy examples">
+        {dateLabelOptions.map((option) => (
+          <article className={mode === option.id ? "is-active" : undefined} key={option.id}>
+            <span>{option.label}</span>
+            <strong lang={option.sampleLanguage}>{option.sample}</strong>
+          </article>
+        ))}
+      </div>
+      <div className="article-calendar-frame">
+        <CalendarRoot
+          ariaLabel="Calendar with localized date labels"
+          calendars={articleCalendars}
+          eventRenderer={ArticleEventCard}
+          initialDateKey={articleDateKey}
+          loadEvents={loadNavigationEvents}
+          now={articleNow}
+          selectedCalendarIds={["provider-a", "room-1"]}
+          settings={settings}
+          view={view}
+        />
+      </div>
+    </CalendarDemoShell>
+  );
+}
+
+function localCalendarDayNumber(date: Date): number {
+  return Math.floor(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) / 86_400_000);
 }
 
 function ThemeControl({ onChange, theme }: { onChange: (theme: ArticleTheme) => void; theme: ArticleTheme }) {

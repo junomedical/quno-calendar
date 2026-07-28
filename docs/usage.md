@@ -48,6 +48,43 @@ Repository example: the read-only chapter in
 [`ArticleRecipeDemos.tsx`](../demo/examples/integration-walkthrough/ArticleRecipeDemos.tsx) and the
 [integration field guide](../demo/examples/integration-walkthrough/README.md).
 
+## Custom Event Card Structure
+
+The calendar owns the event shell’s time geometry; `eventRenderer` owns the content hierarchy inside it. Products can
+therefore extend their event records with domain fields and choose which field leads the card for the current workflow:
+
+```tsx
+type ProductEvent = CalendarEvent & {
+  productGroup: string;
+  patientName: string;
+  roomNumber: string;
+};
+
+function ProductEventCard({ event, style }: EventRendererProps) {
+  const item = event as ProductEvent;
+  const primary = {
+    product: item.productGroup,
+    patient: item.patientName,
+    room: item.roomNumber
+  }[grouping];
+
+  return (
+    <article style={style}>
+      <small>{grouping}</small>
+      <strong>{primary}</strong>
+    </article>
+  );
+}
+
+<CalendarRoot {...calendarProps} eventRenderer={ProductEventCard} />;
+```
+
+Changing renderer hierarchy does not alter event times, overlap lanes, loading, or shell geometry. Keep the renderer
+referentially stable when its hierarchy has not changed.
+
+Repository example: the custom-card structure chapter in
+[`ArticleProductDemos.tsx`](../demo/examples/integration-walkthrough/ArticleProductDemos.tsx).
+
 ## Delayed Or Cancellable APIs
 
 `loadEvents` is a non-blocking data boundary. The calendar renders its date/resource grid immediately and keeps the last cached events visible while a request is slow, retried, or refreshed. Loading indicators should therefore live outside geometry-sensitive calendar rows and columns.
@@ -97,7 +134,9 @@ In the vertical view, event overlap can widen resource columns but does not chan
 
 Repository example: the preloading and late-data chapters in
 [`ArticleRecipeDemos.tsx`](../demo/examples/integration-walkthrough/ArticleRecipeDemos.tsx) and
-[`ArticleDemos.tsx`](../demo/examples/integration-walkthrough/ArticleDemos.tsx).
+[`ArticleDemos.tsx`](../demo/examples/integration-walkthrough/ArticleDemos.tsx). The preloading exhibit also lists
+successful loader results outside the calendar, making warm events visible before their dates enter the rendered
+window.
 
 The repository demo starts with a visible 1-second response from its local `POST /api/demo-events` mock endpoint and exposes an **API delay** selector with instant, 250ms, 1s, and 3s responses. A sidebar status reports pending requests even when stale events remain visible. Changing latency creates a new abort-aware loader generation; selecting a dataset or navigating while delayed demonstrates immediate grid rendering, stale-data retention, and obsolete-request cancellation. The HTTP adapter belongs to the demo; the library remains transport-agnostic through `LoadEvents`.
 
@@ -123,6 +162,44 @@ Use `view="infinite-vertical"` for resource columns with time running vertically
 Repository example: the horizontal/vertical overlap comparison in
 [`ArticleDemos.tsx`](../demo/examples/integration-walkthrough/ArticleDemos.tsx).
 
+## Date Labels And Localization
+
+Date labels use the browser or server runtime locale by default. Set `settings.dateLocale` to a BCP 47 locale string
+or locale priority list when the product needs deterministic output, especially during server rendering. The same
+setting applies to horizontal date headers and both lines of vertical date headers.
+
+Use `dayNameGenerator` when the product should own the complete displayed label:
+
+```tsx
+import type { DayNameGenerator } from "quno-calendar";
+
+const dayNameGenerator: DayNameGenerator = (date, locale) =>
+  new Intl.DateTimeFormat(locale, {
+    day: "numeric",
+    month: "short",
+    year: "numeric"
+  }).format(date);
+
+<CalendarRoot
+  {...calendarProps}
+  settings={{
+    ...settings,
+    dateLocale: "de-DE",
+    dayNameGenerator
+  }}
+/>;
+```
+
+The generator receives the local calendar `Date` and the configured locale, and its return value replaces the complete
+default label. This lets a product render `Tomorrow`, `6 Jul 2026`, or a machine sequence without a built-in date being
+prepended. In the vertical view, generated labels use the primary line rather than retaining the default two-line
+month/day and weekday structure. Keep the function referentially stable when it is created inside a React component.
+Without a generator, English labels retain ordinal days and respect locale ordering (`July 4th` in `en-US`, `4th July`
+in `en-GB`); other locales use their native month/day formatting.
+
+Repository example: the date-localization chapter in
+[`ArticleProductDemos.tsx`](../demo/examples/integration-walkthrough/ArticleProductDemos.tsx).
+
 ## Drag And Create
 
 The calendar requests changes. Parent code validates and persists them.
@@ -147,7 +224,9 @@ these callbacks is read-only.
 Returning `false` from `onEventMoveRequest` rejects a drop. Returning a created event from `onEventCreateRequest` lets the visible cache show the committed event immediately. Newly committed visible events briefly receive `status: "appearing"` in `eventRenderer` props so product renderers can play a save/create highlight. For parent-owned save flows, update your own event store and call `commitVisibleEvent` so the loaded visible cache changes one record instead of reloading the range.
 
 Repository example: the parent-owned mutation chapter in
-[`ArticleRecipeDemos.tsx`](../demo/examples/integration-walkthrough/ArticleRecipeDemos.tsx).
+[`ArticleRecipeDemos.tsx`](../demo/examples/integration-walkthrough/ArticleRecipeDemos.tsx) stages move and create
+proposals as `activeDraft` previews. Its explicit Accept action patches parent state and the visible cache, while Cancel
+removes the preview without changing saved events.
 
 ## Controlled Create/Edit Draft
 

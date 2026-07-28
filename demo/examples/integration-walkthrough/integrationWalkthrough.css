@@ -336,6 +336,8 @@
 .article-demo-toolbar__actions,
 .article-motion-controls,
 .article-creation-controls,
+.article-card-structure-controls,
+.article-mutation-controls,
 .article-layer-controls,
 .article-focus-controls,
 .article-prefetch-controls {
@@ -361,6 +363,80 @@
   color: #29473f;
   font-variant-numeric: tabular-nums;
   font-weight: 750;
+}
+
+.article-prefetch-loaded {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: stretch;
+  gap: 10px;
+  min-height: 66px;
+  padding: 8px 14px;
+  overflow-x: auto;
+  background: #ebece7;
+  border-bottom: 1px solid #d4d8d2;
+}
+
+.article-prefetch-loaded header {
+  display: grid;
+  flex: 0 0 68px;
+  align-content: center;
+  gap: 2px;
+  color: #647069;
+  font-size: 9px;
+  font-weight: 780;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.article-prefetch-loaded header output {
+  color: #29473f;
+  font-size: 18px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+
+.article-prefetch-loaded__items {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+}
+
+.article-prefetch-loaded__items article {
+  display: grid;
+  align-content: center;
+  gap: 2px;
+  min-width: 164px;
+  padding: 6px 9px;
+  overflow: hidden;
+  background: #ffffff;
+  border: 1px solid #d1d7d1;
+  border-radius: 7px;
+}
+
+.article-prefetch-loaded__items strong,
+.article-prefetch-loaded__items time {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.article-prefetch-loaded__items strong {
+  color: #29473f;
+  font-size: 10px;
+}
+
+.article-prefetch-loaded__items time,
+.article-prefetch-loaded__empty {
+  color: #68736e;
+  font-size: 9px;
+  font-variant-numeric: tabular-nums;
+}
+
+.article-prefetch-loaded__empty {
+  display: flex;
+  align-items: center;
+  min-width: 180px;
 }
 
 .article-button,
@@ -551,6 +627,79 @@
   line-height: 1.2;
 }
 
+.article-structured-event-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  min-width: 0;
+  min-height: 0;
+  padding: 8px 10px;
+  overflow: hidden;
+  color: #25312d;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(246, 242, 233, 0.6)), var(--event-accent-muted, #eef5f1);
+  border: 1px solid color-mix(in srgb, var(--event-accent, #246b5d) 42%, white);
+  border-top: 4px solid var(--event-accent, #246b5d);
+  border-radius: 7px;
+  box-shadow: 0 3px 8px rgba(31, 45, 39, 0.1);
+  line-height: 1.2;
+}
+
+.article-structured-event-card__kicker,
+.article-structured-event-card__details,
+.article-structured-event-card__time,
+.article-structured-event-card strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.article-structured-event-card__kicker {
+  color: color-mix(in srgb, var(--event-accent, #246b5d) 78%, #28352f);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.article-structured-event-card strong {
+  font-size: 13px;
+}
+
+.article-structured-event-card__details {
+  color: #52615b;
+  font-size: 9px;
+}
+
+.article-structured-event-card__time {
+  color: #727b76;
+  font-size: 8px;
+  font-variant-numeric: tabular-nums;
+}
+
+.article-structured-event-card.status-hovered {
+  box-shadow: 0 10px 18px rgba(31, 45, 39, 0.2);
+}
+
+@container calendar-event (width < 120px) {
+  .article-structured-event-card {
+    gap: 1px;
+    padding-inline: 7px;
+  }
+
+  .article-structured-event-card__details,
+  .article-structured-event-card__time {
+    display: none;
+  }
+
+  .article-structured-event-card strong {
+    font-size: 10px;
+  }
+}
+
 .article-event-card__kicker,
 .article-event-card__subtitle,
 .article-event-card__time,
@@ -611,6 +760,16 @@
   border-left-color: rgba(75, 155, 125, 0.62);
   box-shadow: none;
   opacity: 0.58;
+}
+
+.article-availability-calendar.is-editing-availability
+  .ic-availability-shell.is-active-layer
+  .article-event-card.kind-availability {
+  background: rgba(212, 237, 221, 0.92);
+  border-color: rgba(75, 155, 125, 0.72);
+  border-left-color: #4b9b7d;
+  box-shadow: inset 0 0 0 1px rgba(75, 155, 125, 0.18);
+  opacity: 1;
 }
 
 .article-event-card.status-hovered {
@@ -736,7 +895,8 @@
 .article-time-marker-controls,
 .article-navigation-controls,
 .article-precision-controls,
-.article-summary-controls {
+.article-summary-controls,
+.article-localization-tools {
   display: flex;
   align-items: center;
   gap: 7px;
@@ -770,7 +930,8 @@
 }
 
 .article-navigation-controls input,
-.article-summary-controls select {
+.article-summary-controls select,
+.article-localization-tools select {
   height: 34px;
   padding: 0 8px;
   color: #29473f;
@@ -802,6 +963,53 @@
 
 .article-calendar-demo--summary {
   height: 560px;
+}
+
+.article-calendar-demo--localization {
+  height: 560px;
+}
+
+.article-language-specimens {
+  display: grid;
+  flex: 0 0 auto;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  padding: 10px 14px;
+  overflow-x: auto;
+  background: #f5f4f0;
+  border-bottom: 1px solid #d9ddd6;
+}
+
+.article-language-specimens article {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+  padding: 9px 11px;
+  background: #ffffff;
+  border: 1px solid #d5dbd5;
+  border-radius: 8px;
+}
+
+.article-language-specimens article.is-active {
+  border-color: #4d8576;
+  box-shadow: inset 0 0 0 1px #4d8576;
+}
+
+.article-language-specimens span {
+  overflow: hidden;
+  color: #758079;
+  font-size: 9px;
+  font-weight: 780;
+  letter-spacing: 0.06em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.article-language-specimens strong {
+  color: #24483e;
+  font-size: 12px;
+  line-height: 1.25;
 }
 
 .article-creation-controls label {
@@ -1251,13 +1459,17 @@
   .article-demo-toolbar__actions,
   .article-motion-controls,
   .article-creation-controls,
+  .article-card-structure-controls,
+  .article-mutation-controls,
   .article-layer-controls,
   .article-focus-controls,
   .article-prefetch-controls,
   .article-time-marker-controls,
   .article-navigation-controls,
   .article-precision-controls,
-  .article-summary-controls {
+  .article-summary-controls,
+  .article-localization-tools,
+  .article-localization-controls {
     flex-wrap: wrap;
   }
 
@@ -1272,6 +1484,14 @@
 
   .article-calendar-demo--summary {
     height: 520px;
+  }
+
+  .article-calendar-demo--localization {
+    height: 540px;
+  }
+
+  .article-language-specimens {
+    grid-template-columns: repeat(4, minmax(145px, 1fr));
   }
 }
 

@@ -22,12 +22,16 @@ test("main demo links to the single example field guide", async ({ page }) => {
 test("editorial table of contents navigates the internal article scroller", async ({ page }) => {
   await page.goto("/examples/integration-walkthrough");
   const contents = page.getByRole("navigation", { name: "Table of contents" });
-  await expect(contents.getByRole("link")).toHaveCount(23);
+  await expect(contents.getByRole("link")).toHaveCount(25);
   await expect(contents.getByRole("link", { name: /Why the primary view runs horizontally/ })).toHaveAttribute(
     "href",
     "#horizontal-first"
   );
+  const horizontalSection = page.locator("#horizontal-first");
   await expect(page.getByRole("heading", { name: "Why the primary view runs horizontally" })).toBeVisible();
+  await expect(horizontalSection).toContainText("shows the time of day horizontally");
+  await expect(horizontalSection).toContainText("more people, resources, rooms, and appointments visible together");
+  await expect(horizontalSection).toContainText("cheapest repeated navigation a mouse wheel or touchpad can offer");
   const motionLink = contents.getByRole("link", { name: /Motion is part of the renderer/ });
   await expect(motionLink).toHaveAttribute("href", "#motion");
   await motionLink.click();
@@ -103,8 +107,8 @@ test("editorial footprint reports raw, gzip, and dependency costs", async ({ pag
   const footprint = page.getByTestId("article-package-footprint");
   await footprint.scrollIntoViewIfNeeded();
   await expect(footprint.locator("dt").filter({ hasText: "Calendar ESM" })).toBeVisible();
-  await expect(footprint).toContainText("123.00 KiB");
-  await expect(footprint).toContainText("30.52 KiB gzip");
+  await expect(footprint).toContainText("124.87 KiB");
+  await expect(footprint).toContainText("30.96 KiB gzip");
   await expect(footprint.locator("dt").filter({ hasText: "Direct runtime" })).toBeVisible();
   await expect(footprint).toContainText("@tanstack/react-virtual");
   await expect(footprint).toContainText("React + React DOM");
@@ -202,6 +206,49 @@ test("editorial styling presets change both settings geometry and scoped CSS", a
   await expect(calendar).toHaveClass(/theme-night/);
   await expect(demo.locator(".ic-row-grid").first()).toHaveCSS("background-color", "rgb(27, 41, 37)");
   await expect(demo.locator(".ic-time-tick").first()).toHaveCSS("color", "rgb(220, 233, 227)");
+});
+
+test("editorial date localization compares human and robot day-name strategies", async ({ page }) => {
+  await page.goto("/examples/integration-walkthrough");
+  const demo = await revealLazyArticleDemo(page, "date localization example", "article-date-localization-demo");
+  const specimens = demo.getByLabel("Day-name strategy examples");
+  await expect(specimens.locator("article")).toHaveCount(4);
+  await expect(specimens.locator("strong")).toHaveText([
+    "July 6th, Monday",
+    "7月6日, 月曜日",
+    "Yesterday · Today · Tomorrow",
+    "011111 · 100000 · 100001"
+  ]);
+
+  const viewport = demo.locator(".ic-viewport");
+  const dateLabel = (dateKey: string) =>
+    demo.locator(`[data-testid="calendar-day"][data-date="${dateKey}"] .ic-date-label`).first();
+  await viewport.evaluate((element) => {
+    element.dataset.localizationIdentity = "preserved";
+  });
+
+  await expect(dateLabel("2026-07-06")).toHaveText("July 6th, Monday");
+  await demo.getByRole("button", { name: "日本語" }).click();
+  await expect(dateLabel("2026-07-06")).toHaveText("7月6日, 月曜日");
+
+  await demo.getByRole("button", { name: "Human" }).click();
+  await expect(dateLabel("2026-07-06")).toHaveText("Today");
+  await expect(dateLabel("2026-07-05")).toHaveText("Yesterday");
+  await expect(dateLabel("2026-07-07")).toHaveText("Tomorrow");
+  await expect(dateLabel("2026-07-08")).toHaveText("Wednesday");
+
+  const humanSpecimen = specimens.locator("article").filter({ hasText: "Yesterday · Today · Tomorrow" });
+  expect(await humanSpecimen.evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(true);
+
+  await demo.getByRole("button", { name: "Robot" }).click();
+  await expect(dateLabel("2026-07-06")).toHaveText("100000");
+  await expect(dateLabel("2026-07-07")).toHaveText("100001");
+  await expect(viewport).toHaveAttribute("data-localization-identity", "preserved");
+
+  await demo.getByLabel("Date label orientation").selectOption("infinite-vertical");
+  const verticalLabel = demo.locator('[data-testid="calendar-day"][data-date="2026-07-06"] .icv-date-label');
+  await expect(verticalLabel.locator(".icv-date-main")).toHaveText("100000");
+  await expect(verticalLabel.locator(".icv-date-weekday")).toHaveCount(0);
 });
 
 test("editorial final calendar composes navigation, zoom, styling, and animated insertion", async ({ page }) => {
@@ -321,9 +368,11 @@ test("every editorial calendar example offers the shared full-screen control", a
   for (const label of [
     "read-only calendar example",
     "event card examples",
+    "custom card structure example",
     "availability interaction layer example",
     "drag and create calendar example",
     "controlled zoom example",
+    "date localization example",
     "overlap lane comparison",
     "underlying event hover example",
     "event preloading example",
@@ -335,8 +384,8 @@ test("every editorial calendar example offers the shared full-screen control", a
     const placeholder = page.getByLabel(`Loading ${label}`);
     if (await placeholder.count()) await placeholder.scrollIntoViewIfNeeded();
   }
-  await expect(page.locator(".article-calendar-demo")).toHaveCount(13);
-  await expect(page.getByRole("button", { name: "Full screen" })).toHaveCount(13);
+  await expect(page.locator(".article-calendar-demo")).toHaveCount(15);
+  await expect(page.getByRole("button", { name: "Full screen" })).toHaveCount(15);
 });
 
 test("editorial read-only exhibit cannot start drag or creation", async ({ page }) => {
@@ -387,23 +436,84 @@ test("editorial article uses one external card renderer for specimens and calend
   await expect(cancelled).toHaveCSS("animation-name", "article-card-cancelled");
 });
 
+test("editorial custom card structure switches its primary product field without moving events", async ({ page }) => {
+  await page.goto("/examples/integration-walkthrough");
+  const demo = await revealLazyArticleDemo(page, "custom card structure example", "article-card-structure-demo");
+  const cards = demo.locator(".article-structured-event-card");
+  const groupingState = demo.getByTestId("article-card-grouping");
+  const groupingControls = demo.locator('.article-segmented-control[aria-label="Card primary field"]');
+  await expect(cards).toHaveCount(4);
+  await expect(groupingState).toHaveText("Grouped by product");
+  expect(
+    await cards.evaluateAll((elements) => elements.map((element) => element.getAttribute("data-card-primary")))
+  ).toEqual(["product", "product", "product", "product"]);
+  await expect(cards.locator("strong")).toHaveText(["IV Drip", "Botox", "Sculptra", "Skin treatment"]);
+
+  const [stateBox, controlsBox] = await Promise.all([groupingState.boundingBox(), groupingControls.boundingBox()]);
+  expect(stateBox).not.toBeNull();
+  expect(controlsBox).not.toBeNull();
+  expect((stateBox?.x ?? 0) + (stateBox?.width ?? 0)).toBeLessThanOrEqual(controlsBox?.x ?? 0);
+
+  const shells = demo.locator('[data-testid="calendar-event"]');
+  const boxesBefore = await shells.evaluateAll((elements) =>
+    elements.map((element) => {
+      element.setAttribute("data-structure-shell", "preserved");
+      const box = element.getBoundingClientRect();
+      return { x: box.x, y: box.y, width: box.width, height: box.height };
+    })
+  );
+
+  await demo.getByRole("button", { name: "Patient name" }).click();
+  await expect(groupingState).toHaveText("Grouped by patient");
+  expect(
+    await cards.evaluateAll((elements) => elements.map((element) => element.getAttribute("data-card-primary")))
+  ).toEqual(["patient", "patient", "patient", "patient"]);
+  await expect(cards.locator("strong")).toHaveText(["Maya Green", "Noah Schneider", "Ava Miller", "Lina Hoffmann"]);
+  expect(
+    await shells.evaluateAll((elements) =>
+      elements.every((element) => element.getAttribute("data-structure-shell") === "preserved")
+    )
+  ).toBe(true);
+
+  const boxesAfter = await shells.evaluateAll((elements) =>
+    elements.map((element) => {
+      const box = element.getBoundingClientRect();
+      return { x: box.x, y: box.y, width: box.width, height: box.height };
+    })
+  );
+  expect(boxesAfter).toEqual(boxesBefore);
+
+  await demo.getByRole("button", { name: "Room number" }).click();
+  await expect(groupingState).toHaveText("Grouped by room");
+  expect(
+    await cards.evaluateAll((elements) => elements.map((element) => element.getAttribute("data-card-primary")))
+  ).toEqual(["room", "room", "room", "room"]);
+  await expect(cards.locator("strong")).toHaveText(["Room 2", "Room 4", "Room 6", "Room 3"]);
+  expect(
+    await cards.evaluateAll((elements) =>
+      elements.every((element) => {
+        const primary = element.querySelector("strong");
+        return primary ? primary.scrollWidth <= primary.clientWidth : false;
+      })
+    )
+  ).toBe(true);
+});
+
 test("editorial availability exhibit switches the only interactive event layer", async ({ page }) => {
   await page.goto("/examples/integration-walkthrough");
   const demo = await revealLazyArticleDemo(page, "availability interaction layer example", "article-availability-demo");
   const appointment = demo.locator('[data-event-id="follow-up-a"]');
-  const availability = demo.locator('[data-event-id="availability-a"]');
+  const availability = demo.locator('[data-testid="availability-event"][data-event-id="availability-a"]');
+  const activeLayerLabel = demo.getByTestId("article-active-layer");
+  const layerButtons = demo.locator('.article-segmented-control[aria-label="Editable calendar layer"]');
 
-  await expect(page.getByTestId("article-active-layer")).toHaveText("Appointments active");
+  await expect(activeLayerLabel).toHaveText("Appointments active");
   await expect(appointment).toHaveCSS("pointer-events", "auto");
   await expect(availability).toHaveCSS("pointer-events", "none");
-
-  await demo.getByRole("button", { name: "Edit availability" }).click();
-  await expect(page.getByTestId("article-active-layer")).toHaveText("Availability active");
-  await expect(appointment).toHaveClass(/ic-background-event-shell/);
-  await expect(appointment).toHaveCSS("pointer-events", "none");
-  await expect(appointment).toHaveCSS("opacity", "0.42");
-  await expect(availability).toHaveClass(/is-active-layer/);
-  await expect(availability).toHaveCSS("pointer-events", "auto");
+  const [labelBox, buttonsBox] = await Promise.all([activeLayerLabel.boundingBox(), layerButtons.boundingBox()]);
+  expect(labelBox).not.toBeNull();
+  expect(buttonsBox).not.toBeNull();
+  expect((labelBox?.x ?? 0) + (labelBox?.width ?? 0)).toBeLessThanOrEqual(buttonsBox?.x ?? 0);
 
   const grid = demo.locator(
     '[data-testid="calendar-day"][data-date="2026-07-06"] [data-testid="calendar-row"][data-calendar-id="provider-a"] .ic-row-grid'
@@ -414,19 +524,59 @@ test("editorial availability exhibit switches the only interactive event layer",
   const y = gridBox.y + gridBox.height / 2;
   await page.mouse.move(gridBox.x + gridBox.width * 0.7, y);
   await page.mouse.down();
-  await page.mouse.move(gridBox.x + gridBox.width * 0.84, y);
+  await page.mouse.move(gridBox.x + gridBox.width * 0.78, y);
+  await expect(demo.getByTestId("draft-event").first()).toBeVisible();
+  await page.mouse.up();
+  await expect(demo.locator('[data-event-id^="article-appointment-created-"]')).toBeVisible();
+  await expect(demo.getByText("New appointment drawn")).toBeVisible();
+
+  await demo.getByRole("button", { name: "Edit availability" }).click();
+  await expect(activeLayerLabel).toHaveText("Availability active");
+  await expect(appointment).toHaveClass(/ic-background-event-shell/);
+  await expect(appointment).toHaveCSS("pointer-events", "none");
+  await expect(appointment).toHaveCSS("opacity", "0.42");
+  await expect(availability).toHaveClass(/is-active-layer/);
+  await expect(availability).toHaveCSS("pointer-events", "auto");
+  await expect(availability.locator(".article-event-card")).toHaveCSS("opacity", "1");
+
+  const availabilityBoxBefore = await availability.boundingBox();
+  expect(availabilityBoxBefore).not.toBeNull();
+  if (!availabilityBoxBefore) return;
+  await page.mouse.move(
+    availabilityBoxBefore.x + availabilityBoxBefore.width / 2,
+    availabilityBoxBefore.y + availabilityBoxBefore.height / 2
+  );
+  await page.mouse.down();
+  await page.mouse.move(
+    availabilityBoxBefore.x + availabilityBoxBefore.width / 2 + 60,
+    availabilityBoxBefore.y + availabilityBoxBefore.height / 2
+  );
+  await expect(availability).toHaveAttribute("data-status", "dragging");
+  await page.mouse.up();
+  await expect(availability).not.toHaveAttribute("data-status", "dragging");
+  await expect(demo.getByText("Availability moved")).toBeVisible();
+  await expect
+    .poll(async () => (await availability.boundingBox())?.x ?? 0)
+    .toBeGreaterThan(availabilityBoxBefore.x + 20);
+
+  await page.mouse.move(gridBox.x + gridBox.width * 0.83, y);
+  await page.mouse.down();
+  await page.mouse.move(gridBox.x + gridBox.width * 0.92, y);
   await expect(demo.getByTestId("draft-event")).toBeVisible();
   await page.mouse.up();
   await expect(demo.locator('[data-event-id^="article-availability-created-"]')).toBeVisible();
-  await expect(demo.getByText("New availability drawn; appointments were ignored")).toBeVisible();
+  await expect(demo.getByText("New availability drawn")).toBeVisible();
 });
 
-test("editorial drag/create exhibit commits parent-owned moves and drawn events", async ({ page }) => {
+test("editorial drag/create exhibit stages parent-owned changes for accept or cancel", async ({ page }) => {
   await page.goto("/examples/integration-walkthrough");
   const demo = await revealLazyArticleDemo(page, "drag and create calendar example", "article-drag-create-demo");
+  const mutationState = demo.getByTestId("article-mutation-state");
   const event = demo.locator(
     '[data-testid="calendar-event"][data-event-id="consultation-a"][data-calendar-id="provider-a"]'
   );
+  await expect(mutationState).toHaveText("No pending change");
+  await expect(demo.getByRole("button", { name: "Accept change" })).toHaveCount(0);
   const eventBox = await event.boundingBox();
   expect(eventBox).not.toBeNull();
   if (!eventBox) return;
@@ -435,7 +585,26 @@ test("editorial drag/create exhibit commits parent-owned moves and drawn events"
   await page.mouse.move(eventBox.x + 70, eventBox.y + eventBox.height / 2);
   await expect(event).toHaveAttribute("data-status", "dragging");
   await page.mouse.up();
-  await expect(demo.getByText(/Moved “Treatment consultation”/)).toBeVisible();
+  await expect(mutationState).toHaveText("Move pending");
+  await expect(demo.getByText(/Review the move for “Treatment consultation”/)).toBeVisible();
+  await expect(demo.getByTestId("draft-event").first()).toBeVisible();
+  const acceptButton = demo.getByRole("button", { name: "Accept change" });
+  const cancelButton = demo.getByRole("button", { name: "Cancel change" });
+  await expect(acceptButton).toBeVisible();
+  await expect(cancelButton).toBeVisible();
+  const [stateBox, acceptBox] = await Promise.all([mutationState.boundingBox(), acceptButton.boundingBox()]);
+  expect(stateBox).not.toBeNull();
+  expect(acceptBox).not.toBeNull();
+  expect((stateBox?.x ?? 0) + (stateBox?.width ?? 0)).toBeLessThanOrEqual(acceptBox?.x ?? 0);
+  await cancelButton.click();
+  await expect(mutationState).toHaveText("No pending change");
+  const exitingDraft = demo.locator('[data-testid="draft-event"][data-exiting="true"]').first();
+  await expect(exitingDraft).toBeVisible();
+  await expect(exitingDraft).toHaveCSS("animation-name", "ic-draft-fade-out");
+  await expect(exitingDraft).toHaveCSS("animation-duration", "0.32s");
+  await expect(demo.getByTestId("draft-event")).toHaveCount(0);
+  await expect(demo.getByText(/Cancelled the move for “Treatment consultation”/)).toBeVisible();
+  await expect.poll(async () => Math.abs(((await event.boundingBox())?.x ?? 0) - eventBox.x)).toBeLessThan(3);
 
   const grid = demo.locator(
     '[data-testid="calendar-day"][data-date="2026-07-06"] [data-testid="calendar-row"][data-calendar-id="room-1"] .ic-row-grid'
@@ -447,15 +616,35 @@ test("editorial drag/create exhibit commits parent-owned moves and drawn events"
   await page.mouse.move(gridBox.x + gridBox.width * 0.75, y);
   await page.mouse.down();
   await page.mouse.move(gridBox.x + gridBox.width * 0.88, y);
-  await expect(demo.getByTestId("draft-event")).toBeVisible();
+  await expect(demo.getByTestId("draft-event").first()).toBeVisible();
   await page.mouse.up();
-  await expect(demo.locator('[data-event-id^="article-created-"]')).toBeVisible();
-  await expect(demo.getByText("Parent accepted the drawn range and returned a saved event")).toBeVisible();
+  await expect(mutationState).toHaveText("New event pending");
+  await expect(demo.getByText("Review the new appointment. Saved data is unchanged.")).toBeVisible();
+  await expect(demo.locator('[data-testid="calendar-event"][data-event-id^="article-created-"]')).toHaveCount(0);
+  await acceptButton.click();
+  await expect(mutationState).toHaveText("No pending change");
+  const acceptedEvent = demo.locator('[data-testid="calendar-event"][data-event-id^="article-created-"]');
+  await expect(acceptedEvent).toBeVisible();
+  await expect(acceptedEvent).toHaveAttribute("data-status", "appearing");
+  const acceptedCard = acceptedEvent.locator(".article-event-card");
+  await expect(acceptedCard).toHaveAttribute("data-render-status", "appearing");
+  expect(await acceptedCard.evaluate((element) => getComputedStyle(element, "::before").animationName)).toBe(
+    "article-event-appearing-glint"
+  );
+  await expect(acceptedEvent).toHaveAttribute("data-status", "existing", { timeout: 3_000 });
+  await expect(
+    demo.getByText("Accepted the new appointment. Parent state and the visible calendar now match.")
+  ).toBeVisible();
 });
 
 test("editorial zoom controls and gesture requests keep zoom parent-controlled", async ({ page }) => {
   await page.goto("/examples/integration-walkthrough");
   const demo = await revealLazyArticleDemo(page, "controlled zoom example", "article-zoom-demo");
+  const zoomSection = page.locator("#zoom");
+  await expect(zoomSection.getByRole("heading", { name: "Zoom in and out—when you need it" })).toBeVisible();
+  await expect(zoomSection).toContainText("Zoom out when you need the shape of the whole day");
+  await expect(zoomSection).toContainText("Zoom in when you need to read a card");
+  await expect(zoomSection).toContainText("without losing the area you were examining");
   const slider = page.getByTestId("article-zoom-slider");
   const output = page.getByTestId("article-zoom-value");
   const marker = demo.locator(".ic-now-pin.is-current");
@@ -502,6 +691,20 @@ test("editorial lane comparison grows only the dense resource and supports verti
 
   await demo.getByRole("button", { name: "Vertical" }).click();
   await expect(demo.getByTestId("infinite-calendar")).toHaveAttribute("data-view", "infinite-vertical");
+  const verticalCollision = demo.locator(
+    '[data-testid="calendar-day"][data-date="2026-07-06"] [data-testid="calendar-event"][data-event-id="overlap-1"]'
+  );
+  await expect(verticalCollision).toBeInViewport();
+  const [verticalCollisionBox, verticalViewportBox] = await Promise.all([
+    verticalCollision.boundingBox(),
+    demo.locator(".icv-viewport").boundingBox()
+  ]);
+  expect(verticalCollisionBox).not.toBeNull();
+  expect(verticalViewportBox).not.toBeNull();
+  expect(verticalCollisionBox?.y ?? 0).toBeGreaterThanOrEqual(verticalViewportBox?.y ?? 0);
+  expect((verticalCollisionBox?.y ?? 0) + (verticalCollisionBox?.height ?? 0)).toBeLessThanOrEqual(
+    (verticalViewportBox?.y ?? 0) + (verticalViewportBox?.height ?? 0)
+  );
   const providerColumn = demo.locator(
     '[data-testid="calendar-day"][data-date="2026-07-06"] [data-testid="calendar-column"][data-calendar-id="provider-a"]'
   );
@@ -559,14 +762,40 @@ test("editorial prefetch exhibit reveals a warm event before the next delayed ra
   await expect(demo.getByText("Warm window accepted and cached")).toBeVisible({ timeout: 10_000 });
   const initialRange = await page.getByTestId("article-prefetch-range").textContent();
   expect(initialRange).toContain("2026-07");
+  const loadedEvents = demo.getByTestId("article-prefetch-loaded-events");
+  const prefetchedLoadedEvent = loadedEvents.locator('[data-loaded-event-id="article-prefetched-event"]');
+  await expect(prefetchedLoadedEvent).toBeVisible();
+  await expect(prefetchedLoadedEvent).toContainText("Prefetched consultation");
+  await expect(prefetchedLoadedEvent).toContainText("2026-07-13 · 09:30–10:30");
+  const [loadedEventsBox, calendarFrameBox] = await Promise.all([
+    loadedEvents.boundingBox(),
+    demo.locator(".article-calendar-frame").boundingBox()
+  ]);
+  expect(loadedEventsBox).not.toBeNull();
+  expect(calendarFrameBox).not.toBeNull();
+  expect((loadedEventsBox?.y ?? 0) + (loadedEventsBox?.height ?? 0)).toBeLessThanOrEqual(calendarFrameBox?.y ?? 0);
+  expect(
+    await prefetchedLoadedEvent.evaluate(
+      (element) => element.scrollWidth <= element.clientWidth && element.scrollHeight <= element.clientHeight
+    )
+  ).toBe(true);
+  await expect(demo.locator('[data-testid="calendar-event"][data-event-id="article-prefetched-event"]')).toHaveCount(0);
   await demo.getByRole("button", { name: "Jump to prefetched date" }).click();
-  await expect(demo.getByText("Prefetched consultation")).toBeVisible({ timeout: 500 });
+  await expect(demo.locator('[data-testid="calendar-event"][data-event-id="article-prefetched-event"]')).toBeVisible({
+    timeout: 500
+  });
   await expect(page.getByTestId("article-prefetch-count")).toContainText("request");
 });
 
 test("editorial stability lab retains stale events and row focus during delayed dense loading", async ({ page }) => {
   await page.goto("/examples/integration-walkthrough");
   const demo = await revealLazyArticleDemo(page, "delayed loading stability example", "article-stability-demo");
+  const loadingStatus = demo.locator(".article-loading-status");
+  const denseButton = demo.getByRole("button", { name: "Load dense update" });
+  const [loadingBox, denseButtonBox] = await Promise.all([loadingStatus.boundingBox(), denseButton.boundingBox()]);
+  expect(loadingBox).not.toBeNull();
+  expect(denseButtonBox).not.toBeNull();
+  expect((loadingBox?.x ?? 0) + (loadingBox?.width ?? 0)).toBeLessThanOrEqual(denseButtonBox?.x ?? 0);
   await expect(demo.getByText("Shared consultation").first()).toBeVisible({ timeout: 10_000 });
   await demo.getByLabel("Room 4").check();
   await expect(demo.getByText("Settled")).toBeVisible({ timeout: 10_000 });
@@ -586,7 +815,7 @@ test("editorial stability lab retains stale events and row focus during delayed 
     return room.getBoundingClientRect().top - viewport.getBoundingClientRect().top;
   });
 
-  await demo.getByRole("button", { name: "Load dense update" }).click();
+  await denseButton.click();
   await expect(demo.getByText("Loading", { exact: true })).toBeVisible();
   await expect(
     demo.locator('[data-event-id="stability-shared-event"][data-calendar-id="room-1"]').first()
@@ -723,13 +952,19 @@ test("repeated focus leaves a fully visible shared-room event and viewport in pl
 test("editorial creation demo narrows to one doctor lane without adding an overlap lane", async ({ page }) => {
   await page.goto("/examples/integration-walkthrough");
   const demo = await revealLazyArticleDemo(page, "single-lane creation example", "article-creation-lane-demo");
+  const laneCount = demo.getByTestId("article-visible-lane-count");
+  const creationButton = demo.getByRole("button", { name: "Start creation" });
   const currentDateRows = demo.locator(
     '[data-testid="calendar-day"][data-date="2026-07-06"] [data-testid="calendar-row"]'
   );
-  await expect(page.getByTestId("article-visible-lane-count")).toHaveText("2 lanes");
+  await expect(laneCount).toHaveText("2 lanes");
+  const [laneCountBox, creationButtonBox] = await Promise.all([laneCount.boundingBox(), creationButton.boundingBox()]);
+  expect(laneCountBox).not.toBeNull();
+  expect(creationButtonBox).not.toBeNull();
+  expect((laneCountBox?.x ?? 0) + (laneCountBox?.width ?? 0)).toBeLessThanOrEqual(creationButtonBox?.x ?? 0);
   await expect(currentDateRows).toHaveCount(2);
-  await demo.getByRole("button", { name: "Start creation" }).click();
-  await expect(page.getByTestId("article-visible-lane-count")).toHaveText("1 lane");
+  await creationButton.click();
+  await expect(laneCount).toHaveText("1 lane");
   await expect(currentDateRows).toHaveCount(1);
   const draft = demo.getByTestId("draft-event");
   await expect(draft).toBeVisible();
@@ -760,7 +995,7 @@ test("editorial creation demo narrows to one doctor lane without adding an overl
   ]);
   await demo.getByRole("button", { name: "Cancel", exact: true }).click();
   await expect(draft).toHaveCount(0);
-  await expect(page.getByTestId("article-visible-lane-count")).toHaveText("2 lanes");
+  await expect(laneCount).toHaveText("2 lanes");
 });
 
 test("editorial event focus preserves a visible card through save and lane changes", async ({ page }) => {
@@ -796,7 +1031,12 @@ test("editorial motion demo animates both add and cancel outcomes", async ({ pag
   await page.goto("/examples/integration-walkthrough");
   const demo = await revealLazyArticleDemo(page, "appearing event example", "article-motion-demo");
   await expect(demo.getByText("Treatment consultation")).toBeVisible();
-  await expect(demo.getByTestId("draft-event")).toBeVisible();
+  const initialDraft = demo.getByTestId("draft-event");
+  await expect(initialDraft).toBeVisible();
+  const initialDraftBox = await initialDraft.boundingBox();
+  expect(initialDraftBox).not.toBeNull();
+  expect(initialDraftBox?.width ?? 0).toBeGreaterThan(90);
+  expect(initialDraftBox?.height ?? 0).toBeGreaterThan(55);
   await demo.locator(".ic-viewport").evaluate((element) => {
     element.scrollTop += 900;
   });

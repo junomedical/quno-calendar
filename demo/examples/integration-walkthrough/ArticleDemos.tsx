@@ -255,7 +255,7 @@ export function ZoomCalendarDemo() {
   return (
     <CalendarDemoShell
       data-testid="article-zoom-demo"
-      note="Try Shift + wheel or Shift + two-finger scroll over the timeline"
+      note="Zoom out for context; zoom in at the pointer with Shift + wheel or a two-finger scroll"
       tools={
         <div className="article-zoom-controls" aria-label="Calendar zoom controls">
           <button aria-label="Zoom out" onClick={() => changeZoom(zoom - 0.25)} type="button">
@@ -296,7 +296,15 @@ export function ZoomCalendarDemo() {
 }
 
 export function LaneComparisonDemo() {
+  const calendarRef = useRef<CalendarNavigationHandle>(null);
   const [view, setView] = useState<"infinite-horizontal" | "infinite-vertical">("infinite-horizontal");
+
+  useEffect(() => {
+    const frameId = window.requestAnimationFrame(() => {
+      calendarRef.current?.scrollToDateTime(articleDateKey, "12:45");
+    });
+    return () => window.cancelAnimationFrame(frameId);
+  }, [view]);
 
   return (
     <CalendarDemoShell
@@ -327,6 +335,7 @@ export function LaneComparisonDemo() {
     >
       <div className="article-calendar-frame article-calendar-frame--lanes">
         <CalendarRoot
+          ref={calendarRef}
           ariaLabel="Overlap lane comparison"
           calendars={articleCalendars}
           eventRenderer={ArticleEventCard}
@@ -384,6 +393,10 @@ export function StabilityDemo() {
       note={isLoading ? "Loading new event geometry; the last accepted view stays visible" : focusStatus}
       tools={
         <div className="article-stability-controls">
+          <span className={`article-loading-status${isLoading ? " is-loading" : ""}`}>
+            <span aria-hidden />
+            {isLoading ? "Loading" : "Settled"}
+          </span>
           <button className="article-button article-button--primary" onClick={loadDenseUpdate} type="button">
             {isDense ? "Restore light events" : "Load dense update"}
           </button>
@@ -401,10 +414,6 @@ export function StabilityDemo() {
           >
             Reveal shared room
           </button>
-          <span className={`article-loading-status${isLoading ? " is-loading" : ""}`}>
-            <span aria-hidden />
-            {isLoading ? "Loading" : "Settled"}
-          </span>
         </div>
       }
     >
@@ -519,7 +528,7 @@ export function MotionDemo() {
           initialDateKey={articleDateKey}
           loadEvents={loadEvents}
           selectedCalendarIds={["provider-a"]}
-          settings={articleSettings}
+          settings={{ ...articleSettings, startHour: 9, endHour: 14, rowHeight: 72, zoom: 2.4 }}
         />
       </div>
     </CalendarDemoShell>
@@ -593,6 +602,9 @@ export function CreationLaneDemo() {
       }
       tools={
         <div className="article-creation-controls">
+          <span className="article-toolbar-badge" data-testid="article-visible-lane-count">
+            {selectedCalendarIds.length} {selectedCalendarIds.length === 1 ? "lane" : "lanes"}
+          </span>
           <label>
             Doctor
             <select
@@ -605,9 +617,6 @@ export function CreationLaneDemo() {
               <option value="provider-b">Dr. Leo Hart</option>
             </select>
           </label>
-          <span className="article-toolbar-badge" data-testid="article-visible-lane-count">
-            {selectedCalendarIds.length} {selectedCalendarIds.length === 1 ? "lane" : "lanes"}
-          </span>
           <button
             className="article-button article-button--primary"
             disabled={Boolean(activeDraft)}

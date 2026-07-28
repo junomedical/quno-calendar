@@ -13,6 +13,8 @@ import {
 import { AvailabilityLayerDemo, EventFocusDemo } from "./ArticleSystemDemos";
 import {
   CssNativeDemo,
+  CustomCardStructureDemo,
+  DateLocalizationDemo,
   EverythingTogetherDemo,
   NavigationControlsDemo,
   ProgressiveTimeRevealDemo,
@@ -32,6 +34,30 @@ const rendererSnippet = `function EventCard({ event, status, laneCount, style })
   );
 }`;
 
+const customCardStructureSnippet = `type CardGrouping = "product" | "patient" | "room";
+
+function TreatmentCard({ event, grouping, style }) {
+  const primary = {
+    product: event.productGroup,
+    patient: event.patientName,
+    room: event.roomNumber
+  }[grouping];
+
+  return (
+    <article className="treatment-card" style={style}>
+      <small>{grouping}</small>
+      <strong>{primary}</strong>
+    </article>
+  );
+}
+
+<CalendarRoot
+  {...calendarProps}
+  eventRenderer={(props) => (
+    <TreatmentCard {...props} grouping={grouping} />
+  )}
+/>`;
+
 const readOnlySnippet = `<CalendarRoot
   calendars={calendars}
   selectedCalendarIds={visibleCalendarIds}
@@ -50,16 +76,21 @@ const cssNativeSnippet = `.calendar-date-header {
   left: 0;
 }`;
 
-const mutationSnippet = `const onEventCreateRequest = async (range) => {
-  const savedEvent = await api.events.create(range);
-  setEvents((current) => [...current, savedEvent]);
-  return savedEvent;
+const mutationSnippet = `const [pendingDraft, setPendingDraft] = useState(null);
+
+const onEventCreateRequest = (range) => {
+  setPendingDraft(toCreateDraft(range));
 };
 
-const onEventMoveRequest = async (proposal) => {
-  await api.events.move(proposal);
-  setEvents((current) => applyMove(current, proposal));
-  return true;
+const onEventMoveRequest = (proposal) => {
+  setPendingDraft(toEditDraft(proposal));
+  return false; // keep saved data unchanged while reviewing
+};
+
+const accept = async () => {
+  const savedEvent = await api.events.save(pendingDraft.event);
+  setEvents((current) => commit(current, savedEvent));
+  setPendingDraft(null);
 };`;
 
 const zoomSnippet = `const [zoom, setZoom] = useState(1.25);
@@ -109,6 +140,25 @@ const stylingSnippet = `const settings = {
 .product-calendar.theme-night {
   --ic-cell-border: #33443f;
 }`;
+
+const dateLocalizationSnippet = `import type { DayNameGenerator } from "quno-calendar";
+
+const dayNames: Record<string, DayNameGenerator | undefined> = {
+  english: undefined,
+  japanese: undefined,
+  human: (date) => humanRelativeDay(date, today),
+  robot: (date) =>
+    (calendarDayNumber(date) % 64).toString(2).padStart(6, "0")
+};
+
+<CalendarRoot
+  {...calendarProps}
+  settings={{
+    ...settings,
+    dateLocale: mode === "japanese" ? "ja-JP" : "en-US",
+    dayNameGenerator: dayNames[mode]
+  }}
+/>`;
 
 const loadingSnippet = `const loadEvents = async ({ startDate, endDate, calendarIds, signal }) => {
   return api.events.list({ startDate, endDate, calendarIds, signal });
@@ -210,23 +260,25 @@ const articleContents = [
   ["03", "css-native", "Let CSS own the stable parts"],
   ["04", "read-only", "Begin with a read-only calendar"],
   ["05", "event-cards", "Events are data; cards are design"],
-  ["06", "availability", "Availability is a separate interaction layer"],
-  ["07", "drag-create", "Drag and create are parent-owned mutations"],
-  ["08", "current-time", "Current time should never get lost"],
-  ["09", "date-time-navigation", "Go directly to the date and time that matters"],
-  ["10", "zoom", "Zoom belongs to the product"],
-  ["11", "time-precision", "Reveal precision only when it becomes useful"],
-  ["12", "styling", "Make the calendar belong to the product"],
-  ["13", "overlap-lanes", "Overlap lanes appear only when time collides"],
-  ["14", "hover-reveal", "Hover can reveal what an expanded card covers"],
-  ["15", "preloading", "Preload the dates a user is likely to visit"],
-  ["16", "late-loading", "Load late without making the calendar jump"],
-  ["17", "creation-lane", "Creation can focus one doctor lane"],
-  ["18", "visual-focus", "Focus keeps the event in view"],
-  ["19", "react-integration", "Use it from React"],
-  ["20", "motion", "Motion is part of the renderer"],
-  ["21", "everything-together", "Let’s see everything together"],
-  ["22", "package-footprint", "Keep the package cost visible"]
+  ["06", "card-structure", "Custom card structure follows the product"],
+  ["07", "availability", "Availability is a separate interaction layer"],
+  ["08", "drag-create", "Drag and create are parent-owned mutations"],
+  ["09", "current-time", "Current time should never get lost"],
+  ["10", "date-time-navigation", "Go directly to the date and time that matters"],
+  ["11", "zoom", "Zoom in and out—when you need it"],
+  ["12", "time-precision", "Reveal precision only when it becomes useful"],
+  ["13", "styling", "Make the calendar belong to the product"],
+  ["14", "date-localization", "Let date labels speak the product’s language"],
+  ["15", "overlap-lanes", "Overlap lanes appear only when time collides"],
+  ["16", "hover-reveal", "Hover can reveal what an expanded card covers"],
+  ["17", "preloading", "Preload the dates a user is likely to visit"],
+  ["18", "late-loading", "Load late without making the calendar jump"],
+  ["19", "creation-lane", "Creation can focus one doctor lane"],
+  ["20", "visual-focus", "Focus keeps the event in view"],
+  ["21", "react-integration", "Use it from React"],
+  ["22", "motion", "Motion is part of the renderer"],
+  ["23", "everything-together", "Let’s see everything together"],
+  ["24", "package-footprint", "Keep the package cost visible"]
 ] as const;
 
 const syntaxKeywords = new Set([
@@ -264,7 +316,7 @@ export function IntegrationWalkthrough() {
             outcomes possible.
           </p>
           <div className="calendar-article__meta" aria-label="Article details">
-            <span>37 minute read</span>
+            <span>39 minute read</span>
             <span>Interactive examples</span>
             <span>React integration</span>
           </div>
@@ -286,22 +338,23 @@ export function IntegrationWalkthrough() {
 
         <ArticleSection id="horizontal-first" number="00" title="Why the primary view runs horizontally">
           <p>
-            The primary calendar puts time of day from left to right, then stacks resources inside days from top to
-            bottom. That orientation is a product decision about information density: an event’s duration creates
-            horizontal room for its title and details, while doctors, rooms, and equipment remain aligned in rows that
-            are easy to compare.
+            The primary calendar shows the time of day horizontally—from morning on the left to evening on the
+            right—then stacks people, resources, and rooms vertically inside each day. That orientation is a product
+            decision about density: vertical space can hold more bookable people and places at once instead of spending
+            a wide column on each one.
           </p>
           <p>
             Text in most interface languages flows horizontally, so a horizontal event card uses the same axis for both
-            time and reading. When several events collide, they can share the height of a resource row before the row
-            grows locally for readability. The schedule can therefore show more appointments without turning every short
-            event into a tall, narrow column of clipped words.
+            time and reading. Event duration creates width for its title and details; collisions share a compact
+            resource row before that row grows locally for readability. The result is a denser presentation with more
+            people, resources, rooms, and appointments visible together, without turning short events into narrow
+            columns of clipped words.
           </p>
           <p>
-            Days move along the ordinary vertical scroll axis. A wheel, trackpad, touch gesture, or keyboard scroll
-            advances the schedule immediately; the user does not need to leave the calendar, reach a date control, open
-            it, and choose the next day. That makes repeated day-to-day navigation one of the cheapest interactions in
-            the product.
+            People, resources, rooms, and days all continue along the ordinary vertical scroll axis. Scrolling up and
+            down is the cheapest repeated navigation a mouse wheel or touchpad can offer: it needs no modifier key,
+            horizontal scrollbar, or small target. One familiar gesture moves through the working set and onward through
+            days, making scanning and interaction substantially faster.
           </p>
           <p>
             Vertical orientation still matters when a product needs time to run top to bottom or wants resources
@@ -443,7 +496,30 @@ export function IntegrationWalkthrough() {
           </DemoBreakout>
         </ArticleSection>
 
-        <ArticleSection id="availability" number="06" title="Availability is a separate interaction layer">
+        <ArticleSection id="card-structure" number="06" title="Custom card structure follows the product">
+          <p>
+            The most useful first line depends on the task. A treatment planner may scan by product group, a clinical
+            handoff by patient, and an operations board by room. Forcing one hierarchy into the calendar would make the
+            same event data less useful everywhere else.
+          </p>
+          <p>
+            Because card content belongs to <code>eventRenderer</code>, the product can promote a different domain field
+            without changing event geometry, loading, overlap, or navigation. The remaining fields stay as supporting
+            context, while the selected grouping becomes the card’s strongest label.
+          </p>
+          <Callout>
+            Switch between Product group, Patient name, and Room number. The same IV Drip, Botox, Sculptra, and skin
+            treatment events remain mounted in the same positions while their visual hierarchy changes.
+          </Callout>
+          <CodeBlock code={customCardStructureSnippet} title="Let workflow choose the card’s primary field" />
+          <DemoBreakout>
+            <LazyArticleDemo label="custom card structure example">
+              <CustomCardStructureDemo />
+            </LazyArticleDemo>
+          </DemoBreakout>
+        </ArticleSection>
+
+        <ArticleSection id="availability" number="07" title="Availability is a separate interaction layer">
           <p>
             Available time answers a different question from booked time: where may work happen, not what has already
             been scheduled. Treating both as ordinary cards makes the calendar noisier, consumes overlap space, and
@@ -467,19 +543,24 @@ export function IntegrationWalkthrough() {
           </DemoBreakout>
         </ArticleSection>
 
-        <ArticleSection id="drag-create" number="07" title="Drag and create are parent-owned mutations">
+        <ArticleSection id="drag-create" number="08" title="Drag and create are parent-owned mutations">
           <p>
             Scheduling changes are business operations: permissions, working hours, conflicts, billing rules, and
             persistence all belong to the product. A reusable calendar cannot safely guess which move or new range
             should be accepted.
           </p>
           <p>
-            Drawing and dragging therefore produce proposals rather than mutating data. The parent validates and stores
-            them, then accepts or rejects the result. Accepted changes enter the visible cache immediately for
-            responsive feedback; rejected changes leave committed data untouched. Users get fast interaction without
-            splitting authority between the calendar and the backend.
+            Drawing and dragging therefore produce proposals rather than mutating saved data. The live exhibit keeps
+            each proposal visible as a parent-owned draft and asks for an explicit Accept or Cancel decision. Accept
+            commits the draft to parent state and the visible cache; Cancel removes the draft and restores the
+            previously saved calendar exactly as it was. The accepted card enters with the renderer’s appearing
+            treatment, while a cancelled draft fades away before its shell is released.
           </p>
-          <CodeBlock code={mutationSnippet} title="Persist first, then accept the calendar proposal" />
+          <Callout>
+            Drag a saved card or draw on empty timeline space. The proposed position remains visible while the saved
+            event data stays untouched, so validation or confirmation UI can run before persistence.
+          </Callout>
+          <CodeBlock code={mutationSnippet} title="Stage a proposal, then accept or cancel it" />
           <DemoBreakout>
             <LazyArticleDemo label="drag and create calendar example">
               <DragCreateArticleDemo />
@@ -487,7 +568,7 @@ export function IntegrationWalkthrough() {
           </DemoBreakout>
         </ArticleSection>
 
-        <ArticleSection id="current-time" number="08" title="Current time should never get lost">
+        <ArticleSection id="current-time" number="09" title="Current time should never get lost">
           <p>
             A planner is full of possible time, but most operational decisions begin with one question: what needs
             attention now? When the current point in the day disappears during scrolling or scaling, people must
@@ -510,7 +591,7 @@ export function IntegrationWalkthrough() {
           </DemoBreakout>
         </ArticleSection>
 
-        <ArticleSection id="date-time-navigation" number="09" title="Go directly to the date and time that matters">
+        <ArticleSection id="date-time-navigation" number="10" title="Go directly to the date and time that matters">
           <p>
             Infinite scrolling makes nearby days inexpensive, but known destinations should not require repeated
             gestures. Search results, notifications, “next appointment” links, date pickers, and product shortcuts
@@ -531,20 +612,19 @@ export function IntegrationWalkthrough() {
           </DemoBreakout>
         </ArticleSection>
 
-        <ArticleSection id="zoom" number="10" title="Zoom belongs to the product">
+        <ArticleSection id="zoom" number="11" title="Zoom in and out—when you need it">
           <p>
-            Schedulers alternate between scanning a full day and placing work to the minute. A fixed scale forces one of
-            those jobs to be uncomfortable, while calendar-owned zoom makes it difficult to persist preferences or
-            coordinate product controls.
+            Zoom out when you need the shape of the whole day: open space, busy periods, and how people or rooms
+            compare. Zoom in when you need to read a card, judge a shorter gap, or place work to the minute. A fixed
+            scale makes one of those tasks unnecessarily difficult.
           </p>
           <p>
-            Zoom is controlled through <code>settings.zoom</code> and <code>onZoomChange</code>, so toolbars, keyboard
-            commands, and saved preferences share one source of truth. Without a pointer anchor, external controls keep
-            a visible current-time marker fixed; if that marker is outside the viewport, they preserve the visible grid
-            center instead. Shift + wheel or Shift + two-finger trackpad keeps the nearest rendered time node under the
-            pointer. People can change precision without losing the time they were examining.
+            The transition should feel continuous rather than like a jump to a different calendar. The slider and step
+            buttons smoothly change the scale while keeping the visible current-time marker—or the center of the
+            schedule—fixed. Shift + wheel or Shift + two-finger trackpad zooms around the nearest time under the
+            pointer, so you can move between context and precision without losing the area you were examining.
           </p>
-          <CodeBlock code={zoomSnippet} title="One source of truth for zoom" />
+          <CodeBlock code={zoomSnippet} title="Keep zoom smooth and controlled" />
           <DemoBreakout>
             <LazyArticleDemo label="controlled zoom example">
               <ZoomCalendarDemo />
@@ -552,7 +632,7 @@ export function IntegrationWalkthrough() {
           </DemoBreakout>
         </ArticleSection>
 
-        <ArticleSection id="time-precision" number="11" title="Reveal precision only when it becomes useful">
+        <ArticleSection id="time-precision" number="12" title="Reveal precision only when it becomes useful">
           <p>
             Showing every five-minute label in a full-day overview creates more arithmetic than information. Labels
             collide, hour landmarks lose emphasis, and the schedule becomes harder to scan before the user has asked for
@@ -575,7 +655,7 @@ export function IntegrationWalkthrough() {
           </DemoBreakout>
         </ArticleSection>
 
-        <ArticleSection id="styling" number="12" title="Make the calendar belong to the product">
+        <ArticleSection id="styling" number="13" title="Make the calendar belong to the product">
           <p>
             A scheduling surface can be structurally correct and still feel foreign inside the product. Density,
             hierarchy, contrast, and brand tone differ between a clinical workstation, a compact operations console, and
@@ -595,7 +675,32 @@ export function IntegrationWalkthrough() {
           </DemoBreakout>
         </ArticleSection>
 
-        <ArticleSection id="overlap-lanes" number="13" title="Overlap lanes appear only when time collides">
+        <ArticleSection id="date-localization" number="14" title="Let date labels speak the product’s language">
+          <p>
+            Dates are shared data, but their labels are read through a language and a product vocabulary. Hard-coded
+            month and weekday names make a global schedule feel foreign, while rebuilding date logic for every locale
+            risks changing navigation and event identity along with the text.
+          </p>
+          <p>
+            <code>settings.dateLocale</code> localizes month, day, and weekday labels through the platform’s
+            internationalization support. A <code>dayNameGenerator</code> owns the complete displayed label, so it can
+            instead speak like a person with Today, Tomorrow, Yesterday, and weekday names, or expose a machine-oriented
+            binary sequence. The underlying date key, event loading, excluded weekdays, and virtual position stay
+            exactly the same.
+          </p>
+          <CodeBlock code={dateLocalizationSnippet} title="Localize dates or supply a product day name" />
+          <Callout>
+            Compare English and Japanese localization, then switch to human-relative or binary robot labels. The same
+            calendar instance and visible date remain in place.
+          </Callout>
+          <DemoBreakout>
+            <LazyArticleDemo label="date localization example">
+              <DateLocalizationDemo />
+            </LazyArticleDemo>
+          </DemoBreakout>
+        </ArticleSection>
+
+        <ArticleSection id="overlap-lanes" number="15" title="Overlap lanes appear only when time collides">
           <p>
             Reserving permanent space for every possible collision wastes the quiet parts of a schedule. Keeping every
             row fixed instead hides conflicts or crushes cards exactly when the information matters most.
@@ -607,6 +712,10 @@ export function IntegrationWalkthrough() {
             widening after their own threshold. The schedule stays compact through ordinary overlap, then creates more
             room when density would otherwise compromise readability.
           </p>
+          <Callout>
+            Switch between Horizontal and Vertical. Both orientations align to the same 13:00 collision cluster, so the
+            row growth and column widening can be compared without searching for the events.
+          </Callout>
           <DemoBreakout>
             <LazyArticleDemo label="overlap lane comparison">
               <LaneComparisonDemo />
@@ -614,7 +723,7 @@ export function IntegrationWalkthrough() {
           </DemoBreakout>
         </ArticleSection>
 
-        <ArticleSection id="hover-reveal" number="14" title="Hover can reveal what an expanded card covers">
+        <ArticleSection id="hover-reveal" number="16" title="Hover can reveal what an expanded card covers">
           <p>
             Dense collisions need compact cards, but compact cards cannot always carry enough text to identify the right
             appointment. Permanently enlarging them would destroy the density that makes the planner useful.
@@ -636,7 +745,7 @@ export function IntegrationWalkthrough() {
           </DemoBreakout>
         </ArticleSection>
 
-        <ArticleSection id="preloading" number="15" title="Preload the dates a user is likely to visit">
+        <ArticleSection id="preloading" number="17" title="Preload the dates a user is likely to visit">
           <p>
             Waiting for events after every small scroll makes the calendar feel slower than the work around it. Loading
             an entire year avoids that pause, but spends network, memory, and backend capacity on dates the user may
@@ -649,8 +758,9 @@ export function IntegrationWalkthrough() {
           </p>
           <CodeBlock code={prefetchSnippet} title="Control the warm event window" />
           <Callout>
-            Wait for the first range to settle, then jump to the prefetched date. Its consultation is already cached;
-            the request counter may advance only to warm dates beyond the new viewport.
+            The loaded-events strip shows every event returned into the warm cache, including the July 13 consultation,
+            before that date is visible. Then jump to the prefetched date: the same consultation appears immediately in
+            the calendar while the request counter may advance only for dates beyond the new viewport.
           </Callout>
           <DemoBreakout>
             <LazyArticleDemo label="event preloading example">
@@ -659,7 +769,7 @@ export function IntegrationWalkthrough() {
           </DemoBreakout>
         </ArticleSection>
 
-        <ArticleSection id="late-loading" number="16" title="Load late without making the calendar jump">
+        <ArticleSection id="late-loading" number="18" title="Load late without making the calendar jump">
           <p>
             Event APIs rarely arrive in layout order. A delayed response can introduce several collisions above the
             viewport, change a resource row’s height, and move the appointment a user was reading or about to click.
@@ -688,7 +798,7 @@ export function IntegrationWalkthrough() {
           </DemoBreakout>
         </ArticleSection>
 
-        <ArticleSection id="creation-lane" number="17" title="Creation can focus one doctor lane">
+        <ArticleSection id="creation-lane" number="19" title="Creation can focus one doctor lane">
           <p>
             Choosing a time for one doctor is harder when every other practitioner competes for attention. A draft that
             also consumes an overlap lane makes the remaining availability narrower precisely while the user is trying
@@ -707,7 +817,7 @@ export function IntegrationWalkthrough() {
           </DemoBreakout>
         </ArticleSection>
 
-        <ArticleSection id="visual-focus" number="18" title="Focus keeps the event in view">
+        <ArticleSection id="visual-focus" number="20" title="Focus keeps the event in view">
           <p>
             Saving a draft, assigning a room, or receiving a new collision can move an event to another lane. If focus
             only means “highlight this id,” the highlighted card may still be clipped or outside the viewport when the
@@ -727,7 +837,7 @@ export function IntegrationWalkthrough() {
           </DemoBreakout>
         </ArticleSection>
 
-        <ArticleSection id="react-integration" number="19" title="Use it from React">
+        <ArticleSection id="react-integration" number="21" title="Use it from React">
           <p>
             A calendar is easier to evolve when ownership is explicit. The product supplies resources, visible ids,
             asynchronous event data, and card design; the calendar supplies bounded rendering, time geometry, and
@@ -741,7 +851,7 @@ export function IntegrationWalkthrough() {
           <CodeBlock code={completeSnippet} initiallyOpen title="Complete minimal integration" />
         </ArticleSection>
 
-        <ArticleSection id="motion" number="20" title="Motion is part of the renderer">
+        <ArticleSection id="motion" number="22" title="Motion is part of the renderer">
           <p>
             Saving and cancelling both need visible confirmation. Without feedback, people repeat actions or wonder
             whether the schedule changed; animation that changes card geometry, however, can destabilize the very layout
@@ -753,6 +863,10 @@ export function IntegrationWalkthrough() {
             changing time geometry, and <code>prefers-reduced-motion</code> can collapse both transitions for people who
             need a quieter interface.
           </p>
+          <Callout>
+            This exhibit zooms into the active 09:00–14:00 window and uses a taller lane, making the draft location and
+            the renderer’s appearing or cancellation treatment easier to inspect.
+          </Callout>
           <DemoBreakout>
             <LazyArticleDemo label="appearing event example">
               <MotionDemo />
@@ -760,7 +874,7 @@ export function IntegrationWalkthrough() {
           </DemoBreakout>
         </ArticleSection>
 
-        <ArticleSection id="everything-together" number="21" title="Let’s see everything together">
+        <ArticleSection id="everything-together" number="23" title="Let’s see everything together">
           <p>
             The strongest outcome does not come from any feature in isolation. It comes from keeping each responsibility
             with the layer that understands it: the calendar bounds time and geometry, loaders own data access, product
@@ -783,7 +897,7 @@ export function IntegrationWalkthrough() {
           </DemoBreakout>
         </ArticleSection>
 
-        <ArticleSection id="package-footprint" number="22" title="Keep the package cost visible">
+        <ArticleSection id="package-footprint" number="24" title="Keep the package cost visible">
           <p>
             Runtime performance is only part of a calendar’s cost. A scheduling surface is present on high-traffic
             screens, so every byte affects startup, parsing, and how quickly the rest of the product becomes usable.
@@ -799,8 +913,8 @@ export function IntegrationWalkthrough() {
               <div>
                 <dt>Calendar ESM</dt>
                 <dd>
-                  <strong>123.00 KiB</strong>
-                  <span>30.52 KiB gzip</span>
+                  <strong>124.87 KiB</strong>
+                  <span>30.96 KiB gzip</span>
                 </dd>
               </div>
               <div>
@@ -813,8 +927,8 @@ export function IntegrationWalkthrough() {
               <div>
                 <dt>Combined</dt>
                 <dd>
-                  <strong>128.68 KiB</strong>
-                  <span>32.09 KiB gzip</span>
+                  <strong>130.55 KiB</strong>
+                  <span>32.53 KiB gzip</span>
                 </dd>
               </div>
             </dl>

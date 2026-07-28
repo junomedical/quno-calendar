@@ -292,23 +292,38 @@ The integration route teaches concepts in one scrolling article instead of mount
 chapter owns a focused public-API exhibit for virtualization, event rendering, zoom, overlap, delayed loading, or
 appearance state; later exhibits mount near the article viewport and remain mounted after first reveal. Every calendar
 uses one accessible full-screen shell around the same React instance, preserving its visible date, intra-date offset,
-and loaded cache. The article scopes smaller, single-line date typography to its examples, reports scroll settlement as
+and loaded cache. The opening chapter frames horizontal time as the denser way to keep people, resources, rooms, and
+appointments visible while reserving the mouse wheel and touchpad’s ordinary vertical gesture for rapid row/day
+navigation. The article scopes smaller, single-line date typography to its examples, reports scroll settlement as
 `scrolled` then `repositioned`, demonstrates hover handoff through expanded cards, and shows parent-owned single-doctor
 creation plus renderer-owned add/cancel motion. The card specimen grid includes replayable save and cancellation
-treatments. Additional labs expose the existing availability-layer switch, current-time reference, imperative
-date/time navigation, scoped CSS plus settings presets, CSS-native sticky chrome, and event-relative viewport anchoring
-across draft replacement and overlap-lane recomputation. Date and time fields navigate as their values change, with
-previous, next, and Today as equally direct product controls. The chapter sequence moves from the current-time
-reference through direct navigation and controlled zoom into progressive label precision: the stable five-minute tick
+treatments. Its live motion calendar narrows and enlarges the active time window so renderer transitions remain
+visually inspectable without changing their event geometry. A custom-card lab keeps the same event shells mounted while
+the external renderer promotes product, patient, or room data for different workflows. Example toolbars put their
+current status or active-state label before the related controls so state is
+read before action. The drag/create recipe stages gesture proposals as controlled drafts and keeps committed data
+unchanged until its explicit Accept action; Accept clears the controlled draft before an appearing cache commit, while
+Cancel uses the active-draft release lifecycle so the rejected proposal can fade before removal. Additional labs
+expose the existing availability-layer switch—with mode-specific creation,
+visually emphasized active availability, and parent-accepted availability moves—current-time reference, imperative
+date/time navigation, scoped CSS plus settings presets, English/Japanese localization plus human-relative and binary
+day-name strategies, CSS-native sticky chrome, and event-relative viewport anchoring across draft replacement
+and overlap-lane recomputation. The lane-comparison lab aligns horizontal and vertical projections to the same
+collision time after an orientation switch. Date and time fields navigate as their values change, with previous, next,
+and Today as equally direct product controls. The zoom chapter describes scale as a task-driven transition—out for
+daily context and in for precise reading or placement—with anchoring presented as what makes that transition feel
+continuous. The chapter sequence moves from the current-time reference through direct navigation and controlled zoom
+into progressive label precision: the stable five-minute tick
 structure reveals more labels only when zoom creates readable space. The sticky-chrome lab explicitly separates
 browser-positioned static labels from React-owned events and interaction state. The stability lab also makes
 multi-calendar identity explicit: one shared event is projected into doctor and room calendars while focus remains
 local to the requested instance. A final lab composes navigation, zoom, styling, overlap, mutation, and motion through
 the same public API. The closing footprint chapter reports verified production ESM and CSS sizes separately from the
-one direct runtime dependency and two React peer dependencies. This presentation behavior stays in `demo/examples` and
-does not add reusable calendar props or state. Read-only, drag/create, availability, vertical comparison, delayed
-loading, and preloading are article chapters rather than standalone routes. A table of contents makes the long-form
-surface directly navigable, and the main demo links to it.
+one direct runtime dependency and two React peer dependencies. The preloading lab mirrors successful loader responses
+in a visible warm-cache strip so prefetched data is inspectable before its date is mounted. This presentation behavior
+stays in `demo/examples` and does not add reusable calendar props or state. Read-only, drag/create, availability,
+vertical comparison, delayed loading, and preloading are article chapters rather than standalone routes. A table of
+contents makes the long-form surface directly navigable, and the main demo links to it.
 
 ## 059 - Performance Is Expressed As A Design Envelope
 
@@ -320,3 +335,14 @@ positioning, and pointer/zoom work is coalesced to animation frames. Actual fram
 hardware, viewport, event collision shape, and consumer `eventRenderer`. Stable algorithmic scaling, DOM/cache ceilings,
 and scripting/layout budgets remain executable tests; the article’s 4/40/400 cards communicate the range rather than
 claiming benchmark results from a reader’s device.
+
+## 060 - Date Localization Is Settings-Owned
+
+Horizontal and vertical date chrome share one `Intl.DateTimeFormat`-based label formatter. The formatter uses
+`settings.dateLocale` when supplied and otherwise follows the runtime locale, avoiding a bundled locale table while
+letting products make server/client output deterministic. English month/day labels preserve ordinal days and the
+locale’s day/month order; non-English locales use their native numeric-day conventions. A caller-provided
+`dayNameGenerator(date, locale)` owns the complete displayed label, so human-relative terms, explicit dates, binary
+sequences, or other product vocabulary do not inherit a redundant built-in month/day prefix. Generated vertical labels
+use the primary line instead of the default two-line month/day plus weekday structure. The generator does not affect
+date keys, excluded weekdays, event loading, navigation, or virtualization.

@@ -2,6 +2,33 @@
 
 ## 0.2.0
 
+- Removed completed rewrite and refactor plans, the superseded initial project brief, empty retired example/test
+  directories, and local generated artifacts. Maintained architecture guidance remains in `docs/architecture.md`,
+  `docs/domains`, and `docs/flows`.
+- Added locale-aware horizontal and vertical date labels through `settings.dateLocale`, plus the exported
+  `DayNameGenerator` contract and `settings.dayNameGenerator` override for complete product-defined date labels.
+- Added a walkthrough localization chapter comparing English and Japanese labels with interactive human-relative and
+  binary robot generators while preserving the live calendar instance.
+- Removed the redundant day/month and day/month/year choices from the walkthrough localization exhibit.
+- Fixed the walkthrough availability lab so appointment mode creates appointments, availability mode visibly marks and
+  creates availability, and availability drag/drop completes through parent-owned state. Active/status labels now
+  precede their related example buttons.
+- Reworked the walkthrough mutation exhibit into an explicit review flow: dragging or drawing stages a visible
+  parent-owned draft, then Accept commits it while Cancel restores the untouched saved data.
+- Aligned both orientations in the walkthrough overlap-lane comparison to the same collision window, keeping the dense
+  13:00 events visible when switching to vertical mode.
+- Enlarged the walkthrough motion exhibit around its active 09:00–14:00 range with higher zoom and a taller event lane,
+  making appearing and cancelled card treatments easier to see.
+- Added a walkthrough custom-card chapter where the same treatment events can promote product group, patient name, or
+  room number without moving or remounting their calendar shells.
+- Fixed the walkthrough mutation review transitions: Cancel now releases the staged draft with its fade-out animation,
+  while Accept clears the draft before committing the saved card with its appearing renderer status.
+- Added a visible loaded-events strip to the walkthrough preloading lab, showing the prefetched event and its date/time
+  before navigation places its shell in the calendar viewport.
+- Sharpened the walkthrough’s horizontal-first rationale around time-of-day placement, denser simultaneous visibility
+  for people/resources/rooms, and low-effort vertical navigation through mouse-wheel and touchpad scrolling.
+- Reframed the walkthrough zoom chapter around smoothly moving between daily context and precise placement when needed,
+  while preserving the visible time instead of referring abstractly to “the product.”
 - Fixed calendar show/hide relayout to preserve the top visible date and align its date header after resource geometry
   settles.
 - Gated drawing and dragging by their parent callbacks, preventing orphan interactions in read-only, vertical planner,
@@ -31,7 +58,7 @@
   progressively, preserving complete visible lines inside the card.
 - Added selectable TSX syntax coloring to the article code blocks while preserving plain-text clipboard output.
 - Moved the progressive time-precision label to the left of its overview, quarter-hour, and five-minute controls.
-- Expanded the editorial field guide to 23 chapters with a four-to-hundreds-of-events performance design envelope,
+- Expanded the editorial field guide to 25 chapters with a four-to-hundreds-of-events performance design envelope,
   60–120fps scrolling target, CSS-native sticky-chrome exhibit, dedicated current-time reference, immediate date/time
   inputs with previous/next/Today controls, progressively revealed time-label precision, three settings-plus-CSS
   styling presets, and a final composed calendar combining navigation, zoom, overlap, mutations, animation, theming,
