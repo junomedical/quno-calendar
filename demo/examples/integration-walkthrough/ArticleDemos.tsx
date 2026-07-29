@@ -125,6 +125,7 @@ export function InfiniteCalendarDemo() {
 }
 
 export function EventCardsDemo() {
+  const responsiveEvent = articleEvents[2];
   const specimens = [
     { label: "Appointment", event: articleEvents[2], status: "existing" as const, className: "" },
     { label: "Consultation", event: articleEvents[1], status: "existing" as const, className: "" },
@@ -176,6 +177,43 @@ export function EventCardsDemo() {
           label="Cancelled draft"
           motion="cancelled"
         />
+      </div>
+      <div className="article-card-container-example" data-testid="article-card-container-example">
+        <div className="article-card-container-example__intro">
+          <strong>One card, three containers</strong>
+          <span>The same event and renderer choose what fits inside each shell.</span>
+        </div>
+        <div className="article-card-container-example__grid">
+          {[
+            { label: "Roomy", detail: "Full context", variant: "roomy" },
+            { label: "Squeezed horizontally", detail: "Title only", variant: "narrow" },
+            { label: "Squeezed vertically", detail: "Type and title", variant: "short" }
+          ].map(({ label, detail, variant }) => (
+            <figure
+              className={`article-card-container-sample is-${variant}`}
+              data-card-container={variant}
+              key={variant}
+            >
+              <figcaption>
+                <strong>{label}</strong>
+                <span>{detail}</span>
+              </figcaption>
+              <div
+                className="article-card-container-sample__stage"
+                style={
+                  {
+                    "--event-accent": responsiveEvent.color,
+                    "--event-accent-muted": "#eef5f1"
+                  } as CSSProperties
+                }
+              >
+                <div className="article-card-container-sample__shell">
+                  <ArticleEventCard {...specimenProps(responsiveEvent, "existing")} />
+                </div>
+              </div>
+            </figure>
+          ))}
+        </div>
       </div>
       <CalendarDemoShell
         note="The same renderer, now positioned by the calendar"

@@ -82,6 +82,27 @@ function ProductEventCard({ event, style }: EventRendererProps) {
 Changing renderer hierarchy does not alter event times, overlap lanes, loading, or shell geometry. Keep the renderer
 referentially stable when its hierarchy has not changed.
 
+Each event shell is already exposed as a named `calendar-event` size container. Use CSS container queries when card
+content should respond to its own rendered width or height rather than the browser viewport:
+
+```css
+@container calendar-event (width < 120px) {
+  .product-event-card__details,
+  .product-event-card__time {
+    display: none;
+  }
+}
+
+@container calendar-event (height < 54px) {
+  .product-event-card__secondary {
+    display: none;
+  }
+}
+```
+
+This lets the same renderer keep full context in a roomy shell, preserve only the title when overlap makes a card
+narrow, or remove secondary details when a compact row makes it short.
+
 Repository example: the custom-card structure chapter in
 [`ArticleProductDemos.tsx`](../demo/examples/integration-walkthrough/ArticleProductDemos.tsx).
 

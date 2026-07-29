@@ -2,6 +2,12 @@
 
 ## 0.2.0
 
+- Rewrote the 25-chapter walkthrough with plain, benefit-led titles and direct problem statements before behavior or
+  implementation details. The introduction now presents Quno Calendar as an existing simple, fast solution for
+  businesses with complex schedules, names the real scheduling problems it was built to solve, and gives the guide a
+  more realistic 20-minute reading estimate. The final narrative now begins with why Quno exists, moves from its
+  vertical/infinite foundation through rendering and interaction features, and closes with the full demo, dependencies,
+  and package size.
 - Fixed the walkthrough parent-owned mutation exhibit so drawing uses the draft-only callback. Reviewing a new
   appointment no longer inserts a local fallback event, and accepting it now produces exactly one committed card.
 - Removed completed rewrite and refactor plans, the superseded initial project brief, empty retired example/test
@@ -68,6 +74,11 @@
   and bundled dependency counts.
 - Added a chapter 00 overview explaining why the primary calendar maps time and event text horizontally while days and
   resources move vertically: denser readable cards, local overlap growth, and lower-effort day navigation.
+- Expanded the event-card chapter with CSS container-query guidance and a live comparison of the same renderer in
+  roomy, horizontally squeezed, and vertically squeezed event shells.
+- Renamed the progressive time chapter to “Progressive time reveal” to describe the visible behavior more directly.
+- Made long-distance table-of-contents navigation jump directly to its chapter so lazy exhibits mounted along a smooth
+  scroll cannot displace the requested destination.
 - Added `removeVisibleEvent(eventId)` for immediate multi-calendar cache deletion without a range refresh.
 - Replaced the eight-step integration walkthrough with a Medium-style interactive article covering settled infinite
   scrolling, external event cards, controlled and pointer-anchored zoom, overlap lanes and hover handoff, delayed stable

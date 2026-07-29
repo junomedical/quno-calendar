@@ -19,20 +19,24 @@ test("main demo links to the single example field guide", async ({ page }) => {
   await expect(link).toHaveAttribute("href", "/examples/integration-walkthrough");
 });
 
-test("editorial table of contents navigates the internal article scroller", async ({ page }) => {
+test("editorial table of contents presents the feature chapters and navigates the article scroller", async ({
+  page
+}) => {
   await page.goto("/examples/integration-walkthrough");
   const contents = page.getByRole("navigation", { name: "Table of contents" });
   await expect(contents.getByRole("link")).toHaveCount(25);
-  await expect(contents.getByRole("link", { name: /Why the primary view runs horizontally/ })).toHaveAttribute(
+  await expect(contents.getByRole("link", { name: /Why build another calendar/ })).toHaveAttribute(
     "href",
     "#horizontal-first"
   );
   const horizontalSection = page.locator("#horizontal-first");
-  await expect(page.getByRole("heading", { name: "Why the primary view runs horizontally" })).toBeVisible();
-  await expect(horizontalSection).toContainText("shows the time of day horizontally");
-  await expect(horizontalSection).toContainText("more people, resources, rooms, and appointments visible together");
-  await expect(horizontalSection).toContainText("cheapest repeated navigation a mouse wheel or touchpad can offer");
-  const motionLink = contents.getByRole("link", { name: /Motion is part of the renderer/ });
+  await expect(page.getByRole("heading", { name: "Why build another calendar" })).toBeVisible();
+  await expect(horizontalSection).toContainText(
+    "Most calendars are built around a month, a week, or one person’s agenda"
+  );
+  await expect(horizontalSection).toContainText("Time runs horizontally");
+  await expect(horizontalSection).toContainText("mouse wheel or touchpad");
+  const motionLink = contents.getByRole("link", { name: /Supporting animations/ });
   await expect(motionLink).toHaveAttribute("href", "#motion");
   await motionLink.click();
   await expect(page.locator("#motion")).toBeInViewport();
@@ -41,12 +45,12 @@ test("editorial table of contents navigates the internal article scroller", asyn
     .toBeGreaterThan(0);
 });
 
-test("editorial performance range explains and responsively presents its design envelope", async ({ page }) => {
+test("editorial performance range explains the busy-schedule use case and responsive target", async ({ page }) => {
   await page.goto("/examples/integration-walkthrough");
   const section = page.locator("#performance");
   await section.scrollIntoViewIfNeeded();
   await expect(section).toContainText("60–120fps");
-  await expect(section).toContainText("design envelope rather than a universal guarantee");
+  await expect(section).toContainText("rendering cost follows the work on screen");
   const range = page.getByTestId("article-performance-range");
   const cards = range.locator("article");
   await expect(cards).toHaveCount(3);
@@ -157,9 +161,9 @@ test("editorial product controls navigate directly to a selected date and time",
   await expect(demo.locator(".ic-now-pin.is-current")).toBeInViewport();
 });
 
-test("editorial time precision progressively reveals minute labels without replacing ticks", async ({ page }) => {
+test("editorial time reveal progressively shows minute labels without replacing ticks", async ({ page }) => {
   await page.goto("/examples/integration-walkthrough");
-  const demo = await revealLazyArticleDemo(page, "progressive time precision example", "article-time-precision-demo");
+  const demo = await revealLazyArticleDemo(page, "progressive time reveal example", "article-time-precision-demo");
   const ticks = demo.locator(".ic-time-tick");
   const visibleMinorTicks = demo.locator(".ic-time-tick:not(.is-hour):not(.is-label-hidden)");
   const stableTickCount = await ticks.count();
@@ -253,7 +257,7 @@ test("editorial date localization compares human and robot day-name strategies",
 
 test("editorial final calendar composes navigation, zoom, styling, and animated insertion", async ({ page }) => {
   await page.goto("/examples/integration-walkthrough");
-  const demo = await revealLazyArticleDemo(page, "complete calendar system example", "article-summary-demo");
+  const demo = await revealLazyArticleDemo(page, "complete scheduling workflow example", "article-summary-demo");
   await expect(demo.locator(".ic-now-pin.is-current")).toBeInViewport();
   await demo.getByRole("button", { name: "Summary zoom in" }).click();
   await expect(page.getByTestId("article-summary-zoom")).toHaveText("1.50×");
@@ -289,7 +293,7 @@ test("editorial article preserves its inline calendar through full-screen expans
   const viewport = demo.locator(".ic-viewport");
 
   await expect(
-    page.getByRole("heading", { name: "A calendar that keeps going, without getting in your way." })
+    page.getByRole("heading", { name: "A simple, fast calendar for businesses with complex schedules." })
   ).toBeVisible();
   await expect(page.getByRole("navigation", { name: "Integration walkthrough steps" })).toHaveCount(0);
   await expect(article).toHaveCSS("overflow-y", "auto");
@@ -424,6 +428,39 @@ test("editorial article uses one external card renderer for specimens and calend
     "display",
     "none"
   );
+
+  const containerExample = demo.getByTestId("article-card-container-example");
+  const roomy = containerExample.locator('[data-card-container="roomy"]');
+  const narrow = containerExample.locator('[data-card-container="narrow"]');
+  const short = containerExample.locator('[data-card-container="short"]');
+  await expect(containerExample.locator(".article-event-card strong")).toHaveText([
+    "Post-op follow-up",
+    "Post-op follow-up",
+    "Post-op follow-up"
+  ]);
+
+  const [roomyBox, narrowBox, shortBox] = await Promise.all(
+    [roomy, narrow, short].map((sample) =>
+      sample.locator(".article-card-container-sample__shell").evaluate((element) => {
+        const box = element.getBoundingClientRect();
+        return { width: box.width, height: box.height };
+      })
+    )
+  );
+  expect(narrowBox.width).toBeLessThan(roomyBox.width);
+  expect(narrowBox.height).toBe(roomyBox.height);
+  expect(shortBox.width).toBeGreaterThan(narrowBox.width);
+  expect(shortBox.height).toBeLessThan(roomyBox.height);
+
+  await expect(roomy.locator(".article-event-card__kicker")).not.toHaveCSS("display", "none");
+  await expect(roomy.locator(".article-event-card__subtitle")).not.toHaveCSS("display", "none");
+  await expect(roomy.locator(".article-event-card__time")).not.toHaveCSS("display", "none");
+  await expect(narrow.locator(".article-event-card__kicker")).toHaveCSS("display", "none");
+  await expect(narrow.locator(".article-event-card__subtitle")).toHaveCSS("display", "none");
+  await expect(narrow.locator(".article-event-card__time")).toHaveCSS("display", "none");
+  await expect(short.locator(".article-event-card__kicker")).not.toHaveCSS("display", "none");
+  await expect(short.locator(".article-event-card__subtitle")).toHaveCSS("display", "none");
+  await expect(short.locator(".article-event-card__time")).toHaveCSS("display", "none");
 
   const added = demo.locator('[data-motion="added"]');
   await demo.getByRole("button", { name: "Replay added event animation" }).click();
@@ -646,10 +683,10 @@ test("editorial zoom controls and gesture requests keep zoom parent-controlled",
   await page.goto("/examples/integration-walkthrough");
   const demo = await revealLazyArticleDemo(page, "controlled zoom example", "article-zoom-demo");
   const zoomSection = page.locator("#zoom");
-  await expect(zoomSection.getByRole("heading", { name: "Zoom in and out—when you need it" })).toBeVisible();
-  await expect(zoomSection).toContainText("Zoom out when you need the shape of the whole day");
-  await expect(zoomSection).toContainText("Zoom in when you need to read a card");
-  await expect(zoomSection).toContainText("without losing the area you were examining");
+  await expect(zoomSection.getByRole("heading", { name: "Zoom into the calendar" })).toBeVisible();
+  await expect(zoomSection).toContainText("Zoom out to compare the shape of the day");
+  await expect(zoomSection).toContainText("zoom in to read cards");
+  await expect(zoomSection).toContainText("without losing the part of the schedule");
   const slider = page.getByTestId("article-zoom-slider");
   const output = page.getByTestId("article-zoom-value");
   const marker = demo.locator(".ic-now-pin.is-current");

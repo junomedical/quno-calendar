@@ -61,12 +61,12 @@ Vitest unit tests live in `tests/unit` and mirror the source module grouping.
 - The editorial integration article scrolls independently from the document, ignores legacy `?step=` parameters, and
   renders as the only example route without the former recipe header/navigation.
 - The main demo exposes a visible link to the field guide. Its 25-entry table of contents targets stable chapter ids
-  and scrolls the internal article viewport to the selected section.
-- Chapter 00 explains the horizontal-first information architecture before the implementation chapters: time and text
-  flow left to right for a denser view of people, resources, rooms, and appointments; those rows and days move top to
-  bottom so a mouse wheel or touchpad provides the lowest-effort repeated navigation without a separate control.
-- The performance chapter presents the four-to-hundreds-of-events design envelope and 60–120fps scrolling target as a
-  target rather than a universal guarantee. Its 4/40/400 density cards share one row at article width and stack at the
+  and scrolls the internal article viewport to the selected section. The narrative begins with “Why build another
+  calendar,” follows the requested feature sequence, and keeps each title paired with its matching numbered section.
+- Chapter 00 explains why complex business scheduling needs a dedicated calendar before introducing horizontal time,
+  vertically stacked resources, and the familiar vertical mouse-wheel or touchpad axis.
+- The performance chapter presents the four-to-hundreds-of-events use case and 60–120fps scrolling target without
+  implying a universal device guarantee. Its 4/40/400 density cards share one row at article width and stack at the
   mobile breakpoint; algorithmic performance remains covered by the scaling test and explicit budgets below.
 - The CSS-native chapter verifies computed `position: sticky` ownership for day, date, and resource labels, then checks
   that date and resource X geometry remains fixed during horizontal timeline scrolling without synchronized React
@@ -77,10 +77,15 @@ Vitest unit tests live in `tests/unit` and mirror the source module grouping.
   calendar DOM, changing its scroll offset, or losing the visible date; Escape closes the overlay and restores focus.
 - Article date labels use compact single-line typography that fits the configured label width. The first chapter’s chip
   reports `scrolled` after manual movement and `repositioned` after settlement.
+- Table-of-contents links update the URL fragment and jump directly to the requested chapter without smooth-scrolling
+  through and mounting every lazy exhibit along the route.
 - Card specimens and live events use the same external renderer, compact specimens hide secondary content, and the
-  replay controls exercise added-event glint and cancelled-draft fade treatments; reduced-motion preferences collapse
-  the card animation duration. The live motion exhibit uses a focused 09:00–14:00 range, `2.4` zoom, and a taller row;
-  its active draft remains at least 90px wide and 55px tall so the transition is legible.
+  responsive-card comparison renders the same event through that renderer in roomy, horizontally squeezed, and
+  vertically squeezed containers. Width and height assertions verify that the narrow card keeps only its title while
+  the short card keeps its type and title. Replay controls exercise added-event glint and cancelled-draft fade
+  treatments; reduced-motion preferences collapse the card animation duration. The live motion exhibit uses a focused
+  09:00–14:00 range, `2.4` zoom, and a taller row; its active draft remains at least 90px wide and 55px tall so the
+  transition is legible.
 - The custom-card structure exhibit promotes product group, patient name, or room number through the external renderer.
   Switching the primary field preserves every event shell’s DOM identity and exact geometry, keeps the active grouping
   label left of its controls, and prevents the promoted room label from clipping.

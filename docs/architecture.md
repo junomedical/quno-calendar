@@ -98,6 +98,9 @@ flowchart TD
 ```
 
 Feature domains do not import views or demo code. Scroll publishes visible positions; events decides what to prefetch. Anchors translate semantic focus using scroll and event geometry without becoming part of either engine. Product card markup stays outside the library internals: rendering positions `EventShell`, then calls `eventRenderer` with event, status, lane, overlap, and full-size style data.
+Each `EventShell` is also a named `calendar-event` size container. Product renderers can therefore adapt their content
+hierarchy to the shell's own width and height with CSS container queries, without viewport media queries or
+layout-measurement state in React.
 
 Primary ownership folders are:
 
