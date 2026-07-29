@@ -118,8 +118,8 @@ Vitest unit tests live in `tests/unit` and mirror the source module grouping.
   updates adjacent-day sequences without remounting its viewport, and keeps the longest custom label unclipped. Custom
   horizontal labels match their specimen text without a redundant default prefix; vertical custom labels use one
   primary line.
-- The closing package-footprint chapter exposes the verified raw/gzip ESM and CSS sizes plus one direct runtime
-  dependency, two React peers, and zero bundled third-party packages.
+- The closing payload-size chapter leads with the verified gzip JavaScript, CSS, and combined package payloads, keeps
+  raw build sizes secondary, and explicitly excludes one external runtime plus two React peers from that package total.
 - The lane comparison proves local horizontal row growth, hover expansion, vertical projection, and dense-column width
   growth. Switching orientation aligns both projections to the same 13:00 collision cluster, which remains inside the
   calendar viewport.

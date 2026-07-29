@@ -106,17 +106,20 @@ test("editorial CSS-native exhibit keeps stable chrome browser-positioned", asyn
     .toBeLessThanOrEqual(1);
 });
 
-test("editorial footprint reports raw, gzip, and dependency costs", async ({ page }) => {
+test("editorial payload leads with gzip size and separates external dependencies", async ({ page }) => {
   await page.goto("/examples/integration-walkthrough");
   const footprint = page.getByTestId("article-package-footprint");
   await footprint.scrollIntoViewIfNeeded();
-  await expect(footprint.locator("dt").filter({ hasText: "Calendar ESM" })).toBeVisible();
-  await expect(footprint).toContainText("124.87 KiB");
+  await expect(page.getByRole("heading", { name: "Payload size" })).toBeVisible();
+  await expect(footprint.locator("dt").filter({ hasText: "JavaScript" })).toBeVisible();
   await expect(footprint).toContainText("30.96 KiB gzip");
-  await expect(footprint.locator("dt").filter({ hasText: "Direct runtime" })).toBeVisible();
+  await expect(footprint).toContainText("124.87 KiB raw");
+  await expect(footprint.locator("dt").filter({ hasText: "Total package" })).toBeVisible();
+  await expect(footprint).toContainText("32.53 KiB gzip");
+  await expect(footprint.locator("dt").filter({ hasText: "External runtime" })).toBeVisible();
   await expect(footprint).toContainText("@tanstack/react-virtual");
   await expect(footprint).toContainText("React + React DOM");
-  await expect(footprint.locator("dt").filter({ hasText: "Bundled third-party" })).toBeVisible();
+  await expect(footprint.locator("dt").filter({ hasText: "Bundled copies" })).toBeVisible();
 });
 
 test("editorial current-time marker provides a shared reference and can be restored", async ({ page }) => {

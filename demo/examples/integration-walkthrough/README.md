@@ -30,7 +30,7 @@ The article teaches the calendar through focused live exhibits:
 21. Plays nice with React.
 22. Supporting animations.
 23. Full demo.
-24. Dependencies and size.
+24. Payload size.
 
 [`IntegrationWalkthrough.tsx`](./IntegrationWalkthrough.tsx) owns the narrative and progressive code examples.
 [`ArticleDemos.tsx`](./ArticleDemos.tsx) owns the foundational interactive exhibits,

@@ -294,7 +294,7 @@ const articleContents = [
   ["21", "react-integration", "Plays nice with React"],
   ["22", "motion", "Supporting animations"],
   ["23", "everything-together", "Full demo"],
-  ["24", "package-footprint", "Dependencies and size"]
+  ["24", "package-footprint", "Payload size"]
 ] as const;
 
 const syntaxKeywords = new Set([
@@ -885,58 +885,58 @@ export function IntegrationWalkthrough() {
           </DemoBreakout>
         </ArticleSection>
 
-        <ArticleSection id="package-footprint" number="24" title="Dependencies and size">
+        <ArticleSection id="package-footprint" number="24" title="Payload size">
           <p>
-            A calendar often appears on a product’s busiest screens, so its cost is paid frequently. JavaScript, CSS,
-            and duplicated dependencies affect download, parsing, startup, and the time before the rest of the product
-            is usable.
+            Quno Calendar adds 32.53 KiB gzip of its own JavaScript and CSS to a production application. Because a
+            calendar often appears on a product’s busiest screens, this transfer payload affects download, parsing,
+            startup, and the time before the rest of the product is usable.
           </p>
           <p>
             The production build keeps React, React DOM, and the virtualizer external instead of copying dependencies
-            already supplied by the application. The measurements below make the calendar’s direct, peer, and bundled
-            costs explicit.
+            already supplied by the application. The package total below therefore covers Quno Calendar itself; the
+            dependency summary makes the additional runtime requirements explicit.
           </p>
           <div className="article-footprint" data-testid="article-package-footprint">
-            <dl aria-label="Production package size">
+            <dl aria-label="Production transfer payload">
               <div>
-                <dt>Calendar ESM</dt>
+                <dt>JavaScript</dt>
                 <dd>
-                  <strong>124.87 KiB</strong>
-                  <span>30.96 KiB gzip</span>
+                  <strong>30.96 KiB gzip</strong>
+                  <span>124.87 KiB raw</span>
                 </dd>
               </div>
               <div>
-                <dt>Calendar CSS</dt>
+                <dt>Styles</dt>
                 <dd>
-                  <strong>5.68 KiB</strong>
-                  <span>1.56 KiB gzip</span>
+                  <strong>1.56 KiB gzip</strong>
+                  <span>5.68 KiB raw</span>
                 </dd>
               </div>
               <div>
-                <dt>Combined</dt>
+                <dt>Total package</dt>
                 <dd>
-                  <strong>130.55 KiB</strong>
-                  <span>32.53 KiB gzip</span>
+                  <strong>32.53 KiB gzip</strong>
+                  <span>130.55 KiB raw</span>
                 </dd>
               </div>
             </dl>
-            <dl aria-label="Production package dependencies">
+            <dl aria-label="External production dependencies">
               <div>
-                <dt>Direct runtime</dt>
+                <dt>External runtime</dt>
                 <dd>
                   <strong>1</strong>
                   <span>@tanstack/react-virtual</span>
                 </dd>
               </div>
               <div>
-                <dt>Peer dependencies</dt>
+                <dt>Peer runtimes</dt>
                 <dd>
                   <strong>2</strong>
                   <span>React + React DOM</span>
                 </dd>
               </div>
               <div>
-                <dt>Bundled third-party</dt>
+                <dt>Bundled copies</dt>
                 <dd>
                   <strong>0</strong>
                   <span>Application copies stay shared</span>
@@ -945,8 +945,9 @@ export function IntegrationWalkthrough() {
             </dl>
           </div>
           <p className="article-footprint__note">
-            Measured from the production package build with maximum gzip compression. The bundle guard caps ESM at 32
-            KiB gzip and CSS at 2 KiB gzip.
+            Measured from the production package build with maximum gzip compression, before consumer tree-shaking.
+            External runtime and peer dependencies are not included. The bundle guard caps JavaScript at 32 KiB gzip and
+            CSS at 2 KiB gzip.
           </p>
         </ArticleSection>
 

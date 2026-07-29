@@ -318,8 +318,9 @@ structure reveals more labels only when zoom creates readable space. The sticky-
 browser-positioned static labels from React-owned events and interaction state. The stability lab also makes
 multi-calendar identity explicit: one shared event is projected into doctor and room calendars while focus remains
 local to the requested instance. A final lab composes navigation, zoom, styling, overlap, mutation, and motion through
-the same public API. The closing footprint chapter reports verified production ESM and CSS sizes separately from the
-one direct runtime dependency and two React peer dependencies. The preloading lab mirrors successful loader responses
+the same public API. The closing payload chapter leads with verified production gzip JavaScript and CSS sizes, keeps
+raw build sizes secondary, and separates the package total from one external runtime dependency and two React peer
+dependencies. The preloading lab mirrors successful loader responses
 in a visible warm-cache strip so prefetched data is inspectable before its date is mounted. This presentation behavior
 stays in `demo/examples` and does not add reusable calendar props or state. Read-only, drag/create, availability,
 vertical comparison, delayed loading, and preloading are article chapters rather than standalone routes. A table of
