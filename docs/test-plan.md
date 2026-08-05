@@ -190,6 +190,9 @@ orientation, availability, loading, visual-focus, and motion assertions formerly
   row or column geometry settles. Parent-only resizing does not start a draft or alter the semantic scroll anchor.
   Active draft participant filtering pins the draft date and lets explicit viewport restoration retain the stronger
   event/slot target.
+- Excluding weekends preserves the visible weekday after the included-date sequence and dense horizontal measurements
+  rebuild. With both 5,000 and 20,000 events/year, drawing and cancelling a create draft afterward keeps the same date
+  and calendar row at its previous viewport-relative position through fadeout and idle recentering.
 - Read-only and layout-only article exhibits cannot start event drags or empty-grid drafts. Availability creation completes and
   clears its draft, while existing availability does not start dragging without `onEventMoveRequest`.
 - Drawing a new event area renders an opaque uncapped-width draft with visible time text without changing row height, lane layout, or committed row event count, then delegates to the external popup in the default demo and leaves the saved event visible after popup save. Drawing a create draft in a row with two saved overlaps keeps the saved row at the compact two-lane height after popup handoff. Editing one event in a three-overlap row filters the source before metrics, so the draft replacement leaves only two committed overlap lanes and the row drops to the compact height.

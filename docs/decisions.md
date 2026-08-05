@@ -358,3 +358,12 @@ must not infer that the first directory is the website. The checked-in Vercel co
 demo build, publishes `dist-demo`, and falls back to `index.html` for client-side routes. The demo's local Vite-only
 event-delay transport has a matching Vercel Function so the hosted application preserves the same async-loading
 behavior without adding a runtime dependency to the reusable package.
+
+## 062 - Date-Sequence Changes Restore Semantically
+
+Raw `scrollTop` cannot survive an `excludedWeekdays` change because removing or restoring weekdays changes every later
+virtual index. Structural restoration therefore retains the semantic top date, writes an initial base-geometry
+position, and repeats alignment after the virtualizer adopts the replacement keys and horizontal variable day sizes.
+The visible-date state is not reset independently after the commit. Controlled-draft calendar filtering has stronger
+focus: the current or just-released draft date carries across row collapse/expansion so transient measurement snapshots
+cannot override the parent's exact event or slot anchor during create cancellation.

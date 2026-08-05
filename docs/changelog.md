@@ -2,6 +2,9 @@
 
 ## 0.2.0
 
+- Fixed dense 5,000- and 20,000-events/year calendars jumping to another day after weekends were hidden and a drawn
+  appointment was cancelled. Weekend filtering now restores the semantic date after the virtual sequence settles, and
+  draft collapse/expansion keeps the draft date until exact row anchoring completes.
 - Fixed Vercel deployments by building and publishing the runnable `dist-demo` application instead of the library-only
   `dist` artifact, added SPA route fallback, and added a production `POST /api/demo-events` function for hosted demos.
 - Reframed the walkthrough’s closing package-size chapter around the 32.53 KiB gzip transfer payload, with raw sizes

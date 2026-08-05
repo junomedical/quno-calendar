@@ -439,7 +439,9 @@ These methods only patch loaded calendar cache. The parent remains responsible f
 
 The date range is bounded and recenters automatically without a consumer setting. Ordinary scroll pauses use a
 1.2-second idle delay; reaching the absolute top or bottom uses a 240 ms delay so the next bounded range becomes
-available sooner. Both paths preserve the visible date and its date-local pixel offset.
+available sooner. Both paths preserve the visible date and its date-local pixel offset. Changing
+`settings.excludedWeekdays` also preserves the current included date (or advances an excluded date to the next included
+date) while the bounded date sequence and dense variable row measurements are rebuilt.
 
 Slider or external prop zoom keeps a visible current-time marker stationary by default. If that marker is outside the viewport, horizontal scrolling uses the time at the center of the visible grid, while the timeline origin keeps its left edge stationary. `Shift` + wheel instead preserves the time node under the pointer. Zoom reprojects event-shell geometry without reloading events, rebuilding prepared overlap cells, or rerunning an unchanged external event renderer.
 

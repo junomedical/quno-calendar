@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { goToWorkday, horizontalDrawTarget, selectPageText } from "../helpers";
+import { goToWorkday, horizontalDrawTarget, selectPageText, topVisibleDayDate, waitForDemoEvents } from "../helpers";
 
 async function expectDraftFadeoutThenGone(page: Page) {
   const exitingDraft = page.locator('[data-testid="draft-event"][data-exiting="true"]');
@@ -34,6 +34,52 @@ const rowViewportOffset = (page: Page, selector: string) =>
     const row = document.querySelector<HTMLElement>(selector);
     return viewport && row ? row.getBoundingClientRect().top - viewport.getBoundingClientRect().top : null;
   }, selector);
+
+for (const scale of [5_000, 20_000]) {
+  test(`keeps the drawn day anchored after excluding weekends with ${scale.toLocaleString()} events`, async ({
+    page
+  }) => {
+    const dateKey = "2026-06-22";
+    const calendarId = "marco-eggens";
+    const rowSelector = `[data-testid="calendar-day"][data-date="${dateKey}"] [data-testid="calendar-row"][data-calendar-id="${calendarId}"]`;
+    await page.goto("/");
+    await page.getByTestId("api-latency-select").selectOption("0");
+    await page.getByTestId("scale-select").selectOption(String(scale));
+    await page.getByTestId("jump-date-input").fill(dateKey);
+    await page.getByTestId("jump-time-input").fill("12:00");
+    await page.getByTestId("go-date-button").click();
+    await waitForDemoEvents(page);
+    await expect.poll(async () => topVisibleDayDate(page)).toBe(dateKey);
+
+    await page.getByTestId("exclude-weekends").check();
+    await expect.poll(async () => topVisibleDayDate(page)).toBe(dateKey);
+    await waitForDemoEvents(page);
+
+    const rowAnchor = await rowViewportOffset(page, rowSelector);
+    expect(rowAnchor).not.toBeNull();
+    if (rowAnchor === null) return;
+    const drawTarget = await horizontalDrawTarget(page, { calendarId, dateKey, distance: 120 });
+    await page.mouse.move(drawTarget.startX, drawTarget.y);
+    await page.mouse.down();
+    await page.mouse.move(drawTarget.endX, drawTarget.y, { steps: 8 });
+    await expect(page.getByTestId("draft-event")).toBeVisible();
+    await page.mouse.up();
+    await expect(page.getByTestId("external-event-popup")).toBeVisible();
+
+    await expect
+      .poll(async () => {
+        const offset = await rowViewportOffset(
+          page,
+          `[data-testid="calendar-row"]:has([data-testid="draft-event"][data-calendar-id="${calendarId}"])`
+        );
+        return offset === null ? Number.POSITIVE_INFINITY : Math.abs(offset - rowAnchor);
+      })
+      .toBeLessThanOrEqual(4);
+
+    await cancelAndKeepRowAnchored(page, rowSelector, rowAnchor);
+    await expect.poll(async () => topVisibleDayDate(page)).toBe(dateKey);
+  });
+}
 
 test("keeps the calendar row position when cancelling external create", async ({ page }) => {
   await page.goto("/");

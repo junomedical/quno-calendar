@@ -110,6 +110,13 @@ export function useScrollRuntime({
       }
     }
   }, [baseDayHeight, resolveOffsetOnLayoutChange, virtualWindow.count, virtualizer]);
+  const isDateInVirtualViewport = useCallback(
+    (dateKey: string) => {
+      const targetIndex = dateKeyToIndex(dateKey);
+      return virtualizer.getVirtualItems().some((item) => item.index === targetIndex);
+    },
+    [dateKeyToIndex, virtualizer]
+  );
   useLayoutOffsetRestoration({
     baseDayHeight,
     verticalLayoutSignature,
@@ -122,6 +129,7 @@ export function useScrollRuntime({
     pendingScrollTargetRef,
     clearScrollEndTimer,
     measureVirtualizer,
+    isDateInVirtualViewport,
     scrollToVisibleDateOffset,
     setAnchorDateKey,
     resolveOffsetOnLayoutChange
