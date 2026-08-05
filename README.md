@@ -86,6 +86,12 @@ Use `calendarRef.current.focusEvent(event)` to reveal known participant calendar
 `src/` contains the reusable library only. The separately documented [`demo/`](./demo/README.md) application contains
 the editorial integration guide and larger stress scenarios.
 
+## Deploy The Demo To Vercel
+
+Import the repository as a Vercel project with the repository root as its Root Directory. The checked-in
+`vercel.json` builds and publishes `dist-demo` (rather than the package artifact in `dist`), keeps client-side demo
+routes available on direct navigation, and deploys the demo event-delay transport at `POST /api/demo-events`.
+
 ## Documentation
 
 - [Usage recipes](./docs/usage.md)

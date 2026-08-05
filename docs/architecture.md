@@ -24,7 +24,11 @@ snapshot without awaiting `loadEvents`. The runtime is designed for schedules ra
 events per day and targets smooth 60–120fps scrolling. That frame-rate range is an engineering target, not a guarantee
 across every browser, device, viewport, data shape, or consumer-provided event renderer.
 
-For local development, the demo wraps its fixture range loader with a Vite-only `POST /api/demo-events` mock transport. It exists to make latency, cancellation, and concurrent requests observable in browser tooling; it is not part of the package or runtime dependency graph.
+The demo wraps its fixture range loader with a `POST /api/demo-events` mock transport: a Vite middleware serves local
+development and preview, while a root `api/` Web handler serves Vercel deployments. Both exist to make latency,
+cancellation, and concurrent requests observable in browser tooling; neither is part of the package or its runtime
+dependency graph. Vercel publishes the separately built `dist-demo` application and applies an SPA fallback after
+filesystem and function routing.
 
 ## Runtime Flow Atlas
 

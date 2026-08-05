@@ -2,6 +2,8 @@
 
 ## 0.2.0
 
+- Fixed Vercel deployments by building and publishing the runnable `dist-demo` application instead of the library-only
+  `dist` artifact, added SPA route fallback, and added a production `POST /api/demo-events` function for hosted demos.
 - Reframed the walkthrough’s closing package-size chapter around the 32.53 KiB gzip transfer payload, with raw sizes
   secondary and external runtime and peer dependencies explicitly excluded from the package total.
 - Rewrote the 25-chapter walkthrough with plain, benefit-led titles and direct problem statements before behavior or

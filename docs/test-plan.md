@@ -53,6 +53,9 @@ Vitest unit tests live in `tests/unit` and mirror the source module grouping.
 - Controlled active edit drafts render through the event renderer while the loaded source event is hidden.
 - A never-resolving loader does not block calendar chrome or Pointer Events; a delayed response adds event shells without replacing the date/resource structure.
 - Demo API-delay controls show pending/idle API status, keep date/resource chrome visible with zero event nodes after a dataset remount, receive HTTP 200 from `POST /api/demo-events`, then publish event shells when the response resolves.
+- The Vercel Web handler echoes valid demo event payloads with no-store caching and rejects unsupported methods or
+  malformed JSON, while the deployment build publishes the runnable `dist-demo` artifact rather than the library-only
+  `dist` artifact.
 - The architecture check keeps `src/` library-only and requires the integration field guide to provide a README,
   source backlink, and `quno-calendar` public-package import.
 

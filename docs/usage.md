@@ -159,7 +159,16 @@ Repository example: the preloading and late-data chapters in
 successful loader results outside the calendar, making warm events visible before their dates enter the rendered
 window.
 
-The repository demo starts with a visible 1-second response from its local `POST /api/demo-events` mock endpoint and exposes an **API delay** selector with instant, 250ms, 1s, and 3s responses. A sidebar status reports pending requests even when stale events remain visible. Changing latency creates a new abort-aware loader generation; selecting a dataset or navigating while delayed demonstrates immediate grid rendering, stale-data retention, and obsolete-request cancellation. The HTTP adapter belongs to the demo; the library remains transport-agnostic through `LoadEvents`.
+The repository demo starts with a visible 1-second response from its `POST /api/demo-events` mock endpoint and exposes
+an **API delay** selector with instant, 250ms, 1s, and 3s responses. Vite middleware serves the endpoint locally and a
+matching Web handler serves it when the demo is deployed to Vercel. A sidebar status reports pending requests even when
+stale events remain visible. Changing latency creates a new abort-aware loader generation; selecting a dataset or
+navigating while delayed demonstrates immediate grid rendering, stale-data retention, and obsolete-request
+cancellation. The HTTP adapter belongs to the demo; the library remains transport-agnostic through `LoadEvents`.
+
+To deploy this repository's demo on Vercel, leave the Root Directory at the repository root. The checked-in
+`vercel.json` selects `npm run build:demo`, publishes `dist-demo`, provides client-side route fallback, and deploys the
+demo endpoint from `api/demo-events.ts`. No Vercel environment variables are required for the fixture-backed demo.
 
 ## Vertical Planner
 

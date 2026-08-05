@@ -199,7 +199,10 @@ Dates, resources, scrolling, zoom, drafts, and hit-testing render independently 
 
 Events for one date are indexed by calendar membership in one pass. Timed events in each date/resource cell receive deterministic heap-based overlap lanes in `O(n log n)`. The resulting prepared cell is reused for row height or column width and for orientation-specific rectangles, avoiding separate sorting and lane assignment in metrics and rendering. Availability, drafts, and drop previews remain separate layers and do not change committed overlap metrics.
 
-The repository demo sends its locally selected fixture range through a Vite-only `POST /api/demo-events` mock endpoint. That endpoint delays and returns the JSON response so local DevTools and browser tests exercise an actual abortable HTTP request. This transport stays outside `src/lib`; consumers provide their own HTTP client behind the unchanged `LoadEvents` contract.
+The repository demo sends its locally selected fixture range through `POST /api/demo-events`. Vite middleware serves
+the endpoint locally and a matching root `api/` Web handler serves it on Vercel. The endpoint delays and returns the
+JSON response so DevTools and browser tests exercise an actual abortable HTTP request. This transport stays outside
+`src/lib`; consumers provide their own HTTP client behind the unchanged `LoadEvents` contract.
 
 ## 044 - Virtualization Covers Both Axes
 
@@ -347,3 +350,11 @@ locale’s day/month order; non-English locales use their native numeric-day con
 sequences, or other product vocabulary do not inherit a redundant built-in month/day prefix. Generated vertical labels
 use the primary line instead of the default two-line month/day plus weekday structure. The generator does not affect
 date keys, excluded weekdays, event loading, navigation, or virtualization.
+
+## 061 - Vercel Publishes The Demo Artifact
+
+The repository produces an installable library in `dist` and a runnable Vite application in `dist-demo`; a deployment
+must not infer that the first directory is the website. The checked-in Vercel configuration therefore runs the focused
+demo build, publishes `dist-demo`, and falls back to `index.html` for client-side routes. The demo's local Vite-only
+event-delay transport has a matching Vercel Function so the hosted application preserves the same async-loading
+behavior without adding a runtime dependency to the reusable package.
