@@ -12,7 +12,7 @@
  *
  * @see docs/flows/virtual-scroll-and-recenter.md
  */
-import { useVirtualizer } from "@tanstack/react-virtual";
+import { useVirtualizer, type Virtualizer } from "@tanstack/react-virtual";
 import { useCallback, useLayoutEffect, useMemo, useRef } from "react";
 import type { TimelineSettings } from "../../core/types";
 import { VIRTUAL_DAY_NODE_OVERSCAN } from "./scrollConstants";
@@ -44,6 +44,26 @@ const shouldAdjustScrollPositionOnItemSizeChange = (
   _delta: number,
   instance: { scrollOffset: number | null }
 ) => shouldAdjustForDateItemResize(item.end, instance.scrollOffset);
+
+function resetVirtualizerMeasurements(
+  virtualizer: Virtualizer<HTMLDivElement, Element>,
+  itemCount: number,
+  baseDayHeight: number,
+  forceUniformGeometry: boolean
+) {
+  virtualizer.measure();
+  if (!forceUniformGeometry) return;
+  for (let index = 0; index < itemCount; index += 1) virtualizer.resizeItem(index, baseDayHeight);
+}
+
+function virtualViewportIncludesDate(
+  virtualizer: Virtualizer<HTMLDivElement, Element>,
+  dateKeyToIndex: (dateKey: string) => number,
+  dateKey: string
+) {
+  const targetIndex = dateKeyToIndex(dateKey);
+  return virtualizer.getVirtualItems().some((item) => item.index === targetIndex);
+}
 
 export function useScrollRuntime({
   anchorDateKey,
@@ -103,18 +123,10 @@ export function useScrollRuntime({
   });
 
   const measureVirtualizer = useCallback(() => {
-    virtualizer.measure();
-    if (resolveOffsetOnLayoutChange) {
-      for (let index = 0; index < virtualWindow.count; index += 1) {
-        virtualizer.resizeItem(index, baseDayHeight);
-      }
-    }
+    resetVirtualizerMeasurements(virtualizer, virtualWindow.count, baseDayHeight, Boolean(resolveOffsetOnLayoutChange));
   }, [baseDayHeight, resolveOffsetOnLayoutChange, virtualWindow.count, virtualizer]);
   const isDateInVirtualViewport = useCallback(
-    (dateKey: string) => {
-      const targetIndex = dateKeyToIndex(dateKey);
-      return virtualizer.getVirtualItems().some((item) => item.index === targetIndex);
-    },
+    (dateKey: string) => virtualViewportIncludesDate(virtualizer, dateKeyToIndex, dateKey),
     [dateKeyToIndex, virtualizer]
   );
   useLayoutOffsetRestoration({

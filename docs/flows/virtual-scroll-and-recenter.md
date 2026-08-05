@@ -127,10 +127,10 @@ This structural path is distinct from late horizontal event metrics. Async row-h
 
 Changing `excludedWeekdays` replaces the virtualizer's date-to-index sequence, so its pre-change pixel offset cannot be
 interpreted in the new model. The structural restore first uses base geometry, then repeats the semantic-date alignment
-after the virtualizer has adopted the new keys and horizontal variable measurements. It does not reset the remembered
-top date in a passive effect. During controlled-draft row collapse or expansion, the current or just-released draft
-date overrides transient top-date snapshots; the explicit parent event/slot restore remains responsible for the exact
-viewport-relative row position.
+after the virtualizer has adopted the new keys and horizontal variable measurements. During controlled-draft row
+collapse or expansion, a current or just-released draft date that belongs to the ordinary virtual viewport overrides
+transient top-date snapshots; an offscreen pinned draft yields to the visible date. The explicit parent event/slot
+restore remains responsible for the exact viewport-relative row position.
 
 Vertical dates have one uniform settings-owned height, so a structural zoom restore resets every bounded date measurement to the new base height before writing the translated scroll offset. While those measurements settle, rendering stays pinned to a base-geometry window around the semantic top date. This prevents pre-commit virtualizer measurements from converting the saved date-local position through stale zoom geometry or exposing a transient blank/wrong-date window.
 

@@ -35,6 +35,14 @@ const rowViewportOffset = (page: Page, selector: string) =>
     return viewport && row ? row.getBoundingClientRect().top - viewport.getBoundingClientRect().top : null;
   }, selector);
 
+async function topVisibleDayDateOrNull(page: Page) {
+  try {
+    return await topVisibleDayDate(page);
+  } catch {
+    return null;
+  }
+}
+
 for (const scale of [5_000, 20_000]) {
   test(`keeps the drawn day anchored after excluding weekends with ${scale.toLocaleString()} events`, async ({
     page
@@ -49,10 +57,10 @@ for (const scale of [5_000, 20_000]) {
     await page.getByTestId("jump-time-input").fill("12:00");
     await page.getByTestId("go-date-button").click();
     await waitForDemoEvents(page);
-    await expect.poll(async () => topVisibleDayDate(page)).toBe(dateKey);
+    await expect.poll(async () => topVisibleDayDateOrNull(page)).toBe(dateKey);
 
     await page.getByTestId("exclude-weekends").check();
-    await expect.poll(async () => topVisibleDayDate(page)).toBe(dateKey);
+    await expect.poll(async () => topVisibleDayDateOrNull(page)).toBe(dateKey);
     await waitForDemoEvents(page);
 
     const rowAnchor = await rowViewportOffset(page, rowSelector);
@@ -77,7 +85,7 @@ for (const scale of [5_000, 20_000]) {
       .toBeLessThanOrEqual(4);
 
     await cancelAndKeepRowAnchored(page, rowSelector, rowAnchor);
-    await expect.poll(async () => topVisibleDayDate(page)).toBe(dateKey);
+    await expect.poll(async () => topVisibleDayDateOrNull(page)).toBe(dateKey);
   });
 }
 

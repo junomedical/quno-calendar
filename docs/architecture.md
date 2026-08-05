@@ -255,7 +255,8 @@ deadline settles, the top visible date becomes the next window anchor while its 
 preserved. When `excludedWeekdays` changes, the calendar rebuilds the included-date sequence from the semantic top date
 instead of reusing the old raw scroll offset. Horizontal variable day measurements receive a settled second alignment
 after their date keys have been replaced. If a controlled draft is opening or closing during another structural
-change, its date remains the structural focus until the parent event/slot anchor finishes the exact row correction.
+change and its date is already in the virtual viewport, that date remains the structural focus until the parent
+event/slot anchor finishes the exact row correction. An offscreen draft does not replace the user's visible date.
 
 ```mermaid
 stateDiagram-v2
