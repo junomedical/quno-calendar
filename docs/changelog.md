@@ -11,6 +11,9 @@
 - Replaced deeply nested internal library imports with the explicitly private `#calendar-internal/*` source alias and
   added architecture enforcement so cross-domain imports no longer depend on directory traversal depth. The mapping
   avoids deprecated `baseUrl`, and Vite ambient types now cover source CSS imports in strict editors.
+- Exported the canonical `CalendarView` orientation type so consumers do not
+  duplicate the library-owned horizontal/vertical view union.
+- Made controlled Shift-wheel zoom and virtual scrolling avoid synchronous React updates during active render work.
 - Fixed dense 5,000- and 20,000-events/year calendars jumping to another day after weekends were hidden and a drawn
   appointment was cancelled. Weekend filtering now restores the semantic date after the virtual sequence settles, and
   draft collapse/expansion keeps the draft date until exact row anchoring completes.
@@ -194,7 +197,7 @@
 - Kept the additional demo routes fully interactive, including calendar orientation and availability-mode switching.
 - Added vertical column sizing settings for base width, overlap-lane capacity, overlap growth, and hover minimum height.
 - Added `view="infinite-vertical"` with calendars as left-to-right columns, vertical time zoom, sticky left time pane, today's horizontal current-time marker, and full event interaction parity.
-- Renamed the original orientation to `view="infinite-horizontal"` while preserving `view="infinite"` as a backward-compatible alias.
+- Named the horizontal orientation `view="infinite-horizontal"` and the vertical orientation `view="infinite-vertical"`.
 - Added a demo calendar-type switch and vertical column growth for dense overlaps.
 - Changed the vertical view to keep per-day date and doctor-name headers top-sticky, keep date/time labels left-sticky, format vertical hour labels as `H:00`, use a 240px base calendar-column width, fit three parallel events before +80px overlap growth, and expand hovered appointments to full column width.
 - Removed synchronized vertical header switching and changed the vertical time pane to sticky-left only, so headers pin naturally and time labels scroll vertically with events.

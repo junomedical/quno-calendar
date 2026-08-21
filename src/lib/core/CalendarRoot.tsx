@@ -11,7 +11,7 @@ import { useCalendarFocusCoordinator } from "./useCalendarFocusCoordinator";
  * @see docs/architecture.md#public-surface
  */
 export const CalendarRoot = forwardRef<CalendarNavigationHandle, CalendarRootProps>(function CalendarRoot(
-  { view = "infinite", ...props },
+  { view = "infinite-horizontal", ...props },
   ref
 ) {
   const viewRef = useRef<CalendarViewHandle | null>(null);

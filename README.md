@@ -51,7 +51,7 @@ export function Schedule() {
 }
 ```
 
-Use `view="infinite-vertical"` when calendars should render as columns and time should run top-to-bottom inside each date. `view="infinite"` remains a compatibility alias for the horizontal view.
+Use `view="infinite-vertical"` when calendars should render as columns and time should run top-to-bottom inside each date.
 
 Calendar chrome colors are consumer-owned CSS variables with built-in defaults. Scope them through `className` or pass
 them through the typed `style` prop; for example, `--ic-surface`, `--ic-header-surface`, `--ic-cell-border`,

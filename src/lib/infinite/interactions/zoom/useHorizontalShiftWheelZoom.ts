@@ -1,5 +1,4 @@
 import { useCallback, useRef } from "react";
-import { flushSync } from "react-dom";
 import { minuteToX, xToMinute } from "#calendar-internal/time/time";
 import type { TimelineSettings } from "#calendar-internal/core/types";
 import { nearestTimeNodeMinute, TIMELINE_LEFT_GUTTER_PX } from "#calendar-internal/time/timelineTicks";
@@ -9,8 +8,8 @@ import {
   gestureTailIsActive,
   nextRestoreVersion,
   nextZoomFromWheel,
-  restoreAcrossFrames,
   restoreIsCurrent,
+  scheduleZoomCommit,
   useCapturedWheel,
   useFrameCoalescedWheelZoom,
   type SharedZoomArgs
@@ -74,18 +73,23 @@ export function useHorizontalShiftWheelZoom(args: HorizontalZoomArgs) {
       extendGestureTail(gestureTailRef);
       scheduleWheelZoom(args.settings, event, (nextZoom) => {
         const restoreVersion = nextRestoreVersion(restoreVersionRef);
-        if (nextZoom !== args.settings.zoom) flushSync(() => args.onZoomChange?.(nextZoom));
         const nextSettings = {
           ...args.effectiveSettings,
           zoom: Math.max(nextZoom, args.horizontalRenderZoomFloor)
         };
-        restoreAcrossFrames(() => {
-          if (!restoreIsCurrent(restoreVersionRef, restoreVersion)) return;
-          viewport.scrollTop = scrollTop;
-          viewport.scrollLeft =
-            args.settings.labelWidth + TIMELINE_LEFT_GUTTER_PX + minuteToX(minute, nextSettings) - screenX;
-          window.scrollTo(pageScroll.x, pageScroll.y);
-        }, 3);
+        scheduleZoomCommit(
+          () => {
+            if (nextZoom !== args.settings.zoom) args.onZoomChange?.(nextZoom);
+          },
+          () => {
+            if (!restoreIsCurrent(restoreVersionRef, restoreVersion)) return;
+            viewport.scrollTop = scrollTop;
+            viewport.scrollLeft =
+              args.settings.labelWidth + TIMELINE_LEFT_GUTTER_PX + minuteToX(minute, nextSettings) - screenX;
+            window.scrollTo(pageScroll.x, pageScroll.y);
+          },
+          3
+        );
       });
     },
     [args, scheduleWheelZoom]

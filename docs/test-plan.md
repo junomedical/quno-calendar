@@ -49,13 +49,13 @@ Vitest unit tests live in `tests/unit` and mirror the source module grouping.
   are revealed, and unknown or excluded-weekday targets resolve unavailable.
 - `removeVisibleEvent` removes every rendered multi-calendar instance without invoking `loadEvents`.
 
-- Calendar root renders the infinite horizontal view, the infinite vertical view, and the legacy `view="infinite"` alias.
+- Calendar root renders the infinite horizontal and infinite vertical views; omitting `view` selects the horizontal view.
 - Fixed labels, the visible single sticky top time scale, same-row CSS-sticky date labels, current-time line alignment, controlled zoom callback, and custom event renderer contract are present.
 - Date labels share the same sticky header row as the time scale, and active availability blocks do not cover calendar row labels.
 - Event renderer receives status information.
 - Consumer-defined semantic color variables compute on the shell, headers, labels, grids, time text, borders, shadow,
   and current-time marker in both orientations when inherited from outside `CalendarRoot`.
-- Zoom-only geometry changes retain the rendered card DOM, do not reinvoke an unchanged external renderer, and do not reload the event range.
+- Zoom-only geometry changes retain the rendered card DOM, do not reinvoke an unchanged external renderer, and do not reload the event range. Controlled Shift-wheel requests commit before their pointer-anchor restoration begins.
 - Controlled active edit drafts render through the event renderer while the loaded source event is hidden.
 - A never-resolving loader does not block calendar chrome or Pointer Events; a delayed response adds event shells without replacing the date/resource structure.
 - Demo API-delay controls show pending/idle API status, keep date/resource chrome visible with zero event nodes after a dataset remount, receive HTTP 200 from `POST /api/demo-events`, then publish event shells when the response resolves.

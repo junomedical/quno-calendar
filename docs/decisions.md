@@ -153,7 +153,7 @@ New-event drafts are visual overlays in the target row. They do not enter commit
 
 ## 033 - Infinite Views Are Named By Time Orientation
 
-The original infinite view is now `view="infinite-horizontal"` because time runs horizontally. The new calendar-column view is `view="infinite-vertical"` because time runs vertically inside each date. The legacy `view="infinite"` stays as an alias for the horizontal view so existing callers keep working.
+The horizontal view is `view="infinite-horizontal"` because time runs horizontally. The calendar-column view is `view="infinite-vertical"` because time runs vertically inside each date. The public surface uses only these explicit orientation names.
 
 Vertical calendar columns default to a `240px` minimum, fit up to three parallel events, and then grow by `80px` for each additional overlap lane. These values are parent-owned settings so product surfaces can choose compact or wide column rules without changing library internals. The vertical date and doctor-name row uses native per-day sticky positioning rather than synchronized overlay state, and the left date/time pane is 30% narrower than the horizontal row-label pane. The vertical timeline adds an 8px gutter before the first hour and after the last hour so labels and events do not touch the board edge. The time pane is sticky only on the left axis so its labels move vertically at the same pace as events.
 
@@ -388,3 +388,11 @@ consume public `--ic-*` variables with those private palette values as fallbacks
 public variables on `.ic-shell`. This lets a theme defined on a wrapper win without depending on stylesheet import
 order. One shared palette covers both orientations; `--ic-vertical-header-bg` remains only as a compatibility alias.
 An event's explicit `color` still wins over the calendar-level default event accent.
+
+## 066 - Controlled Wheel Zoom Commits Outside Active React Work
+
+Shift-wheel zoom remains parent-controlled, but its callback must not synchronously force React work while a render is
+already active. The calendar therefore schedules the controlled request in a microtask and begins pointer-anchor
+restoration on the following animation frame. Virtual scrolling likewise uses TanStack Virtual's queued rerender path
+instead of its synchronous notification option. This preserves anchor ordering without coupling calendar consumers to a
+specific React scheduling implementation.
