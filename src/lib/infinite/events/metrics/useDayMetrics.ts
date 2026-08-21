@@ -14,7 +14,13 @@
 import { useCallback, useMemo } from "react";
 import { withoutActiveDraftSourceEvents } from "./activeDrafts";
 import { prepareEventCell, rowHeightForPreparedCell, type PreparedEventCell } from "../layout/layout";
-import type { ActiveEventDraft, CalendarEvent, CalendarId, CalendarRow, TimelineSettings } from "#calendar-internal/core/types";
+import type {
+  ActiveEventDraft,
+  CalendarEvent,
+  CalendarId,
+  CalendarRow,
+  TimelineSettings
+} from "#calendar-internal/core/types";
 import { indexEventsByCalendar } from "../indexing/eventMembershipIndex";
 
 const EMPTY_PREPARED_CELL: PreparedEventCell = { items: [], laneCount: 1, metricLaneCount: 1 };

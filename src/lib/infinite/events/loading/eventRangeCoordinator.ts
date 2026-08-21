@@ -11,7 +11,13 @@
  *
  * @see docs/flows/async-loading-and-layout.md#date-request-state
  */
-import type { CalendarEvent, CalendarId, EventId, EventPrefetchPolicy, EventPrefetchWindow } from "#calendar-internal/core/types";
+import type {
+  CalendarEvent,
+  CalendarId,
+  EventId,
+  EventPrefetchPolicy,
+  EventPrefetchWindow
+} from "#calendar-internal/core/types";
 import { dateRangeFromKeys, fromDateKey, toDateKey } from "#calendar-internal/date/dateVirtualization";
 import { addCalendarDays } from "#calendar-internal/date/localDate";
 import { EventDateCache } from "./eventDateCache";

@@ -2,6 +2,9 @@
 
 ## 0.2.0
 
+- Replaced Prettier with OxFmt for project formatting. The existing line-width, trailing-comma, and ignore rules now
+  live in the checked-in `.oxfmtrc.json` configuration; `npm run format` checks formatting and `npm run format:write`
+  applies it.
 - Replaced deeply nested internal library imports with the explicitly private `#calendar-internal/*` source alias and
   added architecture enforcement so cross-domain imports no longer depend on directory traversal depth. The mapping
   avoids deprecated `baseUrl`, and Vite ambient types now cover source CSS imports in strict editors.

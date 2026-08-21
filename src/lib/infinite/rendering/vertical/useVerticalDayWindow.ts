@@ -3,7 +3,12 @@
  * widths + viewport + interaction pins -> mounted column indexes
  */
 import { useMemo } from "react";
-import type { CalendarEvent, CalendarId, CalendarRow, CalendarViewportAnchorTarget } from "#calendar-internal/core/types";
+import type {
+  CalendarEvent,
+  CalendarId,
+  CalendarRow,
+  CalendarViewportAnchorTarget
+} from "#calendar-internal/core/types";
 import { eventCalendarIds } from "#calendar-internal/data/calendarEvents";
 import { buildResourceExtents, resourceIndexesInWindow } from "../../scroll/resources/resourceWindow";
 import { useViewportMetrics } from "../../scroll/resources/viewportMetricsStore";
