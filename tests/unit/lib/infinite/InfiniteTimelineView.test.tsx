@@ -115,7 +115,7 @@ describe("InfiniteTimelineView", () => {
     expect(dayNameGenerator).toHaveBeenCalled();
   });
 
-  it("preserves the legacy infinite alias for the horizontal view", async () => {
+  it("defaults to the horizontal view", async () => {
     const renderer = vi.fn(({ event, status, style }: EventRendererProps) => (
       <div data-testid="custom-event" data-status={status} style={style}>
         {event.title}
@@ -123,7 +123,7 @@ describe("InfiniteTimelineView", () => {
     ));
     const loadEvents = vi.fn(async () => []);
 
-    renderCalendar({ view: "infinite", loadEvents, eventRenderer: renderer });
+    renderCalendar({ loadEvents, eventRenderer: renderer });
 
     expect(screen.getByTestId("time-scale-header")).toBeInTheDocument();
     await waitFor(() => expect(loadEvents).toHaveBeenCalled());

@@ -27,6 +27,7 @@ export {
   type CalendarViewportAnchorTarget,
   type CalendarViewComponentProps,
   type CalendarVisibilityRequest,
+  type CalendarView,
   type EventActivateRequest,
   type EventCreateRequest,
   type EventId,

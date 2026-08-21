@@ -92,6 +92,7 @@ export function useScrollRuntime({
     estimateSize: () => baseDayHeight,
     getItemKey: dateKeyForIndex,
     overscan: VIRTUAL_DAY_NODE_OVERSCAN,
+    useFlushSync: false, // TanStack Virtual's synchronous rerender can overlap active React 19 renders. Keep it disabled so scroll notifications use its normal queued rerender path.
     initialRect: { width: 1400, height: 1100 },
     initialOffset: virtualWindow.anchorIndex * baseDayHeight
   });

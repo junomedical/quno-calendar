@@ -101,6 +101,19 @@ export function restoreAcrossFrames(restore: () => void, frameCount: number) {
   };
 }
 
+/**
+ * Applies a controlled zoom outside React's current render/commit work, then
+ * starts anchor restoration at the next paint boundary. Calling `flushSync`
+ * from a wheel animation frame can overlap a concurrent React render and is
+ * rejected by React 19.
+ */
+export function scheduleZoomCommit(commit: () => void, restore: () => void, restoreFrameCount: number) {
+  queueMicrotask(() => {
+    commit();
+    window.requestAnimationFrame(() => restoreAcrossFrames(restore, restoreFrameCount));
+  });
+}
+
 export function useCapturedWheel(ref: RefObject<HTMLDivElement>, listener: (event: WheelEvent) => void) {
   useEffect(() => {
     const element = ref.current;

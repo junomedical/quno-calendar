@@ -44,6 +44,9 @@ function EventCard({ event, status, style }: EventRendererProps) {
 />;
 ```
 
+Parent controls that store the active orientation can import the package-owned
+`CalendarView` type. It contains `"infinite-horizontal"` and `"infinite-vertical"`.
+
 Repository example: the read-only chapter in
 [`ArticleRecipeDemos.tsx`](../demo/examples/integration-walkthrough/ArticleRecipeDemos.tsx) and the
 [integration field guide](../demo/examples/integration-walkthrough/README.md).

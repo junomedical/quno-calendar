@@ -1,5 +1,4 @@
 import { useCallback, useRef } from "react";
-import { flushSync } from "react-dom";
 import { minuteToY, yToMinute } from "#calendar-internal/time/time";
 import { nearestTimeNodeMinute } from "#calendar-internal/time/timelineTicks";
 import {
@@ -8,8 +7,8 @@ import {
   gestureTailIsActive,
   nextRestoreVersion,
   nextZoomFromWheel,
-  restoreAcrossFrames,
   restoreIsCurrent,
+  scheduleZoomCommit,
   useCapturedWheel,
   useFrameCoalescedWheelZoom,
   type SharedZoomArgs
@@ -77,21 +76,26 @@ export function useVerticalShiftWheelZoom(args: VerticalZoomArgs) {
       extendGestureTail(gestureTailRef);
       scheduleWheelZoom(args.settings, event, (nextZoom) => {
         const restoreVersion = nextRestoreVersion(restoreVersionRef);
-        if (nextZoom !== args.settings.zoom) flushSync(() => args.onZoomChange?.(nextZoom));
         const nextSettings = { ...args.settings, zoom: nextZoom };
-        restoreAcrossFrames(() => {
-          if (!restoreIsCurrent(restoreVersionRef, restoreVersion)) return;
-          const anchoredDay = dateKey ? dayForDate(viewport, dateKey) : null;
-          if (anchoredDay) {
-            const offset = args.settings.dayHeaderHeight + args.timelineGutterPx + minuteToY(minute, nextSettings);
-            const currentScreenY =
-              anchoredDay.getBoundingClientRect().top - viewport.getBoundingClientRect().top + offset;
-            args.rememberVisibleDateOffset(dateKey!, Math.max(0, offset - screenY));
-            viewport.scrollTop = Math.max(0, viewport.scrollTop + currentScreenY - screenY);
-          }
-          viewport.scrollLeft = scrollLeft;
-          window.scrollTo(pageScroll.x, pageScroll.y);
-        }, 9);
+        scheduleZoomCommit(
+          () => {
+            if (nextZoom !== args.settings.zoom) args.onZoomChange?.(nextZoom);
+          },
+          () => {
+            if (!restoreIsCurrent(restoreVersionRef, restoreVersion)) return;
+            const anchoredDay = dateKey ? dayForDate(viewport, dateKey) : null;
+            if (anchoredDay) {
+              const offset = args.settings.dayHeaderHeight + args.timelineGutterPx + minuteToY(minute, nextSettings);
+              const currentScreenY =
+                anchoredDay.getBoundingClientRect().top - viewport.getBoundingClientRect().top + offset;
+              args.rememberVisibleDateOffset(dateKey!, Math.max(0, offset - screenY));
+              viewport.scrollTop = Math.max(0, viewport.scrollTop + currentScreenY - screenY);
+            }
+            viewport.scrollLeft = scrollLeft;
+            window.scrollTo(pageScroll.x, pageScroll.y);
+          },
+          9
+        );
       });
     },
     [args, scheduleWheelZoom]

@@ -234,9 +234,12 @@ export type CalendarNavigationHandle = {
   focusEvent: (event: CalendarEvent, options?: CalendarFocusOptions) => Promise<CalendarFocusResult>;
 };
 
+/** Concrete timeline layouts supported by the calendar. */
+export type CalendarView = "infinite-horizontal" | "infinite-vertical";
+
 /** Public reusable calendar shell props. */
 export type CalendarRootProps = CalendarViewComponentProps & {
-  view?: "infinite" | "infinite-horizontal" | "infinite-vertical";
+  view?: CalendarView;
 };
 
 /** Defaults merged with caller-provided timeline settings. */
