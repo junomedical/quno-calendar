@@ -41,7 +41,6 @@ Vitest unit tests live in `tests/unit` and mirror the source module grouping.
   `#calendar-internal/*` alias for cross-domain dependencies.
 - Colorless event shells inherit the consumer-defined default event accent and derive their muted accent toward the
   consumer-defined calendar surface.
-- A source guard keeps numeric reusable-rendering color literals exclusive to `styles/palette.css`.
 
 ## React Tests
 
