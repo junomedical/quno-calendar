@@ -1,8 +1,8 @@
 import { useCallback, useRef } from "react";
 import { flushSync } from "react-dom";
-import { minuteToX, xToMinute } from "../../../time/time";
-import type { TimelineSettings } from "../../../core/types";
-import { nearestTimeNodeMinute, TIMELINE_LEFT_GUTTER_PX } from "../../../time/timelineTicks";
+import { minuteToX, xToMinute } from "#calendar-internal/time/time";
+import type { TimelineSettings } from "#calendar-internal/core/types";
+import { nearestTimeNodeMinute, TIMELINE_LEFT_GUTTER_PX } from "#calendar-internal/time/timelineTicks";
 import {
   captureWheelEvent,
   extendGestureTail,

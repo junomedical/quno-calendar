@@ -80,6 +80,24 @@ function functionViolations(sourceFile) {
   return violations;
 }
 
+function deepRelativeImportViolations(sourceFile) {
+  const violations = [];
+  const visit = (node) => {
+    if (
+      (ts.isImportDeclaration(node) || ts.isExportDeclaration(node)) &&
+      node.moduleSpecifier &&
+      ts.isStringLiteral(node.moduleSpecifier) &&
+      node.moduleSpecifier.text.startsWith("../../../")
+    ) {
+      const line = sourceFile.getLineAndCharacterOfPosition(node.moduleSpecifier.getStart(sourceFile)).line + 1;
+      violations.push({ line, specifier: node.moduleSpecifier.text });
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(sourceFile);
+  return violations;
+}
+
 function displayPath(path) {
   const pathFromProject = relative(projectRoot, path);
   return pathFromProject.startsWith("..") ? path : pathFromProject;
@@ -88,6 +106,7 @@ function displayPath(path) {
 const files = productionTypeScriptFiles(sourceRoot);
 const moduleFailures = [];
 const functionFailures = [];
+const importFailures = [];
 
 for (const path of files) {
   const sourceText = readFileSync(path, "utf8");
@@ -95,6 +114,7 @@ for (const path of files) {
   const moduleLines = nonCommentLineCount(sourceFile, sourceText);
   if (moduleLines > MODULE_LINE_LIMIT) moduleFailures.push({ path, lineCount: moduleLines });
   for (const violation of functionViolations(sourceFile)) functionFailures.push({ path, ...violation });
+  for (const violation of deepRelativeImportViolations(sourceFile)) importFailures.push({ path, ...violation });
 }
 
 for (const failure of moduleFailures) {
@@ -107,14 +127,19 @@ for (const failure of functionFailures) {
     `${displayPath(failure.path)}:${failure.start}-${failure.end}: ${failure.name} spans ${failure.lineCount} source lines (function limit: ${FUNCTION_LINE_LIMIT})`
   );
 }
-
-if (moduleFailures.length || functionFailures.length) {
+for (const failure of importFailures) {
   console.error(
-    `Architecture check failed: ${moduleFailures.length} module violation(s), ${functionFailures.length} function violation(s).`
+    `${displayPath(failure.path)}:${failure.line}: use #calendar-internal/* instead of deep relative import ${failure.specifier}`
+  );
+}
+
+if (moduleFailures.length || functionFailures.length || importFailures.length) {
+  console.error(
+    `Architecture check failed: ${moduleFailures.length} module violation(s), ${functionFailures.length} function violation(s), ${importFailures.length} deep import violation(s).`
   );
   process.exitCode = 1;
 } else {
   console.log(
-    `Architecture check passed for ${files.length} production modules (modules <= ${MODULE_LINE_LIMIT} non-comment lines; functions <= ${FUNCTION_LINE_LIMIT} source lines).`
+    `Architecture check passed for ${files.length} production modules (modules <= ${MODULE_LINE_LIMIT} non-comment lines; functions <= ${FUNCTION_LINE_LIMIT} source lines; no deep relative imports).`
   );
 }

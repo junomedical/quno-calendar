@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, type MutableRefObject, type RefObject } from "react";
-import type { CalendarViewComponentProps, TimelineSettings } from "../../../core/types";
+import type { CalendarViewComponentProps, TimelineSettings } from "#calendar-internal/core/types";
 import { MAX_ZOOM, MIN_ZOOM } from "./zoomLimits";
 
 export type SharedZoomArgs = {

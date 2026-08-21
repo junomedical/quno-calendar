@@ -6,7 +6,10 @@ import { demoEventsApiPlugin } from "./vite/demoEventsApiPlugin";
 export default defineConfig({
   plugins: [react(), demoEventsApiPlugin()],
   resolve: {
-    alias: [{ find: /^quno-calendar$/, replacement: resolve(__dirname, "src/lib/index.ts") }]
+    alias: [
+      { find: /^quno-calendar$/, replacement: resolve(__dirname, "src/lib/index.ts") },
+      { find: /^#calendar-internal\//, replacement: `${resolve(__dirname, "src/lib")}/` }
+    ]
   },
   test: {
     environment: "jsdom",

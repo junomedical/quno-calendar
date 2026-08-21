@@ -368,3 +368,14 @@ Controlled-draft calendar filtering has stronger focus when its date is in the o
 or just-released draft date carries across row collapse/expansion so transient measurement snapshots cannot override
 the parent's exact event or slot anchor during create cancellation. An offscreen draft remains only a render pin and
 does not displace the user's visible date.
+
+## 063 - Cross-Domain Imports Use One Library Alias
+
+Imports that cross from a nested infinite-calendar domain back to the `src/lib` root use the single `#calendar-internal/*`
+alias. Imports within the same feature folder remain relative. One root alias removes fragile `../../../` traversal
+without inventing a separate alias for every responsibility folder, and the architecture check prevents deep relative
+imports from returning. Its explicitly private name distinguishes it from the exact `quno-calendar` demo alias, which
+exercises only the package's public entrypoint and does not expose internal subpaths. TypeScript resolves the mapping
+relative to `tsconfig.json` without the deprecated `baseUrl` option, while the demo/test Vite config and library build
+resolve the same mapping. `vite/vite-env.d.ts` supplies Vite's ambient asset declarations so strict editor diagnostics
+also recognize side-effect CSS imports.

@@ -37,6 +37,8 @@ Vitest unit tests live in `tests/unit` and mirror the source module grouping.
 - Pointer hit-testing resolves date/resource ownership from the mounted grid even while virtual measurements settle; move proposal calculation and draft creation remain covered independently. Active gestures suppress text selection through both standard and WebKit computed properties.
 - Public package entrypoint exports only the supported surface and does not expose concrete infinite view internals.
 - `className`, `style`, `ariaLabel`, and `initialDateKey` work through `CalendarRoot` in both orientations.
+- The architecture guard rejects `../../../` imports in production library files, requiring the private
+  `#calendar-internal/*` alias for cross-domain dependencies.
 
 ## React Tests
 

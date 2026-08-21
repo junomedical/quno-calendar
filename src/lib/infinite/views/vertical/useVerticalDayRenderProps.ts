@@ -10,16 +10,16 @@ import type {
   CalendarViewportAnchorTarget,
   EventRenderer,
   TimelineSettings
-} from "../../../core/types";
+} from "#calendar-internal/core/types";
 import type { ViewportGeometryRegistration } from "../../anchors/parent/viewportAnchorTypes";
 import type { ViewportMetricsStore } from "../../scroll/resources/viewportMetricsStore";
-import { buildTimeTicks } from "../../../time/timelineTicks";
+import { buildTimeTicks } from "#calendar-internal/time/timelineTicks";
 import type { useTimelineInteractions } from "../../interactions/useTimelineInteractions";
 import type { VerticalDayRenderProps } from "../../rendering/vertical/VerticalTimelineCanvas";
 import type { useVerticalColumnHover } from "../../rendering/vertical/useVerticalColumnHover";
 import type { VerticalPreparedColumns } from "../../events/metrics/useVerticalPreparedColumns";
 import { buildVerticalNowState, type VerticalViewGeometry } from "../../rendering/vertical/verticalViewGeometry";
-import type { CalendarFocusedEventTarget } from "../../../core/internalTypes";
+import type { CalendarFocusedEventTarget } from "#calendar-internal/core/internalTypes";
 
 type VerticalDayRenderPropsArgs = {
   geometry: VerticalViewGeometry;

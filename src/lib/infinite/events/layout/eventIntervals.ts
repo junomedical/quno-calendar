@@ -1,5 +1,5 @@
-import type { CalendarEvent, TimelineSettings } from "../../../core/types";
-import { minutesSinceStartOfDay, timelineEndMinute, timelineStartMinute } from "../../../time/time";
+import type { CalendarEvent, TimelineSettings } from "#calendar-internal/core/types";
+import { minutesSinceStartOfDay, timelineEndMinute, timelineStartMinute } from "#calendar-internal/time/time";
 
 /** Visible, same-day interval used by the overlap engine. */
 export type EventInterval = {

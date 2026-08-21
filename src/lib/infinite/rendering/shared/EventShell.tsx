@@ -1,5 +1,5 @@
 import { memo, useCallback, useRef, type CSSProperties, type PointerEvent } from "react";
-import type { CalendarEvent, CalendarId, EventRenderer, EventRenderStatus } from "../../../core/types";
+import type { CalendarEvent, CalendarId, EventRenderer, EventRenderStatus } from "#calendar-internal/core/types";
 import type { ViewportGeometryRegistration } from "../../anchors/parent/viewportAnchorTypes";
 
 export type CssLength = number | string;

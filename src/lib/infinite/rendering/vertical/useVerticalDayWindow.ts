@@ -3,12 +3,12 @@
  * widths + viewport + interaction pins -> mounted column indexes
  */
 import { useMemo } from "react";
-import type { CalendarEvent, CalendarId, CalendarRow, CalendarViewportAnchorTarget } from "../../../core/types";
-import { eventCalendarIds } from "../../../data/calendarEvents";
+import type { CalendarEvent, CalendarId, CalendarRow, CalendarViewportAnchorTarget } from "#calendar-internal/core/types";
+import { eventCalendarIds } from "#calendar-internal/data/calendarEvents";
 import { buildResourceExtents, resourceIndexesInWindow } from "../../scroll/resources/resourceWindow";
 import { useViewportMetrics } from "../../scroll/resources/viewportMetricsStore";
 import { eventDateKey } from "../../events/eventDateKey";
-import { gridCadenceMinutes } from "../../../time/timelineTicks";
+import { gridCadenceMinutes } from "#calendar-internal/time/timelineTicks";
 import type { VerticalTimelineDayProps } from "./types";
 
 type DayWindow = {

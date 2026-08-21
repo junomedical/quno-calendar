@@ -1,8 +1,8 @@
 import { useCallback, type Dispatch, type PointerEvent, type SetStateAction } from "react";
-import type { CalendarId } from "../../../core/types";
+import type { CalendarId } from "#calendar-internal/core/types";
 import type { EventLayoutItem } from "../../events/layout/layout";
 import type { HoveredTimelineEvent } from "../../interactions/useTimelineInteractions";
-import { TIMELINE_LEFT_GUTTER_PX } from "../../../time/timelineTicks";
+import { TIMELINE_LEFT_GUTTER_PX } from "#calendar-internal/time/timelineTicks";
 
 /**
  * Row hover resolution.

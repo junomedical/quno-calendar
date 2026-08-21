@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef, type RefObject } from "react";
-import { minuteToX } from "../../../time/time";
-import { TIMELINE_LEFT_GUTTER_PX } from "../../../time/timelineTicks";
+import { minuteToX } from "#calendar-internal/time/time";
+import { TIMELINE_LEFT_GUTTER_PX } from "#calendar-internal/time/timelineTicks";
 
 type HorizontalControlledZoomAnchorArgs = {
   containerRef: RefObject<HTMLDivElement>;

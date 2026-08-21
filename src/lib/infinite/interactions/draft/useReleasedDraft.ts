@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { ActiveDraftReleaseOptions, ActiveEventDraft, EventRenderStatus } from "../../../core/types";
+import type { ActiveDraftReleaseOptions, ActiveEventDraft, EventRenderStatus } from "#calendar-internal/core/types";
 
 const DEFAULT_RELEASE_DURATION_MS = 220;
 

@@ -1,7 +1,7 @@
 import { useLayoutEffect, useMemo, useState, type RefObject } from "react";
-import type { TimelineSettings } from "../../../core/types";
-import { timelineTotalMinutes, timelineWidth } from "../../../time/time";
-import { TIMELINE_LEFT_GUTTER_PX } from "../../../time/timelineTicks";
+import type { TimelineSettings } from "#calendar-internal/core/types";
+import { timelineTotalMinutes, timelineWidth } from "#calendar-internal/time/time";
+import { TIMELINE_LEFT_GUTTER_PX } from "#calendar-internal/time/timelineTicks";
 
 /**
  * Horizontal viewport sizing.

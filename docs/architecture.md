@@ -122,7 +122,9 @@ Primary ownership folders are:
 [`docs/domains`](./domains/README.md) documents the library ownership contracts and source map.
 [`docs/flows`](./flows/README.md) documents execution order. [`demo/examples`](../demo/examples/README.md) documents the
 consumer field guide. Folder names are the source-level ownership signal; `check:architecture` enforces readable
-module/function sizes and keeps demo code outside the library.
+module/function sizes, prevents cross-domain `../../../` imports, and keeps demo code outside the library. Library
+modules use `#calendar-internal/*` when they cross responsibility folders rooted at `src/lib`; imports within the same local
+feature folder remain relative so nearby dependencies are still obvious.
 
 The `/examples/integration-walkthrough` route owns the complete example surface. It owns a document-height article
 scroller and table of contents, mounts later calendar exhibits only when they approach the viewport, and keeps

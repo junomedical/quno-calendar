@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { TIMELINE_LEFT_GUTTER_PX } from "../../../time/timelineTicks";
+import { TIMELINE_LEFT_GUTTER_PX } from "#calendar-internal/time/timelineTicks";
 import { HorizontalDayHeader } from "./HorizontalDayHeader";
 import type { HorizontalTimelineDayProps } from "./types";
 import { useHorizontalDayResourceWindow } from "./useHorizontalDayResourceWindow";

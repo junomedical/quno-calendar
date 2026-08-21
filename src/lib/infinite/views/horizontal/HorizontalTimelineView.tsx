@@ -1,5 +1,5 @@
 import { forwardRef } from "react";
-import type { CalendarInternalViewProps, CalendarViewHandle } from "../../../core/internalTypes";
+import type { CalendarInternalViewProps, CalendarViewHandle } from "#calendar-internal/core/internalTypes";
 import { HorizontalTimelineCanvas } from "../../rendering/horizontal/HorizontalTimelineCanvas";
 import { useHorizontalTimelineRuntime } from "./useHorizontalTimelineRuntime";
 import "../../rendering/styles/calendar.css";

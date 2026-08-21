@@ -1,4 +1,4 @@
-import { defaultTimelineSettings, type TimelineSettings } from "../../../core/types";
+import { defaultTimelineSettings, type TimelineSettings } from "#calendar-internal/core/types";
 import { MAX_ZOOM } from "../../interactions/zoom/zoomLimits";
 
 /** Merges caller settings with defaults and clamps invalid timeline values. */

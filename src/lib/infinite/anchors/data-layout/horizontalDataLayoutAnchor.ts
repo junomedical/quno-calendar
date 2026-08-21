@@ -9,7 +9,7 @@
  *
  * @see docs/flows/async-loading-and-layout.md
  */
-import type { CalendarId } from "../../../core/types";
+import type { CalendarId } from "#calendar-internal/core/types";
 
 export type HorizontalDayMetric = {
   height: number;

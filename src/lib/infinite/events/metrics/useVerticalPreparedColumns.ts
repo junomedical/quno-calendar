@@ -3,7 +3,7 @@
  * cached date events -> calendar membership -> prepared lanes -> width/read lookups
  */
 import { useMemo } from "react";
-import type { ActiveEventDraft, CalendarEvent, CalendarId, CalendarRow, TimelineSettings } from "../../../core/types";
+import type { ActiveEventDraft, CalendarEvent, CalendarId, CalendarRow, TimelineSettings } from "#calendar-internal/core/types";
 import { withoutActiveDraftSourceEvents } from "./activeDrafts";
 import { columnWidthForPreparedCell, prepareEventCell, type PreparedEventCell } from "../layout/layout";
 import { indexEventsByCalendar } from "../indexing/eventMembershipIndex";

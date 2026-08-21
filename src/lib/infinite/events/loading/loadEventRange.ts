@@ -10,7 +10,7 @@
  *
  * @see docs/flows/async-loading-and-layout.md#failure-and-cancellation-subflows
  */
-import type { CalendarEvent, LoadEvents, LoadEventsArgs } from "../../../core/types";
+import type { CalendarEvent, LoadEvents, LoadEventsArgs } from "#calendar-internal/core/types";
 
 const RETRY_DELAYS_MS = [250, 1_000] as const;
 

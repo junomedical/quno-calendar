@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { buildDraftEvent, type CalendarHit } from "../timelineInteractionModel";
-import { minutesSinceStartOfDay } from "../../../time/time";
-import { type CalendarEvent, type CalendarViewComponentProps } from "../../../core/types";
+import { minutesSinceStartOfDay } from "#calendar-internal/time/time";
+import { type CalendarEvent, type CalendarViewComponentProps } from "#calendar-internal/core/types";
 
 type PointerLike = Pick<PointerEvent, "clientX" | "clientY">;
 

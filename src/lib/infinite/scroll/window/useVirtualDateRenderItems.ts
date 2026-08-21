@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import type { VirtualDateWindow } from "../../../date/dateVirtualization";
+import type { VirtualDateWindow } from "#calendar-internal/date/dateVirtualization";
 import { buildVirtualDateRenderItems, type VirtualDateRenderItem } from "./renderItems";
 
 /**

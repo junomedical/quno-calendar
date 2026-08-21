@@ -3,7 +3,7 @@
  * virtual date items + shared day props -> scroll canvas -> windowed date sections
  */
 import type { PointerEventHandler, RefObject } from "react";
-import type { CalendarViewComponentProps } from "../../../core/types";
+import type { CalendarViewComponentProps } from "#calendar-internal/core/types";
 import { VerticalTimelineDay } from "./VerticalTimelineDay";
 import type { VerticalTimelineDayProps } from "./types";
 import type { VirtualDateRenderItem } from "../../scroll/window/renderItems";

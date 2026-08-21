@@ -1,4 +1,4 @@
-import type { EventMoveRequest } from "../../../core/types";
+import type { EventMoveRequest } from "#calendar-internal/core/types";
 
 /** Compares move proposals so drag previews update only for semantic changes. */
 export function sameMoveRequest(a: EventMoveRequest, b: EventMoveRequest | null): boolean {

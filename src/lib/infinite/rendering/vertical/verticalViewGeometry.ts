@@ -2,9 +2,9 @@
  * Pure vertical-view geometry.
  * settings + current clock -> day dimensions, layout identity, and now-line state
  */
-import type { CalendarId, CalendarRow, TimelineSettings } from "../../../core/types";
-import { toDateKey } from "../../../date/dateVirtualization";
-import { timelineEndMinute, timelineHeight, timelineStartMinute } from "../../../time/time";
+import type { CalendarId, CalendarRow, TimelineSettings } from "#calendar-internal/core/types";
+import { toDateKey } from "#calendar-internal/date/dateVirtualization";
+import { timelineEndMinute, timelineHeight, timelineStartMinute } from "#calendar-internal/time/time";
 import { VERTICAL_TIMELINE_GUTTER_PX } from "./VerticalTimelineDay";
 
 const VERTICAL_LEFT_PANE_WIDTH_RATIO = 0.7;

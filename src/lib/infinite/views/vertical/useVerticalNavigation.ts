@@ -3,10 +3,10 @@
  * date/time requests + geometry registry -> scroll operations and anchor-safe ref methods
  */
 import { useCallback, useImperativeHandle, type ForwardedRef, type RefObject } from "react";
-import type { CalendarNavigationHandle, TimelineSettings } from "../../../core/types";
-import type { CalendarViewHandle } from "../../../core/internalTypes";
-import { toDateKey } from "../../../date/dateVirtualization";
-import { parseClockToMinutes } from "../../../time/time";
+import type { CalendarNavigationHandle, TimelineSettings } from "#calendar-internal/core/types";
+import type { CalendarViewHandle } from "#calendar-internal/core/internalTypes";
+import { toDateKey } from "#calendar-internal/date/dateVirtualization";
+import { parseClockToMinutes } from "#calendar-internal/time/time";
 import { verticalMinuteToY, VERTICAL_TIMELINE_GUTTER_PX } from "../../rendering/vertical/VerticalTimelineDay";
 import { buildVerticalViewGeometry } from "../../rendering/vertical/verticalViewGeometry";
 import { useViewportAnchoring } from "../../anchors/parent/useViewportAnchoring";

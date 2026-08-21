@@ -1,7 +1,7 @@
 import { useCallback, useRef } from "react";
 import { flushSync } from "react-dom";
-import { minuteToY, yToMinute } from "../../../time/time";
-import { nearestTimeNodeMinute } from "../../../time/timelineTicks";
+import { minuteToY, yToMinute } from "#calendar-internal/time/time";
+import { nearestTimeNodeMinute } from "#calendar-internal/time/timelineTicks";
 import {
   captureWheelEvent,
   extendGestureTail,

@@ -2,8 +2,8 @@
  * Vertical day chrome.
  * date/ticks/resources -> sticky date header + resource header + time scale
  */
-import { formatMonthDayOrdinal, formatWeekday } from "../../../date/dateLabels";
-import { fromDateKey } from "../../../date/dateVirtualization";
+import { formatMonthDayOrdinal, formatWeekday } from "#calendar-internal/date/dateLabels";
+import { fromDateKey } from "#calendar-internal/date/dateVirtualization";
 import { VERTICAL_TIMELINE_GUTTER_PX } from "./VerticalTimelineDay";
 import type { VerticalTimelineDayProps } from "./types";
 

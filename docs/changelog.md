@@ -2,6 +2,9 @@
 
 ## 0.2.0
 
+- Replaced deeply nested internal library imports with the explicitly private `#calendar-internal/*` source alias and
+  added architecture enforcement so cross-domain imports no longer depend on directory traversal depth. The mapping
+  avoids deprecated `baseUrl`, and Vite ambient types now cover source CSS imports in strict editors.
 - Fixed dense 5,000- and 20,000-events/year calendars jumping to another day after weekends were hidden and a drawn
   appointment was cancelled. Weekend filtering now restores the semantic date after the virtual sequence settles, and
   draft collapse/expansion keeps the draft date until exact row anchoring completes.

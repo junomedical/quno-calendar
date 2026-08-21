@@ -1,7 +1,7 @@
 import { memo, useMemo } from "react";
-import type { CalendarEvent } from "../../../core/types";
+import type { CalendarEvent } from "#calendar-internal/core/types";
 import { layoutPreparedEventsForRow, type EventLayoutItem } from "../../events/layout/layout";
-import { gridCadenceMinutes, TIMELINE_LEFT_GUTTER_PX } from "../../../time/timelineTicks";
+import { gridCadenceMinutes, TIMELINE_LEFT_GUTTER_PX } from "#calendar-internal/time/timelineTicks";
 import { AvailabilityLayer, CommittedLayer, TransientLayer } from "../shared/EventLayers";
 import { HorizontalRowFrame } from "./HorizontalRowFrame";
 import { committedEventHoverWidth, horizontalEventGeometry } from "./horizontalEventGeometry";

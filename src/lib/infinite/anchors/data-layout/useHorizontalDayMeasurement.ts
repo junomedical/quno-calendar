@@ -14,7 +14,7 @@
  */
 import type { Virtualizer } from "@tanstack/react-virtual";
 import { useLayoutEffect, useRef, type RefObject } from "react";
-import type { CalendarId } from "../../../core/types";
+import type { CalendarId } from "#calendar-internal/core/types";
 import { resolveVisibleDateSnapshot } from "../../scroll/position/visibleSnapshot";
 import {
   captureHorizontalDataLayoutAnchor,

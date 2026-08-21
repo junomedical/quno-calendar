@@ -9,7 +9,7 @@ import type {
   CalendarViewportAnchor,
   CalendarViewportAnchorRestoreOptions,
   CalendarViewportAnchorTarget
-} from "../../../core/types";
+} from "#calendar-internal/core/types";
 import type { ViewportGeometryRegistry } from "./viewportGeometryRegistry";
 
 const MANUAL_SCROLL_KEYS = new Set([

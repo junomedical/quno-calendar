@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type RefObject } from "react";
-import { minuteToX, minuteToY, parseClockToMinutes } from "../../../time/time";
+import { minuteToX, minuteToY, parseClockToMinutes } from "#calendar-internal/time/time";
 import type {
   CalendarNavigationHandle,
   CalendarViewportAnchor,
   CalendarViewportAnchorRestoreOptions,
   CalendarViewportAnchorTarget,
   TimelineSettings
-} from "../../../core/types";
-import { TIMELINE_LEFT_GUTTER_PX } from "../../../time/timelineTicks";
+} from "#calendar-internal/core/types";
+import { TIMELINE_LEFT_GUTTER_PX } from "#calendar-internal/time/timelineTicks";
 import type { ViewportGeometryRegistration } from "./viewportAnchorTypes";
 import { relativeSnapshot, ViewportGeometryRegistry } from "./viewportGeometryRegistry";
 import { ViewportAnchorRestoreSession } from "./viewportAnchorRestoreSession";
