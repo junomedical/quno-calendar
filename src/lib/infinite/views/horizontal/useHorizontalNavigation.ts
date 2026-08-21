@@ -1,10 +1,10 @@
 import { useCallback, useImperativeHandle, useRef, type ForwardedRef, type RefObject } from "react";
-import { toDateKey } from "../../../date/dateVirtualization";
-import type { CalendarNavigationHandle, TimelineSettings } from "../../../core/types";
-import type { CalendarViewHandle } from "../../../core/internalTypes";
-import { minuteToX, parseClockToMinutes } from "../../../time/time";
+import { toDateKey } from "#calendar-internal/date/dateVirtualization";
+import type { CalendarNavigationHandle, TimelineSettings } from "#calendar-internal/core/types";
+import type { CalendarViewHandle } from "#calendar-internal/core/internalTypes";
+import { minuteToX, parseClockToMinutes } from "#calendar-internal/time/time";
 import { useViewportAnchoring } from "../../anchors/parent/useViewportAnchoring";
-import { TIMELINE_LEFT_GUTTER_PX } from "../../../time/timelineTicks";
+import { TIMELINE_LEFT_GUTTER_PX } from "#calendar-internal/time/timelineTicks";
 
 /**
  * Horizontal navigation boundary.

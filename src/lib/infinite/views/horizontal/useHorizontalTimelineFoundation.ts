@@ -12,7 +12,7 @@
  * @see docs/flows/async-loading-and-layout.md
  */
 import { useMemo, useState, type ForwardedRef } from "react";
-import type { CalendarInternalViewProps, CalendarViewHandle } from "../../../core/internalTypes";
+import type { CalendarInternalViewProps, CalendarViewHandle } from "#calendar-internal/core/internalTypes";
 import { useDayMetrics } from "../../events/metrics/useDayMetrics";
 import { useEventRangeLoader } from "../../events/loading/useEventRangeLoader";
 import { useRetainedCalendarRows } from "../../events/metrics/useRetainedCalendarRows";

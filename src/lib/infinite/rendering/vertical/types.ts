@@ -11,12 +11,12 @@ import type {
   EventRenderer,
   EventRenderStatus,
   TimelineSettings
-} from "../../../core/types";
+} from "#calendar-internal/core/types";
 import type { EventColumnLayoutItem, PreparedEventCell } from "../../events/layout/layout";
-import type { buildTimeTicks } from "../../../time/timelineTicks";
+import type { buildTimeTicks } from "#calendar-internal/time/timelineTicks";
 import type { ViewportGeometryRegistration } from "../../anchors/parent/viewportAnchorTypes";
 import type { ViewportMetricsStore } from "../../scroll/resources/viewportMetricsStore";
-import type { CalendarFocusedEventTarget } from "../../../core/internalTypes";
+import type { CalendarFocusedEventTarget } from "#calendar-internal/core/internalTypes";
 
 export type VerticalHoveredEvent = { eventId: string; calendarId: CalendarId } | null;
 

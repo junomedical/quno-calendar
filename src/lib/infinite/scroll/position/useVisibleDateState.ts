@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef } from "react";
-import { normalizeAnchorDate } from "../../../date/dateVirtualization";
+import { normalizeAnchorDate } from "#calendar-internal/date/dateVirtualization";
 import type { PendingScrollTarget } from "./scrollPositionTypes";
 
 /**

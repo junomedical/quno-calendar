@@ -7,7 +7,7 @@
  * not replay the same visual state.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { EventId } from "../../../core/types";
+import type { EventId } from "#calendar-internal/core/types";
 
 const APPEARING_EVENT_DURATION_MS = 900;
 const EMPTY_EVENT_IDS: EventId[] = [];

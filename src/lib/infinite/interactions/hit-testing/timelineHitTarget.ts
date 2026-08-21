@@ -1,5 +1,5 @@
 /** Resolve a pointer coordinate to a grid owned by one calendar instance. */
-import type { CalendarId } from "../../../core/types";
+import type { CalendarId } from "#calendar-internal/core/types";
 
 export type ClientPoint = { clientX: number; clientY: number };
 

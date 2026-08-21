@@ -52,6 +52,20 @@ describe("architecture guard", () => {
     expect(result.stderr).toMatch(/large\.ts: 208 non-comment lines \(module limit: 200\)/);
     expect(result.stderr).toMatch(/large\.ts:1-123: tooLarge spans 123 source lines \(function limit: 120\)/);
   });
+
+  it("rejects deep relative imports in favor of the library alias", () => {
+    const sourceRoot = temporaryDirectory();
+    const nestedDirectory = join(sourceRoot, "infinite", "rendering", "shared");
+    mkdirSync(nestedDirectory, { recursive: true });
+    writeFileSync(
+      join(nestedDirectory, "eventShell.ts"),
+      'import type { CalendarEvent } from "../../../core/types";\nexport type Event = CalendarEvent;\n'
+    );
+
+    const result = runScript(architectureScript, sourceRoot);
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain("use #calendar-internal/* instead of deep relative import ../../../core/types");
+  });
 });
 
 describe("bundle-size guard", () => {

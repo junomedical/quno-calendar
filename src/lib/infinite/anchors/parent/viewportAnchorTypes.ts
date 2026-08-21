@@ -1,4 +1,4 @@
-import type { CalendarId, EventId } from "../../../core/types";
+import type { CalendarId, EventId } from "#calendar-internal/core/types";
 
 export type ViewportGeometryRegistration = {
   registerDayElement: (dateKey: string, element: HTMLElement | null) => void;

@@ -2,9 +2,9 @@
  * Pure vertical geometry.
  * event/time input -> clamped timeline pixels + fixed visual gutter
  */
-import type { CalendarEvent, TimelineSettings } from "../../../core/types";
+import type { CalendarEvent, TimelineSettings } from "#calendar-internal/core/types";
 import type { EventColumnLayoutItem } from "../../events/layout/layout";
-import { minuteToY, minutesSinceStartOfDay } from "../../../time/time";
+import { minuteToY, minutesSinceStartOfDay } from "#calendar-internal/time/time";
 
 export const VERTICAL_COLUMN_GAP_PX = 0;
 export const VERTICAL_TIMELINE_GUTTER_PX = 8;

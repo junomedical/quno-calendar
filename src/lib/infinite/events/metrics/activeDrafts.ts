@@ -1,4 +1,4 @@
-import type { ActiveEventDraft, CalendarEvent } from "../../../core/types";
+import type { ActiveEventDraft, CalendarEvent } from "#calendar-internal/core/types";
 
 /** Returns the persisted event id that an edit draft replaces, if any. */
 export function activeDraftSourceEventId(activeDraft: ActiveEventDraft | null | undefined): string | null {

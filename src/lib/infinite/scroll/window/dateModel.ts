@@ -4,7 +4,7 @@ import {
   virtualDateWindowAround,
   virtualOffsetForDate,
   type VirtualDateWindow
-} from "../../../date/dateVirtualization";
+} from "#calendar-internal/date/dateVirtualization";
 
 /**
  * Data flow: anchor date -> bounded one-month window -> stable date/index mapping.

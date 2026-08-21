@@ -1,6 +1,6 @@
-import { minuteToX } from "../../../time/time";
-import type { TimelineSettings } from "../../../core/types";
-import { TIMELINE_LEFT_GUTTER_PX } from "../../../time/timelineTicks";
+import { minuteToX } from "#calendar-internal/time/time";
+import type { TimelineSettings } from "#calendar-internal/core/types";
+import { TIMELINE_LEFT_GUTTER_PX } from "#calendar-internal/time/timelineTicks";
 
 type TimeTick = {
   minute: number;

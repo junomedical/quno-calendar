@@ -1,8 +1,8 @@
-import { formatHorizontalDateLabel } from "../../../date/dateLabels";
-import { fromDateKey } from "../../../date/dateVirtualization";
-import { minuteToX } from "../../../time/time";
-import { TIMELINE_LEFT_GUTTER_PX } from "../../../time/timelineTicks";
-import type { TimelineSettings } from "../../../core/types";
+import { formatHorizontalDateLabel } from "#calendar-internal/date/dateLabels";
+import { fromDateKey } from "#calendar-internal/date/dateVirtualization";
+import { minuteToX } from "#calendar-internal/time/time";
+import { TIMELINE_LEFT_GUTTER_PX } from "#calendar-internal/time/timelineTicks";
+import type { TimelineSettings } from "#calendar-internal/core/types";
 
 /** Sticky date chrome: header band, current-time marker, and readable date label. */
 

@@ -1,5 +1,5 @@
-import type { CalendarEvent, TimelineSettings } from "../../../core/types";
-import { minuteToX } from "../../../time/time";
+import type { CalendarEvent, TimelineSettings } from "#calendar-internal/core/types";
+import { minuteToX } from "#calendar-internal/time/time";
 import type { PreparedEventCell } from "./preparedCell";
 
 /** Positioned event geometry for one rendered calendar row. */

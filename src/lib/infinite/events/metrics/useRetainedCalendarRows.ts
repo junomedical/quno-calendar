@@ -1,5 +1,5 @@
 import { useMemo, useRef } from "react";
-import type { ActiveEventDraft, CalendarId, CalendarRow } from "../../../core/types";
+import type { ActiveEventDraft, CalendarId, CalendarRow } from "#calendar-internal/core/types";
 
 type RetainedCalendarRows = {
   renderedCalendars: CalendarRow[];

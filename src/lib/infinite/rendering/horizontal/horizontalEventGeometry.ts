@@ -1,6 +1,6 @@
-import type { CalendarEvent, TimelineSettings } from "../../../core/types";
-import { minuteToX, minutesSinceStartOfDay } from "../../../time/time";
-import { TIMELINE_LEFT_GUTTER_PX } from "../../../time/timelineTicks";
+import type { CalendarEvent, TimelineSettings } from "#calendar-internal/core/types";
+import { minuteToX, minutesSinceStartOfDay } from "#calendar-internal/time/time";
+import { TIMELINE_LEFT_GUTTER_PX } from "#calendar-internal/time/timelineTicks";
 
 /** Pure event geometry: event timestamps -> horizontal shell bounds. */
 

@@ -1,7 +1,7 @@
 import { useCallback, type RefObject } from "react";
-import type { CalendarId, TimelineSettings } from "../../../core/types";
-import { snapMinute, xToMinute, yToMinute } from "../../../time/time";
-import { TIMELINE_LEFT_GUTTER_PX } from "../../../time/timelineTicks";
+import type { CalendarId, TimelineSettings } from "#calendar-internal/core/types";
+import { snapMinute, xToMinute, yToMinute } from "#calendar-internal/time/time";
+import { TIMELINE_LEFT_GUTTER_PX } from "#calendar-internal/time/timelineTicks";
 import type { CalendarHit } from "../timelineInteractionModel";
 import type { TimelinePointer } from "./hitTestingTypes";
 import { timelineGridAtPoint, timelineGridIdentity } from "./timelineHitTarget";

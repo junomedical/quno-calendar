@@ -6,7 +6,7 @@ import {
   type CalendarViewComponentProps,
   type EventMoveRequest,
   type TimelineSettings
-} from "../../../core/types";
+} from "#calendar-internal/core/types";
 import { sameMoveRequest } from "./sameMoveRequest";
 import { previewEventForDrag, proposalForDrag, type DragState } from "./dragInteractionModel";
 

@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState, type ForwardedRef } from "react";
-import { toDateKey } from "../../../date/dateVirtualization";
-import type { CalendarInternalViewProps, CalendarViewHandle } from "../../../core/internalTypes";
-import { timelineEndMinute, timelineStartMinute } from "../../../time/time";
+import { toDateKey } from "#calendar-internal/date/dateVirtualization";
+import type { CalendarInternalViewProps, CalendarViewHandle } from "#calendar-internal/core/internalTypes";
+import { timelineEndMinute, timelineStartMinute } from "#calendar-internal/time/time";
 import { useHorizontalShiftWheelZoom } from "../../interactions/zoom/useShiftWheelZoom";
 import { useTimelineInteractions } from "../../interactions/useTimelineInteractions";
 import { useHorizontalTimelineHitTesting } from "../../interactions/hit-testing/useTimelineHitTesting";
-import { buildTimeTicks } from "../../../time/timelineTicks";
+import { buildTimeTicks } from "#calendar-internal/time/timelineTicks";
 import { useHorizontalEventHover } from "../../rendering/horizontal/useHorizontalEventHover";
 import { useHorizontalControlledZoomAnchor } from "../../anchors/zoom/useHorizontalControlledZoomAnchor";
 import { useHorizontalTimelineFoundation } from "./useHorizontalTimelineFoundation";

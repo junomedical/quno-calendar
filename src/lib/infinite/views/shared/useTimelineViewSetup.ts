@@ -1,11 +1,11 @@
 import { useMemo } from "react";
-import { normalizeAnchorDate, toDateKey } from "../../../date/dateVirtualization";
+import { normalizeAnchorDate, toDateKey } from "#calendar-internal/date/dateVirtualization";
 import {
   type CalendarId,
   type CalendarRow,
   type CalendarViewComponentProps,
   type TimelineSettings
-} from "../../../core/types";
+} from "#calendar-internal/core/types";
 import { mergeTimelineSettings } from "./mergeTimelineSettings";
 
 type UseTimelineViewSetupArgs = {

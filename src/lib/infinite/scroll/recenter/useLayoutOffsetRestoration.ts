@@ -11,7 +11,7 @@
  * @see docs/flows/virtual-scroll-and-recenter.md#position-snapshots-and-layout-changes
  */
 import { useLayoutEffect, useRef, type MutableRefObject } from "react";
-import { normalizeAnchorDate } from "../../../date/dateVirtualization";
+import { normalizeAnchorDate } from "#calendar-internal/date/dateVirtualization";
 import type { PendingScrollTarget } from "../position/scrollPositionTypes";
 
 export type ResolveOffsetOnLayoutChange = (

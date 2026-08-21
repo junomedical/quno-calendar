@@ -1,4 +1,4 @@
-import type { CalendarId, CalendarViewportAnchorTarget, EventId } from "../../../core/types";
+import type { CalendarId, CalendarViewportAnchorTarget, EventId } from "#calendar-internal/core/types";
 
 type Listener = () => void;
 

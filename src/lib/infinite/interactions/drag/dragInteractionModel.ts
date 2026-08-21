@@ -1,7 +1,7 @@
 /** Pure proposal/preview transforms for the React drag lifecycle. */
-import { eventCalendarIds, replaceEventCalendarMembership } from "../../../data/calendarEvents";
+import { eventCalendarIds, replaceEventCalendarMembership } from "#calendar-internal/data/calendarEvents";
 import { buildMoveProposal, type CalendarHit } from "../timelineInteractionModel";
-import type { CalendarEvent, CalendarId, EventMoveRequest, TimelineSettings } from "../../../core/types";
+import type { CalendarEvent, CalendarId, EventMoveRequest, TimelineSettings } from "#calendar-internal/core/types";
 
 export type DragState = {
   event: CalendarEvent;

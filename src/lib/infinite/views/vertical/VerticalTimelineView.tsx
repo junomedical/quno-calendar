@@ -3,7 +3,7 @@
  * public props -> virtual/cache/interaction models -> navigation + canvas
  */
 import { forwardRef } from "react";
-import type { CalendarInternalViewProps, CalendarViewHandle } from "../../../core/internalTypes";
+import type { CalendarInternalViewProps, CalendarViewHandle } from "#calendar-internal/core/internalTypes";
 import { VERTICAL_TIMELINE_GUTTER_PX } from "../../rendering/vertical/VerticalTimelineDay";
 import { useEventRangeLoader } from "../../events/loading/useEventRangeLoader";
 import { useTimelineInteractions } from "../../interactions/useTimelineInteractions";

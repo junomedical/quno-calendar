@@ -6,8 +6,8 @@
  * Multi-calendar events keep one object identity in every matching bucket. The
  * pass is proportional to event memberships rather than events × resources.
  */
-import { eventCalendarIds } from "../../../data/calendarEvents";
-import type { CalendarEvent, CalendarId } from "../../../core/types";
+import { eventCalendarIds } from "#calendar-internal/data/calendarEvents";
+import type { CalendarEvent, CalendarId } from "#calendar-internal/core/types";
 
 export function indexEventsByCalendar(
   events: readonly CalendarEvent[],

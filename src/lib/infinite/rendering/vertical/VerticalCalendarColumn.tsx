@@ -3,7 +3,7 @@
  * prepared cell -> grid chrome -> availability -> committed events -> transients
  */
 import { memo, useCallback, useMemo } from "react";
-import type { CalendarEvent } from "../../../core/types";
+import type { CalendarEvent } from "#calendar-internal/core/types";
 import { layoutPreparedEventsForColumn, type EventColumnLayoutItem } from "../../events/layout/layout";
 import { AvailabilityLayer, CommittedLayer, TransientLayer } from "../shared/EventLayers";
 import type { VerticalCalendarColumnProps } from "./types";

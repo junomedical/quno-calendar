@@ -10,7 +10,7 @@
  *
  * @see docs/architecture.md#prepared-cell-pipeline
  */
-import type { CalendarEvent, TimelineSettings } from "../../../core/types";
+import type { CalendarEvent, TimelineSettings } from "#calendar-internal/core/types";
 import { eventIntervals, type EventInterval } from "./eventIntervals";
 import { MinHeap } from "./minHeap";
 

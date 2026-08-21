@@ -3,7 +3,7 @@
  * pointer coordinates + prepared lane boxes -> one row-local hovered event identity
  */
 import { useCallback, type Dispatch, type PointerEvent as ReactPointerEvent, type SetStateAction } from "react";
-import type { CalendarId } from "../../../core/types";
+import type { CalendarId } from "#calendar-internal/core/types";
 import type { EventColumnLayoutItem } from "../../events/layout/layout";
 import type { VerticalHoveredEvent } from "./VerticalTimelineDay";
 

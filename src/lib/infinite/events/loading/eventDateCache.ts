@@ -10,7 +10,7 @@
  *
  * @see docs/flows/async-loading-and-layout.md#cache-commit-transaction
  */
-import type { CalendarEvent, EventId } from "../../../core/types";
+import type { CalendarEvent, EventId } from "#calendar-internal/core/types";
 import { eventDateKey } from "../eventDateKey";
 
 export const MAX_CACHED_DATE_BUCKETS = 120;

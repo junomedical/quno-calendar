@@ -12,7 +12,7 @@
  */
 import type { Virtualizer } from "@tanstack/react-virtual";
 import { useCallback, type MutableRefObject, type RefObject } from "react";
-import type { VirtualDateWindow } from "../../../date/dateVirtualization";
+import type { VirtualDateWindow } from "#calendar-internal/date/dateVirtualization";
 import { clampVirtualDateIndex } from "../window/dateModel";
 import { resolveVisibleDateSnapshot } from "./visibleSnapshot";
 

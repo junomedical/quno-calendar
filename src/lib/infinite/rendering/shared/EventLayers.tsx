@@ -1,9 +1,9 @@
-import { eventBelongsToCalendar } from "../../../data/calendarEvents";
-import type { CalendarEvent, CalendarId, EventRenderer, EventRenderStatus } from "../../../core/types";
+import { eventBelongsToCalendar } from "#calendar-internal/data/calendarEvents";
+import type { CalendarEvent, CalendarId, EventRenderer, EventRenderStatus } from "#calendar-internal/core/types";
 import type { ViewportGeometryRegistration } from "../../anchors/parent/viewportAnchorTypes";
 import { eventDateKey } from "../../events/eventDateKey";
 import { EventShell, type EventShellProps } from "./EventShell";
-import type { CalendarFocusedEventTarget } from "../../../core/internalTypes";
+import type { CalendarFocusedEventTarget } from "#calendar-internal/core/internalTypes";
 
 export type EventProjection = Pick<EventShellProps, "left" | "top" | "width" | "hoverMaxWidth" | "height">;
 

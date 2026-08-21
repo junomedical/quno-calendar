@@ -1,9 +1,9 @@
 import type { PointerEventHandler, RefObject, UIEventHandler } from "react";
-import type { CalendarViewComponentProps } from "../../../core/types";
+import type { CalendarViewComponentProps } from "#calendar-internal/core/types";
 import { InfiniteTimeScaleHeader } from "../shared/TimeScaleHeader";
 import { InfiniteTimelineDay } from "./HorizontalTimelineDay";
 import type { HorizontalTimelineDayProps } from "./types";
-import { TIMELINE_LEFT_GUTTER_PX, buildTimeTicks } from "../../../time/timelineTicks";
+import { TIMELINE_LEFT_GUTTER_PX, buildTimeTicks } from "#calendar-internal/time/timelineTicks";
 
 /**
  * Horizontal render loop.

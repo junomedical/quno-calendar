@@ -14,8 +14,8 @@
  * @see docs/flows/async-loading-and-layout.md
  */
 import { startTransition, useCallback, useEffect, useMemo, useState } from "react";
-import { applyEventMove } from "../../../data/calendarEvents";
-import { defaultEventPrefetchPolicy } from "../../../data/eventPrefetch";
+import { applyEventMove } from "#calendar-internal/data/calendarEvents";
+import { defaultEventPrefetchPolicy } from "#calendar-internal/data/eventPrefetch";
 import { EventRangeCoordinator, eventLoadDateKeys } from "./eventRangeCoordinator";
 import { loadEventRange } from "./loadEventRange";
 import type {
@@ -26,7 +26,7 @@ import type {
   EventPrefetchPolicy,
   EventMoveRequest,
   LoadEvents
-} from "../../../core/types";
+} from "#calendar-internal/core/types";
 import { useAppearingEvents } from "./useAppearingEvents";
 
 type UseEventRangeLoaderArgs = {

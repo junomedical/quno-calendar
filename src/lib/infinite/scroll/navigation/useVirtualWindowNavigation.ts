@@ -12,7 +12,7 @@
  * @see docs/flows/virtual-scroll-and-recenter.md#imperative-navigation
  */
 import { useCallback, useLayoutEffect, type MutableRefObject, type RefObject } from "react";
-import { normalizeAnchorDate } from "../../../date/dateVirtualization";
+import { normalizeAnchorDate } from "#calendar-internal/date/dateVirtualization";
 import type { PendingScrollTarget } from "../position/scrollPositionTypes";
 import { useScrollRecenter } from "../settlement/useScrollRecenter";
 

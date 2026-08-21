@@ -3,7 +3,7 @@
  * date anchor -> bounded virtual days -> measured viewport store + stable date offsets
  */
 import { useCallback, useEffect, useLayoutEffect, useState, type Dispatch, type SetStateAction } from "react";
-import type { TimelineSettings } from "../../../core/types";
+import type { TimelineSettings } from "#calendar-internal/core/types";
 import { useScrollRuntime } from "../../scroll/useScrollRuntime";
 import { useViewportMetricsStore } from "../../scroll/resources/viewportMetricsStore";
 import { resolveVerticalDateOffset } from "../../rendering/vertical/verticalViewGeometry";

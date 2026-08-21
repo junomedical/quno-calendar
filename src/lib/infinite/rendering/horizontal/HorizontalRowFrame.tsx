@@ -1,7 +1,7 @@
 import { useCallback, type PropsWithChildren, type PointerEvent } from "react";
-import type { CalendarId, CalendarRow, TimelineSettings } from "../../../core/types";
-import { minuteToX } from "../../../time/time";
-import { TIMELINE_LEFT_GUTTER_PX } from "../../../time/timelineTicks";
+import type { CalendarId, CalendarRow, TimelineSettings } from "#calendar-internal/core/types";
+import { minuteToX } from "#calendar-internal/time/time";
+import { TIMELINE_LEFT_GUTTER_PX } from "#calendar-internal/time/timelineTicks";
 import type { ViewportGeometryRegistration } from "../../anchors/parent/viewportAnchorTypes";
 import type { HorizontalRowLayoutItems } from "./types";
 

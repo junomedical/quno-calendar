@@ -5,7 +5,7 @@
  *                                            |-> row sizing / geometry
  *                                            `-> column sizing / geometry
  */
-import type { CalendarEvent, TimelineSettings } from "../../../core/types";
+import type { CalendarEvent, TimelineSettings } from "#calendar-internal/core/types";
 import { layoutPreparedEventsForColumn, type EventColumnLayoutItem } from "./columnLayout";
 import { prepareEventCell, type PreparedEventCell } from "./preparedCell";
 import { layoutPreparedEventsForRow, type EventLayoutItem } from "./rowLayout";
