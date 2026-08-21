@@ -55,7 +55,8 @@ Vitest unit tests live in `tests/unit` and mirror the source module grouping.
 - Event renderer receives status information.
 - Consumer-defined semantic color variables compute on the shell, headers, labels, grids, time text, borders, shadow,
   and current-time marker in both orientations when inherited from outside `CalendarRoot`.
-- Zoom-only geometry changes retain the rendered card DOM, do not reinvoke an unchanged external renderer, and do not reload the event range. Controlled Shift-wheel requests commit before their pointer-anchor restoration begins.
+- Event shells classify default and caller-provided width/height thresholds into named density attributes.
+- Zoom-only geometry and density changes retain the rendered card DOM, do not reinvoke an unchanged external renderer, and do not reload the event range. Controlled Shift-wheel requests commit before their pointer-anchor restoration begins.
 - Controlled active edit drafts render through the event renderer while the loaded source event is hidden.
 - A never-resolving loader does not block calendar chrome or Pointer Events; a delayed response adds event shells without replacing the date/resource structure.
 - Demo API-delay controls show pending/idle API status, keep date/resource chrome visible with zero event nodes after a dataset remount, receive HTTP 200 from `POST /api/demo-events`, then publish event shells when the response resolves.
@@ -188,7 +189,7 @@ orientation, availability, loading, visual-focus, and motion assertions formerly
 - Availability renders as a background layer while draft/new event drawing can occur on top.
 - Availability editing mode makes appointments inactive background blocks, supports drawing new availability, and supports dragging an existing availability block.
 - Event cards include a visible `H:mm–H:mm` time range line.
-- Compact event cards hide the time line when three lines do not fit and reveal it once the card has enough hover-expanded height, including single non-overlapping events in compact rows, without reducing hover typography, changing vertical text alignment, or hiding title icons.
+- Compact event cards consume calendar-owned density attributes, hide the time line when three lines do not fit, and reveal it once hover expansion returns the shell to a roomier density, including single non-overlapping events in compact rows, without reducing hover typography, changing vertical text alignment, or hiding title icons.
 - Date navigation can jump to a specific date and back to today.
 - Date/time navigation can jump vertically to a date and horizontally to a requested time.
 - Vertical `Shift` + wheel zoom anchors to the closest rendered in-range time node even when the pointer sits below the configured timeline end.

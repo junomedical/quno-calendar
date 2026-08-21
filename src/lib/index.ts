@@ -1,5 +1,11 @@
 export { CalendarRoot } from "./core/CalendarRoot";
 export type { CalendarStyle, CalendarThemeVariables } from "./core/calendarTheme";
+export {
+  defaultEventRendererSizing,
+  type EventHeightDensity,
+  type EventRendererSizing,
+  type EventWidthDensity
+} from "./core/eventRendererSizing";
 export type { DayNameGenerator } from "./date/dateLabels";
 export { defaultEventPrefetchPolicy } from "./data/eventPrefetch";
 export {

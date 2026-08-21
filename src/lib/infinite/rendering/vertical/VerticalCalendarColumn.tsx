@@ -14,13 +14,20 @@ import {
   VERTICAL_TIMELINE_GUTTER_PX
 } from "./verticalGeometry";
 
-function useEventProjections(settings: VerticalCalendarColumnProps["settings"]) {
+function useEventProjections(settings: VerticalCalendarColumnProps["settings"], columnWidth: number) {
   const event = useCallback(
     (calendarEvent: CalendarEvent) => {
       const box = verticalEventBox(calendarEvent, settings);
-      return { left: 0, top: box.top, width: "100%", hoverMaxWidth: "100%", height: box.height };
+      return {
+        left: 0,
+        top: box.top,
+        width: "100%",
+        densityWidth: columnWidth,
+        hoverMaxWidth: "100%",
+        height: box.height
+      };
     },
-    [settings]
+    [columnWidth, settings]
   );
   const committed = useCallback(
     (item: EventColumnLayoutItem, hovered: boolean) => {
@@ -29,11 +36,14 @@ function useEventProjections(settings: VerticalCalendarColumnProps["settings"]) 
         left: hovered ? "0%" : `calc(${item.leftPercent}% + ${VERTICAL_COLUMN_GAP_PX}px)`,
         top: item.top,
         width,
+        densityWidth: hovered
+          ? columnWidth
+          : Math.max(0, (columnWidth * item.widthPercent) / 100 - VERTICAL_COLUMN_GAP_PX * 2),
         hoverMaxWidth: width,
         height: hovered ? Math.max(item.height, settings.verticalEventHoverMinHeight) : item.height
       };
     },
-    [settings.verticalEventHoverMinHeight]
+    [columnWidth, settings.verticalEventHoverMinHeight]
   );
   return { event, committed };
 }
@@ -45,6 +55,7 @@ export const VerticalCalendarColumn = memo(function VerticalCalendarColumn({
   preparedCell,
   isHidden = false,
   settings,
+  columnWidth,
   boardHeight,
   gridCellHeight,
   interactionMode,
@@ -72,7 +83,7 @@ export const VerticalCalendarColumn = memo(function VerticalCalendarColumn({
     () => positionColumnLayoutItems(layoutPreparedEventsForColumn(preparedCell, settings)),
     [preparedCell, settings]
   );
-  const project = useEventProjections(settings);
+  const project = useEventProjections(settings, columnWidth);
   const setResourceElement = useCallback(
     (element: HTMLDivElement | null) => geometryRegistration.registerResourceElement(dateKey, calendar.id, element),
     [calendar.id, dateKey, geometryRegistration]

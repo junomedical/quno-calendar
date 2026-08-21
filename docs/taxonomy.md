@@ -74,6 +74,7 @@ This document defines the names used for visible calendar interface parts and th
 | Availability          | A background schedulable interval, usually full row height, shown with `kind: "availability"`.                                                                                | `kind: "availability"`              |
 | Multi-calendar event  | One event that belongs to more than one calendar and renders once in each matching selected calendar row.                                                                     | `calendarIds`                       |
 | Event shell           | The calendar-owned positioned wrapper that controls geometry, hover size, z-index, and CSS variables.                                                                         | `EventShell`, `.ic-event-shell`     |
+| Event density         | A calendar-owned width or height category derived from shell geometry and exposed for product-card CSS without duplicating numeric breakpoints.                               | `data-event-*-density`              |
 | Event card            | The product-owned visual content rendered inside an event shell. The demo card is only one possible renderer.                                                                 | `eventRenderer`, `.demo-event-card` |
 | Availability shell    | An event shell used for an availability event. It is pointer-transparent in event mode and active in availability mode.                                                       | `.ic-availability-shell`            |
 | Draft                 | A temporary event shown while the user draws a new time range.                                                                                                                | `draft-new-event`, `status="new"`   |
@@ -136,6 +137,7 @@ This document defines the names used for visible calendar interface parts and th
 - Use `calendar row` for the resource row inside a day. Avoid calling it a lane.
 - Use `overlap lane` only for mini-lanes inside a calendar row.
 - Use `event shell` for calendar-owned geometry and `event card` for product-owned renderer content.
+- Use `event density` for the named shell-size category; keep numeric density thresholds in `eventRendererSizing`.
 - Use `date header` for the gray sticky day band and `date label` for its left text cell.
 - Use `time scale` for the sticky top header and `time label` for individual numbers.
 - Use `availability` for schedulable background intervals, not `free time` or `working hours`, unless product copy explicitly requires those words.

@@ -389,6 +389,16 @@ public variables on `.ic-shell`. This lets a theme defined on a wrapper win with
 order. One shared palette covers both orientations; `--ic-vertical-header-bg` remains only as a compatibility alias.
 An event's explicit `color` still wins over the calendar-level default event accent.
 
+## 065 - Event-Card Density Is A Shell Contract
+
+Numeric event-card breakpoints belong to the calendar because it already owns projected shell geometry in both
+orientations. `CalendarRoot.eventRendererSizing` provides one overridable threshold contract, and each event shell
+publishes the result as named width and height density attributes. Product CSS decides which details each state shows;
+it does not copy geometry thresholds or measure the DOM in React. Density remains shell state rather than an
+`EventRendererProps` field so zoom and other geometry-only updates can change presentation without reinvoking an
+unchanged external renderer.
+The named `calendar-event` size container remains available for consumer-specific rules outside the shared contract.
+
 ## 066 - Controlled Wheel Zoom Commits Outside Active React Work
 
 Shift-wheel zoom remains parent-controlled, but its callback must not synchronously force React work while a render is

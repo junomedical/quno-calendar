@@ -2,7 +2,7 @@
 
 Reusable React infinite-calendar component with virtualized horizontal and vertical timeline views.
 
-This project is still a `0.1.x` release, but the package surface is intentionally small: render `CalendarRoot`, provide calendars, load visible event ranges, and own product-specific event cards through `eventRenderer`.
+This project is still a `0.1.x` release, but the package surface is intentionally small: render `CalendarRoot`, provide calendars, load visible event ranges, and own product-specific event cards through `eventRenderer`. Calendar-owned event-density attributes let those cards adapt to shared width and height thresholds with product CSS.
 
 ## Install
 

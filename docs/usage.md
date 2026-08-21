@@ -85,18 +85,28 @@ function ProductEventCard({ event, style }: EventRendererProps) {
 Changing renderer hierarchy does not alter event times, overlap lanes, loading, or shell geometry. Keep the renderer
 referentially stable when its hierarchy has not changed.
 
-Each event shell is already exposed as a named `calendar-event` size container. Use CSS container queries when card
-content should respond to its own rendered width or height rather than the browser viewport:
+The calendar classifies each event shell with `data-event-width-density` (`regular`, `compact`, or `tight`) and
+`data-event-height-density` (`regular`, `compact`, `title-only`, or `minimal`). The exported
+`defaultEventRendererSizing` owns the numeric thresholds, and `CalendarRoot.eventRendererSizing` can replace that
+contract for a product:
+
+```tsx
+import { CalendarRoot, defaultEventRendererSizing } from "quno-calendar";
+
+<CalendarRoot {...calendarProps} eventRenderer={ProductEventCard} eventRendererSizing={defaultEventRendererSizing} />;
+```
+
+Product CSS can then respond to stable names without repeating pixel values:
 
 ```css
-@container calendar-event (width < 120px) {
+.ic-event-shell:is([data-event-width-density="compact"], [data-event-width-density="tight"]) {
   .product-event-card__details,
   .product-event-card__time {
     display: none;
   }
 }
 
-@container calendar-event (height < 54px) {
+.ic-event-shell:is([data-event-height-density="title-only"], [data-event-height-density="minimal"]) {
   .product-event-card__secondary {
     display: none;
   }
@@ -104,7 +114,9 @@ content should respond to its own rendered width or height rather than the brows
 ```
 
 This lets the same renderer keep full context in a roomy shell, preserve only the title when overlap makes a card
-narrow, or remove secondary details when a compact row makes it short.
+narrow, or remove secondary details when a compact row makes it short. Density changes update only the calendar-owned
+shell; an unchanged external renderer is not called again during zoom. Each shell remains a named `calendar-event`
+size container for consumers that need additional raw CSS container queries beyond the shared states.
 
 Repository example: the custom-card structure chapter in
 [`ArticleProductDemos.tsx`](../demo/examples/integration-walkthrough/ArticleProductDemos.tsx).

@@ -9,6 +9,7 @@ import { verticalMinuteToY } from "./verticalGeometry";
 type VerticalDayBoardProps = {
   day: VerticalTimelineDayProps;
   cadenceHeight: number;
+  columnWidths: number[];
   gridTemplateColumns: string;
   renderedColumnIndexes: number[];
 };
@@ -17,6 +18,7 @@ type VerticalDayBoardProps = {
 export function VerticalDayBoard({
   day,
   cadenceHeight,
+  columnWidths,
   gridTemplateColumns,
   renderedColumnIndexes
 }: VerticalDayBoardProps) {
@@ -51,6 +53,7 @@ export function VerticalDayBoard({
             preparedCell={day.preparedCellForColumn(day.dateKey, calendar.id)}
             isHidden={isHidden}
             settings={day.settings}
+            columnWidth={columnWidths[resourceIndex]}
             boardHeight={day.boardHeight}
             gridCellHeight={cadenceHeight}
             interactionMode={day.interactionMode}

@@ -11,7 +11,13 @@ function useEventProjections(settings: HorizontalTimelineRowProps["settings"], r
   const availability = useMemo(
     () => (event: CalendarEvent) => {
       const geometry = horizontalEventGeometry(event, settings);
-      return { ...geometry, top: 0, hoverMaxWidth: geometry.width, height: rowHeight };
+      return {
+        ...geometry,
+        top: 0,
+        densityWidth: geometry.width,
+        hoverMaxWidth: geometry.width,
+        height: rowHeight
+      };
     },
     [rowHeight, settings]
   );
@@ -21,6 +27,7 @@ function useEventProjections(settings: HorizontalTimelineRowProps["settings"], r
       return {
         ...geometry,
         top: preview ? 6 : 0,
+        densityWidth: geometry.width,
         hoverMaxWidth: geometry.width,
         height: preview ? rowHeight - 12 : rowHeight
       };
@@ -30,11 +37,13 @@ function useEventProjections(settings: HorizontalTimelineRowProps["settings"], r
   const committed = useMemo(
     () => (item: EventLayoutItem, hovered: boolean) => {
       const left = TIMELINE_LEFT_GUTTER_PX + item.left;
+      const hoverMaxWidth = committedEventHoverWidth(left, item.width, width);
       return {
         left,
         top: hovered ? 0 : item.top,
         width: item.width,
-        hoverMaxWidth: committedEventHoverWidth(left, item.width, width),
+        densityWidth: hovered ? hoverMaxWidth : item.width,
+        hoverMaxWidth,
         height: hovered ? rowHeight : item.height
       };
     },

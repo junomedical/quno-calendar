@@ -10,10 +10,7 @@
 }
 
 .demo-event-card {
-  /*
-   * The shell is a size container named `calendar-event`; the card fills that
-   * container and uses container queries below to decide which details fit.
-   */
+  /* The card fills the shell and responds to its calendar-owned density state. */
   display: flex;
   position: relative;
   flex-direction: column;
@@ -96,57 +93,62 @@
   font-size: 11px;
 }
 
-@container calendar-event (height < 52px) {
+.ic-event-shell:is(
+    [data-event-height-density="compact"],
+    [data-event-height-density="title-only"],
+    [data-event-height-density="minimal"]
+  )
+  .demo-event-card {
   /*
    * First compact step: keep title and patient readable, hide the third time
    * line unless an interaction status explicitly reveals it below.
    */
-  .demo-event-card {
-    gap: 0;
-    padding-block: 4px;
-  }
-
-  .demo-event-time {
-    display: none;
-  }
+  gap: 0;
+  padding-block: 4px;
 }
 
-@container calendar-event (height < 32px) {
+.ic-event-shell:is(
+    [data-event-height-density="compact"],
+    [data-event-height-density="title-only"],
+    [data-event-height-density="minimal"]
+  )
+  .demo-event-time {
+  display: none;
+}
+
+.ic-event-shell:is([data-event-height-density="title-only"], [data-event-height-density="minimal"]) .demo-event-card {
   /*
    * Second compact step: remove secondary text and reduce title size. This
    * keeps tiny overlap lanes usable while preserving the appointment label.
    */
-  .demo-event-card {
-    padding: 2px 7px;
-  }
-
-  .demo-event-patient {
-    display: none;
-  }
-
-  .demo-event-title {
-    font-size: 11px;
-  }
+  padding: 2px 7px;
 }
 
-@container calendar-event (height < 22px) {
+.ic-event-shell:is([data-event-height-density="title-only"], [data-event-height-density="minimal"])
+  .demo-event-patient {
+  display: none;
+}
+
+.ic-event-shell:is([data-event-height-density="title-only"], [data-event-height-density="minimal"]) .demo-event-title {
+  font-size: 11px;
+}
+
+.ic-event-shell[data-event-height-density="minimal"] .demo-event-card {
   /*
    * Densest lanes still reserve room for title icons, such as video/locked
    * state, because those icons can carry meaningful appointment type/status.
    */
-  .demo-event-card {
-    padding: 0 6px;
-  }
+  padding: 0 6px;
+}
 
-  .demo-event-title {
-    font-size: 10px;
-    line-height: 1;
-  }
+.ic-event-shell[data-event-height-density="minimal"] .demo-event-title {
+  font-size: 10px;
+  line-height: 1;
+}
 
-  .demo-event-title svg {
-    width: 10px;
-    height: 10px;
-  }
+.ic-event-shell[data-event-height-density="minimal"] .demo-event-title svg {
+  width: 10px;
+  height: 10px;
 }
 
 .demo-event-card.kind-consultation {

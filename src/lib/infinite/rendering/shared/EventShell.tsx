@@ -1,6 +1,8 @@
-import { memo, useCallback, useRef, type CSSProperties, type PointerEvent } from "react";
+import { memo, useCallback, useContext, useRef, type CSSProperties, type PointerEvent } from "react";
 import type { CalendarEvent, CalendarId, EventRenderer, EventRenderStatus } from "#calendar-internal/core/types";
+import { EventRendererSizingContext } from "#calendar-internal/core/eventRendererSizing";
 import type { ViewportGeometryRegistration } from "../../anchors/parent/viewportAnchorTypes";
+import { eventRendererDensity } from "./eventRendererDensity";
 
 export type CssLength = number | string;
 
@@ -10,6 +12,8 @@ export type EventShellProps = {
   left: CssLength;
   top: CssLength;
   width: CssLength;
+  /** Numeric rendered width used to classify the product card without DOM measurement. */
+  densityWidth: number;
   hoverMaxWidth: CssLength;
   height: CssLength;
   zIndex: number;
@@ -30,6 +34,12 @@ export type EventShellProps = {
     renderedCalendarId: CalendarId
   ) => void;
 };
+
+/** Geometry computed by an orientation-specific projection before shell state is added. */
+export type EventShellProjection = Pick<
+  EventShellProps,
+  "left" | "top" | "width" | "densityWidth" | "hoverMaxWidth" | "height"
+>;
 
 type EventRendererContentProps = Pick<
   EventShellProps,
@@ -66,6 +76,7 @@ export const EventShell = memo(function EventShell({
   left,
   top,
   width,
+  densityWidth,
   hoverMaxWidth,
   height,
   zIndex,
@@ -82,6 +93,12 @@ export const EventShell = memo(function EventShell({
   releaseDurationMs,
   onEventPointerDown
 }: EventShellProps) {
+  const eventRendererSizing = useContext(EventRendererSizingContext);
+  const density = eventRendererDensity(
+    densityWidth,
+    typeof height === "number" ? height : Number.POSITIVE_INFINITY,
+    eventRendererSizing
+  );
   const registeredElementRef = useRef<HTMLDivElement | null>(null);
   const registerEventElement = useCallback(
     (element: HTMLDivElement | null) => {
@@ -106,6 +123,8 @@ export const EventShell = memo(function EventShell({
       data-event-id={event.id}
       data-calendar-id={renderedCalendarId}
       data-status={status}
+      data-event-width-density={density.width}
+      data-event-height-density={density.height}
       data-lane-count={laneCount}
       data-exiting={isExiting ? "true" : undefined}
       data-testid={testId}
@@ -151,6 +170,7 @@ function areEventShellPropsEqual(previous: EventShellProps, next: EventShellProp
     previous.left === next.left &&
     previous.top === next.top &&
     previous.width === next.width &&
+    previous.densityWidth === next.densityWidth &&
     previous.hoverMaxWidth === next.hoverMaxWidth &&
     previous.height === next.height &&
     previous.zIndex === next.zIndex &&

@@ -2,10 +2,8 @@ import { eventBelongsToCalendar } from "#calendar-internal/data/calendarEvents";
 import type { CalendarEvent, CalendarId, EventRenderer, EventRenderStatus } from "#calendar-internal/core/types";
 import type { ViewportGeometryRegistration } from "../../anchors/parent/viewportAnchorTypes";
 import { eventDateKey } from "../../events/eventDateKey";
-import { EventShell, type EventShellProps } from "./EventShell";
+import { EventShell, type EventShellProjection, type EventShellProps } from "./EventShell";
 import type { CalendarFocusedEventTarget } from "#calendar-internal/core/internalTypes";
-
-export type EventProjection = Pick<EventShellProps, "left" | "top" | "width" | "hoverMaxWidth" | "height">;
 
 type CommittedItem = Pick<EventShellProps, "event" | "lane" | "laneCount" | "isOverlapping">;
 
@@ -25,7 +23,7 @@ type CommittedLayerProps<Item extends CommittedItem> = SharedLayerProps & {
   dragEventId?: string;
   appearingEventIds: Set<string>;
   focusedEventTarget?: CalendarFocusedEventTarget | null;
-  project: (item: Item, hovered: boolean) => EventProjection;
+  project: (item: Item, hovered: boolean) => EventShellProjection;
 };
 
 export function CommittedLayer<Item extends CommittedItem>({
@@ -83,7 +81,7 @@ type AvailabilityLayerProps = SharedLayerProps & {
   dragEventId?: string;
   appearingEventIds: Set<string>;
   focusedEventTarget?: CalendarFocusedEventTarget | null;
-  project: (event: CalendarEvent) => EventProjection;
+  project: (event: CalendarEvent) => EventShellProjection;
 };
 
 export function AvailabilityLayer({
@@ -142,7 +140,7 @@ type TransientLayerProps = SharedLayerProps & {
   draftEventIsExiting: boolean;
   draftEventReleaseDurationMs?: number;
   dragPreviewEvent: CalendarEvent | null;
-  project: (event: CalendarEvent, preview: boolean) => EventProjection;
+  project: (event: CalendarEvent, preview: boolean) => EventShellProjection;
 };
 
 export function TransientLayer({

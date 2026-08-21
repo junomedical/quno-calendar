@@ -42,6 +42,7 @@ export function VerticalTimelineDay(day: VerticalTimelineDayProps) {
       <VerticalDayBoard
         day={day}
         cadenceHeight={window.cadenceHeight}
+        columnWidths={window.columnWidths}
         gridTemplateColumns={window.gridTemplateColumns}
         renderedColumnIndexes={window.renderedColumnIndexes}
       />
