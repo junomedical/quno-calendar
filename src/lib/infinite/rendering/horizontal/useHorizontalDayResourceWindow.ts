@@ -1,6 +1,11 @@
 import { useMemo } from "react";
 import { eventCalendarIds } from "#calendar-internal/data/calendarEvents";
-import type { CalendarEvent, CalendarId, CalendarRow, CalendarViewportAnchorTarget } from "#calendar-internal/core/types";
+import type {
+  CalendarEvent,
+  CalendarId,
+  CalendarRow,
+  CalendarViewportAnchorTarget
+} from "#calendar-internal/core/types";
 import { buildResourceExtents, resourceIndexesInWindow } from "../../scroll/resources/resourceWindow";
 import { useViewportMetrics, type ViewportMetricsStore } from "../../scroll/resources/viewportMetricsStore";
 import { eventDateKey } from "../../events/eventDateKey";

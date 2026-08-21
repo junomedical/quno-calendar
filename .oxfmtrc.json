@@ -1,0 +1,18 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "printWidth": 120,
+  "trailingComma": "none",
+  "sortPackageJson": false,
+  "ignorePatterns": [
+    "dist",
+    "dist-demo",
+    "node_modules",
+    "coverage",
+    "playwright-report",
+    "test-results",
+    "work",
+    "outputs",
+    "*.tsbuildinfo",
+    "package-lock.json"
+  ]
+}

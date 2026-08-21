@@ -340,7 +340,8 @@ test("supports drawing a new event area", async ({ page }) => {
       return boxes;
     });
     blockDragSource = Object.values(blockDraftBoxesBefore).find((source) => source.isHitTestable) as
-      (DraftBoxSnapshot & { isHitTestable: true }) | undefined;
+      | (DraftBoxSnapshot & { isHitTestable: true })
+      | undefined;
     if (!blockDragSource) {
       await page.waitForTimeout(100);
     }

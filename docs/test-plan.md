@@ -233,11 +233,12 @@ orientation, availability, loading, visual-focus, and motion assertions formerly
 
 - `npm run typecheck` validates library, demo, examples, tests, and configs.
 - `npm run lint` runs ESLint with TypeScript and React Hooks checks.
+- `npm run format` uses OxFmt to check the project against the checked-in formatting and ignore rules.
 - `npm run check:architecture` enforces at most 200 non-comment lines per library module and 120 source lines per function through the TypeScript AST.
 - `npm run build:lib` emits ESM, UMD, declarations, and a package stylesheet subpath.
 - `npm run check:bundle-size` enforces the 32KiB ESM and 2KiB stylesheet gzip ceilings against a fresh library build.
 - `npm run verify:package` checks an explicit stylesheet asset, confirms no runtime `date-fns` or style injection, loads the package through Node CommonJS and ESM without `document`, then installs it into a temporary Vite React app and builds the consumer.
-- CI runs install, typecheck, lint, unit tests, Chromium Playwright tests, and package verification.
+- CI runs install, formatting, typecheck, lint, unit tests, Chromium Playwright tests, and package verification.
 
 ## Performance Budgets
 
