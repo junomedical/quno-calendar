@@ -3,10 +3,6 @@ import type { CalendarEvent, CalendarId, EventRenderer, EventRenderStatus } from
 import type { ViewportGeometryRegistration } from "../../anchors/parent/viewportAnchorTypes";
 
 export type CssLength = number | string;
-type RgbColor = { red: number; green: number; blue: number };
-
-const DEFAULT_EVENT_ACCENT = "#0b6eff";
-const MUTED_EVENT_ACCENT_MIX = 0.14;
 
 export type EventShellProps = {
   event: CalendarEvent;
@@ -124,8 +120,9 @@ export const EventShell = memo(function EventShell({
           zIndex,
           "--event-width": toCssLength(width),
           "--event-hover-width": toCssLength(hoverMaxWidth),
-          "--event-accent": event.color ?? DEFAULT_EVENT_ACCENT,
-          "--event-accent-muted": mutedEventAccent(event.color ?? DEFAULT_EVENT_ACCENT),
+          "--event-accent": event.color ?? "var(--ic-event-accent, var(--_ic-default-event-accent))",
+          "--event-accent-muted":
+            "color-mix(in srgb, var(--event-accent) 14%, var(--ic-surface, var(--_ic-default-surface)))",
           "--draft-release-duration": releaseDurationMs ? `${releaseDurationMs}ms` : undefined
         } as CSSProperties
       }
@@ -144,30 +141,6 @@ export const EventShell = memo(function EventShell({
 
 function toCssLength(value: CssLength): string {
   return typeof value === "number" ? `${value}px` : value;
-}
-
-function mutedEventAccent(accent: string): string {
-  const rgb = parseHexColor(accent);
-  if (!rgb) {
-    return `color-mix(in srgb, ${accent} ${MUTED_EVENT_ACCENT_MIX * 100}%, white)`;
-  }
-  return `rgb(${blendWithWhite(rgb.red)}, ${blendWithWhite(rgb.green)}, ${blendWithWhite(rgb.blue)})`;
-}
-
-function blendWithWhite(channel: number): number {
-  return Math.round(channel * MUTED_EVENT_ACCENT_MIX + 255 * (1 - MUTED_EVENT_ACCENT_MIX));
-}
-
-function parseHexColor(color: string): RgbColor | null {
-  const match = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(color.trim());
-  if (!match) return null;
-  const hex = match[1].length === 3 ? [...match[1]].map((character) => character.repeat(2)).join("") : match[1];
-  const value = Number.parseInt(hex, 16);
-  return {
-    red: value >> 16,
-    green: (value >> 8) & 0xff,
-    blue: value & 0xff
-  };
 }
 
 /** Keeps unchanged external event cards from re-rendering during unrelated drag/scroll state changes. */

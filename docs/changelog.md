@@ -2,6 +2,9 @@
 
 ## 0.2.0
 
+- Centralized calendar-library defaults in one internal palette and exposed inherited semantic CSS-variable overrides,
+  allowing consumers to theme both orientations through a scoped class, ancestor, or the type-safe `CalendarStyle`
+  inline contract without repeated color literals in rendering code.
 - Replaced Prettier with OxFmt for project formatting. The existing line-width, trailing-comma, and ignore rules now
   live in the checked-in `.oxfmtrc.json` configuration; `npm run format` checks formatting and `npm run format:write`
   applies it.

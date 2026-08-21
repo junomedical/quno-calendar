@@ -14,6 +14,7 @@ This document defines the names used for visible calendar interface parts and th
 | Viewport                     | The scrollable calendar area. It owns vertical scrolling and horizontal timeline scrolling.          | `.ic-viewport`                                    |
 | Timeline board               | The scrollable grid area to the right of labels, including the time scale and row grids.             | `.ic-time-header`, `.ic-row-grid`                 |
 | Label column                 | The sticky left column that contains date labels and calendar row labels.                            | `.ic-left-label`                                  |
+| Calendar theme               | Consumer-owned semantic colors inherited by calendar chrome in both orientations.                    | `--ic-*`, `CalendarStyle`                         |
 
 ## Demo Surface
 

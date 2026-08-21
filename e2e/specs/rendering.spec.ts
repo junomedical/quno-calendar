@@ -4,7 +4,6 @@ import {
   firstExpandableOverlappedEvent,
   firstDuplicatedViewportEvent,
   goToWorkday,
-  mutedAccentColor,
   setDemoZoom
 } from "../helpers";
 
@@ -255,10 +254,16 @@ test("uses card left accent borders without calendar row color strips", async ({
     const styles = window.getComputedStyle(card);
     const shell = card.closest<HTMLElement>(".ic-event-shell");
     const shellStyles = shell ? window.getComputedStyle(shell) : null;
+    const mutedAccentProbe = document.createElement("span");
+    mutedAccentProbe.style.backgroundColor = "var(--event-accent-muted)";
+    shell?.append(mutedAccentProbe);
+    const resolvedMutedAccent = window.getComputedStyle(mutedAccentProbe).backgroundColor;
+    mutedAccentProbe.remove();
     return {
       backgroundColor: styles.backgroundColor,
       borderLeftColor: styles.borderLeftColor,
-      mutedAccentVariable: shellStyles?.getPropertyValue("--event-accent-muted").trim() ?? ""
+      mutedAccentVariable: shellStyles?.getPropertyValue("--event-accent-muted").trim() ?? "",
+      resolvedMutedAccent
     };
   });
   const eventTransitionDuration = await page
@@ -272,10 +277,45 @@ test("uses card left accent borders without calendar row color strips", async ({
   expect(cardBorderWidths).toEqual({ left: "6px", top: "1px" });
   expect(standardCardColors).not.toBeNull();
   if (!standardCardColors) return;
-  expect(standardCardColors.backgroundColor).toBe(mutedAccentColor(standardCardColors.borderLeftColor));
-  expect(standardCardColors.backgroundColor).toBe(standardCardColors.mutedAccentVariable);
+  expect(standardCardColors.backgroundColor).not.toBe("rgba(0, 0, 0, 0)");
+  expect(standardCardColors.backgroundColor).toBe(standardCardColors.resolvedMutedAccent);
+  expect(standardCardColors.mutedAccentVariable).toContain("color-mix(in srgb");
   expect(eventTransitionDuration).toBe("0s");
   await expect(page.locator(".demo-event-time").first()).toContainText(/\d{1,2}:\d{2}–\d{1,2}:\d{2}/);
+});
+
+test("inherits consumer color variables across both calendar orientations", async ({ page }) => {
+  await page.goto("/");
+  await page.evaluate(() => {
+    const theme = {
+      "--ic-surface": "#102030",
+      "--ic-header-surface": "#203040",
+      "--ic-label-surface": "#304050",
+      "--ic-alternate-surface": "#405060",
+      "--ic-cell-border": "#506070",
+      "--ic-text": "#f0e0d0",
+      "--ic-text-secondary": "#d0c0b0",
+      "--ic-now-accent": "#00aa88",
+      "--ic-event-accent": "#aa00ee",
+      "--ic-shadow": "none"
+    };
+    for (const [name, value] of Object.entries(theme)) document.documentElement.style.setProperty(name, value);
+  });
+  await goToWorkday(page);
+
+  const calendar = page.getByTestId("infinite-calendar");
+  await expect(calendar).toHaveCSS("background-color", "rgb(16, 32, 48)");
+  await expect(calendar).toHaveCSS("border-top-color", "rgb(80, 96, 112)");
+  await expect(calendar).toHaveCSS("box-shadow", "none");
+  await expect(page.locator(".ic-date-label").first()).toHaveCSS("background-color", "rgb(32, 48, 64)");
+  await expect(page.locator(".ic-row-label").first()).toHaveCSS("background-color", "rgb(48, 64, 80)");
+  await expect(page.locator(".ic-now-line").first()).toHaveCSS("background-color", "rgb(0, 170, 136)");
+
+  await page.getByTestId("view-infinite-vertical").check();
+  await expect(calendar).toHaveAttribute("data-view", "infinite-vertical");
+  await expect(page.locator(".icv-day-header").first()).toHaveCSS("background-color", "rgb(32, 48, 64)");
+  await expect(page.locator(".icv-time-pane").first()).toHaveCSS("background-color", "rgb(48, 64, 80)");
+  await expect(page.locator(".icv-now-line").first()).toHaveCSS("background-color", "rgb(0, 170, 136)");
 });
 
 test("supports availability editing mode", async ({ page }) => {

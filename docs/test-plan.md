@@ -39,6 +39,8 @@ Vitest unit tests live in `tests/unit` and mirror the source module grouping.
 - `className`, `style`, `ariaLabel`, and `initialDateKey` work through `CalendarRoot` in both orientations.
 - The architecture guard rejects `../../../` imports in production library files, requiring the private
   `#calendar-internal/*` alias for cross-domain dependencies.
+- Colorless event shells inherit the consumer-defined default event accent and derive their muted accent toward the
+  consumer-defined calendar surface.
 
 ## React Tests
 
@@ -51,6 +53,8 @@ Vitest unit tests live in `tests/unit` and mirror the source module grouping.
 - Fixed labels, the visible single sticky top time scale, same-row CSS-sticky date labels, current-time line alignment, controlled zoom callback, and custom event renderer contract are present.
 - Date labels share the same sticky header row as the time scale, and active availability blocks do not cover calendar row labels.
 - Event renderer receives status information.
+- Consumer-defined semantic color variables compute on the shell, headers, labels, grids, time text, borders, shadow,
+  and current-time marker in both orientations when inherited from outside `CalendarRoot`.
 - Zoom-only geometry changes retain the rendered card DOM, do not reinvoke an unchanged external renderer, and do not reload the event range.
 - Controlled active edit drafts render through the event renderer while the loaded source event is hidden.
 - A never-resolving loader does not block calendar chrome or Pointer Events; a delayed response adds event shells without replacing the date/resource structure.

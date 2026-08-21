@@ -53,6 +53,11 @@ export function Schedule() {
 
 Use `view="infinite-vertical"` when calendars should render as columns and time should run top-to-bottom inside each date. `view="infinite"` remains a compatibility alias for the horizontal view.
 
+Calendar chrome colors are consumer-owned CSS variables with built-in defaults. Scope them through `className` or pass
+them through the typed `style` prop; for example, `--ic-surface`, `--ic-header-surface`, `--ic-cell-border`,
+`--ic-text`, and `--ic-now-accent`. Per-event `event.color` still takes precedence over the shared
+`--ic-event-accent` fallback. See [Calendar colors](./docs/usage.md#calendar-colors) for the complete palette.
+
 The date/resource grid renders without waiting for `loadEvents`. Cached events remain visible during delayed refreshes, and obsolete requests are cancelled or ignored. The optional abort signal is backward compatible with loaders that do not support cancellation. By default, seven calendar days are prefetched before and after the rendered dates; pass `eventPrefetchPolicy` to customize that buffer.
 
 ## Interaction Model

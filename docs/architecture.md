@@ -65,6 +65,12 @@ virtualization or date-key identity. Generated vertical labels use one primary l
 their month/day and weekday lines. When no locale is supplied, `Intl.DateTimeFormat` uses the current runtime locale;
 server-rendered applications should pass an explicit locale when server and browser defaults may differ.
 
+Calendar chrome presentation is inherited through semantic `--ic-*` color variables. `styles/palette.css` is the one
+source of truth for internal fallback values; rendering selectors reference its private defaults instead of repeating
+color literals. The library does not declare the public variables on `.ic-shell`, so a value set by `className`, the
+typed `style` prop, or an ancestor remains effective independent of stylesheet order. Event-specific
+`CalendarEvent.color` values override only the shared default event accent.
+
 `LoadEventsArgs` includes `signal?: AbortSignal`; existing loaders remain valid and cancellation-aware loaders can stop obsolete requests early. `eventPrefetchPolicy` receives the rendered date keys and selected calendar ids and returns `{ beforeDays, afterDays }`. The exported `defaultEventPrefetchPolicy` requests seven calendar days before the first rendered date and seven after the last rendered date.
 
 `CalendarRoot` also coordinates declarative `focusRequest` values and imperative `focusEvent` calls above both
