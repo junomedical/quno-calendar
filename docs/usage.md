@@ -106,6 +106,30 @@ narrow, or remove secondary details when a compact row makes it short.
 Repository example: the custom-card structure chapter in
 [`ArticleProductDemos.tsx`](../demo/examples/integration-walkthrough/ArticleProductDemos.tsx).
 
+## Calendar Colors
+
+The calendar's surfaces, labels, grid, current-time marker, shadow, and default event accent use inherited CSS custom
+properties. Set them on the calendar class or any ancestor; the library retains built-in fallbacks when a value is omitted.
+
+```css
+.clinic-calendar {
+  --ic-surface: #ffffff;
+  --ic-header-surface: #f6f8fb;
+  --ic-label-surface: #fbfcfe;
+  --ic-alternate-surface: #f7faf9;
+  --ic-cell-border: #d9e0e8;
+  --ic-text: #17202a;
+  --ic-text-secondary: #536273;
+  --ic-now-accent: #d92d20;
+  --ic-event-accent: #2563eb;
+  --ic-shadow: none;
+}
+```
+
+`CalendarEvent.color` remains the event-specific override. Inline themes are type-safe through the exported
+`CalendarStyle` contract. `--ic-vertical-header-bg` remains a vertical-only compatibility override; new themes should
+use `--ic-header-surface`.
+
 ## Delayed Or Cancellable APIs
 
 `loadEvents` is a non-blocking data boundary. The calendar renders its date/resource grid immediately and keeps the last cached events visible while a request is slow, retried, or refreshed. Loading indicators should therefore live outside geometry-sensitive calendar rows and columns.

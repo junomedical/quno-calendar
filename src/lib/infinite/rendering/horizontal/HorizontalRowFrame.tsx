@@ -82,7 +82,8 @@ export function HorizontalRowFrame({
           left: settings.labelWidth,
           width: TIMELINE_LEFT_GUTTER_PX + timelineWidth,
           height: rowHeight,
-          backgroundImage: "linear-gradient(to right, var(--ic-cell-border) 1px, transparent 1px)",
+          backgroundImage:
+            "linear-gradient(to right, var(--ic-cell-border, var(--_ic-default-cell-border)) 1px, transparent 1px)",
           backgroundPosition: `${TIMELINE_LEFT_GUTTER_PX}px 0`,
           backgroundRepeat: "repeat",
           backgroundSize: `${gridCellWidth}px 100%`

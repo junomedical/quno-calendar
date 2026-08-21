@@ -15,8 +15,8 @@
   height: 100%;
   z-index: 220;
   overflow: hidden;
-  background: #f4f7fb;
-  border-bottom: 1px solid var(--ic-cell-border);
+  background: var(--ic-header-surface, var(--_ic-default-header-surface));
+  border-bottom: 1px solid var(--ic-cell-border, var(--_ic-default-cell-border));
 }
 
 .ic-time-tick-track {
@@ -30,7 +30,7 @@
   z-index: 222;
   display: block;
   min-width: 18px;
-  color: #1f2937;
+  color: var(--ic-text-secondary, var(--_ic-default-text-secondary));
   font-size: 14px;
   line-height: 1;
   text-align: left;
@@ -65,23 +65,27 @@
   align-items: center;
   height: 100%;
   padding: 0 14px;
-  color: #17202a;
-  background: #fbfdff;
-  border-bottom: 1px solid var(--ic-cell-border);
+  color: var(--ic-text, var(--_ic-default-text));
+  background: var(--ic-label-surface, var(--_ic-default-label-surface));
+  border-bottom: 1px solid var(--ic-cell-border, var(--_ic-default-cell-border));
   font-size: 16px;
 }
 
 .ic-row-grid {
   position: absolute;
   top: 0;
-  background-color: #ffffff;
-  background-image: linear-gradient(to right, var(--ic-cell-border) 1px, transparent 1px);
-  border-bottom: 1px solid var(--ic-cell-border);
-  border-right: 1px solid var(--ic-cell-border);
+  background-color: var(--ic-surface, var(--_ic-default-surface));
+  background-image: linear-gradient(
+    to right,
+    var(--ic-cell-border, var(--_ic-default-cell-border)) 1px,
+    transparent 1px
+  );
+  border-bottom: 1px solid var(--ic-cell-border, var(--_ic-default-cell-border));
+  border-right: 1px solid var(--ic-cell-border, var(--_ic-default-cell-border));
 }
 
 .ic-row:nth-child(2n + 1) .ic-row-grid {
-  background-color: #f7fbfa;
+  background-color: var(--ic-alternate-surface, var(--_ic-default-alternate-surface));
 }
 
 .ic-now-line {
@@ -89,7 +93,7 @@
   top: 0;
   bottom: 0;
   width: 2px;
-  background: #ef3333;
+  background: var(--ic-now-accent, var(--_ic-default-now-accent));
   z-index: 230;
   pointer-events: none;
 }
@@ -98,7 +102,7 @@
   position: absolute;
   top: 0;
   width: 2px;
-  background: #ef3333;
+  background: var(--ic-now-accent, var(--_ic-default-now-accent));
   z-index: 236;
   pointer-events: none;
 }
@@ -108,7 +112,7 @@
   top: 21px;
   bottom: 0;
   width: 2px;
-  background: #ef3333;
+  background: var(--ic-now-accent, var(--_ic-default-now-accent));
   z-index: 232;
   pointer-events: none;
 }
@@ -124,7 +128,7 @@
   z-index: 234;
   width: 14px;
   height: 14px;
-  background: #ef3333;
+  background: var(--ic-now-accent, var(--_ic-default-now-accent));
   border-radius: 50%;
   transform: translateX(-6px);
 }

@@ -190,17 +190,6 @@ export function todayDateKey() {
   return `${year}-${month}-${day}`;
 }
 
-export function mutedAccentColor(accentColor: string) {
-  const match = /^rgba?\((\d+),\s*(\d+),\s*(\d+)/.exec(accentColor);
-  if (!match) {
-    throw new Error(`Unsupported CSS color: ${accentColor}`);
-  }
-  const [, red, green, blue] = match.map(Number);
-  const mix = 0.14;
-  const blend = (channel: number) => Math.round(channel * mix + 255 * (1 - mix));
-  return `rgb(${blend(red)}, ${blend(green)}, ${blend(blue)})`;
-}
-
 export async function firstViewportEventForPrefix(page: Page, prefix: string) {
   await expect
     .poll(async () => {

@@ -379,3 +379,12 @@ exercises only the package's public entrypoint and does not expose internal subp
 relative to `tsconfig.json` without the deprecated `baseUrl` option, while the demo/test Vite config and library build
 resolve the same mapping. `vite/vite-env.d.ts` supplies Vite's ambient asset declarations so strict editor diagnostics
 also recognize side-effect CSS imports.
+
+## 064 - Calendar Colors Are Inherited Consumer Variables
+
+Color values describe product presentation rather than calendar geometry, so they use semantic inherited CSS custom
+properties instead of React state. `styles/palette.css` owns every internal color literal once; library selectors
+consume public `--ic-*` variables with those private palette values as fallbacks and deliberately do not assign the
+public variables on `.ic-shell`. This lets a theme defined on a wrapper win without depending on stylesheet import
+order. One shared palette covers both orientations; `--ic-vertical-header-bg` remains only as a compatibility alias.
+An event's explicit `color` still wins over the calendar-level default event accent.

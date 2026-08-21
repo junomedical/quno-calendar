@@ -94,7 +94,8 @@ export const VerticalCalendarColumn = memo(function VerticalCalendarColumn({
         minHeight: boardHeight,
         visibility: isHidden ? "hidden" : undefined,
         pointerEvents: isHidden ? "none" : undefined,
-        backgroundImage: "linear-gradient(to bottom, var(--ic-cell-border) 1px, transparent 1px)",
+        backgroundImage:
+          "linear-gradient(to bottom, var(--ic-cell-border, var(--_ic-default-cell-border)) 1px, transparent 1px)",
         backgroundRepeat: "repeat",
         backgroundSize: `100% ${gridCellHeight}px`,
         backgroundPosition: `0 ${VERTICAL_TIMELINE_GUTTER_PX}px`

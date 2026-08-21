@@ -1,13 +1,9 @@
-.icv-shell {
-  --ic-vertical-header-bg: #f4f7fb;
-}
-
 .icv-virtual-space {
   position: relative;
 }
 
 .icv-day {
-  background: #ffffff;
+  background: var(--ic-surface, var(--_ic-default-surface));
 }
 
 .icv-day-header {
@@ -15,8 +11,8 @@
   top: 0;
   z-index: 520;
   height: 42px;
-  background: var(--ic-vertical-header-bg);
-  border-bottom: 1px solid var(--ic-cell-border);
+  background: var(--ic-vertical-header-bg, var(--ic-header-surface, var(--_ic-default-header-surface)));
+  border-bottom: 1px solid var(--ic-cell-border, var(--_ic-default-cell-border));
   pointer-events: none;
 }
 
@@ -29,7 +25,7 @@
   justify-content: center;
   gap: 1px;
   height: 100%;
-  border-right: 1px solid var(--ic-cell-border);
+  border-right: 1px solid var(--ic-cell-border, var(--_ic-default-cell-border));
   line-height: 1.18;
   pointer-events: auto;
 }
@@ -53,7 +49,7 @@
   top: 0;
   display: grid;
   height: 100%;
-  background: var(--ic-vertical-header-bg);
+  background: var(--ic-vertical-header-bg, var(--ic-header-surface, var(--_ic-default-header-surface)));
 }
 
 .icv-calendar-header-cell {
@@ -62,8 +58,8 @@
   min-width: 0;
   padding: 0 12px;
   overflow: hidden;
-  color: #17202a;
-  border-right: 1px solid var(--ic-cell-border);
+  color: var(--ic-text, var(--_ic-default-text));
+  border-right: 1px solid var(--ic-cell-border, var(--_ic-default-cell-border));
   font-size: 14px;
   font-weight: 750;
   text-overflow: ellipsis;
@@ -74,8 +70,8 @@
   position: sticky;
   left: 0;
   z-index: 260;
-  background: #fbfdff;
-  border-right: 1px solid var(--ic-cell-border);
+  background: var(--ic-label-surface, var(--_ic-default-label-surface));
+  border-right: 1px solid var(--ic-cell-border, var(--_ic-default-cell-border));
   pointer-events: none;
 }
 
@@ -93,7 +89,7 @@
   position: absolute;
   right: 12px;
   display: block;
-  color: #1f2937;
+  color: var(--ic-text-secondary, var(--_ic-default-text-secondary));
   font-size: 13px;
   line-height: 1;
   transform: translateY(-50%);
@@ -110,19 +106,19 @@
 .icv-day-board {
   position: absolute;
   display: grid;
-  background: #ffffff;
+  background: var(--ic-surface, var(--_ic-default-surface));
 }
 
 .icv-calendar-column-grid {
   position: relative;
   min-width: 0;
-  background-color: #ffffff;
-  border-bottom: 1px solid var(--ic-cell-border);
-  box-shadow: inset -1px 0 0 var(--ic-cell-border);
+  background-color: var(--ic-surface, var(--_ic-default-surface));
+  border-bottom: 1px solid var(--ic-cell-border, var(--_ic-default-cell-border));
+  box-shadow: inset -1px 0 0 var(--ic-cell-border, var(--_ic-default-cell-border));
 }
 
 .icv-calendar-column-grid.is-alternate {
-  background-color: #f7fbfa;
+  background-color: var(--ic-alternate-surface, var(--_ic-default-alternate-surface));
 }
 
 .icv-now-line {
@@ -131,7 +127,7 @@
   right: 0;
   z-index: 232;
   height: 2px;
-  background: #ef3333;
+  background: var(--ic-now-accent, var(--_ic-default-now-accent));
   pointer-events: none;
 }
 

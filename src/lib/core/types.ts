@@ -1,5 +1,6 @@
 import type { CSSProperties, ReactNode } from "react";
 import type { DayNameGenerator } from "../date/dateLabels";
+import type { CalendarStyle } from "./calendarTheme";
 
 /** Stable identifier for a rendered calendar row. */
 export type CalendarId = string;
@@ -198,7 +199,7 @@ export type CalendarViewComponentProps = {
   appearingEventIds?: EventId[];
   eventRenderer: EventRenderer;
   className?: string;
-  style?: CSSProperties;
+  style?: CalendarStyle;
   ariaLabel?: string;
   initialDateKey?: string;
   settings?: Partial<TimelineSettings>;
