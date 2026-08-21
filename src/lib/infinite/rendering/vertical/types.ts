@@ -81,6 +81,8 @@ export type VerticalCalendarColumnProps = {
   preparedCell: PreparedEventCell;
   isHidden?: boolean;
   settings: TimelineSettings;
+  /** Actual resource-column width used to classify percentage-based event widths. */
+  columnWidth: number;
   boardHeight: number;
   gridCellHeight: number;
   interactionMode: "events" | "availability";

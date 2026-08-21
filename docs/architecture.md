@@ -53,7 +53,7 @@ flowchart LR
 
 ## Public Surface
 
-`CalendarRoot` remains the package entrypoint. It accepts calendars, selected calendar ids, a range loader, an optional `eventPrefetchPolicy`, an external renderer, controlled settings, interaction callbacks, and an optional imperative ref.
+`CalendarRoot` remains the package entrypoint. It accepts calendars, selected calendar ids, a range loader, an optional `eventPrefetchPolicy`, an external renderer, controlled settings, optional `eventRendererSizing` thresholds, interaction callbacks, and an optional imperative ref.
 
 - `view="infinite-horizontal"`: dates flow down, calendars are rows, time runs left-to-right.
 - `view="infinite-vertical"`: dates flow down, calendars are columns, time runs top-to-bottom.
@@ -107,9 +107,11 @@ flowchart TD
 ```
 
 Feature domains do not import views or demo code. Scroll publishes visible positions; events decides what to prefetch. Anchors translate semantic focus using scroll and event geometry without becoming part of either engine. Product card markup stays outside the library internals: rendering positions `EventShell`, then calls `eventRenderer` with event, status, lane, overlap, and full-size style data.
-Each `EventShell` is also a named `calendar-event` size container. Product renderers can therefore adapt their content
-hierarchy to the shell's own width and height with CSS container queries, without viewport media queries or
-layout-measurement state in React.
+Each `EventShell` exposes package-classified `data-event-width-density` and `data-event-height-density` attributes.
+The classifications use the exported `defaultEventRendererSizing` thresholds unless `CalendarRoot` receives an
+override. Products map those stable names to their own content hierarchy without copying numeric breakpoints or adding
+layout-measurement state in React. The shell remains a named `calendar-event` size container so consumers can still use
+raw CSS container queries for product-specific sizing decisions outside the shared density contract.
 
 Primary ownership folders are:
 
@@ -356,7 +358,7 @@ flowchart TB
   Preview --> Marker["current-time and sticky label layers"]
 ```
 
-Layers share prepared geometry but have separate interaction rules. `EventShell` is memoized and owns position, z-index, state classes, CSS variables, and geometry registration. Its product-card child is memoized separately, so zoom can update shell coordinates without reinvoking the external renderer. Membership indexes, prepared lanes, row metrics, and column metrics likewise exclude zoom from their memo dependencies because zoom changes projection pixels rather than event relationships.
+Layers share prepared geometry but have separate interaction rules. `EventShell` is memoized and owns position, z-index, state classes, CSS variables, density attributes, and geometry registration. Its product-card child is memoized separately, so zoom can update shell coordinates and density without reinvoking the external renderer. Membership indexes, prepared lanes, row metrics, and column metrics likewise exclude zoom from their memo dependencies because zoom changes projection pixels rather than event relationships.
 
 ## Viewport Anchoring
 

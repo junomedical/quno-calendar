@@ -14,6 +14,8 @@
 - Exported the canonical `CalendarView` orientation type so consumers do not
   duplicate the library-owned horizontal/vertical view union.
 - Made controlled Shift-wheel zoom and virtual scrolling avoid synchronous React updates during active render work.
+- Added exported event-renderer sizing thresholds and calendar-owned width/height density attributes, allowing product
+  card CSS to share one breakpoint contract while zoom updates shell presentation without rerunning renderer content.
 - Fixed dense 5,000- and 20,000-events/year calendars jumping to another day after weekends were hidden and a drawn
   appointment was cancelled. Weekend filtering now restores the semantic date after the virtual sequence settles, and
   draft collapse/expansion keeps the draft date until exact row anchoring completes.

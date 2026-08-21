@@ -1,6 +1,7 @@
 import type { CSSProperties, ReactNode } from "react";
 import type { DayNameGenerator } from "../date/dateLabels";
 import type { CalendarStyle } from "./calendarTheme";
+import type { EventRendererSizing } from "./eventRendererSizing";
 
 /** Stable identifier for a rendered calendar row. */
 export type CalendarId = string;
@@ -240,6 +241,8 @@ export type CalendarView = "infinite-horizontal" | "infinite-vertical";
 /** Public reusable calendar shell props. */
 export type CalendarRootProps = CalendarViewComponentProps & {
   view?: CalendarView;
+  /** Overrides the shared event-card density thresholds used by event shells. */
+  eventRendererSizing?: EventRendererSizing;
 };
 
 /** Defaults merged with caller-provided timeline settings. */

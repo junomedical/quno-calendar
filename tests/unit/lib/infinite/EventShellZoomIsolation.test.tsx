@@ -51,6 +51,7 @@ describe("EventShell zoom isolation", () => {
 
     const leftBeforeZoom = shellBeforeZoom.style.left;
     const widthBeforeZoom = shellBeforeZoom.style.width;
+    expect(shellBeforeZoom).toHaveAttribute("data-event-width-density", "tight");
     const loadCallCount = loadEvents.mock.calls.length;
     eventRenderer.mockClear();
 
@@ -59,6 +60,7 @@ describe("EventShell zoom isolation", () => {
     await waitFor(() => {
       expect(shellBeforeZoom.style.left).not.toBe(leftBeforeZoom);
       expect(shellBeforeZoom.style.width).not.toBe(widthBeforeZoom);
+      expect(shellBeforeZoom).toHaveAttribute("data-event-width-density", "regular");
     });
     expect(screen.getByTestId("isolated-event-content")).toBe(contentBeforeZoom);
     expect(contentBeforeZoom.closest("[data-testid='calendar-event']")).toBe(shellBeforeZoom);

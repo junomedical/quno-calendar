@@ -18,6 +18,7 @@ import type { VerticalTimelineDayProps } from "./types";
 
 type DayWindow = {
   cadenceHeight: number;
+  columnWidths: number[];
   dayWidth: number;
   gridTemplateColumns: string;
   renderedColumnIndexes: number[];
@@ -68,6 +69,7 @@ export function useVerticalDayWindow(day: VerticalTimelineDayProps): DayWindow {
 
   return {
     cadenceHeight: Math.max(1, settings.zoom * gridCadenceMinutes(settings.zoom)),
+    columnWidths: columnExtents.map((extent) => extent.size),
     dayWidth: labelWidth + virtualBoardMinWidth,
     gridTemplateColumns: minimumColumnWidths.map((width) => `minmax(${width}px, 1fr)`).join(" "),
     renderedColumnIndexes

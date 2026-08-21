@@ -80,7 +80,7 @@ test("drops minor time labels at dense zoom levels", async ({ page }) => {
   ).toBe(0);
 });
 
-test("lets external event renderers adapt content to short heights with CSS", async ({ page }) => {
+test("lets external event renderers adapt to calendar-owned density states with CSS", async ({ page }) => {
   await page.goto("/");
   await page.evaluate(() => {
     const fixture = document.createElement("div");
@@ -90,6 +90,7 @@ test("lets external event renderers adapt content to short heights with CSS", as
     fixture.style.width = "120px";
     fixture.style.height = "24px";
     fixture.className = "ic-event-shell";
+    fixture.dataset.eventHeightDensity = "title-only";
     fixture.innerHTML = `
       <article class="demo-event-card" data-testid="small-event-fixture">
         <strong class="demo-event-title">Long event title</strong>
@@ -106,6 +107,7 @@ test("lets external event renderers adapt content to short heights with CSS", as
     iconFixture.style.width = "130px";
     iconFixture.style.height = "16px";
     iconFixture.className = "ic-event-shell";
+    iconFixture.dataset.eventHeightDensity = "minimal";
     iconFixture.innerHTML = `
       <article class="demo-event-card" data-testid="icon-event-fixture">
         <strong class="demo-event-title">
@@ -146,6 +148,7 @@ test("lets external event renderers adapt content to short heights with CSS", as
     const fixture = document.querySelector<HTMLElement>('[data-testid="small-event-fixture"]')?.parentElement;
     if (fixture) {
       fixture.style.height = "76px";
+      fixture.dataset.eventHeightDensity = "regular";
     }
   });
   await expect(page.locator(".demo-event-time").last()).toHaveCSS("display", "flex");

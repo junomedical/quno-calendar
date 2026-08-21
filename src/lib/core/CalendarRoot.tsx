@@ -4,6 +4,7 @@ import { InfiniteVerticalTimelineView } from "../infinite/views/vertical/Vertica
 import { defaultTimelineSettings, type CalendarNavigationHandle, type CalendarRootProps } from "./types";
 import type { CalendarViewHandle } from "./internalTypes";
 import { useCalendarFocusCoordinator } from "./useCalendarFocusCoordinator";
+import { defaultEventRendererSizing, EventRendererSizingContext } from "./eventRendererSizing";
 
 /**
  * Public calendar shell that selects a concrete view implementation.
@@ -11,7 +12,7 @@ import { useCalendarFocusCoordinator } from "./useCalendarFocusCoordinator";
  * @see docs/architecture.md#public-surface
  */
 export const CalendarRoot = forwardRef<CalendarNavigationHandle, CalendarRootProps>(function CalendarRoot(
-  { view = "infinite-horizontal", ...props },
+  { view = "infinite-horizontal", eventRendererSizing = defaultEventRendererSizing, ...props },
   ref
 ) {
   const viewRef = useRef<CalendarViewHandle | null>(null);
@@ -42,9 +43,13 @@ export const CalendarRoot = forwardRef<CalendarNavigationHandle, CalendarRootPro
   );
 
   const internalProps = { ...props, focusedEventTarget: focus.focusedEventTarget };
-  if (view === "infinite-vertical") {
-    return <InfiniteVerticalTimelineView ref={viewRef} {...internalProps} />;
-  }
-
-  return <InfiniteTimelineView ref={viewRef} {...internalProps} />;
+  return (
+    <EventRendererSizingContext.Provider value={eventRendererSizing}>
+      {view === "infinite-vertical" ? (
+        <InfiniteVerticalTimelineView ref={viewRef} {...internalProps} />
+      ) : (
+        <InfiniteTimelineView ref={viewRef} {...internalProps} />
+      )}
+    </EventRendererSizingContext.Provider>
+  );
 });

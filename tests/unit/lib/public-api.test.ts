@@ -4,6 +4,7 @@ import * as publicApi from "../../../src/lib";
 describe("public API", () => {
   it("exports the stable package surface", () => {
     expect(publicApi).toHaveProperty("CalendarRoot");
+    expect(publicApi).toHaveProperty("defaultEventRendererSizing");
     expect(publicApi).toHaveProperty("defaultTimelineSettings");
     expect(publicApi).toHaveProperty("defaultEventPrefetchPolicy");
     expect(publicApi).toHaveProperty("eventCalendarIds");
