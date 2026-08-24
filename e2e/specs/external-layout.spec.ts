@@ -68,7 +68,7 @@ test("does not duplicate committed events or grow a two-overlap row when drawing
       element.textContent?.includes("Draw overlap fixture A")
     );
     const row = event?.closest<HTMLElement>('[data-testid="calendar-row"]');
-    const grid = row?.querySelector<HTMLElement>(".ic-row-grid");
+    const grid = row?.querySelector<HTMLElement>(".quno-calendar-row-grid");
     if (!event || !row || !grid) return null;
     const rowBox = row.getBoundingClientRect();
     const gridBox = grid.getBoundingClientRect();
@@ -155,9 +155,9 @@ test("renders the external popup above the current-time marker", async ({ page }
   const layering = await page.evaluate(() => {
     const popup = document.querySelector<HTMLElement>('[data-testid="external-event-popup"]');
     const marker =
-      document.querySelector<HTMLElement>(".ic-now-line.is-current") ??
-      document.querySelector<HTMLElement>(".ic-now-header-line") ??
-      document.querySelector<HTMLElement>(".ic-now-pin");
+      document.querySelector<HTMLElement>(".quno-calendar-now-line.is-current") ??
+      document.querySelector<HTMLElement>(".quno-calendar-now-header-line") ??
+      document.querySelector<HTMLElement>(".quno-calendar-now-pin");
     if (!popup || !marker) {
       return null;
     }

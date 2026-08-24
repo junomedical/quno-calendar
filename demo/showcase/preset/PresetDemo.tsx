@@ -1,6 +1,6 @@
 import { demoCalendars } from "../data";
 import type { DemoRoute } from "../types";
-import { DemoCalendarRoot, DemoZoomProvider } from "../zoom/DemoZoom";
+import { DemoQunoCalendar, DemoZoomProvider } from "../zoom/DemoZoom";
 import { PresetDemoSidebar } from "./PresetDemoSidebar";
 import type { DemoPreset } from "./types";
 import { usePresetDemo } from "./usePresetDemo";
@@ -29,7 +29,7 @@ export function PresetDemo({ preset, routes }: PresetDemoProps) {
           onGoToDate={demo.goToDate}
         />
         <section className={`${preset.id}-calendar-panel preset-calendar-panel`}>
-          <DemoCalendarRoot
+          <DemoQunoCalendar
             key={demo.scale}
             view={demo.controls.calendarView}
             ref={demo.calendarRef}

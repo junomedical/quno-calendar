@@ -11,8 +11,13 @@
     "forceConsistentCasingInFileNames": true,
     "module": "ESNext",
     "moduleResolution": "Bundler",
+    "types": ["vitest/globals"],
     "paths": {
-      "#calendar-internal/*": ["./src/lib/*"]
+      "@quno/calendar": ["./src/lib/index.ts"],
+      "@quno/calendar/timeline": ["./src/lib/timeline/index.ts"],
+      "@quno/calendar/date-picker": ["./src/lib/date-picker/index.ts"],
+      "@quno/calendar/date-input": ["./src/lib/date-input/index.ts"],
+      "#quno-internal/*": ["./src/lib/*"]
     },
     "resolveJsonModule": true,
     "isolatedModules": true,

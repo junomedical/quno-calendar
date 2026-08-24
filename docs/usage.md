@@ -1,23 +1,36 @@
-# Usage Recipes
+# Unified Usage Guide
+
+The live, task-oriented field guide is available at `/guide`. This document owns copyable production recipes for all three independent feature entry points.
+
+## Entry points
+
+```tsx
+import type { DateRange, IsoDate } from "@quno/calendar";
+import { QunoCalendar } from "@quno/calendar/timeline";
+import { QunoDatePicker } from "@quno/calendar/date-picker";
+import { QunoDateInput, parseDateInput } from "@quno/calendar/date-input";
+```
+
+Add only the optional stylesheets needed by the browser application. JavaScript imports do not inject CSS.
 
 Import the component and stylesheet from the package entrypoint:
 
 ```tsx
-import { CalendarRoot, type EventRendererProps, type LoadEvents } from "quno-calendar";
-import "quno-calendar/styles.css";
+import { QunoCalendar, type EventRendererProps, type LoadEvents } from "@quno/calendar/timeline";
+import "@quno/calendar/timeline/styles.css";
 ```
 
-Local examples in this repository import from `src/lib`, but package consumers should use `quno-calendar`.
+Repository examples use the same public subpath aliases as package consumers.
 
-The stylesheet is an explicit package asset; JavaScript does not inject it. This keeps both ESM imports and CommonJS `require("quno-calendar")` safe in Node/SSR code. Import the stylesheet from the browser application entrypoint once.
+The stylesheet is an explicit package asset; JavaScript does not inject it. This keeps both ESM imports and CommonJS `require("@quno/calendar/timeline")` safe in Node/SSR code. Import the stylesheet from the browser application entrypoint once.
 
 For a concept-first introduction with live examples, read
-[`Inside an infinite calendar`](../demo/examples/integration-walkthrough/README.md). It combines the same public
+[`Inside an infinite calendar`](../demo/guide/timeline/README.md). It combines the same public
 contracts below into a single editorial walkthrough without introducing a second API layer.
 
-## Read-Only Calendar
+## Timeline: read-only calendar
 
-Use `CalendarRoot` with calendars, selected ids, an async visible-range loader, and an event renderer.
+Use `QunoCalendar` with calendars, selected ids, an async visible-range loader, and an event renderer.
 
 ```tsx
 const calendars = [{ id: "provider-a", name: "Provider A" }];
@@ -35,7 +48,7 @@ function EventCard({ event, status, style }: EventRendererProps) {
   );
 }
 
-<CalendarRoot
+<QunoCalendar
   calendars={calendars}
   selectedCalendarIds={["provider-a"]}
   loadEvents={loadEvents}
@@ -48,8 +61,8 @@ Parent controls that store the active orientation can import the package-owned
 `CalendarView` type. It contains `"infinite-horizontal"` and `"infinite-vertical"`.
 
 Repository example: the read-only chapter in
-[`ArticleRecipeDemos.tsx`](../demo/examples/integration-walkthrough/ArticleRecipeDemos.tsx) and the
-[integration field guide](../demo/examples/integration-walkthrough/README.md).
+[`ArticleRecipeDemos.tsx`](../demo/guide/timeline/ArticleRecipeDemos.tsx) and the
+[integration field guide](../demo/guide/timeline/README.md).
 
 ## Custom Event Card Structure
 
@@ -79,7 +92,7 @@ function ProductEventCard({ event, style }: EventRendererProps) {
   );
 }
 
-<CalendarRoot {...calendarProps} eventRenderer={ProductEventCard} />;
+<QunoCalendar {...calendarProps} eventRenderer={ProductEventCard} />;
 ```
 
 Changing renderer hierarchy does not alter event times, overlap lanes, loading, or shell geometry. Keep the renderer
@@ -107,7 +120,7 @@ This lets the same renderer keep full context in a roomy shell, preserve only th
 narrow, or remove secondary details when a compact row makes it short.
 
 Repository example: the custom-card structure chapter in
-[`ArticleProductDemos.tsx`](../demo/examples/integration-walkthrough/ArticleProductDemos.tsx).
+[`ArticleProductDemos.tsx`](../demo/guide/timeline/ArticleProductDemos.tsx).
 
 ## Calendar Colors
 
@@ -116,22 +129,22 @@ properties. Set them on the calendar class or any ancestor; the library retains 
 
 ```css
 .clinic-calendar {
-  --ic-surface: #ffffff;
-  --ic-header-surface: #f6f8fb;
-  --ic-label-surface: #fbfcfe;
-  --ic-alternate-surface: #f7faf9;
-  --ic-cell-border: #d9e0e8;
-  --ic-text: #17202a;
-  --ic-text-secondary: #536273;
-  --ic-now-accent: #d92d20;
-  --ic-event-accent: #2563eb;
-  --ic-shadow: none;
+  --quno-calendar-surface: #ffffff;
+  --quno-calendar-header-surface: #f6f8fb;
+  --quno-calendar-label-surface: #fbfcfe;
+  --quno-calendar-alternate-surface: #f7faf9;
+  --quno-calendar-cell-border: #d9e0e8;
+  --quno-calendar-text: #17202a;
+  --quno-calendar-text-secondary: #536273;
+  --quno-calendar-now-accent: #d92d20;
+  --quno-calendar-event-accent: #2563eb;
+  --quno-calendar-shadow: none;
 }
 ```
 
 `CalendarEvent.color` remains the event-specific override. Inline themes are type-safe through the exported
-`CalendarStyle` contract. `--ic-vertical-header-bg` remains a vertical-only compatibility override; new themes should
-use `--ic-header-surface`.
+`QunoCalendarStyle` contract. `--quno-calendar-vertical-header-bg` remains a vertical-only compatibility override; new themes should
+use `--quno-calendar-header-surface`.
 
 ## Delayed Or Cancellable APIs
 
@@ -159,14 +172,14 @@ By default, the loader keeps seven calendar days warm before the first rendered 
 Replace the policy when a product has a different latency or navigation profile:
 
 ```tsx
-import type { EventPrefetchPolicy } from "quno-calendar";
+import type { EventPrefetchPolicy } from "@quno/calendar/timeline";
 
 const eventPrefetchPolicy: EventPrefetchPolicy = ({ visibleDateKeys, selectedCalendarIds }) => {
   const navigationBuffer = selectedCalendarIds.length > 20 ? 2 : Math.ceil(visibleDateKeys.length / 2);
   return { beforeDays: navigationBuffer, afterDays: navigationBuffer * 2 };
 };
 
-<CalendarRoot {...calendarProps} eventPrefetchPolicy={eventPrefetchPolicy} />;
+<QunoCalendar {...calendarProps} eventPrefetchPolicy={eventPrefetchPolicy} />;
 ```
 
 Return `{ beforeDays: 0, afterDays: 0 }` to load only rendered dates. Keep a custom policy referentially stable when possible; changing it recalculates the desired warm window but does not invalidate dates that are already fresh.
@@ -181,8 +194,8 @@ When navigation reaches a date before its events load, the date/resource grid is
 In the vertical view, event overlap can widen resource columns but does not change the settings-owned date/time height, so the visible date and time stay fixed. See [Async Loading And Layout](./flows/async-loading-and-layout.md) for the complete request, cache, measurement, and focus diagrams.
 
 Repository example: the preloading and late-data chapters in
-[`ArticleRecipeDemos.tsx`](../demo/examples/integration-walkthrough/ArticleRecipeDemos.tsx) and
-[`ArticleDemos.tsx`](../demo/examples/integration-walkthrough/ArticleDemos.tsx). The preloading exhibit also lists
+[`ArticleRecipeDemos.tsx`](../demo/guide/timeline/ArticleRecipeDemos.tsx) and
+[`ArticleDemos.tsx`](../demo/guide/timeline/ArticleDemos.tsx). The preloading exhibit also lists
 successful loader results outside the calendar, making warm events visible before their dates enter the rendered
 window.
 
@@ -202,7 +215,7 @@ demo endpoint from `api/demo-events.ts`. No Vercel environment variables are req
 Use `view="infinite-vertical"` for resource columns with time running vertically.
 
 ```tsx
-<CalendarRoot
+<QunoCalendar
   {...calendarProps}
   view="infinite-vertical"
   settings={{
@@ -217,7 +230,7 @@ Use `view="infinite-vertical"` for resource columns with time running vertically
 ```
 
 Repository example: the horizontal/vertical overlap comparison in
-[`ArticleDemos.tsx`](../demo/examples/integration-walkthrough/ArticleDemos.tsx).
+[`ArticleDemos.tsx`](../demo/guide/timeline/ArticleDemos.tsx).
 
 ## Date Labels And Localization
 
@@ -228,7 +241,7 @@ setting applies to horizontal date headers and both lines of vertical date heade
 Use `dayNameGenerator` when the product should own the complete displayed label:
 
 ```tsx
-import type { DayNameGenerator } from "quno-calendar";
+import type { DayNameGenerator } from "@quno/calendar/timeline";
 
 const dayNameGenerator: DayNameGenerator = (date, locale) =>
   new Intl.DateTimeFormat(locale, {
@@ -237,7 +250,7 @@ const dayNameGenerator: DayNameGenerator = (date, locale) =>
     year: "numeric"
   }).format(date);
 
-<CalendarRoot
+<QunoCalendar
   {...calendarProps}
   settings={{
     ...settings,
@@ -255,7 +268,76 @@ Without a generator, English labels retain ordinal days and respect locale order
 in `en-GB`); other locales use their native month/day formatting.
 
 Repository example: the date-localization chapter in
-[`ArticleProductDemos.tsx`](../demo/examples/integration-walkthrough/ArticleProductDemos.tsx).
+[`ArticleProductDemos.tsx`](../demo/guide/timeline/ArticleProductDemos.tsx).
+
+## Date picker
+
+The picker accepts `null` or an inclusive `{ start, end }` range of timezone-free `IsoDate` values. A single day has equal endpoints. Controlled and uncontrolled usage share the same model.
+
+```tsx
+import { useState } from "react";
+import type { DateRange } from "@quno/calendar";
+import { QunoDatePicker } from "@quno/calendar/date-picker";
+import "@quno/calendar/date-picker/styles.css";
+
+function TravelDates() {
+  const [value, setValue] = useState<DateRange | null>(null);
+  return <QunoDatePicker value={value} onChange={setValue} weekStartsOn={1} />;
+}
+```
+
+Use `selectionMode="single"` when the product chooses one day while retaining the `DateRange` state shape. `initialMonth` controls only the initial view; navigation and Clear do not unexpectedly change one another. Consumer customization is presentational through scoped `--quno-date-picker-*` properties, typed `classNames`, stable `data-slot`/state attributes, and `getDayCellProps`.
+
+## Natural date input
+
+```tsx
+import { QunoDateInput, parseDateInput } from "@quno/calendar/date-input";
+import "@quno/calendar/date-input/styles.css";
+
+const parsed = parseDateInput("next 2 weeks", {
+  referenceDate: "2026-08-24",
+  locale: "en-GB"
+});
+
+<QunoDateInput value={value} onChange={setValue} referenceDate="2026-08-24" />;
+```
+
+The input and headless parser share the timezone-free range model. Parser language, preferred numeric date order, lexicon, formatting, labels, and controlled/uncontrolled state are configurable. Import `tokenizeDateInput` when an integration needs recognition tokens without rendering the input.
+
+## Compose picker and timeline
+
+Keep both components independent. A single-date picker can navigate the timeline through the public handle:
+
+```tsx
+const calendarRef = useRef<QunoCalendarHandle>(null);
+
+<QunoDatePicker
+  selectionMode="single"
+  onChange={(selection) => {
+    if (selection) calendarRef.current?.scrollToDate(selection.start);
+  }}
+/>
+<QunoCalendar ref={calendarRef} {...timelineProps} />
+```
+
+Do not convert event timestamps with the picker’s UTC day arithmetic. Only the timeline day key passed to `scrollToDate` is an `IsoDate`.
+
+## React, Preact, SSR, and production builds
+
+React 18+ is the authored runtime. For Preact, install `preact` and map `react`, `react-dom`, `react-dom/test-utils`, and their JSX runtime imports to the corresponding `preact/compat` or `preact` modules in the consumer bundler. For Vite:
+
+```ts
+resolve: {
+  alias: {
+    react: "preact/compat",
+    "react-dom": "preact/compat",
+    "react-dom/test-utils": "preact/test-utils",
+    "react/jsx-runtime": "preact/jsx-runtime"
+  }
+}
+```
+
+Every JavaScript entry is available as ESM and CommonJS and can be imported in Node without `document`. Stylesheets are independent browser assets. React, React DOM, Preact compatibility, and `@tanstack/react-virtual` stay outside the feature bundles.
 
 ## Drag And Create
 
@@ -266,7 +348,7 @@ Without a move or activate callback, existing event cards cannot start a drag/pr
 these callbacks is read-only.
 
 ```tsx
-<CalendarRoot
+<QunoCalendar
   {...calendarProps}
   onEventMoveRequest={async (request) => {
     await api.moveEvent(request);
@@ -281,7 +363,7 @@ these callbacks is read-only.
 Returning `false` from `onEventMoveRequest` rejects a drop. Returning a created event from `onEventCreateRequest` lets the visible cache show the committed event immediately. Newly committed visible events briefly receive `status: "appearing"` in `eventRenderer` props so product renderers can play a save/create highlight. For parent-owned save flows, update your own event store and call `commitVisibleEvent` so the loaded visible cache changes one record instead of reloading the range.
 
 Repository example: the parent-owned mutation chapter in
-[`ArticleRecipeDemos.tsx`](../demo/examples/integration-walkthrough/ArticleRecipeDemos.tsx) stages move and create
+[`ArticleRecipeDemos.tsx`](../demo/guide/timeline/ArticleRecipeDemos.tsx) stages move and create
 proposals as `activeDraft` previews. Its explicit Accept action patches parent state and the visible cache, while Cancel
 removes the preview without changing saved events.
 
@@ -290,7 +372,7 @@ removes the preview without changing saved events.
 Use controlled drafts when create/edit UI lives outside the calendar.
 
 ```tsx
-<CalendarRoot
+<QunoCalendar
   {...calendarProps}
   activeDraft={activeDraft}
   onEventDraftRequest={(request) => openCreateForm(request)}
@@ -352,8 +434,8 @@ setActiveDraft(null);
 ```
 
 Repository example: the focused creation, visual-focus, and motion chapters in
-[`ArticleDemos.tsx`](../demo/examples/integration-walkthrough/ArticleDemos.tsx) and
-[`ArticleSystemDemos.tsx`](../demo/examples/integration-walkthrough/ArticleSystemDemos.tsx).
+[`ArticleDemos.tsx`](../demo/guide/timeline/ArticleDemos.tsx) and
+[`ArticleSystemDemos.tsx`](../demo/guide/timeline/ArticleSystemDemos.tsx).
 
 ## Availability Editing
 
@@ -362,7 +444,7 @@ pointer-transparent background context. In availability mode, normal appointment
 pointer-transparent, and only availability blocks participate in move/draw hit-testing.
 
 ```tsx
-<CalendarRoot
+<QunoCalendar
   {...calendarProps}
   interactionMode="availability"
   onEventCreateRequest={(request) => createAvailability(request)}
@@ -370,7 +452,7 @@ pointer-transparent, and only availability blocks participate in move/draw hit-t
 ```
 
 Repository example: the availability interaction-layer chapter in
-[`ArticleSystemDemos.tsx`](../demo/examples/integration-walkthrough/ArticleSystemDemos.tsx).
+[`ArticleSystemDemos.tsx`](../demo/guide/timeline/ArticleSystemDemos.tsx).
 
 ## Data Shape
 
@@ -392,9 +474,9 @@ const event = {
 Use the imperative handle for parent-owned navigation. Keep zoom controlled through `settings.zoom` and `onZoomChange`.
 
 ```tsx
-const calendarRef = useRef<CalendarNavigationHandle>(null);
+const calendarRef = useRef<QunoCalendarHandle>(null);
 
-<CalendarRoot ref={calendarRef} {...calendarProps} settings={{ ...settings, zoom }} onZoomChange={setZoom} />;
+<QunoCalendar ref={calendarRef} {...calendarProps} settings={{ ...settings, zoom }} onZoomChange={setZoom} />;
 
 calendarRef.current?.scrollToDateTime("2026-07-04", "09:30");
 ```
@@ -415,9 +497,9 @@ focus does not change either scroll axis. A partially clipped or offscreen targe
 
 ```tsx
 const [selectedCalendarIds, setSelectedCalendarIds] = useState(["provider-a"]);
-const calendarRef = useRef<CalendarNavigationHandle>(null);
+const calendarRef = useRef<QunoCalendarHandle>(null);
 
-<CalendarRoot
+<QunoCalendar
   ref={calendarRef}
   {...calendarProps}
   selectedCalendarIds={selectedCalendarIds}
@@ -430,7 +512,7 @@ await calendarRef.current?.focusEvent(event, { preferredCalendarId: "room-1" });
 For controlled navigation, pass a unique request id. Re-rendering the same id does not repeat the focus operation.
 
 ```tsx
-<CalendarRoot
+<QunoCalendar
   {...calendarProps}
   focusRequest={{ requestId: selectionVersion, event, preferredCalendarId: "room-1" }}
   onCalendarVisibilityRequest={({ calendarIds }) => setSelectedCalendarIds(calendarIds)}

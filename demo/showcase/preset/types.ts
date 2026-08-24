@@ -1,5 +1,5 @@
 import type { LucideIcon } from "lucide-react";
-import type { EventCreateRequest, EventMoveRequest, EventRenderer } from "quno-calendar";
+import type { EventCreateRequest, EventMoveRequest, EventRenderer } from "@quno/calendar/timeline";
 import type { DemoControlDefaults, DemoLayoutSettings } from "../hooks/useDemoControls";
 
 export type DemoPreset = {

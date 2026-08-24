@@ -7,8 +7,13 @@ const KIB = 1024;
 const projectRoot = resolve(".");
 const distRoot = resolve(process.argv[2] ?? "dist");
 const bundles = [
-  { label: "ESM", path: resolve(distRoot, "quno-calendar.js"), gzipLimit: 32 * KIB },
-  { label: "CSS", path: resolve(distRoot, "styles.css"), gzipLimit: 2 * KIB }
+  { label: "Shared root JavaScript", path: resolve(distRoot, "index.js"), gzipLimit: 2 * KIB },
+  { label: "Timeline JavaScript", path: resolve(distRoot, "timeline.js"), gzipLimit: 32 * KIB },
+  { label: "Timeline CSS", path: resolve(distRoot, "timeline.css"), gzipLimit: 2 * KIB },
+  { label: "Datepicker JavaScript", path: resolve(distRoot, "date-picker.js"), gzipLimit: 10 * KIB },
+  { label: "Datepicker CSS", path: resolve(distRoot, "date-picker.css"), gzipLimit: 3.5 * KIB },
+  { label: "Date input JavaScript", path: resolve(distRoot, "date-input.js"), gzipLimit: 7 * KIB },
+  { label: "Date input CSS", path: resolve(distRoot, "date-input.css"), gzipLimit: 1 * KIB }
 ];
 
 function formatSize(bytes) {

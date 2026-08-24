@@ -1,4 +1,4 @@
-import type { EventRendererProps } from "quno-calendar";
+import type { EventRendererProps } from "@quno/calendar/timeline";
 
 export function eventCardModel(
   prefix: string,

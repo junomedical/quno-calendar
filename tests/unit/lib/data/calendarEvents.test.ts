@@ -3,8 +3,8 @@ import {
   applyEventMove,
   eventBelongsToCalendar,
   replaceEventCalendarMembership
-} from "../../../../src/lib/data/calendarEvents";
-import type { CalendarEvent, EventMoveRequest } from "../../../../src/lib/core/types";
+} from "../../../../src/lib/timeline/data/calendarEvents";
+import type { CalendarEvent, EventMoveRequest } from "../../../../src/lib/timeline/core/types";
 
 const event: CalendarEvent = {
   id: "event-1",

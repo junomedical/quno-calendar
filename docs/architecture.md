@@ -6,7 +6,7 @@ The calendar is a reusable rendering library first and a demo application second
 
 ```mermaid
 flowchart LR
-  Public["CalendarRoot public facade"] --> Runtime["shared view runtime"]
+  Public["QunoCalendar public facade"] --> Runtime["shared view runtime"]
   Runtime --> Cache["bounded async cache"]
   Runtime --> Viewport["date and resource windows"]
   Runtime --> Gestures["pointer and zoom controllers"]
@@ -53,7 +53,7 @@ flowchart LR
 
 ## Public Surface
 
-`CalendarRoot` remains the package entrypoint. It accepts calendars, selected calendar ids, a range loader, an optional `eventPrefetchPolicy`, an external renderer, controlled settings, interaction callbacks, and an optional imperative ref.
+`QunoCalendar` remains the package entrypoint. It accepts calendars, selected calendar ids, a range loader, an optional `eventPrefetchPolicy`, an external renderer, controlled settings, interaction callbacks, and an optional imperative ref.
 
 - `view="infinite-horizontal"`: dates flow down, calendars are rows, time runs left-to-right.
 - `view="infinite-vertical"`: dates flow down, calendars are columns, time runs top-to-bottom.
@@ -64,15 +64,15 @@ virtualization or date-key identity. Generated vertical labels use one primary l
 their month/day and weekday lines. When no locale is supplied, `Intl.DateTimeFormat` uses the current runtime locale;
 server-rendered applications should pass an explicit locale when server and browser defaults may differ.
 
-Calendar chrome presentation is inherited through semantic `--ic-*` color variables. `styles/palette.css` is the one
+Calendar chrome presentation is inherited through semantic `--quno-calendar-*` color variables. `styles/palette.css` is the one
 source of truth for internal fallback values; rendering selectors reference its private defaults instead of repeating
-color literals. The library does not declare the public variables on `.ic-shell`, so a value set by `className`, the
+color literals. The library does not declare the public variables on `.quno-calendar-shell`, so a value set by `className`, the
 typed `style` prop, or an ancestor remains effective independent of stylesheet order. Event-specific
 `CalendarEvent.color` values override only the shared default event accent.
 
 `LoadEventsArgs` includes `signal?: AbortSignal`; existing loaders remain valid and cancellation-aware loaders can stop obsolete requests early. `eventPrefetchPolicy` receives the rendered date keys and selected calendar ids and returns `{ beforeDays, afterDays }`. The exported `defaultEventPrefetchPolicy` requests seven calendar days before the first rendered date and seven after the last rendered date.
 
-`CalendarRoot` also coordinates declarative `focusRequest` values and imperative `focusEvent` calls above both
+`QunoCalendar` also coordinates declarative `focusRequest` values and imperative `focusEvent` calls above both
 orientation views. A focus request contains a complete event, asks the parent to reveal all known participant calendars
 through `onCalendarVisibilityRequest`, and asks the selected view whether the preferred event shell is fully inside its
 uncovered content viewport. A fully visible target is highlighted without a scroll write; a clipped or offscreen target
@@ -113,13 +113,13 @@ layout-measurement state in React.
 
 Primary ownership folders are:
 
-- `src/lib/core`, `date`, `time`, and `data`: public facade and foundation primitives.
-- `src/lib/infinite/scroll`: bounded date windows, visible position, settlement, navigation, and resource windows.
-- `src/lib/infinite/events`: loading, cache, indexing, overlap layout, and metrics.
-- `src/lib/infinite/anchors`: parent, late-data, and zoom visual-focus restoration.
-- `src/lib/infinite/interactions`: pointer, hit-testing, drag, draft, and wheel-zoom state.
-- `src/lib/infinite/rendering`: shared/orientation DOM layers, geometry, and styles.
-- `src/lib/infinite/views`: horizontal and vertical composition roots.
+- `src/lib/timeline/core`, `date`, `time`, and `data`: public facade and foundation primitives.
+- `src/lib/timeline/infinite/scroll`: bounded date windows, visible position, settlement, navigation, and resource windows.
+- `src/lib/timeline/infinite/events`: loading, cache, indexing, overlap layout, and metrics.
+- `src/lib/timeline/infinite/anchors`: parent, late-data, and zoom visual-focus restoration.
+- `src/lib/timeline/infinite/interactions`: pointer, hit-testing, drag, draft, and wheel-zoom state.
+- `src/lib/timeline/infinite/rendering`: shared/orientation DOM layers, geometry, and styles.
+- `src/lib/timeline/infinite/views`: horizontal and vertical composition roots.
 - `demo/app`: application entrypoint and the retained showcase routes.
 - `demo/examples`: the single documented public-API field guide and its recipe-sized live exhibits.
 - `demo/showcase`: application-only presets, dense stress data, and product-style interactions.
@@ -128,13 +128,13 @@ Primary ownership folders are:
 [`docs/flows`](./flows/README.md) documents execution order. [`demo/examples`](../demo/examples/README.md) documents the
 consumer field guide. Folder names are the source-level ownership signal; `check:architecture` enforces readable
 module/function sizes, prevents cross-domain `../../../` imports, and keeps demo code outside the library. Library
-modules use `#calendar-internal/*` when they cross responsibility folders rooted at `src/lib`; imports within the same local
+modules use `#quno-internal/timeline/*` when they cross responsibility folders rooted at `src/lib`; imports within the same local
 feature folder remain relative so nearby dependencies are still obvious.
 
-The `/examples/integration-walkthrough` route owns the complete example surface. It owns a document-height article
+The `/guide` route owns the complete example surface. It owns a document-height article
 scroller and table of contents, mounts later calendar exhibits only when they approach the viewport, and keeps
 each exhibit mounted afterward. Every exhibit uses the same demo-owned full-screen shell, which places its existing
-mounted `CalendarRoot` in a fixed viewport overlay; it does not invoke the browser Fullscreen API or move calendar state
+mounted `QunoCalendar` in a fixed viewport overlay; it does not invoke the browser Fullscreen API or move calendar state
 into the reusable library. Its system-design labs also expose two existing library boundaries without adding article
 state to the runtime: `interactionMode` switches pointer ownership between committed event and availability layers, and
 the public viewport-anchor handle carries visual focus from a controlled draft to its saved replacement or through
@@ -398,4 +398,4 @@ per-day header marker segments, so its opaque header and pin expose only the mar
 date/resource labels remain above both. Reusable CSS is split into base, horizontal, vertical, and event-shell ownership
 files.
 
-Package builds emit JavaScript and an explicit `quno-calendar/styles.css`; JavaScript does not inject CSS or access `document` during import. Both ESM import and CommonJS `require` are safe in Node/SSR environments. Library date parsing and labels use small local/`Intl` helpers, so `date-fns` is not a runtime dependency of consumers.
+Package builds emit JavaScript and an explicit `@quno/calendar/timeline/styles.css`; JavaScript does not inject CSS or access `document` during import. Both ESM import and CommonJS `require` are safe in Node/SSR environments. Library date parsing and labels use small local/`Intl` helpers, so `date-fns` is not a runtime dependency of consumers.

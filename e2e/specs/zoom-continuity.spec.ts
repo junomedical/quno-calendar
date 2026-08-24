@@ -2,8 +2,8 @@ import { expect, test, type Page } from "@playwright/test";
 import { firstViewportEventBox, goToWorkday, topVisibleDayDate, waitForDemoEvents } from "../helpers";
 
 async function visibleTimelineCenterMinuteOffset(page: Page) {
-  return page.locator(".ic-viewport").evaluate((viewport) => {
-    const label = viewport.querySelector<HTMLElement>(".ic-row-label");
+  return page.locator(".quno-calendar-viewport").evaluate((viewport) => {
+    const label = viewport.querySelector<HTMLElement>(".quno-calendar-row-label");
     const zoomText = document.querySelector<HTMLElement>('[data-testid="zoom-value"]')?.textContent;
     if (!label || !zoomText) throw new Error("Missing horizontal zoom geometry");
     const zoom = Number(zoomText);
@@ -21,9 +21,9 @@ test("coalesces a touchpad wheel burst into one anchored timeline projection", a
   await waitForDemoEvents(page);
 
   const result = await page.evaluate(async () => {
-    const viewport = document.querySelector<HTMLElement>(".ic-viewport");
+    const viewport = document.querySelector<HTMLElement>(".quno-calendar-viewport");
     const output = document.querySelector<HTMLElement>('[data-testid="zoom-value"]');
-    const track = document.querySelector<HTMLElement>(".ic-time-tick-track");
+    const track = document.querySelector<HTMLElement>(".quno-calendar-time-tick-track");
     const controlPane = document.querySelector<HTMLElement>(".demo-control-pane");
     if (!viewport || !output || !track || !controlPane) throw new Error("Missing wheel zoom burst fixture");
     const viewportBox = viewport.getBoundingClientRect();
@@ -77,15 +77,15 @@ test("keeps horizontal slider zoom continuous without replacing rendered content
   await waitForDemoEvents(page);
   await firstViewportEventBox(page);
 
-  const viewport = page.locator(".ic-viewport");
+  const viewport = page.locator(".quno-calendar-viewport");
   const zoom = page.getByTestId("zoom-slider");
   const controlPane = page.locator(".demo-control-pane");
   const zoomPaintBoundary = page.locator(".demo-zoom-paint-boundary");
   const statsPaintBoundary = page.locator(".demo-stats");
   const controlPaneBox = await controlPane.boundingBox();
   const brandBox = await page.locator(".demo-brand").boundingBox();
-  await expect(page.locator(".ic-shell")).toHaveCSS("contain", "none");
-  await expect(page.locator(".ic-shell")).toHaveCSS("isolation", "isolate");
+  await expect(page.locator(".quno-calendar-shell")).toHaveCSS("contain", "none");
+  await expect(page.locator(".quno-calendar-shell")).toHaveCSS("isolation", "isolate");
   await expect(controlPane).toHaveCSS("contain", "none");
   await expect(controlPane).toHaveCSS("will-change", "transform");
   expect(await controlPane.evaluate((element) => getComputedStyle(element).transform)).not.toBe("none");
@@ -128,7 +128,7 @@ test("keeps horizontal slider zoom continuous without replacing rendered content
     availability.dataset.zoomStableAvailabilityShell = "true";
     availabilityContent.dataset.zoomStableAvailabilityContent = "true";
 
-    const virtualSpace = element.querySelector<HTMLElement>(".ic-virtual-space");
+    const virtualSpace = element.querySelector<HTMLElement>(".quno-calendar-virtual-space");
     if (!virtualSpace) throw new Error("Missing virtual space to observe");
     const state = window as typeof window & {
       zoomStableNodes?: Element[];
@@ -137,7 +137,7 @@ test("keeps horizontal slider zoom continuous without replacing rendered content
     };
     state.zoomStableNodes = Array.from(
       virtualSpace.querySelectorAll(
-        '[data-testid="calendar-day"], [data-testid="calendar-row"], [data-testid="calendar-event"], [data-testid="availability-event"], .ic-time-tick'
+        '[data-testid="calendar-day"], [data-testid="calendar-row"], [data-testid="calendar-event"], [data-testid="availability-event"], .quno-calendar-time-tick'
       )
     );
     state.zoomChildListMutations = 0;
@@ -174,7 +174,7 @@ test("keeps horizontal slider zoom continuous without replacing rendered content
   await expect(page.locator('[data-zoom-stable-availability-content="true"]')).toHaveCount(1);
   expect(
     await page.evaluate(() => {
-      const viewport = document.querySelector<HTMLElement>(".ic-viewport");
+      const viewport = document.querySelector<HTMLElement>(".quno-calendar-viewport");
       if (!viewport) return false;
       const viewportBox = viewport.getBoundingClientRect();
       return Array.from(viewport.querySelectorAll<HTMLElement>('[data-testid="availability-event"]')).some((shell) => {
@@ -222,7 +222,7 @@ test("keeps the vertical visible date mounted while zoom geometry settles", asyn
 
   await page.evaluate((dateKey) => {
     const day = document.querySelector<HTMLElement>(`[data-testid="calendar-day"][data-date="${dateKey}"]`);
-    const virtualSpace = document.querySelector<HTMLElement>(".ic-virtual-space");
+    const virtualSpace = document.querySelector<HTMLElement>(".quno-calendar-virtual-space");
     if (!day || !virtualSpace) throw new Error("Missing visible vertical date to observe");
     const stableNodes = [
       day,

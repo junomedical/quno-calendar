@@ -1,0 +1,41 @@
+.story__howto {
+  margin-top: 28px;
+  padding: 18px;
+  border: 1px solid #dce3ee;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 12px 32px rgb(32 49 68 / 7%);
+}
+
+.story__howto > span {
+  color: #0167ff;
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.story__howto h3 {
+  margin: 7px 0 5px;
+  font-size: 18px;
+  letter-spacing: -0.02em;
+}
+
+.story__howto p {
+  margin: 0;
+  color: #687486;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.story__howto pre {
+  overflow-x: auto;
+  margin: 14px 0 0;
+  padding: 14px;
+  border-radius: 10px;
+  background: #101820;
+  color: #dbe7f5;
+  font-size: 11px;
+  line-height: 1.55;
+  white-space: pre;
+}

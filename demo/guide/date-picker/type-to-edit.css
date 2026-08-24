@@ -1,0 +1,108 @@
+.story__type-to-edit {
+  position: relative;
+  width: min(100%, 420px);
+  outline: none;
+}
+
+.story__type-to-edit-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 48px;
+  padding: 0 12px 0 16px;
+  border: 1px solid #d9e1ec;
+  border-radius: 12px;
+  background: #fff;
+  transition:
+    border-color 120ms ease,
+    box-shadow 120ms ease;
+}
+
+.story__type-to-edit-summary:focus-within {
+  border-color: #0167ff;
+  box-shadow: 0 0 0 2px rgb(1 103 255 / 22%);
+}
+
+.story__type-to-edit-summary:focus-within:has([data-recognition="recognized"]) {
+  border-color: #087f5b;
+  box-shadow: 0 0 0 2px rgb(8 127 91 / 20%);
+}
+
+.story__type-to-edit-summary:focus-within:has([data-recognition="unrecognized"]) {
+  border-color: #b42318;
+  box-shadow: 0 0 0 2px rgb(180 35 24 / 18%);
+}
+
+.story__type-to-edit-summary button {
+  border: 0;
+  background: transparent;
+  color: #25364d;
+  cursor: pointer;
+  font: inherit;
+}
+
+.story__type-to-edit-input--summary {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.story__type-to-edit-summary button:last-child {
+  color: #627087;
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.story__type-to-edit-input--summary .quno-date-picker-input-root,
+.story__type-to-edit-input--summary .quno-date-picker-input {
+  width: 100%;
+}
+
+.story__type-to-edit-input--summary .quno-date-picker-input {
+  border: 0;
+  border-radius: 0;
+  padding: 7px 12px 7px 0;
+  background: transparent;
+  font-weight: 750;
+  outline: 0;
+}
+
+.story__type-to-edit-input--summary .quno-date-picker-input::placeholder {
+  color: #627087;
+  opacity: 1;
+}
+
+.story__type-to-edit-input--summary .quno-date-picker-input:not(:focus)::placeholder {
+  color: #25364d;
+}
+
+.story__type-to-edit-calendar {
+  position: absolute;
+  z-index: 10;
+  top: calc(100% + 10px);
+  left: 0;
+  width: min(420px, 100%);
+}
+
+.story__picker--draft {
+  --quno-date-picker-month-scroll-duration: 0ms;
+  --quno-date-picker-pill-reveal-duration: 0ms;
+}
+
+.story__type-to-edit-input {
+  position: relative;
+}
+
+.story__type-to-edit-input .quno-date-picker-input-root,
+.story__type-to-edit-input .quno-date-picker-input {
+  width: 100%;
+}
+
+.story__type-to-edit-input .quno-date-picker-input {
+  padding-right: 30px;
+}
+
+.story__picker--without-summary [data-slot="selection-header"] {
+  display: none;
+}

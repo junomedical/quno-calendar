@@ -53,7 +53,7 @@ export function DefaultDemoSidebar({
         </div>
       </div>
       <DemoRouteNav activeRouteId="default" className="demo-route-nav" routes={routes} />
-      <a className="walkthrough-link" href="/examples/integration-walkthrough">
+      <a className="walkthrough-link" href="/guide">
         <BookOpenText size={15} aria-hidden />
         Read the integration field guide
       </a>

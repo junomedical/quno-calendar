@@ -1,0 +1,102 @@
+/**
+ * Vertical navigation and public imperative API.
+ * date/time requests + geometry registry -> scroll operations and anchor-safe ref methods
+ */
+import { useCallback, useImperativeHandle, type ForwardedRef, type RefObject } from "react";
+import type { QunoCalendarHandle, QunoCalendarSettings } from "#quno-internal/timeline/core/types";
+import type { CalendarViewHandle } from "#quno-internal/timeline/core/internalTypes";
+import { toDateKey } from "#quno-internal/timeline/date/dateVirtualization";
+import { parseClockToMinutes } from "#quno-internal/timeline/time/time";
+import { verticalMinuteToY, VERTICAL_TIMELINE_GUTTER_PX } from "../../rendering/vertical/VerticalTimelineDay";
+import { buildVerticalViewGeometry } from "../../rendering/vertical/verticalViewGeometry";
+import { useViewportAnchoring } from "../../anchors/parent/useViewportAnchoring";
+import type { IsoDate } from "#quno-internal/shared/dateRangeModel";
+
+type VerticalNavigationArgs = {
+  ref: ForwardedRef<CalendarViewHandle>;
+  containerRef: RefObject<HTMLDivElement>;
+  settings: QunoCalendarSettings;
+  now: Date;
+  scrollToDate: QunoCalendarHandle["scrollToDate"];
+  rememberVisibleDateOffset: (dateKey: string, offsetWithinDate: number) => void;
+  commitVisibleEvent: QunoCalendarHandle["commitVisibleEvent"];
+  removeVisibleEvent: QunoCalendarHandle["removeVisibleEvent"];
+  releaseActiveDraft: QunoCalendarHandle["releaseActiveDraft"];
+};
+
+export function useVerticalNavigation({
+  ref,
+  containerRef,
+  settings,
+  now,
+  scrollToDate,
+  rememberVisibleDateOffset,
+  commitVisibleEvent,
+  removeVisibleEvent,
+  releaseActiveDraft
+}: VerticalNavigationArgs) {
+  const scrollToTimeInDate = useCallback(
+    (dateKey: IsoDate, time: string) => {
+      const scrollElement = containerRef.current;
+      if (!scrollElement || !/^\d{2}:\d{2}$/.test(time)) return;
+      const dayElement = scrollElement.querySelector<HTMLElement>(
+        `[data-testid="calendar-day"][data-date="${dateKey}"]`
+      );
+      if (!dayElement) return;
+      const offsetWithinDate = Math.max(
+        0,
+        settings.dayHeaderHeight + verticalMinuteToY(parseClockToMinutes(time), settings) - 48
+      );
+      rememberVisibleDateOffset(dateKey, offsetWithinDate);
+      scrollElement.scrollTop = Math.max(0, dayElement.offsetTop + offsetWithinDate);
+    },
+    [containerRef, rememberVisibleDateOffset, settings]
+  );
+  const scrollToDateTime = useCallback(
+    (dateKey: IsoDate, time: string) => {
+      scrollToDate(dateKey);
+      window.requestAnimationFrame(() => {
+        scrollToTimeInDate(dateKey, time);
+        window.requestAnimationFrame(() => scrollToTimeInDate(dateKey, time));
+      });
+    },
+    [scrollToDate, scrollToTimeInDate]
+  );
+  const anchoring = useViewportAnchoring({
+    containerRef,
+    settings,
+    orientation: "vertical",
+    scrollToDateTime,
+    verticalTimelineGutterPx: VERTICAL_TIMELINE_GUTTER_PX,
+    visibilityInsets: {
+      left: buildVerticalViewGeometry(settings).labelWidth,
+      top: settings.dayHeaderHeight
+    }
+  });
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      scrollToDate,
+      scrollToDateTime,
+      scrollToToday: () =>
+        scrollToDateTime(
+          toDateKey(now),
+          `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`
+        ),
+      captureViewportAnchor: anchoring.captureViewportAnchor,
+      isEventFullyVisible: anchoring.isEventFullyVisible,
+      restoreViewportAnchor: anchoring.restoreViewportAnchor,
+      cancelViewportAnchorRestore: anchoring.cancelViewportAnchorRestore,
+      commitVisibleEvent,
+      removeVisibleEvent,
+      releaseActiveDraft
+    }),
+    [anchoring, commitVisibleEvent, now, releaseActiveDraft, removeVisibleEvent, scrollToDate, scrollToDateTime]
+  );
+
+  return {
+    activeRestoreTarget: anchoring.activeRestoreTarget,
+    geometryRegistration: anchoring.registration
+  };
+}

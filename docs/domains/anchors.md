@@ -29,15 +29,15 @@ Priority and interaction with scroll maintenance are defined in the [Flow Guide]
 
 ## Source Map
 
-| Source file                                                                                                        | Responsibility                                                                                               |
-| ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------ |
-| [`viewportAnchorTypes.ts`](../../src/lib/infinite/anchors/parent/viewportAnchorTypes.ts)                           | Defines internal geometry registration and restore-target contracts.                                         |
-| [`viewportGeometryRegistry.ts`](../../src/lib/infinite/anchors/parent/viewportGeometryRegistry.ts)                 | Indexes mounted date, resource, and event elements for semantic resolution.                                  |
-| [`viewportAnchorRestoreSession.ts`](../../src/lib/infinite/anchors/parent/viewportAnchorRestoreSession.ts)         | Schedules, retries, cancels, and completes one parent-owned restoration.                                     |
-| [`useViewportAnchoring.ts`](../../src/lib/infinite/anchors/parent/useViewportAnchoring.ts)                         | Exposes capture/restore operations and geometry registration to a view.                                      |
-| [`horizontalDataLayoutAnchor.ts`](../../src/lib/infinite/anchors/data-layout/horizontalDataLayoutAnchor.ts)        | Captures and resolves date/resource offsets across horizontal metric changes.                                |
-| [`useHorizontalDayMeasurement.ts`](../../src/lib/infinite/anchors/data-layout/useHorizontalDayMeasurement.ts)      | Measures changed days and restores the current semantic slot before paint.                                   |
-| [`useHorizontalControlledZoomAnchor.ts`](../../src/lib/infinite/anchors/zoom/useHorizontalControlledZoomAnchor.ts) | Preserves a visible now marker, with center/origin fallback, across controlled horizontal zoom prop changes. |
+| Source file                                                                                                                 | Responsibility                                                                                               |
+| --------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| [`viewportAnchorTypes.ts`](../../src/lib/timeline/infinite/anchors/parent/viewportAnchorTypes.ts)                           | Defines internal geometry registration and restore-target contracts.                                         |
+| [`viewportGeometryRegistry.ts`](../../src/lib/timeline/infinite/anchors/parent/viewportGeometryRegistry.ts)                 | Indexes mounted date, resource, and event elements for semantic resolution.                                  |
+| [`viewportAnchorRestoreSession.ts`](../../src/lib/timeline/infinite/anchors/parent/viewportAnchorRestoreSession.ts)         | Schedules, retries, cancels, and completes one parent-owned restoration.                                     |
+| [`useViewportAnchoring.ts`](../../src/lib/timeline/infinite/anchors/parent/useViewportAnchoring.ts)                         | Exposes capture/restore operations and geometry registration to a view.                                      |
+| [`horizontalDataLayoutAnchor.ts`](../../src/lib/timeline/infinite/anchors/data-layout/horizontalDataLayoutAnchor.ts)        | Captures and resolves date/resource offsets across horizontal metric changes.                                |
+| [`useHorizontalDayMeasurement.ts`](../../src/lib/timeline/infinite/anchors/data-layout/useHorizontalDayMeasurement.ts)      | Measures changed days and restores the current semantic slot before paint.                                   |
+| [`useHorizontalControlledZoomAnchor.ts`](../../src/lib/timeline/infinite/anchors/zoom/useHorizontalControlledZoomAnchor.ts) | Preserves a visible now marker, with center/origin fallback, across controlled horizontal zoom prop changes. |
 
 ## Verification Map
 

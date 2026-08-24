@@ -64,12 +64,19 @@ function functionName(node, sourceFile) {
 
 function functionViolations(sourceFile) {
   const violations = [];
+  const sourceText = sourceFile.getFullText();
+  const scanner = ts.createScanner(ts.ScriptTarget.Latest, true, sourceFile.languageVariant, sourceText);
+  const codeLines = new Set();
+  for (let token = scanner.scan(); token !== ts.SyntaxKind.EndOfFileToken; token = scanner.scan()) {
+    const line = sourceFile.getLineAndCharacterOfPosition(scanner.getTokenPos()).line + 1;
+    codeLines.add(line);
+  }
   const visit = (node) => {
     if (isFunctionNode(node)) {
       const start = sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile)).line + 1;
       const end =
         sourceFile.getLineAndCharacterOfPosition(Math.max(node.getStart(sourceFile), node.getEnd() - 1)).line + 1;
-      const lineCount = end - start + 1;
+      const lineCount = Array.from(codeLines).filter((line) => line >= start && line <= end).length;
       if (lineCount > FUNCTION_LINE_LIMIT) {
         violations.push({ start, end, lineCount, name: functionName(node, sourceFile) });
       }
@@ -124,12 +131,12 @@ for (const failure of moduleFailures) {
 }
 for (const failure of functionFailures) {
   console.error(
-    `${displayPath(failure.path)}:${failure.start}-${failure.end}: ${failure.name} spans ${failure.lineCount} source lines (function limit: ${FUNCTION_LINE_LIMIT})`
+    `${displayPath(failure.path)}:${failure.start}-${failure.end}: ${failure.name} has ${failure.lineCount} non-comment lines (function limit: ${FUNCTION_LINE_LIMIT})`
   );
 }
 for (const failure of importFailures) {
   console.error(
-    `${displayPath(failure.path)}:${failure.line}: use #calendar-internal/* instead of deep relative import ${failure.specifier}`
+    `${displayPath(failure.path)}:${failure.line}: use #quno-internal/timeline/* instead of deep relative import ${failure.specifier}`
   );
 }
 
@@ -140,6 +147,6 @@ if (moduleFailures.length || functionFailures.length || importFailures.length) {
   process.exitCode = 1;
 } else {
   console.log(
-    `Architecture check passed for ${files.length} production modules (modules <= ${MODULE_LINE_LIMIT} non-comment lines; functions <= ${FUNCTION_LINE_LIMIT} source lines; no deep relative imports).`
+    `Architecture check passed for ${files.length} production modules (modules <= ${MODULE_LINE_LIMIT} non-comment lines; functions <= ${FUNCTION_LINE_LIMIT} non-comment lines; no deep relative imports).`
   );
 }

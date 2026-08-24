@@ -1,10 +1,18 @@
 # Decision Log
 
+## QUNO-001 - Consolidate calendar, picker, and natural input
+
+- Date: 2026-08-24
+- Status: Accepted; supersedes only the pending `infinite-calendar` package rename
+- Context: The timeline and date-selection libraries had separate packages, guides, framework conventions, and release workflows despite sharing calendar-day contracts and consumer use cases.
+- Decision: Publish one React-authored `@quno/calendar` package with independent `timeline`, `date-picker`, and `date-input` UI subpaths, a headless root, optional feature styles, official tested Preact compatibility aliases, and one `/guide`. Keep picker day arithmetic timezone-free and keep timeline event timestamps local/offset-aware.
+- Consequences: Consumers install one package and can import any feature independently. The release is breaking and has no compatibility exports. Historical calendar decisions below and all accepted datepicker decisions in [date-picker-decisions.md](./date-picker-decisions.md) remain authoritative.
+
 ## 001 - Greenfield Vite React TypeScript
 
 Vite keeps the PoC lightweight while still supporting strict TypeScript, Vitest, and Playwright.
 
-## 002 - View Components Behind CalendarRoot
+## 002 - View Components Behind QunoCalendar
 
 The root component owns shared calendar inputs and delegates rendering to view components. This keeps future day/week/resource views possible without rewriting event renderers.
 
@@ -129,7 +137,7 @@ Code modules include short JSDoc plus `@see` links to architecture or refactor d
 
 ## 027 - Styles Follow Ownership Boundaries
 
-Reusable infinite-calendar styles live with the infinite view and are imported by that module. Demo app chrome and the demo event card keep their own styles outside the library. This keeps the package closer to a reusable component library instead of a demo page with one global stylesheet.
+Reusable @quno/calendar/timeline styles live with the infinite view and are imported by that module. Demo app chrome and the demo event card keep their own styles outside the library. This keeps the package closer to a reusable component library instead of a demo page with one global stylesheet.
 
 ## 028 - Unit Tests Live Outside Source
 
@@ -159,11 +167,11 @@ Vertical calendar columns default to a `240px` minimum, fit up to three parallel
 
 ## 034 - Demo Variants Stay Outside Calendar Internals
 
-Additional demo routes are implemented as self-contained parent components over `CalendarRoot`. Each variant folder owns its settings, selected defaults, interaction mode, app chrome, and external event renderer, while sharing only deterministic event data helpers and keeping reusable calendar internals unaware of product treatments.
+Additional demo routes are implemented as self-contained parent components over `QunoCalendar`. Each variant folder owns its settings, selected defaults, interaction mode, app chrome, and external event renderer, while sharing only deterministic event data helpers and keeping reusable calendar internals unaware of product treatments.
 
 ## 035 - External Popups Own Create And Edit Forms
 
-The reusable calendar reports create/edit intent but does not own product form UI. `onEventDraftRequest` delegates drawn creation to the parent, `onEventActivate` reports clicked events for editing, and `activeDraft` renders one parent-owned create/edit preview. Edit previews filter out the loaded source event and render the draft in its proposed position, preserving popup-owned save/cancel semantics without mutating loaded data. The drawn-create local draft is cleared one animation frame after delegation so the parent-controlled draft can take over in the same visible position. While an active draft is present, new grid drawing is blocked and only that draft remains draggable; `onActiveDraftMoveRequest` lets the parent update popup state from drag proposals. Multi-calendar active drafts move as a block so participant edits remain the source of calendar membership changes. Selected-calendar changes refetch visible ranges without clearing the previous event cache first, so draw-to-popup filtering does not create a blank frame. If participant filtering removes every selected calendar while a draft is active, the calendar retains the last non-empty draft rows or columns as hidden inert placeholders so the virtual layout does not collapse. The default demo asks its range loader for the full selected calendar set while an external draft filters visible rows, because cancel expands those rows again and should not display empty calendars while the filtered range refetches. The demo popup sits above the calendar current-time marker because editing controls should remain visually and interactively primary while the form is open. The parent owns participant-filtering policy, save latency, validation errors, whether edit opens keep current calendars visible, how empty participant lists disable save, whether visible row-only changes and visible cancel restores avoid date/time centering, whether create cancel restores the drawn calendar row inside the date after visible calendars expand again, whether create cancel after participant additions still targets the originally drawn participant row, whether a repeated draw on that same date/calendar row keeps the new popup draft at the same viewport-relative row position, whether edit cancel returns to the original first person's event instance, whether date edits move naturally when the destination is already visible, and whether a form change avoids scrolling a visible draft or restores an offscreen draft to its last seen viewport-relative position. Parent restore logic should cancel delayed corrections once the user manually scrolls or once a newer draft geometry edit makes the pending correction stale, but should ignore virtualizer relayout scrolls that do not follow a user scroll gesture. Exact anchor corrections can still use an offscreen event element, which keeps dense draw-to-popup handoffs focused when participant filtering shrinks the day heights before the replacement draft is visible. If a layout expansion temporarily unmounts the target, the restore falls back to date/time navigation immediately and then keeps delayed exact-correction retries for measurement settling; this prevents wrong-date flashes before the idle recenter runs. Starting a new restore cleans up the previous manual-scroll cancellation listener so a stale cancel restore cannot invalidate a newer draw handoff. The library owns the viewport-anchor and active-draft release mechanics through `CalendarNavigationHandle` so parent forms can capture an event or slot before changing state, fade out a released draft shell, restore a replacement target after render, and cancel stale corrections after manual scroll without querying internal DOM. This keeps product forms agnostic of horizontal versus vertical geometry while still preserving create/edit/save/cancel positioning.
+The reusable calendar reports create/edit intent but does not own product form UI. `onEventDraftRequest` delegates drawn creation to the parent, `onEventActivate` reports clicked events for editing, and `activeDraft` renders one parent-owned create/edit preview. Edit previews filter out the loaded source event and render the draft in its proposed position, preserving popup-owned save/cancel semantics without mutating loaded data. The drawn-create local draft is cleared one animation frame after delegation so the parent-controlled draft can take over in the same visible position. While an active draft is present, new grid drawing is blocked and only that draft remains draggable; `onActiveDraftMoveRequest` lets the parent update popup state from drag proposals. Multi-calendar active drafts move as a block so participant edits remain the source of calendar membership changes. Selected-calendar changes refetch visible ranges without clearing the previous event cache first, so draw-to-popup filtering does not create a blank frame. If participant filtering removes every selected calendar while a draft is active, the calendar retains the last non-empty draft rows or columns as hidden inert placeholders so the virtual layout does not collapse. The default demo asks its range loader for the full selected calendar set while an external draft filters visible rows, because cancel expands those rows again and should not display empty calendars while the filtered range refetches. The demo popup sits above the calendar current-time marker because editing controls should remain visually and interactively primary while the form is open. The parent owns participant-filtering policy, save latency, validation errors, whether edit opens keep current calendars visible, how empty participant lists disable save, whether visible row-only changes and visible cancel restores avoid date/time centering, whether create cancel restores the drawn calendar row inside the date after visible calendars expand again, whether create cancel after participant additions still targets the originally drawn participant row, whether a repeated draw on that same date/calendar row keeps the new popup draft at the same viewport-relative row position, whether edit cancel returns to the original first person's event instance, whether date edits move naturally when the destination is already visible, and whether a form change avoids scrolling a visible draft or restores an offscreen draft to its last seen viewport-relative position. Parent restore logic should cancel delayed corrections once the user manually scrolls or once a newer draft geometry edit makes the pending correction stale, but should ignore virtualizer relayout scrolls that do not follow a user scroll gesture. Exact anchor corrections can still use an offscreen event element, which keeps dense draw-to-popup handoffs focused when participant filtering shrinks the day heights before the replacement draft is visible. If a layout expansion temporarily unmounts the target, the restore falls back to date/time navigation immediately and then keeps delayed exact-correction retries for measurement settling; this prevents wrong-date flashes before the idle recenter runs. Starting a new restore cleans up the previous manual-scroll cancellation listener so a stale cancel restore cannot invalidate a newer draw handoff. The library owns the viewport-anchor and active-draft release mechanics through `QunoCalendarHandle` so parent forms can capture an event or slot before changing state, fade out a released draft shell, restore a replacement target after render, and cancel stale corrections after manual scroll without querying internal DOM. This keeps product forms agnostic of horizontal versus vertical geometry while still preserving create/edit/save/cancel positioning.
 
 ## 036 - Large Files Split By Ownership Boundary
 
@@ -171,11 +179,11 @@ Timeline gesture state is shared by horizontal and vertical views through `useTi
 
 ## 037 - Package Surface Is Explicit
 
-The public package entrypoint exports `CalendarRoot`, public API types, `defaultTimelineSettings`, and event membership/move helpers. Concrete infinite view components and draft internals stay internal so consumers depend on the stable shell instead of orientation implementation files.
+The public package entrypoint exports `QunoCalendar`, public API types, `defaultQunoCalendarSettings`, and event membership/move helpers. Concrete infinite view components and draft internals stay internal so consumers depend on the stable shell instead of orientation implementation files.
 
 ## 038 - Release Build Separates Library And Demo
 
-The library builds to `dist` with ESM, UMD, generated TypeScript declarations, and a package stylesheet subpath at `quno-calendar/styles.css`. The demo builds separately to `dist-demo`, keeping package verification focused on the artifact consumers install.
+The library builds to `dist` with ESM, UMD, generated TypeScript declarations, and a package stylesheet subpath at `@quno/calendar/timeline/styles.css`. The demo builds separately to `dist-demo`, keeping package verification focused on the artifact consumers install.
 
 ## 039 - Low-Risk Surface Props Stay View-Agnostic
 
@@ -187,7 +195,7 @@ Shared setup, hit-testing, wheel zoom anchoring, drag lifecycle, and draft lifec
 
 ## 041 - The Example Is A Public Integration Field Guide
 
-The single `/examples/integration-walkthrough` route connects product needs to recipe-sized live exhibits. Its source
+The single `/guide` route connects product needs to recipe-sized live exhibits. Its source
 imports the public package and stays separate from the larger stress variants under `demo/showcase`. The `src/` tree is
 reserved for reusable library code, and an architecture check rejects demo regressions into it.
 
@@ -222,7 +230,7 @@ draft transitions.
 
 ## 046 - Package JavaScript Does Not Inject Styles
 
-The library emits an explicit `quno-calendar/styles.css` asset. ESM and CommonJS JavaScript imports do not touch `document`, which keeps package loading safe in Node and SSR environments. Library date operations use tested local-date and `Intl` helpers instead of a runtime `date-fns` dependency; the demo may keep development-only fixture utilities without increasing the consumer bundle. The declared `@tanstack/react-virtual` dependency remains an external package import instead of being copied into the library artifact, preventing duplicate virtualizer code in consumer applications.
+The library emits an explicit `@quno/calendar/timeline/styles.css` asset. ESM and CommonJS JavaScript imports do not touch `document`, which keeps package loading safe in Node and SSR environments. Library date operations use tested local-date and `Intl` helpers instead of a runtime `date-fns` dependency; the demo may keep development-only fixture utilities without increasing the consumer bundle. The declared `@tanstack/react-virtual` dependency remains an external package import instead of being copied into the library artifact, preventing duplicate virtualizer code in consumer applications.
 
 ## 047 - Demo Variants Are Presets Over Shared Modules
 
@@ -259,8 +267,8 @@ Architecture automation keeps objective size limits and the library/demo boundar
 
 ## 054 - Event Focus Is A One-Shot Root Coordination
 
-Event focus is exposed both as a keyed `focusRequest` and as `CalendarNavigationHandle.focusEvent`; both use one
-`CalendarRoot` coordinator above the orientation views. The caller supplies a complete event, avoiding an event-id
+Event focus is exposed both as a keyed `focusRequest` and as `QunoCalendarHandle.focusEvent`; both use one
+`QunoCalendar` coordinator above the orientation views. The caller supplies a complete event, avoiding an event-id
 lookup contract. The coordinator requests every known participant calendar, waits for the controlled selection, then
 uses the existing instance geometry registry to restore the preferred local instance. Focus is semantic viewport focus
 plus a temporary `focused` renderer status, not DOM focus or a permanent scroll constraint. Manual intent and newer
@@ -371,10 +379,10 @@ does not displace the user's visible date.
 
 ## 063 - Cross-Domain Imports Use One Library Alias
 
-Imports that cross from a nested infinite-calendar domain back to the `src/lib` root use the single `#calendar-internal/*`
+Imports that cross from a nested @quno/calendar/timeline domain back to the `src/lib` root use the single `#quno-internal/timeline/*`
 alias. Imports within the same feature folder remain relative. One root alias removes fragile `../../../` traversal
 without inventing a separate alias for every responsibility folder, and the architecture check prevents deep relative
-imports from returning. Its explicitly private name distinguishes it from the exact `quno-calendar` demo alias, which
+imports from returning. Its explicitly private name distinguishes it from the exact `@quno/calendar/timeline` demo alias, which
 exercises only the package's public entrypoint and does not expose internal subpaths. TypeScript resolves the mapping
 relative to `tsconfig.json` without the deprecated `baseUrl` option, while the demo/test Vite config and library build
 resolve the same mapping. `vite/vite-env.d.ts` supplies Vite's ambient asset declarations so strict editor diagnostics
@@ -384,9 +392,9 @@ also recognize side-effect CSS imports.
 
 Color values describe product presentation rather than calendar geometry, so they use semantic inherited CSS custom
 properties instead of React state. `styles/palette.css` owns every internal color literal once; library selectors
-consume public `--ic-*` variables with those private palette values as fallbacks and deliberately do not assign the
-public variables on `.ic-shell`. This lets a theme defined on a wrapper win without depending on stylesheet import
-order. One shared palette covers both orientations; `--ic-vertical-header-bg` remains only as a compatibility alias.
+consume public `--quno-calendar-*` variables with those private palette values as fallbacks and deliberately do not assign the
+public variables on `.quno-calendar-shell`. This lets a theme defined on a wrapper win without depending on stylesheet import
+order. One shared palette covers both orientations; `--quno-calendar-vertical-header-bg` remains only as a compatibility alias.
 An event's explicit `color` still wins over the calendar-level default event accent.
 
 ## 066 - Controlled Wheel Zoom Commits Outside Active React Work

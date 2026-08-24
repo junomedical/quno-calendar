@@ -9,31 +9,35 @@ import {
 
 test("drops minor time labels at dense zoom levels", async ({ page }) => {
   await page.goto("/");
-  const minuteLabelsAtDefaultZoom = await page.locator(".ic-time-tick:not(.is-hour)").evaluateAll((elements) =>
-    elements
-      .filter((element) => element.getAttribute("aria-hidden") !== "true")
-      .map((element) => element.textContent?.trim())
-      .filter(Boolean)
-  );
+  const minuteLabelsAtDefaultZoom = await page
+    .locator(".quno-calendar-time-tick:not(.is-hour)")
+    .evaluateAll((elements) =>
+      elements
+        .filter((element) => element.getAttribute("aria-hidden") !== "true")
+        .map((element) => element.textContent?.trim())
+        .filter(Boolean)
+    );
   expect(minuteLabelsAtDefaultZoom).toContain("30");
   expect(minuteLabelsAtDefaultZoom).not.toContain("15");
   expect(minuteLabelsAtDefaultZoom).not.toContain("45");
-  await expect(page.locator('.ic-time-tick:not([aria-hidden="true"]) sup').first()).toHaveText("30");
+  await expect(page.locator('.quno-calendar-time-tick:not([aria-hidden="true"]) sup').first()).toHaveText("30");
 
   await setDemoZoom(page, 2);
-  const minuteLabelsAtReadableZoom = await page.locator(".ic-time-tick:not(.is-hour)").evaluateAll((elements) =>
-    elements
-      .filter((element) => element.getAttribute("aria-hidden") !== "true")
-      .map((element) => element.textContent?.trim())
-      .filter(Boolean)
-  );
+  const minuteLabelsAtReadableZoom = await page
+    .locator(".quno-calendar-time-tick:not(.is-hour)")
+    .evaluateAll((elements) =>
+      elements
+        .filter((element) => element.getAttribute("aria-hidden") !== "true")
+        .map((element) => element.textContent?.trim())
+        .filter(Boolean)
+    );
   expect(minuteLabelsAtReadableZoom).toContain("15");
   expect(minuteLabelsAtReadableZoom).toContain("30");
   expect(minuteLabelsAtReadableZoom).toContain("45");
 
   await setDemoZoom(page, 0.5);
 
-  const minuteLabelsAtDenseZoom = await page.locator(".ic-time-tick:not(.is-hour)").evaluateAll((elements) =>
+  const minuteLabelsAtDenseZoom = await page.locator(".quno-calendar-time-tick:not(.is-hour)").evaluateAll((elements) =>
     elements
       .filter((element) => element.getAttribute("aria-hidden") !== "true")
       .map((element) => element.textContent?.trim())
@@ -42,10 +46,10 @@ test("drops minor time labels at dense zoom levels", async ({ page }) => {
   expect(minuteLabelsAtDenseZoom).toContain("30");
   expect(minuteLabelsAtDenseZoom).not.toContain("15");
   expect(minuteLabelsAtDenseZoom).not.toContain("45");
-  await expect(page.locator(".ic-time-tick.is-hour").first()).toBeVisible();
+  await expect(page.locator(".quno-calendar-time-tick.is-hour").first()).toBeVisible();
 
   await setDemoZoom(page, 8);
-  const highZoomLabels = await page.locator(".ic-time-tick").evaluateAll((elements) =>
+  const highZoomLabels = await page.locator(".quno-calendar-time-tick").evaluateAll((elements) =>
     elements
       .filter((element) => element.getAttribute("aria-hidden") !== "true")
       .map((element) => element.textContent?.trim())
@@ -55,11 +59,11 @@ test("drops minor time labels at dense zoom levels", async ({ page }) => {
   expect(highZoomLabels.slice(1, 12)).toEqual(["5", "10", "15", "20", "25", "30", "35", "40", "45", "50", "55"]);
 
   await setDemoZoom(page, 5.9);
-  const stableTickCount = await page.locator(".ic-time-tick").count();
-  await page.locator(".ic-time-tick").evaluateAll((ticks) => {
+  const stableTickCount = await page.locator(".quno-calendar-time-tick").count();
+  await page.locator(".quno-calendar-time-tick").evaluateAll((ticks) => {
     ticks.forEach((tick) => tick.setAttribute("data-stable-tick", "true"));
   });
-  await page.locator(".ic-time-tick-track").evaluate((track) => {
+  await page.locator(".quno-calendar-time-tick-track").evaluate((track) => {
     const state = window as typeof window & { tickChildMutations?: number; tickObserver?: MutationObserver };
     state.tickChildMutations = 0;
     state.tickObserver = new MutationObserver((records) => {
@@ -69,8 +73,8 @@ test("drops minor time labels at dense zoom levels", async ({ page }) => {
     state.tickObserver.observe(track, { childList: true, subtree: true });
   });
   await setDemoZoom(page, 6.1);
-  await expect(page.locator(".ic-time-tick")).toHaveCount(stableTickCount);
-  await expect(page.locator('.ic-time-tick[data-stable-tick="true"]')).toHaveCount(stableTickCount);
+  await expect(page.locator(".quno-calendar-time-tick")).toHaveCount(stableTickCount);
+  await expect(page.locator('.quno-calendar-time-tick[data-stable-tick="true"]')).toHaveCount(stableTickCount);
   expect(
     await page.evaluate(() => {
       const state = window as typeof window & { tickChildMutations?: number; tickObserver?: MutationObserver };
@@ -89,7 +93,7 @@ test("lets external event renderers adapt content to short heights with CSS", as
     fixture.style.bottom = "20px";
     fixture.style.width = "120px";
     fixture.style.height = "24px";
-    fixture.className = "ic-event-shell";
+    fixture.className = "quno-calendar-event-shell";
     fixture.innerHTML = `
       <article class="demo-event-card" data-testid="small-event-fixture">
         <strong class="demo-event-title">Long event title</strong>
@@ -105,7 +109,7 @@ test("lets external event renderers adapt content to short heights with CSS", as
     iconFixture.style.bottom = "20px";
     iconFixture.style.width = "130px";
     iconFixture.style.height = "16px";
-    iconFixture.className = "ic-event-shell";
+    iconFixture.className = "quno-calendar-event-shell";
     iconFixture.innerHTML = `
       <article class="demo-event-card" data-testid="icon-event-fixture">
         <strong class="demo-event-title">
@@ -224,7 +228,7 @@ test("uses card left accent borders without calendar row color strips", async ({
   await page.waitForSelector('[data-testid="calendar-event"]');
 
   const rowBorderLeftWidth = await page
-    .locator(".ic-row-label")
+    .locator(".quno-calendar-row-label")
     .first()
     .evaluate((element) => {
       return window.getComputedStyle(element).borderLeftWidth;
@@ -252,7 +256,7 @@ test("uses card left accent borders without calendar row color strips", async ({
     );
     if (!card) return null;
     const styles = window.getComputedStyle(card);
-    const shell = card.closest<HTMLElement>(".ic-event-shell");
+    const shell = card.closest<HTMLElement>(".quno-calendar-event-shell");
     const shellStyles = shell ? window.getComputedStyle(shell) : null;
     const mutedAccentProbe = document.createElement("span");
     mutedAccentProbe.style.backgroundColor = "var(--event-accent-muted)";
@@ -288,28 +292,28 @@ test("inherits consumer color variables across both calendar orientations", asyn
   await page.goto("/");
   await page.evaluate(() => {
     const theme = {
-      "--ic-surface": "#102030",
-      "--ic-header-surface": "#203040",
-      "--ic-label-surface": "#304050",
-      "--ic-alternate-surface": "#405060",
-      "--ic-cell-border": "#506070",
-      "--ic-text": "#f0e0d0",
-      "--ic-text-secondary": "#d0c0b0",
-      "--ic-now-accent": "#00aa88",
-      "--ic-event-accent": "#aa00ee",
-      "--ic-shadow": "none"
+      "--quno-calendar-surface": "#102030",
+      "--quno-calendar-header-surface": "#203040",
+      "--quno-calendar-label-surface": "#304050",
+      "--quno-calendar-alternate-surface": "#405060",
+      "--quno-calendar-cell-border": "#506070",
+      "--quno-calendar-text": "#f0e0d0",
+      "--quno-calendar-text-secondary": "#d0c0b0",
+      "--quno-calendar-now-accent": "#00aa88",
+      "--quno-calendar-event-accent": "#aa00ee",
+      "--quno-calendar-shadow": "none"
     };
     for (const [name, value] of Object.entries(theme)) document.documentElement.style.setProperty(name, value);
   });
   await goToWorkday(page);
 
-  const calendar = page.getByTestId("infinite-calendar");
+  const calendar = page.getByTestId("quno-calendar-timeline");
   await expect(calendar).toHaveCSS("background-color", "rgb(16, 32, 48)");
   await expect(calendar).toHaveCSS("border-top-color", "rgb(80, 96, 112)");
   await expect(calendar).toHaveCSS("box-shadow", "none");
-  await expect(page.locator(".ic-date-label").first()).toHaveCSS("background-color", "rgb(32, 48, 64)");
-  await expect(page.locator(".ic-row-label").first()).toHaveCSS("background-color", "rgb(48, 64, 80)");
-  await expect(page.locator(".ic-now-line").first()).toHaveCSS("background-color", "rgb(0, 170, 136)");
+  await expect(page.locator(".quno-calendar-date-label").first()).toHaveCSS("background-color", "rgb(32, 48, 64)");
+  await expect(page.locator(".quno-calendar-row-label").first()).toHaveCSS("background-color", "rgb(48, 64, 80)");
+  await expect(page.locator(".quno-calendar-now-line").first()).toHaveCSS("background-color", "rgb(0, 170, 136)");
 
   await page.getByTestId("view-infinite-vertical").check();
   await expect(calendar).toHaveAttribute("data-view", "infinite-vertical");
@@ -335,18 +339,21 @@ test("supports availability editing mode", async ({ page }) => {
 
   await page.getByTestId("availability-mode").check();
   await expect(page.getByTestId("demo-message")).toContainText("Availability editing enabled");
-  await expect(page.locator(".ic-availability-shell.is-active-layer").first()).toHaveCSS("pointer-events", "auto");
-  await expect(page.locator(".ic-background-event-shell").first()).toHaveCSS("pointer-events", "none");
+  await expect(page.locator(".quno-calendar-availability-shell.is-active-layer").first()).toHaveCSS(
+    "pointer-events",
+    "auto"
+  );
+  await expect(page.locator(".quno-calendar-background-event-shell").first()).toHaveCSS("pointer-events", "none");
 
   const emptyAvailabilitySpace = await page.evaluate(() => {
-    const viewport = document.querySelector(".ic-viewport")?.getBoundingClientRect();
+    const viewport = document.querySelector(".quno-calendar-viewport")?.getBoundingClientRect();
     if (!viewport) return null;
 
     for (const availability of Array.from(
       document.querySelectorAll<HTMLElement>('[data-testid="availability-event"]')
     )) {
       const row = availability.closest<HTMLElement>('[data-testid="calendar-row"]');
-      const grid = row?.querySelector<HTMLElement>(".ic-row-grid");
+      const grid = row?.querySelector<HTMLElement>(".quno-calendar-row-grid");
       if (!row || !grid) continue;
       const availabilityBox = availability.getBoundingClientRect();
       const rowBox = row.getBoundingClientRect();
@@ -379,14 +386,14 @@ test("supports availability editing mode", async ({ page }) => {
   await expect(page.locator('[data-testid="availability-event"]:has-text("Popup availability")')).toBeVisible();
 
   const availabilityBox = await page.evaluate(() => {
-    const viewport = document.querySelector(".ic-viewport")?.getBoundingClientRect();
+    const viewport = document.querySelector(".quno-calendar-viewport")?.getBoundingClientRect();
     if (!viewport) return null;
     for (const availability of Array.from(
       document.querySelectorAll<HTMLElement>('[data-testid="availability-event"]')
     )) {
       const row = availability.closest<HTMLElement>('[data-testid="calendar-row"]');
-      const grid = row?.querySelector<HTMLElement>(".ic-row-grid");
-      const label = row?.querySelector<HTMLElement>(".ic-row-label");
+      const grid = row?.querySelector<HTMLElement>(".quno-calendar-row-grid");
+      const label = row?.querySelector<HTMLElement>(".quno-calendar-row-label");
       const box = availability.getBoundingClientRect();
       const gridBox = grid?.getBoundingClientRect();
       const labelBox = label?.getBoundingClientRect();
@@ -399,7 +406,7 @@ test("supports availability editing mode", async ({ page }) => {
         box.bottom <= viewport.bottom &&
         x + 64 < Math.min(box.right, viewport.right) &&
         target?.closest('[data-testid="availability-event"]') === availability &&
-        target.closest(".ic-row-grid") === grid
+        target.closest(".quno-calendar-row-grid") === grid
       ) {
         return { x, y: box.y, width: box.width, height: box.height };
       }
@@ -456,7 +463,7 @@ test("keeps overflowing hovered cards expanded without width oscillation", async
   await goToWorkday(page);
   await page.waitForSelector('[data-testid="calendar-event"]');
   const overflowingBox = await page.evaluate(() => {
-    const viewport = document.querySelector(".ic-viewport")?.getBoundingClientRect();
+    const viewport = document.querySelector(".quno-calendar-viewport")?.getBoundingClientRect();
     if (!viewport) return null;
     const safeTop = viewport.y + 92;
 
@@ -505,7 +512,7 @@ test("allows already-wide hovered cards to use a wider max width", async ({ page
     fixture.style.height = "44px";
     fixture.style.setProperty("--event-width", "320px");
     fixture.style.setProperty("--event-hover-width", "420px");
-    fixture.className = "ic-event-shell is-hovered";
+    fixture.className = "quno-calendar-event-shell is-hovered";
     fixture.innerHTML = `
       <article class="demo-event-card" data-testid="wide-hover-fixture">
         <strong class="demo-event-title">Very long appointment title that can use the wider cap</strong>

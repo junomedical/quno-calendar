@@ -1,32 +1,40 @@
-# Agent Notes
+# Quno Calendar Agent Instructions
 
-## Project Context
+These instructions apply to the entire combined `@quno/calendar` repository.
 
-This repository is a reusable React infinite-calendar PoC. Keep the implementation focused on the component/library surface first and the demo second.
+## Start here
 
-## Documentation Discipline
+Before changing code or behavior, read `README.md`, `docs/decisions.md`, `CHANGELOG.md`, and `docs/usage.md`. Treat them as part of the implementation and update them in the same change.
 
-Behavioral, API, interaction, or architecture changes must update the relevant Markdown files in `docs/` during the same change:
+## Package domains
 
-- `docs/architecture.md` for component contracts, data flow, layout, virtualization, and interaction architecture.
-- `docs/taxonomy.md` for interface vocabulary and canonical names for UI parts.
-- `docs/usage.md` for public API usage and copyable examples.
-- `docs/decisions.md` for design decisions and tradeoffs.
-- `docs/test-plan.md` for new or changed verification expectations.
-- `docs/changelog.md` for user-visible changes.
+- `src/lib/shared`: headless timezone-free `IsoDate` contracts and safe calendar-day helpers.
+- `src/lib/timeline`: `QunoCalendar`; day keys are `IsoDate`, while event start/end values remain timestamp strings.
+- `src/lib/date-picker`: `QunoDatePicker` and its direct-manipulation range behavior.
+- `src/lib/date-input`: `QunoDateInput`, tokenizer, parser, and formatting contracts.
+- `demo/guide`: the one canonical field guide. Every primary contract needs a live public-entry-point example, concise “Try it” guidance, and a copyable recipe. Mount heavy timeline exhibits lazily.
 
-Do not leave documentation updates as a follow-up when changing library behavior.
+Use `#quno-internal/*` only for private cross-domain source imports. The root `@quno/calendar` entry is headless; UI is exported only from its feature subpaths. Styles remain optional, independent, component-scoped assets.
 
-## Visual Verification
+## Documentation records
 
-Any visual calendar change must be backed by a Playwright test in the same change. Prefer assertions that verify geometry, layering, clipping, or computed styles over screenshots alone, and update `docs/test-plan.md` when the visual expectation changes.
+- Keep `CHANGELOG.md` at the repository root with `Unreleased` first.
+- Record important product or engineering choices in `docs/decisions.md`; do not rewrite accepted calendar decisions.
+- Preserve datepicker history and `QDP-*` identifiers in `docs/date-picker-decisions.md`.
+- Keep `README.md` concise, `docs/usage.md` copyable, and `/guide` interactive.
+- Update `docs/migration.md` for any breaking public-name, entrypoint, token, or class change.
+- Keep `docs/architecture.md`, `docs/taxonomy.md`, and `docs/test-plan.md` aligned with the source domains and verification strategy.
 
-## Implementation Notes
+## Architecture and style
 
-- Prefer native CSS sticky positioning for fixed calendar labels and headers before adding synchronized overlay state.
-- Keep zoom controlled by the parent through `settings.zoom`; calendar gestures should request changes with `onZoomChange`.
-- Keep vertical virtualization bounded around the top visible date and recenter after scroll idle; date navigation should update that anchor rather than restoring an unbounded virtual list. Recenter operations must preserve the pixel offset inside the visible date so scroll end does not create a content jump.
-- Keep timeline labels adaptive at dense zoom levels; hide minor minute labels before allowing numbers to overlap.
-- Keep event rendering externalized through `eventRenderer`; product-specific card layout belongs in the renderer, not in calendar internals.
-- Preserve multi-calendar event semantics: `calendarIds` renders one event in multiple rows; hover focus stays local to the row instance, while drag/drop-preview status stays keyed by event id across visible instances.
-- Keep drag/drop and draft creation hit-testing limited to timeline grid space, not left-side labels.
+- Author against React 18+ and keep Preact support through tested `preact/compat` aliases.
+- Preserve strict TypeScript, controlled/uncontrolled component behavior, stable `data-slot` and state attributes, external event rendering, and consumer-owned customization.
+- Keep production modules at or below 200 non-comment lines and functions at or below 120 source lines. Split by responsibility before crossing either limit.
+- Use `--quno-*` shared tokens, `--quno-calendar-*`/`quno-calendar-*` timeline names, and `--quno-date-picker-*`/`quno-date-picker-*` picker and input names.
+- Keep framework runtimes and the TanStack virtualizer external. Never edit generated `dist` assets.
+
+## Verification
+
+Run formatting, architecture checks, typechecking, linting, unit tests, Chromium Playwright tests, the Preact compatibility fixture, demo build, package verification, size reporting, and `npm pack --dry-run` before handoff. Update `CHANGELOG.md` with any exact blocker.
+
+Visual changes require Playwright coverage that asserts geometry, layering, clipping, state, or computed styles rather than screenshots alone. Public API guards must require the three subpath surfaces and reject legacy facade names and private modules.

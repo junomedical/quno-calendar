@@ -1,0 +1,139 @@
+.story__wide {
+  width: min(1120px, 100%);
+  margin: clamp(120px, 16vw, 210px) auto 0;
+}
+
+.story__section-heading > span {
+  color: #0167ff;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.story__section-heading p {
+  max-width: 64ch;
+  color: #5d6878;
+  font-size: 17px;
+  line-height: 1.7;
+}
+
+.story__comparison {
+  overflow: hidden;
+  margin-top: 44px;
+  border: 1px solid #dce3ee;
+  border-radius: 20px;
+  background: #fff;
+}
+
+.story__comparison-row {
+  display: grid;
+  grid-template-columns: 0.7fr 1fr 1fr;
+}
+
+.story__comparison-row + .story__comparison-row {
+  border-top: 1px solid #e4e9f1;
+}
+
+.story__comparison-row > * {
+  padding: 18px 20px;
+}
+
+.story__comparison-row > :last-child {
+  background: #edf4ff;
+  color: #174a8f;
+}
+
+.story__comparison-head {
+  color: #697587;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.story__idea-grid,
+.story__metrics {
+  display: grid;
+  gap: 14px;
+  margin-top: 42px;
+}
+
+.story__idea-grid article,
+.story__metrics > div {
+  padding: 24px;
+  border: 1px solid #dce3ee;
+  border-radius: 18px;
+  background: #fff;
+}
+
+.story__idea-grid p {
+  margin: 0;
+  color: #687486;
+  line-height: 1.55;
+}
+
+.story__idea-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.story__idea-grid article {
+  align-content: start;
+  display: grid;
+  gap: 8px;
+}
+
+.story__idea-grid code {
+  width: fit-content;
+  padding: 4px 7px;
+  border-radius: 6px;
+  background: #edf4ff;
+  color: #174a8f;
+}
+
+.story__metrics {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.story__metrics > div {
+  display: grid;
+  gap: 6px;
+}
+
+.story__metrics strong {
+  color: #0167ff;
+  font-size: clamp(34px, 5vw, 58px);
+  letter-spacing: -0.05em;
+}
+
+.story__metrics span {
+  font-weight: 800;
+}
+
+.story__metrics small,
+.story__measurement {
+  color: #778294;
+}
+
+.story__measurement {
+  margin-top: 18px;
+}
+
+@media (max-width: 820px) {
+  .story__comparison-row {
+    grid-template-columns: 1fr;
+  }
+
+  .story__comparison-head {
+    display: none;
+  }
+
+  .story__comparison-row > * {
+    padding: 12px 18px;
+  }
+
+  .story__idea-grid,
+  .story__metrics {
+    grid-template-columns: 1fr;
+  }
+}

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   centeredScrollLeftAfterZoom,
   controlledScrollLeftAfterZoom
-} from "../../../../src/lib/infinite/anchors/zoom/useHorizontalControlledZoomAnchor";
+} from "../../../../src/lib/timeline/infinite/anchors/zoom/useHorizontalControlledZoomAnchor";
 
 describe("horizontal controlled zoom anchoring", () => {
   it("preserves the timeline pixel represented at the visible grid center", () => {

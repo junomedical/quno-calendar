@@ -7,8 +7,11 @@ export default defineConfig({
   plugins: [react(), demoEventsApiPlugin()],
   resolve: {
     alias: [
-      { find: /^quno-calendar$/, replacement: resolve(__dirname, "src/lib/index.ts") },
-      { find: /^#calendar-internal\//, replacement: `${resolve(__dirname, "src/lib")}/` }
+      { find: /^@quno\/calendar\/timeline$/, replacement: resolve(__dirname, "src/lib/timeline/index.ts") },
+      { find: /^@quno\/calendar\/date-picker$/, replacement: resolve(__dirname, "src/lib/date-picker/index.ts") },
+      { find: /^@quno\/calendar\/date-input$/, replacement: resolve(__dirname, "src/lib/date-input/index.ts") },
+      { find: /^@quno\/calendar$/, replacement: resolve(__dirname, "src/lib/index.ts") },
+      { find: /^#quno-internal\//, replacement: `${resolve(__dirname, "src/lib")}/` }
     ]
   },
   test: {

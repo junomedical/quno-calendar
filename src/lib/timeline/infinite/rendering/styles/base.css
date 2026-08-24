@@ -1,0 +1,77 @@
+.quno-calendar-shell {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--quno-calendar-surface, var(--_ic-default-surface));
+  border: 1px solid var(--quno-calendar-cell-border, var(--_ic-default-cell-border));
+  border-radius: 8px;
+  box-shadow: var(--quno-calendar-shadow, var(--_ic-default-shadow));
+  isolation: isolate;
+}
+
+.quno-calendar-viewport {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  overscroll-behavior: contain;
+  cursor: default;
+}
+
+.quno-calendar-viewport.is-create-enabled {
+  cursor: crosshair;
+}
+
+.quno-calendar-viewport,
+.quno-calendar-viewport * {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.quno-calendar-virtual-space {
+  position: relative;
+}
+
+.quno-calendar-day {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.quno-calendar-day-header-band {
+  position: absolute;
+  z-index: 0;
+  background: var(--quno-calendar-header-surface, var(--_ic-default-header-surface));
+  border-bottom: 1px solid var(--quno-calendar-cell-border, var(--_ic-default-cell-border));
+  pointer-events: none;
+}
+
+.quno-calendar-day-header {
+  position: sticky;
+  left: 0;
+  z-index: 280;
+  display: flex;
+  background: transparent;
+  pointer-events: none;
+}
+
+.quno-calendar-left-label {
+  position: sticky;
+  left: 0;
+  z-index: 260;
+  flex: 0 0 auto;
+  background: var(--quno-calendar-surface, var(--_ic-default-surface));
+  border-right: 1px solid var(--quno-calendar-cell-border, var(--_ic-default-cell-border));
+}
+
+.quno-calendar-date-label {
+  z-index: 280;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  color: var(--quno-calendar-text, var(--_ic-default-date-text));
+  background: var(--quno-calendar-header-surface, var(--_ic-default-header-surface));
+  font-weight: 750;
+  pointer-events: auto;
+}

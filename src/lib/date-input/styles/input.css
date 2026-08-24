@@ -1,0 +1,36 @@
+.quno-date-picker-input-root {
+  display: inline-grid;
+  gap: 4px;
+  color: var(--quno-date-picker-text, var(--quno-date-picker-text-default));
+  font-family: var(--quno-date-picker-font-family, inherit);
+}
+
+.quno-date-picker-input {
+  box-sizing: border-box;
+  min-height: 36px;
+  border: 1px solid var(--quno-date-picker-border, var(--quno-date-picker-border-default));
+  border-radius: var(--quno-date-picker-day-radius, 6px);
+  padding: 7px 10px;
+  color: inherit;
+  background: var(--quno-date-picker-surface, var(--quno-date-picker-surface-default));
+  font: inherit;
+}
+
+.quno-date-picker-input:focus-visible {
+  outline: 2px solid var(--quno-date-picker-primary, var(--quno-date-picker-primary-default));
+  outline-offset: 2px;
+}
+
+.quno-date-picker-input:focus-visible[data-recognition="recognized"] {
+  border-color: var(--quno-date-picker-recognized-default);
+  outline-color: var(--quno-date-picker-recognized-default);
+}
+
+.quno-date-picker-input:focus-visible[data-recognition="unrecognized"] {
+  border-color: var(--quno-date-picker-invalid-default);
+  outline-color: var(--quno-date-picker-invalid-default);
+}
+
+.quno-date-picker-input[aria-invalid="true"] {
+  border-color: var(--quno-date-picker-invalid-default);
+}

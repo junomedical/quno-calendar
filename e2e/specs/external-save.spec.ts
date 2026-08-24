@@ -74,7 +74,7 @@ test("does not pull the viewport back after manual scroll following external sav
   await page.getByTestId("draft-save-button").click();
   await expect(page.getByTestId("demo-message")).toContainText("Saved external create");
 
-  const viewport = page.locator(".ic-viewport");
+  const viewport = page.locator(".quno-calendar-viewport");
   await viewport.hover();
   const beforeWheel = await viewport.evaluate((element) => element.scrollTop);
   await page.mouse.wheel(0, 500);

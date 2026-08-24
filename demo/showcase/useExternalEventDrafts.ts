@@ -4,11 +4,12 @@ import {
   type ActiveEventDraft,
   type CalendarEvent,
   type CalendarId,
-  type CalendarNavigationHandle,
+  type QunoCalendarHandle,
   type EventActivateRequest,
   type EventCreateRequest,
   type EventMoveRequest
-} from "quno-calendar";
+} from "@quno/calendar/timeline";
+import type { IsoDate } from "@quno/calendar";
 import { demoCalendars } from "./data";
 import {
   addMinutesToIso,
@@ -24,8 +25,8 @@ import { useExternalDraftNavigation } from "./useExternalDraftNavigation";
 
 type UseExternalEventDraftsArgs = {
   selectedCalendarIds: CalendarId[];
-  calendarRef: RefObject<CalendarNavigationHandle | null>;
-  jumpDate: string;
+  calendarRef: RefObject<QunoCalendarHandle | null>;
+  jumpDate: IsoDate;
   jumpTime: string;
   snapMinutes: number;
   editAvailabilities: boolean;

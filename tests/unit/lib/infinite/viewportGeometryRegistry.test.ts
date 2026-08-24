@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { ViewportGeometryRegistry } from "../../../../src/lib/infinite/anchors/parent/viewportGeometryRegistry";
+import { ViewportGeometryRegistry } from "../../../../src/lib/timeline/infinite/anchors/parent/viewportGeometryRegistry";
 
 function elementAt(left: number, top: number, width = 20, height = 20): HTMLElement {
   const element = document.createElement("div");

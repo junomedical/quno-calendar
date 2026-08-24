@@ -1,4 +1,4 @@
-.ic-event-shell.is-hovered .demo1-event-card {
+.quno-calendar-event-shell.is-hovered .demo1-event-card {
   width: max-content;
   min-width: 100%;
   max-width: var(--event-hover-width);
@@ -71,7 +71,7 @@
   opacity: 0.5;
 }
 
-.ic-availability-shell.is-active-layer .demo1-event-card.kind-availability {
+.quno-calendar-availability-shell.is-active-layer .demo1-event-card.kind-availability {
   opacity: 0.86;
 }
 

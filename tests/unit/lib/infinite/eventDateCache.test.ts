@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import type { CalendarEvent } from "../../../../src/lib/core/types";
-import { EventDateCache } from "../../../../src/lib/infinite/events/loading/eventDateCache";
+import type { CalendarEvent } from "../../../../src/lib/timeline/core/types";
+import { EventDateCache } from "../../../../src/lib/timeline/infinite/events/loading/eventDateCache";
 
 function event(id: string, dateKey: string, title = id): CalendarEvent {
   return {

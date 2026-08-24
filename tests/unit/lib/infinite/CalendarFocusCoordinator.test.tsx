@@ -2,15 +2,15 @@ import { act, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { createRef, useState, type Ref } from "react";
 import { describe, expect, it, vi } from "vitest";
 import {
-  CalendarRoot,
+  QunoCalendar,
   type CalendarEvent,
   type CalendarFocusRequest,
-  type CalendarNavigationHandle,
+  type QunoCalendarHandle,
   type CalendarVisibilityRequest,
   type EventRendererProps,
   type LoadEvents
-} from "../../../../src/lib";
-import { visibleFocusAnchorCalendarId } from "../../../../src/lib/core/useCalendarFocusCoordinator";
+} from "../../../../src/lib/timeline";
+import { visibleFocusAnchorCalendarId } from "../../../../src/lib/timeline/core/useCalendarFocusCoordinator";
 
 const event: CalendarEvent = {
   id: "shared-event",
@@ -41,7 +41,7 @@ function FocusHarness({
   excludeWeekends = false,
   onVisibilityRequest = vi.fn()
 }: {
-  calendarRef: Ref<CalendarNavigationHandle>;
+  calendarRef: Ref<QunoCalendarHandle>;
   focusRequest?: CalendarFocusRequest;
   loadEvents: LoadEvents;
   excludeWeekends?: boolean;
@@ -49,7 +49,7 @@ function FocusHarness({
 }) {
   const [selectedCalendarIds, setSelectedCalendarIds] = useState(["calendar-a"]);
   return (
-    <CalendarRoot
+    <QunoCalendar
       ref={calendarRef}
       calendars={calendars}
       selectedCalendarIds={selectedCalendarIds}
@@ -76,7 +76,7 @@ describe("Calendar focus coordinator", () => {
   });
 
   it("reveals all participants and focuses the preferred local instance", async () => {
-    const calendarRef = createRef<CalendarNavigationHandle>();
+    const calendarRef = createRef<QunoCalendarHandle>();
     const loadEvents = vi.fn<LoadEvents>(async () => [event]);
     const onVisibilityRequest = vi.fn();
     render(
@@ -84,7 +84,7 @@ describe("Calendar focus coordinator", () => {
     );
 
     await screen.findByText("Shared event");
-    let focusPromise: Promise<Awaited<ReturnType<CalendarNavigationHandle["focusEvent"]>>> | undefined;
+    let focusPromise: Promise<Awaited<ReturnType<QunoCalendarHandle["focusEvent"]>>> | undefined;
     act(() => {
       focusPromise = calendarRef.current?.focusEvent(event, { preferredCalendarId: "calendar-b" });
     });
@@ -111,7 +111,7 @@ describe("Calendar focus coordinator", () => {
   });
 
   it("processes a declarative request id once", async () => {
-    const calendarRef = createRef<CalendarNavigationHandle>();
+    const calendarRef = createRef<QunoCalendarHandle>();
     const loadEvents = vi.fn<LoadEvents>(async () => [event]);
     const onVisibilityRequest = vi.fn();
     const request: CalendarFocusRequest = { requestId: "request-a", event, preferredCalendarId: "calendar-b" };
@@ -138,7 +138,7 @@ describe("Calendar focus coordinator", () => {
   });
 
   it("returns unavailable when none of the event calendars are known", async () => {
-    const calendarRef = createRef<CalendarNavigationHandle>();
+    const calendarRef = createRef<QunoCalendarHandle>();
     render(<FocusHarness calendarRef={calendarRef} loadEvents={async () => []} />);
     const unknownEvent = { ...event, calendarId: "missing", calendarIds: ["missing"] };
 
@@ -149,7 +149,7 @@ describe("Calendar focus coordinator", () => {
   });
 
   it("returns unavailable without revealing calendars when the event date is excluded", async () => {
-    const calendarRef = createRef<CalendarNavigationHandle>();
+    const calendarRef = createRef<QunoCalendarHandle>();
     const onVisibilityRequest = vi.fn();
     render(
       <FocusHarness
@@ -161,7 +161,7 @@ describe("Calendar focus coordinator", () => {
     );
     await waitFor(() => expect(document.querySelector('[data-date="2026-07-06"]')).not.toBeNull());
 
-    let result: Awaited<ReturnType<CalendarNavigationHandle["focusEvent"]>> | undefined;
+    let result: Awaited<ReturnType<QunoCalendarHandle["focusEvent"]>> | undefined;
     await act(async () => {
       result = await calendarRef.current?.focusEvent(event, { preferredCalendarId: "calendar-b" });
     });
@@ -174,9 +174,9 @@ describe("Calendar focus coordinator", () => {
   });
 
   it("cancels a pending reveal when the user navigates manually", async () => {
-    const calendarRef = createRef<CalendarNavigationHandle>();
+    const calendarRef = createRef<QunoCalendarHandle>();
     render(
-      <CalendarRoot
+      <QunoCalendar
         ref={calendarRef}
         calendars={calendars}
         selectedCalendarIds={["calendar-a"]}
@@ -186,7 +186,7 @@ describe("Calendar focus coordinator", () => {
       />
     );
     await screen.findByText("Shared event");
-    let focusPromise: ReturnType<CalendarNavigationHandle["focusEvent"]> | undefined;
+    let focusPromise: ReturnType<QunoCalendarHandle["focusEvent"]> | undefined;
     act(() => {
       focusPromise = calendarRef.current?.focusEvent(event, { preferredCalendarId: "calendar-b" });
     });

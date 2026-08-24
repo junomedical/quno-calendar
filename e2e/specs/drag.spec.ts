@@ -12,7 +12,7 @@ test("supports dragging an event to another time", async ({ page }) => {
     .locator(`[data-testid="calendar-event"][data-event-id="${duplicate.id}"]`)
     .first()
     .evaluate((element) => {
-      const grid = element.closest(".ic-row-grid");
+      const grid = element.closest(".quno-calendar-row-grid");
       const rect = grid?.getBoundingClientRect();
       return rect ? { left: rect.left, right: rect.right } : null;
     });
@@ -30,7 +30,7 @@ test("supports dragging an event to another time", async ({ page }) => {
   ).toHaveCount(duplicate.boxes.length);
   expect(await page.getByTestId("drag-preview-event").count()).toBeGreaterThanOrEqual(duplicate.boxes.length);
   await expect(page.locator('[data-render-status="dragging"]').first()).toHaveCSS("opacity", "0.5");
-  for (const selector of [".ic-viewport", "body", "html"]) {
+  for (const selector of [".quno-calendar-viewport", "body", "html"]) {
     const selectionStyle = await page.locator(selector).evaluate((element) => {
       const style = getComputedStyle(element);
       return style.userSelect || style.webkitUserSelect;
@@ -50,7 +50,7 @@ test("keeps visible event cache populated after dropping on another day", async 
   await waitForDemoEvents(page);
 
   const dragTarget = await page.evaluate(() => {
-    const viewportBox = document.querySelector<HTMLElement>(".ic-viewport")?.getBoundingClientRect();
+    const viewportBox = document.querySelector<HTMLElement>(".quno-calendar-viewport")?.getBoundingClientRect();
     if (!viewportBox) {
       return null;
     }
@@ -79,7 +79,7 @@ test("keeps visible event cache populated after dropping on another day", async 
         const targetRow = day.querySelector<HTMLElement>(
           `[data-testid="calendar-row"][data-calendar-id="${calendarId}"]`
         );
-        const targetGrid = targetRow?.querySelector<HTMLElement>(".ic-row-grid");
+        const targetGrid = targetRow?.querySelector<HTMLElement>(".quno-calendar-row-grid");
         if (!targetRow || !targetGrid) {
           continue;
         }
@@ -121,7 +121,7 @@ test("keeps visible event cache populated after dropping on another day", async 
   await page.evaluate(() => {
     const samples: number[] = [];
     const visibleCommittedEventCount = () => {
-      const viewportBox = document.querySelector<HTMLElement>(".ic-viewport")?.getBoundingClientRect();
+      const viewportBox = document.querySelector<HTMLElement>(".quno-calendar-viewport")?.getBoundingClientRect();
       if (!viewportBox) {
         return 0;
       }

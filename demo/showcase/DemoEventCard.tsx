@@ -1,5 +1,5 @@
 import { Video, Lock } from "lucide-react";
-import type { EventRendererProps } from "quno-calendar";
+import type { EventRendererProps } from "@quno/calendar/timeline";
 import { eventCardModel } from "./eventCardModel";
 import "./DemoEventCard.css";
 

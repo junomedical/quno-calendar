@@ -1,0 +1,63 @@
+@media (max-width: 440px) {
+  .quno-date-picker-calendar-shell {
+    padding: 12px 8px;
+  }
+
+  .quno-date-picker-day {
+    height: var(--quno-date-picker-day-size-mobile, 40px);
+  }
+
+  .quno-date-picker-weekdays {
+    grid-template-rows: var(--quno-date-picker-day-size-mobile, 40px);
+  }
+
+  .quno-date-picker-month-navigation {
+    height: calc(7 * var(--quno-date-picker-day-size-mobile, 40px) + 32px);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .quno-date-picker-grid[data-month-motion="previous"] .quno-date-picker-day > span {
+    animation: quno-date-picker-number-from-top var(--quno-date-picker-month-scroll-duration, 180ms) ease-out both;
+  }
+
+  .quno-date-picker-grid[data-month-motion="next"] .quno-date-picker-day > span {
+    animation: quno-date-picker-number-from-bottom var(--quno-date-picker-month-scroll-duration, 180ms) ease-out both;
+  }
+
+  .quno-date-picker-month-header h2[data-month-motion="previous"] [data-slot="month-heading-button"] > span {
+    animation: quno-date-picker-number-from-top var(--quno-date-picker-month-scroll-duration, 180ms) ease-out both;
+  }
+
+  .quno-date-picker-month-header h2[data-month-motion="next"] [data-slot="month-heading-button"] > span {
+    animation: quno-date-picker-number-from-bottom var(--quno-date-picker-month-scroll-duration, 180ms) ease-out both;
+  }
+
+  .quno-date-picker-calendar-shell,
+  .quno-date-picker-pill,
+  .quno-date-picker-day > span {
+    transition:
+      border-color 140ms ease,
+      background-color 140ms ease,
+      color 140ms ease,
+      box-shadow 140ms ease;
+  }
+
+  .quno-date-picker-grid[data-interaction-active="true"] .quno-date-picker-day > span {
+    transition: none;
+  }
+}
+
+@keyframes quno-date-picker-number-from-top {
+  from {
+    opacity: 0;
+    transform: translateY(calc(-1 * var(--quno-date-picker-month-scroll-distance, 14px)));
+  }
+}
+
+@keyframes quno-date-picker-number-from-bottom {
+  from {
+    opacity: 0;
+    transform: translateY(var(--quno-date-picker-month-scroll-distance, 14px));
+  }
+}

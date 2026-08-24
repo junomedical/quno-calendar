@@ -7,8 +7,8 @@ vi.mock("../../../demo/showcase/DefaultDemo", () => ({
 vi.mock("../../../demo/showcase/demo1/Demo1", () => ({ Demo1: () => <div data-testid="route-demo1" /> }));
 vi.mock("../../../demo/showcase/demo2/Demo2", () => ({ Demo2: () => <div data-testid="route-demo2" /> }));
 vi.mock("../../../demo/showcase/demo3/Demo3", () => ({ Demo3: () => <div data-testid="route-demo3" /> }));
-vi.mock("../../../demo/examples/integration-walkthrough/IntegrationWalkthrough", () => ({
-  IntegrationWalkthrough: () => <div data-testid="route-integration-walkthrough" />
+vi.mock("../../../demo/guide/QunoGuide", () => ({
+  QunoGuide: () => <div data-testid="route-guide" />
 }));
 
 import { App, demoRoutes } from "../../../demo/app/App";
@@ -28,7 +28,7 @@ describe("application route registry", () => {
     ["/demo1", "route-demo1"],
     ["/demo2", "route-demo2"],
     ["/demo3", "route-demo3"],
-    ["/examples/integration-walkthrough", "route-integration-walkthrough"]
+    ["/guide", "route-guide"]
   ])("renders %s from the declarative registry", (path, testId) => {
     window.history.replaceState({}, "", path);
     const view = render(<App />);
@@ -57,11 +57,11 @@ describe("application route registry", () => {
     view.unmount();
   });
 
-  it("renders the editorial walkthrough without the shared recipe shell", () => {
-    window.history.replaceState({}, "", "/examples/integration-walkthrough?step=focus");
+  it.each(["/story", "/examples/integration-walkthrough"])("redirects %s to the canonical guide", (path) => {
+    window.history.replaceState({}, "", path);
     const view = render(<App />);
-    expect(screen.getByTestId("route-integration-walkthrough")).toBeInTheDocument();
-    expect(screen.queryByText("Focused integration recipe")).not.toBeInTheDocument();
+    expect(screen.getByTestId("route-guide")).toBeInTheDocument();
+    expect(window.location.pathname).toBe("/guide");
     view.unmount();
   });
 });

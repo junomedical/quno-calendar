@@ -35,7 +35,7 @@ function activityMessage(kind: "scrolled" | "repositioned", position: ReturnType
 export function useViewportActivityLog({ containerRef, resetKey, onActivity }: ViewportActivityLogArgs) {
   useEffect(() => {
     void resetKey;
-    const viewport = containerRef.current?.querySelector<HTMLElement>(".ic-viewport");
+    const viewport = containerRef.current?.querySelector<HTMLElement>(".quno-calendar-viewport");
     if (!viewport) return;
 
     let settleTimer: number | null = null;

@@ -36,9 +36,9 @@ Vitest unit tests live in `tests/unit` and mirror the source module grouping.
 - The demo range loader filters offset timestamps by their local calendar date rather than the raw timestamp prefix.
 - Pointer hit-testing resolves date/resource ownership from the mounted grid even while virtual measurements settle; move proposal calculation and draft creation remain covered independently. Active gestures suppress text selection through both standard and WebKit computed properties.
 - Public package entrypoint exports only the supported surface and does not expose concrete infinite view internals.
-- `className`, `style`, `ariaLabel`, and `initialDateKey` work through `CalendarRoot` in both orientations.
+- `className`, `style`, `ariaLabel`, and `initialDateKey` work through `QunoCalendar` in both orientations.
 - The architecture guard rejects `../../../` imports in production library files, requiring the private
-  `#calendar-internal/*` alias for cross-domain dependencies.
+  `#quno-internal/timeline/*` alias for cross-domain dependencies.
 - Colorless event shells inherit the consumer-defined default event accent and derive their muted accent toward the
   consumer-defined calendar surface.
 
@@ -54,7 +54,7 @@ Vitest unit tests live in `tests/unit` and mirror the source module grouping.
 - Date labels share the same sticky header row as the time scale, and active availability blocks do not cover calendar row labels.
 - Event renderer receives status information.
 - Consumer-defined semantic color variables compute on the shell, headers, labels, grids, time text, borders, shadow,
-  and current-time marker in both orientations when inherited from outside `CalendarRoot`.
+  and current-time marker in both orientations when inherited from outside `QunoCalendar`.
 - Zoom-only geometry changes retain the rendered card DOM, do not reinvoke an unchanged external renderer, and do not reload the event range. Controlled Shift-wheel requests commit before their pointer-anchor restoration begins.
 - Controlled active edit drafts render through the event renderer while the loaded source event is hidden.
 - A never-resolving loader does not block calendar chrome or Pointer Events; a delayed response adds event shells without replacing the date/resource structure.
@@ -63,7 +63,7 @@ Vitest unit tests live in `tests/unit` and mirror the source module grouping.
   malformed JSON, while the deployment build publishes the runnable `dist-demo` artifact rather than the library-only
   `dist` artifact.
 - The architecture check keeps `src/` library-only and requires the integration field guide to provide a README,
-  source backlink, and `quno-calendar` public-package import.
+  source backlink, and `@quno/calendar/timeline` public-package import.
 
 ## Playwright Tests
 

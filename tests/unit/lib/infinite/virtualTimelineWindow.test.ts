@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { clampVirtualDateIndex, createVirtualDateModel } from "../../../../src/lib/infinite/scroll/window/dateModel";
-import { buildVirtualDateRenderItems } from "../../../../src/lib/infinite/scroll/window/renderItems";
-import { resolveVisibleDateSnapshot } from "../../../../src/lib/infinite/scroll/position/visibleSnapshot";
+import {
+  clampVirtualDateIndex,
+  createVirtualDateModel
+} from "../../../../src/lib/timeline/infinite/scroll/window/dateModel";
+import { buildVirtualDateRenderItems } from "../../../../src/lib/timeline/infinite/scroll/window/renderItems";
+import { resolveVisibleDateSnapshot } from "../../../../src/lib/timeline/infinite/scroll/position/visibleSnapshot";
 
 describe("virtual timeline date model", () => {
   it("uses one normalized date sequence for both mapping directions", () => {

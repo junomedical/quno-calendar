@@ -1,6 +1,7 @@
 import { useMemo, useState, type Dispatch, type SetStateAction } from "react";
 import type { CalendarView } from "../types";
-import type { DemoTimelineSettings } from "../zoom/DemoZoom";
+import type { DemoQunoCalendarSettings } from "../zoom/DemoZoom";
+import type { IsoDate } from "@quno/calendar";
 
 export type DemoControlDefaults = {
   calendarView: CalendarView;
@@ -12,12 +13,12 @@ export type DemoControlDefaults = {
   excludeWeekends: boolean;
   editAvailabilities: boolean;
   apiLatencyMs?: number;
-  jumpDate?: string;
+  jumpDate?: IsoDate;
   jumpTime?: string;
 };
 
 export type DemoLayoutSettings = Pick<
-  DemoTimelineSettings,
+  DemoQunoCalendarSettings,
   | "rowHeight"
   | "dayHeaderHeight"
   | "labelWidth"
@@ -44,11 +45,11 @@ export type DemoControls = {
   setEditAvailabilities: Dispatch<SetStateAction<boolean>>;
   apiLatencyMs: number;
   setApiLatencyMs: Dispatch<SetStateAction<number>>;
-  jumpDate: string;
-  setJumpDate: Dispatch<SetStateAction<string>>;
+  jumpDate: IsoDate;
+  setJumpDate: Dispatch<SetStateAction<IsoDate>>;
   jumpTime: string;
   setJumpTime: Dispatch<SetStateAction<string>>;
-  settings: DemoTimelineSettings;
+  settings: DemoQunoCalendarSettings;
 };
 
 export function useDemoControls(defaults: DemoControlDefaults, layout: DemoLayoutSettings): DemoControls {
@@ -60,10 +61,10 @@ export function useDemoControls(defaults: DemoControlDefaults, layout: DemoLayou
   const [excludeWeekends, setExcludeWeekends] = useState(defaults.excludeWeekends);
   const [editAvailabilities, setEditAvailabilities] = useState(defaults.editAvailabilities);
   const [apiLatencyMs, setApiLatencyMs] = useState(defaults.apiLatencyMs ?? 0);
-  const [jumpDate, setJumpDate] = useState(defaults.jumpDate ?? "2026-07-04");
+  const [jumpDate, setJumpDate] = useState<IsoDate>(defaults.jumpDate ?? "2026-07-04");
   const [jumpTime, setJumpTime] = useState(defaults.jumpTime ?? "09:00");
 
-  const settings = useMemo<DemoTimelineSettings>(
+  const settings = useMemo<DemoQunoCalendarSettings>(
     () => ({
       ...layout,
       startHour,

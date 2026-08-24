@@ -210,12 +210,12 @@ The cache coordinator may already hold the accepted result while React defers th
 
 ## Source Map
 
-- `src/lib/infinite/events/loading/useEventRangeLoader.ts`: React async boundary and snapshot publication.
-- `src/lib/infinite/events/loading/eventRangeCoordinator.ts`: request generations, loaded/loading knowledge, and request ownership.
-- `src/lib/infinite/events/loading/eventDateCache.ts`: date buckets, event-id index, and LRU.
-- `src/lib/infinite/events/loading/loadEventRange.ts`: retry and abort-aware delay.
-- `src/lib/infinite/events/metrics/useDayMetrics.ts`: horizontal membership, preparation, and row/day metrics.
-- `src/lib/infinite/anchors/data-layout/useHorizontalDayMeasurement.ts`: virtualizer sizing and automatic horizontal data-layout focus.
-- `src/lib/infinite/events/metrics/useVerticalPreparedColumns.ts`: vertical membership, preparation, and width metrics.
+- `src/lib/timeline/infinite/events/loading/useEventRangeLoader.ts`: React async boundary and snapshot publication.
+- `src/lib/timeline/infinite/events/loading/eventRangeCoordinator.ts`: request generations, loaded/loading knowledge, and request ownership.
+- `src/lib/timeline/infinite/events/loading/eventDateCache.ts`: date buckets, event-id index, and LRU.
+- `src/lib/timeline/infinite/events/loading/loadEventRange.ts`: retry and abort-aware delay.
+- `src/lib/timeline/infinite/events/metrics/useDayMetrics.ts`: horizontal membership, preparation, and row/day metrics.
+- `src/lib/timeline/infinite/anchors/data-layout/useHorizontalDayMeasurement.ts`: virtualizer sizing and automatic horizontal data-layout focus.
+- `src/lib/timeline/infinite/events/metrics/useVerticalPreparedColumns.ts`: vertical membership, preparation, and width metrics.
 
 The complete ownership map is in [`docs/domains/events.md`](../domains/events.md) and [`docs/domains/anchors.md`](../domains/anchors.md).

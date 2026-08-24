@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useRef, useState, type SetStateAction } from "react";
-import type { CalendarEvent, CalendarNavigationHandle, EventCreateRequest, EventMoveRequest } from "quno-calendar";
+import type { CalendarEvent, QunoCalendarHandle, EventCreateRequest, EventMoveRequest } from "@quno/calendar/timeline";
 import { appendCreatedEvent, applyMove, createDemoEvents, createRangeLoader, demoCalendars } from "../data";
 import { useDemoControls } from "../hooks/useDemoControls";
 import { useSimulatedApiLoader } from "../hooks/useSimulatedApiLoader";
@@ -11,7 +11,7 @@ export function usePresetDemo(preset: DemoPreset) {
   const [events, setEvents] = useState(() => createDemoEvents(preset.initialScale));
   const [message, setMessage] = useState(preset.messages.initial);
   const eventsRef = useRef(events);
-  const calendarRef = useRef<CalendarNavigationHandle>(null);
+  const calendarRef = useRef<QunoCalendarHandle>(null);
   const controls = useDemoControls(preset.controls, preset.layout);
   const systemNow = useSystemNow();
   const { jumpDate, jumpTime, setEditAvailabilities } = controls;

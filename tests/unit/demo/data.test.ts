@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { eventBelongsToCalendar } from "../../../src/lib";
+import { eventBelongsToCalendar } from "../../../src/lib/timeline";
 import { createDemoEvents, createRangeLoader, demoCalendars } from "../../../demo/showcase/data";
 import { isoDateInputValue } from "../../../demo/showcase/draftFormUtils";
 

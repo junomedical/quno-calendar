@@ -1,5 +1,5 @@
 import { useEffect, useState, type ComponentType } from "react";
-import { IntegrationWalkthrough } from "../examples/integration-walkthrough/IntegrationWalkthrough";
+import { QunoGuide } from "../guide/QunoGuide";
 import { DefaultDemo } from "../showcase/DefaultDemo";
 import { Demo1 } from "../showcase/demo1/Demo1";
 import { Demo2 } from "../showcase/demo2/Demo2";
@@ -30,7 +30,10 @@ export function App() {
     return () => window.removeEventListener("popstate", handlePopState);
   }, []);
 
-  if (pathname === "/examples/integration-walkthrough") return <IntegrationWalkthrough />;
+  if (["/guide", "/story", "/examples/integration-walkthrough"].includes(pathname)) {
+    if (pathname !== "/guide") window.history.replaceState({}, "", "/guide");
+    return <QunoGuide />;
+  }
 
   const activeRoute = demoRoutes.find((route) => route.path === pathname) ?? demoRoutes[0];
   const Demo = demoComponents[activeRoute.id] ?? DefaultDemo;

@@ -4,9 +4,9 @@ import type {
   ActiveEventDraft,
   CalendarEvent,
   CalendarId,
-  CalendarNavigationHandle,
+  QunoCalendarHandle,
   CalendarViewportAnchor
-} from "quno-calendar";
+} from "@quno/calendar/timeline";
 import { draftParticipantIds, eventParticipantIds } from "./draftFormUtils";
 import { firstPersonParticipantId } from "./externalDraftParticipants";
 import type { DraftRestoreEventOptions, DraftRestoreOptions } from "./useExternalDraftNavigation";
@@ -33,7 +33,7 @@ type ExternalDraftCommitArgs = {
   activeDraft: ActiveEventDraft | null;
   activeEditSourceEventRef: RefObject<CalendarEvent | null>;
   lastSeenAnchorRef: RefObject<CalendarViewportAnchor | null>;
-  calendarRef: RefObject<CalendarNavigationHandle | null>;
+  calendarRef: RefObject<QunoCalendarHandle | null>;
   captureEventAnchor: CaptureEventAnchor;
   restoreEventAnchor: RestoreEventAnchor;
   restoreSlotAnchor: RestoreSlotAnchor;

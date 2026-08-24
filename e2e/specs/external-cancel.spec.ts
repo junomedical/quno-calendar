@@ -4,7 +4,7 @@ import { goToWorkday, horizontalDrawTarget, selectPageText, topVisibleDayDate, w
 async function expectDraftFadeoutThenGone(page: Page) {
   const exitingDraft = page.locator('[data-testid="draft-event"][data-exiting="true"]');
   await expect(exitingDraft.first()).toBeVisible();
-  await expect(exitingDraft.first()).toHaveCSS("animation-name", "ic-draft-fade-out");
+  await expect(exitingDraft.first()).toHaveCSS("animation-name", "quno-calendar-draft-fade-out");
   await expect(page.getByTestId("draft-event")).toHaveCount(0);
 }
 
@@ -16,7 +16,7 @@ async function cancelAndKeepRowAnchored(page: Page, selector: string, before: nu
     .poll(() =>
       page.evaluate(
         ({ selector, before }) => {
-          const viewport = document.querySelector<HTMLElement>(".ic-viewport");
+          const viewport = document.querySelector<HTMLElement>(".quno-calendar-viewport");
           const row = document.querySelector<HTMLElement>(selector);
           return viewport && row
             ? Math.abs(row.getBoundingClientRect().top - viewport.getBoundingClientRect().top - before)
@@ -30,7 +30,7 @@ async function cancelAndKeepRowAnchored(page: Page, selector: string, before: nu
 
 const rowViewportOffset = (page: Page, selector: string) =>
   page.evaluate((selector) => {
-    const viewport = document.querySelector<HTMLElement>(".ic-viewport");
+    const viewport = document.querySelector<HTMLElement>(".quno-calendar-viewport");
     const row = document.querySelector<HTMLElement>(selector);
     return viewport && row ? row.getBoundingClientRect().top - viewport.getBoundingClientRect().top : null;
   }, selector);
@@ -92,7 +92,7 @@ for (const scale of [5_000, 20_000]) {
 test("keeps the calendar row position when cancelling external create", async ({ page }) => {
   await page.goto("/");
   await goToWorkday(page);
-  const viewport = page.locator(".ic-viewport");
+  const viewport = page.locator(".quno-calendar-viewport");
   const box = await viewport.boundingBox();
   expect(box).not.toBeNull();
   if (!box) return;
@@ -130,7 +130,7 @@ test("keeps a later participant calendar row anchored when cancelling external c
     const row = document.querySelector<HTMLElement>(
       '[data-testid="calendar-day"][data-date="2026-07-08"] [data-testid="calendar-row"][data-calendar-id="room-203"]'
     );
-    const gridBox = row?.querySelector<HTMLElement>(".ic-row-grid")?.getBoundingClientRect();
+    const gridBox = row?.querySelector<HTMLElement>(".quno-calendar-row-grid")?.getBoundingClientRect();
     const rowBox = row?.getBoundingClientRect();
     if (!gridBox || !rowBox) {
       return null;
@@ -272,7 +272,7 @@ test("does not transiently jump before recenter after cancelling a future multi-
 
   await page.getByTestId("draft-cancel-button").click();
   const immediateFocus = await page.evaluate((futureDate) => {
-    const viewport = document.querySelector<HTMLElement>(".ic-viewport");
+    const viewport = document.querySelector<HTMLElement>(".quno-calendar-viewport");
     const day = document.querySelector<HTMLElement>(`[data-testid="calendar-day"][data-date="${futureDate}"]`);
     const row = day?.querySelector<HTMLElement>('[data-testid="calendar-row"][data-calendar-id="marco-eggens"]');
     if (!viewport || !day || !row) return null;
@@ -302,7 +302,7 @@ test("keeps the same calendar row anchored when drawing again after cancelling e
 
   const rowOffset = async () =>
     page.evaluate(() => {
-      const viewport = document.querySelector<HTMLElement>(".ic-viewport");
+      const viewport = document.querySelector<HTMLElement>(".quno-calendar-viewport");
       const row = document.querySelector<HTMLElement>(
         '[data-testid="calendar-day"][data-date="2026-07-09"] [data-testid="calendar-row"][data-calendar-id="dr-kirillov"]'
       );
@@ -312,7 +312,7 @@ test("keeps the same calendar row anchored when drawing again after cancelling e
 
   const draftOffset = async () =>
     page.evaluate(() => {
-      const viewport = document.querySelector<HTMLElement>(".ic-viewport");
+      const viewport = document.querySelector<HTMLElement>(".quno-calendar-viewport");
       const draft = document.querySelector<HTMLElement>('[data-testid="draft-event"][data-calendar-id="dr-kirillov"]');
       if (!viewport || !draft) return null;
       return draft.getBoundingClientRect().top - viewport.getBoundingClientRect().top;
@@ -323,7 +323,7 @@ test("keeps the same calendar row anchored when drawing again after cancelling e
       const row = document.querySelector<HTMLElement>(
         '[data-testid="calendar-day"][data-date="2026-07-09"] [data-testid="calendar-row"][data-calendar-id="dr-kirillov"]'
       );
-      const gridBox = row?.querySelector<HTMLElement>(".ic-row-grid")?.getBoundingClientRect();
+      const gridBox = row?.querySelector<HTMLElement>(".quno-calendar-row-grid")?.getBoundingClientRect();
       const rowBox = row?.getBoundingClientRect();
       if (!gridBox || !rowBox) {
         return null;

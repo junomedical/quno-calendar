@@ -1,0 +1,101 @@
+.story__picker--warm,
+.story__theme--warm {
+  --quno-date-picker-primary: #d45a1f;
+  --quno-date-picker-primary-soft: #fff0e8;
+  --quno-date-picker-cycle-preview: #087f5b;
+  --quno-date-picker-pill-surface: #fff0e8;
+  --quno-date-picker-pill-border: #d45a1f;
+  --quno-date-picker-pill-text: #8a3412;
+  --quno-date-picker-pill-radius: 12px;
+}
+
+.story__picker--violet,
+.story__theme--violet {
+  --quno-date-picker-primary: #6d28d9;
+  --quno-date-picker-primary-soft: #f0e8ff;
+  --quno-date-picker-cycle-preview: #db2777;
+  --quno-date-picker-pill-surface: #f0e8ff;
+  --quno-date-picker-pill-border: #6d28d9;
+  --quno-date-picker-pill-text: #4c1d95;
+  --quno-date-picker-pill-radius: 8px;
+}
+
+.story__theme--violet {
+  --quno-date-picker-calendar-radius: 8px;
+  --quno-date-picker-day-radius: 50%;
+}
+
+.story__theme--warm {
+  --quno-date-picker-calendar-radius: 24px;
+  --quno-date-picker-header-radius: 18px;
+  --quno-date-picker-day-radius: 5px;
+}
+
+.story__theme--acid {
+  --quno-date-picker-width: min(100%, 300px);
+  --quno-date-picker-day-size: 34px;
+  --quno-date-picker-day-size-mobile: 34px;
+  --quno-date-picker-primary: #eaff00;
+  --quno-date-picker-primary-soft: #ff3cac;
+  --quno-date-picker-cycle-preview: #25f4ee;
+  --quno-date-picker-on-primary: #11130c;
+  --quno-date-picker-surface: #171913;
+  --quno-date-picker-text: #f8ffe8;
+  --quno-date-picker-muted: #b8c692;
+  --quno-date-picker-border: #eaff00;
+  --quno-date-picker-calendar-radius: 0;
+  --quno-date-picker-header-radius: 0;
+  --quno-date-picker-day-radius: 0;
+  --quno-date-picker-calendar-shadow: 8px 8px 0 #ff3cac;
+  --quno-date-picker-header-shadow: 5px 5px 0 #25f4ee;
+  --quno-date-picker-font-family: "Arial Black", Impact, sans-serif;
+  --quno-date-picker-pill-surface: #ff3cac;
+  --quno-date-picker-pill-border: #eaff00;
+  --quno-date-picker-pill-text: #11130c;
+  --quno-date-picker-pill-radius: 0;
+  --quno-date-picker-pill-font-size: 12px;
+  --quno-date-picker-pill-gap: 4px;
+  --quno-date-picker-pill-padding: 8px 5px;
+  --quno-date-picker-pill-shadow: 5px 5px 0 #25f4ee;
+  --quno-date-picker-pill-offset-before: 17px;
+  --quno-date-picker-pill-offset-after: 20px;
+  --quno-date-picker-pills-direction: row;
+  --quno-date-picker-pills-gap: 6px;
+  --quno-date-picker-pills-wrap: nowrap;
+  --quno-date-picker-pill-reveal-distance: 90px;
+}
+
+.story__theme--candy {
+  --quno-date-picker-width: min(100%, 390px);
+  --quno-date-picker-day-size: 48px;
+  --quno-date-picker-day-size-mobile: 44px;
+  --quno-date-picker-primary: #7c3aed;
+  --quno-date-picker-primary-soft: #ffd1e3;
+  --quno-date-picker-selection-surface: #ffd1e3;
+  --quno-date-picker-cycle-preview: #e11d48;
+  --quno-date-picker-on-primary: #fff7fb;
+  --quno-date-picker-surface: #fff7fb;
+  --quno-date-picker-text: #402060;
+  --quno-date-picker-muted: #9d5c82;
+  --quno-date-picker-border: #ff8fbd;
+  --quno-date-picker-calendar-radius: 38px;
+  --quno-date-picker-header-radius: 28px;
+  --quno-date-picker-day-radius: 50%;
+  --quno-date-picker-calendar-shadow: 0 18px 0 #b8f2e6;
+  --quno-date-picker-header-shadow: 0 8px 0 #ffe66d;
+  --quno-date-picker-font-family: Georgia, "Times New Roman", serif;
+  --quno-date-picker-pill-surface: #ffd1e3;
+  --quno-date-picker-pill-border: #ff8fbd;
+  --quno-date-picker-pill-text: #7c3aed;
+  --quno-date-picker-pill-radius: 999px;
+  --quno-date-picker-pill-shadow: 0 6px 0 #ffe66d;
+  --quno-date-picker-pill-offset-before: 16px;
+  --quno-date-picker-pill-offset-after: 26px;
+  --quno-date-picker-pills-wrap: wrap;
+}
+
+@media (max-width: 440px) {
+  .story__theme--candy {
+    --quno-date-picker-pill-reveal-distance: 90px;
+  }
+}

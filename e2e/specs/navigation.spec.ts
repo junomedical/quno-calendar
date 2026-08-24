@@ -19,7 +19,7 @@ async function topVisibleDayDateOrNull(page: Page) {
 test("reports settled viewport scrolling and programmatic repositioning", async ({ page }) => {
   await page.goto("/");
   await waitForDemoEvents(page);
-  const viewport = page.locator(".ic-viewport");
+  const viewport = page.locator(".quno-calendar-viewport");
   const viewportBox = await viewport.boundingBox();
   expect(viewportBox).not.toBeNull();
   if (!viewportBox) return;
@@ -39,7 +39,7 @@ test("reports settled viewport scrolling and programmatic repositioning", async 
 
 test("keeps the active day when calendar count changes and supports date navigation", async ({ page }) => {
   await page.goto("/");
-  const viewport = page.locator(".ic-viewport");
+  const viewport = page.locator(".quno-calendar-viewport");
 
   await setDemoZoom(page, 4);
   await page.getByTestId("jump-date-input").fill("2026-08-12");
@@ -88,7 +88,7 @@ test("keeps the active day when calendar count changes and supports date navigat
 
 test("recenters the horizontal virtual window after a large date scroll", async ({ page }) => {
   await page.goto("/");
-  const viewport = page.locator(".ic-viewport");
+  const viewport = page.locator(".quno-calendar-viewport");
 
   await page.getByTestId("jump-date-input").fill("2026-07-06");
   await page.getByTestId("go-date-button").click();

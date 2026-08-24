@@ -202,14 +202,14 @@ flowchart TD
 
 ## Source Map
 
-- `src/lib/infinite/scroll/useScrollRuntime.ts`: composes the bounded model, virtualizer, position tracker, render items, navigation, and layout restoration.
-- `src/lib/infinite/scroll/window/dateModel.ts`: normalized date/index mapping.
-- `src/lib/infinite/scroll/position/useVirtualScrollPosition.ts`: scroll offset and visible snapshot bridge.
-- `src/lib/infinite/scroll/navigation/useVirtualWindowNavigation.ts`: pending targets, imperative navigation, and recenter ownership.
-- `src/lib/infinite/scroll/settlement/useScrollRecenter.ts`: scroll/scrollend scheduling and interaction guard.
-- `src/lib/infinite/scroll/recenter/useLayoutOffsetRestoration.ts`: structural layout translation.
-- `src/lib/infinite/scroll/window/useVirtualDateRenderItems.ts`: visible, fallback, and pinned render items.
-- `src/lib/infinite/scroll/resources/resourceWindow.ts`: resource prefix extents and cross-axis window search.
-- `src/lib/infinite/scroll/resources/viewportMetricsStore.ts`: frame-batched viewport snapshots for local subscribers.
+- `src/lib/timeline/infinite/scroll/useScrollRuntime.ts`: composes the bounded model, virtualizer, position tracker, render items, navigation, and layout restoration.
+- `src/lib/timeline/infinite/scroll/window/dateModel.ts`: normalized date/index mapping.
+- `src/lib/timeline/infinite/scroll/position/useVirtualScrollPosition.ts`: scroll offset and visible snapshot bridge.
+- `src/lib/timeline/infinite/scroll/navigation/useVirtualWindowNavigation.ts`: pending targets, imperative navigation, and recenter ownership.
+- `src/lib/timeline/infinite/scroll/settlement/useScrollRecenter.ts`: scroll/scrollend scheduling and interaction guard.
+- `src/lib/timeline/infinite/scroll/recenter/useLayoutOffsetRestoration.ts`: structural layout translation.
+- `src/lib/timeline/infinite/scroll/window/useVirtualDateRenderItems.ts`: visible, fallback, and pinned render items.
+- `src/lib/timeline/infinite/scroll/resources/resourceWindow.ts`: resource prefix extents and cross-axis window search.
+- `src/lib/timeline/infinite/scroll/resources/viewportMetricsStore.ts`: frame-batched viewport snapshots for local subscribers.
 
 The complete ownership map is in [`docs/domains/scroll.md`](../domains/scroll.md).

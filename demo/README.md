@@ -6,7 +6,7 @@ The demo is intentionally outside `src/`. Everything under `src/lib` is reusable
 flowchart LR
   App["demo/app<br/>routing and shell"] --> Guide["demo/examples<br/>editorial field guide"]
   App --> Showcase["demo/showcase<br/>stress and product scenarios"]
-  Guide --> Public["quno-calendar<br/>public package surface"]
+  Guide --> Public["@quno/calendar/timeline<br/>public package surface"]
   Showcase --> Public
   Public --> Library["src/lib<br/>shipped implementation"]
 ```

@@ -234,14 +234,14 @@ Horizontal wheel zoom preserves a time node on X. Vertical wheel zoom preserves 
 
 ## Source Map
 
-- `src/lib/infinite/interactions/useTimelineInteractions.ts`: shared pointer routing and public render state.
-- `src/lib/infinite/interactions/drag/useTimelineDragInteraction.ts`: drag candidate, proposal, validation, and cache patch.
-- `src/lib/infinite/interactions/draft/useTimelineDraftInteraction.ts`: drawn range and internal/external create paths.
-- `src/lib/infinite/interactions/hit-testing/timelineHitTarget.ts`: mounted grid ownership.
-- `src/lib/infinite/interactions/hit-testing/useTimelineHitTesting.ts`: shared mounted-grid resolution with horizontal and vertical coordinate projections.
-- `src/lib/infinite/interactions/zoom/shiftWheelZoomUtils.ts`: shared gesture tail, versioning, and captured wheel utilities.
-- `src/lib/infinite/interactions/zoom/useHorizontalShiftWheelZoom.ts`: pointer-nearest horizontal time anchor.
-- `src/lib/infinite/interactions/zoom/useVerticalShiftWheelZoom.ts`: date/time vertical anchor.
-- `src/lib/infinite/anchors/zoom/useHorizontalControlledZoomAnchor.ts`: slider/external visible-now-marker correction with center/origin fallback.
+- `src/lib/timeline/infinite/interactions/useTimelineInteractions.ts`: shared pointer routing and public render state.
+- `src/lib/timeline/infinite/interactions/drag/useTimelineDragInteraction.ts`: drag candidate, proposal, validation, and cache patch.
+- `src/lib/timeline/infinite/interactions/draft/useTimelineDraftInteraction.ts`: drawn range and internal/external create paths.
+- `src/lib/timeline/infinite/interactions/hit-testing/timelineHitTarget.ts`: mounted grid ownership.
+- `src/lib/timeline/infinite/interactions/hit-testing/useTimelineHitTesting.ts`: shared mounted-grid resolution with horizontal and vertical coordinate projections.
+- `src/lib/timeline/infinite/interactions/zoom/shiftWheelZoomUtils.ts`: shared gesture tail, versioning, and captured wheel utilities.
+- `src/lib/timeline/infinite/interactions/zoom/useHorizontalShiftWheelZoom.ts`: pointer-nearest horizontal time anchor.
+- `src/lib/timeline/infinite/interactions/zoom/useVerticalShiftWheelZoom.ts`: date/time vertical anchor.
+- `src/lib/timeline/infinite/anchors/zoom/useHorizontalControlledZoomAnchor.ts`: slider/external visible-now-marker correction with center/origin fallback.
 
 The complete ownership map is in [`docs/domains/interactions.md`](../domains/interactions.md) and [`docs/domains/anchors.md`](../domains/anchors.md).

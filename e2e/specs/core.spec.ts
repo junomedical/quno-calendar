@@ -13,7 +13,7 @@ import {
 
 test("renders, scrolls vertically, zooms, and changes dataset scale", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByTestId("infinite-calendar")).toBeVisible();
+  await expect(page.getByTestId("quno-calendar-timeline")).toBeVisible();
   await goToWorkday(page);
   await firstViewportEventBox(page);
   expect(await renderedDayOverscanFailures(page, 5)).toEqual([]);
@@ -37,7 +37,7 @@ test("renders, scrolls vertically, zooms, and changes dataset scale", async ({ p
     );
   expect(Math.min(...compactRowHeights)).toBe(50);
 
-  const viewport = page.locator(".ic-viewport");
+  const viewport = page.locator(".quno-calendar-viewport");
   const firstDate = await topVisibleDayDate(page);
   await viewport.evaluate((element) => {
     element.scrollTop += 1_800;
@@ -58,20 +58,20 @@ test("renders, scrolls vertically, zooms, and changes dataset scale", async ({ p
   await expect(page.getByTestId("zoom-value")).toHaveText("2.00");
   await setDemoZoom(page, 8);
   await expect(page.getByTestId("zoom-value")).toHaveText("8.00");
-  await expect(page.getByTestId("calendar-row").first().locator(".ic-row-grid")).toHaveCSS(
+  await expect(page.getByTestId("calendar-row").first().locator(".quno-calendar-row-grid")).toHaveCSS(
     "background-size",
     "40px 100%"
   );
-  await expect(page.getByTestId("calendar-row").first().locator(".ic-row-grid")).toHaveCSS(
+  await expect(page.getByTestId("calendar-row").first().locator(".quno-calendar-row-grid")).toHaveCSS(
     "background-position-x",
     "8px"
   );
-  await expect(page.getByTestId("calendar-row").first().locator(".ic-row-grid")).toHaveCSS(
+  await expect(page.getByTestId("calendar-row").first().locator(".quno-calendar-row-grid")).toHaveCSS(
     "background-repeat",
     "repeat"
   );
   await setDemoZoom(page, 6);
-  await expect(page.getByTestId("calendar-row").first().locator(".ic-row-grid")).toHaveCSS(
+  await expect(page.getByTestId("calendar-row").first().locator(".quno-calendar-row-grid")).toHaveCSS(
     "background-size",
     "90px 100%"
   );
@@ -87,7 +87,7 @@ test("renders, scrolls vertically, zooms, and changes dataset scale", async ({ p
     element.scrollLeft = 240;
   });
   await expect.poll(async () => viewport.evaluate((element) => element.scrollLeft)).toBeGreaterThan(0);
-  const scrollTopBeforeShiftWheel = await viewport.evaluate((element) => element.scrollTop);
+  const visibleDayBeforeShiftWheel = await topVisibleDayState(page);
   const pointerX = 520;
   const timelineNodeNearPointer = async () => {
     const zoom = Number(await page.getByTestId("zoom-value").textContent());
@@ -121,7 +121,7 @@ test("renders, scrolls vertically, zooms, and changes dataset scale", async ({ p
   await page.keyboard.up("Shift");
   await expect(page.getByTestId("zoom-value")).not.toHaveText(afterButtonZoom ?? "");
   await expect(page.getByTestId("zoom-value")).toHaveText("2.15");
-  await expect.poll(async () => viewport.evaluate((element) => element.scrollTop)).toBe(scrollTopBeforeShiftWheel);
+  await expect.poll(async () => topVisibleDayState(page)).toEqual(visibleDayBeforeShiftWheel);
   await expect.poll(async () => (await timelineNodeNearPointer()).minute).toBe(anchoredNodeBeforeShiftWheel.minute);
   await expect
     .poll(async () => (await timelineNodeNearPointer()).screenX)
@@ -140,7 +140,7 @@ test("renders, scrolls vertically, zooms, and changes dataset scale", async ({ p
     const labelWidth = 230;
     const timelineGutter = 8;
     const zoom = Number(document.querySelector<HTMLElement>('[data-testid="zoom-value"]')?.textContent ?? "1");
-    const virtualSpace = document.querySelector<HTMLElement>(".ic-virtual-space");
+    const virtualSpace = document.querySelector<HTMLElement>(".quno-calendar-virtual-space");
     const minWidth = Number.parseFloat(window.getComputedStyle(virtualSpace ?? element).minWidth);
     const totalMinutes = (minWidth - labelWidth - timelineGutter) / zoom;
     const availableTimelineWidth = Math.max(0, element.clientWidth - labelWidth - timelineGutter);
@@ -157,7 +157,7 @@ test("renders, scrolls vertically, zooms, and changes dataset scale", async ({ p
   await expect
     .poll(async () =>
       viewport.evaluate((element) => {
-        const virtualSpace = document.querySelector<HTMLElement>(".ic-virtual-space");
+        const virtualSpace = document.querySelector<HTMLElement>(".quno-calendar-virtual-space");
         return Number.parseFloat(window.getComputedStyle(virtualSpace ?? element).minWidth) - element.clientWidth;
       })
     )
@@ -172,7 +172,7 @@ test("renders, scrolls vertically, zooms, and changes dataset scale", async ({ p
   await expect
     .poll(async () =>
       viewport.evaluate((element) => {
-        const virtualSpace = document.querySelector<HTMLElement>(".ic-virtual-space");
+        const virtualSpace = document.querySelector<HTMLElement>(".quno-calendar-virtual-space");
         return Number.parseFloat(window.getComputedStyle(virtualSpace ?? element).minWidth) - element.clientWidth;
       })
     )
@@ -208,7 +208,7 @@ test("renders route-specific demo treatments", async ({ page }) => {
   await expect(page.locator(".demo1-event-card").first()).toBeVisible();
   const compactMetrics = await page.evaluate(() => {
     const row = document.querySelector<HTMLElement>('[data-testid="calendar-row"]');
-    const label = document.querySelector<HTMLElement>(".ic-row-label");
+    const label = document.querySelector<HTMLElement>(".quno-calendar-row-label");
     const card = document.querySelector<HTMLElement>(".demo1-event-card");
     if (!row || !label || !card) return null;
     const cardStyles = window.getComputedStyle(card);
@@ -266,7 +266,7 @@ test("renders route-specific demo treatments", async ({ page }) => {
   await expect(page.getByTestId("calendar-count")).toHaveValue("3");
   await goToWorkday(page);
   await expect(page.locator(".demo3-event-card").first()).toBeVisible();
-  await expect(page.locator(".ic-availability-shell.is-active-layer").first()).toBeVisible();
+  await expect(page.locator(".quno-calendar-availability-shell.is-active-layer").first()).toBeVisible();
   const availabilityMetrics = await page.evaluate(() => {
     const header = document.querySelector<HTMLElement>(".icv-day-header");
     const timePane = document.querySelector<HTMLElement>(".icv-time-pane");
@@ -293,7 +293,7 @@ test("renders route-specific demo treatments", async ({ page }) => {
   expect(((availabilityMetrics?.columnWidth ?? 0) - 320) % 120).toBe(0);
   expect(availabilityMetrics?.columnWidth ?? 0).toBeGreaterThan(plannerMetrics?.columnWidth ?? 0);
   await page.getByTestId("availability-mode").uncheck();
-  await expect(page.locator(".ic-availability-shell.is-active-layer")).toHaveCount(0);
+  await expect(page.locator(".quno-calendar-availability-shell.is-active-layer")).toHaveCount(0);
   await page.getByTestId("view-infinite-horizontal").check();
   await expect(page.getByTestId("calendar-row").first()).toBeVisible();
 });
@@ -331,7 +331,7 @@ test("keeps large dataset events visible and hoverable", async ({ page }) => {
   ).toBeVisible();
 
   const visibleRowHeights = await page.evaluate(() => {
-    const viewport = document.querySelector(".ic-viewport")?.getBoundingClientRect();
+    const viewport = document.querySelector(".quno-calendar-viewport")?.getBoundingClientRect();
     if (!viewport) return [];
     return Array.from(document.querySelectorAll<HTMLElement>('[data-testid="calendar-row"]'))
       .map((element) => element.getBoundingClientRect())
@@ -340,7 +340,7 @@ test("keeps large dataset events visible and hoverable", async ({ page }) => {
   });
   expect(Math.min(...visibleRowHeights)).toBeLessThan(Math.max(...visibleRowHeights));
   const visibleEventMetrics = await page.evaluate(() => {
-    const viewport = document.querySelector(".ic-viewport")?.getBoundingClientRect();
+    const viewport = document.querySelector(".quno-calendar-viewport")?.getBoundingClientRect();
     if (!viewport) return [];
     const safeTop = viewport.y + 92;
     return Array.from(document.querySelectorAll<HTMLElement>('[data-testid="calendar-event"]'))
@@ -364,7 +364,7 @@ test("keeps large dataset events visible and hoverable", async ({ page }) => {
   expect(Math.min(...visibleEventMetrics.map((metric) => metric.laneHeight))).toBeGreaterThanOrEqual(24);
 
   const bottomLaneEvent = await page.evaluate(() => {
-    const viewport = document.querySelector(".ic-viewport")?.getBoundingClientRect();
+    const viewport = document.querySelector(".quno-calendar-viewport")?.getBoundingClientRect();
     if (!viewport) return null;
 
     for (const element of Array.from(document.querySelectorAll<HTMLElement>('[data-testid="calendar-event"]'))) {
@@ -411,7 +411,7 @@ test("keeps large dataset events visible and hoverable", async ({ page }) => {
   }
 
   const dayBoundaryIssues = await page.evaluate(() => {
-    const viewport = document.querySelector(".ic-viewport")?.getBoundingClientRect();
+    const viewport = document.querySelector(".quno-calendar-viewport")?.getBoundingClientRect();
     if (!viewport) return [];
     const days = Array.from(document.querySelectorAll<HTMLElement>('[data-testid="calendar-day"]'))
       .map((day) => ({ date: day.dataset.date, box: day.getBoundingClientRect() }))
@@ -443,7 +443,7 @@ test("limits vertical scrollbar to one month around the visible date and recente
 }) => {
   await page.goto("/");
   await goToWorkday(page, "2026-07-06");
-  const viewport = page.locator(".ic-viewport");
+  const viewport = page.locator(".quno-calendar-viewport");
 
   await viewport.evaluate((element) => {
     element.scrollTop = 0;
@@ -472,7 +472,7 @@ test("limits vertical scrollbar to one month around the visible date and recente
 test("keeps intra-day scroll offset when the virtual window recenters", async ({ page }) => {
   await page.goto("/");
   await goToWorkday(page, "2026-07-06");
-  const viewport = page.locator(".ic-viewport");
+  const viewport = page.locator(".quno-calendar-viewport");
 
   await viewport.evaluate((element) => {
     const nextDay = document.querySelector<HTMLElement>('[data-testid="calendar-day"][data-date="2026-07-07"]');

@@ -1,5 +1,5 @@
 import { CalendarCheck2, Lock, Sparkles, Stethoscope } from "lucide-react";
-import type { EventRendererProps } from "quno-calendar";
+import type { EventRendererProps } from "@quno/calendar/timeline";
 import { eventCardModel } from "../eventCardModel";
 import "./Demo3EventCard.css";
 

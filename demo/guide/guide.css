@@ -1,0 +1,76 @@
+.quno-guide {
+  background: #f7f7fa;
+  color: #19182b;
+  min-height: 100vh;
+}
+
+.quno-guide__hero,
+.guide-section {
+  box-sizing: border-box;
+  margin: 0 auto;
+  max-width: 1160px;
+  padding: 64px 32px;
+}
+
+.quno-guide__hero h1 {
+  font-size: clamp(2.5rem, 7vw, 5.5rem);
+  letter-spacing: -0.06em;
+  line-height: 0.95;
+  margin: 24px 0;
+  max-width: 900px;
+}
+
+.quno-guide__hero nav {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  margin-top: 48px;
+}
+
+.quno-guide__hero nav a {
+  background: #fff;
+  border: 1px solid #dddce9;
+  color: inherit;
+  display: grid;
+  gap: 8px;
+  padding: 18px;
+  text-decoration: none;
+}
+
+.quno-guide__hero small,
+.guide-section__number {
+  color: #6557d8;
+  font-weight: 700;
+}
+
+.guide-composition__demo {
+  align-items: start;
+  display: grid;
+  gap: 24px;
+  grid-template-columns: minmax(290px, 360px) minmax(0, 1fr);
+}
+
+.guide-composition__event {
+  box-sizing: border-box;
+  padding: 6px;
+}
+
+.guide-recipe pre,
+.guide-section > pre {
+  background: #19182b;
+  color: #f5f4ff;
+  overflow: auto;
+  padding: 20px;
+}
+
+.quno-guide__loading {
+  margin: 40px auto;
+  max-width: 1160px;
+  padding: 24px 32px;
+}
+
+@media (max-width: 840px) {
+  .guide-composition__demo {
+    grid-template-columns: 1fr;
+  }
+}

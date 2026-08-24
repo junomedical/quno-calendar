@@ -1,10 +1,10 @@
 import { useCallback, useMemo, useRef, useState, type SetStateAction } from "react";
 import {
   type CalendarEvent,
-  type CalendarNavigationHandle,
+  type QunoCalendarHandle,
   type EventCreateRequest,
   type EventMoveRequest
-} from "quno-calendar";
+} from "@quno/calendar/timeline";
 import { createDemoEvents, createRangeLoader, demoCalendars, appendCreatedEvent, applyMove } from "./data";
 import { DemoEventCard } from "./DemoEventCard";
 import { DefaultDemoSidebar } from "./default/DefaultDemoSidebar";
@@ -17,7 +17,7 @@ import { useSystemNow } from "./hooks/useSystemNow";
 import { useViewportActivityLog } from "./hooks/useViewportActivityLog";
 import type { DemoRoute } from "./types";
 import { useExternalEventDrafts } from "./useExternalEventDrafts";
-import { DemoCalendarRoot, DemoZoomProvider } from "./zoom/DemoZoom";
+import { DemoQunoCalendar, DemoZoomProvider } from "./zoom/DemoZoom";
 
 const defaultLayout: DemoLayoutSettings = {
   rowHeight: 50,
@@ -59,7 +59,7 @@ export function DefaultDemo({ routes }: { routes: DemoRoute[] }) {
   const eventsRef = useRef(events);
   const selectedCalendarIdsRef = useRef<string[]>([]);
   const isExternalDraftOpenRef = useRef(false);
-  const calendarRef = useRef<CalendarNavigationHandle>(null);
+  const calendarRef = useRef<QunoCalendarHandle>(null);
   const calendarPanelRef = useRef<HTMLElement>(null);
   const setMessage = useCallback((message: string) => {
     setActivityEntries((current) => [...current.slice(-(MAX_ACTIVITY_ENTRIES - 1)), message]);
@@ -201,7 +201,7 @@ export function DefaultDemo({ routes }: { routes: DemoRoute[] }) {
               onToggleParticipant={draftSave.handleParticipantToggle}
             />
           ) : null}
-          <DemoCalendarRoot
+          <DemoQunoCalendar
             key={scale}
             view={controls.calendarView}
             ref={calendarRef}

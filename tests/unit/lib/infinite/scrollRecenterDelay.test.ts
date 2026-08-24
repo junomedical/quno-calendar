@@ -3,7 +3,7 @@ import {
   SCROLL_EDGE_RECENTER_DELAY_MS,
   SCROLL_RECENTER_DELAY_MS,
   scrollRecenterDelayMs
-} from "../../../../src/lib/infinite/scroll/scrollConstants";
+} from "../../../../src/lib/timeline/infinite/scroll/scrollConstants";
 
 const viewport = { clientHeight: 500, scrollHeight: 10_000 };
 

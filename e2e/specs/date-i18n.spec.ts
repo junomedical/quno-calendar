@@ -8,7 +8,7 @@ test("localizes horizontal and vertical date chrome without clipping labels", as
   await goToWorkday(page, "2026-07-06");
 
   const horizontalLabel = page
-    .locator('[data-testid="calendar-day"][data-date="2026-07-06"] .ic-date-label:not(.icv-date-label)')
+    .locator('[data-testid="calendar-day"][data-date="2026-07-06"] .quno-calendar-date-label:not(.icv-date-label)')
     .filter({ hasText: "6. Juli, Montag" });
   await expect(horizontalLabel).toBeVisible();
   expect(

@@ -12,8 +12,8 @@ import {
   rowHeightForEvents,
   rowHeightForOverlapDepth,
   verticalLaneCountForPreparedCell
-} from "../../../../src/lib/infinite/events/layout/layout";
-import type { CalendarEvent } from "../../../../src/lib/core/types";
+} from "../../../../src/lib/timeline/infinite/events/layout/layout";
+import type { CalendarEvent } from "../../../../src/lib/timeline/core/types";
 
 const settings = {
   startHour: 8,

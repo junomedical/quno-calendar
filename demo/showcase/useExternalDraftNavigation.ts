@@ -2,10 +2,10 @@ import { useCallback, useRef, type RefObject } from "react";
 import type {
   CalendarEvent,
   CalendarId,
-  CalendarNavigationHandle,
+  QunoCalendarHandle,
   CalendarViewportAnchor,
   CalendarViewportAnchorTarget
-} from "quno-calendar";
+} from "@quno/calendar/timeline";
 import { isoDateInputValue, isoTimeInputValue } from "./draftFormUtils";
 
 export type DraftRestoreOptions = {
@@ -42,7 +42,7 @@ function slotTarget(event: CalendarEvent, calendarId?: CalendarId): CalendarView
   };
 }
 
-export function useExternalDraftNavigation(calendarRef: RefObject<CalendarNavigationHandle | null>) {
+export function useExternalDraftNavigation(calendarRef: RefObject<QunoCalendarHandle | null>) {
   const lastSeenAnchorRef = useRef<CalendarViewportAnchor | null>(null);
 
   const captureEventAnchor = useCallback(

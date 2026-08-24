@@ -4,25 +4,25 @@ import { goToWorkday, setDemoZoom, topVisibleDayDate } from "../helpers";
 test("keeps the time scale fixed and day dates css-sticky", async ({ page }) => {
   await page.goto("/");
   await setDemoZoom(page, 1.7);
-  const viewport = page.locator(".ic-viewport");
+  const viewport = page.locator(".quno-calendar-viewport");
   const viewportBox = await viewport.boundingBox();
   expect(viewportBox).not.toBeNull();
   if (!viewportBox) return;
 
   await expect(page.getByTestId("time-scale-header")).toBeVisible();
-  expect(await page.locator(".ic-day .ic-time-header").count()).toBe(0);
-  expect(await page.locator(".ic-now-pin").count()).toBe(1);
+  expect(await page.locator(".quno-calendar-day .quno-calendar-time-header").count()).toBe(0);
+  expect(await page.locator(".quno-calendar-now-pin").count()).toBe(1);
   expect(await page.getByTestId("current-time-line").count()).toBeGreaterThan(1);
   expect(await page.getByTestId("current-time-day-header-line").count()).toBeGreaterThan(1);
   const referenceLineOpacity = await page
-    .locator(".ic-now-line.is-reference")
+    .locator(".quno-calendar-now-line.is-reference")
     .first()
     .evaluate((element) => {
       return window.getComputedStyle(element).opacity;
     });
   expect(referenceLineOpacity).toBe("0.5");
   const referenceHeaderLineOpacity = await page
-    .locator(".ic-now-day-header-line.is-reference")
+    .locator(".quno-calendar-now-day-header-line.is-reference")
     .first()
     .evaluate((element) => {
       return window.getComputedStyle(element).opacity;
@@ -34,14 +34,14 @@ test("keeps the time scale fixed and day dates css-sticky", async ({ page }) => 
   expect(timeHeaderBox).not.toBeNull();
   if (!timeHeaderBox) return;
   expect(Math.abs(timeHeaderBox.y - viewportBox.y)).toBeLessThanOrEqual(2);
-  await expect(page.locator(".ic-time-tick").first()).toBeVisible();
+  await expect(page.locator(".quno-calendar-time-tick").first()).toBeVisible();
   const firstTickAlignment = await page
-    .locator(".ic-time-tick")
+    .locator(".quno-calendar-time-tick")
     .first()
     .evaluate((element) => {
       const rect = element.getBoundingClientRect();
-      const headerRect = element.closest(".ic-time-header")?.getBoundingClientRect();
-      const trackRect = element.closest(".ic-time-tick-track")?.getBoundingClientRect();
+      const headerRect = element.closest(".quno-calendar-time-header")?.getBoundingClientRect();
+      const trackRect = element.closest(".quno-calendar-time-tick-track")?.getBoundingClientRect();
       return headerRect && trackRect
         ? Math.max(Math.abs(trackRect.left - headerRect.left - 8), Math.abs(rect.left - trackRect.left))
         : Number.POSITIVE_INFINITY;
@@ -54,14 +54,14 @@ test("keeps the time scale fixed and day dates css-sticky", async ({ page }) => 
   await expect(topDateHeader).toBeVisible();
   await expect(topDateBand).toBeVisible();
   await expect(topDateHeaderLine).toBeVisible();
-  const dateLabelBox = await topDateHeader.locator(".ic-date-label").boundingBox();
-  const timelineHeaderBox = await page.locator(".ic-time-header").boundingBox();
+  const dateLabelBox = await topDateHeader.locator(".quno-calendar-date-label").boundingBox();
+  const timelineHeaderBox = await page.locator(".quno-calendar-time-header").boundingBox();
   expect(dateLabelBox).not.toBeNull();
   expect(timelineHeaderBox).not.toBeNull();
   if (!dateLabelBox || !timelineHeaderBox) return;
-  expect(timelineHeaderBox.x).toBeGreaterThanOrEqual(dateLabelBox.x + dateLabelBox.width - 1);
-  const pinBeforeScroll = await page.locator(".ic-now-pin").boundingBox();
-  const lineBeforeScroll = await page.locator(".ic-now-line.is-current").first().boundingBox();
+  expect(timelineHeaderBox.x).toBeLessThanOrEqual(dateLabelBox.x + dateLabelBox.width);
+  const pinBeforeScroll = await page.locator(".quno-calendar-now-pin").boundingBox();
+  const lineBeforeScroll = await page.locator(".quno-calendar-now-line.is-current").first().boundingBox();
   expect(pinBeforeScroll).not.toBeNull();
   expect(lineBeforeScroll).not.toBeNull();
   if (!pinBeforeScroll || !lineBeforeScroll) return;
@@ -71,8 +71,8 @@ test("keeps the time scale fixed and day dates css-sticky", async ({ page }) => 
   await viewport.evaluate((element) => {
     element.scrollLeft += 60;
   });
-  const pinAfterScroll = await page.locator(".ic-now-pin").boundingBox();
-  const lineAfterScroll = await page.locator(".ic-now-line.is-current").first().boundingBox();
+  const pinAfterScroll = await page.locator(".quno-calendar-now-pin").boundingBox();
+  const lineAfterScroll = await page.locator(".quno-calendar-now-line.is-current").first().boundingBox();
   expect(pinAfterScroll).not.toBeNull();
   expect(lineAfterScroll).not.toBeNull();
   if (!pinAfterScroll || !lineAfterScroll) return;
@@ -81,20 +81,20 @@ test("keeps the time scale fixed and day dates css-sticky", async ({ page }) => 
     Math.abs(pinAfterScroll.x + pinAfterScroll.width / 2 - (lineAfterScroll.x + lineAfterScroll.width / 2))
   ).toBeLessThanOrEqual(2);
 
-  const headerBackground = await topDateHeader.locator(".ic-date-label").evaluate((element) => {
+  const headerBackground = await topDateHeader.locator(".quno-calendar-date-label").evaluate((element) => {
     return window.getComputedStyle(element).backgroundColor;
   });
   expect(headerBackground).toBe("rgb(244, 247, 251)");
   const leftLabelBorders = await page.evaluate(() => {
-    const shell = document.querySelector<HTMLElement>(".ic-shell");
-    const day = document.querySelector<HTMLElement>(".ic-day");
-    const dayHeader = document.querySelector<HTMLElement>(".ic-day-header");
-    const dayHeaderBand = document.querySelector<HTMLElement>(".ic-day-header-band");
-    const dateLabel = document.querySelector<HTMLElement>(".ic-date-label");
-    const row = document.querySelector<HTMLElement>(".ic-row");
-    const rowLabel = document.querySelector<HTMLElement>(".ic-row-label");
-    const timeHeader = document.querySelector<HTMLElement>(".ic-time-header");
-    const rowGrid = document.querySelector<HTMLElement>(".ic-row-grid");
+    const shell = document.querySelector<HTMLElement>(".quno-calendar-shell");
+    const day = document.querySelector<HTMLElement>(".quno-calendar-day");
+    const dayHeader = document.querySelector<HTMLElement>(".quno-calendar-day-header");
+    const dayHeaderBand = document.querySelector<HTMLElement>(".quno-calendar-day-header-band");
+    const dateLabel = document.querySelector<HTMLElement>(".quno-calendar-date-label");
+    const row = document.querySelector<HTMLElement>(".quno-calendar-row");
+    const rowLabel = document.querySelector<HTMLElement>(".quno-calendar-row-label");
+    const timeHeader = document.querySelector<HTMLElement>(".quno-calendar-time-header");
+    const rowGrid = document.querySelector<HTMLElement>(".quno-calendar-row-grid");
     if (!shell || !day || !dayHeader || !dayHeaderBand || !dateLabel || !row || !rowLabel || !timeHeader || !rowGrid) {
       return null;
     }
@@ -172,14 +172,14 @@ test("keeps the time scale fixed and day dates css-sticky", async ({ page }) => 
       zIndex: styles.zIndex
     };
   });
-  const timeHeaderZIndex = await page.locator(".ic-time-header").evaluate((element) => {
+  const timeHeaderZIndex = await page.locator(".quno-calendar-time-header").evaluate((element) => {
     return Number(window.getComputedStyle(element).zIndex);
   });
-  const dateLabelZIndex = await topDateHeader.locator(".ic-date-label").evaluate((element) => {
+  const dateLabelZIndex = await topDateHeader.locator(".quno-calendar-date-label").evaluate((element) => {
     return Number(window.getComputedStyle(element).zIndex);
   });
   const rowLabelZIndex = await page
-    .locator(".ic-row-label")
+    .locator(".quno-calendar-row-label")
     .first()
     .evaluate((element) => {
       return Number(window.getComputedStyle(element).zIndex);
@@ -206,9 +206,9 @@ test("keeps the time scale fixed and day dates css-sticky", async ({ page }) => 
   expect(headerLineBox.y).toBeLessThanOrEqual(headerBandBox.y + 1);
   expect(headerLineBox.y + headerLineBox.height).toBeGreaterThanOrEqual(headerBandBox.y + headerBandBox.height - 1);
   const headerLineLayering = await topDateHeaderLine.evaluate((line) => {
-    const band = document.querySelector<HTMLElement>(".ic-day-header-band");
-    const dateLabel = document.querySelector<HTMLElement>(".ic-date-label");
-    const timeHeader = document.querySelector<HTMLElement>(".ic-time-header");
+    const band = document.querySelector<HTMLElement>(".quno-calendar-day-header-band");
+    const dateLabel = document.querySelector<HTMLElement>(".quno-calendar-date-label");
+    const timeHeader = document.querySelector<HTMLElement>(".quno-calendar-time-header");
     const zIndex = (element: Element) => {
       const parsed = Number.parseInt(window.getComputedStyle(element).zIndex || "0", 10);
       return Number.isFinite(parsed) ? parsed : 0;
@@ -231,14 +231,14 @@ test("keeps the time scale fixed and day dates css-sticky", async ({ page }) => 
   await viewport.evaluate((element) => {
     element.scrollLeft += 420;
   });
-  const horizontalStickyBox = await topDateHeader.locator(".ic-date-label").boundingBox();
+  const horizontalStickyBox = await topDateHeader.locator(".quno-calendar-date-label").boundingBox();
   expect(horizontalStickyBox).not.toBeNull();
   if (!horizontalStickyBox) return;
   expect(Math.abs(horizontalStickyBox.x - viewportBox.x)).toBeLessThanOrEqual(2);
   const stickyLayering = await page.evaluate(() => {
-    const dateLabel = document.querySelector<HTMLElement>(".ic-date-label");
-    const dayHeaderBand = document.querySelector<HTMLElement>(".ic-day-header-band");
-    const timeHeader = document.querySelector<HTMLElement>(".ic-time-header");
+    const dateLabel = document.querySelector<HTMLElement>(".quno-calendar-date-label");
+    const dayHeaderBand = document.querySelector<HTMLElement>(".quno-calendar-day-header-band");
+    const timeHeader = document.querySelector<HTMLElement>(".quno-calendar-time-header");
     if (!dateLabel || !dayHeaderBand || !timeHeader) {
       return null;
     }
@@ -253,8 +253,8 @@ test("keeps the time scale fixed and day dates css-sticky", async ({ page }) => 
       dateBackground: window.getComputedStyle(dateLabel).backgroundColor,
       timeHeaderClipPath: window.getComputedStyle(timeHeader).clipPath,
       clipVariable: window
-        .getComputedStyle(timeHeader.closest(".ic-viewport") ?? timeHeader)
-        .getPropertyValue("--ic-time-header-clip-left")
+        .getComputedStyle(timeHeader.closest(".quno-calendar-viewport") ?? timeHeader)
+        .getPropertyValue("--quno-calendar-time-header-clip-left")
     };
   });
   expect(stickyLayering).toEqual({
@@ -270,14 +270,14 @@ test("keeps the time scale fixed and day dates css-sticky", async ({ page }) => 
   expect(stickyLayering?.dateLayerZ ?? 0).toBeGreaterThan(stickyLayering?.timeLayerZ ?? 0);
 
   const timeLabelVisibility = await page.evaluate(() => {
-    const viewport = document.querySelector<HTMLElement>(".ic-viewport")?.getBoundingClientRect();
-    const dateLabel = document.querySelector<HTMLElement>(".ic-date-label")?.getBoundingClientRect();
-    const timeHeader = document.querySelector<HTMLElement>(".ic-time-header");
-    const dayHeaderBand = document.querySelector<HTMLElement>(".ic-day-header-band");
+    const viewport = document.querySelector<HTMLElement>(".quno-calendar-viewport")?.getBoundingClientRect();
+    const dateLabel = document.querySelector<HTMLElement>(".quno-calendar-date-label")?.getBoundingClientRect();
+    const timeHeader = document.querySelector<HTMLElement>(".quno-calendar-time-header");
+    const dayHeaderBand = document.querySelector<HTMLElement>(".quno-calendar-day-header-band");
     if (!viewport || !dateLabel || !timeHeader || !dayHeaderBand) {
       return null;
     }
-    const visibleTick = Array.from(document.querySelectorAll<HTMLElement>(".ic-time-tick")).find((tick) => {
+    const visibleTick = Array.from(document.querySelectorAll<HTMLElement>(".quno-calendar-time-tick")).find((tick) => {
       const box = tick.getBoundingClientRect();
       return box.width > 0 && box.height > 0 && box.left > dateLabel.right + 8 && box.left < viewport.right - 20;
     });
@@ -317,17 +317,17 @@ test("keeps the time scale fixed and day dates css-sticky", async ({ page }) => 
   const dayHeaderPaintsAfterRows = await page
     .locator(`[data-testid="calendar-day"][data-date="${topDate}"]`)
     .evaluate((element) => {
-      return element.lastElementChild?.classList.contains("ic-day-header") ?? false;
+      return element.lastElementChild?.classList.contains("quno-calendar-day-header") ?? false;
     });
   expect(dayHeaderPaintsAfterRows).toBe(true);
 
   await setDemoZoom(page, 4);
   await viewport.evaluate((element) => {
     const currentLine =
-      document.querySelector<HTMLElement>(".ic-now-line.is-current") ??
-      document.querySelector<HTMLElement>(".ic-now-line");
-    const rowLabel = document.querySelector<HTMLElement>(".ic-row-label");
-    const rowGrid = currentLine?.closest<HTMLElement>(".ic-row-grid");
+      document.querySelector<HTMLElement>(".quno-calendar-now-line.is-current") ??
+      document.querySelector<HTMLElement>(".quno-calendar-now-line");
+    const rowLabel = document.querySelector<HTMLElement>(".quno-calendar-row-label");
+    const rowGrid = currentLine?.closest<HTMLElement>(".quno-calendar-row-grid");
     if (!currentLine || !rowLabel || !rowGrid) {
       return;
     }
@@ -342,21 +342,21 @@ test("keeps the time scale fixed and day dates css-sticky", async ({ page }) => 
 
   const markerLayering = await page.evaluate(() => {
     const currentLine =
-      document.querySelector<HTMLElement>(".ic-now-line.is-current") ??
-      document.querySelector<HTMLElement>(".ic-now-line");
-    const rowLabel = document.querySelector<HTMLElement>(".ic-row-label");
-    const rowGrid = document.querySelector<HTMLElement>(".ic-row-grid");
-    const dayHeader = document.querySelector<HTMLElement>(".ic-day-header");
-    const dateLabel = document.querySelector<HTMLElement>(".ic-date-label");
-    const timeHeader = document.querySelector<HTMLElement>(".ic-time-header");
+      document.querySelector<HTMLElement>(".quno-calendar-now-line.is-current") ??
+      document.querySelector<HTMLElement>(".quno-calendar-now-line");
+    const rowLabel = document.querySelector<HTMLElement>(".quno-calendar-row-label");
+    const rowGrid = document.querySelector<HTMLElement>(".quno-calendar-row-grid");
+    const dayHeader = document.querySelector<HTMLElement>(".quno-calendar-day-header");
+    const dateLabel = document.querySelector<HTMLElement>(".quno-calendar-date-label");
+    const timeHeader = document.querySelector<HTMLElement>(".quno-calendar-time-header");
     const eventShell = document.querySelector<HTMLElement>(
       '[data-testid="calendar-event"], [data-testid="availability-event"]'
     );
-    const timeTick = document.querySelector<HTMLElement>(".ic-time-tick");
-    const timeScaleHeader = document.querySelector<HTMLElement>(".ic-time-scale-header");
-    const nowPin = document.querySelector<HTMLElement>(".ic-now-pin");
-    const nowHeaderLine = document.querySelector<HTMLElement>(".ic-now-header-line");
-    const nowDayHeaderLine = document.querySelector<HTMLElement>(".ic-now-day-header-line");
+    const timeTick = document.querySelector<HTMLElement>(".quno-calendar-time-tick");
+    const timeScaleHeader = document.querySelector<HTMLElement>(".quno-calendar-time-scale-header");
+    const nowPin = document.querySelector<HTMLElement>(".quno-calendar-now-pin");
+    const nowHeaderLine = document.querySelector<HTMLElement>(".quno-calendar-now-header-line");
+    const nowDayHeaderLine = document.querySelector<HTMLElement>(".quno-calendar-now-day-header-line");
     if (
       !currentLine ||
       !rowLabel ||
@@ -424,7 +424,7 @@ test("keeps sticky labels above the timeline after high-zoom horizontal scroll",
   await setDemoZoom(page, 8);
   await goToWorkday(page, "2026-07-06");
 
-  const viewport = page.locator(".ic-viewport");
+  const viewport = page.locator(".quno-calendar-viewport");
   await viewport.evaluate((element) => {
     element.scrollLeft = 900;
     element.scrollTop += 90;
@@ -432,18 +432,18 @@ test("keeps sticky labels above the timeline after high-zoom horizontal scroll",
   });
 
   const layering = await page.evaluate(() => {
-    const viewport = document.querySelector<HTMLElement>(".ic-viewport")?.getBoundingClientRect();
-    const timeHeader = document.querySelector<HTMLElement>(".ic-time-header");
-    const dayHeaderBand = document.querySelector<HTMLElement>(".ic-day-header-band");
-    const rowGrid = document.querySelector<HTMLElement>(".ic-row-grid");
+    const viewport = document.querySelector<HTMLElement>(".quno-calendar-viewport")?.getBoundingClientRect();
+    const timeHeader = document.querySelector<HTMLElement>(".quno-calendar-time-header");
+    const dayHeaderBand = document.querySelector<HTMLElement>(".quno-calendar-day-header-band");
+    const rowGrid = document.querySelector<HTMLElement>(".quno-calendar-row-grid");
     if (!viewport || !timeHeader || !dayHeaderBand || !rowGrid) {
       return null;
     }
-    const dateLabel = Array.from(document.querySelectorAll<HTMLElement>(".ic-date-label")).find((label) => {
+    const dateLabel = Array.from(document.querySelectorAll<HTMLElement>(".quno-calendar-date-label")).find((label) => {
       const box = label.getBoundingClientRect();
       return box.bottom > viewport.top && box.top < viewport.top + 60;
     });
-    const rowLabel = Array.from(document.querySelectorAll<HTMLElement>(".ic-row-label")).find((label) => {
+    const rowLabel = Array.from(document.querySelectorAll<HTMLElement>(".quno-calendar-row-label")).find((label) => {
       const box = label.getBoundingClientRect();
       return box.top > viewport.top + 45 && box.bottom < viewport.bottom;
     });
@@ -461,7 +461,7 @@ test("keeps sticky labels above the timeline after high-zoom horizontal scroll",
       rowBox.left + Math.min(rowBox.width / 2, 90),
       rowBox.top + rowBox.height / 2
     );
-    const visibleTick = Array.from(document.querySelectorAll<HTMLElement>(".ic-time-tick")).find((tick) => {
+    const visibleTick = Array.from(document.querySelectorAll<HTMLElement>(".quno-calendar-time-tick")).find((tick) => {
       const tickBox = tick.getBoundingClientRect();
       const styles = window.getComputedStyle(tick);
       return (
@@ -483,8 +483,8 @@ test("keeps sticky labels above the timeline after high-zoom horizontal scroll",
     return {
       dateIsStickyLeft: Math.abs(dateBox.left - viewport.left) <= 2,
       rowLabelIsStickyLeft: Math.abs(rowBox.left - viewport.left) <= 2,
-      dateLayerIsTop: Boolean(topAtDate?.closest(".ic-date-label")),
-      rowLabelLayerIsTop: Boolean(topAtRowLabel?.closest(".ic-row-label")),
+      dateLayerIsTop: Boolean(topAtDate?.closest(".quno-calendar-date-label")),
+      rowLabelLayerIsTop: Boolean(topAtRowLabel?.closest(".quno-calendar-row-label")),
       dateLabelZ: zIndex(dateLabel),
       rowLabelZ: zIndex(rowLabel),
       timeHeaderZ: zIndex(timeHeader),
@@ -521,15 +521,15 @@ test("keeps sticky labels above the timeline after high-zoom horizontal scroll",
   expect(layering?.visibleTickLeft ?? 0).toBeGreaterThan((layering?.labelRight ?? 0) + 16);
 
   const dateRowOverlaps = await page.evaluate(() => {
-    const viewport = document.querySelector<HTMLElement>(".ic-viewport")?.getBoundingClientRect();
+    const viewport = document.querySelector<HTMLElement>(".quno-calendar-viewport")?.getBoundingClientRect();
     if (!viewport) {
       return ["missing viewport"];
     }
 
     return Array.from(document.querySelectorAll<HTMLElement>('[data-testid="calendar-day"]')).flatMap((day) => {
       const date = day.dataset.date ?? "";
-      const dateLabel = day.querySelector<HTMLElement>(".ic-date-label");
-      const firstRowLabel = day.querySelector<HTMLElement>(".ic-row-label");
+      const dateLabel = day.querySelector<HTMLElement>(".quno-calendar-date-label");
+      const firstRowLabel = day.querySelector<HTMLElement>(".quno-calendar-row-label");
       if (!dateLabel || !firstRowLabel) {
         return [];
       }

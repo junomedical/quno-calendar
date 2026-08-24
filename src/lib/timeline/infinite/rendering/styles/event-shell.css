@@ -1,0 +1,75 @@
+.quno-calendar-event-shell {
+  position: absolute;
+  min-width: 12px;
+  container-name: calendar-event;
+  container-type: size;
+  touch-action: none;
+  cursor: default;
+}
+
+.quno-calendar-event-shell.is-focused {
+  outline: 3px solid
+    color-mix(in srgb, var(--event-accent) 72%, var(--quno-calendar-surface, var(--_ic-default-surface)));
+  outline-offset: 2px;
+  box-shadow: 0 0 0 5px color-mix(in srgb, var(--event-accent) 20%, transparent);
+}
+
+.quno-calendar-event-shell.is-interactive {
+  cursor: grab;
+}
+
+.quno-calendar-event-shell.is-interactive:active {
+  cursor: grabbing;
+}
+
+.quno-calendar-event-shell.is-hovered {
+  width: max-content !important;
+  min-width: var(--event-width);
+  max-width: var(--event-hover-width);
+}
+
+.quno-calendar-drag-preview {
+  pointer-events: none;
+}
+
+.quno-calendar-draft-shell {
+  pointer-events: none;
+}
+
+.quno-calendar-draft-shell.is-draggable {
+  pointer-events: auto;
+}
+
+.quno-calendar-draft-shell.is-exiting {
+  pointer-events: none;
+  animation: quno-calendar-draft-fade-out var(--draft-release-duration, 180ms) ease-out forwards;
+}
+
+.quno-calendar-availability-shell {
+  pointer-events: none;
+}
+
+.quno-calendar-availability-shell.is-active-layer {
+  pointer-events: auto;
+}
+
+.quno-calendar-background-event-shell {
+  pointer-events: none;
+  opacity: 0.42;
+}
+
+@keyframes quno-calendar-draft-fade-out {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quno-calendar-draft-shell.is-exiting {
+    animation-duration: 1ms;
+  }
+}

@@ -10,11 +10,11 @@ import {
   type ReactNode
 } from "react";
 import {
-  CalendarRoot,
-  type CalendarNavigationHandle,
-  type CalendarRootProps,
-  type TimelineSettings
-} from "quno-calendar";
+  QunoCalendar,
+  type QunoCalendarHandle,
+  type QunoCalendarProps,
+  type QunoCalendarSettings
+} from "@quno/calendar/timeline";
 import { ZoomControl } from "../controls/TimelineControls";
 
 type DemoCalendarZoomValue = {
@@ -31,7 +31,7 @@ const DemoCalendarZoomContext = createContext<DemoCalendarZoomValue | null>(null
 const DemoZoomControlContext = createContext<DemoZoomControlValue | null>(null);
 const GESTURE_READOUT_SETTLE_MS = 300;
 
-export type DemoTimelineSettings = Omit<TimelineSettings, "zoom">;
+export type DemoQunoCalendarSettings = Omit<QunoCalendarSettings, "zoom">;
 
 export function DemoZoomProvider({ initialZoom, children }: { initialZoom: number; children: ReactNode }) {
   const [zoom, setZoom] = useState(initialZoom);
@@ -112,16 +112,16 @@ export function DemoZoomControl({ className }: { className: string }) {
   );
 }
 
-type DemoCalendarRootProps = Omit<CalendarRootProps, "settings" | "onZoomChange"> & {
-  settings: DemoTimelineSettings;
+type DemoQunoCalendarProps = Omit<QunoCalendarProps, "settings" | "onZoomChange"> & {
+  settings: DemoQunoCalendarSettings;
 };
 
-export const DemoCalendarRoot = forwardRef<CalendarNavigationHandle, DemoCalendarRootProps>(function DemoCalendarRoot(
+export const DemoQunoCalendar = forwardRef<QunoCalendarHandle, DemoQunoCalendarProps>(function DemoQunoCalendar(
   { settings: settingsWithoutZoom, ...props },
   ref
 ) {
   const { zoom, requestZoom } = useDemoCalendarZoom();
   const settings = useMemo(() => ({ ...settingsWithoutZoom, zoom }), [settingsWithoutZoom, zoom]);
 
-  return <CalendarRoot {...props} ref={ref} settings={settings} onZoomChange={requestZoom} />;
+  return <QunoCalendar {...props} ref={ref} settings={settings} onZoomChange={requestZoom} />;
 });

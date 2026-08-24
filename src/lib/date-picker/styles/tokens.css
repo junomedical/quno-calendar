@@ -1,0 +1,26 @@
+.quno-date-picker {
+  --quno-date-picker-text-default: #15212a;
+  --quno-date-picker-primary-default: #0167ff;
+  --quno-date-picker-primary-soft-default: #e8f1ff;
+  --quno-date-picker-surface-default: #fff;
+  --quno-date-picker-border-default: #dfe3eb;
+  --quno-date-picker-muted-default: #697386;
+  --quno-date-picker-disabled-default: #a8afb9;
+  --quno-date-picker-outside-default: #a5acb7;
+  --quno-date-picker-on-primary-default: #fff;
+  --quno-date-picker-cycle-preview-default: #0167ff;
+  --quno-date-picker-pill-border-default: #b9d0f6;
+  --quno-date-picker-pill-surface-default: #f5f9ff;
+  --quno-date-picker-pill-text-default: #194c95;
+  --quno-date-picker-header-shadow-default: 0 8px 30px rgb(20 32 43 / 7%);
+  --quno-date-picker-calendar-shadow-default: 0 18px 50px rgb(20 32 43 / 10%);
+}
+
+.quno-date-picker-input-root {
+  --quno-date-picker-text-default: #271d30;
+  --quno-date-picker-border-default: #ddd6e8;
+  --quno-date-picker-surface-default: #fff;
+  --quno-date-picker-primary-default: #6d28d9;
+  --quno-date-picker-recognized-default: #087f5b;
+  --quno-date-picker-invalid-default: #b42318;
+}

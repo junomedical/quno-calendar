@@ -1,7 +1,7 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { CalendarEvent, LoadEvents, LoadEventsArgs } from "../../../../src/lib/core/types";
-import { useEventRangeLoader } from "../../../../src/lib/infinite/events/loading/useEventRangeLoader";
+import type { CalendarEvent, LoadEvents, LoadEventsArgs } from "../../../../src/lib/timeline/core/types";
+import { useEventRangeLoader } from "../../../../src/lib/timeline/infinite/events/loading/useEventRangeLoader";
 
 type Deferred<T> = {
   promise: Promise<T>;

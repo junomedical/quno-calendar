@@ -1,9 +1,10 @@
 import { CalendarDays, LocateFixed } from "lucide-react";
+import type { IsoDate } from "@quno/calendar";
 
 type DefaultDateJumpControlProps = {
-  date: string;
+  date: IsoDate;
   time: string;
-  onDateChange: (date: string) => void;
+  onDateChange: (date: IsoDate) => void;
   onTimeChange: (time: string) => void;
   onToday: () => void;
   onGo: () => void;
@@ -24,7 +25,7 @@ export function DefaultDateJumpControl({
         <input
           type="date"
           value={date}
-          onChange={(event) => onDateChange(event.target.value)}
+          onChange={(event) => onDateChange(event.target.value as IsoDate)}
           data-testid="jump-date-input"
         />
       </label>
