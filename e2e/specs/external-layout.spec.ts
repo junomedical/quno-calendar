@@ -146,6 +146,28 @@ test("keeps a drawn external draft focused with the 5,000 event dataset", async 
     .toBeLessThanOrEqual(4);
 });
 
+test("keeps the first drawn draft at its pointer position while the initial calendar settles", async ({ page }) => {
+  await page.goto("/");
+
+  const drawTarget = await horizontalDrawTarget(page, { distance: 240 });
+  await page.mouse.move(drawTarget.startX, drawTarget.y);
+  await page.mouse.down();
+  await page.mouse.move(drawTarget.endX, drawTarget.y, { steps: 5 });
+  await expect(page.getByTestId("draft-event")).toBeVisible();
+  const pointerDraftBox = await viewportRelativeEventBox(page, '[data-testid="draft-event"]');
+  expect(pointerDraftBox).not.toBeNull();
+
+  await page.mouse.up();
+  await expect(page.getByTestId("external-event-popup")).toBeVisible();
+  if (!pointerDraftBox) return;
+  await expect
+    .poll(async () => {
+      const box = await viewportRelativeEventBox(page, '[data-testid="draft-event"]');
+      return box ? Math.abs(box.y - pointerDraftBox.y) : Number.POSITIVE_INFINITY;
+    })
+    .toBeLessThanOrEqual(4);
+});
+
 test("renders the external popup above the current-time marker", async ({ page }) => {
   await page.goto("/");
   await page.getByTestId("today-button").click();

@@ -404,3 +404,11 @@ already active. The calendar therefore schedules the controlled request in a mic
 restoration on the following animation frame. Virtual scrolling likewise uses TanStack Virtual's queued rerender path
 instead of its synchronous notification option. This preserves anchor ordering without coupling calendar consumers to a
 specific React scheduling implementation.
+
+## 067 - Geometry Registration Survives Strict Mode Effect Replay
+
+The instance geometry registry is populated by mounted callback refs and naturally becomes unreachable when its
+calendar instance unmounts. Effect cleanup cancels active restore work but does not empty the registry, because React
+Strict Mode replays effects while retaining those mounted refs. Clearing it during replay leaves a freshly opened
+calendar unable to capture the first drawn slot, so participant filtering can align that draft date to the viewport
+instead of preserving the pointer-relative position.

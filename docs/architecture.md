@@ -361,6 +361,8 @@ Layers share prepared geometry but have separate interaction rules. `EventShell`
 ## Viewport Anchoring
 
 Every mounted day, resource, and event instance registers with an instance-scoped geometry registry. Anchoring never searches the document with global selectors. Event unregisters carry the element they previously owned, so an old date instance unmounting cannot delete a replacement event that already registered under the same event/calendar key.
+The registry is owned by the component instance and is reclaimed with that instance; effect cleanup does not clear it,
+because React Strict Mode replays effects without replaying mounted callback refs.
 
 ```mermaid
 sequenceDiagram

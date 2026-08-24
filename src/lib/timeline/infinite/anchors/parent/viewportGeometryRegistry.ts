@@ -60,13 +60,6 @@ export class ViewportGeometryRegistry {
     for (const listener of this.listeners) listener();
   }
 
-  clear() {
-    this.days.clear();
-    this.resources.clear();
-    this.events.clear();
-    this.invalidate();
-  }
-
   private setElement<K>(map: Map<K, HTMLElement>, key: K, element: HTMLElement | null) {
     if (element) {
       if (map.get(key) === element) return;

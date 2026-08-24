@@ -59,9 +59,8 @@ export function useViewportAnchoring(args: AnchoringArgs) {
   useEffect(
     () => () => {
       cancelViewportAnchorRestore();
-      registry.clear();
     },
-    [cancelViewportAnchorRestore, registry]
+    [cancelViewportAnchorRestore]
   );
 
   const resolveSnapshot = useCallback(

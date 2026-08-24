@@ -4,6 +4,12 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+### Fixed
+
+- Kept the first event drawn immediately after opening a React Strict Mode calendar at its pointer position. Strict
+  Mode effect replay no longer clears the mounted viewport geometry registry before the parent can capture the draft
+  slot anchor.
+
 ### Changed
 
 - Prepared the combined package locally. Publishing and deprecating former package names remain separately authorized release actions.
