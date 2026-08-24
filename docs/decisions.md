@@ -412,3 +412,11 @@ calendar instance unmounts. Effect cleanup cancels active restore work but does 
 Strict Mode replays effects while retaining those mounted refs. Clearing it during replay leaves a freshly opened
 calendar unable to capture the first drawn slot, so participant filtering can align that draft date to the viewport
 instead of preserving the pointer-relative position.
+
+## 068 - Delayed Demo Loading Is Opt-In
+
+The default showcase uses its instant mock-API mode. A deliberate 250ms, 1s, or 3s delay remains available through the
+API delay control and in delayed-loading coverage, but the ordinary interaction path does not start with an artificial
+one-second request. This prevents a quick create/cancel action on a freshly opened demo from being followed by a bulk
+event-card paint that looks like cancellation redrew the calendar, while the reusable loader remains fully asynchronous
+and transport-agnostic.

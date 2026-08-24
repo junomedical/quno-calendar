@@ -163,6 +163,9 @@ orientation, availability, loading, visual-focus, and motion assertions formerly
   cancellation entry and adds the corresponding scroll-reset requested/skipped entry without overflowing its bounded
   sidebar pane. Settled manual viewport movement produces one coalesced `Viewport scrolled` entry, while imperative
   date/time navigation and automatic corrections produce `Viewport repositioned` with the final scroll coordinates.
+- The default demo uses the instant API mode; explicit loading coverage opts into one second. After a fresh drawn create
+  is cancelled, the settled visible day, row, and event nodes retain identity and geometry through the former delayed
+  repaint window.
 - Vertical virtual scrolling changes visible dates.
 - Rendered day DOM nodes are pruned to the visible viewport plus five day sections of overscan.
 - Vertical scrollbar dragging is bounded to one month before/after the visible date. Interior positions keep the

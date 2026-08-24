@@ -376,3 +376,46 @@ test("keeps the same calendar row anchored when drawing again after cancelling e
     }
   }
 });
+
+test("keeps the settled calendar DOM stable after cancelling the first drawn event", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.getByTestId("api-latency-select")).toHaveValue("0");
+  await waitForDemoEvents(page);
+  const drawTarget = await horizontalDrawTarget(page, { distance: 240 });
+  await page.mouse.move(drawTarget.startX, drawTarget.y);
+  await page.mouse.down();
+  await page.mouse.move(drawTarget.endX, drawTarget.y, { steps: 5 });
+  await page.mouse.up();
+  await expect(page.getByTestId("external-event-popup")).toBeVisible();
+  await page.getByTestId("draft-cancel-button").click();
+  await expectDraftFadeoutThenGone(page);
+
+  const stability = await page.evaluate(async () => {
+    const viewport = document.querySelector<HTMLElement>(".quno-calendar-viewport")!;
+    const selector = '[data-testid="calendar-day"], [data-testid="calendar-row"], [data-testid="calendar-event"]';
+    const nodes = Array.from(viewport.querySelectorAll<HTMLElement>(selector));
+    const boxes = nodes.map((node) => node.getBoundingClientRect());
+    const scrollTop = viewport.scrollTop;
+    await new Promise((resolve) => window.setTimeout(resolve, 1_500));
+    const currentNodes = Array.from(viewport.querySelectorAll<HTMLElement>(selector));
+    const maxGeometryDelta = nodes.reduce((maximum, node, index) => {
+      const before = boxes[index];
+      const after = node.getBoundingClientRect();
+      return Math.max(
+        maximum,
+        Math.abs(after.top - before.top),
+        Math.abs(after.left - before.left),
+        Math.abs(after.width - before.width),
+        Math.abs(after.height - before.height)
+      );
+    }, 0);
+    return {
+      sameNodes: nodes.length === currentNodes.length && nodes.every((node, index) => node === currentNodes[index]),
+      scrollDelta: Math.abs(viewport.scrollTop - scrollTop),
+      maxGeometryDelta
+    };
+  });
+  expect(stability.sameNodes).toBe(true);
+  expect(stability.scrollDelta).toBeLessThanOrEqual(1);
+  expect(stability.maxGeometryDelta).toBeLessThanOrEqual(1);
+});

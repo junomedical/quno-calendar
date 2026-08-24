@@ -42,7 +42,7 @@ function defaultControls(): DemoControlDefaults {
     endHour: Math.min(24, Math.max(18, hour + 1)),
     excludeWeekends: false,
     editAvailabilities: false,
-    apiLatencyMs: 1_000,
+    apiLatencyMs: 0,
     jumpDate: "2026-07-04",
     jumpTime: "09:00"
   };
