@@ -41,8 +41,10 @@ sequenceDiagram
   alt Browser emits scrollend
     View->>Idle: Schedule the same settled path
   end
-  alt Draw or drag remains active
-    Idle->>Idle: Skip this deadline; a later scroll signal can reschedule
+  alt Draw or drag begins
+    Idle->>Idle: Cancel the pending deadline
+  else Draw or drag remains active at a racing deadline
+    Idle->>Idle: Read live ownership and skip; a later scroll signal can reschedule
   else Scroll settles
     Idle->>Nav: Recenter visible snapshot
     Nav->>Nav: Normalize date and store pending target
@@ -57,6 +59,9 @@ The one-pixel probe makes an exact item boundary belong to the following date ra
 The scheduler uses the ordinary 1.2-second deadline inside the bounded range. When `scrollTop` reaches the absolute top
 or bottom within one device-independent pixel, it uses a 240 ms deadline instead. More scroll always replaces the
 pending timer and recalculates which deadline applies.
+Starting a pointer interaction cancels any deadline that was armed before the gesture. The deadline callback also reads
+the current interaction owner rather than the render that scheduled it, so a racing timer cannot rebuild the visible
+date tree while a draw or drag is held.
 
 ## Recenter State Machine
 
@@ -67,6 +72,7 @@ stateDiagram-v2
   Moving --> Moving: more scroll events update snapshot
   Moving --> Waiting: idle timer armed
   Waiting --> Moving: another scroll event
+  Waiting --> Deferred: pointer interaction begins; cancel deadline
   Waiting --> SnapshotReady: idle deadline or scrollend path
   SnapshotReady --> Deferred: pointer interaction active
   Deferred --> Moving: later scroll signal after interaction
@@ -197,7 +203,8 @@ flowchart TD
 | Viewport reaches the absolute top or bottom       | Reduce the recenter deadline from 1.2 seconds to 240 ms.                                   |
 | More scroll arrives before idle deadline          | Clear the old timer, update the snapshot, and schedule once.                               |
 | Component unmounts                                | Clear the fallback timer; no deferred scroll survives.                                     |
-| Interaction remains active at deadline            | Do not rebuild the window; the next settled path uses the newest snapshot.                 |
+| Interaction begins with a deadline pending        | Cancel it; do not rebuild while the pointer owns gesture geometry.                         |
+| Interaction remains active at a racing deadline   | Read live ownership and skip; the next settled path uses the newest snapshot.              |
 | Date already equals the window anchor             | Still restore the saved offset so the scrollbar returns to its centered bounded position.  |
 
 ## Source Map

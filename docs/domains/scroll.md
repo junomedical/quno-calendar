@@ -20,7 +20,7 @@ See [Virtual Scroll And Recenter](../flows/virtual-scroll-and-recenter.md) for e
 
 - Preserve `{dateKey, offsetWithinDate}` across bounded-window rebuilds.
 - Exact item boundaries belong to the following date via the one-pixel probe.
-- Active pointer interactions defer idle recentering.
+- Active pointer interactions cancel pending idle recentering and suppress new deadlines until the gesture releases.
 - Resource windowing never compacts the full board; unmounted resources keep their original offsets.
 - Structural size restoration is separate from late-event data-layout anchoring.
 

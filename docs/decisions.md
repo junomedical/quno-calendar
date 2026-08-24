@@ -420,3 +420,14 @@ API delay control and in delayed-loading coverage, but the ordinary interaction 
 one-second request. This prevents a quick create/cancel action on a freshly opened demo from being followed by a bulk
 event-card paint that looks like cancellation redrew the calendar, while the reusable loader remains fully asynchronous
 and transport-agnostic.
+
+## 069 - Pointer Gestures Own The Recenter Deadline
+
+Date: 2026-08-24
+Status: Accepted
+
+A settled-scroll recenter can already be waiting when a user begins drawing or dragging. A timeout callback that
+captures the earlier inactive render may otherwise rebuild the bounded date tree 1.2 seconds into a held gesture,
+producing a full-calendar flicker. Interaction start cancels that pending deadline, active-gesture scroll signals do not
+arm another, and any callback already racing reads the current interaction owner before recentering. Idle maintenance
+resumes only after a later scroll signal once the gesture has released.

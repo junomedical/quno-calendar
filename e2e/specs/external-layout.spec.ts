@@ -168,6 +168,40 @@ test("keeps the first drawn draft at its pointer position while the initial cale
     .toBeLessThanOrEqual(4);
 });
 
+test("keeps the calendar mounted while a draw is held across a pending idle recenter", async ({ page }) => {
+  await page.goto("/");
+  await page.locator(".quno-calendar-viewport").evaluate((viewport) => {
+    viewport.scrollTop += 1_200;
+  });
+  await page.waitForTimeout(50);
+
+  const drawTarget = await horizontalDrawTarget(page, { distance: 240 });
+  await page.mouse.move(drawTarget.startX, drawTarget.y);
+  await page.mouse.down();
+  await page.mouse.move(drawTarget.endX, drawTarget.y, { steps: 5 });
+  const draft = page.getByTestId("draft-event");
+  await expect(draft).toBeVisible();
+
+  const draftNode = await draft.elementHandle();
+  const visibleDay = page.getByTestId("calendar-day").filter({ visible: true }).first();
+  const dayNode = await visibleDay.elementHandle();
+  const heldDraftBox = await viewportRelativeEventBox(page, '[data-testid="draft-event"]');
+  expect(draftNode).not.toBeNull();
+  expect(dayNode).not.toBeNull();
+  expect(heldDraftBox).not.toBeNull();
+
+  await page.waitForTimeout(1_500);
+  expect(await draftNode?.evaluate((element) => element.isConnected)).toBe(true);
+  expect(await dayNode?.evaluate((element) => element.isConnected)).toBe(true);
+  if (!heldDraftBox) return;
+  const settledDraftBox = await viewportRelativeEventBox(page, '[data-testid="draft-event"]');
+  expect(settledDraftBox).not.toBeNull();
+  expect(Math.abs((settledDraftBox?.x ?? 0) - heldDraftBox.x)).toBeLessThanOrEqual(1);
+  expect(Math.abs((settledDraftBox?.y ?? 0) - heldDraftBox.y)).toBeLessThanOrEqual(1);
+
+  await page.mouse.up();
+});
+
 test("renders the external popup above the current-time marker", async ({ page }) => {
   await page.goto("/");
   await page.getByTestId("today-button").click();

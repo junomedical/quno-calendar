@@ -391,7 +391,7 @@ excluded. A fully visible shell receives `status: "focused"` without scrolling; 
 restored or navigated into view. The focused key is `{ eventId, calendarId }`, so only one multi-calendar instance
 receives the status. Request ids are processed once; a newer request or manual input cancels older work.
 
-Anchor names describe different owners rather than interchangeable snapshots: parent viewport restore, active gesture, pending navigation, automatic data-layout correction, and idle virtual-window recenter. Higher-priority owners suppress lower-priority scroll writes. See the [anchor taxonomy and priority diagram](./flows/README.md#anchor-taxonomy).
+Anchor names describe different owners rather than interchangeable snapshots: parent viewport restore, active gesture, pending navigation, automatic data-layout correction, and idle virtual-window recenter. Higher-priority owners suppress lower-priority scroll writes. An active pointer gesture cancels an already pending idle deadline, whose callback also reads live ownership before changing the virtual window. See the [anchor taxonomy and priority diagram](./flows/README.md#anchor-taxonomy).
 
 ## Styling And Packaging
 

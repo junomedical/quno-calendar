@@ -11,6 +11,8 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
   slot anchor.
 - Made the normal showcase load events immediately so a quick fresh-open create/cancel flow is not followed by the
   former one-second bulk event paint. Delayed API modes remain available as explicit loading demonstrations.
+- Prevented a pending idle virtual-window recenter from rebuilding the visible calendar while an appointment draw or
+  drag remains held. Interaction start now cancels the old deadline, and the callback reads live gesture ownership.
 
 ### Changed
 

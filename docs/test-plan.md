@@ -165,7 +165,8 @@ orientation, availability, loading, visual-focus, and motion assertions formerly
   date/time navigation and automatic corrections produce `Viewport repositioned` with the final scroll coordinates.
 - The default demo uses the instant API mode; explicit loading coverage opts into one second. After a fresh drawn create
   is cancelled, the settled visible day, row, and event nodes retain identity and geometry through the former delayed
-  repaint window.
+  repaint window. Holding a draw across a pending 1.2-second idle-recenter deadline keeps the draft and visible date
+  tree mounted at the same viewport-relative geometry until pointer release.
 - Vertical virtual scrolling changes visible dates.
 - Rendered day DOM nodes are pruned to the visible viewport plus five day sections of overscan.
 - Vertical scrollbar dragging is bounded to one month before/after the visible date. Interior positions keep the
