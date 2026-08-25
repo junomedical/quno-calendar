@@ -11,11 +11,11 @@ export type EventInterval = {
 
 function compareIntervals(left: EventInterval, right: EventInterval): number {
   return (
-    left.startMinute - right.startMinute || left.endMinute - right.endMinute || left.sourceIndex - right.sourceIndex
+    left.startMinute - right.startMinute || left.sourceIndex - right.sourceIndex || left.endMinute - right.endMinute
   );
 }
 
-/** Clips events to the visible timeline and orders equal intervals by caller order. */
+/** Clips events and keeps caller order when appointments share a start time. */
 export function eventIntervals(
   events: readonly CalendarEvent[],
   settings: Pick<QunoCalendarSettings, "startHour" | "endHour">

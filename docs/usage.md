@@ -1,6 +1,13 @@
 # Unified Usage Guide
 
-The live, task-oriented field guide is available at `/guide`. This document owns copyable production recipes for all three independent feature entry points.
+The live project overview is available at `/`. It links to three task-oriented field guides:
+
+- `/guide/infinite-calendar`
+- `/guide/date-range-input`
+- `/guide/date-input-field`
+
+Each guide has a focused Demo destination. This document remains the single source for copyable production recipes
+across all three independent feature entry points.
 
 ## Entry points
 
@@ -296,15 +303,52 @@ Use `selectionMode="single"` when the product chooses one day while retaining th
 import { QunoDateInput, parseDateInput } from "@quno/calendar/date-input";
 import "@quno/calendar/date-input/styles.css";
 
-const parsed = parseDateInput("next 2 weeks", {
+const parsed = parseDateInput("previous week", {
+  expectedRange: { start: "2025-01-01", end: "2027-12-31" },
   referenceDate: "2026-08-24",
+  weekStartsOn: 0,
   locale: "en-GB"
 });
 
-<QunoDateInput value={value} onChange={setValue} referenceDate="2026-08-24" />;
+<QunoDateInput
+  value={value}
+  onChange={setValue}
+  expectedRange={{ start: "2025-01-01", end: "2027-12-31" }}
+  referenceDate="2026-08-24"
+  weekStartsOn={0}
+/>;
 ```
 
-The input and headless parser share the timezone-free range model. Parser language, preferred numeric date order, lexicon, formatting, labels, and controlled/uncontrolled state are configurable. Import `tokenizeDateInput` when an integration needs recognition tokens without rendering the input.
+The input and headless parser share the timezone-free range model. Use `selectionMode="single"` for one day or the
+default `selectionMode="range"` for an inclusive period; both return `DateRange`. Numeric, ISO-like, and month-name
+formats are accepted, while `locale` and `preferredDateOrder` resolve ambiguous numeric dates. The required
+`expectedRange` supplies the realistic period used to infer missing years and rank ambiguity. It is a ranking hint
+rather than a validity boundary: an explicit date outside it still resolves, so products apply their own disabled-date
+or business-period validation after parsing.
+
+Enter and blur commit. Arrow Up and Arrow Down edit the day, month, year, duration unit, or range endpoint under the
+caret. Parser language, lexicon, formatting, labels, and controlled/uncontrolled state are configurable. Import
+`tokenizeDateInput` when an integration needs recognition tokens without rendering the input.
+
+Set `preferredDateOrder` to `"dmy"`, `"mdy"`, `"ymd"`, or `"locale"`. A value such as `3/4/2026` therefore follows the
+product convention while ISO-like and month-name dates remain explicit. Use `parserLanguages={["en", "de"]}` when one
+field should recognize both languages at once. Recognition languages do not change presentation: `locale` and the
+optional formatter still own the committed display value.
+
+`previous day` resolves to yesterday. `this week`, `previous week`, `next week`, and named weekday phrases respect
+`weekStartsOn`, using the same `WeekStart` format as `QunoDatePicker`: `0` is Sunday, `1` is Monday, through `6` for
+Saturday. The default is Monday. Month and year phrases select complete calendar periods independently of that setting.
+For example, with `weekStartsOn={0}`, `this week` is Sunday–Saturday and `this Monday` is the Monday inside that same
+week. All seven English weekday names and their common abbreviations are recognized. Extend `previous` or
+`weekdayNames` through the public lexicon when a product needs additional wording.
+
+Compose `QunoDateInput` with `QunoDatePicker` by passing the same controlled `DateRange` and `onChange` to both public
+entry points. When an input update changes only one endpoint, move the picker’s visible month to that changed date;
+when both endpoints change, fall back to the nearest off-screen endpoint. The independently imported date-input payload
+is currently 6.72 KiB gzip for JavaScript and 0.56 KiB gzip for its optional stylesheet. It uses the React 18+ peer,
+supports Preact 10.18+ through `preact/compat`, imports safely in SSR, and has no date-library runtime dependency. The
+combined package’s TanStack virtualizer dependency belongs to the timeline implementation and is not imported by the
+date-input entry.
 
 ## Compose picker and timeline
 
@@ -477,19 +521,31 @@ Use the imperative handle for parent-owned navigation. Keep zoom controlled thro
 
 ```tsx
 const calendarRef = useRef<QunoCalendarHandle>(null);
+const [date, setDate] = useState<DateRange>({ start: "2026-07-04", end: "2026-07-04" });
+
+<QunoDateInput
+  expectedRange={{ start: "1900-01-01", end: "2100-12-31" }}
+  selectionMode="single"
+  value={date}
+  onChange={(next) => {
+    if (!next) return;
+    setDate(next);
+    calendarRef.current?.scrollToDate(next.start);
+  }}
+/>;
 
 <QunoCalendar ref={calendarRef} {...calendarProps} settings={{ ...settings, zoom }} onZoomChange={setZoom} />;
-
-calendarRef.current?.scrollToDateTime("2026-07-04", "09:30");
 ```
 
 Date pickers, search results, command palettes, and “Today” controls can call the same handle without knowing the
 calendar’s virtual-window geometry. Use `settings` for density and dimensions, then scope product CSS through
 `className`; changing either preserves the same calendar integration and renderer contract.
 
-Product controls do not need a separate submit step. A date or time field can call `scrollToDateTime` from its change
-handler, while previous and next buttons can shift the selected date and call the same method. Keep the five-minute time
-scale structure stable and let controlled zoom progressively reveal finer labels instead of replacing tick nodes.
+Product controls do not need a separate submit step. The infinite-calendar demo uses `QunoDateInput` in single-date mode
+and navigates to the committed day at its product-owned default focus time. It has no separate time field or Add event
+action; creation begins by drawing on the timeline. Previous and next buttons can shift the controlled date and call the
+same handle. Keep the five-minute time scale structure stable and let controlled zoom progressively reveal finer labels
+instead of replacing tick nodes.
 
 ## Reveal And Focus An Event
 

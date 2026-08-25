@@ -27,13 +27,16 @@ The root `@quno/calendar` entry contains shared headless, timezone-free day cont
 
 - `timeline`: virtualized horizontal and vertical schedules with async event loading, custom event rendering, creation, movement, zoom, navigation, and focus.
 - `date-picker`: a controlled or uncontrolled single-month picker for single days and inclusive date ranges.
-- `date-input`: a dependency-free natural date tokenizer/parser and accessible controlled or uncontrolled input.
+- `date-input`: a dependency-free natural date tokenizer/parser with calendar periods and relative weekdays, plus an
+  accessible controlled or uncontrolled input.
 
 Calendar day keys use timezone-free `YYYY-MM-DD` values. Timeline event `start` and `end` remain timestamp strings and retain their local/offset semantics.
 
 ## Guide and records
 
-Run `npm run dev` and open `/guide` for the canonical field guide and live examples. The former `/story` and `/examples/integration-walkthrough` routes redirect there.
+Run `npm run dev` and open `/` for the project overview. Its three cards lead to the dedicated infinite-calendar,
+date-range-input, and date-input field guides; every guide links to a focused demo. The former `/guide`, `/story`, and
+`/examples/integration-walkthrough` routes redirect to the infinite-calendar guide.
 
 - [Usage recipes](./docs/usage.md)
 - [Migration guide](./docs/migration.md)

@@ -1,13 +1,24 @@
 import { expect, test } from "@playwright/test";
-import { goToWorkday, horizontalDrawTarget, viewportRelativeEventBox } from "../helpers";
+import { goToWorkday, horizontalDrawTarget, openDrawnExternalDraft, viewportRelativeEventBox } from "../helpers";
 
 async function createOverlappingEvent(page: import("@playwright/test").Page, title: string, time = "22:00") {
-  await page.getByTestId("jump-date-input").fill("2026-07-06");
-  await page.getByTestId("jump-time-input").fill(time);
   await page.getByRole("spinbutton", { name: "Start" }).fill("8");
   await page.getByRole("spinbutton", { name: "End" }).fill("24");
-  await page.getByRole("button", { name: "Add event" }).click();
-  await expect(page.getByTestId("external-event-popup")).toBeVisible();
+  await goToWorkday(page, "2026-07-06");
+  await openDrawnExternalDraft(page, { dateKey: "2026-07-06" });
+  await page.getByTestId("draft-participant-dr-kirillov").check();
+  for (const calendarId of [
+    "dr-thakker",
+    "marco-eggens",
+    "room-201",
+    "room-202",
+    "room-203",
+    "surgery-a",
+    "surgery-b"
+  ]) {
+    await page.getByTestId(`draft-participant-${calendarId}`).uncheck();
+  }
+  await page.getByTestId("draft-start-input").fill(time);
   await page.getByTestId("draft-title-input").fill(title);
   await page.getByTestId("draft-duration-input").fill("45");
   await page.getByTestId("draft-save-button").click();
@@ -15,8 +26,43 @@ async function createOverlappingEvent(page: import("@playwright/test").Page, tit
   await expect(page.locator(`[data-testid="calendar-event"]:has-text("${title}")`)).toBeVisible();
 }
 
+async function visualOverlapOrder(page: import("@playwright/test").Page, titles: string[]) {
+  const positions = await Promise.all(
+    titles.map(async (title) => ({
+      title,
+      top: await page
+        .locator(`[data-testid="calendar-event"]:has-text("${title}")`)
+        .first()
+        .evaluate((element) => element.getBoundingClientRect().top)
+    }))
+  );
+  return positions.sort((left, right) => left.top - right.top).map(({ title }) => title);
+}
+
+test("keeps equal-start overlap order when the last appointment is modified", async ({ page }) => {
+  await page.goto("/demo/infinite-calendar");
+  await goToWorkday(page, "2026-07-06");
+  const titles = ["Stable overlap A", "Stable overlap B", "Stable overlap C"];
+  for (const title of titles) {
+    await createOverlappingEvent(page, title);
+  }
+
+  await expect.poll(() => visualOverlapOrder(page, titles)).toEqual(titles);
+  const lastEvent = page.locator('[data-testid="calendar-event"]:has-text("Stable overlap C")').first();
+  const lastEventBox = await lastEvent.boundingBox();
+  expect(lastEventBox).not.toBeNull();
+  if (!lastEventBox) return;
+  await page.mouse.click(lastEventBox.x + 12, lastEventBox.y + lastEventBox.height / 2);
+  await expect(page.getByTestId("external-event-popup")).toBeVisible();
+  await page.getByTestId("draft-duration-input").fill("30");
+  await page.getByTestId("draft-save-button").click();
+  await expect(page.getByTestId("external-event-popup")).toHaveCount(0);
+
+  await expect.poll(() => visualOverlapOrder(page, titles)).toEqual(titles);
+});
+
 test("does not let an edit draft source increase overlap row height", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/demo/infinite-calendar");
   await goToWorkday(page);
 
   await createOverlappingEvent(page, "Overlap draft fixture A");
@@ -24,10 +70,13 @@ test("does not let an edit draft source increase overlap row height", async ({ p
   await createOverlappingEvent(page, "Overlap draft fixture C");
 
   const source = page.locator('[data-testid="calendar-event"]:has-text("Overlap draft fixture C")').first();
-  const rowHeightBeforeEdit = await source.evaluate((element) => {
-    return element.closest<HTMLElement>('[data-testid="calendar-row"]')?.getBoundingClientRect().height ?? 0;
-  });
-  expect(rowHeightBeforeEdit).toBe(75);
+  await expect
+    .poll(() =>
+      source.evaluate((element) => {
+        return element.closest<HTMLElement>('[data-testid="calendar-row"]')?.getBoundingClientRect().height ?? 0;
+      })
+    )
+    .toBe(75);
 
   const sourceBox = await source.boundingBox();
   expect(sourceBox).not.toBeNull();
@@ -57,7 +106,7 @@ test("does not let an edit draft source increase overlap row height", async ({ p
 });
 
 test("does not duplicate committed events or grow a two-overlap row when drawing a create draft", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/demo/infinite-calendar");
   await goToWorkday(page, "2026-07-06");
 
   await createOverlappingEvent(page, "Draw overlap fixture A", "22:00");
@@ -123,7 +172,7 @@ test("does not duplicate committed events or grow a two-overlap row when drawing
 });
 
 test("keeps a drawn external draft focused with the 5,000 event dataset", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/demo/infinite-calendar");
   await page.getByTestId("scale-select").selectOption("5000");
   await goToWorkday(page, "2026-07-06");
 
@@ -147,7 +196,7 @@ test("keeps a drawn external draft focused with the 5,000 event dataset", async 
 });
 
 test("keeps the first drawn draft at its pointer position while the initial calendar settles", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/demo/infinite-calendar");
 
   const drawTarget = await horizontalDrawTarget(page, { distance: 240 });
   await page.mouse.move(drawTarget.startX, drawTarget.y);
@@ -169,7 +218,7 @@ test("keeps the first drawn draft at its pointer position while the initial cale
 });
 
 test("keeps the calendar mounted while a draw is held across a pending idle recenter", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/demo/infinite-calendar");
   await page.locator(".quno-calendar-viewport").evaluate((viewport) => {
     viewport.scrollTop += 1_200;
   });
@@ -203,10 +252,9 @@ test("keeps the calendar mounted while a draw is held across a pending idle rece
 });
 
 test("renders the external popup above the current-time marker", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/demo/infinite-calendar");
   await page.getByTestId("today-button").click();
-  await page.getByRole("button", { name: "Add event" }).click();
-  await expect(page.getByTestId("external-event-popup")).toBeVisible();
+  await openDrawnExternalDraft(page);
 
   const layering = await page.evaluate(() => {
     const popup = document.querySelector<HTMLElement>('[data-testid="external-event-popup"]');

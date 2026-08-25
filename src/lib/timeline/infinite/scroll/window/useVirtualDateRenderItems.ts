@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import type { VirtualDateWindow } from "#quno-internal/timeline/date/dateVirtualization";
-import { buildVirtualDateRenderItems, type VirtualDateRenderItem } from "./renderItems";
+import { buildVirtualDateRenderItems, semanticDateKeyForRenderItem, type VirtualDateRenderItem } from "./renderItems";
 
 /**
  * Data flow: virtualizer output -> renderable date items -> loader-visible date keys.
@@ -53,7 +53,7 @@ export function useVirtualDateRenderItems({
     ]
   );
   const visibleDateKeys = useMemo(
-    () => renderItems.map((item) => dateKeyForIndex(item.index)),
+    () => renderItems.map((item) => semanticDateKeyForRenderItem(item, dateKeyForIndex)),
     [dateKeyForIndex, renderItems]
   );
   return { renderItems, visibleDateKeys };

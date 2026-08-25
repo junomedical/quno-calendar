@@ -1,7 +1,8 @@
 # Inside Quno Calendar
 
-This article is embedded in the canonical `/guide` route alongside date selection and composition examples. Every
-chapter uses a plain, benefit-led title, explains the problem the feature solves, and demonstrates the behavior live.
+This article owns the dedicated `/guide/infinite-calendar` route. Every chapter uses a plain, benefit-led title,
+explains the problem the feature solves, and demonstrates the behavior live. Its Demo button opens the unrestricted
+calendar at `/demo/infinite-calendar`.
 
 The article teaches the calendar through focused live exhibits:
 
@@ -15,7 +16,7 @@ The article teaches the calendar through focused live exhibits:
 7. Availability and event layers.
 8. Deferred and optimistic event changes.
 9. Time of the day.
-10. Traditional date navigation.
+10. Natural date navigation with the shared Quno date input.
 11. Zoom into the calendar.
 12. Progressive time reveal.
 13. Visual theming.

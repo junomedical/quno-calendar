@@ -4,8 +4,41 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+### Added
+
+- Added a concise three-card project home for the infinite calendar, date range input, and natural date input. Each
+  feature now has a dedicated field-guide route and a focused demo route linked by a visible Demo button.
+- Added an All components link to every field-guide header so readers can return directly to the three-component
+  project directory.
+- Added natural-input support for `previous day/week/month/year` and relative weekday phrases such as `last Monday`,
+  `this Monday`, and `next Monday`. Weeks and named weekdays respect the same configurable `weekStartsOn` contract as
+  the datepicker.
+- Added `this week` as the complete configured calendar week containing the reference date. Date input and headless
+  parsing accept the datepicker's `weekStartsOn` values from `0` (Sunday) through `6` (Saturday), defaulting to Monday.
+
+### Changed
+
+- Split the former combined `/guide` experience into feature-owned guides. `/guide`, `/story`, and the former
+  integration-walkthrough route now preserve old bookmarks by forwarding to the infinite-calendar guide.
+- Rebuilt the date-input field guide around single/range mode, flexible formats, relative dates, keyboard controls,
+  range entry, expected periods, localization, date-picker composition, library size, and dependency contracts. Each
+  topic now has a focused live example, Try it guidance, and a copyable recipe. Dedicated preferred-date-order and
+  simultaneous multilingual-recognition chapters make ambiguous numeric and mixed-language input explicit.
+- Replaced the infinite-calendar demo and field-guide date/time jump controls with the shared `QunoDateInput` in
+  single-date mode. A committed date now navigates immediately without a separate time or Go control.
+- Kept theme selection in the dedicated field-guide styling chapter instead of repeating it in the final demo.
+
+### Removed
+
+- Removed the infinite-calendar demo sidebar's time input and Add event button. New appointments in the demo now begin
+  by drawing directly on the calendar.
+- Removed the Default, Compact, Planner, and Availability variant strip from the primary infinite-calendar demo. The
+  dedicated styling chapter remains the place to try calendar themes.
+
 ### Fixed
 
+- Focused the date range picker on the changed date when a composed date-input update modifies only one range endpoint.
+  Multi-endpoint updates retain the nearest-off-screen fallback.
 - Kept the first event drawn immediately after opening a React Strict Mode calendar at its pointer position. Strict
   Mode effect replay no longer clears the mounted viewport geometry registry before the parent can capture the draft
   slot anchor.
@@ -13,6 +46,21 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
   former one-second bulk event paint. Delayed API modes remain available as explicit loading demonstrations.
 - Prevented a pending idle virtual-window recenter from rebuilding the visible calendar while an appointment draw or
   drag remains held. Interaction start now cancels the old deadline, and the callback reads live gesture ownership.
+- Reused loaded date buckets when a calendar selection narrows to an already covered participant subset and then
+  returns. Active-draft row filtering also retains the settled warm window while keeping the draft and navigation-anchor
+  dates prefetched, so drawing and cancelling no longer triggers redundant event API requests or a delayed cache
+  repaint while preserving intentional participant-only draft projection and real navigation loading.
+- Isolated the single controlled-draft shell as its own paint and opacity-compositor boundary before cancellation. The
+  draft can still fade out, but its delayed removal no longer repaints the restored calendar surface.
+- Kept overlapping appointments in stable caller order when they share a start time and one is dragged or edited.
+  Same-date cache patches now retain the event's existing slot, and changing its duration no longer changes its lane.
+- Kept visible workday and event nodes mounted when weekend exclusion replaces the virtual date sequence. Calendar-count
+  changes now retain the visible resource-local position instead of snapping to the date header and sweeping unrelated
+  event rows through the viewport.
+- Kept the visible date, resource rows, and event nodes mounted when idle maintenance resets the bounded scrollbar
+  around its center. The equivalent scroll position and replacement month-window anchor now commit without a painted
+  intermediate date tree.
+- Kept an in-progress controlled single-date input draft intact across unrelated parent rerenders.
 
 ### Changed
 

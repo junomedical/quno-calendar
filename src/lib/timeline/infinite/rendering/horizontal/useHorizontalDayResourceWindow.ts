@@ -21,6 +21,7 @@ type HorizontalDayResourceWindowArgs = {
   dragPreviewEvent: CalendarEvent | null;
   activeRestoreTarget: CalendarViewportAnchorTarget | null;
   viewportMetricsStore: ViewportMetricsStore;
+  forceAllResources: boolean;
   getRowHeight: (dateKey: string, calendarId: CalendarId) => number;
 };
 
@@ -33,6 +34,7 @@ export function useHorizontalDayResourceWindow({
   dragPreviewEvent,
   activeRestoreTarget,
   viewportMetricsStore,
+  forceAllResources,
   getRowHeight
 }: HorizontalDayResourceWindowArgs) {
   const viewport = useViewportMetrics(viewportMetricsStore);
@@ -50,7 +52,7 @@ export function useHorizontalDayResourceWindow({
   );
   const renderedRowIndexes = useMemo(
     () =>
-      viewport.height === 0
+      forceAllResources || viewport.height === 0
         ? rowExtents.map((extent) => extent.index)
         : resourceIndexesInWindow(
             rowExtents,
@@ -59,7 +61,7 @@ export function useHorizontalDayResourceWindow({
             2,
             pinnedIndexes
           ),
-    [dayStart, pinnedIndexes, rowExtents, viewport.height, viewport.scrollTop]
+    [dayStart, forceAllResources, pinnedIndexes, rowExtents, viewport.height, viewport.scrollTop]
   );
 
   return { renderedRowIndexes, rowExtents };

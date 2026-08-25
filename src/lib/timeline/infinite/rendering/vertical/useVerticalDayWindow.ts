@@ -35,6 +35,7 @@ export function useVerticalDayWindow(day: VerticalTimelineDayProps): DayWindow {
     selectedCalendars,
     settings,
     viewportMetricsStore,
+    forceAllResources,
     virtualBoardMinWidth
   } = day;
   const viewport = useViewportMetrics(viewportMetricsStore);
@@ -54,7 +55,7 @@ export function useVerticalDayWindow(day: VerticalTimelineDayProps): DayWindow {
   }, [boardMinWidth, labelWidth, minimumColumnWidths, selectedCalendars.length, virtualBoardMinWidth, viewport.width]);
   const renderedColumnIndexes = useMemo(
     () =>
-      viewport.width === 0
+      forceAllResources || viewport.width === 0
         ? columnExtents.map((extent) => extent.index)
         : resourceIndexesInWindow(
             columnExtents,
@@ -63,7 +64,7 @@ export function useVerticalDayWindow(day: VerticalTimelineDayProps): DayWindow {
             2,
             pinnedIndexes
           ),
-    [columnExtents, labelWidth, pinnedIndexes, viewport.scrollLeft, viewport.width]
+    [columnExtents, forceAllResources, labelWidth, pinnedIndexes, viewport.scrollLeft, viewport.width]
   );
 
   return {

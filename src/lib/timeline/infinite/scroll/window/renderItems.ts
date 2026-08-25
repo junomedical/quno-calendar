@@ -11,6 +11,16 @@ export type VirtualDateRenderItem = {
   size: number;
 };
 
+const ISO_DATE_KEY = /^\d{4}-\d{2}-\d{2}$/;
+
+/** Keeps a virtual item's semantic date while a new date-index sequence settles. */
+export function semanticDateKeyForRenderItem(
+  item: Pick<VirtualDateRenderItem, "key" | "index">,
+  dateKeyForIndex: (index: number) => string
+): string {
+  return typeof item.key === "string" && ISO_DATE_KEY.test(item.key) ? item.key : dateKeyForIndex(item.index);
+}
+
 type BuildRenderItemsArgs = {
   virtualItems: VirtualDateRenderItem[];
   anchorIndex: number;

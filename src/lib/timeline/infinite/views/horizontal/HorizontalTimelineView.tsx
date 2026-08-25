@@ -59,6 +59,7 @@ export const InfiniteTimelineView = forwardRef<CalendarViewHandle, CalendarInter
           eventRenderer: props.eventRenderer,
           geometryRegistration: runtime.navigation.registration,
           viewportMetricsStore: runtime.viewportMetricsStore,
+          forceAllResources: runtime.virtualTimeline.retainAllResources,
           measureElement: runtime.virtualTimeline.virtualizer.measureElement,
           getRowHeight: runtime.dayMetrics.getRowHeight,
           eventsForRow: runtime.dayMetrics.eventsForRow,

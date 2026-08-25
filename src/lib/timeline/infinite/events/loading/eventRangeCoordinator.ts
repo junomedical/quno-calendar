@@ -21,9 +21,11 @@ import type {
 import { dateRangeFromKeys, fromDateKey, toDateKey } from "#quno-internal/timeline/date/dateVirtualization";
 import { addCalendarDays } from "#quno-internal/timeline/date/localDate";
 import { EventDateCache } from "./eventDateCache";
+import { calendarIdsCover, DateCalendarCoverage } from "./dateCalendarCoverage";
 import type { IsoDate } from "#quno-internal/shared/dateRangeModel";
 
 export type EventRangeRequest = {
+  calendarIds: Set<CalendarId>;
   controller: AbortController;
   dateKeys: Set<string>;
   generation: number;
@@ -79,10 +81,10 @@ function contiguousDateGroups(dateKeys: string[]): string[][] {
 
 export class EventRangeCoordinator {
   private readonly cache = new EventDateCache();
-  private readonly loadedDates = new Set<string>();
-  private readonly loadingDates = new Set<string>();
+  private readonly coverage = new DateCalendarCoverage();
   private readonly activeRequests = new Map<number, EventRangeRequest>();
   private loadDates = new Set<string>();
+  private selectedCalendarIds = new Set<CalendarId>();
   private generation = 0;
   private requestSequence = 0;
 
@@ -90,7 +92,16 @@ export class EventRangeCoordinator {
     // Keep rendered buckets stale-but-visible while every load-window date becomes refreshable.
     this.generation += 1;
     this.cancelAll();
-    this.loadedDates.clear();
+    this.coverage.clear();
+  }
+
+  updateSelectedCalendarIds(calendarIds: Iterable<CalendarId>): void {
+    this.selectedCalendarIds = new Set(calendarIds);
+    for (const request of this.activeRequests.values()) {
+      if (this.selectedCalendarIds.size === 0 || !calendarIdsCover(request.calendarIds, this.selectedCalendarIds)) {
+        this.cancel(request);
+      }
+    }
   }
 
   updateLoadDates(dateKeys: Iterable<string>): void {
@@ -106,7 +117,7 @@ export class EventRangeCoordinator {
 
   missingLoadRanges(): Array<{ dateKeys: string[]; startDate: IsoDate; endDate: IsoDate }> {
     const missingDateKeys = [...this.loadDates].filter(
-      (dateKey) => !this.loadedDates.has(dateKey) && !this.loadingDates.has(dateKey)
+      (dateKey) => !this.coverage.covers(dateKey, this.selectedCalendarIds) && !this.isLoading(dateKey)
     );
     return contiguousDateGroups(missingDateKeys).flatMap((dateKeys) => {
       const range = dateRangeFromKeys(dateKeys as IsoDate[]);
@@ -116,15 +127,13 @@ export class EventRangeCoordinator {
 
   begin(dateKeys: Iterable<string>): EventRangeRequest {
     const request: EventRangeRequest = {
+      calendarIds: new Set(this.selectedCalendarIds),
       controller: new AbortController(),
       dateKeys: new Set(dateKeys),
       generation: this.generation,
       id: ++this.requestSequence
     };
     this.activeRequests.set(request.id, request);
-    for (const dateKey of request.dateKeys) {
-      this.loadingDates.add(dateKey);
-    }
     return request;
   }
 
@@ -135,14 +144,10 @@ export class EventRangeCoordinator {
     }
     // Replacement, loaded knowledge, load-window protection, and eviction form one transaction.
     const renderedEventsChanged = this.cache.replaceDates(request.dateKeys, events);
-    for (const dateKey of request.dateKeys) {
-      this.loadedDates.add(dateKey);
-    }
+    this.coverage.replace(request.dateKeys, request.calendarIds);
     this.cache.touchDates(this.loadDates);
     const evictedDateKeys = this.cache.trim(this.loadDates);
-    for (const dateKey of evictedDateKeys) {
-      this.loadedDates.delete(dateKey);
-    }
+    this.coverage.delete(evictedDateKeys);
     this.release(request);
     return renderedEventsChanged || evictedDateKeys.length > 0;
   }
@@ -183,6 +188,12 @@ export class EventRangeCoordinator {
     );
   }
 
+  private isLoading(dateKey: string): boolean {
+    return [...this.activeRequests.values()].some(
+      (request) => request.dateKeys.has(dateKey) && calendarIdsCover(request.calendarIds, this.selectedCalendarIds)
+    );
+  }
+
   private cancel(request: EventRangeRequest): void {
     request.controller.abort();
     this.release(request);
@@ -193,16 +204,12 @@ export class EventRangeCoordinator {
       request.controller.abort();
     }
     this.activeRequests.clear();
-    this.loadingDates.clear();
   }
 
   private release(request: EventRangeRequest): void {
     // Idempotence prevents an obsolete promise from releasing a newer request's keys.
     if (!this.activeRequests.delete(request.id)) {
       return;
-    }
-    for (const dateKey of request.dateKeys) {
-      this.loadingDates.delete(dateKey);
     }
   }
 }

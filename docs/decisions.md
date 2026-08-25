@@ -431,3 +431,90 @@ captures the earlier inactive render may otherwise rebuild the bounded date tree
 producing a full-calendar flicker. Interaction start cancels that pending deadline, active-gesture scroll signals do not
 arm another, and any callback already racing reads the current interaction owner before recentering. Idle maintenance
 resumes only after a later scroll signal once the gesture has released.
+
+## 070 - Loaded Dates Retain Calendar Coverage
+
+Date: 2026-08-24
+Status: Accepted
+
+Selected calendars affect both rendering and the event API query, but changing the visible subset does not necessarily
+make an accepted date bucket stale. The range coordinator records the calendar ids covered by each accepted date and
+reuses that bucket whenever it contains the current selection. Narrowing draft participants and returning to the
+previous selection therefore performs no request or cache publication. Because participant filtering can also shorten
+days and expose an extra virtual date, active drafts retain the last settled warm window and add the draft date's and
+virtual-window anchor's policy windows. Expanding to an uncovered calendar, moving a draft, or navigating beyond that
+window still loads the required data, while incompatible in-flight requests are aborted and cannot commit late.
+
+## 071 - Released Draft Animation Is Paint-Isolated
+
+Date: 2026-08-25
+Status: Accepted
+
+Cancelling a controlled draft intentionally restores the previous participant rows immediately while retaining the
+draft shell for a short opacity fade. The draft shell owns a paint-containment and opacity-compositor boundary before
+that animation begins. Its fade and delayed removal therefore remain local to the one preview card instead of
+invalidating the restored calendar surface. The draft animation, participant-only projection, and cancel anchoring
+contracts remain unchanged.
+
+## 072 - Equal-Start Overlap Order Survives Mutation
+
+Date: 2026-08-25
+Status: Accepted
+
+Appointments that share a start time use their stable caller order before comparing their end times. A duration edit
+therefore cannot promote the modified appointment into another lane merely because it became shorter. Targeted cache
+patches also replace same-date records in their existing ordered slot, including temporary-id replacement, instead of
+deleting and appending them. Moving to another date still removes the source and appends to the loaded destination,
+and appointments with different start times retain chronological ordering.
+
+## 073 - Structural Transitions Retain Semantic Date And Resource Nodes
+
+Date: 2026-08-25
+Status: Accepted; supersedes the calendar-membership alignment policy in Decision 022
+
+Ordinary calendar visibility changes affect the resource axis, not the date sequence. Horizontal changes therefore
+translate the existing top-edge resource anchor through the next row geometry, while vertical changes leave date/time
+scroll untouched. A surviving resource retains its row-local offset; a removed resource falls back to a clamped
+date-local position. Membership changes no longer align the date header to the viewport top.
+
+Excluded weekdays still replace the date-index sequence and require structural restoration. During that bounded
+transition, render items use their semantic date keys and a base-geometry window around the saved top date. All resource
+rows or columns in that transition window stay mounted until the virtualizer adopts the replacement indexes and scroll
+offset. A workday that remains visible therefore retains its date, row, and event DOM identities without an intermediate
+wrong-date or wrong-calendar frame. Active-draft event/slot restoration retains its stronger explicit anchor.
+
+## 074 - Idle Recenter Is A Semantic Structural Transition
+
+Date: 2026-08-25
+Status: Accepted
+
+Idle recenter replaces the bounded month window and writes an equivalent scrollbar position; it is not a content
+navigation. The window anchor therefore participates in the structural render identity alongside excluded-weekday and
+vertical-geometry changes. While the replacement indexes and centered scroll offset settle, the renderer pins a
+base-geometry window around the saved top date and keeps that window's resources mounted. The visible date, intra-day
+offset, resource rows or columns, and event DOM nodes survive the reset without an intermediate wrong-date tree or
+painted redraw. Pointer interactions and explicit parent anchors retain higher priority than idle maintenance.
+
+## 075 - Project Discovery Is Feature-First
+
+Date: 2026-08-25
+Status: Accepted; supersedes the single-route guide policy in Decisions 001 and 041
+
+The demo root is a concise project overview rather than a mounted calendar. It presents exactly three cards: infinite
+calendar, date range input, and date input field. Each card owns a dedicated field-guide route, and each field guide
+links through a visible Demo button to a focused component route. This keeps first contact lightweight and lets readers
+choose the relevant responsibility before mounting heavy examples. The timeline field guide retains lazy exhibit
+mounting. Former `/guide`, `/story`, and integration-walkthrough bookmarks redirect to the infinite-calendar guide,
+while the package, public entry points, and independence of the three components remain unchanged.
+
+## 076 - Timeline Demo Navigation Reuses The Shared Date Input
+
+Date: 2026-08-25
+Status: Accepted
+
+The infinite-calendar demo and its navigation field-guide exhibit use `QunoDateInput` in single-date mode as the one
+date-navigation control. Committing a date calls the public calendar navigation handle immediately; the unrestricted
+demo retains its product-owned default focus time without exposing a separate time field. The main demo does not add a
+Go action or Add event button: appointments begin by drawing where they belong on the timeline. Theme selection remains
+in the dedicated styling chapter rather than being duplicated in the final composed demo. The components remain
+independent; the demo owns the date-input-to-calendar-handle connection.

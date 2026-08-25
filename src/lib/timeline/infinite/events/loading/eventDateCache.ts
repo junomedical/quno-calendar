@@ -58,6 +58,9 @@ export class EventDateCache {
   }
 
   patchMovedEvent(eventId: EventId, movedEvent: CalendarEvent): boolean {
+    if (eventId === movedEvent.id && this.replaceSameDateEvent(eventId, movedEvent)) {
+      return true;
+    }
     const removed = this.removeEvent(eventId);
     const destinationLoaded = this.hasDate(eventDateKey(movedEvent));
     // Do not manufacture a bucket for an offscreen/unloaded destination.
@@ -68,6 +71,10 @@ export class EventDateCache {
   }
 
   patchCommittedEvent(event: CalendarEvent, previousEventId?: EventId): boolean {
+    const replacedEventId = previousEventId ?? event.id;
+    if (this.replaceSameDateEvent(replacedEventId, event)) {
+      return true;
+    }
     let changed = this.deleteEvent(event.id);
     if (previousEventId && previousEventId !== event.id) {
       changed = this.deleteEvent(previousEventId) || changed;
@@ -118,6 +125,33 @@ export class EventDateCache {
     this.deleteDate(dateKey);
     this.buckets.set(dateKey, new Map());
     this.touch(dateKey);
+  }
+
+  private replaceSameDateEvent(previousEventId: EventId, event: CalendarEvent): boolean {
+    const dateKey = this.dateByEventId.get(previousEventId);
+    if (!dateKey || dateKey !== eventDateKey(event)) {
+      return false;
+    }
+    const bucket = this.buckets.get(dateKey);
+    if (!bucket) {
+      return false;
+    }
+    if (previousEventId === event.id) {
+      bucket.set(event.id, event);
+    } else {
+      this.buckets.set(
+        dateKey,
+        new Map(
+          [...bucket].flatMap(([eventId, current]) =>
+            eventId === previousEventId ? [[event.id, event]] : eventId === event.id ? [] : [[eventId, current]]
+          )
+        )
+      );
+      this.dateByEventId.delete(previousEventId);
+    }
+    this.dateByEventId.set(event.id, dateKey);
+    this.touch(dateKey);
+    return true;
   }
 
   private upsert(event: CalendarEvent): void {

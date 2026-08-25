@@ -12,7 +12,7 @@ import {
 } from "../helpers";
 
 test("renders, scrolls vertically, zooms, and changes dataset scale", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/demo/infinite-calendar");
   await expect(page.getByTestId("quno-calendar-timeline")).toBeVisible();
   await goToWorkday(page);
   await firstViewportEventBox(page);
@@ -193,9 +193,9 @@ test("renders, scrolls vertically, zooms, and changes dataset scale", async ({ p
 });
 
 test("renders route-specific demo treatments", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/demo/infinite-calendar");
   await expect(page.locator('[data-demo-id="default"]')).toBeVisible();
-  await expect(page.getByTestId("demo-route-default")).toHaveAttribute("aria-current", "page");
+  await expect(page.getByRole("navigation", { name: "Demo variants" })).toHaveCount(0);
   await goToWorkday(page);
   await expect(page.locator(".demo-event-card").first()).toBeVisible();
 
@@ -299,7 +299,7 @@ test("renders route-specific demo treatments", async ({ page }) => {
 });
 
 test("keeps large dataset events visible and hoverable", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/demo/infinite-calendar");
 
   await page.getByTestId("scale-select").selectOption("5000");
   await goToWorkday(page);
@@ -441,7 +441,7 @@ test("keeps large dataset events visible and hoverable", async ({ page }) => {
 test("limits vertical scrollbar to one month around the visible date and recenters after scroll end", async ({
   page
 }) => {
-  await page.goto("/");
+  await page.goto("/demo/infinite-calendar");
   await goToWorkday(page, "2026-07-06");
   const viewport = page.locator(".quno-calendar-viewport");
 
@@ -470,7 +470,7 @@ test("limits vertical scrollbar to one month around the visible date and recente
 });
 
 test("keeps intra-day scroll offset when the virtual window recenters", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/demo/infinite-calendar");
   await goToWorkday(page, "2026-07-06");
   const viewport = page.locator(".quno-calendar-viewport");
 
@@ -483,9 +483,21 @@ test("keeps intra-day scroll offset when the virtual window recenters", async ({
   });
   await page.waitForTimeout(40);
   const beforeRecenter = await topVisibleDayState(page);
+  const visibleDay = page.locator(`[data-testid="calendar-day"][data-date="${beforeRecenter.date}"]`);
+  const visibleDayNode = await visibleDay.elementHandle();
+  const eventNodes = await visibleDay.getByTestId("calendar-event").elementHandles();
+  const beforeTop = await visibleDay.evaluate((element) => element.getBoundingClientRect().top);
+  expect(visibleDayNode).not.toBeNull();
+  expect(eventNodes.length).toBeGreaterThan(0);
   await page.waitForTimeout(1500);
   const afterRecenter = await topVisibleDayState(page);
 
   expect(afterRecenter.date).toBe(beforeRecenter.date);
   expect(Math.abs(afterRecenter.offsetWithinDate - beforeRecenter.offsetWithinDate)).toBeLessThanOrEqual(2);
+  expect(await visibleDayNode?.evaluate((element) => element.isConnected)).toBe(true);
+  for (const eventNode of eventNodes) {
+    expect(await eventNode.evaluate((element) => element.isConnected)).toBe(true);
+  }
+  const afterTop = await visibleDay.evaluate((element) => element.getBoundingClientRect().top);
+  expect(Math.abs(afterTop - beforeTop)).toBeLessThanOrEqual(1);
 });

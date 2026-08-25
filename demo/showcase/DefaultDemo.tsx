@@ -9,13 +9,17 @@ import { createDemoEvents, createRangeLoader, demoCalendars, appendCreatedEvent,
 import { DemoEventCard } from "./DemoEventCard";
 import { DefaultDemoSidebar } from "./default/DefaultDemoSidebar";
 import { useDraftSaveSimulation } from "./default/useDraftSaveSimulation";
-import { dateInputValue, timeInputValue } from "./draftFormUtils";
+import { dateInputValue } from "./draftFormUtils";
 import { ExternalEventPopup } from "./ExternalEventPopup";
-import { useDemoControls, type DemoControlDefaults, type DemoLayoutSettings } from "./hooks/useDemoControls";
+import {
+  useDemoControls,
+  type DemoControlDefaults,
+  type DemoControls,
+  type DemoLayoutSettings
+} from "./hooks/useDemoControls";
 import { useSimulatedApiLoader } from "./hooks/useSimulatedApiLoader";
 import { useSystemNow } from "./hooks/useSystemNow";
 import { useViewportActivityLog } from "./hooks/useViewportActivityLog";
-import type { DemoRoute } from "./types";
 import { useExternalEventDrafts } from "./useExternalEventDrafts";
 import { DemoQunoCalendar, DemoZoomProvider } from "./zoom/DemoZoom";
 
@@ -43,12 +47,11 @@ function defaultControls(): DemoControlDefaults {
     excludeWeekends: false,
     editAvailabilities: false,
     apiLatencyMs: 0,
-    jumpDate: "2026-07-04",
-    jumpTime: "09:00"
+    jumpDate: "2026-07-04"
   };
 }
 
-export function DefaultDemo({ routes }: { routes: DemoRoute[] }) {
+export function DefaultDemo() {
   const controlDefaults = useMemo(defaultControls, []);
   const controls = useDemoControls(controlDefaults, defaultLayout);
   const systemNow = useSystemNow();
@@ -64,7 +67,7 @@ export function DefaultDemo({ routes }: { routes: DemoRoute[] }) {
   const setMessage = useCallback((message: string) => {
     setActivityEntries((current) => [...current.slice(-(MAX_ACTIVITY_ENTRIES - 1)), message]);
   }, []);
-  useViewportActivityLog({
+  const markProgrammaticReposition = useViewportActivityLog({
     containerRef: calendarPanelRef,
     resetKey: `${controls.calendarView}:${scale}`,
     onActivity: setMessage
@@ -93,10 +96,6 @@ export function DefaultDemo({ routes }: { routes: DemoRoute[] }) {
   const drafts = useExternalEventDrafts({
     selectedCalendarIds,
     calendarRef,
-    jumpDate: controls.jumpDate,
-    jumpTime: controls.jumpTime,
-    snapMinutes: controls.snapMinutes,
-    editAvailabilities: controls.editAvailabilities,
     setEvents: updateEvents,
     setMessage
   });
@@ -112,7 +111,7 @@ export function DefaultDemo({ routes }: { routes: DemoRoute[] }) {
   });
   const resetActiveDraft = drafts.resetActiveDraft;
   const resetSaveFeedback = draftSave.resetSaveFeedback;
-  const { jumpDate, jumpTime, setJumpDate, setJumpTime, setEditAvailabilities } = controls;
+  const { setJumpDate, setEditAvailabilities } = controls;
 
   const handleScaleChange = useCallback(
     (nextScale: number) => {
@@ -154,16 +153,21 @@ export function DefaultDemo({ routes }: { routes: DemoRoute[] }) {
   );
 
   const handleToday = useCallback(() => {
+    markProgrammaticReposition();
     calendarRef.current?.scrollToToday();
     setJumpDate(dateInputValue(systemNow));
-    setJumpTime(timeInputValue(systemNow));
     setMessage("Scrolled to today");
-  }, [setJumpDate, setJumpTime, setMessage, systemNow]);
+  }, [markProgrammaticReposition, setJumpDate, setMessage, systemNow]);
 
-  const handleGoToDate = useCallback(() => {
-    calendarRef.current?.scrollToDateTime(jumpDate, jumpTime);
-    setMessage(`Scrolled to ${jumpDate} ${jumpTime}`);
-  }, [jumpDate, jumpTime, setMessage]);
+  const handleGoToDate = useCallback(
+    (date: DemoControls["jumpDate"]) => {
+      setJumpDate(date);
+      markProgrammaticReposition();
+      calendarRef.current?.scrollToDateTime(date, "09:00");
+      setMessage(`Scrolled to ${date}`);
+    },
+    [markProgrammaticReposition, setJumpDate, setMessage]
+  );
 
   const handleAvailabilityModeChange = useCallback(
     (checked: boolean) => {
@@ -177,7 +181,6 @@ export function DefaultDemo({ routes }: { routes: DemoRoute[] }) {
     <DemoZoomProvider initialZoom={controlDefaults.zoom}>
       <main className="app-shell" data-demo-id="default">
         <DefaultDemoSidebar
-          routes={routes}
           scale={scale}
           activityEntries={activityEntries}
           controls={controls}
@@ -186,7 +189,6 @@ export function DefaultDemo({ routes }: { routes: DemoRoute[] }) {
           onAvailabilityModeChange={handleAvailabilityModeChange}
           onToday={handleToday}
           onGoToDate={handleGoToDate}
-          onExternalAdd={drafts.handleExternalAdd}
         />
         <section ref={calendarPanelRef} className="demo-calendar-panel">
           {drafts.activeDraft ? (

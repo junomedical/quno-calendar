@@ -22,4 +22,4 @@ export type {
   QunoDateInputProps,
   QunoDateInputSlot
 } from "./dateInputTypes";
-export type { DateRange, DateSelectionMode, IsoDate } from "#quno-internal/shared/dateRangeModel";
+export type { DateRange, DateSelectionMode, IsoDate, WeekStart } from "#quno-internal/shared/dateRangeModel";

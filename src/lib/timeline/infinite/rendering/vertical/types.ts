@@ -65,6 +65,7 @@ export type VerticalTimelineDayProps = {
   eventRenderer: EventRenderer;
   geometryRegistration: ViewportGeometryRegistration;
   viewportMetricsStore: ViewportMetricsStore;
+  forceAllResources: boolean;
   eventsForColumn: (dateKey: string, calendarId: CalendarId) => CalendarEvent[];
   preparedCellForColumn: (dateKey: string, calendarId: CalendarId) => PreparedEventCell;
   columnWidthForDateCalendar: (dateKey: string, calendarId: CalendarId) => number;

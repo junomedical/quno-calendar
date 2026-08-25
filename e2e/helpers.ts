@@ -32,8 +32,26 @@ export async function firstViewportEventBox(page: Page) {
 }
 
 export async function goToWorkday(page: Page, date = "2026-07-06") {
-  await page.getByTestId("jump-date-input").fill(date);
-  await page.getByTestId("go-date-button").click();
+  const [year, month, day] = date.split("-").map(Number);
+  const formatter = new Intl.DateTimeFormat("en-GB", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC"
+  });
+  const target = new Date(Date.UTC(year, month - 1, day));
+  const text = formatter.format(target);
+  const input = page.getByTestId("jump-date-input");
+  if ((await input.inputValue()) === text) {
+    const adjacent = new Date(target);
+    adjacent.setUTCDate(adjacent.getUTCDate() + 1);
+    await input.fill(formatter.format(adjacent));
+    await input.press("Enter");
+    await expect(input).toHaveValue(formatter.format(adjacent));
+  }
+  await input.fill(text);
+  await expect(input).toHaveValue(text);
+  await input.press("Enter");
   await expect
     .poll(async () => {
       try {
@@ -105,6 +123,15 @@ export async function horizontalDrawTarget(page: Page, options: HorizontalDrawTa
     throw new Error("No visible empty horizontal timeline grid space found");
   }
   return target;
+}
+
+export async function openDrawnExternalDraft(page: Page, options: HorizontalDrawTargetOptions = {}) {
+  const target = await horizontalDrawTarget(page, options);
+  await page.mouse.move(target.startX, target.y);
+  await page.mouse.down();
+  await page.mouse.move(target.endX, target.y, { steps: 6 });
+  await page.mouse.up();
+  await expect(page.getByTestId("external-event-popup")).toBeVisible();
 }
 
 /** Finds empty, visibly exposed timeline space inside a vertical resource column. */

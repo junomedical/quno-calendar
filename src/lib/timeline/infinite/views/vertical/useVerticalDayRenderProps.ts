@@ -37,6 +37,7 @@ type VerticalDayRenderPropsArgs = {
   activeRestoreTarget: CalendarViewportAnchorTarget | null;
   viewportMetricsStore: ViewportMetricsStore;
   hover: ReturnType<typeof useVerticalColumnHover>;
+  forceAllResources: boolean;
 };
 
 export function useVerticalDayRenderProps({
@@ -54,7 +55,8 @@ export function useVerticalDayRenderProps({
   geometryRegistration,
   activeRestoreTarget,
   viewportMetricsStore,
-  hover
+  hover,
+  forceAllResources
 }: VerticalDayRenderPropsArgs): VerticalDayRenderProps {
   const timeTicks = useMemo(() => buildTimeTicks(settings), [settings]);
   const nowState = buildVerticalNowState(now, settings);
@@ -85,6 +87,7 @@ export function useVerticalDayRenderProps({
     geometryRegistration,
     activeRestoreTarget,
     viewportMetricsStore,
+    forceAllResources,
     eventsForColumn: columns.eventsForColumn,
     preparedCellForColumn: columns.preparedCellForColumn,
     columnWidthForDateCalendar: columns.columnWidthForDateCalendar,

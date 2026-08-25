@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useRef, useState, type SetStateAction } from "react";
+import type { IsoDate } from "@quno/calendar";
 import type { CalendarEvent, QunoCalendarHandle, EventCreateRequest, EventMoveRequest } from "@quno/calendar/timeline";
 import { appendCreatedEvent, applyMove, createDemoEvents, createRangeLoader, demoCalendars } from "../data";
 import { useDemoControls } from "../hooks/useDemoControls";
@@ -14,7 +15,7 @@ export function usePresetDemo(preset: DemoPreset) {
   const calendarRef = useRef<QunoCalendarHandle>(null);
   const controls = useDemoControls(preset.controls, preset.layout);
   const systemNow = useSystemNow();
-  const { jumpDate, jumpTime, setEditAvailabilities } = controls;
+  const { setJumpDate, setEditAvailabilities } = controls;
 
   const selectedCalendarIds = useMemo(
     () => demoCalendars.slice(0, controls.calendarCount).map((calendar) => calendar.id),
@@ -66,10 +67,14 @@ export function usePresetDemo(preset: DemoPreset) {
     [preset.messages, updateEvents]
   );
 
-  const goToDate = useCallback(() => {
-    calendarRef.current?.scrollToDateTime(jumpDate, jumpTime);
-    setMessage(`Scrolled to ${jumpDate} ${jumpTime}`);
-  }, [jumpDate, jumpTime]);
+  const goToDate = useCallback(
+    (date: IsoDate) => {
+      setJumpDate(date);
+      calendarRef.current?.scrollToDate(date);
+      setMessage(`Scrolled to ${date}`);
+    },
+    [setJumpDate]
+  );
 
   const setAvailabilityMode = useCallback(
     (checked: boolean) => {

@@ -13,7 +13,7 @@
  *
  * @see docs/flows/async-loading-and-layout.md
  */
-import { startTransition, useCallback, useEffect, useMemo, useState } from "react";
+import { startTransition, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { applyEventMove } from "#quno-internal/timeline/data/calendarEvents";
 import { defaultEventPrefetchPolicy } from "#quno-internal/timeline/data/eventPrefetch";
 import { EventRangeCoordinator, eventLoadDateKeys } from "./eventRangeCoordinator";
@@ -30,6 +30,8 @@ import type {
 import { useAppearingEvents } from "./useAppearingEvents";
 
 type UseEventRangeLoaderArgs = {
+  activeDraftDateKey?: string;
+  activeDraftLoadAnchorDateKey?: string;
   loadEvents: LoadEvents;
   eventPrefetchPolicy?: EventPrefetchPolicy;
   eventVersion?: number | string;
@@ -41,6 +43,8 @@ type UseEventRangeLoaderArgs = {
 const EMPTY_REQUESTED_APPEARING_EVENT_IDS: EventId[] = [];
 
 export function useEventRangeLoader({
+  activeDraftDateKey,
+  activeDraftLoadAnchorDateKey,
   loadEvents,
   eventPrefetchPolicy = defaultEventPrefetchPolicy,
   eventVersion,
@@ -51,17 +55,27 @@ export function useEventRangeLoader({
   const [coordinator] = useState(() => new EventRangeCoordinator());
   const [eventsByDate, setEventsByDate] = useState<Record<string, CalendarEvent[]>>({});
   const selectedIdsKey = JSON.stringify(selectedIds);
-  const loadDateKeys = useMemo(
+  const visibleLoadDateKeys = useMemo(
     () => eventLoadDateKeys(visibleDateKeys, selectedIds, eventPrefetchPolicy),
     [eventPrefetchPolicy, selectedIds, visibleDateKeys]
   );
+  const inactiveLoadDateKeysRef = useRef(visibleLoadDateKeys);
+  if (!activeDraftDateKey) inactiveLoadDateKeysRef.current = visibleLoadDateKeys;
+  const loadDateKeys = useMemo(() => {
+    if (!activeDraftDateKey) return visibleLoadDateKeys;
+    const activeAnchorDateKeys = [activeDraftLoadAnchorDateKey, activeDraftDateKey].filter(
+      (dateKey): dateKey is string => Boolean(dateKey)
+    );
+    const activeLoadDateKeys = eventLoadDateKeys(activeAnchorDateKeys, selectedIds, eventPrefetchPolicy);
+    return [...new Set([...inactiveLoadDateKeysRef.current, ...activeLoadDateKeys])].sort();
+  }, [activeDraftDateKey, activeDraftLoadAnchorDateKey, eventPrefetchPolicy, selectedIds, visibleLoadDateKeys]);
   const { appearingEventIds, hasRequestedEventIds, markEventsAppearing, markRequestedEventsAppearing } =
     useAppearingEvents(requestedAppearingEventIds);
 
   useEffect(() => {
     // Invalidation clears freshness knowledge, not the cache snapshot currently on screen.
     coordinator.invalidate();
-  }, [coordinator, eventVersion, loadEvents, selectedIdsKey]);
+  }, [coordinator, eventVersion, loadEvents]);
 
   useEffect(() => {
     return () => coordinator.dispose();
@@ -69,6 +83,7 @@ export function useEventRangeLoader({
 
   useEffect(() => {
     // The visible and policy-selected prefetch keys protect their accepted buckets from LRU eviction.
+    coordinator.updateSelectedCalendarIds(selectedIds);
     coordinator.updateLoadDates(loadDateKeys);
     const missingRanges = coordinator.missingLoadRanges();
     if (missingRanges.length === 0 || selectedIds.length === 0) {
@@ -77,7 +92,7 @@ export function useEventRangeLoader({
 
     for (const { dateKeys, startDate, endDate } of missingRanges) {
       const request = coordinator.begin(dateKeys);
-      const args = { startDate, endDate, calendarIds: [...selectedIds], signal: request.controller.signal };
+      const args = { startDate, endDate, calendarIds: [...request.calendarIds], signal: request.controller.signal };
       void loadEventRange(loadEvents, args, request.controller.signal).then((loadedEvents) => {
         if (!loadedEvents) {
           // Abort or exhausted retries make these dates requestable again later.

@@ -59,6 +59,13 @@ describe("horizontal late-data layout anchoring", () => {
 
     expect(resolveHorizontalDataLayoutOffset(anchor, reducedMetric, reducedGeometry)).toBe(104);
   });
+
+  it("keeps a surviving resource local offset when resources are appended", () => {
+    const anchor = captureHorizontalDataLayoutAnchor("2026-08-12", 42 + 50 + 12, undefined, geometry);
+    const expandedGeometry = { ...geometry, calendarIds: [...geometry.calendarIds, "room-3", "room-4"] };
+
+    expect(resolveHorizontalDataLayoutOffset(anchor, undefined, expandedGeometry)).toBe(42 + 50 + 12);
+  });
 });
 
 describe("virtual date resize compensation", () => {

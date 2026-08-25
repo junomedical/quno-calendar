@@ -1,20 +1,11 @@
 import { DEFAULT_DATE_INPUT_FORMATTER } from "./dateInputFormat";
 import { spinDateInput, type DateInputSpinMemory } from "./dateInputKeyboard";
 import { parseDateInput } from "./dateInputParser";
+import { equalDateRanges, inputClass, recognitionOf } from "./dateInputViewHelpers";
 import { singleDay, type DateRange } from "#quno-internal/shared/dateRangeModel";
 import type { QunoDateInputProps } from "./dateInputTypes";
 import type { FormEventHandler, JSX } from "react";
-import { useCallback, useEffect, useRef, useState } from "react";
-
-const equal = (left: DateRange | null, right: DateRange | null): boolean =>
-  left === right || Boolean(left && right && left.start === right.start && left.end === right.end);
-
-const inputClass = (...classes: Array<string | undefined>): string => classes.filter(Boolean).join(" ");
-
-const recognitionOf = (result: ReturnType<typeof parseDateInput>) => {
-  if (result.status === "empty") return undefined;
-  return result.status === "success" || result.status === "partial-range" ? "recognized" : "unrecognized";
-};
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 export const QunoDateInput = ({
   value,
@@ -22,6 +13,7 @@ export const QunoDateInput = ({
   expectedRange,
   selectionMode = "range",
   referenceDate,
+  weekStartsOn = 1,
   locale = "en-GB",
   preferredDateOrder,
   parserLanguage,
@@ -43,7 +35,13 @@ export const QunoDateInput = ({
 }: QunoDateInputProps): JSX.Element => {
   const controlled = value !== undefined;
   const range = controlled ? (value ?? null) : defaultValue;
-  const selection = range && selectionMode === "single" ? singleDay(range.start) : range;
+  const rangeStart = range?.start,
+    rangeEnd = range?.end;
+  const selection = useMemo(
+    () =>
+      rangeStart ? (selectionMode === "single" ? singleDay(rangeStart) : { start: rangeStart, end: rangeEnd! }) : null,
+    [rangeEnd, rangeStart, selectionMode]
+  );
   const format = useCallback(
     (range: DateRange, preserveRange = false): string => {
       const value = (formatter?.range ?? DEFAULT_DATE_INPUT_FORMATTER)(range, locale);
@@ -75,6 +73,7 @@ export const QunoDateInput = ({
       expectedRange,
       selectionMode,
       referenceDate,
+      weekStartsOn,
       locale,
       preferredDateOrder,
       parserLanguage,
@@ -88,7 +87,7 @@ export const QunoDateInput = ({
     setRecognition(recognitionOf(result));
     if (result.status === "empty") {
       setInvalid(false);
-      if (!equal(committed.current, null)) {
+      if (!equalDateRanges(committed.current, null)) {
         committed.current = null;
         if (!controlled) setDraft("");
         onChange?.(null);
@@ -101,7 +100,7 @@ export const QunoDateInput = ({
     }
     setInvalid(false);
     setDraft(format(result.value));
-    if (!equal(committed.current, result.value)) {
+    if (!equalDateRanges(committed.current, result.value)) {
       committed.current = result.value;
       onChange?.(result.value);
     }
@@ -155,6 +154,7 @@ export const QunoDateInput = ({
                 expectedRange,
                 selectionMode,
                 referenceDate,
+                weekStartsOn,
                 locale,
                 preferredDateOrder,
                 parserLanguage,
@@ -193,11 +193,3 @@ export const QunoDateInput = ({
     </span>
   );
 };
-
-export type {
-  QunoDateInputClassNames,
-  QunoDateInputFormatter,
-  QunoDateInputLabels,
-  QunoDateInputProps,
-  QunoDateInputSlot
-} from "./dateInputTypes";

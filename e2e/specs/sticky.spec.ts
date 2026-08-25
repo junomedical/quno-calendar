@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 import { goToWorkday, setDemoZoom, topVisibleDayDate } from "../helpers";
 
 test("keeps the time scale fixed and day dates css-sticky", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/demo/infinite-calendar");
   await setDemoZoom(page, 1.7);
   const viewport = page.locator(".quno-calendar-viewport");
   const viewportBox = await viewport.boundingBox();
@@ -420,7 +420,7 @@ test("keeps the time scale fixed and day dates css-sticky", async ({ page }) => 
 });
 
 test("keeps sticky labels above the timeline after high-zoom horizontal scroll", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/demo/infinite-calendar");
   await setDemoZoom(page, 8);
   await goToWorkday(page, "2026-07-06");
 

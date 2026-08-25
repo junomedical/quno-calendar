@@ -1,3 +1,5 @@
+import type { DateRange, IsoDate } from "@quno/calendar";
+import { QunoDateInput } from "@quno/calendar/date-input";
 import {
   QunoCalendar,
   applyEventMove,
@@ -48,6 +50,7 @@ const navigationEvents: CalendarEvent[] = [
   }
 ];
 const loadNavigationEvents: LoadEvents = async (request) => filterEvents(navigationEvents, request);
+const navigationExpectedRange: DateRange = { start: "2025-01-01", end: "2027-12-31" };
 
 type CardGrouping = "product" | "patient" | "room";
 type StructuredArticleEvent = CalendarEvent & {
@@ -261,30 +264,19 @@ export function TimeMarkerDemo() {
 
 export function NavigationControlsDemo() {
   const calendarRef = useRef<QunoCalendarHandle>(null);
-  const [date, setDate] = useState<`${number}-${number}-${number}`>(articleDateKey);
-  const [time, setTime] = useState(articleNowTime);
-  const [status, setStatus] = useState(`Showing ${articleDateKey} at ${articleNowTime}`);
+  const [date, setDate] = useState<IsoDate>(articleDateKey);
+  const [status, setStatus] = useState(`Showing ${articleDateKey}`);
+  const inputValue = useMemo<DateRange>(() => ({ start: date, end: date }), [date]);
 
-  const navigate = (nextDate: `${number}-${number}-${number}`, nextTime: string) => {
-    if (!nextDate || !nextTime) return;
-    calendarRef.current?.scrollToDateTime(nextDate, nextTime);
-    setStatus(`Showing ${nextDate} at ${nextTime}`);
-  };
-
-  const changeDate = (nextDate: `${number}-${number}-${number}`) => {
+  const navigate = (nextDate: IsoDate) => {
     setDate(nextDate);
-    navigate(nextDate, time);
-  };
-
-  const changeTime = (nextTime: string) => {
-    setTime(nextTime);
-    navigate(date, nextTime);
+    calendarRef.current?.scrollToDateTime(nextDate, articleNowTime);
+    setStatus(`Showing ${nextDate}`);
   };
 
   const shiftDay = (amount: number) => {
     const nextDate = shiftDateKey(date, amount);
-    setDate(nextDate);
-    navigate(nextDate, time);
+    navigate(nextDate);
   };
 
   return (
@@ -297,21 +289,15 @@ export function NavigationControlsDemo() {
             ←
           </button>
           <label>
-            <span>Date</span>
-            <input
+            <span>Go to date</span>
+            <QunoDateInput
               aria-label="Destination date"
-              onChange={(event) => changeDate(event.target.value as `${number}-${number}-${number}`)}
-              type="date"
-              value={date}
-            />
-          </label>
-          <label>
-            <span>Time</span>
-            <input
-              aria-label="Destination time"
-              onChange={(event) => changeTime(event.target.value)}
-              type="time"
-              value={time}
+              expectedRange={navigationExpectedRange}
+              onChange={(next) => {
+                if (next) navigate(next.start);
+              }}
+              selectionMode="single"
+              value={inputValue}
             />
           </label>
           <button aria-label="Next day" onClick={() => shiftDay(1)} type="button">
@@ -333,7 +319,7 @@ export function NavigationControlsDemo() {
       <div className="article-calendar-frame">
         <QunoCalendar
           ref={calendarRef}
-          ariaLabel="Calendar with product-owned date and time controls"
+          ariaLabel="Calendar with product-owned date controls"
           calendars={articleCalendars}
           eventRenderer={ArticleEventCard}
           initialDateKey={articleDateKey}
@@ -587,10 +573,9 @@ export function EverythingTogetherDemo() {
   const sequenceRef = useRef(0);
   const eventsRef = useRef<CalendarEvent[]>([...overlapEvents, ...navigationEvents.slice(articleEvents.length)]);
   const [zoom, setZoom] = useState(1.25);
-  const [theme, setTheme] = useState<ArticleTheme>("clinical");
   const [status, setStatus] = useState("The complete scheduling surface is ready");
   const loadEvents = useCallback<LoadEvents>(async (request) => filterEvents(eventsRef.current, request), []);
-  const settings = useMemo(() => ({ ...themeSettings[theme], zoom }), [theme, zoom]);
+  const settings = useMemo(() => ({ ...themeSettings.clinical, zoom }), [zoom]);
 
   const createEvent = useCallback((request: EventCreateRequest) => {
     sequenceRef.current += 1;
@@ -673,15 +658,6 @@ export function EverythingTogetherDemo() {
           >
             +
           </button>
-          <select
-            aria-label="Summary calendar theme"
-            onChange={(event) => setTheme(event.target.value as ArticleTheme)}
-            value={theme}
-          >
-            <option value="clinical">Clinical</option>
-            <option value="compact">Compact</option>
-            <option value="night">Night</option>
-          </select>
         </div>
       }
     >
@@ -690,7 +666,7 @@ export function EverythingTogetherDemo() {
           ref={calendarRef}
           ariaLabel="Complete calendar system example"
           calendars={articleCalendars}
-          className={`article-themed-calendar theme-${theme}`}
+          className="article-themed-calendar theme-clinical"
           eventRenderer={ArticleEventCard}
           initialDateKey={articleDateKey}
           loadEvents={loadEvents}

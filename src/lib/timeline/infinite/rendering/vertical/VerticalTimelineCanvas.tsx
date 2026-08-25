@@ -6,7 +6,7 @@ import type { PointerEventHandler, RefObject } from "react";
 import type { CalendarViewComponentProps } from "#quno-internal/timeline/core/types";
 import { VerticalTimelineDay } from "./VerticalTimelineDay";
 import type { VerticalTimelineDayProps } from "./types";
-import type { VirtualDateRenderItem } from "../../scroll/window/renderItems";
+import { semanticDateKeyForRenderItem, type VirtualDateRenderItem } from "../../scroll/window/renderItems";
 
 export type VerticalDayRenderProps = Omit<
   VerticalTimelineDayProps,
@@ -86,7 +86,7 @@ export function VerticalTimelineCanvas({
           style={{ height: totalHeight, width: "100%", minWidth: labelWidth + maxVisibleDayMinWidth }}
         >
           {renderItems.map((item) => {
-            const dateKey = dateKeyForIndex(item.index);
+            const dateKey = semanticDateKeyForRenderItem(item, dateKeyForIndex);
             return (
               <VerticalTimelineDay
                 {...day}
@@ -95,7 +95,7 @@ export function VerticalTimelineCanvas({
                 top={item.start}
                 dayHeight={dayHeight}
                 boardMinWidth={dayMinWidth(dateKey)}
-                key={item.key}
+                key={dateKey}
               />
             );
           })}

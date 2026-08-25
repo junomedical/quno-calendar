@@ -3,6 +3,7 @@ import {
   firstDuplicatedViewportEvent,
   firstViewportEventBox,
   goToWorkday,
+  openDrawnExternalDraft,
   selectPageText,
   topVisibleDayDate,
   viewportRelativeEventBox,
@@ -10,7 +11,7 @@ import {
 } from "../helpers";
 
 test("keeps popup cancellation and scroll reset visible in the activity pane", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/demo/infinite-calendar");
   await goToWorkday(page);
   await waitForDemoEvents(page);
   const eventBox = await firstViewportEventBox(page);
@@ -46,7 +47,7 @@ test("keeps popup cancellation and scroll reset visible in the activity pane", a
 });
 
 test("supports drawing a new event area", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/demo/infinite-calendar");
   await goToWorkday(page);
   const initialEventCount = await page.getByTestId("calendar-event").count();
   const viewport = page.locator(".quno-calendar-viewport");
@@ -504,7 +505,7 @@ test("supports drawing a new event area", async ({ page }) => {
 });
 
 test("does not pull the viewport back after cancel when the user scrolls immediately", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/demo/infinite-calendar");
   await goToWorkday(page);
   const viewport = page.locator(".quno-calendar-viewport");
   const eventBox = await firstViewportEventBox(page);
@@ -527,9 +528,8 @@ test("does not pull the viewport back after cancel when the user scrolls immedia
 });
 
 test("keeps expanded calendar rows populated immediately after create cancel", async ({ page }) => {
-  await page.goto("/");
-  await page.getByRole("button", { name: "Add event" }).click();
-  await expect(page.getByTestId("external-event-popup")).toBeVisible();
+  await page.goto("/demo/infinite-calendar");
+  await openDrawnExternalDraft(page);
   await expect
     .poll(async () =>
       page
@@ -540,9 +540,7 @@ test("keeps expanded calendar rows populated immediately after create cancel", a
     )
     .toEqual(["dr-kirillov"]);
 
-  await page.getByTestId("jump-date-input").fill("2026-04-27");
-  await page.getByTestId("jump-time-input").fill("09:00");
-  await page.getByTestId("go-date-button").click();
+  await goToWorkday(page, "2026-04-27");
   await expect.poll(async () => topVisibleDayDate(page)).toBe("2026-04-27");
   await waitForDemoEvents(page);
 
@@ -624,7 +622,7 @@ test("keeps expanded calendar rows populated immediately after create cancel", a
 });
 
 test("keeps edit cancel anchored to the original first person", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/demo/infinite-calendar");
   await goToWorkday(page);
   const duplicate = await firstDuplicatedViewportEvent(page);
   const firstPersonParticipant = duplicate.boxes.find((box) => !box.calendarId.includes("room"));
@@ -670,7 +668,7 @@ test("keeps edit cancel anchored to the original first person", async ({ page })
 });
 
 test("supports external event editing popup without blocking calendar scroll", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/demo/infinite-calendar");
   await goToWorkday(page);
   await waitForDemoEvents(page);
   const editableEvent = await page.evaluate(() => {
@@ -880,14 +878,12 @@ test("supports external event editing popup without blocking calendar scroll", a
       )
       .toBeLessThanOrEqual(4);
   }
-  await page.getByTestId("jump-date-input").fill("2026-07-06");
-  await page.getByTestId("jump-time-input").fill("14:45");
-  await page.getByTestId("go-date-button").click();
+  await goToWorkday(page, "2026-07-06");
   await expect(page.locator(`[data-testid="calendar-event"][data-event-id="${eventId}"]`).first()).toBeVisible();
 });
 
 test("does not start event creation outside row grid cells", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/demo/infinite-calendar");
   await goToWorkday(page);
   const nonInteractiveTargets = [
     await page.locator(".quno-calendar-row-label").first().boundingBox(),

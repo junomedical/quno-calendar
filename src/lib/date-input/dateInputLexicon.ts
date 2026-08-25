@@ -15,10 +15,20 @@ const EN: DateInputLexicon = {
     11: ["november", "nov"],
     12: ["december", "dec"]
   },
+  weekdayNames: {
+    0: ["sunday", "sun"],
+    1: ["monday", "mon"],
+    2: ["tuesday", "tue", "tues"],
+    3: ["wednesday", "wed"],
+    4: ["thursday", "thu", "thur", "thurs"],
+    5: ["friday", "fri"],
+    6: ["saturday", "sat"]
+  },
   today: ["today"],
   yesterday: ["yesterday"],
   tomorrow: ["tomorrow"],
   last: ["last"],
+  previous: ["previous"],
   past: ["past"],
   day: ["day"],
   days: ["days"],

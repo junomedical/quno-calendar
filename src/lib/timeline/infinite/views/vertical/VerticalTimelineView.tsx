@@ -43,11 +43,13 @@ export const InfiniteVerticalTimelineView = forwardRef<CalendarViewHandle, Calen
       initialAnchorDateKey,
       settings,
       dayHeight: geometry.dayHeight,
-      layoutSignature: buildVerticalLayoutSignature(renderedCalendars, hiddenCalendarIds, settings),
-      topDateAlignmentKey: renderedCalendars.map((calendar) => calendar.id).join("|"),
+      layoutSignature: buildVerticalLayoutSignature(settings),
+      topDateAlignmentKey: "",
       layoutAnchorDateKey: props.activeDraft ? eventDateKey(props.activeDraft.event) : undefined
     });
     const eventStore = useEventRangeLoader({
+      activeDraftDateKey: props.activeDraft ? eventDateKey(props.activeDraft.event) : undefined,
+      activeDraftLoadAnchorDateKey: viewport.virtualWindow.anchorDateKey,
       loadEvents: props.loadEvents,
       eventPrefetchPolicy: props.eventPrefetchPolicy,
       eventVersion: props.eventVersion,
@@ -123,7 +125,8 @@ export const InfiniteVerticalTimelineView = forwardRef<CalendarViewHandle, Calen
       geometryRegistration: navigation.geometryRegistration,
       activeRestoreTarget: navigation.activeRestoreTarget,
       viewportMetricsStore: viewport.viewportMetricsStore,
-      hover
+      hover,
+      forceAllResources: viewport.retainAllResources
     });
     return (
       <VerticalTimelineCanvas

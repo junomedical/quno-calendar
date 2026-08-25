@@ -4,6 +4,7 @@ import { InfiniteTimeScaleHeader } from "../shared/TimeScaleHeader";
 import { InfiniteTimelineDay } from "./HorizontalTimelineDay";
 import type { HorizontalTimelineDayProps } from "./types";
 import { TIMELINE_LEFT_GUTTER_PX, buildTimeTicks } from "#quno-internal/timeline/time/timelineTicks";
+import { semanticDateKeyForRenderItem } from "../../scroll/window/renderItems";
 
 /**
  * Horizontal render loop.
@@ -91,11 +92,11 @@ export function HorizontalTimelineCanvas({
             nowMinute={nowMinute}
           />
           {renderItems.map((item) => {
-            const dateKey = dateKeyForIndex(item.index);
+            const dateKey = semanticDateKeyForRenderItem(item, dateKeyForIndex);
             return (
               <InfiniteTimelineDay
                 {...dayProps}
-                key={item.key}
+                key={dateKey}
                 item={item}
                 dateKey={dateKey}
                 dayHeight={getDayHeight(dateKey)}

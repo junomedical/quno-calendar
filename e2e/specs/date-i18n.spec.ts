@@ -4,7 +4,7 @@ import { goToWorkday } from "../helpers";
 test.use({ locale: "de-DE" });
 
 test("localizes horizontal and vertical date chrome without clipping labels", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/demo/infinite-calendar");
   await goToWorkday(page, "2026-07-06");
 
   const horizontalLabel = page

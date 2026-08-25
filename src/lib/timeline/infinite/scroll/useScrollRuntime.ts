@@ -20,7 +20,7 @@ import { createVirtualDateModel } from "./window/dateModel";
 import { useLayoutOffsetRestoration } from "./recenter/useLayoutOffsetRestoration";
 import type { ResolveOffsetOnLayoutChange } from "./recenter/useLayoutOffsetRestoration";
 import { useVirtualDateRenderItems } from "./window/useVirtualDateRenderItems";
-import { useVerticalProjectionRenderWindow } from "./window/useVerticalProjectionRenderWindow";
+import { useStructuralRenderWindow } from "./window/useStructuralRenderWindow";
 import { useVirtualScrollPosition } from "./position/useVirtualScrollPosition";
 import { useVirtualWindowNavigation } from "./navigation/useVirtualWindowNavigation";
 import { useVisibleDateState } from "./position/useVisibleDateState";
@@ -149,9 +149,14 @@ export function useScrollRuntime({
   });
 
   const virtualItems = virtualizer.getVirtualItems();
-  const forcedBaseGeometryAnchorIndex = useVerticalProjectionRenderWindow({
-    enabled: Boolean(resolveOffsetOnLayoutChange),
-    baseDayHeight,
+  const dateSequenceKey = settings.excludedWeekdays.join("|");
+  const dateModelTransitionKey = `${dateSequenceKey}:${virtualWindow.anchorDateKey}`;
+  const structuralRenderKey = resolveOffsetOnLayoutChange
+    ? `${verticalLayoutSignature}:${baseDayHeight}:${virtualWindow.anchorDateKey}`
+    : `horizontal-dates:${dateModelTransitionKey}`;
+  const structuralRenderWindow = useStructuralRenderWindow({
+    transitionKey: structuralRenderKey,
+    resourceTransitionKey: dateModelTransitionKey,
     topVisibleDateKey: topVisibleDateRef.current,
     itemCount: virtualWindow.count,
     dateKeyToIndex
@@ -164,7 +169,7 @@ export function useScrollRuntime({
     virtualItems,
     virtualWindow,
     baseDayHeight,
-    forcedBaseGeometryAnchorIndex,
+    forcedBaseGeometryAnchorIndex: structuralRenderWindow.anchorIndex,
     layoutAnchorDateKey,
     dateKeyToIndex,
     dateKeyForIndex,
@@ -182,6 +187,7 @@ export function useScrollRuntime({
     scrollToDate,
     rememberVisibleDateOffset,
     updateTopVisibleDate,
-    clearScrollEndTimer
+    clearScrollEndTimer,
+    retainAllResources: structuralRenderWindow.retainAllResources
   };
 }

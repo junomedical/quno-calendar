@@ -5,6 +5,14 @@
 Vitest unit tests live in `tests/unit` and mirror the source module grouping.
 
 - Date virtualization with excluded weekdays.
+- Natural-date parsing covers complete previous day/week/month/year periods, the current configured calendar week,
+  Sunday-, Monday-, and Saturday-first boundaries, last/this/next weekday resolution against that same week model,
+  aliases, lexicon extensions, and range
+  rejection in single-day mode.
+- The date-input field guide follows twelve task-oriented contracts: single/range mode, familiar absolute formats,
+  preferred date order, relative dates, keyboard controls, range entry, expected-period ranking, localization,
+  simultaneous multilingual recognition, picker composition, library size, and dependencies. Each keeps a
+  public-entry-point exhibit, Try it guidance, and a copyable recipe.
 - Date labels localize month/day and weekday text for explicit and runtime locales, preserve English ordinal ordering,
   and let a custom day-name generator replace the complete label using the local date and configured locale.
 - Variable-size resource prefix extents, binary-searched windows across 50 logical resources, two-resource overscan,
@@ -18,6 +26,7 @@ Vitest unit tests live in `tests/unit` and mirror the source module grouping.
 - The architecture guard enforces readable production module and function sizes; TypeScript resolves all cross-domain imports.
 - Time-to-pixel conversion, vertical time-to-pixel conversion, zoom, and snap interval.
 - Event overlap lane layout, 50px compact row height for one or two lanes, stepped overlap growth from three lanes onward, at least 24px lane slots, and at least 20px visible resting event shells for dense groups.
+- Equal-start overlap lanes retain caller order when the last appointment duration changes, while same-date committed edits and accepted moves preserve cache order.
 - Vertical overlap column layout, default 240px base column width, three-lane fit, +80px growth for each additional overlap lane, and custom caller-provided column sizing rules.
 - Row-height growth remains local to the dense date/calendar row instead of inflating every loaded day.
 - Availability events are excluded from row-height growth and overlap calculations.
@@ -67,10 +76,17 @@ Vitest unit tests live in `tests/unit` and mirror the source module grouping.
 
 ## Playwright Tests
 
-- The editorial integration article scrolls independently from the document, ignores legacy `?step=` parameters, and
-  renders as the only example route without the former recipe header/navigation.
-- The main demo exposes a visible link to the field guide. Its 25-entry table of contents targets stable chapter ids
-  and scrolls the internal article viewport to the selected section. The narrative begins with “Why build another
+- The project home renders exactly three feature cards with punchy descriptions and dedicated field-guide links. Each
+  guide exposes visible All components and Demo links to the project directory and its matching component route, while
+  legacy guide URLs reach the infinite-calendar guide.
+- The date-input guide table of contents exposes all twelve contracts in the requested order. Its live examples switch
+  selection mode and locale, resolve absolute and relative samples, edit by keyboard, demonstrate expected-period
+  ranking without treating it as validation, prioritize ambiguous DMY/MDY input, accept English and German in one
+  parser, share a range with the picker, focus its only changed endpoint, and report the independently measured payload
+  and runtime peers.
+- The editorial infinite-calendar article scrolls independently from the document, ignores legacy `?step=` parameters,
+  and keeps a 25-entry table of contents with stable chapter ids that scroll the internal article viewport to the
+  selected section. The narrative begins with “Why build another
   calendar,” follows the requested feature sequence, and keeps each title paired with its matching numbered section.
 - Chapter 00 explains why complex business scheduling needs a dedicated calendar before introducing horizontal time,
   vertically stacked resources, and the familiar vertical mouse-wheel or touchpad axis.
@@ -113,16 +129,17 @@ Vitest unit tests live in `tests/unit` and mirror the source module grouping.
   reading or placement, and preserve the time being examined throughout the continuous transition.
 - The current-time chapter renders one aligned marker through the header and resource rows, permits horizontal
   exploration, and restores the marker to the viewport through a product-owned control.
-- Date/time inputs navigate immediately on change without a separate submit action; previous and next controls move one
-  day at a time, and Today returns to the visible current-time marker.
+- The single-date `QunoDateInput` navigates immediately on commit without separate time or submit controls; previous and
+  next controls move one day at a time, and Today returns to the visible current-time marker. The main demo sidebar has
+  no Add event action because creation begins by drawing on the timeline.
 - The progressive-precision lab keeps one stable set of five-minute ticks while zoom reveals half-hour, quarter-hour,
   and five-minute labels only when their spacing is readable. Its active precision label sits to the left of the
   overview/quarter-hour/five-minute controls at article width.
 - Walkthrough toolbars place status and active-state labels before their related buttons, including availability,
   loading stability, and creation-lane controls.
 - Clinical, compact, and night presets change settings-owned geometry and scoped CSS color through the same public
-  surface. The final composition combines controlled zoom, theme selection, navigation, mutation, animated insertion,
-  and the shared full-screen shell.
+  surface. The final composition combines controlled zoom, navigation, mutation, animated insertion, and the shared
+  full-screen shell without duplicating the styling chapter's theme selector.
 - The localization exhibit compares English and Japanese labels with human-relative and binary robot generators,
   updates adjacent-day sequences without remounting its viewport, and keeps the longest custom label unclipped. Custom
   horizontal labels match their specimen text without a redundant default prefix; vertical custom labels use one
@@ -157,16 +174,22 @@ Example-route coverage lives in the editorial integration route. Its embedded ex
 orientation, availability, loading, visual-focus, and motion assertions formerly split across standalone routes.
 
 - Initial demo render.
-- Demo routes `/demo1`, `/demo2`, and `/demo3` render distinct calendar compositions using route-specific settings, view defaults, and event-card styles while `/` remains the original demo; each variant still supports live orientation and interaction-mode switching.
+- Demo routes `/demo/infinite-calendar`, `/demo1`, `/demo2`, and `/demo3` render distinct calendar compositions using
+  route-specific settings, view defaults, and event-card styles, while `/` remains the project overview. The focused
+  `/demo/date-range-input` and `/demo/date-input-field` routes render only their named components. The primary infinite
+  calendar demo omits the variant/theme-style route strip so its controls stay focused on calendar behavior.
 - Demo sidebar rendering stats populate frame redraw time, visible event DOM-node count, and total rendered calendar DOM-node count.
 - The default demo activity pane keeps recent messages visible together. Cancelling an external popup retains the
   cancellation entry and adds the corresponding scroll-reset requested/skipped entry without overflowing its bounded
   sidebar pane. Settled manual viewport movement produces one coalesced `Viewport scrolled` entry, while imperative
   date/time navigation and automatic corrections produce `Viewport repositioned` with the final scroll coordinates.
-- The default demo uses the instant API mode; explicit loading coverage opts into one second. After a fresh drawn create
-  is cancelled, the settled visible day, row, and event nodes retain identity and geometry through the former delayed
-  repaint window. Holding a draw across a pending 1.2-second idle-recenter deadline keeps the draft and visible date
-  tree mounted at the same viewport-relative geometry until pointer release.
+- The default demo uses the instant API mode; explicit loading coverage opts into one second. A fresh drawn create
+  narrows the calendar rows to the draft's participant set, and cancel restores the prior selected rows. After that
+  intentional projection change settles, the visible day, row, and event nodes retain identity and geometry through the
+  former delayed repaint window, the fading draft remains on its own paint/opacity-compositor boundary, and no event API
+  request is made when the participant subset is already covered. Holding a draw
+  across a pending 1.2-second idle-recenter deadline keeps the draft and visible date tree mounted at the same
+  viewport-relative geometry until pointer release.
 - Vertical virtual scrolling changes visible dates.
 - Rendered day DOM nodes are pruned to the visible viewport plus five day sections of overscan.
 - Vertical scrollbar dragging is bounded to one month before/after the visible date. Interior positions keep the
@@ -196,13 +219,16 @@ orientation, availability, loading, visual-focus, and motion assertions formerly
 - Date navigation can jump to a specific date and back to today.
 - Date/time navigation can jump vertically to a date and horizontally to a requested time.
 - Vertical `Shift` + wheel zoom anchors to the closest rendered in-range time node even when the pointer sits below the configured timeline end.
-- Calendar visibility/count changes preserve the top visible date and align its date header to the viewport top after
-  row or column geometry settles. Parent-only resizing does not start a draft or alter the semantic scroll anchor.
+- Calendar visibility/count changes preserve the top visible date plus a surviving resource's row-local position after
+  row or column geometry settles. They do not sweep unrelated event rows through the viewport. Parent-only resizing
+  does not start a draft or alter the semantic scroll anchor.
   Active draft participant filtering pins the draft date and lets explicit viewport restoration retain the stronger
   event/slot target.
-- Excluding weekends preserves the visible weekday after the included-date sequence and dense horizontal measurements
-  rebuild. With both 5,000 and 20,000 events/year, drawing and cancelling a create draft afterward keeps the same date
+- Excluding weekends preserves the visible weekday and its event DOM identities while the included-date sequence and
+  dense horizontal measurements rebuild. With both 5,000 and 20,000 events/year, drawing and cancelling a create draft afterward keeps the same date
   and calendar row at its previous viewport-relative position through fadeout and idle recentering.
+- Idle bounded-window recenter preserves the top date, intra-day offset, viewport geometry, and existing visible date
+  and event DOM identities while resetting the scrollbar to its equivalent centered position.
 - Read-only and layout-only article exhibits cannot start event drags or empty-grid drafts. Availability creation completes and
   clears its draft, while existing availability does not start dragging without `onEventMoveRequest`.
 - Drawing a new event area renders an opaque uncapped-width draft with visible time text without changing row height, lane layout, or committed row event count, then delegates to the external popup in the default demo and leaves the saved event visible after popup save. Drawing a create draft in a row with two saved overlaps keeps the saved row at the compact two-lane height after popup handoff. Editing one event in a three-overlap row filters the source before metrics, so the draft replacement leaves only two committed overlap lanes and the row drops to the compact height.
@@ -232,8 +258,8 @@ orientation, availability, loading, visual-focus, and motion assertions formerly
 - Example routes mount for the editorial field guide, read-only, drag/create, vertical planner, availability editing,
   controlled draft, and delayed cancellable API flows; the article stability lab paints its grid before refreshed
   events arrive and preserves stale content while dense data changes layout.
-- The default showcase sidebar links to the integration field guide; retired standalone example paths fall back to the
-  main demo.
+- The default showcase sidebar links to the infinite-calendar field guide; unknown and retired standalone example paths
+  fall back to the project overview.
 - Default and preset showcase sidebars place the dataset-size and API-delay selects on the same horizontal row with
   usable widths; API loading status remains below the pair.
 

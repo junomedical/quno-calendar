@@ -9,15 +9,8 @@ import {
   type EventCreateRequest,
   type EventMoveRequest
 } from "@quno/calendar/timeline";
-import type { IsoDate } from "@quno/calendar";
 import { demoCalendars } from "./data";
-import {
-  addMinutesToIso,
-  dateTimeToIso,
-  draftParticipantIds,
-  eventParticipantIds,
-  isoDateInputValue
-} from "./draftFormUtils";
+import { draftParticipantIds, eventParticipantIds, isoDateInputValue } from "./draftFormUtils";
 import { buildExternalCreateDraft, calendarColor } from "./externalDraftEvents";
 import { firstPersonParticipantId } from "./externalDraftParticipants";
 import { useExternalDraftCommit } from "./useExternalDraftCommit";
@@ -26,10 +19,6 @@ import { useExternalDraftNavigation } from "./useExternalDraftNavigation";
 type UseExternalEventDraftsArgs = {
   selectedCalendarIds: CalendarId[];
   calendarRef: RefObject<QunoCalendarHandle | null>;
-  jumpDate: IsoDate;
-  jumpTime: string;
-  snapMinutes: number;
-  editAvailabilities: boolean;
   setEvents: Dispatch<SetStateAction<CalendarEvent[]>>;
   setMessage: (message: string) => void;
 };
@@ -37,10 +26,6 @@ type UseExternalEventDraftsArgs = {
 export function useExternalEventDrafts({
   selectedCalendarIds,
   calendarRef,
-  jumpDate,
-  jumpTime,
-  snapMinutes,
-  editAvailabilities,
   setEvents,
   setMessage
 }: UseExternalEventDraftsArgs) {
@@ -251,21 +236,6 @@ export function useExternalEventDrafts({
     [activeDraft, activeDraftLastSeenAnchorRef, captureEventAnchor, restoreEventAnchor]
   );
 
-  const handleExternalAdd = useCallback(() => {
-    const start = dateTimeToIso(jumpDate, jumpTime);
-    const end = addMinutesToIso(start, snapMinutes * 3);
-    openCreateDraft(
-      {
-        start,
-        end,
-        calendarId: selectedCalendarIds[0] ?? demoCalendars[0].id,
-        kind: editAvailabilities ? "availability" : "draft"
-      },
-      "button"
-    );
-    calendarRef.current?.scrollToDateTime(jumpDate, jumpTime);
-  }, [calendarRef, editAvailabilities, jumpDate, jumpTime, openCreateDraft, selectedCalendarIds, snapMinutes]);
-
   const { saveActiveDraft, cancelActiveDraft } = useExternalDraftCommit({
     activeDraft,
     activeEditSourceEventRef,
@@ -306,7 +276,6 @@ export function useExternalEventDrafts({
     openCreateDraft,
     handleActivate,
     handleActiveDraftMove,
-    handleExternalAdd,
     saveActiveDraft,
     cancelActiveDraft,
     updateDraftEvent,

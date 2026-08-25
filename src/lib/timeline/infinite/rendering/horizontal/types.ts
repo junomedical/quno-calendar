@@ -57,6 +57,7 @@ export type HorizontalTimelineDayProps = {
   eventRenderer: EventRenderer;
   geometryRegistration: ViewportGeometryRegistration;
   viewportMetricsStore: ViewportMetricsStore;
+  forceAllResources: boolean;
   measureElement: RefCallback<HTMLDivElement>;
   getRowHeight: (dateKey: string, calendarId: CalendarId) => number;
   eventsForRow: (dateKey: string, calendarId: CalendarId) => CalendarEvent[];

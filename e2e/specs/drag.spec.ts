@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 import { firstDuplicatedViewportEvent, goToWorkday, selectPageText, waitForDemoEvents } from "../helpers";
 
 test("supports dragging an event to another time", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/demo/infinite-calendar");
   await goToWorkday(page);
   await waitForDemoEvents(page);
   const initialEventCount = await page.getByTestId("calendar-event").count();
@@ -45,7 +45,7 @@ test("supports dragging an event to another time", async ({ page }) => {
 });
 
 test("keeps visible event cache populated after dropping on another day", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/demo/infinite-calendar");
   await goToWorkday(page);
   await waitForDemoEvents(page);
 

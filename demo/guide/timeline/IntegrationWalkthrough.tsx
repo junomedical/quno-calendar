@@ -119,20 +119,14 @@ const zoomSnippet = `const [zoom, setZoom] = useState(1.25);
 
 const navigationSnippet = `const calendarRef = useRef<QunoCalendarHandle>(null);
 
-<input
-  type="date"
-  value={date}
-  onChange={(event) => {
-    setDate(event.target.value);
-    calendarRef.current?.scrollToDateTime(event.target.value, time);
-  }}
-/>
-<input
-  type="time"
-  value={time}
-  onChange={(event) => {
-    setTime(event.target.value);
-    calendarRef.current?.scrollToDateTime(date, event.target.value);
+<QunoDateInput
+  value={{ start: date, end: date }}
+  selectionMode="single"
+  expectedRange={expectedRange}
+  onChange={(selection) => {
+    if (!selection) return;
+    setDate(selection.start);
+    calendarRef.current?.scrollToDate(selection.start);
   }}
 />
 <button onClick={() => moveByDays(-1)}>Previous day</button>
@@ -325,7 +319,17 @@ export function IntegrationWalkthrough({ embedded = false }: { embedded?: boolea
     <Root className="calendar-article" data-testid="calendar-article">
       <article className="calendar-article__content">
         <header className="calendar-article__hero">
-          <p className="calendar-article__eyebrow">Quno Calendar · Field guide</p>
+          <div className="calendar-article__hero-topline">
+            <p className="calendar-article__eyebrow">Quno Calendar · Field guide</p>
+            <div className="calendar-article__hero-links">
+              <a className="calendar-article__demo-link" href="/">
+                All components
+              </a>
+              <a className="calendar-article__demo-link" href="/demo/infinite-calendar">
+                Demo <span aria-hidden="true">→</span>
+              </a>
+            </div>
+          </div>
           <h1>A simple, fast calendar for businesses with complex schedules.</h1>
           <p className="calendar-article__dek">
             We built Quno Calendar around the problems scheduling teams face every day: moving through long date ranges
@@ -608,13 +612,13 @@ export function IntegrationWalkthrough({ embedded = false }: { embedded?: boolea
             Previous, Next, and Today, while search results and notifications already know the exact destination.
           </p>
           <p>
-            The navigation handle accepts a date or date-and-time target and manages the virtual movement internally.
-            Products can connect it to a compact toolbar, month picker, command palette, or deep link without learning
-            how the infinite date window works.
+            Quno Date Input accepts familiar dates and natural phrases, then passes its timezone-free day key to the
+            navigation handle. Products can connect the same handle to a command palette, search result, or deep link
+            without learning how the infinite date window works.
           </p>
           <CodeBlock code={navigationSnippet} title="Connect any product control to calendar navigation" />
           <DemoBreakout>
-            <LazyArticleDemo label="date and time navigation example">
+            <LazyArticleDemo label="date navigation example">
               <NavigationControlsDemo />
             </LazyArticleDemo>
           </DemoBreakout>
@@ -876,8 +880,8 @@ export function IntegrationWalkthrough({ embedded = false }: { embedded?: boolea
             commits. Every behavior uses the same public component shown in the focused examples.
           </p>
           <Callout>
-            Change density or theme, zoom the schedule, drag an appointment, draw in empty space, insert an animated
-            event, or expand the same calendar full screen.
+            Zoom the schedule, drag an appointment, draw in empty space, insert an animated event, or expand the same
+            calendar full screen. Styling choices remain in the dedicated theming chapter.
           </Callout>
           <DemoBreakout>
             <LazyArticleDemo label="complete scheduling workflow example">
@@ -956,7 +960,7 @@ export function IntegrationWalkthrough({ embedded = false }: { embedded?: boolea
           <p>
             This guide demonstrates when to use read-only access, editing, availability, orientation, loading, focus,
             and motion. To explore the same API with unrestricted data and controls, open the{" "}
-            <a href="/">main calendar demo</a>.
+            <a href="/demo/infinite-calendar">main calendar demo</a>.
           </p>
         </footer>
       </article>

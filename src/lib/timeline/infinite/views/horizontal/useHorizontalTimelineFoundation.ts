@@ -48,7 +48,10 @@ export function useHorizontalTimelineFoundation({
   const [windowAnchorDateKey, setWindowAnchorDateKey] = useState<string>(initialAnchorDateKey);
   const baseDayHeight = settings.dayHeaderHeight + renderedCalendars.length * settings.rowHeight;
   const renderedCalendarIds = useMemo(() => renderedCalendars.map((calendar) => calendar.id), [renderedCalendars]);
-  const verticalLayoutSignature = `${renderedCalendarIds.join("|")}:${Array.from(hiddenCalendarIds).join("|")}:${settings.dayHeaderHeight}:${settings.rowHeight}:${settings.excludedWeekdays.join("|")}`;
+  const activeDraftLayoutSignature = props.activeDraft
+    ? `${renderedCalendarIds.join("|")}:${Array.from(hiddenCalendarIds).join("|")}`
+    : "stable-resources";
+  const verticalLayoutSignature = `${activeDraftLayoutSignature}:${settings.dayHeaderHeight}:${settings.rowHeight}:${settings.excludedWeekdays.join("|")}`;
   const virtualTimeline = useScrollRuntime({
     anchorDateKey: windowAnchorDateKey,
     setAnchorDateKey: setWindowAnchorDateKey,
@@ -56,7 +59,7 @@ export function useHorizontalTimelineFoundation({
     settings,
     baseDayHeight,
     verticalLayoutSignature,
-    topDateAlignmentKey: renderedCalendarIds.join("|"),
+    topDateAlignmentKey: "",
     isInteractionActive,
     layoutAnchorDateKey: props.activeDraft ? eventDateKey(props.activeDraft.event) : undefined
   });
@@ -70,6 +73,8 @@ export function useHorizontalTimelineFoundation({
     scrollToDate: virtualTimeline.scrollToDate
   });
   const eventRange = useEventRangeLoader({
+    activeDraftDateKey: props.activeDraft ? eventDateKey(props.activeDraft.event) : undefined,
+    activeDraftLoadAnchorDateKey: windowAnchorDateKey,
     loadEvents: props.loadEvents,
     eventPrefetchPolicy: props.eventPrefetchPolicy,
     eventVersion: props.eventVersion,

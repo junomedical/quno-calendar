@@ -15,6 +15,15 @@ const nearestDateOutsideView = (range: DateRange | null, visibleMonth: IsoDate):
   return null;
 };
 
+const onlyChangedDate = (previous: DateRange | null, next: DateRange | null): IsoDate | null => {
+  if (!previous || !next) return null;
+  const changed = [
+    previous.start === next.start ? null : next.start,
+    previous.end === next.end ? null : next.end
+  ].filter((date): date is IsoDate => date !== null);
+  return changed.length === 1 ? changed[0] : null;
+};
+
 export const TypeToEditExample = (): JSX.Element => {
   const [value, setValue] = useState<DateRange | null>(initialValue);
   const [open, setOpen] = useState(false);
@@ -35,15 +44,19 @@ export const TypeToEditExample = (): JSX.Element => {
     return () => document.removeEventListener("pointerdown", closeOutside);
   }, [open]);
 
-  const moveCalendar = (next: DateRange | null): void => {
-    const date = nearestDateOutsideView(next, calendarMonth);
-    if (date) {
-      setCalendarMonth(monthOf(date));
-      setCalendarRevision((revision) => revision + 1);
-    }
+  const moveCalendar = (next: DateRange | null, preferredDate?: IsoDate | null): void => {
+    const date = preferredDate ?? nearestDateOutsideView(next, calendarMonth);
+    if (!date || monthOf(date) === calendarMonth) return;
+    setCalendarMonth(monthOf(date));
+    setCalendarRevision((revision) => revision + 1);
   };
   const changeValue = (next: DateRange | null): void => {
     moveCalendar(next);
+    setPreview(null);
+    setValue(next);
+  };
+  const changeInputValue = (next: DateRange | null): void => {
+    moveCalendar(next, onlyChangedDate(preview ?? value, next));
     setPreview(null);
     setValue(next);
   };
@@ -55,7 +68,7 @@ export const TypeToEditExample = (): JSX.Element => {
       parserLanguages: ["en", "de"]
     });
     if (result.status !== "success") return;
-    moveCalendar(result.value);
+    moveCalendar(result.value, onlyChangedDate(preview ?? value, result.value));
     setPreview(result.value);
   };
   const previewArrow: KeyboardEventHandler<HTMLInputElement> = (event) => {
@@ -77,7 +90,7 @@ export const TypeToEditExample = (): JSX.Element => {
         <div className="story__type-to-edit-input story__type-to-edit-input--summary">
           <QunoDateInput
             value={value}
-            onChange={changeValue}
+            onChange={changeInputValue}
             onFocus={() => {
               setFocused(true);
               setOpen(true);

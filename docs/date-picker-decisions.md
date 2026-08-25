@@ -929,3 +929,56 @@ This file records decisions that should remain stable across implementation sess
 - Context: Repeating literal fallback colors across component styles makes the built-in palette difficult to inspect and update, while global theme defaults would leak implementation choices into consuming applications.
 - Decision: Define internal `--quno-picker-*-default` palette tokens in one component-scoped stylesheet. Keep the existing ordinary `--quno-picker-*` names as the consumer override API, and resolve each public token through its corresponding internal default.
 - Consequences: Consumers continue to override one familiar token per property without a `:root` dependency. The fallback palette is auditable in one place, but its internal default names are not part of the documented customization contract.
+
+## QDP-117 — Resolve previous periods and named weekdays by calendar week
+
+- Date: 2026-08-25
+- Status: Accepted; extends QDP-105 and QDP-112
+- Context: Future calendar periods are already boundary-aligned, but users cannot express the corresponding previous
+  calendar unit or choose a weekday relative to the current week. Rolling seven-day interpretations are unsuitable for
+  phrases such as `previous week`, and “next Monday” must remain predictable on every reference weekday.
+- Decision: Accept English `previous day`, `previous week`, `previous month`, and `previous year`. Day means yesterday;
+  week, month, and year return the complete prior calendar unit. Resolve `last`, `this`, and `next` plus any English
+  weekday name or common abbreviation against the prior, current, or following Monday–Sunday calendar week. Expose
+  `previous` aliases and indexed `weekdayNames` through the customizable lexicon. Do not reinterpret the existing
+  rolling `last N days` and `past N units` grammar.
+- Consequences: Calendar filters can select exact prior units and deterministic named days without timezone conversion.
+  Weekday phrases remain valid in single-day mode, while previous week/month/year results retain normal multi-day
+  rejection there. Additional localized wording stays consumer-owned through lexicon extensions.
+
+## QDP-118 — Resolve this week as the current calendar week
+
+- Date: 2026-08-25
+- Status: Accepted; extends QDP-105 and QDP-117
+- Context: Named weekdays already use the current Monday–Sunday week, but the corresponding complete `this week`
+  period is missing. Treating it as a rolling seven-day range would disagree with `this Monday` and calendar filters.
+- Decision: Resolve English `this week` to the Monday–Sunday calendar week containing `referenceDate`. Keep it as a
+  multi-day range, so single selection mode rejects it consistently with other calendar periods.
+- Consequences: Current-week filters align with previous-week and named-weekday grammar, including across year
+  boundaries, without adding timezone conversion or counted `this` phrases.
+
+## QDP-119 — Follow the only changed typed endpoint in picker composition
+
+- Date: 2026-08-25
+- Status: Accepted; refines QDP-100 and QDP-105
+- Context: When a typed range changes only its off-screen Start or End value, keeping the picker on the previously
+  visible endpoint hides the exact date the user just edited. Moving indiscriminately is also wrong when both endpoints
+  change and there is no single edited target.
+- Decision: In the public input-plus-picker composition, compare the next recognized range with the last preview or
+  committed range. If exactly one endpoint changed, move the picker’s visible month to that date. If zero or both
+  endpoints changed, retain the existing nearest-off-screen fallback. Picker-originated changes keep their normal
+  navigation behavior.
+- Consequences: Arrow edits and typed one-endpoint commits immediately reveal the edited date without adding private
+  coupling or changing either component API. Whole-range replacements remain stable and predictable.
+
+## QDP-120 — Share configurable week boundaries between input and picker
+
+- Date: 2026-08-25
+- Status: Accepted; supersedes the fixed Monday boundary in QDP-117 and QDP-118
+- Context: The datepicker already exposes `weekStartsOn` as `0` through `6`, while natural-input calendar phrases were
+  fixed to Monday–Sunday. A composed field and picker could therefore disagree about what `this week` means.
+- Decision: Add the same optional `weekStartsOn: WeekStart` setting to `QunoDateInput` and `parseDateInput`, defaulting
+  to `1` as the picker does. Apply it consistently to `this`, `previous`, and `next` calendar weeks and to
+  last/this/next named weekdays. Keep rolling durations independent of calendar-week boundaries.
+- Consequences: Input and picker can share one setting and return matching week ranges for Sunday-, Monday-, or any
+  other first weekday. Existing consumers retain Monday-first behavior unless they opt into another value.

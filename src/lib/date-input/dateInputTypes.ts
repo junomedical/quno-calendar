@@ -1,4 +1,4 @@
-import type { DateRange, DateSelectionMode, IsoDate } from "#quno-internal/shared/dateRangeModel";
+import type { DateRange, DateSelectionMode, IsoDate, WeekStart } from "#quno-internal/shared/dateRangeModel";
 import type { FormEventHandler, InputHTMLAttributes } from "react";
 
 export type DateInputParserLanguage = "en" | "de";
@@ -17,10 +17,12 @@ export type DateInputToken = {
 
 export type DateInputLexicon = {
   monthNames?: Partial<Record<number, ReadonlyArray<string>>>;
+  weekdayNames?: Partial<Record<number, ReadonlyArray<string>>>;
   today?: ReadonlyArray<string>;
   yesterday?: ReadonlyArray<string>;
   tomorrow?: ReadonlyArray<string>;
   last?: ReadonlyArray<string>;
+  previous?: ReadonlyArray<string>;
   past?: ReadonlyArray<string>;
   day?: ReadonlyArray<string>;
   days?: ReadonlyArray<string>;
@@ -39,6 +41,7 @@ export type DateInputParseOptions = {
   expectedRange: DateRange;
   selectionMode?: DateSelectionMode;
   referenceDate?: IsoDate;
+  weekStartsOn?: WeekStart;
   locale?: string;
   preferredDateOrder?: DateInputDateOrder;
   parserLanguage?: DateInputParserLanguage;
@@ -49,6 +52,7 @@ export type DateInputParseOptions = {
 export type DateInputResolveOptions = {
   expectedRange: DateRange;
   referenceDate: IsoDate;
+  weekStartsOn: WeekStart;
   locale: string;
   preferredDateOrder: DateInputDateOrder;
   parserLanguages: ReadonlyArray<DateInputParserLanguage>;
@@ -111,6 +115,7 @@ export type QunoDateInputProps = Omit<
   expectedRange: DateRange;
   selectionMode?: DateSelectionMode;
   referenceDate?: IsoDate;
+  weekStartsOn?: WeekStart;
   locale?: string;
   preferredDateOrder?: DateInputDateOrder;
   parserLanguage?: DateInputParserLanguage;
@@ -125,4 +130,4 @@ export type QunoDateInputProps = Omit<
   onChange?: (value: DateRange | null) => void;
 };
 
-export type { DateRange, IsoDate };
+export type { DateRange, IsoDate, WeekStart };

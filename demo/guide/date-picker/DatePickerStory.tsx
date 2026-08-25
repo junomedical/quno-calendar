@@ -23,8 +23,7 @@ const contents = [
   ["#localization", "11", "Internationalization"],
   ["#week-starts", "12", "Different week starts"],
   ["#theming", "13", "Theme and size tokens"],
-  ["#natural-input", "14", "Natural date input"],
-  ["#single-day", "15", "Single-day mode"],
+  ["#single-day", "14", "Single-day mode"],
   ["#idea", "Model", "Interaction architecture"],
   ["#footprint", "Build", "Production footprint"],
   ["#reference", "Docs", "Complete API reference"]
@@ -37,9 +36,14 @@ export const DatePickerStory = ({ embedded = false }: { embedded?: boolean }): J
       <header className="story__hero">
         <div className="story__hero-topline">
           <span className="story__kicker">Quno Date Picker · Field guide</span>
-          <a className="story__demo-link" href={embedded ? "#timeline-guide" : "/guide"}>
-            Explore the complete guide <span aria-hidden="true">→</span>
-          </a>
+          <div className="story__hero-links">
+            <a className="story__demo-link" href="/">
+              All components
+            </a>
+            <a className="story__demo-link" href="/demo/date-range-input">
+              Demo <span aria-hidden="true">→</span>
+            </a>
+          </div>
         </div>
         <h1>One range model. Every calendar interaction.</h1>
         <p>Try each interaction, understand why it exists, and copy the relevant integration recipe beside it.</p>

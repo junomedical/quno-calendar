@@ -46,6 +46,33 @@ describe("EventDateCache", () => {
     });
   });
 
+  it("keeps same-date event order across committed edits and accepted moves", () => {
+    const cache = new EventDateCache();
+    const dateKey = "2026-07-18";
+    cache.replaceDates([dateKey], [event("event-a", dateKey), event("event-b", dateKey), event("event-c", dateKey)]);
+
+    cache.patchCommittedEvent(event("event-b", dateKey, "edited"), "event-b");
+    cache.patchMovedEvent("event-b", {
+      ...event("event-b", dateKey, "moved"),
+      start: `${dateKey}T09:15:00`,
+      end: `${dateKey}T10:15:00`
+    });
+
+    expect(cache.toRecord()[dateKey].map((item) => item.id)).toEqual(["event-a", "event-b", "event-c"]);
+  });
+
+  it("keeps a replaced event id in the previous event's same-date slot", () => {
+    const cache = new EventDateCache();
+    const dateKey = "2026-07-18";
+    cache.replaceDates([dateKey], [event("event-a", dateKey), event("temporary", dateKey), event("event-c", dateKey)]);
+
+    cache.patchCommittedEvent(event("saved", dateKey), "temporary");
+
+    expect(cache.toRecord()[dateKey].map((item) => item.id)).toEqual(["event-a", "saved", "event-c"]);
+    expect(cache.hasEvent("temporary")).toBe(false);
+    expect(cache.hasEvent("saved")).toBe(true);
+  });
+
   it("keeps the LRU bounded while protecting visible date buckets", () => {
     const cache = new EventDateCache(3);
     cache.replaceDates(["2026-07-18"], [event("event-a", "2026-07-18")]);

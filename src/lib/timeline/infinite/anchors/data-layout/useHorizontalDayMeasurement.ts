@@ -59,6 +59,7 @@ export function useHorizontalDayMeasurement({
 }: HorizontalDayMeasurementArgs) {
   const previousMetricsRef = useRef(dayMetricsByDate);
   const previousLayoutSignatureRef = useRef(layoutSignature);
+  const previousCalendarIdsRef = useRef(calendarIds);
 
   useLayoutEffect(() => {
     const previousMetrics = previousMetricsRef.current;
@@ -73,19 +74,21 @@ export function useHorizontalDayMeasurement({
             dateKeyForIndex
           )
         : null;
-    const geometry = { calendarIds, dayHeaderHeight, baseRowHeight };
+    const previousGeometry = { calendarIds: previousCalendarIdsRef.current, dayHeaderHeight, baseRowHeight };
+    const nextGeometry = { calendarIds, dayHeaderHeight, baseRowHeight };
     const anchor = snapshot
       ? captureHorizontalDataLayoutAnchor(
           snapshot.dateKey,
           snapshot.offsetWithinDate,
           previousMetrics.get(snapshot.dateKey),
-          geometry
+          previousGeometry
         )
       : null;
 
     resizeAffectedDays(previousMetrics, dayMetricsByDate, baseDayHeight, dateKeyToIndex, virtualItemCount, virtualizer);
     previousMetricsRef.current = dayMetricsByDate;
     previousLayoutSignatureRef.current = layoutSignature;
+    previousCalendarIdsRef.current = calendarIds;
     if (!viewport || !anchor) return;
 
     // `resizeItem` invalidates cached prefix positions; materialize them before
@@ -94,7 +97,7 @@ export function useHorizontalDayMeasurement({
     const index = dateKeyToIndex(anchor.dateKey);
     const dateStart = virtualizer.getOffsetForIndex(index, "start")?.[0];
     if (dateStart === undefined) return;
-    const nextOffset = resolveHorizontalDataLayoutOffset(anchor, dayMetricsByDate.get(anchor.dateKey), geometry);
+    const nextOffset = resolveHorizontalDataLayoutOffset(anchor, dayMetricsByDate.get(anchor.dateKey), nextGeometry);
     const nextScrollTop = dateStart + nextOffset;
     if (Math.abs(viewport.scrollTop - nextScrollTop) > 0.5) {
       virtualizer.scrollToOffset(nextScrollTop, { align: "start" });

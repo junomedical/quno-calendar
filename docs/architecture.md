@@ -120,18 +120,19 @@ Primary ownership folders are:
 - `src/lib/timeline/infinite/interactions`: pointer, hit-testing, drag, draft, and wheel-zoom state.
 - `src/lib/timeline/infinite/rendering`: shared/orientation DOM layers, geometry, and styles.
 - `src/lib/timeline/infinite/views`: horizontal and vertical composition roots.
-- `demo/app`: application entrypoint and the retained showcase routes.
-- `demo/examples`: the single documented public-API field guide and its recipe-sized live exhibits.
+- `demo/app`: application entrypoint, the three-card project home, and route ownership.
+- `demo/guide`: feature-owned public-API field guides and their recipe-sized live exhibits.
+- `demo/demos`: focused component demo shells for the picker and natural input.
 - `demo/showcase`: application-only presets, dense stress data, and product-style interactions.
 
 [`docs/domains`](./domains/README.md) documents the library ownership contracts and source map.
-[`docs/flows`](./flows/README.md) documents execution order. [`demo/examples`](../demo/examples/README.md) documents the
-consumer field guide. Folder names are the source-level ownership signal; `check:architecture` enforces readable
+[`docs/flows`](./flows/README.md) documents execution order. [`demo/guide/timeline`](../demo/guide/timeline/README.md)
+documents the infinite-calendar field guide. Folder names are the source-level ownership signal; `check:architecture` enforces readable
 module/function sizes, prevents cross-domain `../../../` imports, and keeps demo code outside the library. Library
 modules use `#quno-internal/timeline/*` when they cross responsibility folders rooted at `src/lib`; imports within the same local
 feature folder remain relative so nearby dependencies are still obvious.
 
-The `/guide` route owns the complete example surface. It owns a document-height article
+The root route owns a short project overview and links to three feature guides. `/guide/infinite-calendar` owns a document-height article
 scroller and table of contents, mounts later calendar exhibits only when they approach the viewport, and keeps
 each exhibit mounted afterward. Every exhibit uses the same demo-owned full-screen shell, which places its existing
 mounted `QunoCalendar` in a fixed viewport overlay; it does not invoke the browser Fullscreen API or move calendar state
@@ -142,8 +143,8 @@ overlap-lane recomputation. A CSS-native lab demonstrates that sticky days and r
 instead of entering high-frequency React scroll state. Product-control labs use the existing navigation handle,
 controlled settings, and scoped `className` styling. Date/time fields navigate immediately, adjacent-day controls call
 the same handle, and a progressive-precision lab changes only controlled zoom while the existing stable tick DOM reveals
-readable minute labels. A final composition demonstrates those boundaries together without adding an article-specific
-library surface.
+readable minute labels. `/guide/date-range-input` and `/guide/date-input-field` own the picker and natural-input
+contracts respectively. Every guide exposes a direct Demo link without adding an article-specific library surface.
 
 ## Async Event Loading
 
@@ -215,6 +216,11 @@ The anchor targets stable grid semantics, never a newly arriving event. The full
 Important invariants:
 
 - A refresh invalidates loaded-date knowledge, not the rendered cache, so delayed requests do not blank events.
+- Accepted date buckets record their calendar-id coverage. Narrowing to a covered subset and returning to the previous
+  selection reuse that snapshot without an API request or React cache commit.
+- Active-draft resource filtering retains the last settled warm window and adds the draft and virtual-window navigation
+  anchor dates explicitly. Transiently shorter days cannot widen prefetch merely because virtualization fits another
+  date in the viewport, while navigation to a new anchor still loads its destination.
 - Abort signals are advisory; generation checks also protect against loaders that ignore cancellation.
 - Event ids are deduplicated globally inside cached buckets.
 - Moves and visible commits use the event-id index to patch only source/destination buckets.

@@ -1,19 +1,16 @@
-import { BookOpenText, CalendarDays, Plus } from "lucide-react";
+import { BookOpenText, CalendarDays } from "lucide-react";
 import { useEffect, useRef } from "react";
-import { DemoRouteNav } from "../DemoRouteNav";
 import { ApiLatencyControl } from "../controls/ApiLatencyControl";
 import { DatasetControl } from "../controls/DatasetControl";
 import { CalendarCountControl, SnapControl, TimeRangeControl, ToggleControl } from "../controls/TimelineControls";
 import { ViewControl } from "../controls/ViewControl";
 import { demoCalendars } from "../data";
 import type { DemoControls } from "../hooks/useDemoControls";
-import type { DemoRoute } from "../types";
 import { DemoZoomControl } from "../zoom/DemoZoom";
 import { DefaultDateJumpControl } from "./DefaultDateJumpControl";
 import { DemoStatsPanel } from "./DemoStatsPanel";
 
 type DefaultDemoSidebarProps = {
-  routes: DemoRoute[];
   scale: number;
   activityEntries: string[];
   controls: DemoControls;
@@ -21,12 +18,10 @@ type DefaultDemoSidebarProps = {
   onScaleChange: (scale: number) => void;
   onAvailabilityModeChange: (checked: boolean) => void;
   onToday: () => void;
-  onGoToDate: () => void;
-  onExternalAdd: () => void;
+  onGoToDate: (date: DemoControls["jumpDate"]) => void;
 };
 
 export function DefaultDemoSidebar({
-  routes,
   scale,
   activityEntries,
   controls,
@@ -34,8 +29,7 @@ export function DefaultDemoSidebar({
   onScaleChange,
   onAvailabilityModeChange,
   onToday,
-  onGoToDate,
-  onExternalAdd
+  onGoToDate
 }: DefaultDemoSidebarProps) {
   const activityPaneRef = useRef<HTMLElement>(null);
   useEffect(() => {
@@ -52,8 +46,7 @@ export function DefaultDemoSidebar({
           <span>Reusable React PoC</span>
         </div>
       </div>
-      <DemoRouteNav activeRouteId="default" className="demo-route-nav" routes={routes} />
-      <a className="walkthrough-link" href="/guide">
+      <a className="walkthrough-link" href="/guide/infinite-calendar">
         <BookOpenText size={15} aria-hidden />
         Read the integration field guide
       </a>
@@ -99,18 +92,7 @@ export function DefaultDemoSidebar({
         testId="availability-mode"
         onChange={onAvailabilityModeChange}
       />
-      <DefaultDateJumpControl
-        date={controls.jumpDate}
-        time={controls.jumpTime}
-        onDateChange={controls.setJumpDate}
-        onTimeChange={controls.setJumpTime}
-        onToday={onToday}
-        onGo={onGoToDate}
-      />
-      <button type="button" className="external-add-button" onClick={onExternalAdd} data-testid="external-add-button">
-        <Plus size={15} aria-hidden />
-        Add event
-      </button>
+      <DefaultDateJumpControl date={controls.jumpDate} onDateChange={onGoToDate} onToday={onToday} />
       <section
         ref={activityPaneRef}
         className="demo-message"

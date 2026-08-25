@@ -43,9 +43,14 @@ sequenceDiagram
 
 The response is indexed into the bounded cache before it becomes React state. Prepared-cell layout then reads the committed snapshot; React rendering does not coordinate requests or mutate the cache.
 
+While a controlled draft is active, participant filtering may make horizontal days shorter and expose more virtual
+date nodes. Event loading retains the last non-draft warm window instead of treating that geometry-only expansion as
+new navigation, then unions policy windows around the draft date and the explicit virtual-window anchor. A genuinely moved draft
+or viewport navigation still loads its destination without prefetching a transient extra date at the lower edge.
+
 ## Date Request State
 
-Loaded knowledge and rendered cache content are deliberately different concepts. Invalidating knowledge makes a date eligible for refresh; it does not erase the cached bucket that is currently on screen.
+Loaded knowledge and rendered cache content are deliberately different concepts. Invalidating knowledge makes a date eligible for refresh; it does not erase the cached bucket that is currently on screen. Each loaded date also records the calendar ids covered by its accepted response. A selected subset remains fresh when that coverage contains every requested calendar id.
 
 ```mermaid
 stateDiagram-v2
@@ -57,7 +62,9 @@ stateDiagram-v2
   RetryWait --> Missing: aborted while waiting
   Loading --> Missing: rejected after final retry
   Loading --> Missing: viewport leaves every requested date
-  Loaded --> StaleVisible: loader, selection, or eventVersion changes
+  Loaded --> Loaded: selection narrows within accepted calendar coverage
+  Loaded --> StaleVisible: loader or eventVersion changes
+  Loaded --> Loading: selection requires an uncovered calendar id
   StaleVisible --> Loading: warm-window date refresh begins
   Loading --> Loading: obsolete response ignored by generation check
   Loaded --> Missing: bucket evicted outside protected load dates
@@ -77,7 +84,7 @@ flowchart TD
   Active -->|Yes| Keep["Keep request alive"]
   Abort --> Diff
   Keep --> Diff["Diff warm-window keys against loaded + loading sets"]
-  Diff --> Range{"Any contiguous missing ranges and selected calendars?"}
+  Diff --> Range{"Any date missing selected-calendar coverage?"}
   Range -->|No| Done["Render current snapshot"]
   Range -->|Yes| Begin["Capture request id + generation + key set"]
   Begin --> Fetch["Call loader with AbortSignal"]
@@ -175,16 +182,18 @@ For horizontal `scrollToDateTime`, vertical focus follows the date/resource poli
 
 ## Runtime Invalidation Matrix
 
-| Trigger                                        | Recomputed or updated                                                                        | Must remain stable                                                    |
-| ---------------------------------------------- | -------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
-| Visible date keys or prefetch policy change    | Warm-window derivation, missing-range diff, request sets, load-window LRU protection         | Existing fresh cache buckets and grid DOM                             |
-| Current API response                           | Requested buckets, membership for revised dates, prepared cells, affected row/column metrics | Settings, unrelated dates, pointer state                              |
-| `eventVersion`, loader, or selected ids change | Request generation and loaded-date knowledge                                                 | Rendered stale cache until replacement arrives                        |
-| Accepted move/create/visible commit            | Indexed source/destination buckets and affected cells                                        | Loader call count and unrelated buckets                               |
-| Horizontal zoom only                           | Time projection pixels and event-shell geometry                                              | Cache, memberships, overlap lanes, row metrics, external card content |
-| Vertical zoom only                             | Time projection pixels and virtual day height                                                | Cache, memberships, overlap lanes, column metrics                     |
-| Scroll                                         | Visible snapshot, virtual items, local resource subscribers                                  | Event cache and prepared cells                                        |
-| Hover                                          | One resource-local rendered instance                                                         | Multi-calendar sibling instances and cache                            |
+| Trigger                                     | Recomputed or updated                                                                        | Must remain stable                                                    |
+| ------------------------------------------- | -------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| Visible date keys or prefetch policy change | Warm-window derivation, missing-range diff, request sets, load-window LRU protection         | Existing fresh cache buckets and grid DOM                             |
+| Current API response                        | Requested buckets, membership for revised dates, prepared cells, affected row/column metrics | Settings, unrelated dates, pointer state                              |
+| `eventVersion` or loader changes            | Request generation and loaded-date/calendar coverage knowledge                               | Rendered stale cache until replacement arrives                        |
+| Selected ids change                         | Coverage diff; request only when a selected id is not already covered                        | Covered cache snapshot and rendered event DOM                         |
+| Active-draft filtering changes visible keys | Retained settled warm window plus draft/navigation-anchor policy windows                     | Loader calls caused only by transient day-height contraction          |
+| Accepted move/create/visible commit         | Indexed source/destination buckets and affected cells                                        | Loader call count and unrelated buckets                               |
+| Horizontal zoom only                        | Time projection pixels and event-shell geometry                                              | Cache, memberships, overlap lanes, row metrics, external card content |
+| Vertical zoom only                          | Time projection pixels and virtual day height                                                | Cache, memberships, overlap lanes, column metrics                     |
+| Scroll                                      | Visible snapshot, virtual items, local resource subscribers                                  | Event cache and prepared cells                                        |
+| Hover                                       | One resource-local rendered instance                                                         | Multi-calendar sibling instances and cache                            |
 
 ## Failure And Cancellation Subflows
 
@@ -198,7 +207,7 @@ The calendar surface stays interactive. If the request stops overlapping the act
 
 ### Out-of-order responses
 
-Every request carries a generation and id. Selection, loader, or `eventVersion` changes advance the generation and abort registered requests. An older response fails the current-request predicate before touching rendered state.
+Every request carries a generation, id, and calendar-id set. Loader or `eventVersion` changes advance the generation and abort registered requests. A selection change retains requests that cover the next subset and aborts incompatible ones. An older response fails the current-request predicate before touching rendered state.
 
 ### Empty response
 

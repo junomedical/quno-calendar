@@ -17,7 +17,7 @@ async function visibleTimelineCenterMinuteOffset(page: Page) {
 }
 
 test("coalesces a touchpad wheel burst into one anchored timeline projection", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/demo/infinite-calendar");
   await waitForDemoEvents(page);
 
   const result = await page.evaluate(async () => {
@@ -72,7 +72,7 @@ test("coalesces a touchpad wheel burst into one anchored timeline projection", a
 
 test("keeps horizontal slider zoom continuous without replacing rendered content", async ({ page }) => {
   await page.clock.install({ time: new Date("2026-07-06T03:00:00") });
-  await page.goto("/");
+  await page.goto("/demo/infinite-calendar");
   await goToWorkday(page);
   await waitForDemoEvents(page);
   await firstViewportEventBox(page);
@@ -216,7 +216,7 @@ test("keeps horizontal slider zoom continuous without replacing rendered content
 });
 
 test("keeps the vertical visible date mounted while zoom geometry settles", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/demo/infinite-calendar");
   await page.getByTestId("view-infinite-vertical").check();
   const visibleDate = await topVisibleDayDate(page);
 

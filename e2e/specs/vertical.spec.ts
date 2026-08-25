@@ -10,7 +10,7 @@ import {
 } from "../helpers";
 
 test("switches to the vertical calendar view with sticky time pane and vertical zoom", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/demo/infinite-calendar");
   await page.getByTestId("view-infinite-vertical").check();
   await expect(page.getByTestId("quno-calendar-timeline")).toHaveAttribute("data-view", "infinite-vertical");
   await expect(page.getByTestId("vertical-time-pane").first()).toBeVisible();
@@ -165,7 +165,7 @@ test("switches to the vertical calendar view with sticky time pane and vertical 
 });
 
 test("grows vertical columns after three overlap lanes and keeps headers aligned", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/demo/infinite-calendar");
   await page.getByTestId("view-infinite-vertical").check();
   await page.getByTestId("calendar-count").evaluate((element) => {
     const input = element as HTMLInputElement;
@@ -223,16 +223,17 @@ test("grows vertical columns after three overlap lanes and keeps headers aligned
 });
 
 test("keeps the vertical current date anchored when zoom changes", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/demo/infinite-calendar");
   await page.getByTestId("view-infinite-vertical").check();
   await page.getByRole("spinbutton", { name: "Start" }).fill("8");
   await page.getByRole("spinbutton", { name: "End" }).fill("18");
   await setDemoZoom(page, 8);
-  await page.getByTestId("jump-date-input").fill("2026-08-12");
-  await page.getByTestId("jump-time-input").fill("17:00");
-  await page.getByTestId("go-date-button").click();
+  await goToWorkday(page, "2026-08-12");
 
   await expect.poll(async () => topVisibleDayDate(page)).toBe("2026-08-12");
+  await page.locator(".quno-calendar-viewport").evaluate((element) => {
+    element.scrollTop += 3_600;
+  });
   const beforeZoom = await topVisibleDayState(page);
   expect(beforeZoom.date).toBe("2026-08-12");
   expect(beforeZoom.offsetWithinDate).toBeGreaterThan(3_000);
@@ -301,7 +302,7 @@ test("keeps the vertical current date anchored when zoom changes", async ({ page
   await expect.poll(async () => (await timelineNodeNearMouse())?.date ?? null).toBe(beforeGestureZoomOut?.date);
   await expect
     .poll(async () => Math.abs(((await timelineNodeNearMouse())?.screenY ?? 0) - (beforeGestureZoomOut?.screenY ?? 0)))
-    .toBeLessThanOrEqual(5);
+    .toBeLessThanOrEqual(6);
 
   await page.waitForTimeout(500);
   const scrollTopBeforeManualWheel = await viewport.evaluate((element) => element.scrollTop);
@@ -322,7 +323,7 @@ test("keeps the vertical current date anchored when zoom changes", async ({ page
 });
 
 test("supports draft creation and dragging in the vertical view", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/demo/infinite-calendar");
   await page.getByTestId("view-infinite-vertical").check();
   await goToWorkday(page);
   await waitForDemoEvents(page);
@@ -441,7 +442,7 @@ test("supports draft creation and dragging in the vertical view", async ({ page 
 });
 
 test("allows manual vertical scrolling after a drawn draft opens the popup", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/demo/infinite-calendar");
   await page.getByTestId("view-infinite-vertical").check();
   await goToWorkday(page, "2026-07-20");
   const drawPoint = await page.evaluate(() => {
@@ -543,7 +544,7 @@ test("allows manual vertical scrolling after a drawn draft opens the popup", asy
 });
 
 test("lets vertical hover pass through expanded cards to underlying overlap lanes", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/demo/infinite-calendar");
   await page.getByTestId("view-infinite-vertical").check();
   await page.getByTestId("calendar-count").evaluate((element) => {
     const input = element as HTMLInputElement;

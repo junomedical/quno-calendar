@@ -85,6 +85,26 @@ describe("event overlap layout", () => {
     ]);
   });
 
+  it("keeps equal-start lane order when the last appointment duration changes", () => {
+    const initial = [
+      event("first", "09:00", "10:00"),
+      event("second", "09:00", "10:00"),
+      event("last", "09:00", "10:00")
+    ];
+    const modified = [initial[0], initial[1], event("last", "09:00", "09:30")];
+
+    expect(layoutEventsForRow(initial, settings).map((item) => [item.event.id, item.lane])).toEqual([
+      ["first", 0],
+      ["second", 1],
+      ["last", 2]
+    ]);
+    expect(layoutEventsForRow(modified, settings).map((item) => [item.event.id, item.lane])).toEqual([
+      ["first", 0],
+      ["second", 1],
+      ["last", 2]
+    ]);
+  });
+
   it("assigns lanes by interval identity when event ids are duplicated", () => {
     const duplicateIdEvents = [event("same-id", "09:00", "10:00"), event("same-id", "09:30", "10:30")];
 

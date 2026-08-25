@@ -8,6 +8,7 @@ import {
   type DateRange,
   type IsoDate
 } from "#quno-internal/shared/dateRangeModel";
+import { calendarWeek, calendarWeekday } from "./dateInputWeekResolver";
 import { hasDateInputWord, normalizeDateInputWord, type DateInputVocabulary } from "./dateInputVocabulary";
 import type { DateInputResolveOptions, DateInputToken } from "./dateInputTypes";
 
@@ -82,13 +83,24 @@ const calendarPeriod = (reference: IsoDate, offset: number, unit: "day" | "month
   return { start: `${year}-01-01` as IsoDate, end: `${year}-12-31` as IsoDate };
 };
 
-const nextCalendarPeriod = (reference: IsoDate, count: number, unit: "day" | "week" | "month" | "year"): DateRange => {
+const previousCalendarPeriod = (
+  reference: IsoDate,
+  unit: "day" | "week" | "month" | "year",
+  weekStartsOn: DateInputResolveOptions["weekStartsOn"]
+): DateRange => {
+  if (unit === "day") return calendarPeriod(reference, -1, unit);
+  if (unit === "week") return calendarWeek(reference, weekStartsOn, -1);
+  return calendarPeriod(reference, -1, unit);
+};
+
+const nextCalendarPeriod = (
+  reference: IsoDate,
+  count: number,
+  unit: "day" | "week" | "month" | "year",
+  weekStartsOn: DateInputResolveOptions["weekStartsOn"]
+): DateRange => {
   if (unit === "day") return { start: addDays(reference, 1), end: addDays(reference, count) };
-  if (unit === "week") {
-    const weekday = fromIsoDate(reference).getUTCDay();
-    const start = addDays(reference, (8 - weekday) % 7 || 7);
-    return { start, end: addDays(start, count * 7 - 1) };
-  }
+  if (unit === "week") return calendarWeek(reference, weekStartsOn, 1, count);
   if (unit === "month") {
     const start = startOfMonth(addMonths(reference, 1));
     return { start, end: endOfMonth(addMonths(start, count - 1)) };
@@ -124,11 +136,29 @@ export const resolveRelativeDateRange = (
     const count = typeof input[1] === "number" ? input[1] : 1;
     const unitName = typeof input[1] === "number" ? input[2] : input[1];
     const unit = typeof unitName === "string" ? durationUnit(unitName, vocabulary) : null;
-    if (unit && Number.isInteger(count) && count > 0) return nextCalendarPeriod(options.referenceDate, count, unit);
+    if (unit && Number.isInteger(count) && count > 0)
+      return nextCalendarPeriod(options.referenceDate, count, unit, options.weekStartsOn);
   }
   if (input.length === 2 && typeof input[0] === "string" && typeof input[1] === "string") {
+    const weekday = vocabulary.weekdays[input[1]];
+    const weekOffset = has(input[0], "last", vocabulary)
+      ? -1
+      : has(input[0], "this", vocabulary)
+        ? 0
+        : has(input[0], "next", vocabulary)
+          ? 1
+          : null;
+    if (weekday !== undefined && weekOffset !== null) {
+      return calendarWeekday(options.referenceDate, weekday, weekOffset, options.weekStartsOn);
+    }
     const unit = durationUnit(input[1], vocabulary);
+    if (unit && has(input[0], "previous", vocabulary)) {
+      return previousCalendarPeriod(options.referenceDate, unit, options.weekStartsOn);
+    }
     const offset = has(input[0], "this", vocabulary) ? 0 : null;
+    if (offset !== null && unit === "week") {
+      return calendarWeek(options.referenceDate, options.weekStartsOn);
+    }
     if (offset !== null && (unit === "day" || unit === "month" || unit === "year")) {
       return calendarPeriod(options.referenceDate, offset, unit);
     }

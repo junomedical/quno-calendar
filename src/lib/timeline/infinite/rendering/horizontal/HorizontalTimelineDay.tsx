@@ -30,6 +30,7 @@ export function InfiniteTimelineDay(props: HorizontalTimelineDayProps) {
     nowMinute,
     geometryRegistration,
     viewportMetricsStore,
+    forceAllResources,
     measureElement,
     getRowHeight
   } = props;
@@ -42,6 +43,7 @@ export function InfiniteTimelineDay(props: HorizontalTimelineDayProps) {
     dragPreviewEvent: props.dragPreviewEvent,
     activeRestoreTarget: props.activeRestoreTarget,
     viewportMetricsStore,
+    forceAllResources,
     getRowHeight
   });
   const setDayElement = useCallback(

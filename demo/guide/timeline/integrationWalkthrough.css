@@ -30,6 +30,45 @@
   margin-bottom: 112px;
 }
 
+.calendar-article__hero-topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.calendar-article__hero-topline .calendar-article__eyebrow {
+  margin-bottom: 0;
+}
+
+.calendar-article__hero-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.calendar-article__demo-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 14px;
+  color: var(--article-green-dark);
+  background: #edf3ef;
+  border: 1px solid #cadbd3;
+  border-radius: 999px;
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 760;
+  text-decoration: none;
+}
+
+.calendar-article__demo-link:hover,
+.calendar-article__demo-link:focus-visible {
+  border-color: var(--article-green);
+  outline: none;
+}
+
 .calendar-article__eyebrow,
 .calendar-article__section-number,
 .calendar-article__meta,
@@ -1009,6 +1048,10 @@
   font-weight: 750;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+}
+
+.article-navigation-controls .quno-date-picker-input-root {
+  width: 180px;
 }
 
 .article-navigation-controls input,

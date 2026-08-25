@@ -2,7 +2,7 @@
  * Pure vertical-view geometry.
  * settings + current clock -> day dimensions, layout identity, and now-line state
  */
-import type { CalendarId, CalendarRow, QunoCalendarSettings } from "#quno-internal/timeline/core/types";
+import type { QunoCalendarSettings } from "#quno-internal/timeline/core/types";
 import { toDateKey } from "#quno-internal/timeline/date/dateVirtualization";
 import { timelineEndMinute, timelineHeight, timelineStartMinute } from "#quno-internal/timeline/time/time";
 import { VERTICAL_TIMELINE_GUTTER_PX } from "./VerticalTimelineDay";
@@ -25,12 +25,8 @@ export function buildVerticalViewGeometry(settings: QunoCalendarSettings): Verti
   };
 }
 
-export function buildVerticalLayoutSignature(
-  calendars: readonly CalendarRow[],
-  hiddenCalendarIds: ReadonlySet<CalendarId>,
-  settings: QunoCalendarSettings
-): string {
-  return `${calendars.map((calendar) => calendar.id).join("|")}:${Array.from(hiddenCalendarIds).join("|")}:${settings.dayHeaderHeight}:${settings.startHour}:${settings.endHour}:${settings.zoom}:${settings.excludedWeekdays.join("|")}`;
+export function buildVerticalLayoutSignature(settings: QunoCalendarSettings): string {
+  return `${settings.dayHeaderHeight}:${settings.startHour}:${settings.endHour}:${settings.zoom}:${settings.excludedWeekdays.join("|")}`;
 }
 
 export function resolveVerticalDateOffset(

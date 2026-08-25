@@ -111,9 +111,12 @@ The repeated frame is a mount/measurement bridge, not polling. The bounded model
 
 Two translations use date-local offsets:
 
-1. **Window recenter:** preserve the exact raw offset inside the top date while date indexes are rebuilt.
-2. **Structural layout change:** align the preserved date header for calendar membership changes; translate or clamp
-   the saved offset for settings-driven geometry changes such as zoom.
+1. **Window recenter:** preserve the exact raw offset and mounted semantic nodes inside the top date while date indexes
+   and the equivalent centered scrollbar position are rebuilt.
+2. **Structural layout change:** translate or clamp the saved offset for settings-driven geometry changes such as zoom
+   or excluded weekdays.
+3. **Resource membership change:** preserve the surviving resource and its row-local offset without rebuilding the
+   date model; if that resource disappears, clamp the captured date-local fallback inside the resized date.
 
 ```mermaid
 flowchart LR
@@ -133,7 +136,9 @@ This structural path is distinct from late horizontal event metrics. Async row-h
 
 Changing `excludedWeekdays` replaces the virtualizer's date-to-index sequence, so its pre-change pixel offset cannot be
 interpreted in the new model. The structural restore first uses base geometry, then repeats the semantic-date alignment
-after the virtualizer has adopted the new keys and horizontal variable measurements. During controlled-draft row
+after the virtualizer has adopted the new keys and horizontal variable measurements. The transition window renders
+from semantic date keys and retains all resources for its bounded settling frames, so a still-visible weekday and its
+event nodes are never temporarily interpreted through replacement indexes or unmounted. During controlled-draft row
 collapse or expansion, a current or just-released draft date that belongs to the ordinary virtual viewport overrides
 transient top-date snapshots; an offscreen pinned draft yields to the visible date. The explicit parent event/slot
 restore remains responsible for the exact viewport-relative row position.
@@ -155,7 +160,11 @@ flowchart TD
   Sorted --> Keys["Map every rendered item to visible loader key"]
 ```
 
-The pinned layout date is mounted once without widening ordinary overscan. Pinning makes geometry resolvable; it does not replace the current scroll anchor.
+The pinned layout date is mounted once without widening ordinary overscan. Pinning makes geometry resolvable; it does
+not replace the current scroll anchor. A date-sequence or base-geometry transition temporarily uses the same semantic
+fallback principle for the visible window and keeps its resource nodes mounted until the virtualizer settles.
+Changing the bounded window's anchor during idle recenter uses this transition as well, so the old absolute indexes
+cannot produce a painted wrong-date frame before the equivalent centered scroll offset lands.
 
 ## Cross-Axis Resource Window
 

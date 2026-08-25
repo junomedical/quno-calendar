@@ -19,7 +19,7 @@ type PresetDemoSidebarProps = {
   pendingApiRequestCount: number;
   onScaleChange: (scale: number) => void;
   onAvailabilityModeChange: (checked: boolean) => void;
-  onGoToDate: () => void;
+  onGoToDate: (date: DemoControls["jumpDate"]) => void;
 };
 
 export function PresetDemoSidebar({
@@ -82,15 +82,7 @@ export function PresetDemoSidebar({
         testId="exclude-weekends"
         onChange={controls.setExcludeWeekends}
       />
-      <DateJumpControl
-        className={className("date-jump")}
-        date={controls.jumpDate}
-        time={controls.jumpTime}
-        showIcon={preset.id !== "demo1"}
-        onDateChange={controls.setJumpDate}
-        onTimeChange={controls.setJumpTime}
-        onGo={onGoToDate}
-      />
+      <DateJumpControl className={className("date-jump")} date={controls.jumpDate} onDateChange={onGoToDate} />
       <ToggleControl
         checked={controls.editAvailabilities}
         className={className("toggle")}

@@ -24,6 +24,7 @@ const languagesFor = (
 const resolveOptions = (options: DateInputParseOptions): DateInputResolveOptions => ({
   expectedRange: options.expectedRange,
   referenceDate: options.referenceDate ?? todayIso(),
+  weekStartsOn: options.weekStartsOn ?? 1,
   locale: options.locale ?? "en-GB",
   preferredDateOrder: options.preferredDateOrder ?? "locale",
   parserLanguages: languagesFor(options.locale ?? "en-GB", options.parserLanguage, options.parserLanguages),

@@ -8,7 +8,7 @@ import {
 } from "../helpers";
 
 test("drops minor time labels at dense zoom levels", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/demo/infinite-calendar");
   const minuteLabelsAtDefaultZoom = await page
     .locator(".quno-calendar-time-tick:not(.is-hour)")
     .evaluateAll((elements) =>
@@ -85,7 +85,7 @@ test("drops minor time labels at dense zoom levels", async ({ page }) => {
 });
 
 test("lets external event renderers adapt content to short heights with CSS", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/demo/infinite-calendar");
   await page.evaluate(() => {
     const fixture = document.createElement("div");
     fixture.style.position = "fixed";
@@ -160,7 +160,7 @@ test("lets external event renderers adapt content to short heights with CSS", as
 });
 
 test("expands compact single-lane events on hover so renderer details fit", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/demo/infinite-calendar");
   await page.getByTestId("scale-select").selectOption("100");
   await goToWorkday(page);
 
@@ -203,7 +203,7 @@ test("expands compact single-lane events on hover so renderer details fit", asyn
 });
 
 test("expands overlapped event shells to the full row lane height on hover", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/demo/infinite-calendar");
   await page.getByTestId("scale-select").selectOption("20000");
   await goToWorkday(page);
 
@@ -223,7 +223,7 @@ test("expands overlapped event shells to the full row lane height on hover", asy
 });
 
 test("uses card left accent borders without calendar row color strips", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/demo/infinite-calendar");
   await goToWorkday(page);
   await page.waitForSelector('[data-testid="calendar-event"]');
 
@@ -289,7 +289,7 @@ test("uses card left accent borders without calendar row color strips", async ({
 });
 
 test("inherits consumer color variables across both calendar orientations", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/demo/infinite-calendar");
   await page.evaluate(() => {
     const theme = {
       "--quno-calendar-surface": "#102030",
@@ -323,7 +323,7 @@ test("inherits consumer color variables across both calendar orientations", asyn
 });
 
 test("supports availability editing mode", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/demo/infinite-calendar");
   await page.getByTestId("scale-select").selectOption("5000");
   await goToWorkday(page);
   await expect(page.getByTestId("availability-event").first()).toBeVisible();
@@ -427,7 +427,7 @@ test("supports availability editing mode", async ({ page }) => {
 });
 
 test("focuses only the hovered row instance of a multi-calendar event", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/demo/infinite-calendar");
   await goToWorkday(page);
   const duplicate = await firstDuplicatedViewportEvent(page);
   const [box] = duplicate.boxes;
@@ -441,7 +441,7 @@ test("focuses only the hovered row instance of a multi-calendar event", async ({
 });
 
 test("does not widen hovered cards when their text already fits", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/demo/infinite-calendar");
   await goToWorkday(page);
   const event = page.locator('[data-testid="calendar-event"]:has-text("PRP Treatment")').first();
   await expect(event).toBeVisible();
@@ -459,7 +459,7 @@ test("does not widen hovered cards when their text already fits", async ({ page 
 });
 
 test("keeps overflowing hovered cards expanded without width oscillation", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/demo/infinite-calendar");
   await goToWorkday(page);
   await page.waitForSelector('[data-testid="calendar-event"]');
   const overflowingBox = await page.evaluate(() => {
@@ -502,7 +502,7 @@ test("keeps overflowing hovered cards expanded without width oscillation", async
 });
 
 test("allows already-wide hovered cards to use a wider max width", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/demo/infinite-calendar");
   await page.evaluate(() => {
     const fixture = document.createElement("div");
     fixture.style.position = "fixed";

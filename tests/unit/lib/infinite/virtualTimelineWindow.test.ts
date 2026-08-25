@@ -3,7 +3,10 @@ import {
   clampVirtualDateIndex,
   createVirtualDateModel
 } from "../../../../src/lib/timeline/infinite/scroll/window/dateModel";
-import { buildVirtualDateRenderItems } from "../../../../src/lib/timeline/infinite/scroll/window/renderItems";
+import {
+  buildVirtualDateRenderItems,
+  semanticDateKeyForRenderItem
+} from "../../../../src/lib/timeline/infinite/scroll/window/renderItems";
 import { resolveVisibleDateSnapshot } from "../../../../src/lib/timeline/infinite/scroll/position/visibleSnapshot";
 
 describe("virtual timeline date model", () => {
@@ -22,6 +25,13 @@ describe("virtual timeline date model", () => {
 });
 
 describe("virtual timeline render items", () => {
+  it("keeps the item's semantic date while a replacement index sequence settles", () => {
+    const staleIndexItem = { key: "2026-07-06", index: 30 };
+
+    expect(semanticDateKeyForRenderItem(staleIndexItem, () => "2026-07-20")).toBe("2026-07-06");
+    expect(semanticDateKeyForRenderItem({ key: "layout-anchor", index: 30 }, () => "2026-07-20")).toBe("2026-07-20");
+  });
+
   it("provides the same nine-item centered fallback before measurement", () => {
     const items = buildVirtualDateRenderItems({
       virtualItems: [],

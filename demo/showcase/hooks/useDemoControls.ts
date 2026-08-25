@@ -14,7 +14,6 @@ export type DemoControlDefaults = {
   editAvailabilities: boolean;
   apiLatencyMs?: number;
   jumpDate?: IsoDate;
-  jumpTime?: string;
 };
 
 export type DemoLayoutSettings = Pick<
@@ -47,8 +46,6 @@ export type DemoControls = {
   setApiLatencyMs: Dispatch<SetStateAction<number>>;
   jumpDate: IsoDate;
   setJumpDate: Dispatch<SetStateAction<IsoDate>>;
-  jumpTime: string;
-  setJumpTime: Dispatch<SetStateAction<string>>;
   settings: DemoQunoCalendarSettings;
 };
 
@@ -62,7 +59,6 @@ export function useDemoControls(defaults: DemoControlDefaults, layout: DemoLayou
   const [editAvailabilities, setEditAvailabilities] = useState(defaults.editAvailabilities);
   const [apiLatencyMs, setApiLatencyMs] = useState(defaults.apiLatencyMs ?? 0);
   const [jumpDate, setJumpDate] = useState<IsoDate>(defaults.jumpDate ?? "2026-07-04");
-  const [jumpTime, setJumpTime] = useState(defaults.jumpTime ?? "09:00");
 
   const settings = useMemo<DemoQunoCalendarSettings>(
     () => ({
@@ -94,8 +90,6 @@ export function useDemoControls(defaults: DemoControlDefaults, layout: DemoLayou
     setApiLatencyMs,
     jumpDate,
     setJumpDate,
-    jumpTime,
-    setJumpTime,
     settings
   };
 }

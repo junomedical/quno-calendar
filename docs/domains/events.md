@@ -20,9 +20,10 @@ See [Async Loading And Layout](../flows/async-loading-and-layout.md) for request
 ## Contracts And Invariants
 
 - The calendar surface renders independently of request latency.
-- Abort, generation, and selected-calendar checks reject stale commits.
+- Abort, generation, and selected-calendar coverage checks reject stale commits without refetching covered subsets.
 - One event may belong to multiple calendars without duplicating the cached event record.
 - Layout preparation is deterministic and shared by sizing and projection.
+- Equal-start appointments retain caller lane order across duration edits, and same-date mutations retain cache order.
 - Loading never writes scroll position; it only publishes event snapshots and metrics.
 
 ## Source Map

@@ -14,9 +14,10 @@ describe("datepicker field guide", () => {
     const contents = screen.getByRole("navigation", {
       name: "Explore the field guide"
     });
-    expect(within(contents).getAllByRole("link")).toHaveLength(19);
+    expect(within(contents).getAllByRole("link")).toHaveLength(18);
     expect(within(contents).queryByRole("link", { name: /Interactive demo/ })).not.toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /Explore the complete guide/ })).toHaveAttribute("href", "/guide");
+    expect(screen.getByRole("link", { name: "All components" })).toHaveAttribute("href", "/");
+    expect(screen.getByRole("link", { name: /Demo/ })).toHaveAttribute("href", "/demo/date-range-input");
     expect(within(contents).getByRole("link", { name: /Custom day styling/ })).toHaveAttribute("href", "#day-handler");
     expect(within(contents).getByRole("link", { name: /Jump across years/ })).toHaveAttribute("href", "#quick-jump");
     expect(screen.queryByText("Why Quno")).not.toBeInTheDocument();
@@ -55,8 +56,7 @@ describe("datepicker field guide", () => {
       "#week-starts"
     );
     expect(within(contents).getByRole("link", { name: /Single-day mode/ })).toHaveAttribute("href", "#single-day");
-    const naturalInput = document.querySelector<HTMLElement>('[data-story-topic="natural-input"]');
-    expect(naturalInput?.querySelectorAll(".story__try code")).toHaveLength(6);
+    expect(document.querySelector('[data-story-topic="natural-input"]')).not.toBeInTheDocument();
     expect(screen.getByText("9.00 KiB")).toBeInTheDocument();
     expect(screen.getByText("6.95 KiB")).toBeInTheDocument();
     expect(screen.getByText(/docs\/usage\.md/)).toBeInTheDocument();
@@ -77,24 +77,6 @@ describe("datepicker field guide", () => {
       })
     );
     expect(within(topic as HTMLElement).getByRole("grid")).toHaveAccessibleName("Date range picker: January 2029");
-  });
-
-  it("shares controlled state between the natural input and calendar", () => {
-    render(<DatePickerStory />);
-    const topic = document.querySelector<HTMLElement>('[data-story-topic="natural-input"]');
-    expect(topic).not.toBeNull();
-    const input = within(topic as HTMLElement).getByRole("textbox") as HTMLInputElement;
-    fireEvent.focus(input);
-    fireEvent.input(input, { target: { value: "12 juni" } });
-    fireEvent.keyDown(input, { key: "Enter" });
-    expect(input).toHaveValue("12 June 2026");
-    fireEvent.input(input, { target: { value: "12/14" } });
-    fireEvent.keyDown(input, { key: "Enter" });
-    expect(input).toHaveValue("14 December 2025");
-    const calendarDate = topic?.querySelector<HTMLElement>('[data-date="2025-12-20"]');
-    fireEvent.pointerDown(calendarDate as HTMLElement);
-    fireEvent.pointerUp(calendarDate as HTMLElement);
-    expect(input).toHaveValue("14 December 2025 – 20 December 2025");
   });
 
   it("switches the live example between different week starts", () => {
@@ -150,7 +132,7 @@ describe("datepicker field guide", () => {
   });
 });
 
-describe("combined guide entry", () => {
+describe("date range field guide entry", () => {
   it("uses the combined package in its primary recipe", () => {
     render(<DatePickerStory />);
     expect(screen.getAllByText(/@quno\/calendar\/date-picker/).length).toBeGreaterThan(0);
