@@ -269,6 +269,7 @@ test("does not transiently jump before recenter after cancelling a future multi-
   await page.getByTestId("draft-participant-surgery-a").check();
   await expect(page.getByTestId("draft-event")).toHaveCount(3);
 
+  await observeDraftFadeout(page);
   await page.getByTestId("draft-cancel-button").click();
   const immediateFocus = await page.evaluate((futureDate) => {
     const viewport = document.querySelector<HTMLElement>(".quno-calendar-viewport");
@@ -338,6 +339,7 @@ test("keeps the same calendar row anchored when drawing again after cancelling e
     .poll(async () => Math.abs(((await draftOffset()) ?? Number.POSITIVE_INFINITY) - firstRowAnchor))
     .toBeLessThanOrEqual(4);
 
+  await observeDraftFadeout(page);
   await page.getByTestId("draft-cancel-button").click();
   await expectDraftFadeoutThenGone(page);
   await expect(page.getByTestId("external-event-popup")).toHaveCount(0);
@@ -488,6 +490,7 @@ test("restores participant-filtered calendars without a delayed redraw or event 
       mutationDetails
     };
   });
+  await observeDraftFadeout(page);
   await page.getByTestId("draft-cancel-button").click();
   await expectDraftFadeoutThenGone(page);
   const cancellationFrames = await cancellationFramesPromise;
