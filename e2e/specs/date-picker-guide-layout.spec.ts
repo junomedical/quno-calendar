@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-test("single-day mode and focused Date Input composition stay distinct", async ({ page }) => {
+test("single-day mode and focused range-input composition stay distinct", async ({ page }) => {
   await page.goto("/guide/datepicker");
 
   const singleDay = page.locator("#single-day");
@@ -9,16 +9,18 @@ test("single-day mode and focused Date Input composition stay distinct", async (
   await singleDay.locator('[data-date="2026-08-18"]').click();
   await expect(singleDay.locator('[data-date="2026-08-18"]')).toHaveAttribute("data-selected", "true");
 
-  const composition = page.locator("#single-day-input");
-  const editor = composition.getByRole("textbox", { name: "Choose a day" });
+  const composition = page.locator("#date-input-composition");
+  const editor = composition.getByRole("textbox", { name: "Choose a period" });
   await expect(composition.getByRole("grid")).toHaveCount(0);
   await editor.focus();
   await expect(composition.getByRole("grid")).toBeVisible();
   await expect(composition.locator('[data-slot="selection-header"]')).toBeHidden();
-  await editor.fill("12 juni");
+  await editor.fill("12 juni - 18 juni");
   await editor.press("Enter");
-  await expect(editor).toHaveValue("12 June 2026");
-  await expect(composition.locator('[data-date="2026-06-12"]')).toHaveAttribute("data-selected", "true");
+  await expect(editor).toHaveValue("12 June 2026 – 18 June 2026");
+  await expect(composition.locator('[data-date="2026-06-12"]')).toHaveAttribute("data-range-start", "true");
+  await expect(composition.locator('[data-date="2026-06-15"]')).toHaveAttribute("data-selected", "true");
+  await expect(composition.locator('[data-date="2026-06-18"]')).toHaveAttribute("data-range-end", "true");
   await editor.fill("");
   await editor.press("Enter");
   await expect(editor).toHaveValue("");

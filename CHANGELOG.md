@@ -6,9 +6,6 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ### Added
 
-- Added public Date Parser `datePartMarkers` lexicon configuration and a dedicated internationalization chapter. Its
-  live Japanese example shows the complete marker setup and resolves `2026年8月25日` without a built-in Japanese parser
-  language or application-side text rewrite.
 - Added a focused React-controlled Infinite Calendar exhibit showing visible-calendar selection and zoom flowing through
   product-owned state while the calendar preserves its date and loaded content.
 - Added a concise four-card project home for Quno/Infinite Calendar, Quno/Datepicker, Quno/Date Input, and Quno/Date Parser. Each
@@ -26,8 +23,8 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 ### Changed
 
 - Split the Datepicker field guide’s single-day chapter into a picker-only `selectionMode="single"` demonstration and
-  a dedicated Date Input composition. In the composition, the input replaces the selected-day summary and Clear action,
-  the picker appears only while the control has focus, and typed dates move the visible picker month.
+  a dedicated range-enabled Date Input composition. In the composition, the input replaces the selected-period summary
+  and Clear action, the picker appears only while the control has focus, and typed ranges move the visible picker month.
 - Unified the four field-guide production chapters around the same exact JavaScript, optional CSS, raw-size, budget,
   runtime, dependency, entry-point, and public-API presentation. Removed ambiguous combined gzip totals and replaced the
   Datepicker's repository-only reference with a browser-readable public API summary.
@@ -76,8 +73,8 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 - Kept the Datepicker range-summary Clear action compact in the Acid and Candy field-guide themes instead of inheriting
   the editorial 20px type scale and expanding to roughly 50px high.
 - Restored the Datepicker field guide's selected-period input that opens the range picker and edits the same controlled
-  range through typing or picking. The single-day example now recognizes its documented `12 juni` phrase through
-  simultaneous English and German parsing.
+  range through typing or picking. Its composition example recognizes the documented `12 juni – 18 juni` phrase
+  through simultaneous English and German parsing.
 - Kept visible Infinite Calendar days, resource rows, and committed events mounted through every painted frame when a
   drawn appointment is cancelled. Programmatic anchor corrections now publish the matching virtual range before the
   browser can paint an empty intermediate viewport.

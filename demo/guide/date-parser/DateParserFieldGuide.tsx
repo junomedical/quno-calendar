@@ -6,12 +6,11 @@ import { StoryHowTo } from "#quno-demo/guide/date-picker/StoryHowTo";
 import { FieldGuidePage } from "#quno-demo/guide/shared/FieldGuidePage";
 import { FieldGuideProduction } from "#quno-demo/guide/shared/FieldGuideProduction";
 import { dateParserProduction } from "#quno-demo/guide/shared/productionProfiles";
-import { JapaneseParserExample, PreferredOrderParserExample, TokenParserExample } from "./DateParserExamples";
+import { PreferredOrderParserExample, TokenParserExample } from "./DateParserExamples";
 import {
   expectedRecipe,
   formatsRecipe,
   languageRecipe,
-  japaneseRecipe,
   orderRecipe,
   productionRecipe,
   rangeRecipe,
@@ -26,9 +25,8 @@ const contents = [
   ["#range-parsing", "04", "Parse inclusive ranges"],
   ["#expected-period", "05", "Rank a useful period"],
   ["#multiple-languages", "06", "Recognize languages together"],
-  ["#internationalization", "07", "Adapt locale-specific syntax"],
-  ["#tokenization", "08", "Inspect the headless grammar"],
-  ["#parser-production", "09", "Ship without a UI runtime"]
+  ["#tokenization", "07", "Inspect the headless grammar"],
+  ["#parser-production", "08", "Ship without a UI runtime"]
 ] as const;
 
 const recipe = (title: string, copy: string, code: string) => (
@@ -130,23 +128,8 @@ export function DateParserFieldGuide() {
         />
       </StoryFeature>
       <StoryFeature
-        id="internationalization"
-        number="07"
-        kicker="Internationalization"
-        title="Teach the parser a locale’s date markers."
-        copy="Locale-specific syntax can stay explicit and product-owned. Add Japanese year, month, and day markers through the lexicon, then parse the familiar YYYY年M月D日 form directly."
-        instruction="Turn Date markers off to see the raw Japanese date become invalid, then turn them on to resolve 2026年8月25日. The complete setup change stays visible beside the result."
-        howTo={recipe(
-          "Add Japanese date markers",
-          "Extend syntax without adding a built-in parser language.",
-          japaneseRecipe
-        )}
-      >
-        <JapaneseParserExample />
-      </StoryFeature>
-      <StoryFeature
         id="tokenization"
-        number="08"
+        number="07"
         kicker="Headless grammar"
         title="Inspect recognition before resolving a value."
         copy="Tokenization exposes words, numbers, date separators, and range separators without rendering a component."
@@ -157,10 +140,10 @@ export function DateParserFieldGuide() {
       </StoryFeature>
       <StoryFeature
         id="parser-production"
-        number="09"
+        number="08"
         kicker="Production"
         title="Ship Date Parser independently."
-        copy="Date Parser JavaScript is 4.49 KiB gzip. It has no stylesheet, UI framework runtime, or runtime dependency."
+        copy="Date Parser JavaScript is 4.45 KiB gzip. It has no stylesheet, UI framework runtime, or runtime dependency."
         instruction="Review its JavaScript artifact, runtime contract, and public surface without a UI payload."
         howTo={recipe("Import Date Parser", "Use the headless entry by itself.", productionRecipe)}
       >

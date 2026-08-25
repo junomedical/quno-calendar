@@ -17,7 +17,7 @@ const contents = [
   ["#localization", "07", "Localize dates and weeks"],
   ["#theming", "08", "Theme with scoped tokens"],
   ["#single-day", "09", "Choose one day"],
-  ["#single-day-input", "10", "Combine with Date Input"],
+  ["#date-input-composition", "10", "Combine with Date Input"],
   ["#idea", "11", "Understand and ship the model"]
 ] as const;
 

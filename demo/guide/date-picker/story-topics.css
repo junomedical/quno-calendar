@@ -53,22 +53,22 @@
   width: min(100%, 420px);
 }
 
-.story__single-day-composition {
+.story__date-input-composition {
   position: relative;
   width: min(100%, 420px);
 }
 
-.story__single-day-composition .quno-date-picker-input-root,
-.story__single-day-composition .quno-date-picker-input {
+.story__date-input-composition .quno-date-picker-input-root,
+.story__date-input-composition .quno-date-picker-input {
   width: 100%;
 }
 
-.story__single-day-composition .quno-date-picker-input {
+.story__date-input-composition .quno-date-picker-input {
   font-size: 14px;
   font-weight: 650;
 }
 
-.story__single-day-composition-calendar {
+.story__date-input-composition-calendar {
   position: absolute;
   z-index: 10;
   top: calc(100% + 10px);
@@ -76,7 +76,7 @@
   width: 100%;
 }
 
-.story__single-day-composition-picker > [data-slot="selection-header"] {
+.story__date-input-composition-picker > [data-slot="selection-header"] {
   display: none;
 }
 

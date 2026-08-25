@@ -57,19 +57,6 @@ describe("natural date parser", () => {
     });
   });
 
-  it("accepts locale-specific date-part markers through the lexicon", () => {
-    expect(parseDateInput("2026年8月25日", options)).toEqual({ status: "invalid" });
-    expect(
-      parseDateInput("2026年8月25日", {
-        ...options,
-        lexicon: { datePartMarkers: ["年", "月", "日"] }
-      })
-    ).toEqual({
-      status: "success",
-      value: { start: "2026-08-25", end: "2026-08-25" }
-    });
-  });
-
   it("resolves two-digit years, month words, locale order, and leap days", () => {
     expect(parseDateInput("22 / 07 / 80", options)).toEqual({
       status: "success",

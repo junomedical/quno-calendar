@@ -63,3 +63,16 @@ because that repository was the consolidation source. Its identifier and text re
   only while focus remains in the composed control, and shares one parent-owned `DateRange` with it.
 - Consequences: Each chapter demonstrates one contract. The composition remains adapter-free, avoids duplicated
   selection chrome, follows typed dates into their visible month, and closes when readers leave the control.
+
+## QUNO-006 - Demonstrate range composition after single-day configuration
+
+- Date: 2026-08-25
+- Status: Accepted; supersedes the composition mode in QUNO-005
+- Context: The focused Date Input composition followed the standalone single-day configuration chapter but repeated
+  its one-day mode. That made the integration example undersell the shared range model and left its benefit-led title
+  paired with the narrower interaction.
+- Decision: Keep the standalone Datepicker chapter in `selectionMode="single"`, then configure both Quno/Date Input and
+  Quno/Datepicker in the focused composition for ranges. Start it with a multi-day value and teach a complete typed
+  range while retaining the shared controlled `DateRange`, focus-open behavior, and hidden duplicate selection header.
+- Consequences: The adjacent chapters now demonstrate distinct contracts: one isolates single-day picker behavior, and
+  the other shows typed and painted range editing through one compact selection surface.

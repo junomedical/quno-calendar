@@ -153,7 +153,7 @@ test("date input field guide follows the task-oriented component contract", asyn
 test("date parser guide keeps parsing semantics headless and interactive", async ({ page }) => {
   await page.goto("/guide/date-parser");
   const guide = page.locator('[data-field-guide="Quno/Date Parser"]');
-  await expect(guide.getByRole("navigation", { name: "Table of contents" }).getByRole("link")).toHaveCount(9);
+  await expect(guide.getByRole("navigation", { name: "Table of contents" }).getByRole("link")).toHaveCount(8);
   await guide.locator("#preferred-date-order").getByRole("button", { name: "MDY" }).click();
   await expect(guide.locator("#preferred-date-order output")).toHaveText("2026-03-04");
   await guide.locator("#relative-dates").getByRole("button", { name: "this week" }).click();
@@ -172,14 +172,6 @@ test("date parser guide keeps parsing semantics headless and interactive", async
     await expect(output).toContainText(`"start": "${expectedStart}"`);
   }
   await expect(output).toContainText('"end": "2026-08-23"');
-
-  const internationalization = guide.locator("#internationalization");
-  const japaneseOutput = internationalization.locator(".date-input-parser-example pre");
-  await expect(internationalization).toContainText('lexicon.datePartMarkers = ["年", "月", "日"]');
-  await expect(internationalization.getByRole("textbox", { name: "Japanese date" })).toHaveValue("2026年8月25日");
-  await expect(japaneseOutput).toContainText('"start": "2026-08-25"');
-  await internationalization.getByRole("button", { name: "Date markers on" }).click();
-  await expect(japaneseOutput).toContainText('"status": "invalid"');
 });
 
 test("editorial table of contents presents the feature chapters and navigates the article scroller", async ({

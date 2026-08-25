@@ -45,13 +45,6 @@ parseDateInput(text, {
   lexicon: { previous: ["prior"] }
 });`;
 
-export const japaneseRecipe = `parseDateInput("2026年8月25日", {
-  expectedRange,
-  lexicon: {
-    datePartMarkers: ["年", "月", "日"]
-  }
-});`;
-
 export const tokenizeRecipe = `import { tokenizeDateInput } from "@quno/calendar/date-parser";
 
 const tokens = tokenizeDateInput("next 2 weeks");`;
