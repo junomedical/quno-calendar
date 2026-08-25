@@ -7,13 +7,29 @@ import {
   waitForDemoEvents
 } from "#quno-e2e/helpers";
 
+async function observeDraftFadeout(page: Page) {
+  await page.evaluate(() => {
+    delete document.documentElement.dataset.observedDraftExitAnimation;
+    const observer = new MutationObserver(() => {
+      const draft = document.querySelector<HTMLElement>('[data-testid="draft-event"][data-exiting="true"]');
+      if (!draft) return;
+      document.documentElement.dataset.observedDraftExitAnimation = getComputedStyle(draft).animationName;
+      observer.disconnect();
+    });
+    observer.observe(document.body, { attributes: true, childList: true, subtree: true });
+    window.setTimeout(() => observer.disconnect(), 2_000);
+  });
+}
+
 async function expectDraftFadeoutThenGone(page: Page) {
-  const exitingDraft = page.locator('[data-testid="draft-event"][data-exiting="true"]');
-  await expect(exitingDraft.first()).toHaveCSS("animation-name", "quno-calendar-draft-fade-out");
+  await expect
+    .poll(() => page.locator("html").getAttribute("data-observed-draft-exit-animation"))
+    .toBe("quno-calendar-draft-fade-out");
   await expect(page.getByTestId("draft-event")).toHaveCount(0);
 }
 
 async function cancelAndKeepRowAnchored(page: Page, selector: string, before: number) {
+  await observeDraftFadeout(page);
   await page.getByTestId("draft-cancel-button").click();
   await expectDraftFadeoutThenGone(page);
   await expect(page.getByTestId("external-event-popup")).toHaveCount(0);

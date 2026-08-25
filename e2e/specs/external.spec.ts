@@ -743,17 +743,17 @@ test("supports external event editing popup without blocking calendar scroll", a
   }
 
   const originalDraftDate = await page.getByTestId("draft-date-input").inputValue();
-  const nextDraftDate = await page.evaluate((date) => {
+  const futureDraftDate = await page.evaluate((date) => {
     const next = new Date(`${date}T00:00:00`);
-    next.setDate(next.getDate() + 1);
+    next.setDate(next.getDate() + 45);
     return next.toISOString().slice(0, 10);
   }, originalDraftDate);
   const draftBoxBeforeFutureDate = await viewportRelativeEventBox(
     page,
     `[data-testid="draft-event"][data-event-id="${eventId}"]`
   );
-  await page.getByTestId("draft-date-input").fill(nextDraftDate);
-  await expect(page.getByTestId("draft-date-input")).toHaveValue(nextDraftDate);
+  await page.getByTestId("draft-date-input").fill(futureDraftDate);
+  await expect(page.getByTestId("draft-date-input")).toHaveValue(futureDraftDate);
   if (draftBoxBeforeFutureDate) {
     await expect
       .poll(async () => {

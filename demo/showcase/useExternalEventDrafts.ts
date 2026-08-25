@@ -164,6 +164,11 @@ export function useExternalEventDrafts({
         flushSync(() => {
           setActiveDraft({ ...activeDraft, event: nextEvent });
         });
+        const movedVisibleAnchor = captureEventAnchor(nextEvent, undefined, true);
+        if (movedVisibleAnchor) {
+          activeDraftLastSeenAnchorRef.current = movedVisibleAnchor;
+          return;
+        }
         restoreEventAnchor(visibleAnchor, nextEvent, {
           afterRecenter: true
         });

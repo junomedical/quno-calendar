@@ -71,8 +71,6 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ### Fixed
 
-- Kept an externally edited event at its captured viewport position when its date changes to another day that is
-  already partially visible. Nearby-date visibility no longer bypasses semantic anchor restoration.
 - Made every English, German, and product-vocabulary sample in the Date Parser language exhibit resolve to a different
   visible day or range, so switching examples now demonstrates the parser output instead of repeating the same date.
 - Kept the Datepicker range-summary Clear action compact in the Acid and Candy field-guide themes instead of inheriting
