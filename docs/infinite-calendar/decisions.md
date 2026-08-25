@@ -608,3 +608,16 @@ restores the saved source event or original creation slot with navigation fallba
 This makes review UI feel local to the work that initiated it and demonstrates the public anchor contract without
 moving persistence responsibility into the calendar. Manual scrolling can still cancel a pending restoration, so user
 intent takes precedence over the pre-proposal snapshot.
+
+## 084 - The Resizable Card Lab Uses Native CSS
+
+Date: 2026-08-25
+Status: Accepted
+
+The event-card container-query lab uses one live shell with the browser-native lower-right resize corner instead of
+separate React-controlled width and height sliders. CSS owns `resize: both`, clipped overflow, the initial dimensions,
+and the minimum and maximum bounds. Container queries continue to decide which renderer details fit after the browser
+changes the shell geometry.
+
+This keeps the exhibit aligned with the contract it teaches: card adaptation and the demonstration's resize mechanism
+are both CSS behavior, while React supplies the unchanged event renderer and data.

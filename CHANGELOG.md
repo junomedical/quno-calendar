@@ -25,6 +25,11 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ### Changed
 
+- Replaced the event-card resize lab's width and height sliders with one browser-native draggable corner. The demo's
+  resize behavior, dimension limits, and responsive content changes are now fully CSS-defined.
+- Removed the vague Public API at a glance row from all four production chapters and the redundant How we design
+  eyebrow above the project home's Guiding principles section. Replaced the Datepicker contents label “Understand and
+  ship the model” with the concrete state responsibility it links to.
 - Repositioned the Datepicker field guide around direct range selection and clarified that its long-distance month
   navigator groups months by season while sticky year labels preserve context during fast scrolling.
 - Reframed the project home and Infinite Calendar guide around an opinionated approach to date and scheduling UI, and

@@ -38,7 +38,19 @@ const rendererSnippet = `function EventCard({ event, status, laneCount, style })
   );
 }`;
 
-const containerQuerySnippet = `/* Calendar event shells are named "calendar-event" size containers. */
+const containerQuerySnippet = `/* This lab's complete resize interaction is CSS-defined. */
+.resize-lab {
+  width: 260px;
+  height: 92px;
+  min-width: 90px;
+  max-width: 360px;
+  min-height: 28px;
+  max-height: 120px;
+  overflow: hidden;
+  resize: both;
+  container: calendar-event / size;
+}
+
 @container calendar-event (width < 120px) {
   .event-card__type,
   .event-card__details,
@@ -470,8 +482,8 @@ export function IntegrationWalkthrough({ embedded = false }: { embedded?: boolea
         <CodeBlock code={rendererSnippet} title="Render a product-specific event card" />
         <CodeBlock code={containerQuerySnippet} title="Keep the most useful content for the available space" />
         <Callout>
-          Move the Width and Height controls in the resize lab. The same renderer removes supporting details only as its
-          own container becomes narrow or short; the surrounding page size does not decide.
+          Drag the live card’s lower-right corner. CSS defines the resize behavior, dimension limits, and responsive
+          content rules; the same renderer removes supporting details only as its own container becomes narrow or short.
         </Callout>
         <DemoBreakout>
           <LazyArticleDemo label="event card examples">

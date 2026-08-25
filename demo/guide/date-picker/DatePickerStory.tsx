@@ -18,7 +18,7 @@ const contents = [
   ["#theming", "08", "Theme with scoped tokens"],
   ["#single-day", "09", "Choose one day"],
   ["#date-input-composition", "10", "Combine with Date Input"],
-  ["#idea", "11", "Understand and ship the model"]
+  ["#idea", "11", "Separate value, view, and gesture state"]
 ] as const;
 
 export const DatePickerStory = ({ embedded = false }: { embedded?: boolean }): JSX.Element => {

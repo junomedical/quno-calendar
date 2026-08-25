@@ -25,8 +25,7 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
-.field-guide-production dl > div,
-.field-guide-production__api {
+.field-guide-production dl > div {
   min-width: 0;
   padding: 18px;
   border: 1px solid var(--guide-line, #d5ddd7);
@@ -71,19 +70,10 @@
   font-size: 12px;
 }
 
-.field-guide-production__api strong {
-  color: var(--guide-accent-dark, #174b40);
-}
-
-.field-guide-production__api p,
 .field-guide-production__note {
   color: var(--guide-muted, #657069);
   font-size: 12px;
   line-height: 1.55;
-}
-
-.field-guide-production__api p {
-  margin: 8px 0 0;
 }
 
 .field-guide-production__note {

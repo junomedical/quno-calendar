@@ -148,8 +148,6 @@ export function InfiniteCalendarDemo() {
 
 export function EventCardsDemo() {
   const responsiveEvent = articleEvents[2];
-  const [cardWidth, setCardWidth] = useState(260);
-  const [cardHeight, setCardHeight] = useState(92);
   const specimens = [
     { label: "Appointment", event: articleEvents[2], status: "existing" as const, className: "" },
     { label: "Consultation", event: articleEvents[1], status: "existing" as const, className: "" },
@@ -242,51 +240,23 @@ export function EventCardsDemo() {
       <div className="article-card-resize-example" data-testid="article-card-resize-example">
         <div className="article-card-container-example__intro">
           <strong>Resize one live container</strong>
-          <span>Watch secondary information leave only when the card runs out of room.</span>
+          <span>Drag its lower-right corner. The resize behavior and limits are fully defined in CSS.</span>
         </div>
-        <div className="article-card-resize-example__body">
-          <div className="article-card-resize-example__controls">
-            <label>
-              <span>Width</span>
-              <input
-                aria-label="Card width"
-                max="360"
-                min="90"
-                onChange={(event) => setCardWidth(Number(event.target.value))}
-                type="range"
-                value={cardWidth}
-              />
-              <output>{cardWidth}px</output>
-            </label>
-            <label>
-              <span>Height</span>
-              <input
-                aria-label="Card height"
-                max="120"
-                min="28"
-                onChange={(event) => setCardHeight(Number(event.target.value))}
-                type="range"
-                value={cardHeight}
-              />
-              <output>{cardHeight}px</output>
-            </label>
-          </div>
+        <div
+          className="article-card-resize-example__stage"
+          style={
+            {
+              "--event-accent": responsiveEvent.color,
+              "--event-accent-muted": "#eef5f1"
+            } as CSSProperties
+          }
+        >
           <div
-            className="article-card-resize-example__stage"
-            style={
-              {
-                "--event-accent": responsiveEvent.color,
-                "--event-accent-muted": "#eef5f1"
-              } as CSSProperties
-            }
+            aria-label="Resizable event card container"
+            className="article-card-resize-example__shell"
+            data-testid="article-resizable-card-shell"
           >
-            <div
-              className="article-card-resize-example__shell"
-              data-testid="article-resizable-card-shell"
-              style={{ width: cardWidth, height: cardHeight }}
-            >
-              <ArticleEventCard {...specimenProps(responsiveEvent, "existing")} />
-            </div>
+            <ArticleEventCard {...specimenProps(responsiveEvent, "existing")} />
           </div>
         </div>
       </div>

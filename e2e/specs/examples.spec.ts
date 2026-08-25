@@ -87,6 +87,7 @@ test("project home links each component card to its dedicated field guide and de
   await expect(page.getByRole("heading", { name: "Opinionated approach to dates and schedules UI" })).toBeVisible();
   await expect(page.locator(".project-home__intro")).toContainText("Four different ideas in the date UI elements");
   const principles = page.getByRole("region", { name: "Guiding principles" });
+  await expect(principles.getByText("How we design", { exact: true })).toHaveCount(0);
   await expect(principles.locator(".project-home__principle")).toHaveCount(6);
   await expect(principles.getByRole("heading", { level: 3 })).toHaveText([
     "Clean",
@@ -310,7 +311,7 @@ test("all four guides separate exact payloads from runtime contracts", async ({ 
     await expect(production.getByText(javascript, { exact: true })).toBeVisible();
     await expect(production.getByText(styles, { exact: true })).toBeVisible();
     await expect(production.getByText(entrypoint, { exact: true })).toBeVisible();
-    await expect(production.getByText("Public API at a glance", { exact: true })).toBeVisible();
+    await expect(production.getByText("Public API at a glance", { exact: true })).toHaveCount(0);
     await expect(production).not.toContainText("Total package");
     await expect(production).toContainText(
       route === "date-parser" ? "no CSS artifact or combined total" : "JavaScript and CSS are separate imports"
@@ -711,11 +712,21 @@ test("editorial article uses one external card renderer for specimens and calend
 
   const resizeExample = demo.getByTestId("article-card-resize-example");
   const resizableShell = resizeExample.getByTestId("article-resizable-card-shell");
-  await resizeExample.getByLabel("Card width").fill("100");
+  await expect(resizeExample.getByRole("slider")).toHaveCount(0);
+  await expect(resizableShell).toHaveCSS("resize", "both");
+  await expect(resizableShell).toHaveCSS("overflow", "hidden");
+  await expect(resizableShell).toHaveCSS("min-width", "90px");
+  await expect(resizableShell).toHaveCSS("min-height", "28px");
+  await resizableShell.evaluate((element) => {
+    element.style.width = "100px";
+  });
   await expect.poll(async () => (await resizableShell.boundingBox())?.width ?? 0).toBeCloseTo(100, 0);
   await expect(resizableShell.locator(".article-event-card__kicker")).toHaveCSS("display", "none");
-  await resizeExample.getByLabel("Card width").fill("260");
-  await resizeExample.getByLabel("Card height").fill("44");
+  await resizableShell.evaluate((element) => {
+    element.style.width = "260px";
+    element.style.height = "44px";
+  });
+  await expect.poll(async () => (await resizableShell.boundingBox())?.width ?? 0).toBeCloseTo(260, 0);
   await expect.poll(async () => (await resizableShell.boundingBox())?.height ?? 0).toBeCloseTo(44, 0);
   await expect(resizableShell.locator(".article-event-card__kicker")).not.toHaveCSS("display", "none");
   await expect(resizableShell.locator(".article-event-card__subtitle")).toHaveCSS("display", "none");

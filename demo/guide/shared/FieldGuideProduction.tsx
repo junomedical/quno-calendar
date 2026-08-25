@@ -50,10 +50,6 @@ export function FieldGuideProduction({ profile, anchorIds = [], testId }: Props)
           <dd>{profile.dependencies}</dd>
         </div>
       </dl>
-      <div className="field-guide-production__api">
-        <strong>Public API at a glance</strong>
-        <p>{profile.publicApi.join(" · ")}</p>
-      </div>
       <p className="field-guide-production__note">
         Measured from the production package build with maximum gzip compression, before consumer tree-shaking.
         {profile.stylesheet

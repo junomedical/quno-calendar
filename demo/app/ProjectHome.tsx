@@ -78,7 +78,6 @@ export function ProjectHome() {
         </div>
         <section className="project-home__principles" aria-labelledby="guiding-principles-title">
           <div className="project-home__principles-intro">
-            <p className="project-home__eyebrow">How we design</p>
             <h2 id="guiding-principles-title">Guiding principles</h2>
           </div>
           <div className="project-home__principle-grid">

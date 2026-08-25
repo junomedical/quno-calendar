@@ -21,7 +21,7 @@ describe("field guide production facts", () => {
     expect(within(payload).getByText(javascript, { exact: true })).toBeInTheDocument();
     expect(within(profile.stylesheet ? payload : contract).getByText(styles, { exact: true })).toBeInTheDocument();
     expect(within(contract).getByText(profile.entrypoint, { exact: true })).toBeInTheDocument();
-    expect(screen.getByText("Public API at a glance")).toBeInTheDocument();
+    expect(screen.queryByText("Public API at a glance")).not.toBeInTheDocument();
     expect(screen.queryByText(/Total package/)).not.toBeInTheDocument();
     unmount();
   });

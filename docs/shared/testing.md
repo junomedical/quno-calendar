@@ -245,6 +245,9 @@ orientation, availability, loading, visual-focus, and motion assertions formerly
 - Drawing and drag/drop clear existing browser text selection, suppress new selection, and suppress other event hover effects while the interaction is active.
 - Event resize/focus changes are not animated.
 - Event cards show a thick left accent border, standard card backgrounds use a muted version of the same accent color, and row labels remain uncolored.
+- The event-card resize lab has no slider controls. Its shell computes to `resize: both` with clipped overflow, dragging
+  the browser-native lower-right corner changes both dimensions within CSS bounds, and browser coverage verifies the
+  resulting shell geometry and container-query content states directly.
 - Dragging an event produces parent-side accept/reject feedback.
 - Demo calendar-type switch changes between infinite horizontal and infinite vertical views.
 - Infinite vertical columns fill available space, follow `verticalColumnMinWidth`, `verticalColumnOverlapCapacity`, and `verticalColumnOverlapGrowth`, and keep default 240px/three-lane/+80px behavior when callers do not override those settings.

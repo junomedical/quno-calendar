@@ -10,7 +10,8 @@ The article teaches the calendar through focused live exhibits:
 2. Move through dates without limits while immediately populating newly visible days.
 3. Keep busy schedules fast.
 4. Leverage the browser engine.
-5. Render useful event cards, including one renderer adapting to fixed specimens and a user-resizable container.
+5. Render useful event cards, including one renderer adapting to fixed specimens and a CSS-only, user-resizable
+   container with a browser-native draggable corner.
 6. Shape card structure for the occasion.
 7. Start with a read-only calendar.
 8. Add availability and event layers.

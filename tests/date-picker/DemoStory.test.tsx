@@ -58,11 +58,15 @@ describe("datepicker field guide", () => {
       "href",
       "#date-input-composition"
     );
+    expect(within(contents).getByRole("link", { name: /Separate value, view, and gesture state/ })).toHaveAttribute(
+      "href",
+      "#idea"
+    );
+    expect(within(contents).queryByText("Understand and ship the model")).not.toBeInTheDocument();
     expect(document.querySelector('[data-story-topic="natural-input"]')).not.toBeInTheDocument();
     expect(screen.getByText("9.00 KiB gzip")).toBeInTheDocument();
     expect(screen.getByText("3.20 KiB gzip")).toBeInTheDocument();
-    expect(screen.getByText("Public API at a glance")).toBeInTheDocument();
-    expect(screen.getByText(/QunoDatePicker · QunoDatePickerProps/)).toBeInTheDocument();
+    expect(screen.queryByText("Public API at a glance")).not.toBeInTheDocument();
     expect(screen.queryByText(/docs\/shared\/usage\.md/)).not.toBeInTheDocument();
   });
 

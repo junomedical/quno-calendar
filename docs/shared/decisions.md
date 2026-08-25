@@ -102,3 +102,16 @@ because that repository was the consolidation source. Its identifier and text re
   visible in the shared production presentation.
 - Consequences: The two production endings are shorter and avoid duplicate payload guidance without hiding their
   entry-point or stylesheet contracts. Other field-guide chapters retain their focused implementation recipes.
+
+## QUNO-009 - Keep production facts concrete
+
+- Date: 2026-08-25
+- Status: Accepted; refines QUNO-004 and QUNO-008
+- Context: The shared production ending followed exact payload, import, runtime, compatibility, and dependency facts
+  with a compressed “Public API at a glance” list. Labels such as “calendar event and loader types” were too vague to
+  help readers understand or adopt the components.
+- Decision: Remove the public-API summary row from all four production-facts presentations. Keep complete API teaching
+  in task-oriented guide chapters and copyable recipes, while the production ending stays limited to concrete build
+  and runtime facts.
+- Consequences: Production chapters end sooner and every remaining fact is specific and comparable. Public APIs remain
+  documented where their individual behavior has enough context to be useful.

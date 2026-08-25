@@ -11,7 +11,6 @@ export type FieldGuideProductionProfile = {
   runtime: string;
   compatibility: string;
   dependencies: string;
-  publicApi: ReadonlyArray<string>;
 };
 
 export const infiniteCalendarProduction: FieldGuideProductionProfile = {
@@ -24,8 +23,7 @@ export const infiniteCalendarProduction: FieldGuideProductionProfile = {
   ],
   runtime: "React 18+ and React DOM peers",
   compatibility: "Preact 10.18+ through compat aliases",
-  dependencies: "@tanstack/react-virtual stays external",
-  publicApi: ["QunoInfiniteCalendar", "defaultQunoInfiniteCalendarSettings", "calendar event and loader types"]
+  dependencies: "@tanstack/react-virtual stays external"
 };
 
 export const datepickerProduction: FieldGuideProductionProfile = {
@@ -38,8 +36,7 @@ export const datepickerProduction: FieldGuideProductionProfile = {
   ],
   runtime: "React 18+ and React DOM peers",
   compatibility: "Preact 10.18+ through compat aliases",
-  dependencies: "No bundled date or positioning library",
-  publicApi: ["QunoDatePicker", "QunoDatePickerProps", "DateRange", "day customization and label types"]
+  dependencies: "No bundled date or positioning library"
 };
 
 export const dateInputProduction: FieldGuideProductionProfile = {
@@ -52,8 +49,7 @@ export const dateInputProduction: FieldGuideProductionProfile = {
   ],
   runtime: "React 18+ and React DOM peers",
   compatibility: "Preact 10.18+ through compat aliases",
-  dependencies: "No bundled date library",
-  publicApi: ["QunoDateInput", "QunoDateInputProps", "component label and formatter types"]
+  dependencies: "No bundled date library"
 };
 
 export const dateParserProduction: FieldGuideProductionProfile = {
@@ -63,6 +59,5 @@ export const dateParserProduction: FieldGuideProductionProfile = {
   artifacts: [{ label: "JavaScript", gzip: "4.45 KiB", raw: "15.33 KiB", budget: "≤ 6 KiB gzip" }],
   runtime: "No UI framework runtime",
   compatibility: "ESM, CommonJS, browser, Node, and SSR",
-  dependencies: "No runtime dependencies",
-  publicApi: ["parseDateInput", "tokenizeDateInput", "parser, token, language, and vocabulary types"]
+  dependencies: "No runtime dependencies"
 };

@@ -728,34 +728,6 @@
   border-radius: 12px;
 }
 
-.article-card-resize-example__body {
-  display: grid;
-  grid-template-columns: minmax(180px, 0.7fr) minmax(0, 1.3fr);
-  gap: 20px;
-}
-
-.article-card-resize-example__controls {
-  display: grid;
-  align-content: center;
-  gap: 14px;
-}
-
-.article-card-resize-example__controls label {
-  display: grid;
-  grid-template-columns: 52px minmax(0, 1fr) 48px;
-  align-items: center;
-  gap: 8px;
-  color: #4e5a54;
-  font-size: 11px;
-  font-weight: 700;
-}
-
-.article-card-resize-example__controls output {
-  color: #246b5d;
-  font-variant-numeric: tabular-nums;
-  text-align: right;
-}
-
 .article-card-resize-example__stage {
   display: flex;
   min-height: 144px;
@@ -770,8 +742,15 @@
 }
 
 .article-card-resize-example__shell {
-  max-width: 100%;
+  width: 260px;
+  height: 92px;
+  min-width: 90px;
+  max-width: min(360px, 100%);
+  min-height: 28px;
+  max-height: 120px;
   flex: 0 0 auto;
+  overflow: hidden;
+  resize: both;
   container-name: calendar-event;
   container-type: size;
 }
@@ -1559,10 +1538,6 @@
   }
 
   .article-card-container-example__grid {
-    grid-template-columns: 1fr;
-  }
-
-  .article-card-resize-example__body {
     grid-template-columns: 1fr;
   }
 
