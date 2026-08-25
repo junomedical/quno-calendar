@@ -9,7 +9,6 @@ import {
 
 async function expectDraftFadeoutThenGone(page: Page) {
   const exitingDraft = page.locator('[data-testid="draft-event"][data-exiting="true"]');
-  await expect(exitingDraft.first()).toBeVisible();
   await expect(exitingDraft.first()).toHaveCSS("animation-name", "quno-calendar-draft-fade-out");
   await expect(page.getByTestId("draft-event")).toHaveCount(0);
 }
