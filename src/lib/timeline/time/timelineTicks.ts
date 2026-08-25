@@ -1,4 +1,4 @@
-import type { QunoCalendarSettings } from "../core/types";
+import type { QunoInfiniteCalendarSettings } from "#quno-internal/timeline/core/types";
 import { formatHourLabel, pixelsPerMinute, timelineEndMinute, timelineStartMinute } from "./time";
 
 /** Left gutter keeping time labels away from the resource-label border. */
@@ -18,7 +18,7 @@ export function gridCadenceMinutes(zoom: number): number {
 /** Returns the rendered time-grid node nearest a minute. */
 export function nearestTimeNodeMinute(
   minute: number,
-  settings: Pick<QunoCalendarSettings, "startHour" | "endHour" | "zoom">
+  settings: Pick<QunoInfiniteCalendarSettings, "startHour" | "endHour" | "zoom">
 ): number {
   const cadenceMinutes = gridCadenceMinutes(settings.zoom);
   const nodeMinute = Math.round(minute / cadenceMinutes) * cadenceMinutes;
@@ -26,7 +26,7 @@ export function nearestTimeNodeMinute(
 }
 
 /** Builds sticky-header ticks without allowing dense labels to overlap. */
-export function buildTimeTicks(settings: QunoCalendarSettings) {
+export function buildTimeTicks(settings: QunoInfiniteCalendarSettings) {
   const quarterHourSpacing = pixelsPerMinute(settings.zoom) * 15;
   const isFineCadence = gridCadenceMinutes(settings.zoom) === STABLE_TICK_CADENCE_MINUTES;
   const startMinute = timelineStartMinute(settings);

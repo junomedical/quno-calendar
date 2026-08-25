@@ -1,4 +1,4 @@
-import { parseDateInput } from "../../src/lib/date-input";
+import { parseDateInput } from "@quno/calendar/date-parser";
 
 const options = {
   expectedRange: { start: "2024-01-01", end: "2028-12-31" } as const,

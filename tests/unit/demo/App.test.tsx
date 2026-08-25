@@ -1,32 +1,38 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-vi.mock("../../../demo/app/ProjectHome", () => ({
+vi.mock("#quno-demo/app/ProjectHome", () => ({
   ProjectHome: () => <div data-testid="route-home" />
 }));
-vi.mock("../../../demo/showcase/DefaultDemo", () => ({
+vi.mock("#quno-demo/showcase/DefaultDemo", () => ({
   DefaultDemo: () => <div data-testid="route-default" />
 }));
-vi.mock("../../../demo/showcase/demo1/Demo1", () => ({ Demo1: () => <div data-testid="route-demo1" /> }));
-vi.mock("../../../demo/showcase/demo2/Demo2", () => ({ Demo2: () => <div data-testid="route-demo2" /> }));
-vi.mock("../../../demo/showcase/demo3/Demo3", () => ({ Demo3: () => <div data-testid="route-demo3" /> }));
-vi.mock("../../../demo/guide/timeline/IntegrationWalkthrough", () => ({
+vi.mock("#quno-demo/showcase/demo1/Demo1", () => ({ Demo1: () => <div data-testid="route-demo1" /> }));
+vi.mock("#quno-demo/showcase/demo2/Demo2", () => ({ Demo2: () => <div data-testid="route-demo2" /> }));
+vi.mock("#quno-demo/showcase/demo3/Demo3", () => ({ Demo3: () => <div data-testid="route-demo3" /> }));
+vi.mock("#quno-demo/guide/timeline/IntegrationWalkthrough", () => ({
   IntegrationWalkthrough: () => <div data-testid="route-timeline-guide" />
 }));
-vi.mock("../../../demo/guide/date-picker/DatePickerStory", () => ({
+vi.mock("#quno-demo/guide/date-picker/DatePickerStory", () => ({
   DatePickerStory: () => <div data-testid="route-date-range-guide" />
 }));
-vi.mock("../../../demo/guide/date-input/DateInputFieldGuide", () => ({
+vi.mock("#quno-demo/guide/date-input/DateInputFieldGuide", () => ({
   DateInputFieldGuide: () => <div data-testid="route-date-input-guide" />
 }));
-vi.mock("../../../demo/demos/DateRangeDemo", () => ({
+vi.mock("#quno-demo/guide/date-parser/DateParserFieldGuide", () => ({
+  DateParserFieldGuide: () => <div data-testid="route-date-parser-guide" />
+}));
+vi.mock("#quno-demo/demos/DateRangeDemo", () => ({
   DateRangeDemo: () => <div data-testid="route-date-range-demo" />
 }));
-vi.mock("../../../demo/demos/DateInputDemo", () => ({
+vi.mock("#quno-demo/demos/DateInputDemo", () => ({
   DateInputDemo: () => <div data-testid="route-date-input-demo" />
 }));
+vi.mock("#quno-demo/demos/DateParserDemo", () => ({
+  DateParserDemo: () => <div data-testid="route-date-parser-demo" />
+}));
 
-import { App, demoRoutes } from "../../../demo/app/App";
+import { App, demoRoutes } from "#quno-demo/app/App";
 
 describe("application route registry", () => {
   it("keeps all four calendar demo routes", () => {
@@ -41,11 +47,13 @@ describe("application route registry", () => {
   it.each([
     ["/", "route-home"],
     ["/guide/infinite-calendar", "route-timeline-guide"],
-    ["/guide/date-range-input", "route-date-range-guide"],
-    ["/guide/date-input-field", "route-date-input-guide"],
+    ["/guide/datepicker", "route-date-range-guide"],
+    ["/guide/date-input", "route-date-input-guide"],
+    ["/guide/date-parser", "route-date-parser-guide"],
     ["/demo/infinite-calendar", "route-default"],
-    ["/demo/date-range-input", "route-date-range-demo"],
-    ["/demo/date-input-field", "route-date-input-demo"],
+    ["/demo/datepicker", "route-date-range-demo"],
+    ["/demo/date-input", "route-date-input-demo"],
+    ["/demo/date-parser", "route-date-parser-demo"],
     ["/demo1", "route-demo1"],
     ["/demo2", "route-demo2"],
     ["/demo3", "route-demo3"]
@@ -73,4 +81,17 @@ describe("application route registry", () => {
       view.unmount();
     }
   );
+
+  it.each([
+    ["/guide/date-range-input", "/guide/datepicker", "route-date-range-guide"],
+    ["/guide/date-input-field", "/guide/date-input", "route-date-input-guide"],
+    ["/demo/date-range-input", "/demo/datepicker", "route-date-range-demo"],
+    ["/demo/date-input-field", "/demo/date-input", "route-date-input-demo"]
+  ])("redirects %s to %s", (path, destination, testId) => {
+    window.history.replaceState({}, "", path);
+    const view = render(<App />);
+    expect(screen.getByTestId(testId)).toBeInTheDocument();
+    expect(window.location.pathname).toBe(destination);
+    view.unmount();
+  });
 });

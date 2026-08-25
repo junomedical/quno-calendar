@@ -13,7 +13,7 @@ export function ComponentDemoShell({ children, description, guideHref, title }: 
     <main className="component-demo">
       <header className="component-demo__header">
         <div>
-          <p>Quno Calendar · Demo</p>
+          <p>Quno · Demo</p>
           <h1>{title}</h1>
           <span>{description}</span>
         </div>

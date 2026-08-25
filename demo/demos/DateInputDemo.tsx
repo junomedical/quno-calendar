@@ -11,8 +11,8 @@ export function DateInputDemo() {
   return (
     <ComponentDemoShell
       description="Try “next 2 weeks”, “12 June”, or a complete typed range."
-      guideHref="/guide/date-input-field"
-      title="Date input field"
+      guideHref="/guide/date-input"
+      title="Quno/Date Input"
     >
       <div className="component-demo__panel">
         <QunoDateInput

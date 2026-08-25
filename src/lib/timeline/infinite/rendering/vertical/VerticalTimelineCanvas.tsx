@@ -6,7 +6,10 @@ import type { PointerEventHandler, RefObject } from "react";
 import type { CalendarViewComponentProps } from "#quno-internal/timeline/core/types";
 import { VerticalTimelineDay } from "./VerticalTimelineDay";
 import type { VerticalTimelineDayProps } from "./types";
-import { semanticDateKeyForRenderItem, type VirtualDateRenderItem } from "../../scroll/window/renderItems";
+import {
+  semanticDateKeyForRenderItem,
+  type VirtualDateRenderItem
+} from "#quno-internal/timeline/infinite/scroll/window/renderItems";
 
 export type VerticalDayRenderProps = Omit<
   VerticalTimelineDayProps,

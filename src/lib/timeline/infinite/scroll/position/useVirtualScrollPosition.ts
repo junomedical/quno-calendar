@@ -8,12 +8,12 @@
  * timing, window-anchor changes, item measurement, or layout focus policy. A
  * missing viewport or unresolved item leaves the last valid snapshot intact.
  *
- * @see docs/flows/virtual-scroll-and-recenter.md#position-snapshots-and-layout-changes
+ * @see docs/infinite-calendar/flows/virtual-scroll-and-recenter.md#position-snapshots-and-layout-changes
  */
 import type { Virtualizer } from "@tanstack/react-virtual";
 import { useCallback, type MutableRefObject, type RefObject } from "react";
 import type { VirtualDateWindow } from "#quno-internal/timeline/date/dateVirtualization";
-import { clampVirtualDateIndex } from "../window/dateModel";
+import { clampVirtualDateIndex } from "#quno-internal/timeline/infinite/scroll/window/dateModel";
 import { resolveVisibleDateSnapshot } from "./visibleSnapshot";
 
 type UseVirtualScrollPositionArgs = {

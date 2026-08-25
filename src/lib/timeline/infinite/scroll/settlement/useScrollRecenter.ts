@@ -9,10 +9,13 @@
  * unmount clears it; active draw/drag skips that deadline so a later scroll
  * signal can schedule again.
  *
- * @see docs/flows/virtual-scroll-and-recenter.md#settled-scroll-lifecycle
+ * @see docs/infinite-calendar/flows/virtual-scroll-and-recenter.md#settled-scroll-lifecycle
  */
 import { useCallback, useEffect, useLayoutEffect, useRef, type RefObject } from "react";
-import { SCROLL_RECENTER_DELAY_MS, scrollRecenterDelayMs } from "../scrollConstants";
+import {
+  SCROLL_RECENTER_DELAY_MS,
+  scrollRecenterDelayMs
+} from "#quno-internal/timeline/infinite/scroll/scrollConstants";
 
 type UseScrollRecenterArgs = {
   containerRef: RefObject<HTMLDivElement | null>;

@@ -1,35 +1,29 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
-import { DateInputFieldGuide } from "../../demo/guide/date-input/DateInputFieldGuide";
+import { DateInputFieldGuide } from "#quno-demo/guide/date-input/DateInputFieldGuide";
 
-describe("natural input story", () => {
-  it("owns a dedicated guide, demo link, and live headless parser", () => {
+describe("date input field guide", () => {
+  it("owns a dedicated guide, demo link, and task-oriented chapters", () => {
     render(<DateInputFieldGuide />);
-    expect(screen.getByRole("heading", { name: "Dates, written the way people think." })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "A date field that stays useful while people type." })
+    ).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "All components" })).toHaveAttribute("href", "/");
-    expect(screen.getByRole("link", { name: /Demo/ })).toHaveAttribute("href", "/demo/date-input-field");
-    const contents = screen.getByRole("navigation", { name: "Explore the field guide" });
-    expect(within(contents).getAllByRole("link")).toHaveLength(12);
+    expect(screen.getByRole("link", { name: /Demo/ })).toHaveAttribute("href", "/demo/date-input");
+    const contents = screen.getByRole("navigation", { name: "Table of contents" });
+    expect(within(contents).getAllByRole("link")).toHaveLength(8);
     for (const title of [
-      "Choose one day or a period.",
-      "Recognize dates in familiar formats.",
-      "Decide what an ambiguous number means.",
-      "Understand dates relative to today.",
+      "Keep one timezone-free value shape.",
+      "Let the product own every committed change.",
       "Edit the part under the caret.",
-      "Type both ends in one field.",
-      "Guide ambiguity toward a useful period.",
-      "Parse and format for the product language.",
-      "Let languages live together in one field.",
-      "Compose typing with the date range picker.",
-      "Import only the field-sized payload.",
-      "Know what the field brings with it."
+      "Separate recognition from presentation.",
+      "Use the same parsing contract everywhere.",
+      "Let typing and direct manipulation share one value.",
+      "Keep the field understandable to every input method.",
+      "Ship the field independently."
     ]) {
       expect(screen.getByRole("heading", { name: title })).toBeInTheDocument();
     }
-    const parser = document.querySelector<HTMLElement>(".date-input-parser-example") as HTMLElement;
-    const input = within(parser).getByRole("textbox", { name: "Phrase to parse" });
-    expect(within(parser).getByText(/"status": "success"/)).toBeInTheDocument();
-    fireEvent.change(input, { target: { value: "not a date" } });
-    expect(within(parser).getByText(/"status": "invalid"/)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Date Parser field guide" })).toHaveAttribute("href", "/guide/date-parser");
   });
 
   it("opens the calendar when the button-like input gains focus and closes outside", async () => {

@@ -1,6 +1,6 @@
 import type { CalendarFocusedEventTarget } from "#quno-internal/timeline/core/internalTypes";
 import type { CalendarEvent, CalendarId, EventRenderer } from "#quno-internal/timeline/core/types";
-import type { ViewportGeometryRegistration } from "../../anchors/parent/viewportAnchorTypes";
+import type { ViewportGeometryRegistration } from "#quno-internal/timeline/infinite/anchors/parent/viewportAnchorTypes";
 import type { EventShellProps } from "./EventShell";
 
 export type EventProjection = Pick<EventShellProps, "left" | "top" | "width" | "hoverMaxWidth" | "height">;

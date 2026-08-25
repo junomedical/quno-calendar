@@ -1,17 +1,17 @@
 import { useCallback, useEffect, useRef, type MutableRefObject, type RefObject } from "react";
-import type { CalendarViewComponentProps, QunoCalendarSettings } from "#quno-internal/timeline/core/types";
+import type { CalendarViewComponentProps, QunoInfiniteCalendarSettings } from "#quno-internal/timeline/core/types";
 import { MAX_ZOOM, MIN_ZOOM } from "./zoomLimits";
 
 export type SharedZoomArgs = {
   containerRef: RefObject<HTMLDivElement>;
-  settings: QunoCalendarSettings;
+  settings: QunoInfiniteCalendarSettings;
   onZoomChange?: CalendarViewComponentProps["onZoomChange"];
   clearScrollEndTimer: () => void;
 };
 
 const GESTURE_TAIL_MS = 300;
 
-export function nextZoomFromWheel(settings: QunoCalendarSettings, event: WheelEvent): number | null {
+export function nextZoomFromWheel(settings: QunoInfiniteCalendarSettings, event: WheelEvent): number | null {
   const delta = Math.abs(event.deltaY) >= Math.abs(event.deltaX) ? event.deltaY : event.deltaX;
   if (delta === 0) return null;
   const direction = delta < 0 ? 1 : -1;
@@ -29,7 +29,7 @@ export function useFrameCoalescedWheelZoom(controlledZoom: number) {
   const controlledZoomRef = useRef(controlledZoom);
   controlledZoomRef.current = controlledZoom;
 
-  const schedule = useCallback((settings: QunoCalendarSettings, event: WheelEvent, commit: WheelZoomCommit) => {
+  const schedule = useCallback((settings: QunoInfiniteCalendarSettings, event: WheelEvent, commit: WheelZoomCommit) => {
     const sourceSettings = pendingZoomRef.current === null ? settings : { ...settings, zoom: pendingZoomRef.current };
     const nextZoom = nextZoomFromWheel(sourceSettings, event);
     if (nextZoom === null) return null;

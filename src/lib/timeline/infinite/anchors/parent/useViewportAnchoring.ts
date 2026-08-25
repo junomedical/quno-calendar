@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import { minuteToX, minuteToY, parseClockToMinutes } from "#quno-internal/timeline/time/time";
 import type {
-  QunoCalendarHandle,
+  QunoInfiniteCalendarHandle,
   CalendarViewportAnchor,
   CalendarViewportAnchorRestoreOptions,
   CalendarViewportAnchorTarget,
-  QunoCalendarSettings
+  QunoInfiniteCalendarSettings
 } from "#quno-internal/timeline/core/types";
 import { TIMELINE_LEFT_GUTTER_PX } from "#quno-internal/timeline/time/timelineTicks";
 import type { ViewportGeometryRegistration } from "./viewportAnchorTypes";
@@ -14,9 +14,9 @@ import { ViewportAnchorRestoreSession } from "./viewportAnchorRestoreSession";
 
 type AnchoringArgs = {
   containerRef: RefObject<HTMLElement | null>;
-  settings: QunoCalendarSettings;
+  settings: QunoInfiniteCalendarSettings;
   orientation: "horizontal" | "vertical";
-  scrollToDateTime: QunoCalendarHandle["scrollToDateTime"];
+  scrollToDateTime: QunoInfiniteCalendarHandle["scrollToDateTime"];
   verticalTimelineGutterPx?: number;
   visibilityInsets?: { left?: number; top?: number };
 };

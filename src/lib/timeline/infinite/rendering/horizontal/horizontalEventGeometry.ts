@@ -1,4 +1,4 @@
-import type { CalendarEvent, QunoCalendarSettings } from "#quno-internal/timeline/core/types";
+import type { CalendarEvent, QunoInfiniteCalendarSettings } from "#quno-internal/timeline/core/types";
 import { minuteToX, minutesSinceStartOfDay } from "#quno-internal/timeline/time/time";
 import { TIMELINE_LEFT_GUTTER_PX } from "#quno-internal/timeline/time/timelineTicks";
 
@@ -11,7 +11,7 @@ type HorizontalEventGeometry = {
 
 export function horizontalEventGeometry(
   event: Pick<CalendarEvent, "start" | "end">,
-  settings: Pick<QunoCalendarSettings, "startHour" | "endHour" | "zoom">
+  settings: Pick<QunoInfiniteCalendarSettings, "startHour" | "endHour" | "zoom">
 ): HorizontalEventGeometry {
   const startX = minuteToX(minutesSinceStartOfDay(event.start), settings);
   const endX = minuteToX(minutesSinceStartOfDay(event.end), settings);

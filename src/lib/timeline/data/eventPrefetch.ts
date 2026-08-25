@@ -1,4 +1,4 @@
-import type { EventPrefetchPolicy } from "../core/types";
+import type { EventPrefetchPolicy } from "#quno-internal/timeline/core/types";
 
 /**
  * Keeps one calendar week warm on each side of the rendered dates.

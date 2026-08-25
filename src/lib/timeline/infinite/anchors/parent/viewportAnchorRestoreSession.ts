@@ -5,7 +5,7 @@
  * manual intent or deadline ---------------------------> cleanup
  */
 import type {
-  QunoCalendarHandle,
+  QunoInfiniteCalendarHandle,
   CalendarViewportAnchor,
   CalendarViewportAnchorRestoreOptions,
   CalendarViewportAnchorTarget
@@ -31,7 +31,7 @@ type RestoreSessionArgs = {
   options: CalendarViewportAnchorRestoreOptions;
   registry: ViewportGeometryRegistry;
   resolveSnapshot: (target: CalendarViewportAnchorTarget) => CalendarViewportAnchor["snapshot"] | null;
-  scrollToDateTime: QunoCalendarHandle["scrollToDateTime"];
+  scrollToDateTime: QunoInfiniteCalendarHandle["scrollToDateTime"];
   isCurrent: () => boolean;
   cancel: () => void;
 };

@@ -9,7 +9,7 @@ import {
   renderedDayOverscanFailures,
   visibleDayDates,
   verticalScrollRatio
-} from "../helpers";
+} from "#quno-e2e/helpers";
 
 test("renders, scrolls vertically, zooms, and changes dataset scale", async ({ page }) => {
   await page.goto("/demo/infinite-calendar");

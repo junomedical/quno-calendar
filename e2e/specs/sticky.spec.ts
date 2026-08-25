@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { goToWorkday, setDemoZoom, topVisibleDayDate } from "../helpers";
+import { goToWorkday, setDemoZoom, topVisibleDayDate } from "#quno-e2e/helpers";
 
 test("keeps the time scale fixed and day dates css-sticky", async ({ page }) => {
   await page.goto("/demo/infinite-calendar");

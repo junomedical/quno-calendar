@@ -1,7 +1,7 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { defaultQunoCalendarSettings } from "../../../src/lib/timeline";
-import { DemoQunoCalendar, DemoZoomControl, DemoZoomProvider } from "../../../demo/showcase/zoom/DemoZoom";
+import { defaultQunoInfiniteCalendarSettings } from "#quno-internal/timeline";
+import { DemoQunoInfiniteCalendar, DemoZoomControl, DemoZoomProvider } from "#quno-demo/showcase/zoom/DemoZoom";
 
 describe("demo zoom render boundary", () => {
   afterEach(() => vi.restoreAllMocks());
@@ -34,11 +34,11 @@ describe("demo zoom render boundary", () => {
       .spyOn(window, "requestAnimationFrame")
       .mockImplementation((callback: FrameRequestCallback) => frameCallbacks.push(callback));
     vi.spyOn(window, "cancelAnimationFrame").mockImplementation(() => undefined);
-    const { zoom: _zoom, ...settings } = defaultQunoCalendarSettings;
+    const { zoom: _zoom, ...settings } = defaultQunoInfiniteCalendarSettings;
 
     render(
       <DemoZoomProvider initialZoom={1.2}>
-        <DemoQunoCalendar
+        <DemoQunoInfiniteCalendar
           calendars={[{ id: "calendar-a", name: "Calendar A" }]}
           selectedCalendarIds={["calendar-a"]}
           loadEvents={async () => []}

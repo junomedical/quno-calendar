@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { goToWorkday, horizontalDrawTarget, openDrawnExternalDraft, viewportRelativeEventBox } from "../helpers";
+import { goToWorkday, horizontalDrawTarget, openDrawnExternalDraft, viewportRelativeEventBox } from "#quno-e2e/helpers";
 
 async function createOverlappingEvent(page: import("@playwright/test").Page, title: string, time = "22:00") {
   await page.getByRole("spinbutton", { name: "Start" }).fill("8");

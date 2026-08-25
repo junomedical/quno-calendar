@@ -1,10 +1,10 @@
 import type { PointerEventHandler, RefObject, UIEventHandler } from "react";
 import type { CalendarViewComponentProps } from "#quno-internal/timeline/core/types";
-import { InfiniteTimeScaleHeader } from "../shared/TimeScaleHeader";
+import { InfiniteTimeScaleHeader } from "#quno-internal/timeline/infinite/rendering/shared/TimeScaleHeader";
 import { InfiniteTimelineDay } from "./HorizontalTimelineDay";
 import type { HorizontalTimelineDayProps } from "./types";
 import { TIMELINE_LEFT_GUTTER_PX, buildTimeTicks } from "#quno-internal/timeline/time/timelineTicks";
-import { semanticDateKeyForRenderItem } from "../../scroll/window/renderItems";
+import { semanticDateKeyForRenderItem } from "#quno-internal/timeline/infinite/scroll/window/renderItems";
 
 /**
  * Horizontal render loop.

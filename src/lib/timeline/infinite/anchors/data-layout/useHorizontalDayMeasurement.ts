@@ -10,12 +10,12 @@
  * row and its local offset for mid-date scrolling. `scrollLeft` is untouched.
  * Does not own: parent viewport restores, pointer gestures, or zoom anchoring.
  *
- * @see docs/flows/async-loading-and-layout.md
+ * @see docs/infinite-calendar/flows/async-loading-and-layout.md
  */
 import type { Virtualizer } from "@tanstack/react-virtual";
 import { useLayoutEffect, useRef, type RefObject } from "react";
 import type { CalendarId } from "#quno-internal/timeline/core/types";
-import { resolveVisibleDateSnapshot } from "../../scroll/position/visibleSnapshot";
+import { resolveVisibleDateSnapshot } from "#quno-internal/timeline/infinite/scroll/position/visibleSnapshot";
 import {
   captureHorizontalDataLayoutAnchor,
   resolveHorizontalDataLayoutOffset,

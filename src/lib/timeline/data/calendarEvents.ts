@@ -1,4 +1,4 @@
-import type { CalendarEvent, CalendarId, EventMoveRequest } from "../core/types";
+import type { CalendarEvent, CalendarId, EventMoveRequest } from "#quno-internal/timeline/core/types";
 
 /** Returns all calendar ids an event should render in. */
 export function eventCalendarIds(event: CalendarEvent): CalendarId[] {

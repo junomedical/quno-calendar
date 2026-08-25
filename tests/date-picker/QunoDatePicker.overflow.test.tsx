@@ -1,6 +1,6 @@
 import { fireEvent, render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { QunoDatePicker } from "../../src/lib/date-picker";
+import { QunoDatePicker } from "@quno/calendar/datepicker";
 import { day, overflowDay, slot, weekday } from "./datePickerTestUtils";
 
 describe("QunoDatePicker overflow drag zone", () => {

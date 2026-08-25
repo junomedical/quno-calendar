@@ -3,25 +3,28 @@
  * date/time requests + geometry registry -> scroll operations and anchor-safe ref methods
  */
 import { useCallback, useImperativeHandle, type ForwardedRef, type RefObject } from "react";
-import type { QunoCalendarHandle, QunoCalendarSettings } from "#quno-internal/timeline/core/types";
+import type { QunoInfiniteCalendarHandle, QunoInfiniteCalendarSettings } from "#quno-internal/timeline/core/types";
 import type { CalendarViewHandle } from "#quno-internal/timeline/core/internalTypes";
 import { toDateKey } from "#quno-internal/timeline/date/dateVirtualization";
 import { parseClockToMinutes } from "#quno-internal/timeline/time/time";
-import { verticalMinuteToY, VERTICAL_TIMELINE_GUTTER_PX } from "../../rendering/vertical/VerticalTimelineDay";
-import { buildVerticalViewGeometry } from "../../rendering/vertical/verticalViewGeometry";
-import { useViewportAnchoring } from "../../anchors/parent/useViewportAnchoring";
+import {
+  verticalMinuteToY,
+  VERTICAL_TIMELINE_GUTTER_PX
+} from "#quno-internal/timeline/infinite/rendering/vertical/VerticalTimelineDay";
+import { buildVerticalViewGeometry } from "#quno-internal/timeline/infinite/rendering/vertical/verticalViewGeometry";
+import { useViewportAnchoring } from "#quno-internal/timeline/infinite/anchors/parent/useViewportAnchoring";
 import type { IsoDate } from "#quno-internal/shared/dateRangeModel";
 
 type VerticalNavigationArgs = {
   ref: ForwardedRef<CalendarViewHandle>;
   containerRef: RefObject<HTMLDivElement>;
-  settings: QunoCalendarSettings;
+  settings: QunoInfiniteCalendarSettings;
   now: Date;
-  scrollToDate: QunoCalendarHandle["scrollToDate"];
+  scrollToDate: QunoInfiniteCalendarHandle["scrollToDate"];
   rememberVisibleDateOffset: (dateKey: string, offsetWithinDate: number) => void;
-  commitVisibleEvent: QunoCalendarHandle["commitVisibleEvent"];
-  removeVisibleEvent: QunoCalendarHandle["removeVisibleEvent"];
-  releaseActiveDraft: QunoCalendarHandle["releaseActiveDraft"];
+  commitVisibleEvent: QunoInfiniteCalendarHandle["commitVisibleEvent"];
+  removeVisibleEvent: QunoInfiniteCalendarHandle["removeVisibleEvent"];
+  releaseActiveDraft: QunoInfiniteCalendarHandle["releaseActiveDraft"];
 };
 
 export function useVerticalNavigation({

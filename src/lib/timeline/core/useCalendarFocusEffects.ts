@@ -5,7 +5,7 @@ import type {
   CalendarFocusResult,
   CalendarFocusRequestResult,
   CalendarId,
-  QunoCalendarProps,
+  QunoInfiniteCalendarProps,
   CalendarViewportAnchor
 } from "./types";
 import type { CalendarFocusedEventTarget, CalendarViewHandle } from "./internalTypes";
@@ -40,7 +40,10 @@ export function eventDateAndTime(event: CalendarEvent) {
   };
 }
 
-type FocusEffectsArgs = Pick<QunoCalendarProps, "selectedCalendarIds" | "focusRequest" | "onFocusRequestComplete"> & {
+type FocusEffectsArgs = Pick<
+  QunoInfiniteCalendarProps,
+  "selectedCalendarIds" | "focusRequest" | "onFocusRequestComplete"
+> & {
   pendingFocus: PendingFocus | null;
   pendingRef: MutableRefObject<PendingFocus | null>;
   focusedEventTarget: CalendarFocusedEventTarget | null;

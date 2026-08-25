@@ -1,4 +1,4 @@
-import type { CalendarEvent, CalendarId } from "@quno/calendar/timeline";
+import type { CalendarEvent, CalendarId } from "@quno/calendar/infinite-calendar";
 import type { IsoDate } from "@quno/calendar";
 
 export function timeInputValue(date: Date) {

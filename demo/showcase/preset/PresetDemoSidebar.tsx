@@ -1,13 +1,18 @@
-import { DemoRouteNav } from "../DemoRouteNav";
-import { ApiLatencyControl } from "../controls/ApiLatencyControl";
-import { DateJumpControl } from "../controls/DateJumpControl";
-import { DatasetControl } from "../controls/DatasetControl";
-import { CalendarCountControl, SnapControl, TimeRangeControl, ToggleControl } from "../controls/TimelineControls";
-import { ViewControl } from "../controls/ViewControl";
-import { demoCalendars } from "../data";
-import type { DemoControls } from "../hooks/useDemoControls";
-import type { DemoRoute } from "../types";
-import { DemoZoomControl } from "../zoom/DemoZoom";
+import { DemoRouteNav } from "#quno-demo/showcase/DemoRouteNav";
+import { ApiLatencyControl } from "#quno-demo/showcase/controls/ApiLatencyControl";
+import { DateJumpControl } from "#quno-demo/showcase/controls/DateJumpControl";
+import { DatasetControl } from "#quno-demo/showcase/controls/DatasetControl";
+import {
+  CalendarCountControl,
+  SnapControl,
+  TimeRangeControl,
+  ToggleControl
+} from "#quno-demo/showcase/controls/TimelineControls";
+import { ViewControl } from "#quno-demo/showcase/controls/ViewControl";
+import { demoCalendars } from "#quno-demo/showcase/data";
+import type { DemoControls } from "#quno-demo/showcase/hooks/useDemoControls";
+import type { DemoRoute } from "#quno-demo/showcase/types";
+import { DemoZoomControl } from "#quno-demo/showcase/zoom/DemoZoom";
 import type { DemoPreset } from "./types";
 
 type PresetDemoSidebarProps = {

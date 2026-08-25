@@ -1,8 +1,15 @@
 import { memo, useMemo } from "react";
 import type { CalendarEvent } from "#quno-internal/timeline/core/types";
-import { layoutPreparedEventsForRow, type EventLayoutItem } from "../../events/layout/layout";
+import {
+  layoutPreparedEventsForRow,
+  type EventLayoutItem
+} from "#quno-internal/timeline/infinite/events/layout/layout";
 import { gridCadenceMinutes, TIMELINE_LEFT_GUTTER_PX } from "#quno-internal/timeline/time/timelineTicks";
-import { AvailabilityLayer, CommittedLayer, TransientLayer } from "../shared/EventLayers";
+import {
+  AvailabilityLayer,
+  CommittedLayer,
+  TransientLayer
+} from "#quno-internal/timeline/infinite/rendering/shared/EventLayers";
 import { HorizontalRowFrame } from "./HorizontalRowFrame";
 import { committedEventHoverWidth, horizontalEventGeometry } from "./horizontalEventGeometry";
 import type { HorizontalTimelineRowProps } from "./types";

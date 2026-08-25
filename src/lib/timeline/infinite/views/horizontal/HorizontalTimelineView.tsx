@@ -1,8 +1,8 @@
 import { forwardRef } from "react";
 import type { CalendarInternalViewProps, CalendarViewHandle } from "#quno-internal/timeline/core/internalTypes";
-import { HorizontalTimelineCanvas } from "../../rendering/horizontal/HorizontalTimelineCanvas";
+import { HorizontalTimelineCanvas } from "#quno-internal/timeline/infinite/rendering/horizontal/HorizontalTimelineCanvas";
 import { useHorizontalTimelineRuntime } from "./useHorizontalTimelineRuntime";
-import "../../rendering/styles/calendar.css";
+import "#quno-internal/timeline/infinite/rendering/styles/calendar.css";
 
 /**
  * Horizontal timeline projection.

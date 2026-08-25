@@ -7,7 +7,7 @@ import {
   topVisibleDayState,
   viewportRelativeEventBox,
   waitForDemoEvents
-} from "../helpers";
+} from "#quno-e2e/helpers";
 
 test("switches to the vertical calendar view with sticky time pane and vertical zoom", async ({ page }) => {
   await page.goto("/demo/infinite-calendar");

@@ -1,5 +1,6 @@
 import type { DateRange, DateSelectionMode } from "@quno/calendar";
-import { parseDateInput, QunoDateInput, type DateInputDateOrder } from "@quno/calendar/date-input";
+import { QunoDateInput } from "@quno/calendar/date-input";
+import { parseDateInput, type DateInputDateOrder } from "@quno/calendar/date-parser";
 import { useState } from "react";
 
 const expectedRange: DateRange = { start: "2024-01-01", end: "2028-12-31" };
@@ -53,6 +54,25 @@ export function KeyboardDateInputExample() {
         onChange={setValue}
         referenceDate="2026-08-25"
       />
+      <Value value={value} />
+    </div>
+  );
+}
+
+export function ControlledDateInputExample() {
+  const [value, setValue] = useState<DateRange | null>(oneDay);
+  return (
+    <div className="date-input-guide__example">
+      <QunoDateInput
+        aria-label="Controlled date"
+        expectedRange={expectedRange}
+        onChange={setValue}
+        referenceDate="2026-08-25"
+        value={value}
+      />
+      <button type="button" onClick={() => setValue(oneDay)}>
+        Reset
+      </button>
       <Value value={value} />
     </div>
   );
@@ -124,12 +144,47 @@ export function LocalizedDateInputExample() {
   );
 }
 
+export function ParserConfiguredInputExample() {
+  const [value, setValue] = useState<DateRange | null>(period);
+  return (
+    <div className="date-input-guide__example">
+      <QunoDateInput
+        aria-label="Sunday-first date range"
+        expectedRange={expectedRange}
+        onChange={setValue}
+        referenceDate="2026-08-25"
+        value={value}
+        weekStartsOn={0}
+      />
+      <Value value={value} />
+    </div>
+  );
+}
+
+export function AccessibleDateInputExample() {
+  const [value, setValue] = useState<DateRange | null>(oneDay);
+  return (
+    <div className="date-input-guide__example">
+      <label htmlFor="accessible-date-input">Appointment date</label>
+      <QunoDateInput
+        id="accessible-date-input"
+        expectedRange={expectedRange}
+        labels={{ placeholder: "Type a date" }}
+        onChange={setValue}
+        referenceDate="2026-08-25"
+        value={value}
+      />
+      <Value value={value} />
+    </div>
+  );
+}
+
 export function DateInputLibrarySizeFacts() {
   return (
     <dl className="date-input-guide__facts">
       <div>
         <dt>JavaScript</dt>
-        <dd>6.72 KiB gzip</dd>
+        <dd>6.71 KiB gzip</dd>
       </div>
       <div>
         <dt>JavaScript budget</dt>

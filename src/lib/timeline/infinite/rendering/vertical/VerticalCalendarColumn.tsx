@@ -4,8 +4,15 @@
  */
 import { memo, useCallback, useMemo } from "react";
 import type { CalendarEvent } from "#quno-internal/timeline/core/types";
-import { layoutPreparedEventsForColumn, type EventColumnLayoutItem } from "../../events/layout/layout";
-import { AvailabilityLayer, CommittedLayer, TransientLayer } from "../shared/EventLayers";
+import {
+  layoutPreparedEventsForColumn,
+  type EventColumnLayoutItem
+} from "#quno-internal/timeline/infinite/events/layout/layout";
+import {
+  AvailabilityLayer,
+  CommittedLayer,
+  TransientLayer
+} from "#quno-internal/timeline/infinite/rendering/shared/EventLayers";
 import type { VerticalCalendarColumnProps } from "./types";
 import {
   positionColumnLayoutItems,

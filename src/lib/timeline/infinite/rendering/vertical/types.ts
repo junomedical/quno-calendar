@@ -10,12 +10,12 @@ import type {
   CalendarViewportAnchorTarget,
   EventRenderer,
   EventRenderStatus,
-  QunoCalendarSettings
+  QunoInfiniteCalendarSettings
 } from "#quno-internal/timeline/core/types";
-import type { EventColumnLayoutItem, PreparedEventCell } from "../../events/layout/layout";
+import type { EventColumnLayoutItem, PreparedEventCell } from "#quno-internal/timeline/infinite/events/layout/layout";
 import type { buildTimeTicks } from "#quno-internal/timeline/time/timelineTicks";
-import type { ViewportGeometryRegistration } from "../../anchors/parent/viewportAnchorTypes";
-import type { ViewportMetricsStore } from "../../scroll/resources/viewportMetricsStore";
+import type { ViewportGeometryRegistration } from "#quno-internal/timeline/infinite/anchors/parent/viewportAnchorTypes";
+import type { ViewportMetricsStore } from "#quno-internal/timeline/infinite/scroll/resources/viewportMetricsStore";
 import type { CalendarFocusedEventTarget } from "#quno-internal/timeline/core/internalTypes";
 
 export type VerticalHoveredEvent = { eventId: string; calendarId: CalendarId } | null;
@@ -42,7 +42,7 @@ export type VerticalTimelineDayProps = {
   boardMinWidth: number;
   virtualBoardMinWidth: number;
   labelWidth: number;
-  settings: QunoCalendarSettings;
+  settings: QunoInfiniteCalendarSettings;
   selectedCalendars: CalendarRow[];
   hiddenCalendarIds: Set<CalendarId>;
   timeTicks: ReturnType<typeof buildTimeTicks>;
@@ -81,7 +81,7 @@ export type VerticalCalendarColumnProps = {
   rowEvents: CalendarEvent[];
   preparedCell: PreparedEventCell;
   isHidden?: boolean;
-  settings: QunoCalendarSettings;
+  settings: QunoInfiniteCalendarSettings;
   boardHeight: number;
   gridCellHeight: number;
   interactionMode: "events" | "availability";

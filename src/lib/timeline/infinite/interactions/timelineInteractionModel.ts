@@ -1,12 +1,12 @@
-import type { CalendarEvent, CalendarId, QunoCalendarSettings } from "../../core/types";
-import { dateAtVirtualOffset } from "../../date/dateVirtualization";
+import type { CalendarEvent, CalendarId, QunoInfiniteCalendarSettings } from "#quno-internal/timeline/core/types";
+import { dateAtVirtualOffset } from "#quno-internal/timeline/date/dateVirtualization";
 import {
   clampEventToTimeline,
   dateKeyAndMinuteToIso,
   minutesSinceStartOfDay,
   snapMinute,
   xToMinute
-} from "../../time/time";
+} from "#quno-internal/timeline/time/time";
 
 /** Raw coordinates and calendar geometry used for non-virtualized hit tests. */
 export type HitTestInput = {
@@ -20,7 +20,7 @@ export type HitTestInput = {
   anchorIndex: number;
   selectedCalendarIds: CalendarId[];
   settings: Pick<
-    QunoCalendarSettings,
+    QunoInfiniteCalendarSettings,
     | "labelWidth"
     | "dayHeaderHeight"
     | "rowHeight"
@@ -75,7 +75,7 @@ export function buildMoveProposal(
   event: CalendarEvent,
   hit: CalendarHit,
   pointerOffsetMinutes: number,
-  settings: Pick<QunoCalendarSettings, "startHour" | "endHour" | "snapMinutes">
+  settings: Pick<QunoInfiniteCalendarSettings, "startHour" | "endHour" | "snapMinutes">
 ) {
   const durationMinutes = Math.max(1, minutesSinceStartOfDay(event.end) - minutesSinceStartOfDay(event.start));
   const startMinute = snapMinute(hit.minute - pointerOffsetMinutes, settings.snapMinutes);

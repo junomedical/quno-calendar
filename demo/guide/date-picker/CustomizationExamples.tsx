@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { JSX } from "react";
-import { QunoDatePicker, type QunoDatePickerDayCellCustomizer, type WeekStart } from "@quno/calendar/date-picker";
+import { QunoDatePicker, type QunoDatePickerDayCellCustomizer, type WeekStart } from "@quno/calendar/datepicker";
 
 const themes = ["quno", "warm", "violet", "acid", "candy"] as const;
 

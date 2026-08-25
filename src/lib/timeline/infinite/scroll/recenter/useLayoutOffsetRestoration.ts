@@ -8,11 +8,11 @@
  * metrics, ordinary scroll recenter, or explicit event/slot restoration. The
  * initial signature records a baseline; unchanged signatures perform no write.
  *
- * @see docs/flows/virtual-scroll-and-recenter.md#position-snapshots-and-layout-changes
+ * @see docs/infinite-calendar/flows/virtual-scroll-and-recenter.md#position-snapshots-and-layout-changes
  */
 import { useLayoutEffect, useRef, type MutableRefObject } from "react";
 import { normalizeAnchorDate } from "#quno-internal/timeline/date/dateVirtualization";
-import type { PendingScrollTarget } from "../position/scrollPositionTypes";
+import type { PendingScrollTarget } from "#quno-internal/timeline/infinite/scroll/position/scrollPositionTypes";
 
 export type ResolveOffsetOnLayoutChange = (
   offsetWithinDate: number,

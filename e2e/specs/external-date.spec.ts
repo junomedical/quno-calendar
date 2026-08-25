@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { goToWorkday, openDrawnExternalDraft, viewportRelativeEventBox } from "../helpers";
+import { goToWorkday, openDrawnExternalDraft, viewportRelativeEventBox } from "#quno-e2e/helpers";
 
 async function showOneCalendar(page: import("@playwright/test").Page) {
   await page.getByTestId("calendar-count").evaluate((element) => {

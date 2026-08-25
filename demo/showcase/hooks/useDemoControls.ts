@@ -1,6 +1,6 @@
 import { useMemo, useState, type Dispatch, type SetStateAction } from "react";
-import type { CalendarView } from "../types";
-import type { DemoQunoCalendarSettings } from "../zoom/DemoZoom";
+import type { CalendarView } from "#quno-demo/showcase/types";
+import type { DemoQunoInfiniteCalendarSettings } from "#quno-demo/showcase/zoom/DemoZoom";
 import type { IsoDate } from "@quno/calendar";
 
 export type DemoControlDefaults = {
@@ -17,7 +17,7 @@ export type DemoControlDefaults = {
 };
 
 export type DemoLayoutSettings = Pick<
-  DemoQunoCalendarSettings,
+  DemoQunoInfiniteCalendarSettings,
   | "rowHeight"
   | "dayHeaderHeight"
   | "labelWidth"
@@ -46,7 +46,7 @@ export type DemoControls = {
   setApiLatencyMs: Dispatch<SetStateAction<number>>;
   jumpDate: IsoDate;
   setJumpDate: Dispatch<SetStateAction<IsoDate>>;
-  settings: DemoQunoCalendarSettings;
+  settings: DemoQunoInfiniteCalendarSettings;
 };
 
 export function useDemoControls(defaults: DemoControlDefaults, layout: DemoLayoutSettings): DemoControls {
@@ -60,7 +60,7 @@ export function useDemoControls(defaults: DemoControlDefaults, layout: DemoLayou
   const [apiLatencyMs, setApiLatencyMs] = useState(defaults.apiLatencyMs ?? 0);
   const [jumpDate, setJumpDate] = useState<IsoDate>(defaults.jumpDate ?? "2026-07-04");
 
-  const settings = useMemo<DemoQunoCalendarSettings>(
+  const settings = useMemo<DemoQunoInfiniteCalendarSettings>(
     () => ({
       ...layout,
       startHour,

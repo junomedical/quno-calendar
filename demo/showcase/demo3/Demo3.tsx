@@ -1,7 +1,7 @@
 import { CalendarCheck2 } from "lucide-react";
-import { PresetDemo } from "../preset/PresetDemo";
-import type { DemoPreset } from "../preset/types";
-import type { DemoRoute } from "../types";
+import { PresetDemo } from "#quno-demo/showcase/preset/PresetDemo";
+import type { DemoPreset } from "#quno-demo/showcase/preset/types";
+import type { DemoRoute } from "#quno-demo/showcase/types";
 import { Demo3EventCard } from "./Demo3EventCard";
 
 const availabilityPreset: DemoPreset = {

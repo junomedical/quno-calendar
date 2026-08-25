@@ -4,11 +4,11 @@ import {
   type ActiveEventDraft,
   type CalendarEvent,
   type CalendarId,
-  type QunoCalendarHandle,
+  type QunoInfiniteCalendarHandle,
   type EventActivateRequest,
   type EventCreateRequest,
   type EventMoveRequest
-} from "@quno/calendar/timeline";
+} from "@quno/calendar/infinite-calendar";
 import { demoCalendars } from "./data";
 import { draftParticipantIds, eventParticipantIds, isoDateInputValue } from "./draftFormUtils";
 import { buildExternalCreateDraft, calendarColor } from "./externalDraftEvents";
@@ -18,7 +18,7 @@ import { useExternalDraftNavigation } from "./useExternalDraftNavigation";
 
 type UseExternalEventDraftsArgs = {
   selectedCalendarIds: CalendarId[];
-  calendarRef: RefObject<QunoCalendarHandle | null>;
+  calendarRef: RefObject<QunoInfiniteCalendarHandle | null>;
   setEvents: Dispatch<SetStateAction<CalendarEvent[]>>;
   setMessage: (message: string) => void;
 };

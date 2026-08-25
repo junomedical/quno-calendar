@@ -1,6 +1,6 @@
 import { fireEvent, render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { QunoDatePicker, type DateRange } from "../../src/lib/date-picker";
+import { QunoDatePicker, type DateRange } from "@quno/calendar/datepicker";
 import { clickDay, day, drag } from "./datePickerTestUtils";
 
 const renderRange = () => {

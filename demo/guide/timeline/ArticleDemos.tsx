@@ -1,11 +1,11 @@
 import {
-  QunoCalendar,
+  QunoInfiniteCalendar,
   type ActiveEventDraft,
   type CalendarEvent,
   type CalendarFocusRequest,
-  type QunoCalendarHandle,
+  type QunoInfiniteCalendarHandle,
   type LoadEvents
-} from "@quno/calendar/timeline";
+} from "@quno/calendar/infinite-calendar";
 import {
   useCallback,
   useEffect,
@@ -110,7 +110,7 @@ export function InfiniteCalendarDemo() {
       }
     >
       <div className="article-calendar-frame" ref={activityRootRef}>
-        <QunoCalendar
+        <QunoInfiniteCalendar
           ariaLabel="Infinite calendar concept"
           calendars={articleCalendars}
           eventRenderer={ArticleEventCard}
@@ -220,7 +220,7 @@ export function EventCardsDemo() {
         tools={<span className="article-toolbar-badge">Live calendar</span>}
       >
         <div className="article-calendar-frame">
-          <QunoCalendar
+          <QunoInfiniteCalendar
             ariaLabel="Calendar populated by external event cards"
             calendars={articleCalendars}
             eventRenderer={ArticleEventCard}
@@ -317,7 +317,7 @@ export function ZoomCalendarDemo() {
       }
     >
       <div className="article-calendar-frame">
-        <QunoCalendar
+        <QunoInfiniteCalendar
           ariaLabel="Controlled zoom calendar"
           calendars={articleCalendars}
           eventRenderer={ArticleEventCard}
@@ -334,7 +334,7 @@ export function ZoomCalendarDemo() {
 }
 
 export function LaneComparisonDemo() {
-  const calendarRef = useRef<QunoCalendarHandle>(null);
+  const calendarRef = useRef<QunoInfiniteCalendarHandle>(null);
   const [view, setView] = useState<"infinite-horizontal" | "infinite-vertical">("infinite-horizontal");
 
   useEffect(() => {
@@ -372,7 +372,7 @@ export function LaneComparisonDemo() {
       }
     >
       <div className="article-calendar-frame article-calendar-frame--lanes">
-        <QunoCalendar
+        <QunoInfiniteCalendar
           ref={calendarRef}
           ariaLabel="Overlap lane comparison"
           calendars={articleCalendars}
@@ -470,7 +470,7 @@ export function StabilityDemo() {
         ))}
       </fieldset>
       <div className="article-calendar-frame">
-        <QunoCalendar
+        <QunoInfiniteCalendar
           ariaLabel="Delayed loading and viewport stability calendar"
           calendars={articleCalendars}
           eventRenderer={ArticleEventCard}
@@ -489,7 +489,7 @@ export function StabilityDemo() {
 }
 
 export function MotionDemo() {
-  const calendarRef = useRef<QunoCalendarHandle>(null);
+  const calendarRef = useRef<QunoInfiniteCalendarHandle>(null);
   const eventsRef = useRef<CalendarEvent[]>(articleEvents.slice(0, 3));
   const sequenceRef = useRef(0);
   const [activeDraft, setActiveDraft] = useState<ActiveEventDraft | null>(() => createMotionDraft(0));
@@ -563,7 +563,7 @@ export function MotionDemo() {
       }
     >
       <div className="article-calendar-frame">
-        <QunoCalendar
+        <QunoInfiniteCalendar
           ref={calendarRef}
           activeDraft={activeDraft}
           ariaLabel="Appearing event animation calendar"
@@ -587,7 +587,7 @@ export function HoverRevealDemo() {
       tools={<span className="article-toolbar-badge">Original lane hit-testing</span>}
     >
       <div className="article-calendar-frame">
-        <QunoCalendar
+        <QunoInfiniteCalendar
           ariaLabel="Hover reveals underlying overlap lanes"
           calendars={articleCalendars}
           eventRenderer={ArticleEventCard}
@@ -609,7 +609,7 @@ export function HoverRevealDemo() {
 }
 
 export function CreationLaneDemo() {
-  const calendarRef = useRef<QunoCalendarHandle>(null);
+  const calendarRef = useRef<QunoInfiniteCalendarHandle>(null);
   const doctorIds = ["provider-a", "provider-b"];
   const [selectedDoctorId, setSelectedDoctorId] = useState(doctorIds[0]);
   const [activeDraft, setActiveDraft] = useState<ActiveEventDraft | null>(null);
@@ -679,7 +679,7 @@ export function CreationLaneDemo() {
       }
     >
       <div className="article-calendar-frame">
-        <QunoCalendar
+        <QunoInfiniteCalendar
           ref={calendarRef}
           activeDraft={activeDraft}
           ariaLabel="Single-lane event creation calendar"

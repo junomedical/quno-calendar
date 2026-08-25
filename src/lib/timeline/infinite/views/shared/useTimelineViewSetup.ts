@@ -4,14 +4,14 @@ import {
   type CalendarId,
   type CalendarRow,
   type CalendarViewComponentProps,
-  type QunoCalendarSettings
+  type QunoInfiniteCalendarSettings
 } from "#quno-internal/timeline/core/types";
-import { mergeQunoCalendarSettings } from "./mergeQunoCalendarSettings";
+import { mergeQunoInfiniteCalendarSettings } from "./mergeQunoInfiniteCalendarSettings";
 
 type UseTimelineViewSetupArgs = {
   calendars: CalendarRow[];
   selectedCalendarIds: CalendarId[];
-  settingsInput?: Partial<QunoCalendarSettings>;
+  settingsInput?: Partial<QunoInfiniteCalendarSettings>;
   initialDateKey?: CalendarViewComponentProps["initialDateKey"];
   now: Date;
 };
@@ -23,7 +23,7 @@ export function useTimelineViewSetup({
   initialDateKey,
   now
 }: UseTimelineViewSetupArgs) {
-  const settings = useMemo(() => mergeQunoCalendarSettings(settingsInput), [settingsInput]);
+  const settings = useMemo(() => mergeQunoInfiniteCalendarSettings(settingsInput), [settingsInput]);
   const selectedCalendars = useMemo(
     () => calendars.filter((calendar) => selectedCalendarIds.includes(calendar.id)),
     [calendars, selectedCalendarIds]

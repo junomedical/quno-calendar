@@ -1,6 +1,6 @@
 import type { CSSProperties, ReactNode } from "react";
 import type { IsoDate } from "#quno-internal/shared/dateRangeModel";
-import type { DayNameGenerator } from "../date/dateLabels";
+import type { DayNameGenerator } from "#quno-internal/timeline/date/dateLabels";
 import type { CalendarStyle } from "./calendarTheme";
 
 /** Stable identifier for a rendered calendar row. */
@@ -33,7 +33,7 @@ export type CalendarEvent = {
 export type EventRenderStatus = "existing" | "hovered" | "dragging" | "drop-preview" | "new" | "appearing" | "focused";
 
 /** Shared geometry, interaction, and filtering settings for timeline views. */
-export type QunoCalendarSettings = {
+export type QunoInfiniteCalendarSettings = {
   startHour: number;
   endHour: number;
   zoom: number;
@@ -137,7 +137,7 @@ export type CalendarViewportAnchorTarget = {
   requireVisible?: boolean;
 };
 
-/** Opaque viewport anchor captured by `QunoCalendar` and restored after parent layout changes. */
+/** Opaque viewport anchor captured by `QunoInfiniteCalendar` and restored after parent layout changes. */
 export type CalendarViewportAnchor = {
   snapshot: {
     top: number;
@@ -203,7 +203,7 @@ export type CalendarViewComponentProps = {
   style?: CalendarStyle;
   ariaLabel?: string;
   initialDateKey?: IsoDate;
-  settings?: Partial<QunoCalendarSettings>;
+  settings?: Partial<QunoInfiniteCalendarSettings>;
   now?: Date;
   interactionMode?: "events" | "availability";
   activeDraft?: ActiveEventDraft | null;
@@ -218,8 +218,8 @@ export type CalendarViewComponentProps = {
   onFocusRequestComplete?: (result: CalendarFocusRequestResult) => void;
 };
 
-/** Imperative navigation methods exposed by `QunoCalendar`. */
-export type QunoCalendarHandle = {
+/** Imperative navigation methods exposed by `QunoInfiniteCalendar`. */
+export type QunoInfiniteCalendarHandle = {
   scrollToDate: (dateKey: IsoDate) => void;
   scrollToDateTime: (dateKey: IsoDate, time: string) => void;
   scrollToToday: () => void;
@@ -239,12 +239,12 @@ export type QunoCalendarHandle = {
 export type CalendarView = "infinite-horizontal" | "infinite-vertical";
 
 /** Public reusable calendar shell props. */
-export type QunoCalendarProps = CalendarViewComponentProps & {
+export type QunoInfiniteCalendarProps = CalendarViewComponentProps & {
   view?: CalendarView;
 };
 
 /** Defaults merged with caller-provided timeline settings. */
-export const defaultQunoCalendarSettings: QunoCalendarSettings = {
+export const defaultQunoInfiniteCalendarSettings: QunoInfiniteCalendarSettings = {
   startHour: 8,
   endHour: 18,
   zoom: 1,

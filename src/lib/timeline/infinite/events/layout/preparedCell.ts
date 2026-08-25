@@ -8,9 +8,9 @@
  * depth while retaining availability items for rendering. Does not own pixel
  * projection, row/column growth policy, or React state.
  *
- * @see docs/architecture.md#prepared-cell-pipeline
+ * @see docs/infinite-calendar/architecture.md#prepared-cell-pipeline
  */
-import type { CalendarEvent, QunoCalendarSettings } from "#quno-internal/timeline/core/types";
+import type { CalendarEvent, QunoInfiniteCalendarSettings } from "#quno-internal/timeline/core/types";
 import { eventIntervals, type EventInterval } from "./eventIntervals";
 import { MinHeap } from "./minHeap";
 
@@ -128,7 +128,7 @@ function maximumMetricLaneCount(intervals: EventInterval[]): number {
 /** Prepares one cell once for sizing, horizontal layout, and vertical layout. */
 export function prepareEventCell(
   events: readonly CalendarEvent[],
-  settings: Pick<QunoCalendarSettings, "startHour" | "endHour">
+  settings: Pick<QunoInfiniteCalendarSettings, "startHour" | "endHour">
 ): PreparedEventCell {
   const intervals = eventIntervals(events, settings);
   const items = splitOverlapGroups(intervals).flatMap(prepareOverlapGroup);

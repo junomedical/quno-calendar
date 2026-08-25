@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { firstViewportEventBox, goToWorkday, topVisibleDayDate, waitForDemoEvents } from "../helpers";
+import { firstViewportEventBox, goToWorkday, topVisibleDayDate, waitForDemoEvents } from "#quno-e2e/helpers";
 
 async function visibleTimelineCenterMinuteOffset(page: Page) {
   return page.locator(".quno-calendar-viewport").evaluate((viewport) => {

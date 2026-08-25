@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { goToWorkday, setDemoZoom, todayDateKey, topVisibleDayDate, waitForDemoEvents } from "../helpers";
+import { goToWorkday, setDemoZoom, todayDateKey, topVisibleDayDate, waitForDemoEvents } from "#quno-e2e/helpers";
 
 async function setCalendarCount(page: Page, count: string) {
   await page.getByTestId("calendar-count").fill(count);

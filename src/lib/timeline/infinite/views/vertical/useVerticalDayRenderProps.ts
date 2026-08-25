@@ -9,22 +9,25 @@ import type {
   CalendarViewComponentProps,
   CalendarViewportAnchorTarget,
   EventRenderer,
-  QunoCalendarSettings
+  QunoInfiniteCalendarSettings
 } from "#quno-internal/timeline/core/types";
-import type { ViewportGeometryRegistration } from "../../anchors/parent/viewportAnchorTypes";
-import type { ViewportMetricsStore } from "../../scroll/resources/viewportMetricsStore";
+import type { ViewportGeometryRegistration } from "#quno-internal/timeline/infinite/anchors/parent/viewportAnchorTypes";
+import type { ViewportMetricsStore } from "#quno-internal/timeline/infinite/scroll/resources/viewportMetricsStore";
 import { buildTimeTicks } from "#quno-internal/timeline/time/timelineTicks";
-import type { useTimelineInteractions } from "../../interactions/useTimelineInteractions";
-import type { VerticalDayRenderProps } from "../../rendering/vertical/VerticalTimelineCanvas";
-import type { useVerticalColumnHover } from "../../rendering/vertical/useVerticalColumnHover";
-import type { VerticalPreparedColumns } from "../../events/metrics/useVerticalPreparedColumns";
-import { buildVerticalNowState, type VerticalViewGeometry } from "../../rendering/vertical/verticalViewGeometry";
+import type { useTimelineInteractions } from "#quno-internal/timeline/infinite/interactions/useTimelineInteractions";
+import type { VerticalDayRenderProps } from "#quno-internal/timeline/infinite/rendering/vertical/VerticalTimelineCanvas";
+import type { useVerticalColumnHover } from "#quno-internal/timeline/infinite/rendering/vertical/useVerticalColumnHover";
+import type { VerticalPreparedColumns } from "#quno-internal/timeline/infinite/events/metrics/useVerticalPreparedColumns";
+import {
+  buildVerticalNowState,
+  type VerticalViewGeometry
+} from "#quno-internal/timeline/infinite/rendering/vertical/verticalViewGeometry";
 import type { CalendarFocusedEventTarget } from "#quno-internal/timeline/core/internalTypes";
 
 type VerticalDayRenderPropsArgs = {
   geometry: VerticalViewGeometry;
   columns: VerticalPreparedColumns;
-  settings: QunoCalendarSettings;
+  settings: QunoInfiniteCalendarSettings;
   renderedCalendars: CalendarRow[];
   hiddenCalendarIds: Set<CalendarId>;
   now: Date;

@@ -1,6 +1,6 @@
 import type {
   CalendarId,
-  QunoCalendarHandle,
+  QunoInfiniteCalendarHandle,
   CalendarViewComponentProps,
   CalendarViewportAnchorTarget,
   EventId
@@ -11,7 +11,7 @@ export type CalendarFocusedEventTarget = {
   calendarId: CalendarId;
 };
 
-export type CalendarViewHandle = Omit<QunoCalendarHandle, "focusEvent"> & {
+export type CalendarViewHandle = Omit<QunoInfiniteCalendarHandle, "focusEvent"> & {
   isEventFullyVisible: (target: CalendarViewportAnchorTarget) => boolean;
 };
 

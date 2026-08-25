@@ -3,9 +3,9 @@ import {
   formatHorizontalDateLabel,
   formatMonthDayOrdinal,
   formatWeekday
-} from "../../../../src/lib/timeline/date/dateLabels";
-import { fromDateKey, toDateKey } from "../../../../src/lib/timeline/date/dateVirtualization";
-import { addCalendarMonths, parseIsoDate } from "../../../../src/lib/timeline/date/localDate";
+} from "#quno-internal/timeline/date/dateLabels";
+import { fromDateKey, toDateKey } from "#quno-internal/timeline/date/dateVirtualization";
+import { addCalendarMonths, parseIsoDate } from "#quno-internal/timeline/date/localDate";
 
 describe("local date helpers", () => {
   it("parses a date key at local midnight without a UTC date shift", () => {

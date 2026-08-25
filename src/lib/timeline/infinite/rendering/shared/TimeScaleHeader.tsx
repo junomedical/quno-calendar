@@ -1,5 +1,5 @@
 import { minuteToX } from "#quno-internal/timeline/time/time";
-import type { QunoCalendarSettings } from "#quno-internal/timeline/core/types";
+import type { QunoInfiniteCalendarSettings } from "#quno-internal/timeline/core/types";
 import { TIMELINE_LEFT_GUTTER_PX } from "#quno-internal/timeline/time/timelineTicks";
 
 type TimeTick = {
@@ -11,7 +11,7 @@ type TimeTick = {
 };
 
 type InfiniteTimeScaleHeaderProps = {
-  settings: QunoCalendarSettings;
+  settings: QunoInfiniteCalendarSettings;
   width: number;
   timeTicks: TimeTick[];
   showNowLine: boolean;
@@ -21,7 +21,7 @@ type InfiniteTimeScaleHeaderProps = {
 /**
  * Renders the single sticky time scale used above all virtualized day sections.
  *
- * @see docs/architecture.md#styling-and-packaging
+ * @see docs/infinite-calendar/architecture.md#styling-and-packaging
  */
 export function InfiniteTimeScaleHeader({
   settings,

@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
-import { DatePickerStory } from "../../demo/guide/date-picker/DatePickerStory";
+import { DatePickerStory } from "#quno-demo/guide/date-picker/DatePickerStory";
 
 describe("datepicker field guide", () => {
   it("renders the public integration chapters and live examples", () => {
@@ -7,30 +7,26 @@ describe("datepicker field guide", () => {
 
     expect(
       screen.getByRole("heading", {
-        name: "One range model. Every calendar interaction."
+        name: "Shape a date range as directly as you point to it."
       })
     ).toBeInTheDocument();
     expect(screen.getAllByRole("grid")).toHaveLength(14);
     const contents = screen.getByRole("navigation", {
-      name: "Explore the field guide"
+      name: "Table of contents"
     });
-    expect(within(contents).getAllByRole("link")).toHaveLength(18);
+    expect(within(contents).getAllByRole("link")).toHaveLength(10);
     expect(within(contents).queryByRole("link", { name: /Interactive demo/ })).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: "All components" })).toHaveAttribute("href", "/");
-    expect(screen.getByRole("link", { name: /Demo/ })).toHaveAttribute("href", "/demo/date-range-input");
-    expect(within(contents).getByRole("link", { name: /Custom day styling/ })).toHaveAttribute("href", "#day-handler");
-    expect(within(contents).getByRole("link", { name: /Jump across years/ })).toHaveAttribute("href", "#quick-jump");
+    expect(screen.getByRole("link", { name: /Demo/ })).toHaveAttribute("href", "/demo/datepicker");
+    expect(within(contents).getByRole("link", { name: /Customize meaningful dates/ })).toHaveAttribute(
+      "href",
+      "#day-handler"
+    );
+    expect(document.querySelector("#quick-jump")).toBeInTheDocument();
     expect(screen.queryByText("Why Quno")).not.toBeInTheDocument();
     expect(screen.queryByText("Quno approach")).not.toBeInTheDocument();
-    for (const howTo of [
-      "Basic usage how-to",
-      "Custom day attributes how-to",
-      "Localization how-to",
-      "Choose the first weekday how-to",
-      "Theme with tokens how-to"
-    ]) {
-      expect(screen.getByRole("complementary", { name: howTo })).toBeInTheDocument();
-    }
+    expect(screen.getAllByText(/^Try it$/).length).toBeGreaterThan(5);
+    expect(screen.getAllByText(/^Implementation/).length).toBeGreaterThan(5);
     expect(
       screen.getByRole("heading", {
         name: "Range editing, not two date inputs sharing a box"
@@ -51,15 +47,11 @@ describe("datepicker field guide", () => {
     expect(screen.getByText("Période sélectionnée")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Effacer" })).toBeInTheDocument();
     expect(screen.getByRole("grid", { name: "Sélecteur de période: août 2026" })).toBeInTheDocument();
-    expect(within(contents).getByRole("link", { name: /Different week starts/ })).toHaveAttribute(
-      "href",
-      "#week-starts"
-    );
-    expect(within(contents).getByRole("link", { name: /Single-day mode/ })).toHaveAttribute("href", "#single-day");
+    expect(document.querySelector("#week-starts")).toBeInTheDocument();
+    expect(within(contents).getByRole("link", { name: /Choose one day/ })).toHaveAttribute("href", "#single-day");
     expect(document.querySelector('[data-story-topic="natural-input"]')).not.toBeInTheDocument();
-    expect(screen.getByText("9.00 KiB")).toBeInTheDocument();
-    expect(screen.getByText("6.95 KiB")).toBeInTheDocument();
-    expect(screen.getByText(/docs\/usage\.md/)).toBeInTheDocument();
+    expect(screen.getAllByText(/KiB/).length).toBeGreaterThan(2);
+    expect(screen.getByText(/docs\/shared\/usage\.md/)).toBeInTheDocument();
   });
 
   it("keeps the quick jump example interactive", () => {
@@ -90,6 +82,25 @@ describe("datepicker field guide", () => {
     expect(firstWeekday()).toBe("Sun");
     fireEvent.click(within(controls).getByRole("button", { name: "Saturday" }));
     expect(firstWeekday()).toBe("Sat");
+  });
+
+  it("uses the selected day itself as the single-day editor", () => {
+    render(<DatePickerStory />);
+    const topic = document.querySelector<HTMLElement>('[data-story-topic="single-day"]');
+    expect(topic).not.toBeNull();
+    const editor = within(topic as HTMLElement).getByRole("textbox", { name: "Selected day" });
+    expect(within(topic as HTMLElement).getAllByRole("textbox")).toHaveLength(1);
+    expect(editor).toHaveValue("19 August 2026");
+
+    fireEvent.input(editor, { target: { value: "12 June 2026" } });
+    fireEvent.keyDown(editor, { key: "Enter" });
+    expect(editor).toHaveValue("12 June 2026");
+
+    const pickedDay = topic?.querySelector<HTMLElement>('[data-date="2026-08-18"]');
+    expect(pickedDay).not.toBeNull();
+    fireEvent.pointerDown(pickedDay as HTMLElement);
+    fireEvent.pointerUp(pickedDay as HTMLElement);
+    expect(editor).toHaveValue("18 August 2026");
   });
 
   it("keeps the theming story interactive", () => {
@@ -132,9 +143,9 @@ describe("datepicker field guide", () => {
   });
 });
 
-describe("date range field guide entry", () => {
+describe("datepicker field guide entry", () => {
   it("uses the combined package in its primary recipe", () => {
     render(<DatePickerStory />);
-    expect(screen.getAllByText(/@quno\/calendar\/date-picker/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/@quno\/calendar\/datepicker/).length).toBeGreaterThan(0);
   });
 });

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import demoEventsApi from "../../../api/demo-events";
+import demoEventsApi from "#quno-api/demo-events";
 
 describe("Vercel demo events API", () => {
   it("returns posted events using the production Web handler", async () => {

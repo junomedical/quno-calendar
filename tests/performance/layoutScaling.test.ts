@@ -1,7 +1,7 @@
 import { performance } from "node:perf_hooks";
 import { describe, expect, it } from "vitest";
-import type { CalendarEvent } from "../../src/lib/timeline/core/types";
-import { prepareEventCell } from "../../src/lib/timeline/infinite/events/layout/layout";
+import type { CalendarEvent } from "#quno-internal/timeline/core/types";
+import { prepareEventCell } from "#quno-internal/timeline/infinite/events/layout/layout";
 
 const settings = { startHour: 8, endHour: 18 };
 

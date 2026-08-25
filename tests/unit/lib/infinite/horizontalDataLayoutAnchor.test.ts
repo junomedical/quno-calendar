@@ -3,8 +3,8 @@ import {
   captureHorizontalDataLayoutAnchor,
   resolveHorizontalDataLayoutOffset,
   type HorizontalDayMetric
-} from "../../../../src/lib/timeline/infinite/anchors/data-layout/horizontalDataLayoutAnchor";
-import { shouldAdjustForDateItemResize } from "../../../../src/lib/timeline/infinite/scroll/position/visibleSnapshot";
+} from "#quno-internal/timeline/infinite/anchors/data-layout/horizontalDataLayoutAnchor";
+import { shouldAdjustForDateItemResize } from "#quno-internal/timeline/infinite/scroll/position/visibleSnapshot";
 
 const geometry = {
   calendarIds: ["provider-a", "room-1", "room-2"],

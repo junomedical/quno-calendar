@@ -1,3 +1,4 @@
+import { FieldGuideRecipe } from "#quno-demo/guide/shared/FieldGuideFeature";
 import type { JSX } from "react";
 
 type Props = {
@@ -7,13 +8,4 @@ type Props = {
   language: string;
 };
 
-export const StoryHowTo = ({ title, copy, code, language }: Props): JSX.Element => (
-  <aside className="story__howto" aria-label={`${title} how-to`}>
-    <span>How to · {language}</span>
-    <h3>{title}</h3>
-    <p>{copy}</p>
-    <pre>
-      <code>{code}</code>
-    </pre>
-  </aside>
-);
+export const StoryHowTo = (props: Props): JSX.Element => <FieldGuideRecipe {...props} />;

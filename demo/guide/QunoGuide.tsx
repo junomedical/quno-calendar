@@ -26,7 +26,7 @@ export function QunoGuide() {
   return (
     <main className="quno-guide">
       <header className="quno-guide__hero">
-        <p>Quno Calendar · Field guide</p>
+        <p>Quno/Infinite Calendar · Field guide</p>
         <h1>Dates and schedules, documented as one system.</h1>
         <p>Use a component independently, or compose them through their public APIs.</p>
         <nav aria-label="Guide contents">
@@ -60,10 +60,10 @@ export function QunoGuide() {
           <strong>Try it:</strong> import one JavaScript subpath without CSS, then add only its optional stylesheet.
         </p>
         <pre>
-          <code>{`import { QunoDatePicker } from '@quno/calendar/date-picker';\nimport '@quno/calendar/date-picker/styles.css';`}</code>
+          <code>{`import { QunoDatePicker } from '@quno/calendar/datepicker';\nimport '@quno/calendar/datepicker/styles.css';`}</code>
         </pre>
         <p>
-          See <strong>docs/usage.md</strong> for React, Preact aliases, SSR, and build recipes.
+          See <strong>docs/shared/usage.md</strong> for React, Preact aliases, SSR, and build recipes.
         </p>
       </section>
     </main>

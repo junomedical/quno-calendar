@@ -2,7 +2,7 @@
  * Pure vertical-view geometry.
  * settings + current clock -> day dimensions, layout identity, and now-line state
  */
-import type { QunoCalendarSettings } from "#quno-internal/timeline/core/types";
+import type { QunoInfiniteCalendarSettings } from "#quno-internal/timeline/core/types";
 import { toDateKey } from "#quno-internal/timeline/date/dateVirtualization";
 import { timelineEndMinute, timelineHeight, timelineStartMinute } from "#quno-internal/timeline/time/time";
 import { VERTICAL_TIMELINE_GUTTER_PX } from "./VerticalTimelineDay";
@@ -15,7 +15,7 @@ export type VerticalViewGeometry = {
   dayHeight: number;
 };
 
-export function buildVerticalViewGeometry(settings: QunoCalendarSettings): VerticalViewGeometry {
+export function buildVerticalViewGeometry(settings: QunoInfiniteCalendarSettings): VerticalViewGeometry {
   const labelWidth = Math.round(settings.labelWidth * VERTICAL_LEFT_PANE_WIDTH_RATIO);
   const dayTimelineHeight = timelineHeight(settings) + VERTICAL_TIMELINE_GUTTER_PX * 2;
   return {
@@ -25,7 +25,7 @@ export function buildVerticalViewGeometry(settings: QunoCalendarSettings): Verti
   };
 }
 
-export function buildVerticalLayoutSignature(settings: QunoCalendarSettings): string {
+export function buildVerticalLayoutSignature(settings: QunoInfiniteCalendarSettings): string {
   return `${settings.dayHeaderHeight}:${settings.startHour}:${settings.endHour}:${settings.zoom}:${settings.excludedWeekdays.join("|")}`;
 }
 
@@ -44,7 +44,7 @@ export function resolveVerticalDateOffset(
   return Math.min(Math.max(0, nextDayHeight - 1), dayHeaderHeight + relativeTimelineOffset * nextTimelineHeight);
 }
 
-export function buildVerticalNowState(now: Date, settings: QunoCalendarSettings) {
+export function buildVerticalNowState(now: Date, settings: QunoInfiniteCalendarSettings) {
   const minute = now.getHours() * 60 + now.getMinutes();
   return {
     dateKey: toDateKey(now),

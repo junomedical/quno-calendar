@@ -76,9 +76,61 @@
   line-height: 1.5;
 }
 
+.date-parser-demo {
+  width: min(100%, 760px);
+}
+
+.date-parser-demo > input,
+.date-parser-demo select {
+  min-height: 44px;
+  padding: 0 12px;
+  color: #17202a;
+  background: #fff;
+  border: 1px solid #cbd7d1;
+  border-radius: 9px;
+}
+
+.date-parser-demo__samples {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.date-parser-demo__samples button {
+  padding: 7px 10px;
+  color: #174c42;
+  background: #edf3ef;
+  border: 1px solid #cadbd3;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.date-parser-demo__options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.date-parser-demo__options label {
+  display: grid;
+  gap: 6px;
+  color: #5d6878;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.date-parser-demo section h2 {
+  margin: 0 0 8px;
+  font-size: 14px;
+}
+
 @media (max-width: 680px) {
   .component-demo__header {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .date-parser-demo__options {
+    grid-template-columns: 1fr;
   }
 }

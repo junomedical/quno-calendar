@@ -1,6 +1,6 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { QunoDatePicker } from "../../src/lib/date-picker";
+import { QunoDatePicker } from "@quno/calendar/datepicker";
 import { clickDay, slot } from "./datePickerTestUtils";
 
 const openMonthNavigation = (): void => {

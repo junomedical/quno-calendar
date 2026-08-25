@@ -1,5 +1,5 @@
 import type { DateRange } from "@quno/calendar";
-import { QunoDatePicker } from "@quno/calendar/date-picker";
+import { QunoDatePicker } from "@quno/calendar/datepicker";
 import { useState } from "react";
 import { ComponentDemoShell } from "./ComponentDemoShell";
 
@@ -12,8 +12,8 @@ export function DateRangeDemo() {
   return (
     <ComponentDemoShell
       description="Paint a range, resize either endpoint, or move the whole period."
-      guideHref="/guide/date-range-input"
-      title="Date range input"
+      guideHref="/guide/datepicker"
+      title="Quno/Datepicker"
     >
       <div className="component-demo__panel">
         <QunoDatePicker initialMonth="2026-08-01" onChange={setValue} value={value} />

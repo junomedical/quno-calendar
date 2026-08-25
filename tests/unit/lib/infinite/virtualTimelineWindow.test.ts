@@ -2,12 +2,12 @@ import { describe, expect, it } from "vitest";
 import {
   clampVirtualDateIndex,
   createVirtualDateModel
-} from "../../../../src/lib/timeline/infinite/scroll/window/dateModel";
+} from "#quno-internal/timeline/infinite/scroll/window/dateModel";
 import {
   buildVirtualDateRenderItems,
   semanticDateKeyForRenderItem
-} from "../../../../src/lib/timeline/infinite/scroll/window/renderItems";
-import { resolveVisibleDateSnapshot } from "../../../../src/lib/timeline/infinite/scroll/position/visibleSnapshot";
+} from "#quno-internal/timeline/infinite/scroll/window/renderItems";
+import { resolveVisibleDateSnapshot } from "#quno-internal/timeline/infinite/scroll/position/visibleSnapshot";
 
 describe("virtual timeline date model", () => {
   it("uses one normalized date sequence for both mapping directions", () => {

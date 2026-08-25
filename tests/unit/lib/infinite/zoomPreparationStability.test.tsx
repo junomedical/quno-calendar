@@ -1,13 +1,13 @@
 import { renderHook } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import {
-  defaultQunoCalendarSettings,
+  defaultQunoInfiniteCalendarSettings,
   type CalendarEvent,
   type CalendarRow,
-  type QunoCalendarSettings
-} from "../../../../src/lib/timeline/core/types";
-import { useDayMetrics } from "../../../../src/lib/timeline/infinite/events/metrics/useDayMetrics";
-import { useVerticalPreparedColumns } from "../../../../src/lib/timeline/infinite/events/metrics/useVerticalPreparedColumns";
+  type QunoInfiniteCalendarSettings
+} from "#quno-internal/timeline/core/types";
+import { useDayMetrics } from "#quno-internal/timeline/infinite/events/metrics/useDayMetrics";
+import { useVerticalPreparedColumns } from "#quno-internal/timeline/infinite/events/metrics/useVerticalPreparedColumns";
 
 const dateKey = "2026-07-18";
 const calendar: CalendarRow = { id: "calendar-a", name: "Calendar A" };
@@ -21,8 +21,8 @@ const event: CalendarEvent = {
 };
 const eventsByDate = { [dateKey]: [event] };
 
-function settingsAtZoom(zoom: number): QunoCalendarSettings {
-  return { ...defaultQunoCalendarSettings, zoom };
+function settingsAtZoom(zoom: number): QunoInfiniteCalendarSettings {
+  return { ...defaultQunoInfiniteCalendarSettings, zoom };
 }
 
 describe("zoom preparation stability", () => {

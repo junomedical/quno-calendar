@@ -3,10 +3,10 @@ import {
   buildDraftEvent,
   buildMoveProposal,
   hitTestCalendar
-} from "../../../../src/lib/timeline/infinite/interactions/timelineInteractionModel";
-import type { CalendarEvent, QunoCalendarSettings } from "../../../../src/lib/timeline/core/types";
+} from "#quno-internal/timeline/infinite/interactions/timelineInteractionModel";
+import type { CalendarEvent, QunoInfiniteCalendarSettings } from "#quno-internal/timeline/core/types";
 
-const settings: QunoCalendarSettings = {
+const settings: QunoInfiniteCalendarSettings = {
   startHour: 8,
   endHour: 18,
   zoom: 2,

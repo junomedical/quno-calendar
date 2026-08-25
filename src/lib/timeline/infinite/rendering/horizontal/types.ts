@@ -6,11 +6,14 @@ import type {
   CalendarViewportAnchorTarget,
   EventRenderer,
   EventRenderStatus,
-  QunoCalendarSettings
+  QunoInfiniteCalendarSettings
 } from "#quno-internal/timeline/core/types";
-import type { PreparedEventCell, layoutPreparedEventsForRow } from "../../events/layout/layout";
-import type { ViewportGeometryRegistration } from "../../anchors/parent/viewportAnchorTypes";
-import type { ViewportMetricsStore } from "../../scroll/resources/viewportMetricsStore";
+import type {
+  PreparedEventCell,
+  layoutPreparedEventsForRow
+} from "#quno-internal/timeline/infinite/events/layout/layout";
+import type { ViewportGeometryRegistration } from "#quno-internal/timeline/infinite/anchors/parent/viewportAnchorTypes";
+import type { ViewportMetricsStore } from "#quno-internal/timeline/infinite/scroll/resources/viewportMetricsStore";
 import type { CalendarFocusedEventTarget } from "#quno-internal/timeline/core/internalTypes";
 
 /** Shared horizontal-render contracts: view coordinator -> day -> row -> event layers. */
@@ -34,7 +37,7 @@ export type HorizontalTimelineDayProps = {
   item: VirtualDayItem;
   dateKey: string;
   dayHeight: number;
-  settings: QunoCalendarSettings;
+  settings: QunoInfiniteCalendarSettings;
   width: number;
   selectedCalendars: CalendarRow[];
   hiddenCalendarIds: Set<CalendarId>;
@@ -80,7 +83,7 @@ export type HorizontalTimelineRowProps = {
   rowEvents: CalendarEvent[];
   preparedCell: PreparedEventCell;
   isHidden?: boolean;
-  settings: QunoCalendarSettings;
+  settings: QunoInfiniteCalendarSettings;
   width: number;
   showNowLine: boolean;
   nowLineClassName: "is-current" | "is-reference";

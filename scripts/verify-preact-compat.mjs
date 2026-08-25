@@ -1,13 +1,13 @@
 import { execFileSync } from "node:child_process";
-import { mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 
 const root = resolve(".");
-const workDir = join(root, "work", "preact-compat");
+const workDir = mkdtempSync(join(tmpdir(), "quno-preact-compat-"));
 const packDir = join(workDir, "pack");
 const appDir = join(workDir, "app");
 const npmEnvironment = { ...process.env, npm_config_cache: join(workDir, "npm-cache") };
-rmSync(workDir, { recursive: true, force: true });
 mkdirSync(packDir, { recursive: true });
 mkdirSync(join(appDir, "src"), { recursive: true });
 const packed = execFileSync("npm", ["pack", "--pack-destination", packDir], {
@@ -50,12 +50,14 @@ export default defineConfig({ resolve: { alias: {
 writeFileSync(
   join(appDir, "src", "main.jsx"),
   `import { render } from "preact";
-import { QunoCalendar } from "@quno/calendar/timeline";
-import { QunoDatePicker } from "@quno/calendar/date-picker";
+import { QunoInfiniteCalendar } from "@quno/calendar/infinite-calendar";
+import { QunoDatePicker } from "@quno/calendar/datepicker";
 import { QunoDateInput } from "@quno/calendar/date-input";
+import { parseDateInput } from "@quno/calendar/date-parser";
 const value = { start: "2026-08-24", end: "2026-08-24" };
+parseDateInput("today", { expectedRange: value, referenceDate: value.start });
 render(<><QunoDatePicker value={value} /><QunoDateInput expectedRange={value} value={value} />
-  <QunoCalendar calendars={[{ id: "team", name: "Team" }]} selectedCalendarIds={["team"]}
+  <QunoInfiniteCalendar calendars={[{ id: "team", name: "Team" }]} selectedCalendarIds={["team"]}
     loadEvents={async () => []} eventRenderer={() => null} initialDateKey="2026-08-24" /></>, document.getElementById("root"));
 `
 );
@@ -65,4 +67,4 @@ execFileSync("npm", ["install", "--prefer-offline", "--no-audit", "--no-fund"], 
   stdio: "inherit"
 });
 execFileSync("npm", ["run", "build"], { cwd: appDir, env: npmEnvironment, stdio: "inherit" });
-console.log("Packed Preact compatibility fixture passed for all three UI subpaths.");
+console.log("Packed Preact compatibility fixture passed for three UI subpaths and the headless parser.");

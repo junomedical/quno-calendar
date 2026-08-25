@@ -1,5 +1,5 @@
-import { fromDateKey } from "../date/dateVirtualization";
-import { parseIsoDate } from "../date/localDate";
+import { fromDateKey } from "#quno-internal/timeline/date/dateVirtualization";
+import { parseIsoDate } from "#quno-internal/timeline/date/localDate";
 
 /** Timeline geometry inputs used by pure pixel/time conversion helpers. */
 export type TimelineGeometry = {

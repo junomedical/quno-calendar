@@ -8,11 +8,15 @@ import type {
   CalendarEvent,
   CalendarId,
   CalendarRow,
-  QunoCalendarSettings
+  QunoInfiniteCalendarSettings
 } from "#quno-internal/timeline/core/types";
 import { withoutActiveDraftSourceEvents } from "./activeDrafts";
-import { columnWidthForPreparedCell, prepareEventCell, type PreparedEventCell } from "../layout/layout";
-import { indexEventsByCalendar } from "../indexing/eventMembershipIndex";
+import {
+  columnWidthForPreparedCell,
+  prepareEventCell,
+  type PreparedEventCell
+} from "#quno-internal/timeline/infinite/events/layout/layout";
+import { indexEventsByCalendar } from "#quno-internal/timeline/infinite/events/indexing/eventMembershipIndex";
 
 const EMPTY_PREPARED_CELL: PreparedEventCell = { items: [], laneCount: 1, metricLaneCount: 1 };
 
@@ -20,7 +24,7 @@ type PreparedColumnsArgs = {
   activeDraft?: ActiveEventDraft | null;
   eventsByDate: Readonly<Record<string, CalendarEvent[]>>;
   renderedCalendars: CalendarRow[];
-  settings: QunoCalendarSettings;
+  settings: QunoInfiniteCalendarSettings;
   visibleDateKeys: string[];
 };
 

@@ -5,8 +5,8 @@ import type {
   EventRendererProps,
   LoadEvents,
   LoadEventsArgs,
-  QunoCalendarSettings
-} from "@quno/calendar/timeline";
+  QunoInfiniteCalendarSettings
+} from "@quno/calendar/infinite-calendar";
 
 export const articleDateKey = "2026-07-06";
 
@@ -17,7 +17,7 @@ export const articleCalendars: CalendarRow[] = [
   { id: "provider-b", name: "Dr. Leo Hart", color: "#7d8244" }
 ];
 
-export const articleSettings: Partial<QunoCalendarSettings> = {
+export const articleSettings: Partial<QunoInfiniteCalendarSettings> = {
   startHour: 8,
   endHour: 18,
   zoom: 1.15,

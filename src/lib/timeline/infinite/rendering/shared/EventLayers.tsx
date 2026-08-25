@@ -1,6 +1,6 @@
 import { eventBelongsToCalendar } from "#quno-internal/timeline/data/calendarEvents";
 import type { CalendarEvent, EventRenderStatus } from "#quno-internal/timeline/core/types";
-import { eventDateKey } from "../../events/eventDateKey";
+import { eventDateKey } from "#quno-internal/timeline/infinite/events/eventDateKey";
 import { EventShell } from "./EventShell";
 import type {
   AvailabilityLayerProps,

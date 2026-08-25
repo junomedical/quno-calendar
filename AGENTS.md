@@ -4,26 +4,36 @@ These instructions apply to the entire combined `@quno/calendar` repository.
 
 ## Start here
 
-Before changing code or behavior, read `README.md`, `docs/decisions.md`, `CHANGELOG.md`, and `docs/usage.md`. Treat them as part of the implementation and update them in the same change.
+Before changing code or behavior, read `README.md`, `docs/README.md`, `docs/shared/decisions.md`, `CHANGELOG.md`,
+`docs/shared/usage.md`, and the `README.md` plus `decisions.md` for every product in scope. Treat them as part of the
+implementation and update them in the same change.
 
 ## Package domains
 
 - `src/lib/shared`: headless timezone-free `IsoDate` contracts and safe calendar-day helpers.
-- `src/lib/timeline`: `QunoCalendar`; day keys are `IsoDate`, while event start/end values remain timestamp strings.
+- `src/lib/timeline`: `QunoInfiniteCalendar`; day keys are `IsoDate`, while event start/end values remain timestamp strings.
 - `src/lib/date-picker`: `QunoDatePicker` and its direct-manipulation range behavior.
-- `src/lib/date-input`: `QunoDateInput`, tokenizer, parser, and formatting contracts.
-- `demo/guide`: the one canonical field guide. Every primary contract needs a live public-entry-point example, concise “Try it” guidance, and a copyable recipe. Mount heavy timeline exhibits lazily.
+- `src/lib/date-input`: `QunoDateInput` plus the parser implementation it consumes internally.
+- `src/lib/date-parser`: the public headless parser and tokenizer surface.
+- `demo/guide`: four guides built from one editorial system. Every primary contract needs a live public-entry-point example, concise “Try it” guidance, and a copyable recipe. Mount heavy Infinite Calendar exhibits lazily.
 
-Use `#quno-internal/*` only for private cross-domain source imports. The root `@quno/calendar` entry is headless; UI is exported only from its feature subpaths. Styles remain optional, independent, component-scoped assets.
+Do not use parent-directory module imports. Same-folder imports may use `./`; every cross-folder import uses a stable alias: public package tests use `@quno/calendar/*`, private source tests use `#quno-internal/*`, demo code uses `#quno-demo/*`, API handlers use `#quno-api/*`, browser tests use `#quno-e2e/*`, unit-test helpers use `#quno-tests/*`, and root configuration uses `#quno-project/*`. The root `@quno/calendar` entry is headless; UI is exported only from its feature subpaths. Styles remain optional, independent, component-scoped assets.
 
 ## Documentation records
 
 - Keep `CHANGELOG.md` at the repository root with `Unreleased` first.
-- Record important product or engineering choices in `docs/decisions.md`; do not rewrite accepted calendar decisions.
-- Preserve datepicker history and `QDP-*` identifiers in `docs/date-picker-decisions.md`.
-- Keep `README.md` concise, `docs/usage.md` copyable, and `/guide` interactive.
-- Update `docs/migration.md` for any breaking public-name, entrypoint, token, or class change.
-- Keep `docs/architecture.md`, `docs/taxonomy.md`, and `docs/test-plan.md` aligned with the source domains and verification strategy.
+- Keep product documentation under `docs/infinite-calendar`, `docs/datepicker`, `docs/date-input`, and
+  `docs/date-parser`. Every product must retain its own `README.md` and `decisions.md`.
+- Record a product-specific choice only in that product's `decisions.md`. Record a choice affecting more than one
+  product in `docs/shared/decisions.md`; do not use another product's ledger as a convenient default.
+- Append a new decision when accepted behavior changes. Never silently rewrite an accepted decision, move or reuse its
+  identifier, or erase historical context. Preserve existing calendar, `QDP-*`, `QDI-*`, `QDPR-*`, and `QUNO-*`
+  identifiers and link superseding entries explicitly.
+- Keep `README.md` concise, `docs/README.md` navigable, `docs/shared/usage.md` copyable, and all four `/guide/*` routes
+  interactive.
+- Update `docs/shared/migration.md` for any breaking public-name, entrypoint, token, or class change.
+- Keep `docs/shared/architecture.md`, `docs/shared/taxonomy.md`, and `docs/shared/testing.md` aligned with package-wide
+  boundaries and verification. Keep Infinite Calendar runtime details in `docs/infinite-calendar`.
 
 ## Architecture and style
 
@@ -37,4 +47,4 @@ Use `#quno-internal/*` only for private cross-domain source imports. The root `@
 
 Run formatting, architecture checks, typechecking, linting, unit tests, Chromium Playwright tests, the Preact compatibility fixture, demo build, package verification, size reporting, and `npm pack --dry-run` before handoff. Update `CHANGELOG.md` with any exact blocker.
 
-Visual changes require Playwright coverage that asserts geometry, layering, clipping, state, or computed styles rather than screenshots alone. Public API guards must require the three subpath surfaces and reject legacy facade names and private modules.
+Visual changes require Playwright coverage that asserts geometry, layering, clipping, state, or computed styles rather than screenshots alone. Public API guards must require all four product subpath surfaces and reject legacy facade names and private modules.

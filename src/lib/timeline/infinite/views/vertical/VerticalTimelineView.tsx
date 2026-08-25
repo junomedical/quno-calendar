@@ -4,22 +4,28 @@
  */
 import { forwardRef } from "react";
 import type { CalendarInternalViewProps, CalendarViewHandle } from "#quno-internal/timeline/core/internalTypes";
-import { VERTICAL_TIMELINE_GUTTER_PX } from "../../rendering/vertical/VerticalTimelineDay";
-import { useEventRangeLoader } from "../../events/loading/useEventRangeLoader";
-import { useTimelineInteractions } from "../../interactions/useTimelineInteractions";
-import { useTimelineViewSetup } from "../shared/useTimelineViewSetup";
-import { useVerticalTimelineHitTesting } from "../../interactions/hit-testing/useTimelineHitTesting";
-import { useVerticalShiftWheelZoom } from "../../interactions/zoom/useShiftWheelZoom";
-import { useRetainedCalendarRows } from "../../events/metrics/useRetainedCalendarRows";
-import { eventDateKey } from "../../events/eventDateKey";
-import { VerticalTimelineCanvas, type VerticalDayRenderProps } from "../../rendering/vertical/VerticalTimelineCanvas";
-import { useVerticalColumnHover } from "../../rendering/vertical/useVerticalColumnHover";
+import { VERTICAL_TIMELINE_GUTTER_PX } from "#quno-internal/timeline/infinite/rendering/vertical/VerticalTimelineDay";
+import { useEventRangeLoader } from "#quno-internal/timeline/infinite/events/loading/useEventRangeLoader";
+import { useTimelineInteractions } from "#quno-internal/timeline/infinite/interactions/useTimelineInteractions";
+import { useTimelineViewSetup } from "#quno-internal/timeline/infinite/views/shared/useTimelineViewSetup";
+import { useVerticalTimelineHitTesting } from "#quno-internal/timeline/infinite/interactions/hit-testing/useTimelineHitTesting";
+import { useVerticalShiftWheelZoom } from "#quno-internal/timeline/infinite/interactions/zoom/useShiftWheelZoom";
+import { useRetainedCalendarRows } from "#quno-internal/timeline/infinite/events/metrics/useRetainedCalendarRows";
+import { eventDateKey } from "#quno-internal/timeline/infinite/events/eventDateKey";
+import {
+  VerticalTimelineCanvas,
+  type VerticalDayRenderProps
+} from "#quno-internal/timeline/infinite/rendering/vertical/VerticalTimelineCanvas";
+import { useVerticalColumnHover } from "#quno-internal/timeline/infinite/rendering/vertical/useVerticalColumnHover";
 import { useVerticalDayRenderProps } from "./useVerticalDayRenderProps";
 import { useVerticalNavigation } from "./useVerticalNavigation";
-import { useVerticalPreparedColumns } from "../../events/metrics/useVerticalPreparedColumns";
+import { useVerticalPreparedColumns } from "#quno-internal/timeline/infinite/events/metrics/useVerticalPreparedColumns";
 import { useVerticalInteractionWindowSync, useVerticalViewportWindow } from "./useVerticalViewportWindow";
-import { buildVerticalLayoutSignature, buildVerticalViewGeometry } from "../../rendering/vertical/verticalViewGeometry";
-import "../../rendering/styles/calendar.css";
+import {
+  buildVerticalLayoutSignature,
+  buildVerticalViewGeometry
+} from "#quno-internal/timeline/infinite/rendering/vertical/verticalViewGeometry";
+import "#quno-internal/timeline/infinite/rendering/styles/calendar.css";
 
 function useVerticalViewSetup(props: CalendarInternalViewProps, now: Date) {
   return useTimelineViewSetup({

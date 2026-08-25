@@ -5,7 +5,7 @@ import {
   firstDuplicatedViewportEvent,
   goToWorkday,
   setDemoZoom
-} from "../helpers";
+} from "#quno-e2e/helpers";
 
 test("drops minor time labels at dense zoom levels", async ({ page }) => {
   await page.goto("/demo/infinite-calendar");

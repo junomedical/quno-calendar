@@ -1,14 +1,14 @@
 import { useCallback, type RefObject } from "react";
-import type { CalendarId, QunoCalendarSettings } from "#quno-internal/timeline/core/types";
+import type { CalendarId, QunoInfiniteCalendarSettings } from "#quno-internal/timeline/core/types";
 import { snapMinute, xToMinute, yToMinute } from "#quno-internal/timeline/time/time";
 import { TIMELINE_LEFT_GUTTER_PX } from "#quno-internal/timeline/time/timelineTicks";
-import type { CalendarHit } from "../timelineInteractionModel";
+import type { CalendarHit } from "#quno-internal/timeline/infinite/interactions/timelineInteractionModel";
 import type { TimelinePointer } from "./hitTestingTypes";
 import { timelineGridAtPoint, timelineGridIdentity } from "./timelineHitTarget";
 
 type SharedArgs = {
   containerRef: RefObject<HTMLDivElement>;
-  settings: QunoCalendarSettings;
+  settings: QunoInfiniteCalendarSettings;
   selectedIds: CalendarId[];
 };
 
@@ -37,7 +37,7 @@ function useTimelineHitTesting(
   return { getHit, isTimelinePoint };
 }
 
-type HorizontalArgs = SharedArgs & { effectiveSettings: QunoCalendarSettings };
+type HorizontalArgs = SharedArgs & { effectiveSettings: QunoInfiniteCalendarSettings };
 
 export function useHorizontalTimelineHitTesting(args: HorizontalArgs) {
   const minuteAtPoint = useCallback(

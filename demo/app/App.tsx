@@ -1,14 +1,16 @@
 import { useEffect, useState, type ComponentType } from "react";
-import { DateInputDemo } from "../demos/DateInputDemo";
-import { DateRangeDemo } from "../demos/DateRangeDemo";
-import { DateInputFieldGuide } from "../guide/date-input/DateInputFieldGuide";
-import { DatePickerStory } from "../guide/date-picker/DatePickerStory";
-import { IntegrationWalkthrough } from "../guide/timeline/IntegrationWalkthrough";
-import { DefaultDemo } from "../showcase/DefaultDemo";
-import { Demo1 } from "../showcase/demo1/Demo1";
-import { Demo2 } from "../showcase/demo2/Demo2";
-import { Demo3 } from "../showcase/demo3/Demo3";
-import type { DemoRoute } from "../showcase/types";
+import { DateInputDemo } from "#quno-demo/demos/DateInputDemo";
+import { DateParserDemo } from "#quno-demo/demos/DateParserDemo";
+import { DateRangeDemo } from "#quno-demo/demos/DateRangeDemo";
+import { DateInputFieldGuide } from "#quno-demo/guide/date-input/DateInputFieldGuide";
+import { DateParserFieldGuide } from "#quno-demo/guide/date-parser/DateParserFieldGuide";
+import { DatePickerStory } from "#quno-demo/guide/date-picker/DatePickerStory";
+import { IntegrationWalkthrough } from "#quno-demo/guide/timeline/IntegrationWalkthrough";
+import { DefaultDemo } from "#quno-demo/showcase/DefaultDemo";
+import { Demo1 } from "#quno-demo/showcase/demo1/Demo1";
+import { Demo2 } from "#quno-demo/showcase/demo2/Demo2";
+import { Demo3 } from "#quno-demo/showcase/demo3/Demo3";
+import type { DemoRoute } from "#quno-demo/showcase/types";
 import { ProjectHome } from "./ProjectHome";
 import "./App.css";
 
@@ -35,19 +37,34 @@ export function App() {
     return () => window.removeEventListener("popstate", handlePopState);
   }, []);
 
-  if (["/guide", "/story", "/examples/integration-walkthrough"].includes(pathname)) {
-    window.history.replaceState({}, "", "/guide/infinite-calendar");
+  const redirects: Record<string, string> = {
+    "/guide": "/guide/infinite-calendar",
+    "/story": "/guide/infinite-calendar",
+    "/examples/integration-walkthrough": "/guide/infinite-calendar",
+    "/guide/date-range-input": "/guide/datepicker",
+    "/guide/date-input-field": "/guide/date-input",
+    "/demo/date-range-input": "/demo/datepicker",
+    "/demo/date-input-field": "/demo/date-input"
+  };
+  const redirect = redirects[pathname];
+  if (redirect) {
+    window.history.replaceState({}, "", `${redirect}${window.location.hash}`);
+  }
+  const routePath = redirect ?? pathname;
+
+  if (routePath === "/guide/infinite-calendar") {
     return <IntegrationWalkthrough />;
   }
 
-  if (pathname === "/") return <ProjectHome />;
-  if (pathname === "/guide/infinite-calendar") return <IntegrationWalkthrough />;
-  if (pathname === "/guide/date-range-input") return <DatePickerStory />;
-  if (pathname === "/guide/date-input-field") return <DateInputFieldGuide />;
-  if (pathname === "/demo/date-range-input") return <DateRangeDemo />;
-  if (pathname === "/demo/date-input-field") return <DateInputDemo />;
+  if (routePath === "/") return <ProjectHome />;
+  if (routePath === "/guide/datepicker") return <DatePickerStory />;
+  if (routePath === "/guide/date-input") return <DateInputFieldGuide />;
+  if (routePath === "/guide/date-parser") return <DateParserFieldGuide />;
+  if (routePath === "/demo/datepicker") return <DateRangeDemo />;
+  if (routePath === "/demo/date-input") return <DateInputDemo />;
+  if (routePath === "/demo/date-parser") return <DateParserDemo />;
 
-  const activeRoute = demoRoutes.find((route) => route.path === pathname);
+  const activeRoute = demoRoutes.find((route) => route.path === routePath);
   if (!activeRoute) return <ProjectHome />;
   const Demo = demoComponents[activeRoute.id] ?? DefaultDemo;
   return <Demo routes={demoRoutes} />;

@@ -1,6 +1,6 @@
 import { memo, useCallback, useRef, type CSSProperties, type PointerEvent } from "react";
 import type { CalendarEvent, CalendarId, EventRenderer, EventRenderStatus } from "#quno-internal/timeline/core/types";
-import type { ViewportGeometryRegistration } from "../../anchors/parent/viewportAnchorTypes";
+import type { ViewportGeometryRegistration } from "#quno-internal/timeline/infinite/anchors/parent/viewportAnchorTypes";
 
 export type CssLength = number | string;
 
@@ -58,7 +58,7 @@ const EventRendererContent = memo(function EventRendererContent({
 /**
  * Positioned wrapper that isolates calendar geometry from the external card renderer.
  *
- * @see docs/architecture.md#render-layers
+ * @see docs/infinite-calendar/architecture.md#render-layers
  */
 export const EventShell = memo(function EventShell({
   event,

@@ -4,7 +4,7 @@
  */
 import { useCallback, type Dispatch, type PointerEvent as ReactPointerEvent, type SetStateAction } from "react";
 import type { CalendarId } from "#quno-internal/timeline/core/types";
-import type { EventColumnLayoutItem } from "../../events/layout/layout";
+import type { EventColumnLayoutItem } from "#quno-internal/timeline/infinite/events/layout/layout";
 import type { VerticalHoveredEvent } from "./VerticalTimelineDay";
 
 type VerticalColumnHoverArgs = {

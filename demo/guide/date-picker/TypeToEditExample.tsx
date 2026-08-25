@@ -1,5 +1,6 @@
-import { QunoDatePicker, type DateRange, type IsoDate } from "@quno/calendar/date-picker";
-import { parseDateInput, QunoDateInput } from "@quno/calendar/date-input";
+import { QunoDatePicker, type DateRange, type IsoDate } from "@quno/calendar/datepicker";
+import { QunoDateInput } from "@quno/calendar/date-input";
+import { parseDateInput } from "@quno/calendar/date-parser";
 import type { JSX, KeyboardEventHandler } from "react";
 import { useEffect, useRef, useState } from "react";
 

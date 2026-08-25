@@ -1,12 +1,12 @@
 import { useCallback, useRef, useState, type CSSProperties } from "react";
 import type { DateRange } from "@quno/calendar";
-import { QunoDatePicker } from "@quno/calendar/date-picker";
+import { QunoDatePicker } from "@quno/calendar/datepicker";
 import {
-  QunoCalendar,
+  QunoInfiniteCalendar,
   type EventRendererProps,
   type LoadEvents,
-  type QunoCalendarHandle
-} from "@quno/calendar/timeline";
+  type QunoInfiniteCalendarHandle
+} from "@quno/calendar/infinite-calendar";
 
 const calendars = [{ id: "team", name: "Care team", color: "#7367f0" }];
 const loadEvents: LoadEvents = async ({ startDate }) => [
@@ -27,7 +27,7 @@ function EventCard({ event, style }: EventRendererProps) {
   );
 }
 
-const recipe = `const calendarRef = useRef<QunoCalendarHandle>(null);
+const recipe = `const calendarRef = useRef<QunoInfiniteCalendarHandle>(null);
 
 <QunoDatePicker
   selectionMode="single"
@@ -35,10 +35,10 @@ const recipe = `const calendarRef = useRef<QunoCalendarHandle>(null);
     if (selection) calendarRef.current?.scrollToDate(selection.start);
   }}
 />
-<QunoCalendar ref={calendarRef} {...timelineProps} />`;
+<QunoInfiniteCalendar ref={calendarRef} {...timelineProps} />`;
 
 export function CompositionExample() {
-  const calendarRef = useRef<QunoCalendarHandle>(null);
+  const calendarRef = useRef<QunoInfiniteCalendarHandle>(null);
   const [selection, setSelection] = useState<DateRange | null>({
     start: "2026-08-24",
     end: "2026-08-24"
@@ -52,13 +52,13 @@ export function CompositionExample() {
   return (
     <section className="guide-section guide-composition" id="compose">
       <p className="guide-section__number">06</p>
-      <h2>Compose QunoDatePicker with QunoCalendar</h2>
+      <h2>Compose QunoDatePicker with QunoInfiniteCalendar</h2>
       <p>
         <strong>Try it:</strong> choose one date; the independent timeline scrolls to that day.
       </p>
       <div className="guide-composition__demo">
         <QunoDatePicker initialMonth="2026-08-01" onChange={selectDate} selectionMode="single" value={selection} />
-        <QunoCalendar
+        <QunoInfiniteCalendar
           ariaLabel="Date-picker controlled schedule"
           calendars={calendars}
           eventRenderer={EventCard}

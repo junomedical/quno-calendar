@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { buildDraftEvent, type CalendarHit } from "../timelineInteractionModel";
+import {
+  buildDraftEvent,
+  type CalendarHit
+} from "#quno-internal/timeline/infinite/interactions/timelineInteractionModel";
 import { minutesSinceStartOfDay } from "#quno-internal/timeline/time/time";
 import { type CalendarEvent, type CalendarViewComponentProps } from "#quno-internal/timeline/core/types";
 

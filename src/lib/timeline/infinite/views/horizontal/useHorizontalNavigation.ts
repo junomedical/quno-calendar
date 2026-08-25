@@ -1,9 +1,9 @@
 import { useCallback, useImperativeHandle, useRef, type ForwardedRef, type RefObject } from "react";
 import { toDateKey } from "#quno-internal/timeline/date/dateVirtualization";
-import type { QunoCalendarHandle, QunoCalendarSettings } from "#quno-internal/timeline/core/types";
+import type { QunoInfiniteCalendarHandle, QunoInfiniteCalendarSettings } from "#quno-internal/timeline/core/types";
 import type { CalendarViewHandle } from "#quno-internal/timeline/core/internalTypes";
 import { minuteToX, parseClockToMinutes } from "#quno-internal/timeline/time/time";
-import { useViewportAnchoring } from "../../anchors/parent/useViewportAnchoring";
+import { useViewportAnchoring } from "#quno-internal/timeline/infinite/anchors/parent/useViewportAnchoring";
 import { TIMELINE_LEFT_GUTTER_PX } from "#quno-internal/timeline/time/timelineTicks";
 import type { IsoDate } from "#quno-internal/shared/dateRangeModel";
 
@@ -16,9 +16,9 @@ import type { IsoDate } from "#quno-internal/shared/dateRangeModel";
 type HorizontalNavigationArgs = {
   forwardedRef: ForwardedRef<CalendarViewHandle>;
   containerRef: RefObject<HTMLDivElement>;
-  effectiveSettings: QunoCalendarSettings;
+  effectiveSettings: QunoInfiniteCalendarSettings;
   now: Date;
-  scrollToDate: QunoCalendarHandle["scrollToDate"];
+  scrollToDate: QunoInfiniteCalendarHandle["scrollToDate"];
 };
 
 export function useHorizontalNavigation({
@@ -56,9 +56,9 @@ export function useHorizontalNavigation({
     }
   });
   const { captureViewportAnchor, isEventFullyVisible, restoreViewportAnchor, cancelViewportAnchorRestore } = anchoring;
-  const releaseActiveDraftRef = useRef<QunoCalendarHandle["releaseActiveDraft"]>(() => undefined);
-  const commitVisibleEventRef = useRef<QunoCalendarHandle["commitVisibleEvent"]>(() => undefined);
-  const removeVisibleEventRef = useRef<QunoCalendarHandle["removeVisibleEvent"]>(() => undefined);
+  const releaseActiveDraftRef = useRef<QunoInfiniteCalendarHandle["releaseActiveDraft"]>(() => undefined);
+  const commitVisibleEventRef = useRef<QunoInfiniteCalendarHandle["commitVisibleEvent"]>(() => undefined);
+  const removeVisibleEventRef = useRef<QunoInfiniteCalendarHandle["removeVisibleEvent"]>(() => undefined);
 
   useImperativeHandle(
     forwardedRef,

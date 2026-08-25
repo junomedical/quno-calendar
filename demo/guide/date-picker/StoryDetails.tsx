@@ -1,4 +1,5 @@
 import type { JSX } from "react";
+import { FieldGuideRecipe } from "#quno-demo/guide/shared/FieldGuideFeature";
 
 const comparisons = [
   ["Forced order", "Choose From first, then choose To", "Click, paint, resize, or move in any order"],
@@ -54,6 +55,16 @@ export const DifferenceStory = (): JSX.Element => (
         </div>
       ))}
     </div>
+    <aside className="field-guide__try">
+      <strong>Try it</strong>
+      Compare how each model corrects an existing range without restarting selection.
+    </aside>
+    <FieldGuideRecipe
+      title="Use one range model"
+      language="TS"
+      copy="Represent both one day and an inclusive period with the same timezone-free contract."
+      code={"type Selection = null | { start: IsoDate; end: IsoDate };\n// One day: start === end"}
+    />
   </section>
 );
 
@@ -88,6 +99,16 @@ export const ArchitectureStory = (): JSX.Element => (
         <p>Hover and drag previews cannot masquerade as public state.</p>
       </article>
     </div>
+    <aside className="field-guide__try">
+      <strong>Try it</strong>
+      Review which layer owns committed value, visible month, and the active gesture.
+    </aside>
+    <FieldGuideRecipe
+      title="Keep state responsibilities separate"
+      language="TSX"
+      copy="Control the public range without coupling it to the visible month."
+      code={'<QunoDatePicker value={range} onChange={setRange} initialMonth="2026-08" />'}
+    />
   </section>
 );
 
@@ -95,10 +116,9 @@ export const FootprintStory = (): JSX.Element => (
   <section className="story__wide story__footprint" id="footprint">
     <div className="story__section-heading">
       <span>Production footprint</span>
-      <h2>About 12.05 KiB gzip for the picker’s default theme</h2>
+      <h3>About 12.05 KiB gzip for the picker’s default theme</h3>
       <p>
-        The picker and natural input are opt-in ESM family members. Preact remains a peer dependency, and each optional
-        stylesheet travels with its component.
+        The independently imported Datepicker supports React 18+, tested Preact compatibility, SSR, and optional CSS.
       </p>
     </div>
     <div className="story__metrics">
@@ -113,9 +133,9 @@ export const FootprintStory = (): JSX.Element => (
         <small>17.61 KiB raw</small>
       </div>
       <div>
-        <strong>6.95 KiB</strong>
-        <span>Natural input JavaScript + CSS gzip</span>
-        <small>21.42 KiB JS + 2.11 KiB CSS raw</small>
+        <strong>React 18+</strong>
+        <span>Runtime peer</span>
+        <small>Preact 10.18+ through compat aliases</small>
       </div>
     </div>
     <p className="story__measurement">

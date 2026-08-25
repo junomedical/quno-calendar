@@ -9,19 +9,23 @@
  * metrics; zoom-only changes retain membership, lanes, and metric identities.
  * Does not own virtual measurement or viewport correction.
  *
- * @see docs/flows/async-loading-and-layout.md#late-events-that-increase-horizontal-height
+ * @see docs/infinite-calendar/flows/async-loading-and-layout.md#late-events-that-increase-horizontal-height
  */
 import { useCallback, useMemo } from "react";
 import { withoutActiveDraftSourceEvents } from "./activeDrafts";
-import { prepareEventCell, rowHeightForPreparedCell, type PreparedEventCell } from "../layout/layout";
+import {
+  prepareEventCell,
+  rowHeightForPreparedCell,
+  type PreparedEventCell
+} from "#quno-internal/timeline/infinite/events/layout/layout";
 import type {
   ActiveEventDraft,
   CalendarEvent,
   CalendarId,
   CalendarRow,
-  QunoCalendarSettings
+  QunoInfiniteCalendarSettings
 } from "#quno-internal/timeline/core/types";
-import { indexEventsByCalendar } from "../indexing/eventMembershipIndex";
+import { indexEventsByCalendar } from "#quno-internal/timeline/infinite/events/indexing/eventMembershipIndex";
 
 const EMPTY_PREPARED_CELL: PreparedEventCell = { items: [], laneCount: 1, metricLaneCount: 1 };
 
@@ -34,7 +38,7 @@ export function useDayMetrics({
 }: {
   eventsByDate: Record<string, CalendarEvent[]>;
   selectedCalendars: CalendarRow[];
-  settings: QunoCalendarSettings;
+  settings: QunoInfiniteCalendarSettings;
   baseDayHeight: number;
   activeDraft?: ActiveEventDraft | null;
 }) {

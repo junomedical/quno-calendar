@@ -1,133 +1,113 @@
-import { StoryFeature } from "../date-picker/StoryFeature";
-import { StoryHowTo } from "../date-picker/StoryHowTo";
-import { TypeToEditExample } from "../date-picker/TypeToEditExample";
+import { StoryFeature } from "#quno-demo/guide/date-picker/StoryFeature";
+import { StoryHowTo } from "#quno-demo/guide/date-picker/StoryHowTo";
+import { TypeToEditExample } from "#quno-demo/guide/date-picker/TypeToEditExample";
 import {
+  AccessibleDateInputExample,
   DateInputDependencyFacts,
   DateInputLibrarySizeFacts,
-  LocalizedDateInputExample
+  LocalizedDateInputExample,
+  ParserConfiguredInputExample
 } from "./DateInputGuideExamples";
-import { DateInputParserExample } from "./DateInputParserExample";
 import {
+  accessibilitySnippet,
   compositionSnippet,
   dependenciesSnippet,
-  expectedPeriodSnippet,
   librarySizeSnippet,
   localizationSnippet,
-  multipleLanguagesSnippet
+  parserConnectionSnippet
 } from "./dateInputGuideSnippets";
 
-const recipe = (title: string, copy: string, code: string, language = "TSX") => (
-  <StoryHowTo title={title} language={language} copy={copy} code={code} />
+const recipe = (title: string, copy: string, code: string) => (
+  <StoryHowTo title={title} language="TSX" copy={copy} code={code} />
 );
 
 export function DateInputGuideIntegration() {
   return (
     <>
       <StoryFeature
-        id="expected-period"
-        number="07"
-        kicker="Expected period"
-        title="Guide ambiguity toward a useful period."
-        copy="The required expectedRange ranks missing years and ambiguous dates around the product’s real domain. It is a hint, not a validity boundary; products validate explicit out-of-period dates separately."
-        instruction="Switch between 12/14 and 1/1/30. The first infers a nearby year; the explicit 2030 date still resolves."
-        howTo={recipe(
-          "Set the expected period",
-          "Use a realistic business window for ranking, then apply product validation separately.",
-          expectedPeriodSnippet
-        )}
-        reverse
-      >
-        <DateInputParserExample
-          expectedRange={{ start: "2025-08-25", end: "2027-08-25" }}
-          initialText="12/14"
-          label="Date inside the expected period"
-          samples={["12/14", "1/1/30"]}
-        />
-      </StoryFeature>
-
-      <StoryFeature
         id="localization"
-        number="08"
-        kicker="Localization"
-        title="Parse and format for the product language."
-        copy="Locale controls output and numeric order. Parser languages, labels, formatter, and lexicon let products accept multilingual or domain-specific wording deliberately."
-        instruction="Switch to Deutsch, type 12 Juni, and press Enter; switch back to compare formatting."
-        howTo={recipe(
-          "Localize the field",
-          "Configure recognition and presentation independently when needed.",
-          localizationSnippet
-        )}
+        number="04"
+        kicker="Localized field"
+        title="Separate recognition from presentation."
+        copy="Locale, labels, and formatting control what people see, while parser languages decide which words the field recognizes."
+        instruction="Switch to Deutsch, type 12 Juni, and press Enter; switch back to compare the committed format."
+        howTo={recipe("Localize the field", "Configure recognition and display deliberately.", localizationSnippet)}
       >
         <LocalizedDateInputExample />
       </StoryFeature>
 
       <StoryFeature
-        id="multiple-languages"
-        number="09"
-        kicker="Multiple languages"
-        title="Let languages live together in one field."
-        copy="Recognition languages are independent from display locale. A multilingual product can accept English and German month names or relative words together, then format every committed value consistently."
-        instruction="Switch between 12 June 2026, 12 Juni 2026, today, and heute; every phrase resolves in the same parser."
+        id="parser-configuration"
+        number="05"
+        kicker="Date Parser"
+        title="Use the same parsing contract everywhere."
+        copy={
+          <p>
+            Date Input consumes Quno/Date Parser semantics. Configure the same expected range, language, date order,
+            reference date, and week start; explore the full grammar in the{" "}
+            <a href="/guide/date-parser">Date Parser field guide</a>.
+          </p>
+        }
+        instruction="Type this week and press Enter. This field starts weeks on Sunday, matching the configured Datepicker format."
         howTo={recipe(
-          "Recognize multiple languages",
-          "List accepted parser languages while keeping one output locale.",
-          multipleLanguagesSnippet
+          "Share parser options",
+          "Pass one parsing context to every date surface.",
+          parserConnectionSnippet
         )}
       >
-        <DateInputParserExample
-          initialText="12 June 2026"
-          label="English or German date"
-          parserLanguages={["en", "de"]}
-          samples={["12 June 2026", "12 Juni 2026", "today", "heute"]}
-        />
+        <ParserConfiguredInputExample />
       </StoryFeature>
 
       <StoryFeature
         id="picker-composition"
-        number="10"
-        kicker="Date range input"
-        title="Compose typing with the date range picker."
-        copy="QunoDateInput and QunoDatePicker stay independent and synchronize through one controlled DateRange. Neither component needs an adapter or private coupling."
+        number="06"
+        kicker="Datepicker composition"
+        title="Let typing and direct manipulation share one value."
+        copy="Date Input and Datepicker stay independent and synchronize through one controlled DateRange without an adapter."
         instruction="Type a range, use Arrow keys, or choose dates in the calendar. Both surfaces keep the same value."
-        howTo={recipe(
-          "Compose input and picker",
-          "Own one range in the parent and pass it to both public entry points.",
-          compositionSnippet
-        )}
-        reverse
+        howTo={recipe("Compose input and Datepicker", "Own one range in the parent.", compositionSnippet)}
       >
         <TypeToEditExample />
       </StoryFeature>
 
       <StoryFeature
-        id="library-size"
-        number="11"
-        kicker="Library size"
-        title="Import only the field-sized payload."
-        copy="The date-input entry is built and measured independently from the picker and timeline, with JavaScript and optional CSS tracked against separate gzip budgets."
-        instruction="Compare the current independently measured artifacts with their release budgets."
+        id="accessibility"
+        number="07"
+        kicker="Native contracts"
+        title="Keep the field understandable to every input method."
+        copy="The component retains native labels and events, exposes recognition state, and marks invalid committed text with aria-invalid."
+        instruction="Enter an invalid phrase and press Enter, then replace it with tomorrow and commit again."
         howTo={recipe(
-          "Keep the input entry independent",
-          "Import the date-input entry and add its stylesheet only when the default presentation is useful.",
-          librarySizeSnippet
+          "Label and validate the field",
+          "Use native input attributes and product labels.",
+          accessibilitySnippet
         )}
       >
+        <AccessibleDateInputExample />
+      </StoryFeature>
+
+      <StoryFeature
+        id="library-size"
+        number="08"
+        kicker="Production"
+        title="Ship the field independently."
+        copy="Date Input is independently importable, SSR-safe, and measured separately from the calendar, Datepicker, and headless parser entry."
+        instruction="Compare the current artifacts and runtime contracts with their release budgets."
+        howTo={recipe("Import Date Input", "Add its optional stylesheet only when useful.", librarySizeSnippet)}
+      >
         <DateInputLibrarySizeFacts />
+        <DateInputDependencyFacts />
       </StoryFeature>
 
       <StoryFeature
         id="dependencies"
-        number="12"
+        number="08"
         kicker="Dependencies"
         title="Know what the field brings with it."
-        copy="The date-input entry is independently importable, SSR-safe, and has no date-library runtime. Its stylesheet is optional and JavaScript never injects CSS."
-        instruction="Review the independently measured payload and runtime contracts before adding the entry to a production build."
-        howTo={recipe(
-          "Import the date input",
-          "Import only the entry and optional stylesheet you use.",
-          dependenciesSnippet
-        )}
-        reverse
+        copy="React is a peer, Preact is supported through compat aliases, styles stay optional, and JavaScript never injects CSS."
+        instruction="Import only the component entry and optional stylesheet."
+        howTo={recipe("Review dependencies", "Keep product runtimes shared.", dependenciesSnippet)}
+        subsection
       >
         <DateInputDependencyFacts />
       </StoryFeature>

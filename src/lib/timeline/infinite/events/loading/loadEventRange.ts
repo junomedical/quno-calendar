@@ -8,7 +8,7 @@
  * cache writes, or React state. Loader errors are intentionally normalized so
  * the coordinator can release dates without clearing rendered events.
  *
- * @see docs/flows/async-loading-and-layout.md#failure-and-cancellation-subflows
+ * @see docs/infinite-calendar/flows/async-loading-and-layout.md#failure-and-cancellation-subflows
  */
 import type { CalendarEvent, LoadEvents, LoadEventsArgs } from "#quno-internal/timeline/core/types";
 

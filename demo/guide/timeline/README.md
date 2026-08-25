@@ -1,4 +1,4 @@
-# Inside Quno Calendar
+# Quno/Infinite Calendar field guide
 
 This article owns the dedicated `/guide/infinite-calendar` route. Every chapter uses a plain, benefit-led title,
 explains the problem the feature solves, and demonstrates the behavior live. Its Demo button opens the unrestricted
@@ -6,31 +6,31 @@ calendar at `/demo/infinite-calendar`.
 
 The article teaches the calendar through focused live exhibits:
 
-0. Why build another calendar.
-1. Vertical and infinite.
-2. Fast in the busiest times.
-3. Leveraging browser engine.
-4. Event cards on the grid, including one renderer adapting to roomy, narrow, and short event containers.
-5. Card structure for the occasion.
-6. Starting static example.
-7. Availability and event layers.
-8. Deferred and optimistic event changes.
-9. Time of the day.
-10. Natural date navigation with the shared Quno date input.
-11. Zoom into the calendar.
-12. Progressive time reveal.
-13. Visual theming.
-14. Localization.
-15. Overlapping events.
-16. See-through event hover.
-17. Content preloading.
-18. Stable view position.
-19. Focus on the person.
-20. Keep event in the view.
-21. Plays nice with React.
-22. Supporting animations.
-23. Full demo.
-24. Payload size.
+1. Fit dense schedules into a clear view.
+2. Move through dates without limits.
+3. Keep busy schedules fast.
+4. Leverage the browser engine.
+5. Render useful event cards, including one renderer adapting to roomy, narrow, and short containers.
+6. Shape card structure for the occasion.
+7. Start with a read-only calendar.
+8. Add availability and event layers.
+9. Create, move, and edit content.
+10. Mark and return to the current time.
+11. Connect familiar date navigation with the shared Quno Date Input.
+12. Zoom without losing precision.
+13. Reveal time progressively.
+14. Theme the calendar.
+15. Localize dates and product labels.
+16. Resolve overlapping content.
+17. Reveal events beneath a hover.
+18. Preload events before they enter the view.
+19. Keep a stable position during late loading.
+20. Focus creation on one calendar.
+21. Keep the committed event in view.
+22. Keep React as the source of truth.
+23. Support motion without losing state.
+24. Put everything together.
+25. Ship the package.
 
 [`IntegrationWalkthrough.tsx`](./IntegrationWalkthrough.tsx) owns the narrative and progressive code examples.
 [`ArticleDemos.tsx`](./ArticleDemos.tsx) owns the foundational interactive exhibits,
@@ -38,8 +38,9 @@ The article teaches the calendar through focused live exhibits:
 [`ArticleRecipeDemos.tsx`](./ArticleRecipeDemos.tsx) owns the read-only, drag/create, and preloading exhibits.
 [`ArticleProductDemos.tsx`](./ArticleProductDemos.tsx) owns CSS-native chrome, current-time, navigation, progressive
 precision, styling, custom card structure, date localization, and final-composition exhibits.
+[`ReactStateDemo.tsx`](./ReactStateDemo.tsx) owns the focused controlled-props and callback exhibit.
 [`articleSupport.tsx`](./articleSupport.tsx) contains deterministic fixtures and the external event renderer. Every live
-calendar imports the public `@quno/calendar/timeline` entrypoint.
+calendar imports the public `@quno/calendar/infinite-calendar` entrypoint.
 
 Each chapter leads with a concrete outcome and the problem it solves. Behavior and implementation follow only after
 that context, and control instructions remain in callouts beside the relevant live example.

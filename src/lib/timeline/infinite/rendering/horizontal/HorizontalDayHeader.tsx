@@ -2,13 +2,13 @@ import { formatHorizontalDateLabel } from "#quno-internal/timeline/date/dateLabe
 import { fromDateKey } from "#quno-internal/timeline/date/dateVirtualization";
 import { minuteToX } from "#quno-internal/timeline/time/time";
 import { TIMELINE_LEFT_GUTTER_PX } from "#quno-internal/timeline/time/timelineTicks";
-import type { QunoCalendarSettings } from "#quno-internal/timeline/core/types";
+import type { QunoInfiniteCalendarSettings } from "#quno-internal/timeline/core/types";
 
 /** Sticky date chrome: header band, current-time marker, and readable date label. */
 
 type HorizontalDayHeaderProps = {
   dateKey: string;
-  settings: QunoCalendarSettings;
+  settings: QunoInfiniteCalendarSettings;
   timelineWidth: number;
   todayKey: string;
   showNowLine: boolean;

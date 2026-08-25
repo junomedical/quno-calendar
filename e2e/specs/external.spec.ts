@@ -8,7 +8,7 @@ import {
   topVisibleDayDate,
   viewportRelativeEventBox,
   waitForDemoEvents
-} from "../helpers";
+} from "#quno-e2e/helpers";
 
 test("keeps popup cancellation and scroll reset visible in the activity pane", async ({ page }) => {
   await page.goto("/demo/infinite-calendar");

@@ -1,11 +1,14 @@
 /** Pure proposal/preview transforms for the React drag lifecycle. */
 import { eventCalendarIds, replaceEventCalendarMembership } from "#quno-internal/timeline/data/calendarEvents";
-import { buildMoveProposal, type CalendarHit } from "../timelineInteractionModel";
+import {
+  buildMoveProposal,
+  type CalendarHit
+} from "#quno-internal/timeline/infinite/interactions/timelineInteractionModel";
 import type {
   CalendarEvent,
   CalendarId,
   EventMoveRequest,
-  QunoCalendarSettings
+  QunoInfiniteCalendarSettings
 } from "#quno-internal/timeline/core/types";
 
 export type DragState = {
@@ -18,7 +21,7 @@ export type DragState = {
 export function proposalForDrag(
   drag: DragState,
   hit: CalendarHit,
-  settings: QunoCalendarSettings,
+  settings: QunoInfiniteCalendarSettings,
   draggingActiveDraft: boolean
 ): EventMoveRequest {
   const baseProposal = buildMoveProposal(drag.event, hit, drag.offsetMinutes, settings);

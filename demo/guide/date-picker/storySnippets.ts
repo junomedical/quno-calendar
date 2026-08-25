@@ -1,5 +1,5 @@
-export const packageSnippet = `import { QunoDatePicker, type DateRange } from '@quno/calendar/date-picker';
-import '@quno/calendar/date-picker/styles.css';`;
+export const packageSnippet = `import { QunoDatePicker, type DateRange } from '@quno/calendar/datepicker';
+import '@quno/calendar/datepicker/styles.css';`;
 
 export const basicUsageSnippet = `${packageSnippet}
 import { useState } from 'react';
@@ -11,7 +11,7 @@ const [dates, setDates] = useState<DateRange | null>(null);
 export const customDaysSnippet = `import {
   QunoDatePicker,
   type QunoDatePickerDayCellCustomizer,
-} from '@quno/calendar/date-picker';
+} from '@quno/calendar/datepicker';
 
 const styleDay: QunoDatePickerDayCellCustomizer = ({
   date,
@@ -54,7 +54,7 @@ export const localizationSnippet = `<QunoDatePicker
 />`;
 
 export const weekStartSnippet = `import { useState } from 'react';
-import { QunoDatePicker, type WeekStart } from '@quno/calendar/date-picker';
+import { QunoDatePicker, type WeekStart } from '@quno/calendar/datepicker';
 
 const [weekStartsOn, setWeekStartsOn] =
   useState<WeekStart>(1);
@@ -88,7 +88,7 @@ export const themingSnippet = `.booking-dates {
 <QunoDatePicker className="booking-dates" />`;
 
 export const naturalInputSnippet = `import { useState } from 'react';
-import { QunoDatePicker, type DateRange } from '@quno/calendar/date-picker';
+import { QunoDatePicker, type DateRange } from '@quno/calendar/datepicker';
 import { QunoDateInput } from '@quno/calendar/date-input';
 import '@quno/calendar/date-input/styles.css';
 

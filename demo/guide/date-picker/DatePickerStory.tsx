@@ -1,69 +1,36 @@
+import { FieldGuidePage } from "#quno-demo/guide/shared/FieldGuidePage";
 import type { JSX } from "react";
 import { ArchitectureStory, DifferenceStory, FootprintStory } from "./StoryDetails";
 import { StoryTopics } from "./StoryTopics";
-import "./story.css";
 import "./story-details.css";
-import "./story-howto.css";
 import "./story-topics.css";
 import "./story-themes.css";
 import "./type-to-edit.css";
 
 const contents = [
-  ["#difference", "Overview", "Range editing explained"],
-  ["#paint", "01", "Paint and resize"],
-  ["#stable-view", "02", "Stable six-week view"],
-  ["#quick-jump", "03", "Jump across years"],
-  ["#hidden-row", "04", "Hidden-week drag"],
-  ["#segment-drag", "05", "Move a period"],
-  ["#best-guess", "06", "Build a range by click"],
-  ["#wrong-guess", "07", "Correct a click guess"],
-  ["#shortcuts", "08", "Off-screen endpoints"],
-  ["#motion", "09", "Motion and reduced motion"],
-  ["#day-handler", "10", "Custom day styling"],
-  ["#localization", "11", "Internationalization"],
-  ["#week-starts", "12", "Different week starts"],
-  ["#theming", "13", "Theme and size tokens"],
-  ["#single-day", "14", "Single-day mode"],
-  ["#idea", "Model", "Interaction architecture"],
-  ["#footprint", "Build", "Production footprint"],
-  ["#reference", "Docs", "Complete API reference"]
+  ["#difference", "01", "Understand the range model"],
+  ["#paint", "02", "Paint, resize, and move"],
+  ["#stable-view", "03", "Navigate stable months"],
+  ["#best-guess", "04", "Build and correct by click"],
+  ["#motion", "05", "Use motion with purpose"],
+  ["#day-handler", "06", "Customize meaningful dates"],
+  ["#localization", "07", "Localize dates and weeks"],
+  ["#theming", "08", "Theme with scoped tokens"],
+  ["#single-day", "09", "Choose one day"],
+  ["#idea", "10", "Understand and ship the model"]
 ] as const;
 
 export const DatePickerStory = ({ embedded = false }: { embedded?: boolean }): JSX.Element => {
-  const Root = embedded ? "div" : "main";
   return (
-    <Root className="story">
-      <header className="story__hero">
-        <div className="story__hero-topline">
-          <span className="story__kicker">Quno Date Picker · Field guide</span>
-          <div className="story__hero-links">
-            <a className="story__demo-link" href="/">
-              All components
-            </a>
-            <a className="story__demo-link" href="/demo/date-range-input">
-              Demo <span aria-hidden="true">→</span>
-            </a>
-          </div>
-        </div>
-        <h1>One range model. Every calendar interaction.</h1>
-        <p>Try each interaction, understand why it exists, and copy the relevant integration recipe beside it.</p>
-        <nav className="story__toc" aria-labelledby="story-toc-title">
-          <div>
-            <span>On this page</span>
-            <h2 id="story-toc-title">Explore the field guide</h2>
-            <p>Read in order or jump directly to a behavior or implementation contract.</p>
-          </div>
-          <div className="story__toc-links">
-            {contents.map(([href, label, title]) => (
-              <a href={href} key={href}>
-                <small>{label}</small>
-                <strong>{title}</strong>
-              </a>
-            ))}
-          </div>
-        </nav>
-      </header>
-
+    <FieldGuidePage
+      product="Quno/Datepicker"
+      title="Shape a date range as directly as you point to it."
+      intro={<p>Paint, resize, move, and correct a range without restarting a forced From–To sequence.</p>}
+      demoHref="/demo/datepicker"
+      contents={contents}
+      meta={["Interactive examples", "Copyable recipes", "React + Preact"]}
+      embedded={embedded}
+    >
       <DifferenceStory />
 
       <StoryTopics />
@@ -74,12 +41,12 @@ export const DatePickerStory = ({ embedded = false }: { embedded?: boolean }): J
 
       <section className="story__integration" id="reference">
         <span>Complete reference</span>
-        <h2>Keep the full API contract nearby</h2>
+        <h3>Keep the full API contract nearby</h3>
         <p>
           Controlled and uncontrolled state, localization, forms, every public slot, and the deferred V1 scope are
-          documented in <strong>docs/usage.md</strong>.
+          documented in <strong>docs/shared/usage.md</strong>.
         </p>
       </section>
-    </Root>
+    </FieldGuidePage>
   );
 };

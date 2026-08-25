@@ -227,6 +227,15 @@
   line-height: 1.6;
 }
 
+.calendar-article__callout strong {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--article-green);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
 .article-performance-range {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1015,6 +1024,7 @@
 .article-segmented-control,
 .article-time-marker-controls,
 .article-navigation-controls,
+.article-react-state-controls,
 .article-precision-controls,
 .article-summary-controls,
 .article-localization-tools {
@@ -1040,18 +1050,15 @@
   content: "";
 }
 
-.article-navigation-controls label {
-  display: grid;
-  gap: 2px;
-  color: #657069;
-  font-size: 9px;
-  font-weight: 750;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
 .article-navigation-controls .quno-date-picker-input-root {
   width: 180px;
+}
+
+.article-navigation-controls .quno-date-picker-input {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
 }
 
 .article-navigation-controls input,
@@ -1066,7 +1073,8 @@
   font: inherit;
 }
 
-.article-navigation-controls > button[aria-label] {
+.article-navigation-controls > button[aria-label],
+.article-react-state-controls > button[aria-label] {
   width: 34px;
   padding: 0;
   font-size: 16px;
@@ -1074,6 +1082,14 @@
 
 .article-summary-controls output {
   min-width: 44px;
+  color: #29473f;
+  font-variant-numeric: tabular-nums;
+  font-weight: 760;
+  text-align: center;
+}
+
+.article-react-state-controls output {
+  min-width: 48px;
   color: #29473f;
   font-variant-numeric: tabular-nums;
   font-weight: 760;
@@ -1605,6 +1621,7 @@
   .article-prefetch-controls,
   .article-time-marker-controls,
   .article-navigation-controls,
+  .article-react-state-controls,
   .article-precision-controls,
   .article-summary-controls,
   .article-localization-tools,

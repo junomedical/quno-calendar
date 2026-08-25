@@ -1,12 +1,12 @@
 import { useCallback, useRef, useState, type RefObject } from "react";
-import { eventCalendarIds } from "../data/calendarEvents";
-import { fromDateKey, isWeekdayExcluded } from "../date/dateVirtualization";
-import type { CalendarEvent, CalendarFocusOptions, CalendarFocusResult, QunoCalendarProps } from "./types";
+import { eventCalendarIds } from "#quno-internal/timeline/data/calendarEvents";
+import { fromDateKey, isWeekdayExcluded } from "#quno-internal/timeline/date/dateVirtualization";
+import type { CalendarEvent, CalendarFocusOptions, CalendarFocusResult, QunoInfiniteCalendarProps } from "./types";
 import type { CalendarFocusedEventTarget, CalendarViewHandle } from "./internalTypes";
 import { eventDateAndTime, useCalendarFocusEffects, type PendingFocus } from "./useCalendarFocusEffects";
 
 type FocusCoordinatorArgs = Pick<
-  QunoCalendarProps,
+  QunoInfiniteCalendarProps,
   "calendars" | "selectedCalendarIds" | "focusRequest" | "onCalendarVisibilityRequest" | "onFocusRequestComplete"
 > & {
   excludedWeekdays: number[];

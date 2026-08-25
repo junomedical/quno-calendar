@@ -8,10 +8,10 @@
  * loaded buckets. Does not own request freshness, React state, or layout.
  * Deletion always repairs the secondary id index before a bucket disappears.
  *
- * @see docs/flows/async-loading-and-layout.md#cache-commit-transaction
+ * @see docs/infinite-calendar/flows/async-loading-and-layout.md#cache-commit-transaction
  */
 import type { CalendarEvent, EventId } from "#quno-internal/timeline/core/types";
-import { eventDateKey } from "../eventDateKey";
+import { eventDateKey } from "#quno-internal/timeline/infinite/events/eventDateKey";
 
 export const MAX_CACHED_DATE_BUCKETS = 120;
 

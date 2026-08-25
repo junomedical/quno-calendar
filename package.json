@@ -1,7 +1,7 @@
 {
   "name": "@quno/calendar",
   "version": "0.6.0",
-  "description": "Quno timeline calendar, date picker, and natural date input for React and Preact-compatible applications.",
+  "description": "Quno Infinite Calendar, Datepicker, Date Input, and headless Date Parser for React and Preact-compatible applications.",
   "type": "module",
   "license": "MIT",
   "author": "",
@@ -17,7 +17,7 @@
     "README.md",
     "LICENSE",
     "CHANGELOG.md",
-    "docs/migration.md"
+    "docs/shared/migration.md"
   ],
   "sideEffects": [
     "**/*.css"
@@ -31,29 +31,34 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
-    "./timeline": {
+    "./infinite-calendar": {
       "types": "./dist/timeline/index.d.ts",
-      "import": "./dist/timeline.js",
-      "require": "./dist/timeline.cjs"
+      "import": "./dist/infinite-calendar.js",
+      "require": "./dist/infinite-calendar.cjs"
     },
-    "./timeline/styles.css": "./dist/timeline.css",
-    "./date-picker": {
+    "./infinite-calendar/styles.css": "./dist/infinite-calendar.css",
+    "./datepicker": {
       "types": "./dist/date-picker/index.d.ts",
-      "import": "./dist/date-picker.js",
-      "require": "./dist/date-picker.cjs"
+      "import": "./dist/datepicker.js",
+      "require": "./dist/datepicker.cjs"
     },
-    "./date-picker/styles.css": "./dist/date-picker.css",
+    "./datepicker/styles.css": "./dist/datepicker.css",
     "./date-input": {
       "types": "./dist/date-input/index.d.ts",
       "import": "./dist/date-input.js",
       "require": "./dist/date-input.cjs"
     },
-    "./date-input/styles.css": "./dist/date-input.css"
+    "./date-input/styles.css": "./dist/date-input.css",
+    "./date-parser": {
+      "types": "./dist/date-parser/index.d.ts",
+      "import": "./dist/date-parser.js",
+      "require": "./dist/date-parser.cjs"
+    }
   },
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "build": "npm run build:lib && npm run build:demo",
-    "build:lib": "vite build -c vite.lib.config.ts --mode shared && vite build -c vite.lib.config.ts --mode timeline && vite build -c vite.lib.config.ts --mode date-picker && vite build -c vite.lib.config.ts --mode date-input",
+    "build:lib": "vite build -c vite.lib.config.ts --mode shared && vite build -c vite.lib.config.ts --mode infinite-calendar && vite build -c vite.lib.config.ts --mode datepicker && vite build -c vite.lib.config.ts --mode date-input && vite build -c vite.lib.config.ts --mode date-parser",
     "build:demo": "vite build -c vite.config.ts --outDir dist-demo",
     "check:architecture": "node scripts/check-architecture.mjs && node scripts/check-demo-boundaries.mjs",
     "check:bundle-size": "node scripts/check-bundle-size.mjs",

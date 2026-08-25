@@ -5,6 +5,7 @@ import ts from "typescript";
 
 const MODULE_LINE_LIMIT = 200;
 const FUNCTION_LINE_LIMIT = 120;
+const PARENT_RELATIVE_PREFIX = `${[".."].join("")}/`;
 const projectRoot = resolve(".");
 const sourceRoot = resolve(process.argv[2] ?? "src/lib");
 
@@ -16,6 +17,17 @@ function productionTypeScriptFiles(directory) {
     })
     .filter((path) => /\.(?:ts|tsx)$/.test(path))
     .filter((path) => !/\.d\.ts$|\.(?:test|spec)\.(?:ts|tsx)$|[/\\]__tests__[/\\]/.test(path))
+    .sort();
+}
+
+function allTypeScriptFiles(directory) {
+  return readdirSync(directory, { withFileTypes: true })
+    .flatMap((entry) => {
+      const path = resolve(directory, entry.name);
+      return entry.isDirectory() ? allTypeScriptFiles(path) : [path];
+    })
+    .filter((path) => /\.(?:ts|tsx)$/.test(path))
+    .filter((path) => !/\.d\.ts$/.test(path))
     .sort();
 }
 
@@ -87,17 +99,18 @@ function functionViolations(sourceFile) {
   return violations;
 }
 
-function deepRelativeImportViolations(sourceFile) {
+function parentRelativeImportViolations(sourceFile) {
   const violations = [];
   const visit = (node) => {
-    if (
+    const moduleSpecifier =
       (ts.isImportDeclaration(node) || ts.isExportDeclaration(node)) &&
       node.moduleSpecifier &&
-      ts.isStringLiteral(node.moduleSpecifier) &&
-      node.moduleSpecifier.text.startsWith("../../../")
-    ) {
-      const line = sourceFile.getLineAndCharacterOfPosition(node.moduleSpecifier.getStart(sourceFile)).line + 1;
-      violations.push({ line, specifier: node.moduleSpecifier.text });
+      ts.isStringLiteralLike(node.moduleSpecifier)
+        ? node.moduleSpecifier
+        : undefined;
+    if (moduleSpecifier?.text.startsWith(PARENT_RELATIVE_PREFIX)) {
+      const line = sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile)).line + 1;
+      violations.push({ line, specifier: moduleSpecifier.text });
     }
     ts.forEachChild(node, visit);
   };
@@ -111,6 +124,10 @@ function displayPath(path) {
 }
 
 const files = productionTypeScriptFiles(sourceRoot);
+const importRoots = ["src", "demo", "tests", "e2e", "api", "vite"]
+  .map((directory) => resolve(projectRoot, directory))
+  .concat(sourceRoot);
+const importFiles = [...new Set(importRoots.flatMap((directory) => allTypeScriptFiles(directory)))];
 const moduleFailures = [];
 const functionFailures = [];
 const importFailures = [];
@@ -121,7 +138,12 @@ for (const path of files) {
   const moduleLines = nonCommentLineCount(sourceFile, sourceText);
   if (moduleLines > MODULE_LINE_LIMIT) moduleFailures.push({ path, lineCount: moduleLines });
   for (const violation of functionViolations(sourceFile)) functionFailures.push({ path, ...violation });
-  for (const violation of deepRelativeImportViolations(sourceFile)) importFailures.push({ path, ...violation });
+}
+
+for (const path of importFiles) {
+  const sourceText = readFileSync(path, "utf8");
+  const sourceFile = sourceFileFor(path, sourceText);
+  for (const violation of parentRelativeImportViolations(sourceFile)) importFailures.push({ path, ...violation });
 }
 
 for (const failure of moduleFailures) {
@@ -136,17 +158,17 @@ for (const failure of functionFailures) {
 }
 for (const failure of importFailures) {
   console.error(
-    `${displayPath(failure.path)}:${failure.line}: use #quno-internal/timeline/* instead of deep relative import ${failure.specifier}`
+    `${displayPath(failure.path)}:${failure.line}: use a configured @quno/calendar or #quno-* alias instead of parent-relative import ${failure.specifier}`
   );
 }
 
 if (moduleFailures.length || functionFailures.length || importFailures.length) {
   console.error(
-    `Architecture check failed: ${moduleFailures.length} module violation(s), ${functionFailures.length} function violation(s), ${importFailures.length} deep import violation(s).`
+    `Architecture check failed: ${moduleFailures.length} module violation(s), ${functionFailures.length} function violation(s), ${importFailures.length} parent-relative import violation(s).`
   );
   process.exitCode = 1;
 } else {
   console.log(
-    `Architecture check passed for ${files.length} production modules (modules <= ${MODULE_LINE_LIMIT} non-comment lines; functions <= ${FUNCTION_LINE_LIMIT} non-comment lines; no deep relative imports).`
+    `Architecture check passed for ${files.length} production modules (modules <= ${MODULE_LINE_LIMIT} non-comment lines; functions <= ${FUNCTION_LINE_LIMIT} non-comment lines; no parent-relative imports).`
   );
 }

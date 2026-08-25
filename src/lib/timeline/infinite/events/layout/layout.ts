@@ -5,7 +5,7 @@
  *                                            |-> row sizing / geometry
  *                                            `-> column sizing / geometry
  */
-import type { CalendarEvent, QunoCalendarSettings } from "#quno-internal/timeline/core/types";
+import type { CalendarEvent, QunoInfiniteCalendarSettings } from "#quno-internal/timeline/core/types";
 import { layoutPreparedEventsForColumn, type EventColumnLayoutItem } from "./columnLayout";
 import { prepareEventCell, type PreparedEventCell } from "./preparedCell";
 import { layoutPreparedEventsForRow, type EventLayoutItem } from "./rowLayout";
@@ -37,7 +37,7 @@ export function laneCountForPreparedCell(preparedCell: PreparedEventCell): numbe
 /** Computes row height without preparing or assigning the cell again. */
 export function rowHeightForPreparedCell(
   preparedCell: PreparedEventCell,
-  settings: Pick<QunoCalendarSettings, "rowHeight">
+  settings: Pick<QunoInfiniteCalendarSettings, "rowHeight">
 ): number {
   return rowHeightForOverlapDepth(settings.rowHeight, laneCountForPreparedCell(preparedCell));
 }
@@ -45,7 +45,7 @@ export function rowHeightForPreparedCell(
 /** Computes a row height from event overlap depth. */
 export function rowHeightForEvents(
   events: CalendarEvent[],
-  settings: Pick<QunoCalendarSettings, "startHour" | "endHour" | "zoom" | "rowHeight">
+  settings: Pick<QunoInfiniteCalendarSettings, "startHour" | "endHour" | "zoom" | "rowHeight">
 ): number {
   return rowHeightForPreparedCell(prepareEventCell(events, settings), settings);
 }
@@ -53,7 +53,7 @@ export function rowHeightForEvents(
 /** Converts row events into positioned shells with compact overlap lanes. */
 export function layoutEventsForRow(
   events: CalendarEvent[],
-  settings: Pick<QunoCalendarSettings, "startHour" | "endHour" | "zoom" | "rowHeight">
+  settings: Pick<QunoInfiniteCalendarSettings, "startHour" | "endHour" | "zoom" | "rowHeight">
 ): EventLayoutItem[] {
   return layoutPreparedEventsForRow(prepareEventCell(events, settings), settings);
 }
@@ -64,7 +64,7 @@ export function verticalLaneCountForPreparedCell(preparedCell: PreparedEventCell
 }
 
 type ColumnMetricSettings = Pick<
-  QunoCalendarSettings,
+  QunoInfiniteCalendarSettings,
   "verticalColumnMinWidth" | "verticalColumnOverlapCapacity" | "verticalColumnOverlapGrowth"
 >;
 
@@ -81,7 +81,7 @@ export function columnWidthForPreparedCell(preparedCell: PreparedEventCell, sett
 export function columnWidthForEvents(
   events: CalendarEvent[],
   settings: Pick<
-    QunoCalendarSettings,
+    QunoInfiniteCalendarSettings,
     | "startHour"
     | "endHour"
     | "zoom"
@@ -96,7 +96,7 @@ export function columnWidthForEvents(
 /** Converts column events into top/bottom shells with horizontal overlap lanes. */
 export function layoutEventsForColumn(
   events: CalendarEvent[],
-  settings: Pick<QunoCalendarSettings, "startHour" | "endHour" | "zoom">
+  settings: Pick<QunoInfiniteCalendarSettings, "startHour" | "endHour" | "zoom">
 ): EventColumnLayoutItem[] {
   return layoutPreparedEventsForColumn(prepareEventCell(events, settings), settings);
 }

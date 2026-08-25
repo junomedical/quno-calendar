@@ -47,23 +47,23 @@ export const StoryTopics = (): JSX.Element => (
       title="Six weeks, every month."
       copy="Every month uses the same 42-cell body and one reserved line for its title. Dates and the month name change, but the calendar height does not, so surrounding forms and popovers stay still."
       instruction="Use both chevrons and watch the bottom edge remain fixed."
-      reverse
     >
       <StableViewExample />
     </StoryFeature>
     <StoryFeature
       id="quick-jump"
+      subsection
       number="03"
       kicker="Quick navigation"
       title="Jump years without leaving the calendar."
       copy="The month-and-year title opens an in-place navigator with a 100-year runway in either direction. Compact sticky-year blocks place a left rail beside month grids containing only their labeled year: January and February lead, complete rows run through November, and December closes on its own row. Year labels and month names share a distinct, theme-coordinated alternating text tone. Virtualization keeps the mounted page small and settled edge loading prevents iPhone momentum from cascading. A month, chevron, or Start/End jump restores the same six-week date view without changing the selected period."
       instruction="Click August 2026, flick or scroll through years, then choose a month. Open it again and click the title to close without jumping."
-      reverse
     >
       <QuickJumpExample />
     </StoryFeature>
     <StoryFeature
       id="hidden-row"
+      subsection
       number="04"
       kicker="Hidden week"
       title="Day names become another row of dates."
@@ -74,12 +74,12 @@ export const StoryTopics = (): JSX.Element => (
     </StoryFeature>
     <StoryFeature
       id="segment-drag"
+      subsection
       number="05"
       kicker="Segment movement"
       title="Move the whole period by days or weeks."
       copy="The highlighted band is draggable. Movement snaps to dates and preserves inclusive duration, whether the destination is three days away or several calendar rows away."
       instruction="Grab the pale middle of the range—not an endpoint—and drag it to another week."
-      reverse
     >
       <SegmentMoveExample />
     </StoryFeature>
@@ -95,17 +95,18 @@ export const StoryTopics = (): JSX.Element => (
     </StoryFeature>
     <StoryFeature
       id="wrong-guess"
+      subsection
       number="07"
       kicker="Inline correction"
       title="Wrong guess? Stay on the date."
       copy="The first click applies the contextual guess. Hover that same clicked date to outline the next interpretation; click again for the opposite endpoint, then once more to keep only that day."
       instruction="Click 15, keep hovering it to see the outline, then click it twice more."
-      reverse
     >
       <WrongGuessExample />
     </StoryFeature>
     <StoryFeature
       id="shortcuts"
+      subsection
       number="08"
       kicker="Range context"
       title="Start and End remain one click away."
@@ -121,7 +122,6 @@ export const StoryTopics = (): JSX.Element => (
       title="Motion explains direction, then gets out of the way."
       copy="Month names and day numbers move vertically just enough to show travel direction. Endpoint shortcuts reveal from the calendar edge. The operating-system reduced-motion preference removes those animations automatically."
       instruction="Switch the demo mode, then use the month chevrons in each mode."
-      reverse
     >
       <MotionExample />
     </StoryFeature>
@@ -163,6 +163,7 @@ export const StoryTopics = (): JSX.Element => (
     </StoryFeature>
     <StoryFeature
       id="week-starts"
+      subsection
       number="12"
       kicker="Different week starts"
       title="Start the week where your product does."
@@ -176,7 +177,6 @@ export const StoryTopics = (): JSX.Element => (
           code={weekStartSnippet}
         />
       }
-      reverse
     >
       <WeekStartExample />
     </StoryFeature>
@@ -195,7 +195,6 @@ export const StoryTopics = (): JSX.Element => (
           code={themingSnippet}
         />
       }
-      reverse
     >
       <ThemeExample />
     </StoryFeature>

@@ -1,10 +1,21 @@
 import { useCallback, useMemo, useRef, useState, type SetStateAction } from "react";
 import type { IsoDate } from "@quno/calendar";
-import type { CalendarEvent, QunoCalendarHandle, EventCreateRequest, EventMoveRequest } from "@quno/calendar/timeline";
-import { appendCreatedEvent, applyMove, createDemoEvents, createRangeLoader, demoCalendars } from "../data";
-import { useDemoControls } from "../hooks/useDemoControls";
-import { useSimulatedApiLoader } from "../hooks/useSimulatedApiLoader";
-import { useSystemNow } from "../hooks/useSystemNow";
+import type {
+  CalendarEvent,
+  QunoInfiniteCalendarHandle,
+  EventCreateRequest,
+  EventMoveRequest
+} from "@quno/calendar/infinite-calendar";
+import {
+  appendCreatedEvent,
+  applyMove,
+  createDemoEvents,
+  createRangeLoader,
+  demoCalendars
+} from "#quno-demo/showcase/data";
+import { useDemoControls } from "#quno-demo/showcase/hooks/useDemoControls";
+import { useSimulatedApiLoader } from "#quno-demo/showcase/hooks/useSimulatedApiLoader";
+import { useSystemNow } from "#quno-demo/showcase/hooks/useSystemNow";
 import type { DemoPreset } from "./types";
 
 export function usePresetDemo(preset: DemoPreset) {
@@ -12,7 +23,7 @@ export function usePresetDemo(preset: DemoPreset) {
   const [events, setEvents] = useState(() => createDemoEvents(preset.initialScale));
   const [message, setMessage] = useState(preset.messages.initial);
   const eventsRef = useRef(events);
-  const calendarRef = useRef<QunoCalendarHandle>(null);
+  const calendarRef = useRef<QunoInfiniteCalendarHandle>(null);
   const controls = useDemoControls(preset.controls, preset.layout);
   const systemNow = useSystemNow();
   const { setJumpDate, setEditAvailabilities } = controls;

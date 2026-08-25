@@ -1,14 +1,14 @@
 import {
-  QunoCalendar,
+  QunoInfiniteCalendar,
   applyEventMove,
   type ActiveEventDraft,
   type CalendarEvent,
-  type QunoCalendarHandle,
+  type QunoInfiniteCalendarHandle,
   type EventCreateRequest,
   type EventMoveRequest,
   type EventPrefetchPolicy,
   type LoadEvents
-} from "@quno/calendar/timeline";
+} from "@quno/calendar/infinite-calendar";
 import { useCallback, useRef, useState } from "react";
 import { CalendarDemoShell } from "./ArticleDemos";
 import {
@@ -32,7 +32,7 @@ export function ReadOnlyArticleDemo() {
       tools={<span className="article-toolbar-badge">Read only</span>}
     >
       <div className="article-calendar-frame">
-        <QunoCalendar
+        <QunoInfiniteCalendar
           ariaLabel="Read-only article calendar"
           calendars={articleCalendars}
           eventRenderer={ArticleEventCard}
@@ -47,7 +47,7 @@ export function ReadOnlyArticleDemo() {
 }
 
 export function DragCreateArticleDemo() {
-  const calendarRef = useRef<QunoCalendarHandle>(null);
+  const calendarRef = useRef<QunoInfiniteCalendarHandle>(null);
   const [events, setEvents] = useState(articleEvents);
   const eventsRef = useRef(events);
   const createdSequenceRef = useRef(0);
@@ -139,7 +139,7 @@ export function DragCreateArticleDemo() {
       }
     >
       <div className="article-calendar-frame">
-        <QunoCalendar
+        <QunoInfiniteCalendar
           ref={calendarRef}
           activeDraft={pendingDraft}
           ariaLabel="Drag and create article calendar"
@@ -174,7 +174,7 @@ const preloadEvents: CalendarEvent[] = [
 const articlePrefetchPolicy: EventPrefetchPolicy = () => ({ beforeDays: 3, afterDays: 8 });
 
 export function PrefetchLoadingDemo() {
-  const calendarRef = useRef<QunoCalendarHandle>(null);
+  const calendarRef = useRef<QunoInfiniteCalendarHandle>(null);
   const latestRequestRef = useRef(0);
   const [requestCount, setRequestCount] = useState(0);
   const [range, setRange] = useState("Waiting for the first range");
@@ -252,7 +252,7 @@ export function PrefetchLoadingDemo() {
         </div>
       </section>
       <div className="article-calendar-frame">
-        <QunoCalendar
+        <QunoInfiniteCalendar
           ref={calendarRef}
           ariaLabel="Delayed loading and event prefetch calendar"
           calendars={articleCalendars}

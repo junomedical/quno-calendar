@@ -1,6 +1,6 @@
 # @quno/calendar
 
-One React-authored package for Quno’s timeline calendar, date picker, and natural date input. Version `0.6.0` supports React 18+ directly and Preact through documented `preact/compat` aliases.
+Four focused date and scheduling primitives in one React-authored package. Version `0.6.0` supports React 18+ directly and Preact through tested `preact/compat` aliases.
 
 ## Install
 
@@ -8,42 +8,44 @@ One React-authored package for Quno’s timeline calendar, date picker, and natu
 npm install @quno/calendar react react-dom
 ```
 
-Import only the feature and optional stylesheet you use:
+Import only the primitive and optional stylesheet you use:
 
 ```tsx
-import { QunoCalendar } from "@quno/calendar/timeline";
-import "@quno/calendar/timeline/styles.css";
+import { QunoInfiniteCalendar } from "@quno/calendar/infinite-calendar";
+import "@quno/calendar/infinite-calendar/styles.css";
 
-import { QunoDatePicker } from "@quno/calendar/date-picker";
-import "@quno/calendar/date-picker/styles.css";
+import { QunoDatePicker } from "@quno/calendar/datepicker";
+import "@quno/calendar/datepicker/styles.css";
 
-import { QunoDateInput, parseDateInput } from "@quno/calendar/date-input";
+import { QunoDateInput } from "@quno/calendar/date-input";
 import "@quno/calendar/date-input/styles.css";
+
+import { parseDateInput, tokenizeDateInput } from "@quno/calendar/date-parser";
 ```
 
-The root `@quno/calendar` entry contains shared headless, timezone-free day contracts such as `IsoDate`, `DateRange`, `addDays`, and `compareDates`. It exports no UI component. Each JavaScript subpath is ESM/CommonJS compatible, SSR-safe, and does not inject styles.
+- **Quno/Infinite Calendar** virtualizes horizontal and vertical schedules with event loading, rendering, editing, zoom, navigation, and focus.
+- **Quno/Datepicker** paints, resizes, and moves one timezone-free date or inclusive range.
+- **Quno/Date Input** provides a native controlled or uncontrolled field for typed dates and ranges.
+- **Quno/Date Parser** recognizes formats, relative phrases, configurable weeks, ranges, and multilingual vocabulary without a UI runtime.
 
-## Features
+The headless `@quno/calendar` root exports shared contracts such as `IsoDate`, `DateRange`, `DateSelectionMode`, `WeekStart`, and safe calendar-day helpers. It exports no UI. JavaScript entry points are ESM/CommonJS compatible, SSR-safe, and never inject CSS. The separately exported stylesheets remain readable, unminified CSS in `dist`.
 
-- `timeline`: virtualized horizontal and vertical schedules with async event loading, custom event rendering, creation, movement, zoom, navigation, and focus.
-- `date-picker`: a controlled or uncontrolled single-month picker for single days and inclusive date ranges.
-- `date-input`: a dependency-free natural date tokenizer/parser with calendar periods and relative weekdays, plus an
-  accessible controlled or uncontrolled input.
+Calendar day keys use timezone-free `YYYY-MM-DD` values. Infinite Calendar event `start` and `end` remain timestamp strings with their local or offset semantics.
 
-Calendar day keys use timezone-free `YYYY-MM-DD` values. Timeline event `start` and `end` remain timestamp strings and retain their local/offset semantics.
+## Guides and records
 
-## Guide and records
+Run `npm run dev` and open `/` for the four-product overview. Each card links to a dedicated field guide and focused demo:
 
-Run `npm run dev` and open `/` for the project overview. Its three cards lead to the dedicated infinite-calendar,
-date-range-input, and date-input field guides; every guide links to a focused demo. The former `/guide`, `/story`, and
-`/examples/integration-walkthrough` routes redirect to the infinite-calendar guide.
+- `/guide/infinite-calendar`
+- `/guide/datepicker`
+- `/guide/date-input`
+- `/guide/date-parser`
 
-- [Usage recipes](./docs/usage.md)
-- [Migration guide](./docs/migration.md)
-- [Architecture](./docs/architecture.md)
-- [Test plan](./docs/test-plan.md)
-- [Decision log](./docs/decisions.md)
-- [Changelog](./CHANGELOG.md)
+Start with the [documentation index](./docs/README.md). Shared records cover [usage](./docs/shared/usage.md),
+[migration](./docs/shared/migration.md), [architecture](./docs/shared/architecture.md),
+[taxonomy](./docs/shared/taxonomy.md), [testing](./docs/shared/testing.md), and
+[cross-product decisions](./docs/shared/decisions.md). Each product directory owns its own overview and decision log.
+Release history remains in the [changelog](./CHANGELOG.md).
 
 ## Development
 

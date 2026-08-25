@@ -1,7 +1,7 @@
-export { QunoCalendar } from "./core/QunoCalendar";
+export { QunoInfiniteCalendar } from "./core/QunoInfiniteCalendar";
 export type {
-  CalendarStyle as QunoCalendarStyle,
-  CalendarThemeVariables as QunoCalendarThemeVariables
+  CalendarStyle as QunoInfiniteCalendarStyle,
+  CalendarThemeVariables as QunoInfiniteCalendarThemeVariables
 } from "./core/calendarTheme";
 export type { DayNameGenerator } from "./date/dateLabels";
 export { defaultEventPrefetchPolicy } from "./data/eventPrefetch";
@@ -12,7 +12,7 @@ export {
   replaceEventCalendarMembership
 } from "./data/calendarEvents";
 export {
-  defaultQunoCalendarSettings,
+  defaultQunoInfiniteCalendarSettings,
   type ActiveDraftReleaseOptions,
   type ActiveEventDraft,
   type CalendarEvent,
@@ -21,8 +21,8 @@ export {
   type CalendarFocusRequestResult,
   type CalendarFocusResult,
   type CalendarId,
-  type QunoCalendarHandle,
-  type QunoCalendarProps,
+  type QunoInfiniteCalendarHandle,
+  type QunoInfiniteCalendarProps,
   type CalendarRow,
   type CalendarVisibleEventCommitOptions,
   type CalendarViewportAnchor,
@@ -42,5 +42,5 @@ export {
   type EventRenderStatus,
   type LoadEvents,
   type LoadEventsArgs,
-  type QunoCalendarSettings
+  type QunoInfiniteCalendarSettings
 } from "./core/types";

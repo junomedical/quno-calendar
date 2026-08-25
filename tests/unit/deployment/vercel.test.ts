@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import vercelConfig from "../../../vercel.json";
+import vercelConfig from "#quno-project/vercel.json";
 
 describe("Vercel deployment configuration", () => {
   it("publishes the runnable demo with SPA route fallback", () => {

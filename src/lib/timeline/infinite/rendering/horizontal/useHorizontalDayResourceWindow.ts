@@ -6,9 +6,15 @@ import type {
   CalendarRow,
   CalendarViewportAnchorTarget
 } from "#quno-internal/timeline/core/types";
-import { buildResourceExtents, resourceIndexesInWindow } from "../../scroll/resources/resourceWindow";
-import { useViewportMetrics, type ViewportMetricsStore } from "../../scroll/resources/viewportMetricsStore";
-import { eventDateKey } from "../../events/eventDateKey";
+import {
+  buildResourceExtents,
+  resourceIndexesInWindow
+} from "#quno-internal/timeline/infinite/scroll/resources/resourceWindow";
+import {
+  useViewportMetrics,
+  type ViewportMetricsStore
+} from "#quno-internal/timeline/infinite/scroll/resources/viewportMetricsStore";
+import { eventDateKey } from "#quno-internal/timeline/infinite/events/eventDateKey";
 
 /** Cross-axis windowing: row heights + viewport metrics -> mounted resource indexes. */
 

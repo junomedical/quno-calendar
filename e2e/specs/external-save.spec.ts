@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { firstViewportEventBox, goToWorkday, openDrawnExternalDraft, topVisibleDayState } from "../helpers";
+import { firstViewportEventBox, goToWorkday, openDrawnExternalDraft, topVisibleDayState } from "#quno-e2e/helpers";
 
 test("shows delayed external save errors in the edit popup", async ({ page }) => {
   await page.goto("/demo/infinite-calendar");

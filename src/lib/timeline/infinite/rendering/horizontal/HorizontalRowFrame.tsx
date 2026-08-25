@@ -1,8 +1,8 @@
 import { useCallback, type PropsWithChildren, type PointerEvent } from "react";
-import type { CalendarId, CalendarRow, QunoCalendarSettings } from "#quno-internal/timeline/core/types";
+import type { CalendarId, CalendarRow, QunoInfiniteCalendarSettings } from "#quno-internal/timeline/core/types";
 import { minuteToX } from "#quno-internal/timeline/time/time";
 import { TIMELINE_LEFT_GUTTER_PX } from "#quno-internal/timeline/time/timelineTicks";
-import type { ViewportGeometryRegistration } from "../../anchors/parent/viewportAnchorTypes";
+import type { ViewportGeometryRegistration } from "#quno-internal/timeline/infinite/anchors/parent/viewportAnchorTypes";
 import type { HorizontalRowLayoutItems } from "./types";
 
 /** Row chrome: resource label + time grid + hover hit surface around event layers. */
@@ -13,7 +13,7 @@ type HorizontalRowFrameProps = PropsWithChildren<{
   top: number;
   rowHeight: number;
   isHidden: boolean;
-  settings: QunoCalendarSettings;
+  settings: QunoInfiniteCalendarSettings;
   timelineWidth: number;
   gridCellWidth: number;
   eventCount: number;

@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import type { CalendarEvent, LoadEvents } from "@quno/calendar/timeline";
+import type { CalendarEvent, LoadEvents } from "@quno/calendar/infinite-calendar";
 
 /** Sends each selected demo range through the local mock HTTP API. */
 export function useSimulatedApiLoader(source: LoadEvents, latencyMs: number) {

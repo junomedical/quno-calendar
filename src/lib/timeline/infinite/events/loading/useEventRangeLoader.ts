@@ -11,7 +11,7 @@
  * prepared layout, virtualization, or loading UI. Failed, aborted, and stale
  * work releases request ownership without clearing rendered events.
  *
- * @see docs/flows/async-loading-and-layout.md
+ * @see docs/infinite-calendar/flows/async-loading-and-layout.md
  */
 import { startTransition, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { applyEventMove } from "#quno-internal/timeline/data/calendarEvents";

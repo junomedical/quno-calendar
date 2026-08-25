@@ -1,5 +1,10 @@
 import type { DateRange, DateSelectionMode, WeekStart } from "@quno/calendar";
-import { parseDateInput, type DateInputDateOrder, type DateInputParserLanguage } from "@quno/calendar/date-input";
+import {
+  parseDateInput,
+  type DateInputDateOrder,
+  type DateInputLexicon,
+  type DateInputParserLanguage
+} from "@quno/calendar/date-parser";
 import { useId, useState } from "react";
 
 type DateInputParserExampleProps = {
@@ -7,6 +12,7 @@ type DateInputParserExampleProps = {
   initialText?: string;
   label?: string;
   locale?: string;
+  lexicon?: Partial<DateInputLexicon>;
   parserLanguages?: ReadonlyArray<DateInputParserLanguage>;
   preferredDateOrder?: DateInputDateOrder;
   samples?: ReadonlyArray<string>;
@@ -21,6 +27,7 @@ export function DateInputParserExample({
   initialText = "3/4/2026",
   label = "Phrase to parse",
   locale = "en-GB",
+  lexicon,
   parserLanguages,
   preferredDateOrder = "dmy",
   samples = [],
@@ -32,6 +39,7 @@ export function DateInputParserExample({
   const result = parseDateInput(text, {
     expectedRange,
     locale,
+    lexicon,
     parserLanguages,
     selectionMode,
     weekStartsOn,

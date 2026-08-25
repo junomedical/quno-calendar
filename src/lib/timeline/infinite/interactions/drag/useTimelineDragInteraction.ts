@@ -1,11 +1,11 @@
 import { useCallback, useRef, useState } from "react";
-import type { CalendarHit } from "../timelineInteractionModel";
+import type { CalendarHit } from "#quno-internal/timeline/infinite/interactions/timelineInteractionModel";
 import {
   type CalendarEvent,
   type CalendarId,
   type CalendarViewComponentProps,
   type EventMoveRequest,
-  type QunoCalendarSettings
+  type QunoInfiniteCalendarSettings
 } from "#quno-internal/timeline/core/types";
 import { sameMoveRequest } from "./sameMoveRequest";
 import { previewEventForDrag, proposalForDrag, type DragState } from "./dragInteractionModel";
@@ -15,7 +15,7 @@ type PointerLike = Pick<PointerEvent | MouseEvent, "clientX" | "clientY">;
 export type { DragState } from "./dragInteractionModel";
 
 type UseTimelineDragInteractionArgs = {
-  settings: QunoCalendarSettings;
+  settings: QunoInfiniteCalendarSettings;
   getHit: (event: PointerLike) => CalendarHit | null;
   isActiveDraftEvent: (event: CalendarEvent) => boolean;
   onEventMoveRequest?: CalendarViewComponentProps["onEventMoveRequest"];

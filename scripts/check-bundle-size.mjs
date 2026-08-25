@@ -8,12 +8,13 @@ const projectRoot = resolve(".");
 const distRoot = resolve(process.argv[2] ?? "dist");
 const bundles = [
   { label: "Shared root JavaScript", path: resolve(distRoot, "index.js"), gzipLimit: 2 * KIB },
-  { label: "Timeline JavaScript", path: resolve(distRoot, "timeline.js"), gzipLimit: 32 * KIB },
-  { label: "Timeline CSS", path: resolve(distRoot, "timeline.css"), gzipLimit: 2 * KIB },
-  { label: "Datepicker JavaScript", path: resolve(distRoot, "date-picker.js"), gzipLimit: 10 * KIB },
-  { label: "Datepicker CSS", path: resolve(distRoot, "date-picker.css"), gzipLimit: 3.5 * KIB },
+  { label: "Infinite Calendar JavaScript", path: resolve(distRoot, "infinite-calendar.js"), gzipLimit: 32 * KIB },
+  { label: "Infinite Calendar CSS", path: resolve(distRoot, "infinite-calendar.css"), gzipLimit: 2 * KIB },
+  { label: "Datepicker JavaScript", path: resolve(distRoot, "datepicker.js"), gzipLimit: 10 * KIB },
+  { label: "Datepicker CSS", path: resolve(distRoot, "datepicker.css"), gzipLimit: 3.5 * KIB },
   { label: "Date input JavaScript", path: resolve(distRoot, "date-input.js"), gzipLimit: 7 * KIB },
-  { label: "Date input CSS", path: resolve(distRoot, "date-input.css"), gzipLimit: 1 * KIB }
+  { label: "Date input CSS", path: resolve(distRoot, "date-input.css"), gzipLimit: 1 * KIB },
+  { label: "Date Parser JavaScript", path: resolve(distRoot, "date-parser.js"), gzipLimit: 6 * KIB }
 ];
 
 function formatSize(bytes) {

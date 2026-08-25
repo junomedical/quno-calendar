@@ -1,7 +1,7 @@
 import { useCallback, type Dispatch, type PointerEvent, type SetStateAction } from "react";
 import type { CalendarId } from "#quno-internal/timeline/core/types";
-import type { EventLayoutItem } from "../../events/layout/layout";
-import type { HoveredTimelineEvent } from "../../interactions/useTimelineInteractions";
+import type { EventLayoutItem } from "#quno-internal/timeline/infinite/events/layout/layout";
+import type { HoveredTimelineEvent } from "#quno-internal/timeline/infinite/interactions/useTimelineInteractions";
 import { TIMELINE_LEFT_GUTTER_PX } from "#quno-internal/timeline/time/timelineTicks";
 
 /**

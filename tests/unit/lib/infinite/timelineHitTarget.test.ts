@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import {
   timelineGridAtPoint,
   timelineGridIdentity
-} from "../../../../src/lib/timeline/infinite/interactions/hit-testing/timelineHitTarget";
+} from "#quno-internal/timeline/infinite/interactions/hit-testing/timelineHitTarget";
 
 function resolvePointTo(element: Element) {
   Object.defineProperty(document, "elementFromPoint", {

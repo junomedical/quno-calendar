@@ -37,7 +37,7 @@ for (const [directory, recipe] of Object.entries(guideComponents)) {
   const publicSource = readFileSync(publicSourcePath, "utf8");
   if (!source.includes("@see ./README.md"))
     failures.push(`demo/guide/${directory}/${componentName}: missing README backlink`);
-  if (!publicSource.includes('from "@quno/calendar/timeline"'))
+  if (!publicSource.includes('from "@quno/calendar/infinite-calendar"'))
     failures.push(`demo/guide/${directory}/${publicEntry}: use the public package import`);
   if (/src\/lib|\.\.\/lib/.test(source) || /src\/lib|\.\.\/lib/.test(publicSource))
     failures.push(`demo/guide/${directory}: imports library internals`);

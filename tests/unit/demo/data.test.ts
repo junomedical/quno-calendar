@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { eventBelongsToCalendar } from "../../../src/lib/timeline";
-import { createDemoEvents, createRangeLoader, demoCalendars } from "../../../demo/showcase/data";
-import { isoDateInputValue } from "../../../demo/showcase/draftFormUtils";
+import { eventBelongsToCalendar } from "#quno-internal/timeline";
+import { createDemoEvents, createRangeLoader, demoCalendars } from "#quno-demo/showcase/data";
+import { isoDateInputValue } from "#quno-demo/showcase/draftFormUtils";
 
 function minutes(value: string) {
   const date = new Date(value);

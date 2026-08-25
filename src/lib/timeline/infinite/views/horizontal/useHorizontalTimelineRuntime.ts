@@ -2,12 +2,12 @@ import { useEffect, useMemo, useState, type ForwardedRef } from "react";
 import { toDateKey } from "#quno-internal/timeline/date/dateVirtualization";
 import type { CalendarInternalViewProps, CalendarViewHandle } from "#quno-internal/timeline/core/internalTypes";
 import { timelineEndMinute, timelineStartMinute } from "#quno-internal/timeline/time/time";
-import { useHorizontalShiftWheelZoom } from "../../interactions/zoom/useShiftWheelZoom";
-import { useTimelineInteractions } from "../../interactions/useTimelineInteractions";
-import { useHorizontalTimelineHitTesting } from "../../interactions/hit-testing/useTimelineHitTesting";
+import { useHorizontalShiftWheelZoom } from "#quno-internal/timeline/infinite/interactions/zoom/useShiftWheelZoom";
+import { useTimelineInteractions } from "#quno-internal/timeline/infinite/interactions/useTimelineInteractions";
+import { useHorizontalTimelineHitTesting } from "#quno-internal/timeline/infinite/interactions/hit-testing/useTimelineHitTesting";
 import { buildTimeTicks } from "#quno-internal/timeline/time/timelineTicks";
-import { useHorizontalEventHover } from "../../rendering/horizontal/useHorizontalEventHover";
-import { useHorizontalControlledZoomAnchor } from "../../anchors/zoom/useHorizontalControlledZoomAnchor";
+import { useHorizontalEventHover } from "#quno-internal/timeline/infinite/rendering/horizontal/useHorizontalEventHover";
+import { useHorizontalControlledZoomAnchor } from "#quno-internal/timeline/infinite/anchors/zoom/useHorizontalControlledZoomAnchor";
 import { useHorizontalTimelineFoundation } from "./useHorizontalTimelineFoundation";
 
 /**

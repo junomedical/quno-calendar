@@ -5,9 +5,10 @@ import { resolve } from "node:path";
 
 const entries = {
   shared: { entry: "src/lib/index.ts", file: "index" },
-  timeline: { entry: "src/lib/timeline/index.ts", file: "timeline" },
-  "date-picker": { entry: "src/lib/date-picker/index.ts", file: "date-picker" },
-  "date-input": { entry: "src/lib/date-input/index.ts", file: "date-input" }
+  "infinite-calendar": { entry: "src/lib/timeline/index.ts", file: "infinite-calendar" },
+  datepicker: { entry: "src/lib/date-picker/index.ts", file: "datepicker" },
+  "date-input": { entry: "src/lib/date-input/index.ts", file: "date-input" },
+  "date-parser": { entry: "src/lib/date-parser/index.ts", file: "date-parser" }
 } as const;
 
 export default defineConfig(({ mode }) => {
@@ -26,6 +27,7 @@ export default defineConfig(({ mode }) => {
     build: {
       emptyOutDir: mode === "shared",
       cssCodeSplit: false,
+      cssMinify: false,
       minify: "esbuild",
       lib: {
         entry: selected.entry,

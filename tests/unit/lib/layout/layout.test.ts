@@ -12,8 +12,8 @@ import {
   rowHeightForEvents,
   rowHeightForOverlapDepth,
   verticalLaneCountForPreparedCell
-} from "../../../../src/lib/timeline/infinite/events/layout/layout";
-import type { CalendarEvent } from "../../../../src/lib/timeline/core/types";
+} from "#quno-internal/timeline/infinite/events/layout/layout";
+import type { CalendarEvent } from "#quno-internal/timeline/core/types";
 
 const settings = {
   startHour: 8,

@@ -1,6 +1,6 @@
 import { useCallback, useRef } from "react";
 import { minuteToX, xToMinute } from "#quno-internal/timeline/time/time";
-import type { QunoCalendarSettings } from "#quno-internal/timeline/core/types";
+import type { QunoInfiniteCalendarSettings } from "#quno-internal/timeline/core/types";
 import { nearestTimeNodeMinute, TIMELINE_LEFT_GUTTER_PX } from "#quno-internal/timeline/time/timelineTicks";
 import {
   captureWheelEvent,
@@ -16,7 +16,7 @@ import {
 } from "./shiftWheelZoomUtils";
 
 type HorizontalZoomArgs = SharedZoomArgs & {
-  effectiveSettings: QunoCalendarSettings;
+  effectiveSettings: QunoInfiniteCalendarSettings;
   horizontalRenderZoomFloor: number;
 };
 

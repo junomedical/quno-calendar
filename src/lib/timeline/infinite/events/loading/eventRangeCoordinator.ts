@@ -9,7 +9,7 @@
  * persistence. Abort releases loading keys; request id and generation checks
  * reject clients that ignore it.
  *
- * @see docs/flows/async-loading-and-layout.md#date-request-state
+ * @see docs/infinite-calendar/flows/async-loading-and-layout.md#date-request-state
  */
 import type {
   CalendarEvent,

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { dateInputValue, isoDateInputValue } from "../../../demo/showcase/draftFormUtils";
+import { dateInputValue, isoDateInputValue } from "#quno-demo/showcase/draftFormUtils";
 
 describe("draft form date values", () => {
   it("derives an ISO timestamp's calendar date in local time", () => {

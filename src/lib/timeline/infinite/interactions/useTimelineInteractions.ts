@@ -1,6 +1,6 @@
 import { useCallback, useState, type PointerEvent as ReactPointerEvent } from "react";
 import type { CalendarHit } from "./timelineInteractionModel";
-import { minutesSinceStartOfDay } from "../../time/time";
+import { minutesSinceStartOfDay } from "#quno-internal/timeline/time/time";
 import type {
   ActiveEventDraft,
   CalendarEvent,
@@ -8,8 +8,8 @@ import type {
   CalendarViewComponentProps,
   EventMoveRequest,
   EventRenderStatus,
-  QunoCalendarSettings
-} from "../../core/types";
+  QunoInfiniteCalendarSettings
+} from "#quno-internal/timeline/core/types";
 import { useInteractionSelectionLock } from "./pointer/useInteractionSelectionLock";
 import { useReleasedDraft } from "./draft/useReleasedDraft";
 import { useGlobalPointerContinuation } from "./pointer/useGlobalPointerContinuation";
@@ -22,7 +22,7 @@ type PointerLike = Pick<PointerEvent | ReactPointerEvent, "clientX" | "clientY">
 type UseTimelineInteractionsArgs = {
   activeDraft?: ActiveEventDraft | null;
   interactionMode: NonNullable<CalendarViewComponentProps["interactionMode"]>;
-  settings: QunoCalendarSettings;
+  settings: QunoInfiniteCalendarSettings;
   getHit: (event: PointerLike) => CalendarHit | null;
   isTimelinePoint: (event: PointerLike) => boolean;
   onEventMoveRequest?: CalendarViewComponentProps["onEventMoveRequest"];

@@ -9,12 +9,12 @@
  * loading. New navigation clears the previous idle deadline and supersedes its
  * pending target.
  *
- * @see docs/flows/virtual-scroll-and-recenter.md#imperative-navigation
+ * @see docs/infinite-calendar/flows/virtual-scroll-and-recenter.md#imperative-navigation
  */
 import { useCallback, useLayoutEffect, type MutableRefObject, type RefObject } from "react";
 import { normalizeAnchorDate } from "#quno-internal/timeline/date/dateVirtualization";
-import type { PendingScrollTarget } from "../position/scrollPositionTypes";
-import { useScrollRecenter } from "../settlement/useScrollRecenter";
+import type { PendingScrollTarget } from "#quno-internal/timeline/infinite/scroll/position/scrollPositionTypes";
+import { useScrollRecenter } from "#quno-internal/timeline/infinite/scroll/settlement/useScrollRecenter";
 
 type UseVirtualWindowNavigationArgs = {
   containerRef: RefObject<HTMLDivElement | null>;

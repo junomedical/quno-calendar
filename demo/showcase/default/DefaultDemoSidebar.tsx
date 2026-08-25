@@ -1,12 +1,17 @@
 import { BookOpenText, CalendarDays } from "lucide-react";
 import { useEffect, useRef } from "react";
-import { ApiLatencyControl } from "../controls/ApiLatencyControl";
-import { DatasetControl } from "../controls/DatasetControl";
-import { CalendarCountControl, SnapControl, TimeRangeControl, ToggleControl } from "../controls/TimelineControls";
-import { ViewControl } from "../controls/ViewControl";
-import { demoCalendars } from "../data";
-import type { DemoControls } from "../hooks/useDemoControls";
-import { DemoZoomControl } from "../zoom/DemoZoom";
+import { ApiLatencyControl } from "#quno-demo/showcase/controls/ApiLatencyControl";
+import { DatasetControl } from "#quno-demo/showcase/controls/DatasetControl";
+import {
+  CalendarCountControl,
+  SnapControl,
+  TimeRangeControl,
+  ToggleControl
+} from "#quno-demo/showcase/controls/TimelineControls";
+import { ViewControl } from "#quno-demo/showcase/controls/ViewControl";
+import { demoCalendars } from "#quno-demo/showcase/data";
+import type { DemoControls } from "#quno-demo/showcase/hooks/useDemoControls";
+import { DemoZoomControl } from "#quno-demo/showcase/zoom/DemoZoom";
 import { DefaultDateJumpControl } from "./DefaultDateJumpControl";
 import { DemoStatsPanel } from "./DemoStatsPanel";
 

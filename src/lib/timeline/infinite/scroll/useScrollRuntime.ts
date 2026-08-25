@@ -10,11 +10,11 @@
  * generic compensation; the visible date is left to projection-specific focus
  * translation. Does not own event metrics, resource windows, or product anchors.
  *
- * @see docs/flows/virtual-scroll-and-recenter.md
+ * @see docs/infinite-calendar/flows/virtual-scroll-and-recenter.md
  */
 import { useVirtualizer, type Virtualizer } from "@tanstack/react-virtual";
 import { useCallback, useLayoutEffect, useMemo, useRef } from "react";
-import type { QunoCalendarSettings } from "../../core/types";
+import type { QunoInfiniteCalendarSettings } from "#quno-internal/timeline/core/types";
 import { VIRTUAL_DAY_NODE_OVERSCAN } from "./scrollConstants";
 import { createVirtualDateModel } from "./window/dateModel";
 import { useLayoutOffsetRestoration } from "./recenter/useLayoutOffsetRestoration";
@@ -30,7 +30,7 @@ type UseVirtualTimelineWindowArgs = {
   anchorDateKey: string;
   setAnchorDateKey: (updater: (current: string) => string) => void;
   initialAnchorDateKey: string;
-  settings: QunoCalendarSettings;
+  settings: QunoInfiniteCalendarSettings;
   baseDayHeight: number;
   verticalLayoutSignature: string;
   topDateAlignmentKey: string;
@@ -92,7 +92,7 @@ export function useScrollRuntime({
     estimateSize: () => baseDayHeight,
     getItemKey: dateKeyForIndex,
     overscan: VIRTUAL_DAY_NODE_OVERSCAN,
-    useFlushSync: false, // TanStack Virtual's synchronous rerender can overlap active React 19 renders. Keep it disabled so scroll notifications use its normal queued rerender path.
+    useFlushSync: true,
     initialRect: { width: 1400, height: 1100 },
     initialOffset: virtualWindow.anchorIndex * baseDayHeight
   });

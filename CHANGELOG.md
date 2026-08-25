@@ -6,10 +6,14 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ### Added
 
-- Added a concise three-card project home for the infinite calendar, date range input, and natural date input. Each
-  feature now has a dedicated field-guide route and a focused demo route linked by a visible Demo button.
-- Added an All components link to every field-guide header so readers can return directly to the three-component
+- Added a focused React-controlled Infinite Calendar exhibit showing visible-calendar selection and zoom flowing through
+  product-owned state while the calendar preserves its date and loaded content.
+- Added a concise four-card project home for Quno/Infinite Calendar, Quno/Datepicker, Quno/Date Input, and Quno/Date Parser. Each
+  primitive now has a dedicated field-guide route and a focused demo route linked by a visible Demo button.
+- Added an All components link to every field-guide header so readers can return directly to the four-component
   project directory.
+- Added the headless `@quno/calendar/date-parser` entry point and focused parser guide/playground for formats, preferred
+  order, relative dates, week starts, ranges, expected periods, languages, lexicon extensions, and tokenization.
 - Added natural-input support for `previous day/week/month/year` and relative weekday phrases such as `last Monday`,
   `this Monday`, and `next Monday`. Weeks and named weekdays respect the same configurable `weekStartsOn` contract as
   the datepicker.
@@ -18,6 +22,24 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ### Changed
 
+- Reorganized maintained documentation around Quno/Infinite Calendar, Quno/Datepicker, Quno/Date Input, Quno/Date
+  Parser, and a shared package layer. Every product now owns a `README.md` and `decisions.md`, and repository rules
+  require future decisions to be filed with their owning product.
+- Kept the independently exported `dist` stylesheets formatted and readable instead of minifying them during the
+  library build. JavaScript optimization and the separately built demo remain unchanged.
+- Replaced the Datepicker single-day exhibit's duplicated standalone editor and read-only selection summary with one
+  editable Selected day field that both typing and calendar picking update. The explicit-state cards now use a readable
+  two-by-two layout instead of four narrow columns.
+- Unified all four field guides on the warm Infinite Calendar editorial theme, shared page rhythm, product names,
+  numbered contents, Try it callouts, and collapsible Implementation recipes. The Infinite Calendar guide keeps its 25
+  focused topics as independently numbered chapters so unrelated demos are never grouped under one apparent task.
+- Renamed the public surfaces to `@quno/calendar/infinite-calendar` and `@quno/calendar/datepicker`, and renamed the
+  calendar facade to `QunoInfiniteCalendar`, `QunoInfiniteCalendarProps`, `QunoInfiniteCalendarHandle`, and
+  `QunoInfiniteCalendarSettings`.
+- Limited `@quno/calendar/date-input` to the component surface; parser functions and parser-specific types now come
+  from `@quno/calendar/date-parser`.
+- Replaced all parent-directory module imports with stable public, internal, demo, API, e2e, unit-test, and project
+  aliases, and extended architecture enforcement across source and test code.
 - Split the former combined `/guide` experience into feature-owned guides. `/guide`, `/story`, and the former
   integration-walkthrough route now preserve old bookmarks by forwarding to the infinite-calendar guide.
 - Rebuilt the date-input field guide around single/range mode, flexible formats, relative dates, keyboard controls,
@@ -27,9 +49,12 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 - Replaced the infinite-calendar demo and field-guide date/time jump controls with the shared `QunoDateInput` in
   single-date mode. A committed date now navigates immediately without a separate time or Go control.
 - Kept theme selection in the dedicated field-guide styling chapter instead of repeating it in the final demo.
+- Prepared the combined package locally. Publishing and deprecating former package names remain separately authorized release actions.
 
 ### Removed
 
+- Removed the old `timeline` and `date-picker` package subpaths and the old `QunoCalendar` facade names without
+  compatibility exports.
 - Removed the infinite-calendar demo sidebar's time input and Add event button. New appointments in the demo now begin
   by drawing directly on the calendar.
 - Removed the Default, Compact, Planner, and Availability variant strip from the primary infinite-calendar demo. The
@@ -37,6 +62,19 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ### Fixed
 
+- Kept visible Infinite Calendar days, resource rows, and committed events mounted through every painted frame when a
+  drawn appointment is cancelled. Programmatic anchor corrections now publish the matching virtual range before the
+  browser can paint an empty intermediate viewport.
+- Made the focused Date Parser demo recognize its English and German sample phrases together by default. The visible
+  `12 June 2026 – next Monday` sample now resolves as a range instead of becoming invalid under a mismatched language
+  setting.
+- Vertically aligned the shared All components and Demo actions with each field guide's eyebrow and added deliberate
+  breathing room between that header row and the guide title.
+- Restored full chapter spacing after Infinite Calendar preview exhibits. The familiar date-navigation example now
+  relies on its accessible input name instead of a visible "Go to date" label and renders the entered date at a
+  readable 13px size.
+- Kept the Datepicker's month and year controls at their component-defined type sizes inside field-guide exhibits. The
+  shared editorial heading scale is now limited to direct guide headings instead of cascading into live components.
 - Focused the date range picker on the changed date when a composed date-input update modifies only one range endpoint.
   Multi-endpoint updates retain the nearest-off-screen fallback.
 - Kept the first event drawn immediately after opening a React Strict Mode calendar at its pointer position. Strict
@@ -61,10 +99,6 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
   around its center. The equivalent scroll position and replacement month-window anchor now commit without a painted
   intermediate date tree.
 - Kept an in-progress controlled single-date input draft intact across unrelated parent rerenders.
-
-### Changed
-
-- Prepared the combined package locally. Publishing and deprecating former package names remain separately authorized release actions.
 
 ## 0.6.0 - 2026-08-24
 

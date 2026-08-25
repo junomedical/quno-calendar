@@ -1,4 +1,4 @@
-import type { CalendarEvent, QunoCalendarSettings } from "#quno-internal/timeline/core/types";
+import type { CalendarEvent, QunoInfiniteCalendarSettings } from "#quno-internal/timeline/core/types";
 import { minutesSinceStartOfDay, timelineEndMinute, timelineStartMinute } from "#quno-internal/timeline/time/time";
 
 /** Visible, same-day interval used by the overlap engine. */
@@ -18,7 +18,7 @@ function compareIntervals(left: EventInterval, right: EventInterval): number {
 /** Clips events and keeps caller order when appointments share a start time. */
 export function eventIntervals(
   events: readonly CalendarEvent[],
-  settings: Pick<QunoCalendarSettings, "startHour" | "endHour">
+  settings: Pick<QunoInfiniteCalendarSettings, "startHour" | "endHour">
 ): EventInterval[] {
   const timelineStart = timelineStartMinute(settings);
   const timelineEnd = timelineEndMinute(settings);

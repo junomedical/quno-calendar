@@ -2,13 +2,13 @@ import { act, render, screen, waitFor } from "@testing-library/react";
 import { createRef, type Ref } from "react";
 import { describe, expect, it, vi } from "vitest";
 import {
-  QunoCalendar,
+  QunoInfiniteCalendar,
   type CalendarEvent,
-  type QunoCalendarHandle,
-  type QunoCalendarProps,
+  type QunoInfiniteCalendarHandle,
+  type QunoInfiniteCalendarProps,
   type EventRendererProps,
   type LoadEvents
-} from "../../../../src/lib/timeline";
+} from "#quno-internal/timeline";
 
 const calendars = [
   { id: "calendar-a", name: "Calendar A", color: "#0b6eff" },
@@ -17,12 +17,12 @@ const calendars = [
 const now = new Date("2026-07-04T09:30:00");
 const settings = { startHour: 8, endHour: 18, zoom: 1, excludedWeekdays: [] };
 const defaultRenderer = ({ event, style }: EventRendererProps) => <div style={style}>{event.title}</div>;
-type TestCalendarProps = Partial<QunoCalendarProps> &
-  Pick<QunoCalendarProps, "loadEvents"> & { ref?: Ref<QunoCalendarHandle> };
+type TestCalendarProps = Partial<QunoInfiniteCalendarProps> &
+  Pick<QunoInfiniteCalendarProps, "loadEvents"> & { ref?: Ref<QunoInfiniteCalendarHandle> };
 
 function calendar(props: TestCalendarProps) {
   return (
-    <QunoCalendar
+    <QunoInfiniteCalendar
       calendars={calendars}
       selectedCalendarIds={["calendar-a"]}
       eventRenderer={defaultRenderer}
@@ -256,7 +256,7 @@ describe("InfiniteTimelineView", () => {
   });
 
   it("patches a committed visible event without reloading the range", async () => {
-    const ref = createRef<QunoCalendarHandle>();
+    const ref = createRef<QunoInfiniteCalendarHandle>();
     const renderer = vi.fn(({ event, status, style }: EventRendererProps) => (
       <div data-testid={`custom-event-${event.id}`} data-status={status} style={style}>
         {event.title}
@@ -297,7 +297,7 @@ describe("InfiniteTimelineView", () => {
   });
 
   it("removes every visible instance without reloading the range", async () => {
-    const ref = createRef<QunoCalendarHandle>();
+    const ref = createRef<QunoInfiniteCalendarHandle>();
     const sharedEvent: CalendarEvent = {
       id: "event-shared",
       calendarId: "calendar-a",

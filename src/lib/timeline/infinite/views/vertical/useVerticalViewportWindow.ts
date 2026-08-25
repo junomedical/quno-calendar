@@ -3,14 +3,14 @@
  * date anchor -> bounded virtual days -> measured viewport store + stable date offsets
  */
 import { useCallback, useEffect, useLayoutEffect, useState, type Dispatch, type SetStateAction } from "react";
-import type { QunoCalendarSettings } from "#quno-internal/timeline/core/types";
-import { useScrollRuntime } from "../../scroll/useScrollRuntime";
-import { useViewportMetricsStore } from "../../scroll/resources/viewportMetricsStore";
-import { resolveVerticalDateOffset } from "../../rendering/vertical/verticalViewGeometry";
+import type { QunoInfiniteCalendarSettings } from "#quno-internal/timeline/core/types";
+import { useScrollRuntime } from "#quno-internal/timeline/infinite/scroll/useScrollRuntime";
+import { useViewportMetricsStore } from "#quno-internal/timeline/infinite/scroll/resources/viewportMetricsStore";
+import { resolveVerticalDateOffset } from "#quno-internal/timeline/infinite/rendering/vertical/verticalViewGeometry";
 
 type VerticalViewportWindowArgs = {
   initialAnchorDateKey: string;
-  settings: QunoCalendarSettings;
+  settings: QunoInfiniteCalendarSettings;
   dayHeight: number;
   layoutSignature: string;
   topDateAlignmentKey: string;

@@ -1,10 +1,10 @@
 import { useCallback, useMemo, useRef, useState, type SetStateAction } from "react";
 import {
   type CalendarEvent,
-  type QunoCalendarHandle,
+  type QunoInfiniteCalendarHandle,
   type EventCreateRequest,
   type EventMoveRequest
-} from "@quno/calendar/timeline";
+} from "@quno/calendar/infinite-calendar";
 import { createDemoEvents, createRangeLoader, demoCalendars, appendCreatedEvent, applyMove } from "./data";
 import { DemoEventCard } from "./DemoEventCard";
 import { DefaultDemoSidebar } from "./default/DefaultDemoSidebar";
@@ -21,7 +21,7 @@ import { useSimulatedApiLoader } from "./hooks/useSimulatedApiLoader";
 import { useSystemNow } from "./hooks/useSystemNow";
 import { useViewportActivityLog } from "./hooks/useViewportActivityLog";
 import { useExternalEventDrafts } from "./useExternalEventDrafts";
-import { DemoQunoCalendar, DemoZoomProvider } from "./zoom/DemoZoom";
+import { DemoQunoInfiniteCalendar, DemoZoomProvider } from "./zoom/DemoZoom";
 
 const defaultLayout: DemoLayoutSettings = {
   rowHeight: 50,
@@ -62,7 +62,7 @@ export function DefaultDemo() {
   const eventsRef = useRef(events);
   const selectedCalendarIdsRef = useRef<string[]>([]);
   const isExternalDraftOpenRef = useRef(false);
-  const calendarRef = useRef<QunoCalendarHandle>(null);
+  const calendarRef = useRef<QunoInfiniteCalendarHandle>(null);
   const calendarPanelRef = useRef<HTMLElement>(null);
   const setMessage = useCallback((message: string) => {
     setActivityEntries((current) => [...current.slice(-(MAX_ACTIVITY_ENTRIES - 1)), message]);
@@ -203,7 +203,7 @@ export function DefaultDemo() {
               onToggleParticipant={draftSave.handleParticipantToggle}
             />
           ) : null}
-          <DemoQunoCalendar
+          <DemoQunoInfiniteCalendar
             key={scale}
             view={controls.calendarView}
             ref={calendarRef}

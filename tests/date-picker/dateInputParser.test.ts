@@ -1,4 +1,4 @@
-import { parseDateInput, tokenizeDateInput } from "../../src/lib/date-input";
+import { parseDateInput, tokenizeDateInput } from "@quno/calendar/date-parser";
 
 const options = {
   expectedRange: { start: "2025-08-19", end: "2026-08-19" } as const,
@@ -196,6 +196,10 @@ describe("natural date parser", () => {
     expect(parseDateInput("22.07 - 7 days ago", options)).toEqual({
       status: "success",
       value: { start: "2026-07-22", end: "2026-08-12" }
+    });
+    expect(parseDateInput("12 June 2026 – next Monday", { ...options, referenceDate: "2026-08-25" })).toEqual({
+      status: "success",
+      value: { start: "2026-06-12", end: "2026-08-31" }
     });
     expect(parseDateInput("12/14 -", options)).toEqual({
       status: "partial-range",

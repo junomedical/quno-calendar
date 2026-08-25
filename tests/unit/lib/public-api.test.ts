@@ -1,14 +1,15 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
-import * as sharedApi from "../../../src/lib";
-import * as dateInputApi from "../../../src/lib/date-input";
-import * as datePickerApi from "../../../src/lib/date-picker";
-import * as publicApi from "../../../src/lib/timeline";
+import * as sharedApi from "@quno/calendar";
+import * as dateInputApi from "@quno/calendar/date-input";
+import * as dateParserApi from "@quno/calendar/date-parser";
+import * as datePickerApi from "@quno/calendar/datepicker";
+import * as publicApi from "@quno/calendar/infinite-calendar";
 
 describe("public API", () => {
   it("exports the stable package surface", () => {
-    expect(publicApi).toHaveProperty("QunoCalendar");
-    expect(publicApi).toHaveProperty("defaultQunoCalendarSettings");
+    expect(publicApi).toHaveProperty("QunoInfiniteCalendar");
+    expect(publicApi).toHaveProperty("defaultQunoInfiniteCalendarSettings");
     expect(publicApi).toHaveProperty("defaultEventPrefetchPolicy");
     expect(publicApi).toHaveProperty("eventCalendarIds");
     expect(publicApi).toHaveProperty("eventBelongsToCalendar");
@@ -19,20 +20,28 @@ describe("public API", () => {
   it("keeps the package root headless", () => {
     expect(sharedApi).toHaveProperty("addDays");
     expect(sharedApi).toHaveProperty("parseIsoDate");
-    expect(sharedApi).not.toHaveProperty("QunoCalendar");
+    expect(sharedApi).not.toHaveProperty("QunoInfiniteCalendar");
     expect(sharedApi).not.toHaveProperty("QunoDatePicker");
   });
 
-  it("publishes the independent date feature surfaces", () => {
+  it("publishes four independent primitive surfaces", () => {
     expect(datePickerApi).toHaveProperty("QunoDatePicker");
     expect(dateInputApi).toHaveProperty("QunoDateInput");
-    expect(dateInputApi).toHaveProperty("parseDateInput");
-    expect(dateInputApi).toHaveProperty("tokenizeDateInput");
+    expect(dateInputApi).not.toHaveProperty("parseDateInput");
+    expect(dateInputApi).not.toHaveProperty("tokenizeDateInput");
+    expect(dateParserApi).toHaveProperty("parseDateInput");
+    expect(dateParserApi).toHaveProperty("tokenizeDateInput");
   });
 
   it("does not retain legacy timeline facade names", () => {
     const facade = readFileSync("src/lib/timeline/index.ts", "utf8");
-    for (const name of ["CalendarRoot", "CalendarRootProps", "CalendarNavigationHandle", "TimelineSettings"]) {
+    for (const name of [
+      "QunoCalendar",
+      "CalendarRoot",
+      "CalendarRootProps",
+      "CalendarNavigationHandle",
+      "TimelineSettings"
+    ]) {
       expect(facade).not.toContain(name);
     }
   });

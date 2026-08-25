@@ -1,13 +1,13 @@
 import {
-  QunoCalendar,
+  QunoInfiniteCalendar,
   applyEventMove,
   type ActiveEventDraft,
   type CalendarEvent,
   type CalendarFocusRequest,
-  type QunoCalendarHandle,
+  type QunoInfiniteCalendarHandle,
   type EventMoveRequest,
   type LoadEvents
-} from "@quno/calendar/timeline";
+} from "@quno/calendar/infinite-calendar";
 import { useCallback, useRef, useState } from "react";
 import { CalendarDemoShell } from "./ArticleDemos";
 import {
@@ -66,7 +66,7 @@ export function AvailabilityLayerDemo() {
       }
     >
       <div className="article-calendar-frame">
-        <QunoCalendar
+        <QunoInfiniteCalendar
           ariaLabel="Availability editing layer calendar"
           calendars={availabilityCalendars}
           className={`article-availability-calendar${mode === "availability" ? " is-editing-availability" : ""}`}
@@ -153,7 +153,7 @@ const focusCollisions: CalendarEvent[] = [
 ];
 
 export function EventFocusDemo() {
-  const calendarRef = useRef<QunoCalendarHandle>(null);
+  const calendarRef = useRef<QunoInfiniteCalendarHandle>(null);
   const eventsRef = useRef<CalendarEvent[]>([articleEvents[0]]);
   const [activeDraft, setActiveDraft] = useState<ActiveEventDraft | null>(() => ({
     mode: "create",
@@ -221,7 +221,7 @@ export function EventFocusDemo() {
       }
     >
       <div className="article-calendar-frame">
-        <QunoCalendar
+        <QunoInfiniteCalendar
           ref={calendarRef}
           activeDraft={activeDraft}
           ariaLabel="Event visual focus and lane changes calendar"

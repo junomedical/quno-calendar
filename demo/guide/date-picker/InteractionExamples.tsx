@@ -1,5 +1,5 @@
 import type { JSX } from "react";
-import { QunoDatePicker } from "@quno/calendar/date-picker";
+import { QunoDatePicker } from "@quno/calendar/datepicker";
 
 const exampleLabels = { hint: "" };
 

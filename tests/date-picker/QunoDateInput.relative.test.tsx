@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import { QunoDateInput, type DateRange } from "../../src/lib/date-input";
+import { QunoDateInput, type DateRange } from "@quno/calendar/date-input";
 
 const expectedRange: DateRange = { start: "2024-01-01", end: "2028-12-31" };
 

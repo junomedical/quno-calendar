@@ -1,17 +1,17 @@
 import type { DateRange, IsoDate } from "@quno/calendar";
 import { QunoDateInput } from "@quno/calendar/date-input";
 import {
-  QunoCalendar,
+  QunoInfiniteCalendar,
   applyEventMove,
   type CalendarEvent,
-  type QunoCalendarHandle,
+  type QunoInfiniteCalendarHandle,
   type DayNameGenerator,
   type EventCreateRequest,
   type EventMoveRequest,
   type EventRendererProps,
   type LoadEvents,
-  type QunoCalendarSettings
-} from "@quno/calendar/timeline";
+  type QunoInfiniteCalendarSettings
+} from "@quno/calendar/infinite-calendar";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CalendarDemoShell } from "./ArticleDemos";
 import {
@@ -147,7 +147,7 @@ export function CustomCardStructureDemo() {
       }
     >
       <div className="article-calendar-frame">
-        <QunoCalendar
+        <QunoInfiniteCalendar
           ariaLabel="Calendar with switchable product card structure"
           calendars={articleCalendars}
           className="article-card-structure-calendar"
@@ -203,7 +203,7 @@ export function CssNativeDemo() {
       }
     >
       <div className="article-calendar-frame">
-        <QunoCalendar
+        <QunoInfiniteCalendar
           ariaLabel="Calendar with CSS-native sticky chrome"
           calendars={articleCalendars}
           eventRenderer={ArticleEventCard}
@@ -219,7 +219,7 @@ export function CssNativeDemo() {
 }
 
 export function TimeMarkerDemo() {
-  const calendarRef = useRef<QunoCalendarHandle>(null);
+  const calendarRef = useRef<QunoInfiniteCalendarHandle>(null);
 
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => {
@@ -246,7 +246,7 @@ export function TimeMarkerDemo() {
       }
     >
       <div className="article-calendar-frame">
-        <QunoCalendar
+        <QunoInfiniteCalendar
           ref={calendarRef}
           ariaLabel="Calendar with visible current-time marker"
           calendars={articleCalendars}
@@ -263,7 +263,7 @@ export function TimeMarkerDemo() {
 }
 
 export function NavigationControlsDemo() {
-  const calendarRef = useRef<QunoCalendarHandle>(null);
+  const calendarRef = useRef<QunoInfiniteCalendarHandle>(null);
   const [date, setDate] = useState<IsoDate>(articleDateKey);
   const [status, setStatus] = useState(`Showing ${articleDateKey}`);
   const inputValue = useMemo<DateRange>(() => ({ start: date, end: date }), [date]);
@@ -288,18 +288,15 @@ export function NavigationControlsDemo() {
           <button aria-label="Previous day" onClick={() => shiftDay(-1)} type="button">
             ←
           </button>
-          <label>
-            <span>Go to date</span>
-            <QunoDateInput
-              aria-label="Destination date"
-              expectedRange={navigationExpectedRange}
-              onChange={(next) => {
-                if (next) navigate(next.start);
-              }}
-              selectionMode="single"
-              value={inputValue}
-            />
-          </label>
+          <QunoDateInput
+            aria-label="Destination date"
+            expectedRange={navigationExpectedRange}
+            onChange={(next) => {
+              if (next) navigate(next.start);
+            }}
+            selectionMode="single"
+            value={inputValue}
+          />
           <button aria-label="Next day" onClick={() => shiftDay(1)} type="button">
             →
           </button>
@@ -317,7 +314,7 @@ export function NavigationControlsDemo() {
       }
     >
       <div className="article-calendar-frame">
-        <QunoCalendar
+        <QunoInfiniteCalendar
           ref={calendarRef}
           ariaLabel="Calendar with product-owned date controls"
           calendars={articleCalendars}
@@ -371,7 +368,7 @@ export function ProgressiveTimeRevealDemo() {
       }
     >
       <div className="article-calendar-frame">
-        <QunoCalendar
+        <QunoInfiniteCalendar
           ariaLabel="Calendar with progressively revealed time precision"
           calendars={articleCalendars}
           eventRenderer={ArticleEventCard}
@@ -392,7 +389,7 @@ export function ProgressiveTimeRevealDemo() {
 
 type ArticleTheme = "clinical" | "compact" | "night";
 
-const themeSettings: Record<ArticleTheme, Partial<QunoCalendarSettings>> = {
+const themeSettings: Record<ArticleTheme, Partial<QunoInfiniteCalendarSettings>> = {
   clinical: { ...articleSettings, rowHeight: 58, labelWidth: 190, zoom: 1.15 },
   compact: { ...articleSettings, rowHeight: 42, dayHeaderHeight: 36, labelWidth: 150, zoom: 0.95 },
   night: { ...articleSettings, rowHeight: 56, dayHeaderHeight: 46, labelWidth: 180, zoom: 1.2 }
@@ -408,7 +405,7 @@ export function StylingDemo() {
       tools={<ThemeControl onChange={setTheme} theme={theme} />}
     >
       <div className="article-calendar-frame">
-        <QunoCalendar
+        <QunoInfiniteCalendar
           ariaLabel="Styleable calendar presets"
           calendars={articleCalendars}
           className={`article-themed-calendar theme-${theme}`}
@@ -529,7 +526,7 @@ export function DateLocalizationDemo() {
         ))}
       </div>
       <div className="article-calendar-frame">
-        <QunoCalendar
+        <QunoInfiniteCalendar
           ariaLabel="Calendar with localized date labels"
           calendars={articleCalendars}
           eventRenderer={ArticleEventCard}
@@ -569,7 +566,7 @@ function shiftDateKey(dateKey: string, amount: number): `${number}-${number}-${n
 }
 
 export function EverythingTogetherDemo() {
-  const calendarRef = useRef<QunoCalendarHandle>(null);
+  const calendarRef = useRef<QunoInfiniteCalendarHandle>(null);
   const sequenceRef = useRef(0);
   const eventsRef = useRef<CalendarEvent[]>([...overlapEvents, ...navigationEvents.slice(articleEvents.length)]);
   const [zoom, setZoom] = useState(1.25);
@@ -662,7 +659,7 @@ export function EverythingTogetherDemo() {
       }
     >
       <div className="article-calendar-frame">
-        <QunoCalendar
+        <QunoInfiniteCalendar
           ref={calendarRef}
           ariaLabel="Complete calendar system example"
           calendars={articleCalendars}

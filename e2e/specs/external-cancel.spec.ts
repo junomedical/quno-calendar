@@ -1,5 +1,11 @@
 import { expect, test, type Page } from "@playwright/test";
-import { goToWorkday, horizontalDrawTarget, selectPageText, topVisibleDayDate, waitForDemoEvents } from "../helpers";
+import {
+  goToWorkday,
+  horizontalDrawTarget,
+  selectPageText,
+  topVisibleDayDate,
+  waitForDemoEvents
+} from "#quno-e2e/helpers";
 
 async function expectDraftFadeoutThenGone(page: Page) {
   const exitingDraft = page.locator('[data-testid="draft-event"][data-exiting="true"]');
@@ -369,6 +375,27 @@ test("restores participant-filtered calendars without a delayed redraw or event 
   const draftShell = page.getByTestId("draft-event").first();
   await expect(draftShell).toHaveCSS("contain", "paint");
   await expect(draftShell).toHaveCSS("will-change", "opacity");
+  const cancellationFramesPromise = page.evaluate(async () => {
+    const frames: Array<{ committedEvents: number; days: number; rows: number }> = [];
+    const viewport = document.querySelector<HTMLElement>(".quno-calendar-viewport")!;
+    const visibleCount = (selector: string) => {
+      const viewportBox = viewport.getBoundingClientRect();
+      return Array.from(viewport.querySelectorAll<HTMLElement>(selector)).filter((element) => {
+        const box = element.getBoundingClientRect();
+        return box.bottom > viewportBox.top && box.top < viewportBox.bottom;
+      }).length;
+    };
+    const deadline = performance.now() + 1_700;
+    while (performance.now() < deadline) {
+      await new Promise((resolve) => requestAnimationFrame(resolve));
+      frames.push({
+        committedEvents: visibleCount('[data-testid="calendar-event"], [data-testid="availability-event"]'),
+        days: visibleCount('[data-testid="calendar-day"]'),
+        rows: visibleCount('[data-testid="calendar-row"]')
+      });
+    }
+    return frames;
+  });
   const stabilityPromise = page.evaluate(async () => {
     const expectedCalendarIds = ["dr-kirillov", "dr-thakker", "marco-eggens", "room-201", "room-202", "room-203"];
     const viewport = document.querySelector<HTMLElement>(".quno-calendar-viewport")!;
@@ -448,6 +475,23 @@ test("restores participant-filtered calendars without a delayed redraw or event 
   });
   await page.getByTestId("draft-cancel-button").click();
   await expectDraftFadeoutThenGone(page);
+  const cancellationFrames = await cancellationFramesPromise;
+  const emptyFrames = cancellationFrames
+    .map((frame, index) => ({ ...frame, index }))
+    .filter((frame) => frame.days === 0 || frame.rows === 0 || frame.committedEvents === 0);
+  expect(cancellationFrames.length).toBeGreaterThan(0);
+  expect(
+    cancellationFrames.every((frame) => frame.days > 0),
+    JSON.stringify(emptyFrames)
+  ).toBe(true);
+  expect(
+    cancellationFrames.every((frame) => frame.rows > 0),
+    JSON.stringify(emptyFrames)
+  ).toBe(true);
+  expect(
+    cancellationFrames.every((frame) => frame.committedEvents > 0),
+    JSON.stringify(emptyFrames)
+  ).toBe(true);
   await expect
     .poll(async () =>
       page

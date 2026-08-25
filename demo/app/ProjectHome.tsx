@@ -2,22 +2,28 @@ import "./projectHome.css";
 
 const projects = [
   {
-    title: "Infinite calendar",
+    title: "Quno/Infinite Calendar",
     description: "Move through endless schedules, dense resources, and live event updates without losing your place.",
     href: "/guide/infinite-calendar",
     label: "Explore the calendar guide"
   },
   {
-    title: "Date range input",
+    title: "Quno/Datepicker",
     description: "Paint, resize, and move timezone-free ranges in one stable, direct-manipulation calendar.",
-    href: "/guide/date-range-input",
-    label: "Explore the date range guide"
+    href: "/guide/datepicker",
+    label: "Explore the Datepicker guide"
   },
   {
-    title: "Date input field",
+    title: "Quno/Date Input",
     description: "Turn natural phrases and typed dates into clear, validated ranges people can edit quickly.",
-    href: "/guide/date-input-field",
-    label: "Explore the date input guide"
+    href: "/guide/date-input",
+    label: "Explore the Date Input guide"
+  },
+  {
+    title: "Quno/Date Parser",
+    description: "Resolve familiar formats, relative phrases, and multilingual ranges without a UI runtime.",
+    href: "/guide/date-parser",
+    label: "Explore the Date Parser guide"
   }
 ] as const;
 
@@ -26,7 +32,7 @@ export function ProjectHome() {
     <main className="project-home">
       <section className="project-home__content">
         <p className="project-home__eyebrow">@quno/calendar</p>
-        <h1>Three focused tools for dates and schedules.</h1>
+        <h1>Four focused tools for dates and schedules.</h1>
         <p className="project-home__intro">
           Start with the part you need. Each field guide explains the product thinking, lets you try the important
           interactions, and links to a focused demo.

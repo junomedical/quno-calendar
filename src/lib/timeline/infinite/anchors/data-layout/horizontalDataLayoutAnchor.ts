@@ -7,7 +7,7 @@
  * The anchor is grid-owned: newly loaded events never become focus targets.
  * If a resource disappears, restoration falls back to the captured date pixel.
  *
- * @see docs/flows/async-loading-and-layout.md
+ * @see docs/infinite-calendar/flows/async-loading-and-layout.md
  */
 import type { CalendarId } from "#quno-internal/timeline/core/types";
 

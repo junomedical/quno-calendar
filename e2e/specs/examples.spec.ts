@@ -22,8 +22,54 @@ test("legacy guides redirect to the infinite-calendar field guide", async ({ pag
   }
 });
 
-test("date range field guide keeps picker geometry stable", async ({ page }) => {
-  await page.goto("/guide/date-range-input");
+test("renamed guide and demo routes redirect while preserving deep links", async ({ page }) => {
+  await page.goto("/guide/date-range-input#week-starts");
+  await expect(page).toHaveURL(/\/guide\/datepicker#week-starts$/);
+  await expect(page.locator("#week-starts")).toBeVisible();
+
+  await page.goto("/guide/date-input-field#picker-composition");
+  await expect(page).toHaveURL(/\/guide\/date-input#picker-composition$/);
+  await expect(page.locator("#picker-composition")).toBeVisible();
+
+  await page.goto("/demo/date-range-input");
+  await expect(page).toHaveURL(/\/demo\/datepicker$/);
+  await page.goto("/demo/date-input-field");
+  await expect(page).toHaveURL(/\/demo\/date-input$/);
+});
+
+test("all four field guides share editorial structure and theme", async ({ page }) => {
+  let referenceTheme: { background: string; color: string; font: string } | undefined;
+  for (const route of ["infinite-calendar", "datepicker", "date-input", "date-parser"]) {
+    await page.goto(`/guide/${route}`);
+    const guide = page.locator(".field-guide");
+    await expect(guide.getByRole("link", { name: "All components" })).toHaveAttribute("href", "/");
+    await expect(guide.getByRole("link", { name: /^Demo/ })).toBeVisible();
+    await expect(guide.getByRole("navigation", { name: "Table of contents" })).toBeVisible();
+    await expect(guide.getByText(/^Try it$/).first()).toBeVisible();
+    await expect(guide.getByText(/^Implementation/).first()).toBeVisible();
+    const headerGeometry = await guide.evaluate((element) => {
+      const eyebrow = element.querySelector(".field-guide__eyebrow")?.getBoundingClientRect();
+      const links = element.querySelector(".field-guide__links")?.getBoundingClientRect();
+      const title = element.querySelector("h1")?.getBoundingClientRect();
+      return {
+        centerDifference: eyebrow && links ? eyebrow.top + eyebrow.height / 2 - (links.top + links.height / 2) : 99,
+        titleGap: links && title ? title.top - links.bottom : 0
+      };
+    });
+    expect(Math.abs(headerGeometry.centerDifference)).toBeLessThan(1);
+    expect(headerGeometry.titleGap).toBeGreaterThanOrEqual(20);
+    const theme = await guide.evaluate((element) => {
+      const guideStyle = getComputedStyle(element);
+      const contentStyle = getComputedStyle(element.querySelector(".field-guide__content") as Element);
+      return { background: guideStyle.backgroundColor, color: guideStyle.color, font: contentStyle.fontFamily };
+    });
+    referenceTheme ??= theme;
+    expect(theme).toEqual(referenceTheme);
+  }
+});
+
+test("datepicker field guide keeps picker geometry stable", async ({ page }) => {
+  await page.goto("/guide/datepicker");
   const picker = page.locator("#paint .quno-date-picker-grid").first();
   await expect(picker.locator('[data-slot="day"]')).toHaveCount(42);
   const boxes = await picker.locator('[data-slot="day"]').evaluateAll((days) =>
@@ -42,17 +88,17 @@ test("project home links each component card to its dedicated field guide and de
   await page.goto("/");
   const routes = [
     ["Explore the calendar guide", "/guide/infinite-calendar", "/demo/infinite-calendar", ".quno-calendar-viewport"],
-    ["Explore the date range guide", "/guide/date-range-input", "/demo/date-range-input", ".quno-date-picker"],
-    ["Explore the date input guide", "/guide/date-input-field", "/demo/date-input-field", ".quno-date-picker-input"]
+    ["Explore the Datepicker guide", "/guide/datepicker", "/demo/datepicker", ".quno-date-picker"],
+    ["Explore the Date Input guide", "/guide/date-input", "/demo/date-input", ".quno-date-picker-input"],
+    ["Explore the Date Parser guide", "/guide/date-parser", "/demo/date-parser", ".component-demo__panel"]
   ] as const;
   const cards = page.locator(".project-home__card");
-  await expect(cards).toHaveCount(3);
+  await expect(cards).toHaveCount(4);
   const desktopBoxes = await cards.evaluateAll((elements) =>
     elements.map((element) => element.getBoundingClientRect())
   );
-  expect(
-    Math.max(...desktopBoxes.map((box) => box.top)) - Math.min(...desktopBoxes.map((box) => box.top))
-  ).toBeLessThan(2);
+  expect(Math.abs(desktopBoxes[0].width - desktopBoxes[3].width)).toBeLessThan(2);
+  expect(desktopBoxes[2].top).toBeGreaterThan(desktopBoxes[0].bottom);
   for (const [label, guideHref, demoHref, demoSelector] of routes) {
     const card = page.getByRole("link", { name: label });
     await expect(card).toHaveAttribute("href", guideHref);
@@ -69,44 +115,28 @@ test("project home links each component card to its dedicated field guide and de
   const mobileBoxes = await cards.evaluateAll((elements) => elements.map((element) => element.getBoundingClientRect()));
   expect(mobileBoxes[1].top).toBeGreaterThan(mobileBoxes[0].bottom);
   expect(mobileBoxes[2].top).toBeGreaterThan(mobileBoxes[1].bottom);
+  expect(mobileBoxes[3].top).toBeGreaterThan(mobileBoxes[2].bottom);
 });
 
 test("date input field guide follows the task-oriented component contract", async ({ page }) => {
-  await page.goto("/guide/date-input-field");
+  await page.goto("/guide/date-input");
   const guide = page.locator(".date-input-guide");
-  const contents = guide.getByRole("navigation", { name: "Explore the field guide" });
-  await expect(contents.getByRole("link")).toHaveCount(12);
+  const contents = guide.getByRole("navigation", { name: "Table of contents" });
+  await expect(contents.getByRole("link")).toHaveCount(8);
   expect(await contents.getByRole("link").allTextContents()).toEqual([
-    "01Single date or range",
-    "02Date formats",
-    "03Preferred date order",
-    "04Relative dates",
-    "05Keyboard controls",
-    "06Range input",
-    "07Expected period",
-    "08Localization",
-    "09Multiple languages",
-    "10Date range picker",
-    "11Library size",
-    "12Dependencies"
+    "01Choose one date or a range",
+    "02Control recognition and state",
+    "03Edit with the keyboard",
+    "04Localize the field",
+    "05Use Date Parser semantics",
+    "06Compose with Datepicker",
+    "07Preserve native field contracts",
+    "08Ship the field independently"
   ]);
   await guide.getByRole("button", { name: "range", exact: true }).click();
   await expect(guide.getByRole("textbox", { name: "range date input" })).toBeVisible();
-  await guide.getByRole("button", { name: "2026-04-03" }).click();
-  await expect(guide.locator("#date-formats .date-input-parser-example pre")).toContainText('"start": "2026-04-03"');
-  await guide.getByRole("button", { name: "MDY" }).click();
-  await expect(guide.locator("#preferred-date-order output")).toHaveText("2026-03-04");
-  await guide.getByRole("button", { name: "this week" }).click();
-  await expect(guide.locator("#relative-dates .date-input-parser-example pre")).toContainText('"start": "2026-08-23"');
-  await expect(guide.locator("#relative-dates .date-input-parser-example pre")).toContainText('"end": "2026-08-29"');
-  await guide.getByRole("button", { name: "1/1/30" }).click();
-  await expect(guide.locator("#expected-period .date-input-parser-example pre")).toContainText('"start": "2030-01-01"');
   await guide.getByRole("button", { name: "Deutsch" }).click();
   await expect(guide.getByRole("textbox", { name: "Localized date" })).toHaveValue("25. August 2026");
-  await guide.getByRole("button", { name: "12 Juni 2026" }).click();
-  await expect(guide.locator("#multiple-languages .date-input-parser-example pre")).toContainText(
-    '"start": "2026-06-12"'
-  );
   const composedInput = guide.locator("#picker-composition").getByRole("textbox", { name: "Choose a period" });
   await composedInput.focus();
   await composedInput.fill("21 May 2026 – 18 December 2026");
@@ -114,7 +144,25 @@ test("date input field guide follows the task-oriented component contract", asyn
   await expect(guide.locator("#picker-composition").getByRole("grid")).toHaveAccessibleName(
     "Date range picker: December 2026"
   );
-  await expect(guide.getByText("6.72 KiB gzip", { exact: true })).toBeVisible();
+  await expect(guide.getByRole("link", { name: "Date Parser field guide" })).toHaveAttribute(
+    "href",
+    "/guide/date-parser"
+  );
+});
+
+test("date parser guide keeps parsing semantics headless and interactive", async ({ page }) => {
+  await page.goto("/guide/date-parser");
+  const guide = page.locator('[data-field-guide="Quno/Date Parser"]');
+  await expect(guide.getByRole("navigation", { name: "Table of contents" }).getByRole("link")).toHaveCount(8);
+  await guide.locator("#preferred-date-order").getByRole("button", { name: "MDY" }).click();
+  await expect(guide.locator("#preferred-date-order output")).toHaveText("2026-03-04");
+  await guide.locator("#relative-dates").getByRole("button", { name: "this week" }).click();
+  await expect(guide.locator("#relative-dates .date-input-parser-example pre")).toContainText('"start": "2026-08-23"');
+  await expect(guide.locator("#relative-dates .date-input-parser-example pre")).toContainText('"end": "2026-08-29"');
+  await guide.locator("#multiple-languages").getByRole("button", { name: "12 Juni 2026" }).click();
+  await expect(guide.locator("#multiple-languages .date-input-parser-example pre")).toContainText(
+    '"start": "2026-06-12"'
+  );
 });
 
 test("editorial table of contents presents the feature chapters and navigates the article scroller", async ({
@@ -123,18 +171,28 @@ test("editorial table of contents presents the feature chapters and navigates th
   await page.goto("/guide");
   const contents = page.getByRole("navigation", { name: "Table of contents" });
   await expect(contents.getByRole("link")).toHaveCount(25);
-  await expect(contents.getByRole("link", { name: /Why build another calendar/ })).toHaveAttribute(
+  const chapterBreakoutCounts = await page
+    .locator(".calendar-article__section")
+    .evaluateAll((sections) =>
+      sections.map(
+        (section) =>
+          [...section.children].filter((child) => child.classList.contains("calendar-article__breakout")).length
+      )
+    );
+  expect(chapterBreakoutCounts).toHaveLength(25);
+  expect(chapterBreakoutCounts.every((count) => count <= 1)).toBe(true);
+  await expect(contents.getByRole("link", { name: /Fit dense schedules into a clear view/ })).toHaveAttribute(
     "href",
     "#horizontal-first"
   );
   const horizontalSection = page.locator("#horizontal-first");
-  await expect(page.getByRole("heading", { name: "Why build another calendar" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Fit dense schedules into a clear view" })).toBeVisible();
   await expect(horizontalSection).toContainText(
     "Most calendars are built around a month, a week, or one person’s agenda"
   );
   await expect(horizontalSection).toContainText("Time runs horizontally");
   await expect(horizontalSection).toContainText("mouse wheel or touchpad");
-  const motionLink = contents.getByRole("link", { name: /Supporting animations/ });
+  const motionLink = contents.getByRole("link", { name: /Support motion without losing state/ });
   await expect(motionLink).toHaveAttribute("href", "#motion");
   await motionLink.click();
   await expect(page.locator(".calendar-article #motion")).toBeVisible();
@@ -208,12 +266,12 @@ test("editorial payload leads with gzip size and separates external dependencies
   await page.goto("/guide");
   const footprint = page.getByTestId("article-package-footprint");
   await footprint.scrollIntoViewIfNeeded();
-  await expect(page.getByRole("heading", { name: "Payload size" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Ship the package" })).toBeVisible();
   await expect(footprint.locator("dt").filter({ hasText: "JavaScript" })).toBeVisible();
-  await expect(footprint).toContainText("31.12 KiB gzip");
-  await expect(footprint).toContainText("126.21 KiB raw");
+  await expect(footprint).toContainText("31.85 KiB gzip");
+  await expect(footprint).toContainText("128.92 KiB raw");
   await expect(footprint.locator("dt").filter({ hasText: "Total package" })).toBeVisible();
-  await expect(footprint).toContainText("32.91 KiB gzip");
+  await expect(footprint).toContainText("33.65 KiB gzip");
   await expect(footprint.locator("dt").filter({ hasText: "External runtime" })).toBeVisible();
   await expect(footprint).toContainText("@tanstack/react-virtual");
   await expect(footprint).toContainText("React + React DOM");
@@ -377,6 +435,7 @@ test("editorial final calendar composes navigation, zoom, styling, and animated 
 test("editorial code blocks use selectable TSX syntax colors", async ({ page }) => {
   await page.goto("/guide");
   const source = page.getByLabel("Complete minimal integration TSX source");
+  await source.locator("xpath=ancestor::details").locator("summary").click();
   await source.scrollIntoViewIfNeeded();
   await expect(source).toContainText('import { useState } from "react"');
   await expect(source.locator(".syntax-keyword").first()).toBeVisible();
@@ -388,6 +447,25 @@ test("editorial code blocks use selectable TSX syntax colors", async ({ page }) 
     .evaluateAll((tokens) => [...new Set(tokens.map((token) => getComputedStyle(token).color))]);
   expect(colors.length).toBeGreaterThanOrEqual(6);
   await expect(source).toHaveCSS("user-select", "auto");
+});
+
+test("editorial React integration demonstrates product-owned state", async ({ page }) => {
+  await page.goto("/guide/infinite-calendar");
+  const demo = await revealLazyArticleDemo(page, "React-controlled calendar example", "article-react-state-demo");
+  const state = page.getByTestId("article-react-state-value");
+  const roomRows = demo.locator('[data-testid="calendar-row"][data-calendar-id="room-1"]');
+
+  await expect(state).toHaveText("React owns 2 calendars · 1.25×");
+  await expect(roomRows.first()).toBeVisible();
+  await demo.getByRole("button", { name: "One calendar" }).click();
+  await expect(state).toHaveText("React owns 1 calendar · 1.25×");
+  await expect(roomRows).toHaveCount(0);
+
+  await demo.getByRole("button", { name: "Two calendars" }).click();
+  await expect(roomRows.first()).toBeVisible();
+  await demo.getByRole("button", { name: "Increase controlled zoom" }).click();
+  await expect(demo.getByRole("status", { name: "Controlled zoom" })).toHaveText("1.50×");
+  await expect(state).toHaveText("React owns 2 calendars · 1.50×");
 });
 
 test("editorial article preserves its inline calendar through full-screen expansion", async ({ page }) => {
@@ -798,7 +876,7 @@ test("editorial zoom controls and gesture requests keep zoom parent-controlled",
   await page.goto("/guide");
   const demo = await revealLazyArticleDemo(page, "controlled zoom example", "article-zoom-demo");
   const zoomSection = page.locator("#zoom");
-  await expect(zoomSection.getByRole("heading", { name: "Zoom into the calendar" })).toBeVisible();
+  await expect(zoomSection.getByRole("heading", { name: "Zoom without losing precision" })).toBeVisible();
   await expect(zoomSection).toContainText("Zoom out to compare the shape of the day");
   await expect(zoomSection).toContainText("zoom in to read cards");
   await expect(zoomSection).toContainText("without losing the part of the schedule");

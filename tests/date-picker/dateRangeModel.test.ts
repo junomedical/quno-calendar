@@ -7,7 +7,7 @@ import {
   moveRange,
   nearestEndpoint,
   selectDate
-} from "../../src/lib/date-picker";
+} from "@quno/calendar/datepicker";
 
 describe("date range model", () => {
   it("creates a one-day range from empty selection", () => {

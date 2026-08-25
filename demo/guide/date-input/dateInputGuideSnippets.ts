@@ -7,6 +7,14 @@ export const modeSnippet = `const [value, setValue] = useState<DateRange | null>
   selectionMode="single" // or "range" (the default)
 />;`;
 
+export const controlledSnippet = `const [value, setValue] = useState<DateRange | null>(initialValue);
+
+<QunoDateInput
+  value={value}
+  onChange={setValue}
+  expectedRange={expectedRange}
+/>;`;
+
 export const formatsSnippet = `const result = parseDateInput(text, {
   expectedRange,
   locale: "en-GB",
@@ -79,6 +87,27 @@ export const localizationSnippet = `<QunoDateInput
   expectedRange={expectedRange}
 />;`;
 
+export const parserConnectionSnippet = `<QunoDateInput
+  expectedRange={expectedRange}
+  referenceDate="2026-08-25"
+  weekStartsOn={0}
+  preferredDateOrder="dmy"
+  parserLanguages={["en", "de"]}
+  onChange={setValue}
+/>;
+
+// Headless parsing options live at @quno/calendar/date-parser.`;
+
+export const accessibilitySnippet = `<label htmlFor="appointment-date">Appointment date</label>
+<QunoDateInput
+  id="appointment-date"
+  expectedRange={expectedRange}
+  labels={{ placeholder: "Type a date" }}
+  onChange={setValue}
+/>
+
+// Invalid committed text sets aria-invalid; native events remain available.`;
+
 export const multipleLanguagesSnippet = `<QunoDateInput
   expectedRange={expectedRange}
   locale="en-GB"
@@ -107,7 +136,7 @@ export const librarySizeSnippet = `import { QunoDateInput } from "@quno/calendar
 import "@quno/calendar/date-input/styles.css"; // optional
 
 // Independently measured ESM output:
-// JavaScript: 6.72 KiB gzip / 7 KiB budget
+// JavaScript: 6.71 KiB gzip / 7 KiB budget
 // CSS: 0.56 KiB gzip / 1 KiB budget`;
 
 export const dependenciesSnippet = `import { QunoDateInput } from "@quno/calendar/date-input";

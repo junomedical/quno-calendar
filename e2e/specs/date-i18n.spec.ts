@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { goToWorkday } from "../helpers";
+import { goToWorkday } from "#quno-e2e/helpers";
 
 test.use({ locale: "de-DE" });
 

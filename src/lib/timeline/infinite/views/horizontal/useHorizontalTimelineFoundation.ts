@@ -9,20 +9,20 @@
  * and late metrics yield to an active parent restore or pointer interaction.
  * Does not own hit-testing, pointer state transitions, or render layers.
  *
- * @see docs/flows/async-loading-and-layout.md
+ * @see docs/infinite-calendar/flows/async-loading-and-layout.md
  */
 import { useMemo, useState, type ForwardedRef } from "react";
 import type { CalendarInternalViewProps, CalendarViewHandle } from "#quno-internal/timeline/core/internalTypes";
-import { useDayMetrics } from "../../events/metrics/useDayMetrics";
-import { useEventRangeLoader } from "../../events/loading/useEventRangeLoader";
-import { useRetainedCalendarRows } from "../../events/metrics/useRetainedCalendarRows";
-import { useTimelineViewSetup } from "../shared/useTimelineViewSetup";
-import { useScrollRuntime } from "../../scroll/useScrollRuntime";
-import { useViewportMetricsStore } from "../../scroll/resources/viewportMetricsStore";
-import { eventDateKey } from "../../events/eventDateKey";
-import { useHorizontalDayMeasurement } from "../../anchors/data-layout/useHorizontalDayMeasurement";
+import { useDayMetrics } from "#quno-internal/timeline/infinite/events/metrics/useDayMetrics";
+import { useEventRangeLoader } from "#quno-internal/timeline/infinite/events/loading/useEventRangeLoader";
+import { useRetainedCalendarRows } from "#quno-internal/timeline/infinite/events/metrics/useRetainedCalendarRows";
+import { useTimelineViewSetup } from "#quno-internal/timeline/infinite/views/shared/useTimelineViewSetup";
+import { useScrollRuntime } from "#quno-internal/timeline/infinite/scroll/useScrollRuntime";
+import { useViewportMetricsStore } from "#quno-internal/timeline/infinite/scroll/resources/viewportMetricsStore";
+import { eventDateKey } from "#quno-internal/timeline/infinite/events/eventDateKey";
+import { useHorizontalDayMeasurement } from "#quno-internal/timeline/infinite/anchors/data-layout/useHorizontalDayMeasurement";
 import { useHorizontalNavigation } from "./useHorizontalNavigation";
-import { useHorizontalViewportSizing } from "../../rendering/horizontal/useHorizontalViewportSizing";
+import { useHorizontalViewportSizing } from "#quno-internal/timeline/infinite/rendering/horizontal/useHorizontalViewportSizing";
 
 type HorizontalTimelineFoundationArgs = {
   props: CalendarInternalViewProps;

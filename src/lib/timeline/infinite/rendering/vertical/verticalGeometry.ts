@@ -2,14 +2,14 @@
  * Pure vertical geometry.
  * event/time input -> clamped timeline pixels + fixed visual gutter
  */
-import type { CalendarEvent, QunoCalendarSettings } from "#quno-internal/timeline/core/types";
-import type { EventColumnLayoutItem } from "../../events/layout/layout";
+import type { CalendarEvent, QunoInfiniteCalendarSettings } from "#quno-internal/timeline/core/types";
+import type { EventColumnLayoutItem } from "#quno-internal/timeline/infinite/events/layout/layout";
 import { minuteToY, minutesSinceStartOfDay } from "#quno-internal/timeline/time/time";
 
 export const VERTICAL_COLUMN_GAP_PX = 0;
 export const VERTICAL_TIMELINE_GUTTER_PX = 8;
 
-type VerticalGeometrySettings = Pick<QunoCalendarSettings, "startHour" | "endHour" | "zoom">;
+type VerticalGeometrySettings = Pick<QunoInfiniteCalendarSettings, "startHour" | "endHour" | "zoom">;
 
 export function verticalMinuteToY(minute: number, settings: VerticalGeometrySettings): number {
   return VERTICAL_TIMELINE_GUTTER_PX + minuteToY(minute, settings);

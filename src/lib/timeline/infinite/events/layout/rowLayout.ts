@@ -1,4 +1,4 @@
-import type { CalendarEvent, QunoCalendarSettings } from "#quno-internal/timeline/core/types";
+import type { CalendarEvent, QunoInfiniteCalendarSettings } from "#quno-internal/timeline/core/types";
 import { minuteToX } from "#quno-internal/timeline/time/time";
 import type { PreparedEventCell } from "./preparedCell";
 
@@ -18,7 +18,7 @@ export type EventLayoutItem = {
 /** Projects prepared, orientation-neutral items into horizontal row geometry. */
 export function layoutPreparedEventsForRow(
   preparedCell: PreparedEventCell,
-  settings: Pick<QunoCalendarSettings, "startHour" | "endHour" | "zoom" | "rowHeight">
+  settings: Pick<QunoInfiniteCalendarSettings, "startHour" | "endHour" | "zoom" | "rowHeight">
 ): EventLayoutItem[] {
   return preparedCell.items.map((item) => {
     const laneHeight = Math.max(1, settings.rowHeight / item.laneCount);

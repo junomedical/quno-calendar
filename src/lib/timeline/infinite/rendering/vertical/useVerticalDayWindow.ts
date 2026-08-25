@@ -10,9 +10,12 @@ import type {
   CalendarViewportAnchorTarget
 } from "#quno-internal/timeline/core/types";
 import { eventCalendarIds } from "#quno-internal/timeline/data/calendarEvents";
-import { buildResourceExtents, resourceIndexesInWindow } from "../../scroll/resources/resourceWindow";
-import { useViewportMetrics } from "../../scroll/resources/viewportMetricsStore";
-import { eventDateKey } from "../../events/eventDateKey";
+import {
+  buildResourceExtents,
+  resourceIndexesInWindow
+} from "#quno-internal/timeline/infinite/scroll/resources/resourceWindow";
+import { useViewportMetrics } from "#quno-internal/timeline/infinite/scroll/resources/viewportMetricsStore";
+import { eventDateKey } from "#quno-internal/timeline/infinite/events/eventDateKey";
 import { gridCadenceMinutes } from "#quno-internal/timeline/time/timelineTicks";
 import type { VerticalTimelineDayProps } from "./types";
 

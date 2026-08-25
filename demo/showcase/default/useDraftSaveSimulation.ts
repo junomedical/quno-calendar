@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { ActiveEventDraft, CalendarEvent, CalendarId } from "@quno/calendar/timeline";
+import type { ActiveEventDraft, CalendarEvent, CalendarId } from "@quno/calendar/infinite-calendar";
 
 type DraftSaveSimulationArgs = {
   activeDraft: ActiveEventDraft | null;

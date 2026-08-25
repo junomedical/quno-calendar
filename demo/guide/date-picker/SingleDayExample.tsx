@@ -1,4 +1,4 @@
-import { QunoDatePicker, type DateRange } from "@quno/calendar/date-picker";
+import { QunoDatePicker, type DateRange } from "@quno/calendar/datepicker";
 import { QunoDateInput } from "@quno/calendar/date-input";
 import type { JSX } from "react";
 import { useState } from "react";
@@ -12,16 +12,25 @@ export const SingleDayExample = (): JSX.Element => {
   });
 
   return (
-    <div className="story__single-day">
-      <QunoDateInput
-        value={value}
-        onChange={setValue}
-        expectedRange={expectedRange}
-        referenceDate="2026-08-19"
-        selectionMode="single"
-        aria-label="Choose one day"
-      />
+    <div className="quno-date-picker story__single-day">
+      <header className="quno-date-picker-selection-header story__single-day-header">
+        <label className="story__single-day-field">
+          <span className="quno-date-picker-eyebrow">Selected day</span>
+          <QunoDateInput
+            value={value}
+            onChange={setValue}
+            expectedRange={expectedRange}
+            referenceDate="2026-08-19"
+            selectionMode="single"
+            aria-label="Selected day"
+          />
+        </label>
+        <button className="quno-date-picker-clear" disabled={!value} onClick={() => setValue(null)} type="button">
+          Clear
+        </button>
+      </header>
       <QunoDatePicker
+        className="story__single-day-picker"
         value={value}
         onChange={setValue}
         initialMonth="2026-08-01"

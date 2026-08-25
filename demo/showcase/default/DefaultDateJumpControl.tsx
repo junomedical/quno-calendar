@@ -1,6 +1,6 @@
 import { LocateFixed } from "lucide-react";
 import type { IsoDate } from "@quno/calendar";
-import { DateNavigationInput } from "../controls/DateNavigationInput";
+import { DateNavigationInput } from "#quno-demo/showcase/controls/DateNavigationInput";
 
 type DefaultDateJumpControlProps = {
   date: IsoDate;

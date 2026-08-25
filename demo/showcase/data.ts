@@ -8,7 +8,7 @@ import {
   type EventCreateRequest,
   type EventMoveRequest,
   type LoadEvents
-} from "@quno/calendar/timeline";
+} from "@quno/calendar/infinite-calendar";
 import { isoDateInputValue } from "./draftFormUtils";
 
 export const demoCalendars: CalendarRow[] = [

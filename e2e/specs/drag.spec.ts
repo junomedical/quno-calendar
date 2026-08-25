@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { firstDuplicatedViewportEvent, goToWorkday, selectPageText, waitForDemoEvents } from "../helpers";
+import { firstDuplicatedViewportEvent, goToWorkday, selectPageText, waitForDemoEvents } from "#quno-e2e/helpers";
 
 test("supports dragging an event to another time", async ({ page }) => {
   await page.goto("/demo/infinite-calendar");

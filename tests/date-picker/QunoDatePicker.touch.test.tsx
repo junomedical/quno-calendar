@@ -1,6 +1,6 @@
 import { fireEvent, render } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { QunoDatePicker } from "../../src/lib/date-picker";
+import { QunoDatePicker } from "@quno/calendar/datepicker";
 import { day, overflowDay, slot, weekday } from "./datePickerTestUtils";
 
 afterEach(() => vi.restoreAllMocks());
