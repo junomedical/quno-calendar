@@ -4,10 +4,19 @@ import type { JSX } from "react";
 import { useEffect, useRef, useState } from "react";
 
 const expectedRange: DateRange = { start: "2025-08-19", end: "2027-08-19" };
-const initialValue: DateRange = { start: "2026-08-19", end: "2026-08-19" };
+const initialValue: DateRange = { start: "2026-08-12", end: "2026-08-19" };
 const monthOf = (date: IsoDate): IsoDate => `${date.slice(0, 7)}-01` as IsoDate;
 
-export const SingleDayInputExample = (): JSX.Element => {
+const onlyChangedDate = (previous: DateRange | null, next: DateRange): IsoDate | null => {
+  if (!previous) return null;
+  const changed = [
+    previous.start === next.start ? null : next.start,
+    previous.end === next.end ? null : next.end
+  ].filter((date): date is IsoDate => date !== null);
+  return changed.length === 1 ? changed[0] : null;
+};
+
+export const RangeInputExample = (): JSX.Element => {
   const [value, setValue] = useState<DateRange | null>(initialValue);
   const [open, setOpen] = useState(false);
   const [calendarMonth, setCalendarMonth] = useState<IsoDate>(monthOf(initialValue.start));
@@ -25,9 +34,12 @@ export const SingleDayInputExample = (): JSX.Element => {
   }, [open]);
 
   const changeFromInput = (next: DateRange | null): void => {
+    if (!next) {
+      setValue(null);
+      return;
+    }
+    const nextMonth = monthOf(onlyChangedDate(value, next) ?? next.end);
     setValue(next);
-    if (!next) return;
-    const nextMonth = monthOf(next.start);
     if (nextMonth === calendarMonth) return;
     setCalendarMonth(nextMonth);
     setCalendarRevision((revision) => revision + 1);
@@ -39,7 +51,7 @@ export const SingleDayInputExample = (): JSX.Element => {
   };
 
   return (
-    <div className="story__single-day-composition" ref={rootRef} onBlurCapture={closeWhenFocusLeaves}>
+    <div className="story__date-input-composition" ref={rootRef} onBlurCapture={closeWhenFocusLeaves}>
       <QunoDateInput
         value={value}
         onChange={changeFromInput}
@@ -48,21 +60,21 @@ export const SingleDayInputExample = (): JSX.Element => {
         referenceDate="2026-08-19"
         preferredDateOrder="dmy"
         parserLanguages={["en", "de"]}
-        selectionMode="single"
-        placeholder="Choose a day"
-        aria-label="Choose a day"
+        selectionMode="range"
+        placeholder="Choose a period"
+        aria-label="Choose a period"
       />
       {open && (
-        <div className="story__single-day-composition-calendar">
+        <div className="story__date-input-composition-calendar">
           <QunoDatePicker
             key={calendarRevision}
-            className="story__single-day-composition-picker"
+            className="story__date-input-composition-picker"
             value={value}
             onChange={setValue}
             onVisibleMonthChange={setCalendarMonth}
             initialMonth={calendarMonth}
-            selectionMode="single"
-            labels={{ selectedPeriod: "Selected day", hint: "Choose one day." }}
+            selectionMode="range"
+            labels={{ selectedPeriod: "Selected period", hint: "Choose an inclusive period." }}
           />
         </div>
       )}

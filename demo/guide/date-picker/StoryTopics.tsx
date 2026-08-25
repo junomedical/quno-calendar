@@ -1,7 +1,7 @@
 import type { JSX } from "react";
 import { BestGuessExample, PaintExample, SegmentMoveExample, WrongGuessExample } from "./InteractionExamples";
+import { RangeInputExample } from "./RangeInputExample";
 import { SingleDayExample } from "./SingleDayExample";
-import { SingleDayInputExample } from "./SingleDayInputExample";
 import {
   HiddenRowExample,
   MotionExample,
@@ -16,7 +16,7 @@ import {
   basicUsageSnippet,
   customDaysSnippet,
   localizationSnippet,
-  singleDayInputSnippet,
+  rangeInputSnippet,
   singleDaySnippet,
   themingSnippet,
   weekStartSnippet
@@ -219,22 +219,22 @@ export const StoryTopics = (): JSX.Element => (
       <SingleDayExample />
     </StoryFeature>
     <StoryFeature
-      id="single-day-input"
+      id="date-input-composition"
       number="15"
       kicker="Date Input composition"
       title="Combines with Date Input beautifully."
-      copy="Replace the Datepicker’s selected-day summary and Clear action with QunoDateInput. The picker appears only while focus remains in the composed control, and both public components share one controlled value."
-      instruction="Focus the date input to reveal the picker. Type 12 juni or choose a date, then click elsewhere to close it."
+      copy="Replace the Datepicker’s selected-period summary and Clear action with QunoDateInput. The picker appears only while focus remains in the composed control, and both public components share one controlled range."
+      instruction="Focus the date input to reveal the picker. Type 12 juni – 18 juni or paint a range, then click elsewhere to close it."
       howTo={
         <StoryHowTo
-          title="Use Date Input as the selection surface"
+          title="Use Date Input as the range surface"
           language="TSX + CSS"
-          copy="Open the single-day picker on focus and hide its duplicate selection header."
-          code={singleDayInputSnippet}
+          copy="Open the range picker on focus and hide its duplicate selection header."
+          code={rangeInputSnippet}
         />
       }
     >
-      <SingleDayInputExample />
+      <RangeInputExample />
     </StoryFeature>
   </>
 );

@@ -35,3 +35,17 @@ applies; new refinements belong here rather than in the Datepicker ledger.
 - Consequences: `2026年8月25日` resolves after the small explicit setup
   `lexicon: { datePartMarkers: ["年", "月", "日"] }` and remains invalid without it. Other locale-specific numeric
   markers can use the same mechanism without adding a general preprocessing callback or changing relative grammar.
+
+## QDPR-003 - Do not present isolated syntax markers as locale support
+
+- Date: 2026-08-25
+- Status: Accepted; supersedes QDPR-002 before release
+- Context: Date-part markers can make one Japanese absolute-date form resolve, but the parser's fixed token order does
+  not recognize common relative forms such as `5日前` or `来週`. A Japanese marker exhibit would therefore imply a level of
+  locale support that its relative-date and range examples could not sustain.
+- Decision: Remove the unshipped `datePartMarkers` lexicon property and the Date Parser internationalization chapter.
+  Keep built-in English and German recognition explicit, and describe consumer lexicon extensions as aliases within
+  the bounded grammar rather than as general locale translation.
+- Consequences: The public surface and guide no longer promise partial Japanese parsing. Supporting Japanese or
+  another grammar with different word boundaries and order requires a coherent parser-language design rather than
+  isolated ignored markers.

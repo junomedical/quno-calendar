@@ -51,7 +51,7 @@ describe("datepicker field guide", () => {
     expect(within(contents).getByRole("link", { name: /Choose one day/ })).toHaveAttribute("href", "#single-day");
     expect(within(contents).getByRole("link", { name: /Combine with Date Input/ })).toHaveAttribute(
       "href",
-      "#single-day-input"
+      "#date-input-composition"
     );
     expect(document.querySelector('[data-story-topic="natural-input"]')).not.toBeInTheDocument();
     expect(screen.getByText("9.00 KiB gzip")).toBeInTheDocument();
@@ -106,20 +106,22 @@ describe("datepicker field guide", () => {
     expect(pickedDay).toHaveAttribute("data-selected", "true");
   });
 
-  it("opens the single-day picker only from its Date Input selection surface", () => {
+  it("opens the range picker only from its Date Input selection surface", () => {
     render(<DatePickerStory />);
-    const topic = document.querySelector<HTMLElement>('[data-story-topic="single-day-input"]') as HTMLElement;
-    const editor = within(topic).getByRole("textbox", { name: "Choose a day" });
+    const topic = document.querySelector<HTMLElement>('[data-story-topic="date-input-composition"]') as HTMLElement;
+    const editor = within(topic).getByRole("textbox", { name: "Choose a period" });
 
     expect(within(topic).queryByRole("grid")).not.toBeInTheDocument();
     fireEvent.focus(editor);
     expect(within(topic).getByRole("grid")).toBeInTheDocument();
     expect(topic.querySelector('[data-slot="selection-header"]')).not.toBeVisible();
 
-    fireEvent.input(editor, { target: { value: "12 juni" } });
+    fireEvent.input(editor, { target: { value: "12 juni - 18 juni" } });
     fireEvent.keyDown(editor, { key: "Enter" });
-    expect(editor).toHaveValue("12 June 2026");
-    expect(topic.querySelector('[data-date="2026-06-12"]')).toHaveAttribute("data-selected", "true");
+    expect(editor).toHaveValue("12 June 2026 – 18 June 2026");
+    expect(topic.querySelector('[data-date="2026-06-12"]')).toHaveAttribute("data-range-start", "true");
+    expect(topic.querySelector('[data-date="2026-06-15"]')).toHaveAttribute("data-selected", "true");
+    expect(topic.querySelector('[data-date="2026-06-18"]')).toHaveAttribute("data-range-end", "true");
   });
 
   it("opens the range picker from the selected-period input", () => {

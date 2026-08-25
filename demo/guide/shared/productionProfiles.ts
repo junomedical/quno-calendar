@@ -60,7 +60,7 @@ export const dateParserProduction: FieldGuideProductionProfile = {
   product: "Quno/Date Parser",
   entrypoint: "@quno/calendar/date-parser",
   stylesheet: null,
-  artifacts: [{ label: "JavaScript", gzip: "4.49 KiB", raw: "15.49 KiB", budget: "≤ 6 KiB gzip" }],
+  artifacts: [{ label: "JavaScript", gzip: "4.45 KiB", raw: "15.33 KiB", budget: "≤ 6 KiB gzip" }],
   runtime: "No UI framework runtime",
   compatibility: "ESM, CommonJS, browser, Node, and SSR",
   dependencies: "No runtime dependencies",

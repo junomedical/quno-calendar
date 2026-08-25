@@ -62,7 +62,6 @@ const extract = (
     if (token.type === "number") values.push({ value: Number(token.value), digits: token.value.length });
     else if (token.type === "word") {
       const word = normalizeDateInputWord(token.value);
-      if (vocabulary.datePartMarkers.includes(word)) continue;
       if (month !== undefined) return null;
       const resolvedMonth = vocabulary.months[word];
       if (resolvedMonth) month = resolvedMonth;

@@ -84,6 +84,9 @@ Vitest unit tests live in `tests/unit` and mirror the source module grouping.
 - The Date Input guide exposes eight component-focused chapters. Its live examples switch selection mode and locale,
   edit by keyboard, share controlled state with Datepicker, focus the only changed endpoint, and report the independently
   measured payload and runtime peers without duplicating parser semantics.
+- The Datepicker guide keeps its standalone single-day picker separate from the focused Date Input composition. The
+  composition opens a range-enabled picker, hides duplicate selection chrome, commits a complete multilingual typed
+  range, renders its start/interior/end states, clears through the shared input, and closes when focus leaves.
 - The Date Parser guide exposes eight headless chapters and verifies absolute/relative formats, DMY/MDY preference,
   configurable week starts, ranges, expected-period ranking, simultaneous English/German recognition, lexicon
   extension, tokenization, SSR safety, and its independent payload. Its focused demo recognizes the visible English and

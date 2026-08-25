@@ -12,7 +12,7 @@ describe("field guide production facts", () => {
     [infiniteCalendarProduction, "31.76 KiB gzip", "1.95 KiB gzip"],
     [datepickerProduction, "9.00 KiB gzip", "3.20 KiB gzip"],
     [dateInputProduction, "6.77 KiB gzip", "0.58 KiB gzip"],
-    [dateParserProduction, "4.49 KiB gzip", "No stylesheet"]
+    [dateParserProduction, "4.45 KiB gzip", "No stylesheet"]
   ] as const)("separates exact artifacts and runtime contracts for $product", (profile, javascript, styles) => {
     const { unmount } = render(<FieldGuideProduction profile={profile} />);
     const payload = screen.getByLabelText(`${profile.product} production payload`);

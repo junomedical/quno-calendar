@@ -8,17 +8,13 @@ describe("date parser field guide", () => {
     expect(screen.getByRole("link", { name: "All components" })).toHaveAttribute("href", "/");
     expect(screen.getByRole("link", { name: /Demo/ })).toHaveAttribute("href", "/demo/date-parser");
     const contents = screen.getByRole("navigation", { name: "Table of contents" });
-    expect(within(contents).getAllByRole("link")).toHaveLength(9);
+    expect(within(contents).getAllByRole("link")).toHaveLength(8);
     expect(within(contents).getByRole("link", { name: /Resolve numeric order/ })).toHaveAttribute(
       "href",
       "#preferred-date-order"
     );
-    expect(within(contents).getByRole("link", { name: /Adapt locale-specific syntax/ })).toHaveAttribute(
-      "href",
-      "#internationalization"
-    );
-    expect(screen.getAllByText(/^Try it$/)).toHaveLength(9);
-    expect(screen.getAllByText(/^Implementation/)).toHaveLength(9);
+    expect(screen.getAllByText(/^Try it$/)).toHaveLength(8);
+    expect(screen.getAllByText(/^Implementation/)).toHaveLength(8);
   });
 
   it("keeps parsing and tokenization interactive", () => {
@@ -51,18 +47,5 @@ describe("date parser field guide", () => {
       expect(output).toHaveTextContent(expectedStart);
     }
     expect(output).toHaveTextContent('"end": "2026-08-23"');
-  });
-
-  it("shows the complete Japanese marker setup and its parsing effect", () => {
-    render(<DateParserFieldGuide />);
-    const topic = document.querySelector<HTMLElement>('[data-story-topic="internationalization"]') as HTMLElement;
-    const toggle = within(topic).getByRole("button", { name: "Date markers on" });
-    const output = topic.querySelector(".date-input-parser-example pre") as HTMLElement;
-
-    expect(within(topic).getByText('lexicon.datePartMarkers = ["年", "月", "日"]')).toBeInTheDocument();
-    expect(within(topic).getByRole("textbox", { name: "Japanese date" })).toHaveValue("2026年8月25日");
-    expect(output).toHaveTextContent('"start": "2026-08-25"');
-    fireEvent.click(toggle);
-    expect(output).toHaveTextContent('"status": "invalid"');
   });
 });
