@@ -1,1 +1,0 @@
-- on exclude weekends calendar should try and stay in place, except the visible day becomes invisible

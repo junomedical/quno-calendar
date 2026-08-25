@@ -1,10 +1,10 @@
 import { act, renderHook } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { defaultTimelineSettings } from "../../../../src/lib";
+import { defaultQunoInfiniteCalendarSettings } from "#quno-internal/timeline";
 import {
   scheduleZoomCommit,
   useFrameCoalescedWheelZoom
-} from "../../../../src/lib/infinite/interactions/zoom/shiftWheelZoomUtils";
+} from "#quno-internal/timeline/infinite/interactions/zoom/shiftWheelZoomUtils";
 
 describe("frame-coalesced wheel zoom", () => {
   afterEach(() => vi.unstubAllGlobals());
@@ -18,7 +18,7 @@ describe("frame-coalesced wheel zoom", () => {
     vi.stubGlobal("cancelAnimationFrame", vi.fn());
     const commit = vi.fn();
     const { result } = renderHook(() => useFrameCoalescedWheelZoom(1));
-    const settings = { ...defaultTimelineSettings, zoom: 1 };
+    const settings = { ...defaultQunoInfiniteCalendarSettings, zoom: 1 };
     const zoomIn = () => new WheelEvent("wheel", { deltaY: -100 });
 
     act(() => {
@@ -67,7 +67,11 @@ describe("frame-coalesced wheel zoom", () => {
     });
 
     act(() =>
-      result.current({ ...defaultTimelineSettings, zoom: 1 }, new WheelEvent("wheel", { deltaY: -100 }), commit)
+      result.current(
+        { ...defaultQunoInfiniteCalendarSettings, zoom: 1 },
+        new WheelEvent("wheel", { deltaY: -100 }),
+        commit
+      )
     );
     rerender({ zoom: 3 });
     act(() => frameCallbacks.shift()?.(16.7));

@@ -2,13 +2,13 @@ import { act, render, screen, waitFor } from "@testing-library/react";
 import { createRef, type Ref } from "react";
 import { describe, expect, it, vi } from "vitest";
 import {
-  CalendarRoot,
+  QunoInfiniteCalendar,
   type CalendarEvent,
-  type CalendarNavigationHandle,
-  type CalendarRootProps,
+  type QunoInfiniteCalendarHandle,
+  type QunoInfiniteCalendarProps,
   type EventRendererProps,
   type LoadEvents
-} from "../../../../src/lib";
+} from "#quno-internal/timeline";
 
 const calendars = [
   { id: "calendar-a", name: "Calendar A", color: "#0b6eff" },
@@ -17,12 +17,12 @@ const calendars = [
 const now = new Date("2026-07-04T09:30:00");
 const settings = { startHour: 8, endHour: 18, zoom: 1, excludedWeekdays: [] };
 const defaultRenderer = ({ event, style }: EventRendererProps) => <div style={style}>{event.title}</div>;
-type TestCalendarProps = Partial<CalendarRootProps> &
-  Pick<CalendarRootProps, "loadEvents"> & { ref?: Ref<CalendarNavigationHandle> };
+type TestCalendarProps = Partial<QunoInfiniteCalendarProps> &
+  Pick<QunoInfiniteCalendarProps, "loadEvents"> & { ref?: Ref<QunoInfiniteCalendarHandle> };
 
 function calendar(props: TestCalendarProps) {
   return (
-    <CalendarRoot
+    <QunoInfiniteCalendar
       calendars={calendars}
       selectedCalendarIds={["calendar-a"]}
       eventRenderer={defaultRenderer}
@@ -45,9 +45,9 @@ describe("InfiniteTimelineView", () => {
       loadEvents
     });
 
-    const shell = screen.getByTestId("infinite-calendar");
+    const shell = screen.getByTestId("quno-calendar-timeline");
     expect(shell).toHaveAccessibleName("Public schedule");
-    expect(shell).toHaveClass("ic-shell", "custom-calendar");
+    expect(shell).toHaveClass("quno-calendar-shell", "custom-calendar");
     expect(shell).toHaveStyle({ minHeight: "320px" });
   });
 
@@ -256,7 +256,7 @@ describe("InfiniteTimelineView", () => {
   });
 
   it("patches a committed visible event without reloading the range", async () => {
-    const ref = createRef<CalendarNavigationHandle>();
+    const ref = createRef<QunoInfiniteCalendarHandle>();
     const renderer = vi.fn(({ event, status, style }: EventRendererProps) => (
       <div data-testid={`custom-event-${event.id}`} data-status={status} style={style}>
         {event.title}
@@ -297,7 +297,7 @@ describe("InfiniteTimelineView", () => {
   });
 
   it("removes every visible instance without reloading the range", async () => {
-    const ref = createRef<CalendarNavigationHandle>();
+    const ref = createRef<QunoInfiniteCalendarHandle>();
     const sharedEvent: CalendarEvent = {
       id: "event-shared",
       calendarId: "calendar-a",

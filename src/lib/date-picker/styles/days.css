@@ -1,0 +1,110 @@
+.quno-date-picker-day {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  height: var(--quno-date-picker-day-size, 42px);
+  padding: 0;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: var(--quno-date-picker-text, var(--quno-date-picker-text-default));
+  cursor: pointer;
+  isolation: isolate;
+}
+
+.quno-date-picker-day::before {
+  position: absolute;
+  z-index: -2;
+  inset: 4px 0;
+  background: transparent;
+  content: "";
+}
+
+.quno-date-picker-day > span {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border-radius: var(--quno-date-picker-day-radius, 9px);
+  font-size: 13px;
+  font-weight: 550;
+}
+
+.quno-date-picker-handle {
+  position: absolute;
+}
+
+.quno-date-picker-day:hover > span,
+.quno-date-picker-day:focus-visible > span {
+  outline: 2px solid var(--quno-date-picker-primary, var(--quno-date-picker-primary-default));
+  outline-offset: 1px;
+}
+
+.quno-date-picker-grid[data-dragging="move"] .quno-date-picker-day:hover > span {
+  outline: none;
+}
+
+.quno-date-picker-grid:has(.quno-date-picker-day[data-cycle-trigger="true"]:hover)
+  .quno-date-picker-day[data-cycle-trigger="true"]:hover
+  > span {
+  outline: none;
+}
+
+.quno-date-picker-grid:has(.quno-date-picker-day[data-cycle-trigger="true"]:hover)
+  .quno-date-picker-day[data-cycle-preview="true"]::after {
+  position: absolute;
+  z-index: 2;
+  inset: 4px var(--quno-cycle-preview-right, 0) 4px var(--quno-cycle-preview-left, 0);
+  border-top: 1px solid var(--quno-date-picker-cycle-preview, var(--quno-date-picker-cycle-preview-default));
+  border-bottom: 1px solid var(--quno-date-picker-cycle-preview, var(--quno-date-picker-cycle-preview-default));
+  content: "";
+  pointer-events: none;
+}
+
+.quno-date-picker-day[data-cycle-preview-range-start="true"]::after {
+  --quno-cycle-preview-left: calc(50% - 17px);
+
+  border-left: 1px solid var(--quno-date-picker-cycle-preview, var(--quno-date-picker-cycle-preview-default));
+  border-radius: var(--quno-date-picker-day-radius, 9px) 0 0 var(--quno-date-picker-day-radius, 9px);
+}
+
+.quno-date-picker-day[data-cycle-preview-range-end="true"]::after {
+  --quno-cycle-preview-right: calc(50% - 17px);
+
+  border-right: 1px solid var(--quno-date-picker-cycle-preview, var(--quno-date-picker-cycle-preview-default));
+  border-radius: 0 var(--quno-date-picker-day-radius, 9px) var(--quno-date-picker-day-radius, 9px) 0;
+}
+
+.quno-date-picker-day[data-cycle-preview-range-start="true"][data-cycle-preview-range-end="true"]::after {
+  border-radius: var(--quno-date-picker-day-radius, 9px);
+}
+
+.quno-date-picker-day--outside {
+  color: var(--quno-date-picker-outside, var(--quno-date-picker-outside-default));
+}
+
+.quno-date-picker-day--selected::before {
+  background: var(--quno-date-picker-primary-soft, var(--quno-date-picker-primary-soft-default));
+}
+
+.quno-date-picker-day--start::before {
+  left: 50%;
+  border-radius: var(--quno-date-picker-day-radius, 9px) 0 0 var(--quno-date-picker-day-radius, 9px);
+}
+
+.quno-date-picker-day--end::before {
+  right: 50%;
+  border-radius: 0 var(--quno-date-picker-day-radius, 9px) var(--quno-date-picker-day-radius, 9px) 0;
+}
+
+.quno-date-picker-day--start.quno-date-picker-day--end::before {
+  right: calc(50% - 17px);
+  left: calc(50% - 17px);
+  border-radius: var(--quno-date-picker-day-radius, 9px);
+}
+
+.quno-date-picker-day--start > span,
+.quno-date-picker-day--end > span {
+  background: var(--quno-date-picker-primary, var(--quno-date-picker-primary-default));
+  color: var(--quno-date-picker-on-primary, var(--quno-date-picker-on-primary-default));
+}

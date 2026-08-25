@@ -1,4 +1,4 @@
-import type { EventRendererProps } from "quno-calendar";
+import type { EventRendererProps } from "@quno/calendar/infinite-calendar";
 
 export function eventCardModel(
   prefix: string,

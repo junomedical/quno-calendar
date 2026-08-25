@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import type { CalendarEvent } from "../../../../src/lib/core/types";
+import type { CalendarEvent } from "#quno-internal/timeline/core/types";
 import {
   positionColumnLayoutItems,
   verticalEventBox
-} from "../../../../src/lib/infinite/rendering/vertical/verticalGeometry";
-import { pinnedVerticalColumnIndexes } from "../../../../src/lib/infinite/rendering/vertical/useVerticalDayWindow";
+} from "#quno-internal/timeline/infinite/rendering/vertical/verticalGeometry";
+import { pinnedVerticalColumnIndexes } from "#quno-internal/timeline/infinite/rendering/vertical/useVerticalDayWindow";
 
 const event: CalendarEvent = {
   id: "event-a",

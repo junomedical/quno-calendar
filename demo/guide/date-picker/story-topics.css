@@ -1,0 +1,138 @@
+.story__fixed-frame {
+  position: relative;
+  padding: 20px 10px 10px;
+  border: 1px dashed #91a3bd;
+  border-radius: 20px;
+}
+
+.story__fixed-frame > span {
+  position: absolute;
+  top: 0;
+  left: 18px;
+  padding: 0 7px;
+  background: #f3f6fb;
+  color: #66748a;
+  font-size: 11px;
+  font-weight: 750;
+  text-transform: uppercase;
+  transform: translateY(-50%);
+}
+
+.story__controls,
+.story__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.story__controls button {
+  padding: 7px 11px;
+  border: 1px solid #cfd8e6;
+  border-radius: 999px;
+  background: #fff;
+  color: #536176;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 750;
+  text-transform: capitalize;
+}
+
+.story__controls button[aria-pressed="true"] {
+  border-color: #0167ff;
+  background: #e8f1ff;
+  color: #174a8f;
+}
+
+.story__picker--no-motion {
+  --quno-date-picker-month-scroll-duration: 0ms;
+  --quno-date-picker-pill-reveal-duration: 0ms;
+}
+
+.story__single-day {
+  width: min(100%, 420px);
+}
+
+.story__single-day-composition {
+  position: relative;
+  width: min(100%, 420px);
+}
+
+.story__single-day-composition .quno-date-picker-input-root,
+.story__single-day-composition .quno-date-picker-input {
+  width: 100%;
+}
+
+.story__single-day-composition .quno-date-picker-input {
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.story__single-day-composition-calendar {
+  position: absolute;
+  z-index: 10;
+  top: calc(100% + 10px);
+  left: 0;
+  width: 100%;
+}
+
+.story__single-day-composition-picker > [data-slot="selection-header"] {
+  display: none;
+}
+
+.story__legend span {
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: #fff;
+  color: #607085;
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.story__legend [data-kind="today"] {
+  box-shadow: inset 0 0 0 2px #ff8a00;
+}
+
+.story__legend [data-kind="weekend"] {
+  color: #9f4d00;
+}
+
+.story__legend [data-kind="off"] {
+  text-decoration: line-through;
+}
+
+.story__legend [data-kind="holiday"] {
+  box-shadow: inset 0 -2px 0 #7c3aed;
+  color: #6d28d9;
+}
+
+.story__day--weekend:not([data-selected="true"]) > span {
+  color: #9f4d00;
+}
+
+.story__day--today > span {
+  box-shadow: inset 0 0 0 2px #ff8a00;
+}
+
+.story__day--non-working:not([data-selected="true"]) > span {
+  background: #edf0f4;
+  color: #7b8492;
+  text-decoration: line-through;
+}
+
+.story__day--holiday:not([data-selected="true"]) > span {
+  box-shadow: inset 0 0 0 2px #7c3aed;
+  color: #6d28d9;
+  font-weight: 800;
+}
+
+@media (max-width: 820px) {
+  .story__topic {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .story__topic--reverse .story__topic-copy,
+  .story__topic--reverse .story__topic-example {
+    order: initial;
+  }
+}

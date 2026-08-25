@@ -1,14 +1,15 @@
-import type { CalendarEvent, CalendarId } from "quno-calendar";
+import type { CalendarEvent, CalendarId } from "@quno/calendar/infinite-calendar";
+import type { IsoDate } from "@quno/calendar";
 
 export function timeInputValue(date: Date) {
   return `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
 }
 
-export function dateInputValue(date: Date) {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+export function dateInputValue(date: Date): IsoDate {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}` as IsoDate;
 }
 
-export function isoDateInputValue(value: string) {
+export function isoDateInputValue(value: string): IsoDate {
   return dateInputValue(new Date(value));
 }
 

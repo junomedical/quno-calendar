@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import type { CalendarEvent } from "../../../../src/lib/core/types";
-import { indexEventsByCalendar } from "../../../../src/lib/infinite/events/indexing/eventMembershipIndex";
+import type { CalendarEvent } from "#quno-internal/timeline/core/types";
+import { indexEventsByCalendar } from "#quno-internal/timeline/infinite/events/indexing/eventMembershipIndex";
 
 const event = (id: string, calendarId: string, calendarIds?: string[]): CalendarEvent => ({
   id,

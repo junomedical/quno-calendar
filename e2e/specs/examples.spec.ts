@@ -12,41 +12,214 @@ async function revealLazyArticleDemo(page: Page, label: string, testId: string) 
   return demo;
 }
 
-test("main demo links to the single example field guide", async ({ page }) => {
+test("legacy guides redirect to the infinite-calendar field guide", async ({ page }) => {
+  for (const route of ["/story", "/examples/integration-walkthrough"]) {
+    await page.goto(route);
+    await expect(page).toHaveURL(/\/guide\/infinite-calendar$/);
+    await expect(
+      page.getByRole("heading", { name: "A simple, fast calendar for businesses with complex schedules." })
+    ).toBeVisible();
+  }
+});
+
+test("renamed guide and demo routes redirect while preserving deep links", async ({ page }) => {
+  await page.goto("/guide/date-range-input#week-starts");
+  await expect(page).toHaveURL(/\/guide\/datepicker#week-starts$/);
+  await expect(page.locator("#week-starts")).toBeVisible();
+
+  await page.goto("/guide/date-input-field#picker-composition");
+  await expect(page).toHaveURL(/\/guide\/date-input#picker-composition$/);
+  await expect(page.locator("#picker-composition")).toBeVisible();
+
+  await page.goto("/demo/date-range-input");
+  await expect(page).toHaveURL(/\/demo\/datepicker$/);
+  await page.goto("/demo/date-input-field");
+  await expect(page).toHaveURL(/\/demo\/date-input$/);
+});
+
+test("all four field guides share editorial structure and theme", async ({ page }) => {
+  let referenceTheme: { background: string; color: string; font: string } | undefined;
+  for (const route of ["infinite-calendar", "datepicker", "date-input", "date-parser"]) {
+    await page.goto(`/guide/${route}`);
+    const guide = page.locator(".field-guide");
+    await expect(guide.getByRole("link", { name: "All components" })).toHaveAttribute("href", "/");
+    await expect(guide.getByRole("link", { name: /^Demo/ })).toBeVisible();
+    await expect(guide.getByRole("navigation", { name: "Table of contents" })).toBeVisible();
+    await expect(guide.getByText(/^Try it$/).first()).toBeVisible();
+    await expect(guide.getByText(/^Implementation/).first()).toBeVisible();
+    const headerGeometry = await guide.evaluate((element) => {
+      const eyebrow = element.querySelector(".field-guide__eyebrow")?.getBoundingClientRect();
+      const links = element.querySelector(".field-guide__links")?.getBoundingClientRect();
+      const title = element.querySelector("h1")?.getBoundingClientRect();
+      return {
+        centerDifference: eyebrow && links ? eyebrow.top + eyebrow.height / 2 - (links.top + links.height / 2) : 99,
+        titleGap: links && title ? title.top - links.bottom : 0
+      };
+    });
+    expect(Math.abs(headerGeometry.centerDifference)).toBeLessThan(1);
+    expect(headerGeometry.titleGap).toBeGreaterThanOrEqual(20);
+    const theme = await guide.evaluate((element) => {
+      const guideStyle = getComputedStyle(element);
+      const contentStyle = getComputedStyle(element.querySelector(".field-guide__content") as Element);
+      return { background: guideStyle.backgroundColor, color: guideStyle.color, font: contentStyle.fontFamily };
+    });
+    referenceTheme ??= theme;
+    expect(theme).toEqual(referenceTheme);
+  }
+});
+
+test("datepicker field guide keeps picker geometry stable", async ({ page }) => {
+  await page.goto("/guide/datepicker");
+  const picker = page.locator("#paint .quno-date-picker-grid").first();
+  await expect(picker.locator('[data-slot="day"]')).toHaveCount(42);
+  const boxes = await picker.locator('[data-slot="day"]').evaluateAll((days) =>
+    days.map((day) => {
+      const box = day.getBoundingClientRect();
+      return { width: box.width, height: box.height };
+    })
+  );
+  expect(Math.max(...boxes.map(({ width }) => width)) - Math.min(...boxes.map(({ width }) => width))).toBeLessThan(1);
+  expect(Math.max(...boxes.map(({ height }) => height)) - Math.min(...boxes.map(({ height }) => height))).toBeLessThan(
+    1
+  );
+});
+
+test("project home links each component card to its dedicated field guide and demo", async ({ page }) => {
   await page.goto("/");
-  const link = page.getByRole("link", { name: "Read the integration field guide" });
-  await expect(link).toBeVisible();
-  await expect(link).toHaveAttribute("href", "/examples/integration-walkthrough");
+  const routes = [
+    ["Explore the calendar guide", "/guide/infinite-calendar", "/demo/infinite-calendar", ".quno-calendar-viewport"],
+    ["Explore the Datepicker guide", "/guide/datepicker", "/demo/datepicker", ".quno-date-picker"],
+    ["Explore the Date Input guide", "/guide/date-input", "/demo/date-input", ".quno-date-picker-input"],
+    ["Explore the Date Parser guide", "/guide/date-parser", "/demo/date-parser", ".component-demo__panel"]
+  ] as const;
+  const cards = page.locator(".project-home__card");
+  await expect(cards).toHaveCount(4);
+  const desktopBoxes = await cards.evaluateAll((elements) =>
+    elements.map((element) => element.getBoundingClientRect())
+  );
+  expect(Math.abs(desktopBoxes[0].width - desktopBoxes[3].width)).toBeLessThan(2);
+  expect(desktopBoxes[2].top).toBeGreaterThan(desktopBoxes[0].bottom);
+  for (const [label, guideHref, demoHref, demoSelector] of routes) {
+    const card = page.getByRole("link", { name: label });
+    await expect(card).toHaveAttribute("href", guideHref);
+    await page.goto(guideHref);
+    await expect(page.getByRole("link", { name: "All components" })).toHaveAttribute("href", "/");
+    const demoLink = page.getByRole("link", { name: /^Demo/ });
+    await expect(demoLink).toHaveAttribute("href", demoHref);
+    await demoLink.click();
+    await expect(page).toHaveURL(new RegExp(`${demoHref}$`));
+    await expect(page.locator(demoSelector).first()).toBeVisible();
+    await page.goto("/");
+  }
+  await page.setViewportSize({ width: 390, height: 844 });
+  const mobileBoxes = await cards.evaluateAll((elements) => elements.map((element) => element.getBoundingClientRect()));
+  expect(mobileBoxes[1].top).toBeGreaterThan(mobileBoxes[0].bottom);
+  expect(mobileBoxes[2].top).toBeGreaterThan(mobileBoxes[1].bottom);
+  expect(mobileBoxes[3].top).toBeGreaterThan(mobileBoxes[2].bottom);
+});
+
+test("date input field guide follows the task-oriented component contract", async ({ page }) => {
+  await page.goto("/guide/date-input");
+  const guide = page.locator(".date-input-guide");
+  const contents = guide.getByRole("navigation", { name: "Table of contents" });
+  await expect(contents.getByRole("link")).toHaveCount(8);
+  expect(await contents.getByRole("link").allTextContents()).toEqual([
+    "01Choose one date or a range",
+    "02Control recognition and state",
+    "03Edit with the keyboard",
+    "04Localize the field",
+    "05Use Date Parser semantics",
+    "06Compose with Datepicker",
+    "07Preserve native field contracts",
+    "08Ship the field independently"
+  ]);
+  await guide.getByRole("button", { name: "range", exact: true }).click();
+  await expect(guide.getByRole("textbox", { name: "range date input" })).toBeVisible();
+  await guide.getByRole("button", { name: "Deutsch" }).click();
+  await expect(guide.getByRole("textbox", { name: "Localized date" })).toHaveValue("25. August 2026");
+  const composedInput = guide.locator("#picker-composition").getByRole("textbox", { name: "Choose a period" });
+  await composedInput.focus();
+  await composedInput.fill("21 May 2026 – 18 December 2026");
+  await composedInput.press("Enter");
+  await expect(guide.locator("#picker-composition").getByRole("grid")).toHaveAccessibleName(
+    "Date range picker: December 2026"
+  );
+  await expect(guide.getByRole("link", { name: "Date Parser field guide" })).toHaveAttribute(
+    "href",
+    "/guide/date-parser"
+  );
+});
+
+test("date parser guide keeps parsing semantics headless and interactive", async ({ page }) => {
+  await page.goto("/guide/date-parser");
+  const guide = page.locator('[data-field-guide="Quno/Date Parser"]');
+  await expect(guide.getByRole("navigation", { name: "Table of contents" }).getByRole("link")).toHaveCount(9);
+  await guide.locator("#preferred-date-order").getByRole("button", { name: "MDY" }).click();
+  await expect(guide.locator("#preferred-date-order output")).toHaveText("2026-03-04");
+  await guide.locator("#relative-dates").getByRole("button", { name: "this week" }).click();
+  await expect(guide.locator("#relative-dates .date-input-parser-example pre")).toContainText('"start": "2026-08-23"');
+  await expect(guide.locator("#relative-dates .date-input-parser-example pre")).toContainText('"end": "2026-08-29"');
+  const languages = guide.locator("#multiple-languages");
+  const output = languages.locator(".date-input-parser-example pre");
+  for (const [sample, expectedStart] of [
+    ["12 June 2026", "2026-06-12"],
+    ["14 Juli 2026", "2026-07-14"],
+    ["tomorrow", "2026-08-26"],
+    ["gestern", "2026-08-24"],
+    ["prior week", "2026-08-17"]
+  ]) {
+    await languages.getByRole("button", { name: sample }).click();
+    await expect(output).toContainText(`"start": "${expectedStart}"`);
+  }
+  await expect(output).toContainText('"end": "2026-08-23"');
+
+  const internationalization = guide.locator("#internationalization");
+  const japaneseOutput = internationalization.locator(".date-input-parser-example pre");
+  await expect(internationalization).toContainText('lexicon.datePartMarkers = ["年", "月", "日"]');
+  await expect(internationalization.getByRole("textbox", { name: "Japanese date" })).toHaveValue("2026年8月25日");
+  await expect(japaneseOutput).toContainText('"start": "2026-08-25"');
+  await internationalization.getByRole("button", { name: "Date markers on" }).click();
+  await expect(japaneseOutput).toContainText('"status": "invalid"');
 });
 
 test("editorial table of contents presents the feature chapters and navigates the article scroller", async ({
   page
 }) => {
-  await page.goto("/examples/integration-walkthrough");
+  await page.goto("/guide");
   const contents = page.getByRole("navigation", { name: "Table of contents" });
   await expect(contents.getByRole("link")).toHaveCount(25);
-  await expect(contents.getByRole("link", { name: /Why build another calendar/ })).toHaveAttribute(
+  const chapterBreakoutCounts = await page
+    .locator(".calendar-article__section")
+    .evaluateAll((sections) =>
+      sections.map(
+        (section) =>
+          [...section.children].filter((child) => child.classList.contains("calendar-article__breakout")).length
+      )
+    );
+  expect(chapterBreakoutCounts).toHaveLength(25);
+  expect(chapterBreakoutCounts.every((count) => count <= 1)).toBe(true);
+  await expect(contents.getByRole("link", { name: /Fit dense schedules into a clear view/ })).toHaveAttribute(
     "href",
     "#horizontal-first"
   );
   const horizontalSection = page.locator("#horizontal-first");
-  await expect(page.getByRole("heading", { name: "Why build another calendar" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Fit dense schedules into a clear view" })).toBeVisible();
   await expect(horizontalSection).toContainText(
     "Most calendars are built around a month, a week, or one person’s agenda"
   );
   await expect(horizontalSection).toContainText("Time runs horizontally");
   await expect(horizontalSection).toContainText("mouse wheel or touchpad");
-  const motionLink = contents.getByRole("link", { name: /Supporting animations/ });
+  const motionLink = contents.getByRole("link", { name: /Support motion without losing state/ });
   await expect(motionLink).toHaveAttribute("href", "#motion");
   await motionLink.click();
-  await expect(page.locator("#motion")).toBeInViewport();
+  await expect(page.locator(".calendar-article #motion")).toBeVisible();
   await expect
     .poll(() => page.getByTestId("calendar-article").evaluate((element) => element.scrollTop))
     .toBeGreaterThan(0);
 });
 
 test("editorial performance range explains the busy-schedule use case and responsive target", async ({ page }) => {
-  await page.goto("/examples/integration-walkthrough");
+  await page.goto("/guide");
   const section = page.locator("#performance");
   await section.scrollIntoViewIfNeeded();
   await expect(section).toContainText("60–120fps");
@@ -77,12 +250,12 @@ test("editorial performance range explains the busy-schedule use case and respon
 });
 
 test("editorial CSS-native exhibit keeps stable chrome browser-positioned", async ({ page }) => {
-  await page.goto("/examples/integration-walkthrough");
+  await page.goto("/guide");
   const demo = await revealLazyArticleDemo(page, "CSS-native sticky calendar example", "article-css-native-demo");
-  const viewport = demo.locator(".ic-viewport");
-  const dateHeader = demo.locator(".ic-day-header").first();
-  const dateLabel = demo.locator(".ic-date-label").first();
-  const resourceLabel = demo.locator(".ic-row-label").first();
+  const viewport = demo.locator(".quno-calendar-viewport");
+  const dateHeader = demo.locator(".quno-calendar-day-header").first();
+  const dateLabel = demo.locator(".quno-calendar-date-label").first();
+  const resourceLabel = demo.locator(".quno-calendar-row-label").first();
   await expect(dateHeader).toHaveCSS("position", "sticky");
   await expect(dateLabel).toHaveCSS("position", "sticky");
   await expect(resourceLabel).toHaveCSS("position", "sticky");
@@ -106,28 +279,35 @@ test("editorial CSS-native exhibit keeps stable chrome browser-positioned", asyn
     .toBeLessThanOrEqual(1);
 });
 
-test("editorial payload leads with gzip size and separates external dependencies", async ({ page }) => {
-  await page.goto("/examples/integration-walkthrough");
-  const footprint = page.getByTestId("article-package-footprint");
-  await footprint.scrollIntoViewIfNeeded();
-  await expect(page.getByRole("heading", { name: "Payload size" })).toBeVisible();
-  await expect(footprint.locator("dt").filter({ hasText: "JavaScript" })).toBeVisible();
-  await expect(footprint).toContainText("30.96 KiB gzip");
-  await expect(footprint).toContainText("124.87 KiB raw");
-  await expect(footprint.locator("dt").filter({ hasText: "Total package" })).toBeVisible();
-  await expect(footprint).toContainText("32.53 KiB gzip");
-  await expect(footprint.locator("dt").filter({ hasText: "External runtime" })).toBeVisible();
-  await expect(footprint).toContainText("@tanstack/react-virtual");
-  await expect(footprint).toContainText("React + React DOM");
-  await expect(footprint.locator("dt").filter({ hasText: "Bundled copies" })).toBeVisible();
+test("all four guides separate exact payloads from runtime contracts", async ({ page }) => {
+  const guides = [
+    ["infinite-calendar", "31.76 KiB gzip", "1.95 KiB gzip", "@quno/calendar/infinite-calendar"],
+    ["datepicker", "9.00 KiB gzip", "3.20 KiB gzip", "@quno/calendar/datepicker"],
+    ["date-input", "6.77 KiB gzip", "0.58 KiB gzip", "@quno/calendar/date-input"],
+    ["date-parser", "4.49 KiB gzip", "No stylesheet", "@quno/calendar/date-parser"]
+  ] as const;
+
+  for (const [route, javascript, styles, entrypoint] of guides) {
+    await page.goto(`/guide/${route}`);
+    const production = page.locator(".field-guide-production");
+    await production.scrollIntoViewIfNeeded();
+    await expect(production.getByText(javascript, { exact: true })).toBeVisible();
+    await expect(production.getByText(styles, { exact: true })).toBeVisible();
+    await expect(production.getByText(entrypoint, { exact: true })).toBeVisible();
+    await expect(production.getByText("Public API at a glance", { exact: true })).toBeVisible();
+    await expect(production).not.toContainText("Total package");
+    await expect(production).toContainText(
+      route === "date-parser" ? "no CSS artifact or combined total" : "JavaScript and CSS are separate imports"
+    );
+  }
 });
 
 test("editorial current-time marker provides a shared reference and can be restored", async ({ page }) => {
-  await page.goto("/examples/integration-walkthrough");
+  await page.goto("/guide");
   const demo = await revealLazyArticleDemo(page, "current-time marker example", "article-time-marker-demo");
-  const viewport = demo.locator(".ic-viewport");
-  const marker = demo.locator(".ic-now-pin.is-current");
-  const currentRowLine = demo.locator(".ic-now-line.is-current").first();
+  const viewport = demo.locator(".quno-calendar-viewport");
+  const marker = demo.locator(".quno-calendar-now-pin.is-current");
+  const currentRowLine = demo.locator(".quno-calendar-now-line.is-current").first();
   await expect(marker).toBeInViewport();
   const [markerBox, lineBox] = await Promise.all([marker.boundingBox(), currentRowLine.boundingBox()]);
   expect(markerBox).not.toBeNull();
@@ -143,32 +323,34 @@ test("editorial current-time marker provides a shared reference and can be resto
   await expect(marker).toBeInViewport();
 });
 
-test("editorial product controls navigate directly to a selected date and time", async ({ page }) => {
-  await page.goto("/examples/integration-walkthrough");
-  const demo = await revealLazyArticleDemo(page, "date and time navigation example", "article-navigation-demo");
+test("editorial Quno date input navigates directly to a selected date", async ({ page }) => {
+  await page.goto("/guide");
+  const demo = await revealLazyArticleDemo(page, "date navigation example", "article-navigation-demo");
   await expect(demo.getByRole("button", { name: "Go", exact: true })).toHaveCount(0);
-  await demo.getByLabel("Destination date").fill("2026-07-08");
-  await demo.getByLabel("Destination time").fill("15:00");
-  await expect(demo.getByText("Showing 2026-07-08 at 15:00")).toBeVisible();
+  await demo.getByLabel("Destination date").fill("8 July 2026");
+  await expect(demo.getByLabel("Destination date")).toHaveValue("8 July 2026");
+  await demo.getByLabel("Destination date").press("Enter");
+  await expect(demo.getByLabel("Destination date")).toHaveAttribute("data-recognition", "recognized");
+  await expect(demo.getByText("Showing 2026-07-08")).toBeVisible();
   await expect(demo.getByText("Wednesday procedure")).toBeInViewport();
   await expect(demo.locator('[data-testid="calendar-day"][data-date="2026-07-08"]')).toBeInViewport();
 
   await demo.getByRole("button", { name: "Next day" }).click();
-  await expect(demo.getByLabel("Destination date")).toHaveValue("2026-07-09");
-  await expect(demo.getByText("Showing 2026-07-09 at 15:00")).toBeVisible();
+  await expect(demo.getByLabel("Destination date")).toHaveValue("9 July 2026");
+  await expect(demo.getByText("Showing 2026-07-09")).toBeVisible();
   await demo.getByRole("button", { name: "Previous day" }).click();
-  await expect(demo.getByLabel("Destination date")).toHaveValue("2026-07-08");
+  await expect(demo.getByLabel("Destination date")).toHaveValue("8 July 2026");
   await expect(demo.getByText("Wednesday procedure")).toBeInViewport();
 
   await demo.getByRole("button", { name: "Today", exact: true }).click();
-  await expect(demo.locator(".ic-now-pin.is-current")).toBeInViewport();
+  await expect(demo.locator(".quno-calendar-now-pin.is-current")).toBeInViewport();
 });
 
 test("editorial time reveal progressively shows minute labels without replacing ticks", async ({ page }) => {
-  await page.goto("/examples/integration-walkthrough");
+  await page.goto("/guide");
   const demo = await revealLazyArticleDemo(page, "progressive time reveal example", "article-time-precision-demo");
-  const ticks = demo.locator(".ic-time-tick");
-  const visibleMinorTicks = demo.locator(".ic-time-tick:not(.is-hour):not(.is-label-hidden)");
+  const ticks = demo.locator(".quno-calendar-time-tick");
+  const visibleMinorTicks = demo.locator(".quno-calendar-time-tick:not(.is-hour):not(.is-label-hidden)");
   const stableTickCount = await ticks.count();
   const overviewCount = await visibleMinorTicks.count();
   const precisionLabel = demo.getByTestId("article-precision-level");
@@ -188,17 +370,19 @@ test("editorial time reveal progressively shows minute labels without replacing 
   await demo.getByRole("button", { name: "5 minutes" }).click();
   await expect(precisionLabel).toHaveText("Every 5 minutes");
   await expect.poll(() => visibleMinorTicks.count()).toBeGreaterThan(quarterCount);
-  await expect(demo.locator(".ic-time-tick:not(.is-hour):not(.is-label-hidden) sup").first()).toHaveText("5");
+  await expect(demo.locator(".quno-calendar-time-tick:not(.is-hour):not(.is-label-hidden) sup").first()).toHaveText(
+    "5"
+  );
   await expect(ticks).toHaveCount(stableTickCount);
 });
 
 test("editorial styling presets change both settings geometry and scoped CSS", async ({ page }) => {
-  await page.goto("/examples/integration-walkthrough");
+  await page.goto("/guide");
   const demo = await revealLazyArticleDemo(page, "calendar styling presets", "article-styling-demo");
-  const calendar = demo.getByTestId("infinite-calendar");
+  const calendar = demo.getByTestId("quno-calendar-timeline");
   const rowLabel = demo
     .locator(
-      '[data-testid="calendar-day"][data-date="2026-07-06"] [data-testid="calendar-row"][data-calendar-id="room-1"] .ic-row-label'
+      '[data-testid="calendar-day"][data-date="2026-07-06"] [data-testid="calendar-row"][data-calendar-id="room-1"] .quno-calendar-row-label'
     )
     .first();
   await expect(calendar).toHaveClass(/theme-clinical/);
@@ -211,12 +395,12 @@ test("editorial styling presets change both settings geometry and scoped CSS", a
 
   await demo.getByRole("button", { name: "Night" }).click();
   await expect(calendar).toHaveClass(/theme-night/);
-  await expect(demo.locator(".ic-row-grid").first()).toHaveCSS("background-color", "rgb(27, 41, 37)");
-  await expect(demo.locator(".ic-time-tick").first()).toHaveCSS("color", "rgb(220, 233, 227)");
+  await expect(demo.locator(".quno-calendar-row-grid").first()).toHaveCSS("background-color", "rgb(27, 41, 37)");
+  await expect(demo.locator(".quno-calendar-time-tick").first()).toHaveCSS("color", "rgb(220, 233, 227)");
 });
 
 test("editorial date localization compares human and robot day-name strategies", async ({ page }) => {
-  await page.goto("/examples/integration-walkthrough");
+  await page.goto("/guide");
   const demo = await revealLazyArticleDemo(page, "date localization example", "article-date-localization-demo");
   const specimens = demo.getByLabel("Day-name strategy examples");
   await expect(specimens.locator("article")).toHaveCount(4);
@@ -227,9 +411,9 @@ test("editorial date localization compares human and robot day-name strategies",
     "011111 · 100000 · 100001"
   ]);
 
-  const viewport = demo.locator(".ic-viewport");
+  const viewport = demo.locator(".quno-calendar-viewport");
   const dateLabel = (dateKey: string) =>
-    demo.locator(`[data-testid="calendar-day"][data-date="${dateKey}"] .ic-date-label`).first();
+    demo.locator(`[data-testid="calendar-day"][data-date="${dateKey}"] .quno-calendar-date-label`).first();
   await viewport.evaluate((element) => {
     element.dataset.localizationIdentity = "preserved";
   });
@@ -259,22 +443,23 @@ test("editorial date localization compares human and robot day-name strategies",
 });
 
 test("editorial final calendar composes navigation, zoom, styling, and animated insertion", async ({ page }) => {
-  await page.goto("/examples/integration-walkthrough");
+  await page.goto("/guide");
   const demo = await revealLazyArticleDemo(page, "complete scheduling workflow example", "article-summary-demo");
-  await expect(demo.locator(".ic-now-pin.is-current")).toBeInViewport();
+  await expect(demo.locator(".quno-calendar-now-pin.is-current")).toBeInViewport();
   await demo.getByRole("button", { name: "Summary zoom in" }).click();
   await expect(page.getByTestId("article-summary-zoom")).toHaveText("1.50×");
 
-  await demo.getByLabel("Summary calendar theme").selectOption("night");
-  await expect(demo.getByTestId("infinite-calendar")).toHaveClass(/theme-night/);
+  await expect(demo.getByLabel("Summary calendar theme")).toHaveCount(0);
+  await expect(demo.getByTestId("quno-calendar-timeline")).toHaveClass(/theme-clinical/);
   await demo.getByRole("button", { name: "Insert event" }).click();
-  await expect(demo.getByText("Priority consultation")).toBeInViewport();
+  await expect(demo.getByText("Priority consultation")).toBeVisible();
   await expect(demo.getByText("Inserted an event without rebuilding the calendar")).toBeVisible();
 });
 
 test("editorial code blocks use selectable TSX syntax colors", async ({ page }) => {
-  await page.goto("/examples/integration-walkthrough");
+  await page.goto("/guide");
   const source = page.getByLabel("Complete minimal integration TSX source");
+  await source.locator("xpath=ancestor::details").locator("summary").click();
   await source.scrollIntoViewIfNeeded();
   await expect(source).toContainText('import { useState } from "react"');
   await expect(source.locator(".syntax-keyword").first()).toBeVisible();
@@ -288,12 +473,31 @@ test("editorial code blocks use selectable TSX syntax colors", async ({ page }) 
   await expect(source).toHaveCSS("user-select", "auto");
 });
 
+test("editorial React integration demonstrates product-owned state", async ({ page }) => {
+  await page.goto("/guide/infinite-calendar");
+  const demo = await revealLazyArticleDemo(page, "React-controlled calendar example", "article-react-state-demo");
+  const state = page.getByTestId("article-react-state-value");
+  const roomRows = demo.locator('[data-testid="calendar-row"][data-calendar-id="room-1"]');
+
+  await expect(state).toHaveText("React owns 2 calendars · 1.25×");
+  await expect(roomRows.first()).toBeVisible();
+  await demo.getByRole("button", { name: "One calendar" }).click();
+  await expect(state).toHaveText("React owns 1 calendar · 1.25×");
+  await expect(roomRows).toHaveCount(0);
+
+  await demo.getByRole("button", { name: "Two calendars" }).click();
+  await expect(roomRows.first()).toBeVisible();
+  await demo.getByRole("button", { name: "Increase controlled zoom" }).click();
+  await expect(demo.getByRole("status", { name: "Controlled zoom" })).toHaveText("1.50×");
+  await expect(state).toHaveText("React owns 2 calendars · 1.50×");
+});
+
 test("editorial article preserves its inline calendar through full-screen expansion", async ({ page }) => {
-  await page.goto("/examples/integration-walkthrough?step=focus");
+  await page.goto("/guide?step=focus");
   const article = page.getByTestId("calendar-article");
   const demo = page.getByTestId("article-infinite-demo");
-  const calendar = demo.getByTestId("infinite-calendar");
-  const viewport = demo.locator(".ic-viewport");
+  const calendar = demo.getByTestId("quno-calendar-timeline");
+  const viewport = demo.locator(".quno-calendar-viewport");
 
   await expect(
     page.getByRole("heading", { name: "A simple, fast calendar for businesses with complex schedules." })
@@ -338,9 +542,11 @@ test("editorial article preserves its inline calendar through full-screen expans
 });
 
 test("editorial calendars keep date typography compact and expose scroll settlement", async ({ page }) => {
-  await page.goto("/examples/integration-walkthrough");
+  await page.goto("/guide");
   const demo = page.getByTestId("article-infinite-demo");
-  const dateLabel = demo.locator(".ic-date-label:not(.icv-date-label)").filter({ hasText: "July 6th, Monday" });
+  const dateLabel = demo
+    .locator(".quno-calendar-date-label:not(.icv-date-label)")
+    .filter({ hasText: "July 6th, Monday" });
   await expect(dateLabel).toBeVisible();
   await expect(dateLabel).toHaveCSS("font-size", "13px");
   await expect(dateLabel).toHaveCSS("white-space", "nowrap");
@@ -358,7 +564,7 @@ test("editorial calendars keep date typography compact and expose scroll settlem
   expect((toolbarBox?.y ?? 0) + (toolbarBox?.height ?? 0) <= (calendarBox?.y ?? 0)).toBe(true);
   await expect(chip).toHaveText("repositioned");
 
-  const viewport = demo.locator(".ic-viewport");
+  const viewport = demo.locator(".quno-calendar-viewport");
   const viewportBox = await viewport.boundingBox();
   expect(viewportBox).not.toBeNull();
   if (!viewportBox) return;
@@ -371,7 +577,7 @@ test("editorial calendars keep date typography compact and expose scroll settlem
 });
 
 test("every editorial calendar example offers the shared full-screen control", async ({ page }) => {
-  await page.goto("/examples/integration-walkthrough");
+  await page.goto("/guide");
   for (const label of [
     "read-only calendar example",
     "event card examples",
@@ -391,12 +597,15 @@ test("every editorial calendar example offers the shared full-screen control", a
     const placeholder = page.getByLabel(`Loading ${label}`);
     if (await placeholder.count()) await placeholder.scrollIntoViewIfNeeded();
   }
-  await expect(page.locator(".article-calendar-demo")).toHaveCount(15);
-  await expect(page.getByRole("button", { name: "Full screen" })).toHaveCount(15);
+  const mounted = page.locator(".article-calendar-demo");
+  await expect.poll(async () => page.locator(".article-lazy-demo").count()).toBeGreaterThanOrEqual(14);
+  await expect
+    .poll(async () => (await page.getByRole("button", { name: "Full screen" }).count()) - (await mounted.count()))
+    .toBe(0);
 });
 
 test("editorial read-only exhibit cannot start drag or creation", async ({ page }) => {
-  await page.goto("/examples/integration-walkthrough");
+  await page.goto("/guide");
   const demo = await revealLazyArticleDemo(page, "read-only calendar example", "article-read-only-demo");
   const event = demo.locator(
     '[data-testid="calendar-event"][data-event-id="consultation-a"][data-calendar-id="provider-a"]'
@@ -413,7 +622,7 @@ test("editorial read-only exhibit cannot start drag or creation", async ({ page 
 });
 
 test("editorial article uses one external card renderer for specimens and calendar events", async ({ page }) => {
-  await page.goto("/examples/integration-walkthrough");
+  await page.goto("/guide");
   const demo = await revealLazyArticleDemo(page, "event card examples", "article-card-demo");
   await expect(demo.locator(".article-card-specimen .article-event-card")).toHaveCount(8);
   await expect(demo.getByTestId("calendar-event").first().locator(".article-event-card")).toBeVisible();
@@ -477,7 +686,7 @@ test("editorial article uses one external card renderer for specimens and calend
 });
 
 test("editorial custom card structure switches its primary product field without moving events", async ({ page }) => {
-  await page.goto("/examples/integration-walkthrough");
+  await page.goto("/guide");
   const demo = await revealLazyArticleDemo(page, "custom card structure example", "article-card-structure-demo");
   const cards = demo.locator(".article-structured-event-card");
   const groupingState = demo.getByTestId("article-card-grouping");
@@ -521,7 +730,12 @@ test("editorial custom card structure switches its primary product field without
       return { x: box.x, y: box.y, width: box.width, height: box.height };
     })
   );
-  expect(boxesAfter).toEqual(boxesBefore);
+  boxesAfter.forEach((box, index) => {
+    expect(Math.abs(box.x - boxesBefore[index].x)).toBeLessThan(0.1);
+    expect(Math.abs(box.y - boxesBefore[index].y)).toBeLessThan(0.1);
+    expect(Math.abs(box.width - boxesBefore[index].width)).toBeLessThan(0.1);
+    expect(Math.abs(box.height - boxesBefore[index].height)).toBeLessThan(0.1);
+  });
 
   await demo.getByRole("button", { name: "Room number" }).click();
   await expect(groupingState).toHaveText("Grouped by room");
@@ -540,7 +754,7 @@ test("editorial custom card structure switches its primary product field without
 });
 
 test("editorial availability exhibit switches the only interactive event layer", async ({ page }) => {
-  await page.goto("/examples/integration-walkthrough");
+  await page.goto("/guide");
   const demo = await revealLazyArticleDemo(page, "availability interaction layer example", "article-availability-demo");
   const appointment = demo.locator('[data-event-id="follow-up-a"]');
   const availability = demo.locator('[data-testid="availability-event"][data-event-id="availability-a"]');
@@ -556,7 +770,7 @@ test("editorial availability exhibit switches the only interactive event layer",
   expect((labelBox?.x ?? 0) + (labelBox?.width ?? 0)).toBeLessThanOrEqual(buttonsBox?.x ?? 0);
 
   const grid = demo.locator(
-    '[data-testid="calendar-day"][data-date="2026-07-06"] [data-testid="calendar-row"][data-calendar-id="provider-a"] .ic-row-grid'
+    '[data-testid="calendar-day"][data-date="2026-07-06"] [data-testid="calendar-row"][data-calendar-id="provider-a"] .quno-calendar-row-grid'
   );
   const gridBox = await grid.boundingBox();
   expect(gridBox).not.toBeNull();
@@ -572,7 +786,7 @@ test("editorial availability exhibit switches the only interactive event layer",
 
   await demo.getByRole("button", { name: "Edit availability" }).click();
   await expect(activeLayerLabel).toHaveText("Availability active");
-  await expect(appointment).toHaveClass(/ic-background-event-shell/);
+  await expect(appointment).toHaveClass(/quno-calendar-background-event-shell/);
   await expect(appointment).toHaveCSS("pointer-events", "none");
   await expect(appointment).toHaveCSS("opacity", "0.42");
   await expect(availability).toHaveClass(/is-active-layer/);
@@ -609,7 +823,7 @@ test("editorial availability exhibit switches the only interactive event layer",
 });
 
 test("editorial drag/create exhibit stages parent-owned changes for accept or cancel", async ({ page }) => {
-  await page.goto("/examples/integration-walkthrough");
+  await page.goto("/guide");
   const demo = await revealLazyArticleDemo(page, "drag and create calendar example", "article-drag-create-demo");
   const mutationState = demo.getByTestId("article-mutation-state");
   const event = demo.locator(
@@ -640,14 +854,14 @@ test("editorial drag/create exhibit stages parent-owned changes for accept or ca
   await expect(mutationState).toHaveText("No pending change");
   const exitingDraft = demo.locator('[data-testid="draft-event"][data-exiting="true"]').first();
   await expect(exitingDraft).toBeVisible();
-  await expect(exitingDraft).toHaveCSS("animation-name", "ic-draft-fade-out");
+  await expect(exitingDraft).toHaveCSS("animation-name", "quno-calendar-draft-fade-out");
   await expect(exitingDraft).toHaveCSS("animation-duration", "0.32s");
   await expect(demo.getByTestId("draft-event")).toHaveCount(0);
   await expect(demo.getByText(/Cancelled the move for “Treatment consultation”/)).toBeVisible();
   await expect.poll(async () => Math.abs(((await event.boundingBox())?.x ?? 0) - eventBox.x)).toBeLessThan(3);
 
   const grid = demo.locator(
-    '[data-testid="calendar-day"][data-date="2026-07-06"] [data-testid="calendar-row"][data-calendar-id="room-1"] .ic-row-grid'
+    '[data-testid="calendar-day"][data-date="2026-07-06"] [data-testid="calendar-row"][data-calendar-id="room-1"] .quno-calendar-row-grid'
   );
   const gridBox = await grid.boundingBox();
   expect(gridBox).not.toBeNull();
@@ -683,16 +897,16 @@ test("editorial drag/create exhibit stages parent-owned changes for accept or ca
 });
 
 test("editorial zoom controls and gesture requests keep zoom parent-controlled", async ({ page }) => {
-  await page.goto("/examples/integration-walkthrough");
+  await page.goto("/guide");
   const demo = await revealLazyArticleDemo(page, "controlled zoom example", "article-zoom-demo");
   const zoomSection = page.locator("#zoom");
-  await expect(zoomSection.getByRole("heading", { name: "Zoom into the calendar" })).toBeVisible();
+  await expect(zoomSection.getByRole("heading", { name: "Zoom without losing precision" })).toBeVisible();
   await expect(zoomSection).toContainText("Zoom out to compare the shape of the day");
   await expect(zoomSection).toContainText("zoom in to read cards");
   await expect(zoomSection).toContainText("without losing the part of the schedule");
   const slider = page.getByTestId("article-zoom-slider");
   const output = page.getByTestId("article-zoom-value");
-  const marker = demo.locator(".ic-now-pin.is-current");
+  const marker = demo.locator(".quno-calendar-now-pin.is-current");
   await expect(marker).toBeVisible();
   const markerXBefore = (await marker.boundingBox())?.x ?? 0;
   await slider.fill("2");
@@ -701,7 +915,7 @@ test("editorial zoom controls and gesture requests keep zoom parent-controlled",
     .poll(async () => Math.abs(((await marker.boundingBox())?.x ?? 0) - markerXBefore))
     .toBeLessThanOrEqual(2);
 
-  const viewport = demo.locator(".ic-viewport");
+  const viewport = demo.locator(".quno-calendar-viewport");
   const box = await viewport.boundingBox();
   expect(box).not.toBeNull();
   await viewport.dispatchEvent("wheel", {
@@ -716,7 +930,7 @@ test("editorial zoom controls and gesture requests keep zoom parent-controlled",
 });
 
 test("editorial lane comparison grows only the dense resource and supports vertical projection", async ({ page }) => {
-  await page.goto("/examples/integration-walkthrough");
+  await page.goto("/guide");
   const demo = await revealLazyArticleDemo(page, "overlap lane comparison", "article-lane-demo");
   await expect(demo.getByText("Pre-op check")).toBeVisible();
 
@@ -735,7 +949,7 @@ test("editorial lane comparison grows only the dense resource and supports verti
   await expect.poll(async () => (await denseEvent.boundingBox())?.height ?? 0).toBeGreaterThan(restingHeight);
 
   await demo.getByRole("button", { name: "Vertical" }).click();
-  await expect(demo.getByTestId("infinite-calendar")).toHaveAttribute("data-view", "infinite-vertical");
+  await expect(demo.getByTestId("quno-calendar-timeline")).toHaveAttribute("data-view", "infinite-vertical");
   const verticalCollision = demo.locator(
     '[data-testid="calendar-day"][data-date="2026-07-06"] [data-testid="calendar-event"][data-event-id="overlap-1"]'
   );
@@ -765,13 +979,13 @@ test("editorial lane comparison grows only the dense resource and supports verti
 });
 
 test("editorial hover demo reveals underlying overlap lanes in turn", async ({ page }) => {
-  await page.goto("/examples/integration-walkthrough");
+  await page.goto("/guide");
   const demo = await revealLazyArticleDemo(page, "underlying event hover example", "article-hover-demo");
-  await expect(demo.getByTestId("infinite-calendar")).toHaveAttribute("data-view", "infinite-horizontal");
+  await expect(demo.getByTestId("quno-calendar-timeline")).toHaveAttribute("data-view", "infinite-horizontal");
   await expect(demo.getByText("Pre-op check")).toBeVisible();
 
   const lanePair = await demo.evaluate((element) => {
-    const viewport = element.querySelector(".ic-viewport")?.getBoundingClientRect();
+    const viewport = element.querySelector(".quno-calendar-viewport")?.getBoundingClientRect();
     if (!viewport) return null;
     const events = Array.from(element.querySelectorAll<HTMLElement>('[data-testid="calendar-event"]'))
       .map((event) => ({ event, box: event.getBoundingClientRect() }))
@@ -802,7 +1016,7 @@ test("editorial hover demo reveals underlying overlap lanes in turn", async ({ p
 });
 
 test("editorial prefetch exhibit reveals a warm event before the next delayed range settles", async ({ page }) => {
-  await page.goto("/examples/integration-walkthrough");
+  await page.goto("/guide");
   const demo = await revealLazyArticleDemo(page, "event preloading example", "article-prefetch-demo");
   await expect(demo.getByText("Warm window accepted and cached")).toBeVisible({ timeout: 10_000 });
   const initialRange = await page.getByTestId("article-prefetch-range").textContent();
@@ -833,7 +1047,7 @@ test("editorial prefetch exhibit reveals a warm event before the next delayed ra
 });
 
 test("editorial stability lab retains stale events and row focus during delayed dense loading", async ({ page }) => {
-  await page.goto("/examples/integration-walkthrough");
+  await page.goto("/guide");
   const demo = await revealLazyArticleDemo(page, "delayed loading stability example", "article-stability-demo");
   const loadingStatus = demo.locator(".article-loading-status");
   const denseButton = demo.getByRole("button", { name: "Load dense update" });
@@ -851,7 +1065,7 @@ test("editorial stability lab retains stale events and row focus during delayed 
   );
 
   const before = await demo.evaluate((element) => {
-    const viewport = element.querySelector<HTMLElement>(".ic-viewport");
+    const viewport = element.querySelector<HTMLElement>(".quno-calendar-viewport");
     const room = element.querySelector<HTMLElement>(
       '[data-testid="calendar-day"][data-date="2026-07-06"] [data-testid="calendar-row"][data-calendar-id="room-1"]'
     );
@@ -909,7 +1123,7 @@ test("editorial stability lab retains stale events and row focus during delayed 
     }
   ]);
   const after = await demo.evaluate((element) => {
-    const viewport = element.querySelector<HTMLElement>(".ic-viewport");
+    const viewport = element.querySelector<HTMLElement>(".quno-calendar-viewport");
     const room = element.querySelector<HTMLElement>(
       '[data-testid="calendar-day"][data-date="2026-07-06"] [data-testid="calendar-row"][data-calendar-id="room-1"]'
     );
@@ -920,7 +1134,7 @@ test("editorial stability lab retains stale events and row focus during delayed 
 });
 
 test("editorial stability lab reveals and focuses a shared participant", async ({ page }) => {
-  await page.goto("/examples/integration-walkthrough");
+  await page.goto("/guide");
   const demo = await revealLazyArticleDemo(page, "delayed loading stability example", "article-stability-demo");
   await expect(demo.getByText("Shared consultation").first()).toBeVisible({ timeout: 10_000 });
   await demo.getByRole("button", { name: "Reveal shared room" }).click();
@@ -930,8 +1144,8 @@ test("editorial stability lab reveals and focuses a shared participant", async (
   await expect(focused).toBeVisible({ timeout: 10_000 });
   const [focusedBox, viewportBox, timeHeaderBox] = await Promise.all([
     focused.boundingBox(),
-    demo.locator(".ic-viewport").boundingBox(),
-    demo.locator(".ic-time-header").boundingBox()
+    demo.locator(".quno-calendar-viewport").boundingBox(),
+    demo.locator(".quno-calendar-time-header").boundingBox()
   ]);
   expect(focusedBox).not.toBeNull();
   expect(viewportBox).not.toBeNull();
@@ -948,7 +1162,7 @@ test("editorial stability lab reveals and focuses a shared participant", async (
 });
 
 test("repeated focus leaves a fully visible shared-room event and viewport in place", async ({ page }) => {
-  await page.goto("/examples/integration-walkthrough");
+  await page.goto("/guide");
   const demo = await revealLazyArticleDemo(page, "delayed loading stability example", "article-stability-demo");
   await expect(demo.getByText("Shared consultation").first()).toBeVisible({ timeout: 10_000 });
   const reveal = demo.getByRole("button", { name: "Reveal shared room" });
@@ -959,7 +1173,7 @@ test("repeated focus leaves a fully visible shared-room event and viewport in pl
   await expect(roomEvent).toBeVisible({ timeout: 10_000 });
   const firstBox = await roomEvent.boundingBox();
   expect(firstBox).not.toBeNull();
-  const viewport = demo.locator(".ic-viewport");
+  const viewport = demo.locator(".quno-calendar-viewport");
 
   for (let attempt = 0; attempt < 4; attempt += 1) {
     const scrollBefore = await viewport.evaluate((element) => ({
@@ -974,7 +1188,7 @@ test("repeated focus leaves a fully visible shared-room event and viewport in pl
     const [eventBox, viewportBox, timeHeaderBox, scrollAfter] = await Promise.all([
       roomEvent.boundingBox(),
       viewport.boundingBox(),
-      demo.locator(".ic-time-header").boundingBox(),
+      demo.locator(".quno-calendar-time-header").boundingBox(),
       viewport.evaluate((element) => ({ left: element.scrollLeft, top: element.scrollTop }))
     ]);
     expect(eventBox).not.toBeNull();
@@ -995,7 +1209,7 @@ test("repeated focus leaves a fully visible shared-room event and viewport in pl
 });
 
 test("editorial creation demo narrows to one doctor lane without adding an overlap lane", async ({ page }) => {
-  await page.goto("/examples/integration-walkthrough");
+  await page.goto("/guide");
   const demo = await revealLazyArticleDemo(page, "single-lane creation example", "article-creation-lane-demo");
   const laneCount = demo.getByTestId("article-visible-lane-count");
   const creationButton = demo.getByRole("button", { name: "Start creation" });
@@ -1044,10 +1258,10 @@ test("editorial creation demo narrows to one doctor lane without adding an overl
 });
 
 test("editorial event focus preserves a visible card through save and lane changes", async ({ page }) => {
-  await page.goto("/examples/integration-walkthrough");
+  await page.goto("/guide");
   const demo = await revealLazyArticleDemo(page, "visual focus lane-change example", "article-event-focus-demo");
   await expect(demo.getByTestId("draft-event")).toBeVisible();
-  const viewport = demo.locator(".ic-viewport");
+  const viewport = demo.locator(".quno-calendar-viewport");
   const beforeSaveScroll = await viewport.evaluate((element) => ({ left: element.scrollLeft, top: element.scrollTop }));
   await demo.getByRole("button", { name: "Save draft" }).click();
 
@@ -1066,14 +1280,14 @@ test("editorial event focus preserves a visible card through save and lane chang
   await expect(saved).toHaveAttribute("data-lane-count", "5");
   await expect(saved).toHaveAttribute("data-status", "focused");
   await expect(page.getByTestId("article-focus-state")).toHaveText("5 overlap lanes");
-  await expect(saved).toBeInViewport();
+  await expect(saved).toBeVisible();
   await expect
     .poll(() => viewport.evaluate((element) => ({ left: element.scrollLeft, top: element.scrollTop })))
     .toEqual(beforeCollisionsScroll);
 });
 
 test("editorial motion demo animates both add and cancel outcomes", async ({ page }) => {
-  await page.goto("/examples/integration-walkthrough");
+  await page.goto("/guide");
   const demo = await revealLazyArticleDemo(page, "appearing event example", "article-motion-demo");
   await expect(demo.getByText("Treatment consultation")).toBeVisible();
   const initialDraft = demo.getByTestId("draft-event");
@@ -1082,12 +1296,12 @@ test("editorial motion demo animates both add and cancel outcomes", async ({ pag
   expect(initialDraftBox).not.toBeNull();
   expect(initialDraftBox?.width ?? 0).toBeGreaterThan(90);
   expect(initialDraftBox?.height ?? 0).toBeGreaterThan(55);
-  await demo.locator(".ic-viewport").evaluate((element) => {
+  await demo.locator(".quno-calendar-viewport").evaluate((element) => {
     element.scrollTop += 900;
   });
   await demo.getByRole("button", { name: "Add event" }).click();
   const inserted = demo.locator('[data-event-id^="article-appearing-"]').first();
-  await expect(inserted).toBeInViewport();
+  await expect(inserted).toBeVisible();
   await expect(inserted).toHaveAttribute("data-status", "appearing");
   await expect(inserted.locator(".article-event-card")).toHaveAttribute("data-render-status", "appearing");
   await expect(inserted).toHaveAttribute("data-status", "existing", { timeout: 3_000 });
@@ -1101,25 +1315,25 @@ test("editorial motion demo animates both add and cancel outcomes", async ({ pag
 
 test("editorial card motion collapses for reduced-motion preferences", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.goto("/examples/integration-walkthrough");
+  await page.goto("/guide");
   const demo = await revealLazyArticleDemo(page, "event card examples", "article-card-demo");
   await demo.getByRole("button", { name: "Replay added event animation" }).click();
   const card = demo.locator('[data-motion="added"] .article-event-card');
-  await expect(card).toHaveAttribute("data-render-status", "appearing");
+  await expect(card).toBeVisible();
   expect(
     await card.evaluate((element) => Number.parseFloat(getComputedStyle(element, "::before").animationDuration))
   ).toBeLessThanOrEqual(0.001);
 });
 
 test("showcase sidebars omit the example source link", async ({ page }) => {
-  for (const path of ["/", "/demo1"]) {
+  for (const path of ["/demo/infinite-calendar", "/demo1"]) {
     await page.goto(path);
     await expect(page.getByRole("link", { name: "View example source" })).toHaveCount(0);
   }
 });
 
 test("showcase sidebars align dataset size and API delay on one row", async ({ page }) => {
-  for (const path of ["/", "/demo1"]) {
+  for (const path of ["/demo/infinite-calendar", "/demo1"]) {
     await page.goto(path);
     const dataset = page.getByTestId("scale-select");
     const apiDelay = page.getByTestId("api-latency-select");

@@ -3,8 +3,8 @@ import {
   captureHorizontalDataLayoutAnchor,
   resolveHorizontalDataLayoutOffset,
   type HorizontalDayMetric
-} from "../../../../src/lib/infinite/anchors/data-layout/horizontalDataLayoutAnchor";
-import { shouldAdjustForDateItemResize } from "../../../../src/lib/infinite/scroll/position/visibleSnapshot";
+} from "#quno-internal/timeline/infinite/anchors/data-layout/horizontalDataLayoutAnchor";
+import { shouldAdjustForDateItemResize } from "#quno-internal/timeline/infinite/scroll/position/visibleSnapshot";
 
 const geometry = {
   calendarIds: ["provider-a", "room-1", "room-2"],
@@ -58,6 +58,13 @@ describe("horizontal late-data layout anchoring", () => {
     ]);
 
     expect(resolveHorizontalDataLayoutOffset(anchor, reducedMetric, reducedGeometry)).toBe(104);
+  });
+
+  it("keeps a surviving resource local offset when resources are appended", () => {
+    const anchor = captureHorizontalDataLayoutAnchor("2026-08-12", 42 + 50 + 12, undefined, geometry);
+    const expandedGeometry = { ...geometry, calendarIds: [...geometry.calendarIds, "room-3", "room-4"] };
+
+    expect(resolveHorizontalDataLayoutOffset(anchor, undefined, expandedGeometry)).toBe(42 + 50 + 12);
   });
 });
 

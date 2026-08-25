@@ -12,8 +12,8 @@ import {
   rowHeightForEvents,
   rowHeightForOverlapDepth,
   verticalLaneCountForPreparedCell
-} from "../../../../src/lib/infinite/events/layout/layout";
-import type { CalendarEvent } from "../../../../src/lib/core/types";
+} from "#quno-internal/timeline/infinite/events/layout/layout";
+import type { CalendarEvent } from "#quno-internal/timeline/core/types";
 
 const settings = {
   startHour: 8,
@@ -82,6 +82,26 @@ describe("event overlap layout", () => {
       ["second", 1],
       ["third", 2],
       ["later", 0]
+    ]);
+  });
+
+  it("keeps equal-start lane order when the last appointment duration changes", () => {
+    const initial = [
+      event("first", "09:00", "10:00"),
+      event("second", "09:00", "10:00"),
+      event("last", "09:00", "10:00")
+    ];
+    const modified = [initial[0], initial[1], event("last", "09:00", "09:30")];
+
+    expect(layoutEventsForRow(initial, settings).map((item) => [item.event.id, item.lane])).toEqual([
+      ["first", 0],
+      ["second", 1],
+      ["last", 2]
+    ]);
+    expect(layoutEventsForRow(modified, settings).map((item) => [item.event.id, item.lane])).toEqual([
+      ["first", 0],
+      ["second", 1],
+      ["last", 2]
     ]);
   });
 

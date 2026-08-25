@@ -10,12 +10,12 @@ import {
   type ReactNode
 } from "react";
 import {
-  CalendarRoot,
-  type CalendarNavigationHandle,
-  type CalendarRootProps,
-  type TimelineSettings
-} from "quno-calendar";
-import { ZoomControl } from "../controls/TimelineControls";
+  QunoInfiniteCalendar,
+  type QunoInfiniteCalendarHandle,
+  type QunoInfiniteCalendarProps,
+  type QunoInfiniteCalendarSettings
+} from "@quno/calendar/infinite-calendar";
+import { ZoomControl } from "#quno-demo/showcase/controls/TimelineControls";
 
 type DemoCalendarZoomValue = {
   zoom: number;
@@ -31,7 +31,7 @@ const DemoCalendarZoomContext = createContext<DemoCalendarZoomValue | null>(null
 const DemoZoomControlContext = createContext<DemoZoomControlValue | null>(null);
 const GESTURE_READOUT_SETTLE_MS = 300;
 
-export type DemoTimelineSettings = Omit<TimelineSettings, "zoom">;
+export type DemoQunoInfiniteCalendarSettings = Omit<QunoInfiniteCalendarSettings, "zoom">;
 
 export function DemoZoomProvider({ initialZoom, children }: { initialZoom: number; children: ReactNode }) {
   const [zoom, setZoom] = useState(initialZoom);
@@ -112,16 +112,15 @@ export function DemoZoomControl({ className }: { className: string }) {
   );
 }
 
-type DemoCalendarRootProps = Omit<CalendarRootProps, "settings" | "onZoomChange"> & {
-  settings: DemoTimelineSettings;
+type DemoQunoInfiniteCalendarProps = Omit<QunoInfiniteCalendarProps, "settings" | "onZoomChange"> & {
+  settings: DemoQunoInfiniteCalendarSettings;
 };
 
-export const DemoCalendarRoot = forwardRef<CalendarNavigationHandle, DemoCalendarRootProps>(function DemoCalendarRoot(
-  { settings: settingsWithoutZoom, ...props },
-  ref
-) {
-  const { zoom, requestZoom } = useDemoCalendarZoom();
-  const settings = useMemo(() => ({ ...settingsWithoutZoom, zoom }), [settingsWithoutZoom, zoom]);
+export const DemoQunoInfiniteCalendar = forwardRef<QunoInfiniteCalendarHandle, DemoQunoInfiniteCalendarProps>(
+  function DemoQunoInfiniteCalendar({ settings: settingsWithoutZoom, ...props }, ref) {
+    const { zoom, requestZoom } = useDemoCalendarZoom();
+    const settings = useMemo(() => ({ ...settingsWithoutZoom, zoom }), [settingsWithoutZoom, zoom]);
 
-  return <CalendarRoot {...props} ref={ref} settings={settings} onZoomChange={requestZoom} />;
-});
+    return <QunoInfiniteCalendar {...props} ref={ref} settings={settings} onZoomChange={requestZoom} />;
+  }
+);

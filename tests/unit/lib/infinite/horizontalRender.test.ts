@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   committedEventHoverWidth,
   horizontalEventGeometry
-} from "../../../../src/lib/infinite/rendering/horizontal/horizontalEventGeometry";
-import { pinnedResourceIndexes } from "../../../../src/lib/infinite/rendering/horizontal/useHorizontalDayResourceWindow";
+} from "#quno-internal/timeline/infinite/rendering/horizontal/horizontalEventGeometry";
+import { pinnedResourceIndexes } from "#quno-internal/timeline/infinite/rendering/horizontal/useHorizontalDayResourceWindow";
 
 describe("horizontal render helpers", () => {
   it("converts event timestamps to gutter-aware, minimum-width shell geometry", () => {

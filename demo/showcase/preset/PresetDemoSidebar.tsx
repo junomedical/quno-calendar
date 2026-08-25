@@ -1,13 +1,18 @@
-import { DemoRouteNav } from "../DemoRouteNav";
-import { ApiLatencyControl } from "../controls/ApiLatencyControl";
-import { DateJumpControl } from "../controls/DateJumpControl";
-import { DatasetControl } from "../controls/DatasetControl";
-import { CalendarCountControl, SnapControl, TimeRangeControl, ToggleControl } from "../controls/TimelineControls";
-import { ViewControl } from "../controls/ViewControl";
-import { demoCalendars } from "../data";
-import type { DemoControls } from "../hooks/useDemoControls";
-import type { DemoRoute } from "../types";
-import { DemoZoomControl } from "../zoom/DemoZoom";
+import { DemoRouteNav } from "#quno-demo/showcase/DemoRouteNav";
+import { ApiLatencyControl } from "#quno-demo/showcase/controls/ApiLatencyControl";
+import { DateJumpControl } from "#quno-demo/showcase/controls/DateJumpControl";
+import { DatasetControl } from "#quno-demo/showcase/controls/DatasetControl";
+import {
+  CalendarCountControl,
+  SnapControl,
+  TimeRangeControl,
+  ToggleControl
+} from "#quno-demo/showcase/controls/TimelineControls";
+import { ViewControl } from "#quno-demo/showcase/controls/ViewControl";
+import { demoCalendars } from "#quno-demo/showcase/data";
+import type { DemoControls } from "#quno-demo/showcase/hooks/useDemoControls";
+import type { DemoRoute } from "#quno-demo/showcase/types";
+import { DemoZoomControl } from "#quno-demo/showcase/zoom/DemoZoom";
 import type { DemoPreset } from "./types";
 
 type PresetDemoSidebarProps = {
@@ -19,7 +24,7 @@ type PresetDemoSidebarProps = {
   pendingApiRequestCount: number;
   onScaleChange: (scale: number) => void;
   onAvailabilityModeChange: (checked: boolean) => void;
-  onGoToDate: () => void;
+  onGoToDate: (date: DemoControls["jumpDate"]) => void;
 };
 
 export function PresetDemoSidebar({
@@ -82,15 +87,7 @@ export function PresetDemoSidebar({
         testId="exclude-weekends"
         onChange={controls.setExcludeWeekends}
       />
-      <DateJumpControl
-        className={className("date-jump")}
-        date={controls.jumpDate}
-        time={controls.jumpTime}
-        showIcon={preset.id !== "demo1"}
-        onDateChange={controls.setJumpDate}
-        onTimeChange={controls.setJumpTime}
-        onGo={onGoToDate}
-      />
+      <DateJumpControl className={className("date-jump")} date={controls.jumpDate} onDateChange={onGoToDate} />
       <ToggleControl
         checked={controls.editAvailabilities}
         className={className("toggle")}

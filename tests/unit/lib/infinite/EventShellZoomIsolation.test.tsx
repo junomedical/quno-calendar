@@ -1,12 +1,12 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import {
-  CalendarRoot,
+  QunoInfiniteCalendar,
   type CalendarEvent,
   type EventRendererProps,
   type LoadEvents,
-  type TimelineSettings
-} from "../../../../src/lib";
+  type QunoInfiniteCalendarSettings
+} from "#quno-internal/timeline";
 
 const calendars = [{ id: "calendar-a", name: "Calendar A" }];
 const selectedCalendarIds = ["calendar-a"];
@@ -19,7 +19,7 @@ const loadedEvent: CalendarEvent = {
   end: "2026-07-04T10:00:00"
 };
 
-function settings(zoom: number): Partial<TimelineSettings> {
+function settings(zoom: number): Partial<QunoInfiniteCalendarSettings> {
   return { startHour: 8, endHour: 18, zoom, excludedWeekdays: [] };
 }
 
@@ -32,7 +32,7 @@ describe("EventShell zoom isolation", () => {
       </div>
     ));
     const calendar = (zoom: number) => (
-      <CalendarRoot
+      <QunoInfiniteCalendar
         calendars={calendars}
         selectedCalendarIds={selectedCalendarIds}
         loadEvents={loadEvents}

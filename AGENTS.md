@@ -1,32 +1,50 @@
-# Agent Notes
+# Quno Calendar Agent Instructions
 
-## Project Context
+These instructions apply to the entire combined `@quno/calendar` repository.
 
-This repository is a reusable React infinite-calendar PoC. Keep the implementation focused on the component/library surface first and the demo second.
+## Start here
 
-## Documentation Discipline
+Before changing code or behavior, read `README.md`, `docs/README.md`, `docs/shared/decisions.md`, `CHANGELOG.md`,
+`docs/shared/usage.md`, and the `README.md` plus `decisions.md` for every product in scope. Treat them as part of the
+implementation and update them in the same change.
 
-Behavioral, API, interaction, or architecture changes must update the relevant Markdown files in `docs/` during the same change:
+## Package domains
 
-- `docs/architecture.md` for component contracts, data flow, layout, virtualization, and interaction architecture.
-- `docs/taxonomy.md` for interface vocabulary and canonical names for UI parts.
-- `docs/usage.md` for public API usage and copyable examples.
-- `docs/decisions.md` for design decisions and tradeoffs.
-- `docs/test-plan.md` for new or changed verification expectations.
-- `docs/changelog.md` for user-visible changes.
+- `src/lib/shared`: headless timezone-free `IsoDate` contracts and safe calendar-day helpers.
+- `src/lib/timeline`: `QunoInfiniteCalendar`; day keys are `IsoDate`, while event start/end values remain timestamp strings.
+- `src/lib/date-picker`: `QunoDatePicker` and its direct-manipulation range behavior.
+- `src/lib/date-input`: `QunoDateInput` plus the parser implementation it consumes internally.
+- `src/lib/date-parser`: the public headless parser and tokenizer surface.
+- `demo/guide`: four guides built from one editorial system. Every primary contract needs a live public-entry-point example, concise “Try it” guidance, and a copyable recipe. Mount heavy Infinite Calendar exhibits lazily.
 
-Do not leave documentation updates as a follow-up when changing library behavior.
+Do not use parent-directory module imports. Same-folder imports may use `./`; every cross-folder import uses a stable alias: public package tests use `@quno/calendar/*`, private source tests use `#quno-internal/*`, demo code uses `#quno-demo/*`, API handlers use `#quno-api/*`, browser tests use `#quno-e2e/*`, unit-test helpers use `#quno-tests/*`, and root configuration uses `#quno-project/*`. The root `@quno/calendar` entry is headless; UI is exported only from its feature subpaths. Styles remain optional, independent, component-scoped assets.
 
-## Visual Verification
+## Documentation records
 
-Any visual calendar change must be backed by a Playwright test in the same change. Prefer assertions that verify geometry, layering, clipping, or computed styles over screenshots alone, and update `docs/test-plan.md` when the visual expectation changes.
+- Keep `CHANGELOG.md` at the repository root with `Unreleased` first.
+- Keep product documentation under `docs/infinite-calendar`, `docs/datepicker`, `docs/date-input`, and
+  `docs/date-parser`. Every product must retain its own `README.md` and `decisions.md`.
+- Record a product-specific choice only in that product's `decisions.md`. Record a choice affecting more than one
+  product in `docs/shared/decisions.md`; do not use another product's ledger as a convenient default.
+- Append a new decision when accepted behavior changes. Never silently rewrite an accepted decision, move or reuse its
+  identifier, or erase historical context. Preserve existing calendar, `QDP-*`, `QDI-*`, `QDPR-*`, and `QUNO-*`
+  identifiers and link superseding entries explicitly.
+- Keep `README.md` concise, `docs/README.md` navigable, `docs/shared/usage.md` copyable, and all four `/guide/*` routes
+  interactive.
+- Update `docs/shared/migration.md` for any breaking public-name, entrypoint, token, or class change.
+- Keep `docs/shared/architecture.md`, `docs/shared/taxonomy.md`, and `docs/shared/testing.md` aligned with package-wide
+  boundaries and verification. Keep Infinite Calendar runtime details in `docs/infinite-calendar`.
 
-## Implementation Notes
+## Architecture and style
 
-- Prefer native CSS sticky positioning for fixed calendar labels and headers before adding synchronized overlay state.
-- Keep zoom controlled by the parent through `settings.zoom`; calendar gestures should request changes with `onZoomChange`.
-- Keep vertical virtualization bounded around the top visible date and recenter after scroll idle; date navigation should update that anchor rather than restoring an unbounded virtual list. Recenter operations must preserve the pixel offset inside the visible date so scroll end does not create a content jump.
-- Keep timeline labels adaptive at dense zoom levels; hide minor minute labels before allowing numbers to overlap.
-- Keep event rendering externalized through `eventRenderer`; product-specific card layout belongs in the renderer, not in calendar internals.
-- Preserve multi-calendar event semantics: `calendarIds` renders one event in multiple rows; hover focus stays local to the row instance, while drag/drop-preview status stays keyed by event id across visible instances.
-- Keep drag/drop and draft creation hit-testing limited to timeline grid space, not left-side labels.
+- Author against React 18+ and keep Preact support through tested `preact/compat` aliases.
+- Preserve strict TypeScript, controlled/uncontrolled component behavior, stable `data-slot` and state attributes, external event rendering, and consumer-owned customization.
+- Keep production modules at or below 200 non-comment lines and functions at or below 120 source lines. Split by responsibility before crossing either limit.
+- Use `--quno-*` shared tokens, `--quno-calendar-*`/`quno-calendar-*` timeline names, and `--quno-date-picker-*`/`quno-date-picker-*` picker and input names.
+- Keep framework runtimes and the TanStack virtualizer external. Never edit generated `dist` assets.
+
+## Verification
+
+Run formatting, architecture checks, typechecking, linting, unit tests, Chromium Playwright tests, the Preact compatibility fixture, demo build, package verification, size reporting, and `npm pack --dry-run` before handoff. Update `CHANGELOG.md` with any exact blocker.
+
+Visual changes require Playwright coverage that asserts geometry, layering, clipping, state, or computed styles rather than screenshots alone. Public API guards must require all four product subpath surfaces and reject legacy facade names and private modules.

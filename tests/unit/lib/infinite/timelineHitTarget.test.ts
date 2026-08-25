@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import {
   timelineGridAtPoint,
   timelineGridIdentity
-} from "../../../../src/lib/infinite/interactions/hit-testing/timelineHitTarget";
+} from "#quno-internal/timeline/infinite/interactions/hit-testing/timelineHitTarget";
 
 function resolvePointTo(element: Element) {
   Object.defineProperty(document, "elementFromPoint", {
@@ -19,24 +19,26 @@ describe("timelineGridAtPoint", () => {
     const secondCalendar = document.createElement("section");
     const firstGrid = firstCalendar.appendChild(document.createElement("div"));
     const secondGrid = secondCalendar.appendChild(document.createElement("div"));
-    firstGrid.className = "ic-row-grid";
-    secondGrid.className = "ic-row-grid";
+    firstGrid.className = "quno-calendar-row-grid";
+    secondGrid.className = "quno-calendar-row-grid";
     const secondEvent = secondGrid.appendChild(document.createElement("div"));
     document.body.append(firstCalendar, secondCalendar);
     resolvePointTo(secondEvent);
 
-    expect(timelineGridAtPoint(firstCalendar, { clientX: 10, clientY: 10 }, ".ic-row-grid", ".sticky")).toBeNull();
-    expect(timelineGridAtPoint(secondCalendar, { clientX: 10, clientY: 10 }, ".ic-row-grid", ".sticky")).toBe(
-      secondGrid
-    );
+    expect(
+      timelineGridAtPoint(firstCalendar, { clientX: 10, clientY: 10 }, ".quno-calendar-row-grid", ".sticky")
+    ).toBeNull();
+    expect(
+      timelineGridAtPoint(secondCalendar, { clientX: 10, clientY: 10 }, ".quno-calendar-row-grid", ".sticky")
+    ).toBe(secondGrid);
   });
 
   it("rejects horizontal and vertical sticky chrome even when it overlaps a grid", () => {
     const calendar = document.createElement("section");
     const horizontalGrid = calendar.appendChild(document.createElement("div"));
-    horizontalGrid.className = "ic-row-grid";
+    horizontalGrid.className = "quno-calendar-row-grid";
     const horizontalLabel = horizontalGrid.appendChild(document.createElement("div"));
-    horizontalLabel.className = "ic-day-header";
+    horizontalLabel.className = "quno-calendar-day-header";
     const verticalGrid = calendar.appendChild(document.createElement("div"));
     verticalGrid.className = "icv-calendar-column-grid";
     const verticalLabel = verticalGrid.appendChild(document.createElement("div"));
@@ -44,7 +46,14 @@ describe("timelineGridAtPoint", () => {
     document.body.append(calendar);
 
     resolvePointTo(horizontalLabel);
-    expect(timelineGridAtPoint(calendar, { clientX: 20, clientY: 20 }, ".ic-row-grid", ".ic-day-header")).toBeNull();
+    expect(
+      timelineGridAtPoint(
+        calendar,
+        { clientX: 20, clientY: 20 },
+        ".quno-calendar-row-grid",
+        ".quno-calendar-day-header"
+      )
+    ).toBeNull();
 
     resolvePointTo(verticalLabel);
     expect(

@@ -1,6 +1,6 @@
 import { ClipboardList, LockKeyhole, UserRound, Video } from "lucide-react";
-import type { EventRendererProps } from "quno-calendar";
-import { eventCardModel } from "../eventCardModel";
+import type { EventRendererProps } from "@quno/calendar/infinite-calendar";
+import { eventCardModel } from "#quno-demo/showcase/eventCardModel";
 import "./Demo2EventCard.css";
 
 export function Demo2EventCard(props: EventRendererProps) {

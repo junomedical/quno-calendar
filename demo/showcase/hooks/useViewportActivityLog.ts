@@ -1,4 +1,4 @@
-import { useEffect, type RefObject } from "react";
+import { useCallback, useEffect, useRef, type RefObject } from "react";
 
 type ViewportActivityLogArgs = {
   containerRef: RefObject<HTMLElement | null>;
@@ -33,16 +33,16 @@ function activityMessage(kind: "scrolled" | "repositioned", position: ReturnType
 
 /** Reports settled demo viewport movement without exposing a library-level instrumentation API. */
 export function useViewportActivityLog({ containerRef, resetKey, onActivity }: ViewportActivityLogArgs) {
+  const manualIntentUntilRef = useRef(0);
   useEffect(() => {
     void resetKey;
-    const viewport = containerRef.current?.querySelector<HTMLElement>(".ic-viewport");
+    const viewport = containerRef.current?.querySelector<HTMLElement>(".quno-calendar-viewport");
     if (!viewport) return;
 
     let settleTimer: number | null = null;
-    let manualIntentUntil = 0;
     let lastReported = viewportPosition(viewport);
     const markManualIntent = () => {
-      manualIntentUntil = performance.now() + MANUAL_INTENT_TAIL_MS;
+      manualIntentUntilRef.current = performance.now() + MANUAL_INTENT_TAIL_MS;
     };
     const handleKey = (event: KeyboardEvent) => {
       if (MANUAL_SCROLL_KEYS.has(event.key)) markManualIntent();
@@ -51,7 +51,7 @@ export function useViewportActivityLog({ containerRef, resetKey, onActivity }: V
       if (event.target === viewport) markManualIntent();
     };
     const clearManualIntentOutsideViewport = (event: PointerEvent) => {
-      if (!(event.target instanceof Node) || !viewport.contains(event.target)) manualIntentUntil = 0;
+      if (!(event.target instanceof Node) || !viewport.contains(event.target)) manualIntentUntilRef.current = 0;
     };
     const handleScroll = () => {
       if (settleTimer !== null) window.clearTimeout(settleTimer);
@@ -60,7 +60,7 @@ export function useViewportActivityLog({ containerRef, resetKey, onActivity }: V
         const position = viewportPosition(viewport);
         if (position.top === lastReported.top && position.left === lastReported.left) return;
         lastReported = position;
-        const kind = performance.now() <= manualIntentUntil ? "scrolled" : "repositioned";
+        const kind = performance.now() <= manualIntentUntilRef.current ? "scrolled" : "repositioned";
         onActivity(activityMessage(kind, position));
       }, SCROLL_SETTLE_MS);
     };
@@ -83,4 +83,8 @@ export function useViewportActivityLog({ containerRef, resetKey, onActivity }: V
       window.removeEventListener("pointerdown", clearManualIntentOutsideViewport, true);
     };
   }, [containerRef, onActivity, resetKey]);
+
+  return useCallback(() => {
+    manualIntentUntilRef.current = 0;
+  }, []);
 }

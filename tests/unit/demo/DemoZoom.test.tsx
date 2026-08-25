@@ -1,7 +1,7 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { defaultTimelineSettings } from "../../../src/lib";
-import { DemoCalendarRoot, DemoZoomControl, DemoZoomProvider } from "../../../demo/showcase/zoom/DemoZoom";
+import { defaultQunoInfiniteCalendarSettings } from "#quno-internal/timeline";
+import { DemoQunoInfiniteCalendar, DemoZoomControl, DemoZoomProvider } from "#quno-demo/showcase/zoom/DemoZoom";
 
 describe("demo zoom render boundary", () => {
   afterEach(() => vi.restoreAllMocks());
@@ -34,11 +34,11 @@ describe("demo zoom render boundary", () => {
       .spyOn(window, "requestAnimationFrame")
       .mockImplementation((callback: FrameRequestCallback) => frameCallbacks.push(callback));
     vi.spyOn(window, "cancelAnimationFrame").mockImplementation(() => undefined);
-    const { zoom: _zoom, ...settings } = defaultTimelineSettings;
+    const { zoom: _zoom, ...settings } = defaultQunoInfiniteCalendarSettings;
 
     render(
       <DemoZoomProvider initialZoom={1.2}>
-        <DemoCalendarRoot
+        <DemoQunoInfiniteCalendar
           calendars={[{ id: "calendar-a", name: "Calendar A" }]}
           selectedCalendarIds={["calendar-a"]}
           loadEvents={async () => []}
@@ -49,7 +49,7 @@ describe("demo zoom render boundary", () => {
       </DemoZoomProvider>
     );
     const slider = screen.getByTestId("zoom-slider");
-    const timelineTrack = document.querySelector<HTMLElement>(".ic-time-tick-track");
+    const timelineTrack = document.querySelector<HTMLElement>(".quno-calendar-time-tick-track");
     expect(timelineTrack?.style.width).toBe("720px");
     frameCallbacks.length = 0;
     requestFrame.mockClear();

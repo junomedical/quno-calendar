@@ -1,24 +1,26 @@
 import { execFileSync } from "node:child_process";
-import { accessSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { accessSync, existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 
 const root = resolve(".");
-const workDir = join(root, "work", "package-verify");
+const workDir = mkdtempSync(join(tmpdir(), "quno-package-verify-"));
 const packDir = join(workDir, "pack");
-const appDir = join(workDir, "app");
+const appDir = join(workDir, "react-app");
 const npmEnvironment = { ...process.env, npm_config_cache: join(workDir, "npm-cache") };
-
-rmSync(workDir, { recursive: true, force: true });
 mkdirSync(packDir, { recursive: true });
 mkdirSync(join(appDir, "src"), { recursive: true });
 
-const packOutput = execFileSync("npm", ["pack", "--pack-destination", packDir], {
+const packed = execFileSync("npm", ["pack", "--pack-destination", packDir], {
   cwd: root,
   env: npmEnvironment,
   encoding: "utf8",
   stdio: ["ignore", "pipe", "inherit"]
-});
-const tarball = join(packDir, packOutput.trim().split(/\r?\n/).at(-1));
+})
+  .trim()
+  .split(/\r?\n/)
+  .at(-1);
+const tarball = join(packDir, packed);
 
 writeFileSync(
   join(appDir, "package.json"),
@@ -26,36 +28,29 @@ writeFileSync(
     {
       private: true,
       type: "module",
-      scripts: {
-        build: "tsc --noEmit && vite build"
-      },
+      scripts: { build: "tsc --noEmit && vite build" },
       dependencies: {
+        "@quno/calendar": tarball,
         "@vitejs/plugin-react": "^4.7.0",
-        typescript: "^5.8.3",
-        vite: "^7.3.6",
         react: "^18.3.1",
         "react-dom": "^18.3.1",
-        "quno-calendar": tarball
+        typescript: "^5.8.3",
+        vite: "^7.3.6"
       },
-      devDependencies: {
-        "@types/react": "^18.3.23",
-        "@types/react-dom": "^18.3.7"
-      }
+      devDependencies: { "@types/react": "^18.3.23", "@types/react-dom": "^18.3.7" }
     },
     null,
     2
   )
 );
-
 writeFileSync(join(appDir, "index.html"), '<div id="root"></div><script type="module" src="/src/main.tsx"></script>\n');
-
 writeFileSync(
   join(appDir, "tsconfig.json"),
   JSON.stringify(
     {
       compilerOptions: {
         target: "ES2020",
-        lib: ["ES2020", "DOM", "DOM.Iterable"],
+        lib: ["ES2020", "DOM"],
         module: "ESNext",
         moduleResolution: "Bundler",
         jsx: "react-jsx",
@@ -70,76 +65,101 @@ writeFileSync(
     2
   )
 );
-
 writeFileSync(
   join(appDir, "src", "main.tsx"),
   `import { createRoot } from "react-dom/client";
-import { CalendarRoot, type CalendarEvent, type EventRendererProps, type LoadEvents } from "quno-calendar";
-import "quno-calendar/styles.css";
+import { addDays, type DateRange } from "@quno/calendar";
+import { QunoInfiniteCalendar, type EventRendererProps, type LoadEvents } from "@quno/calendar/infinite-calendar";
+import { QunoDatePicker } from "@quno/calendar/datepicker";
+import { QunoDateInput } from "@quno/calendar/date-input";
+import { parseDateInput, tokenizeDateInput } from "@quno/calendar/date-parser";
+import "@quno/calendar/infinite-calendar/styles.css";
+import "@quno/calendar/datepicker/styles.css";
+import "@quno/calendar/date-input/styles.css";
 
-const calendars = [{ id: "calendar-a", name: "Calendar A" }];
-
-const loadEvents: LoadEvents = async ({ startDate }) => [
-  {
-    id: "event-a",
-    calendarId: "calendar-a",
-    title: "Packaged event",
-    start: \`\${startDate}T09:00:00\`,
-    end: \`\${startDate}T10:00:00\`
-  } satisfies CalendarEvent
-];
-
-function EventCard({ event, status, style }: EventRendererProps) {
-  return <div style={style} data-status={status}>{event.title}</div>;
-}
-
-createRoot(document.getElementById("root")!).render(
-  <CalendarRoot
-    ariaLabel="Package verification calendar"
-    calendars={calendars}
-    selectedCalendarIds={["calendar-a"]}
-    loadEvents={loadEvents}
-    eventRenderer={EventCard}
-    initialDateKey="2026-07-04"
-  />
-);
+const loadEvents: LoadEvents = async ({ startDate }) => [{
+  id: "event", calendarId: "team", title: "Visit",
+  start: startDate + "T09:00:00+02:00", end: startDate + "T10:00:00+02:00"
+}];
+function EventCard({ event, style }: EventRendererProps) { return <div style={style}>{event.title}</div>; }
+const value: DateRange = { start: "2026-08-24", end: addDays("2026-08-24", 1) };
+parseDateInput("tomorrow", { referenceDate: "2026-08-24", expectedRange: value });
+parseDateInput("2026年8月25日", {
+  expectedRange: value,
+  lexicon: { datePartMarkers: ["年", "月", "日"] }
+});
+tokenizeDateInput("tomorrow");
+createRoot(document.getElementById("root")!).render(<>
+  <QunoDatePicker value={value} /><QunoDateInput expectedRange={value} value={value} />
+  <QunoInfiniteCalendar calendars={[{ id: "team", name: "Team" }]} selectedCalendarIds={["team"]}
+    loadEvents={loadEvents} eventRenderer={EventCard} initialDateKey="2026-08-24" />
+</>);
 `
 );
 
-execFileSync("npm", ["install", "--no-audit", "--no-fund"], {
+execFileSync("npm", ["install", "--prefer-offline", "--no-audit", "--no-fund"], {
   cwd: appDir,
   env: npmEnvironment,
   stdio: "inherit"
 });
-
-const installedPackageRoot = join(appDir, "node_modules", "quno-calendar");
-const installedPackageJson = JSON.parse(readFileSync(join(installedPackageRoot, "package.json"), "utf8"));
-const installedStylesPath = join(installedPackageRoot, "dist", "styles.css");
-
-accessSync(installedStylesPath);
-if (installedPackageJson.dependencies?.["date-fns"]) {
-  throw new Error("Published runtime dependencies must not include date-fns.");
+const installed = join(appDir, "node_modules", "@quno", "calendar");
+const manifest = JSON.parse(readFileSync(join(installed, "package.json"), "utf8"));
+for (const file of ["infinite-calendar.css", "datepicker.css", "date-input.css"]) {
+  const stylesheet = join(installed, "dist", file);
+  accessSync(stylesheet);
+  const source = readFileSync(stylesheet, "utf8");
+  if (!/\{\r?\n\s{2}/u.test(source)) {
+    throw new Error(`Expected readable, unminified CSS in dist/${file}`);
+  }
 }
-if (installedPackageJson.exports?.["./styles.css"] !== "./dist/styles.css") {
-  throw new Error("The public styles export does not target dist/styles.css.");
+if (existsSync(join(installed, "dist", "date-parser.css"))) throw new Error("Date Parser unexpectedly emits CSS");
+for (const subpath of [
+  ".",
+  "./infinite-calendar",
+  "./infinite-calendar/styles.css",
+  "./datepicker",
+  "./datepicker/styles.css",
+  "./date-input",
+  "./date-input/styles.css",
+  "./date-parser"
+]) {
+  if (!manifest.exports?.[subpath]) throw new Error(`Missing package export ${subpath}`);
 }
-if (!readFileSync(installedStylesPath, "utf8").includes(".ic-shell")) {
-  throw new Error("The packaged stylesheet does not contain the calendar styles.");
+for (const subpath of ["./timeline", "./date-picker"]) {
+  if (manifest.exports?.[subpath]) throw new Error(`Legacy package export remains: ${subpath}`);
 }
-
-execFileSync(
-  process.execPath,
-  ["--input-type=commonjs", "--eval", 'const api = require("quno-calendar"); if (!api.CalendarRoot) process.exit(1);'],
-  { cwd: appDir, stdio: "inherit" }
-);
+for (const subpath of [
+  "@quno/calendar",
+  "@quno/calendar/infinite-calendar",
+  "@quno/calendar/datepicker",
+  "@quno/calendar/date-input",
+  "@quno/calendar/date-parser"
+]) {
+  execFileSync(process.execPath, ["--input-type=module", "--eval", `await import("${subpath}")`], { cwd: appDir });
+  execFileSync(process.execPath, ["--input-type=commonjs", "--eval", `require("${subpath}")`], { cwd: appDir });
+}
 execFileSync(
   process.execPath,
   [
     "--input-type=module",
     "--eval",
-    'const api = await import("quno-calendar"); if (!api.CalendarRoot) process.exit(1);'
+    `const calendar = await import("@quno/calendar/infinite-calendar");
+     const input = await import("@quno/calendar/date-input");
+     if ("QunoCalendar" in calendar) throw new Error("Legacy calendar facade remains");
+     if ("parseDateInput" in input || "tokenizeDateInput" in input) throw new Error("Date Input re-exports parser utilities");`
   ],
-  { cwd: appDir, stdio: "inherit" }
+  { cwd: appDir }
 );
-
+for (const oldSubpath of ["@quno/calendar/timeline", "@quno/calendar/date-picker"]) {
+  try {
+    execFileSync(process.execPath, ["--input-type=module", "--eval", `await import("${oldSubpath}")`], {
+      cwd: appDir,
+      stdio: "ignore"
+    });
+    throw new Error(`Legacy package path still resolves: ${oldSubpath}`);
+  } catch (error) {
+    if (error instanceof Error && error.message.startsWith("Legacy package path")) throw error;
+  }
+}
 execFileSync("npm", ["run", "build"], { cwd: appDir, env: npmEnvironment, stdio: "inherit" });
+console.log("Packed React, type, stylesheet, ESM, CommonJS, and SSR verification passed.");

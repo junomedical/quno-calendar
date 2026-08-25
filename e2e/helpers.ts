@@ -17,7 +17,7 @@ export async function setDemoZoom(page: Page, zoom: number) {
 export async function firstViewportEventBox(page: Page) {
   await page.waitForSelector('[data-testid="calendar-event"]');
   const viewport = page.viewportSize() ?? { width: 1280, height: 720 };
-  const calendarViewport = await page.locator(".ic-viewport").boundingBox();
+  const calendarViewport = await page.locator(".quno-calendar-viewport").boundingBox();
   const safeTop = (calendarViewport?.y ?? 0) + 92;
   const handles = await page.getByTestId("calendar-event").elementHandles();
 
@@ -32,8 +32,26 @@ export async function firstViewportEventBox(page: Page) {
 }
 
 export async function goToWorkday(page: Page, date = "2026-07-06") {
-  await page.getByTestId("jump-date-input").fill(date);
-  await page.getByTestId("go-date-button").click();
+  const [year, month, day] = date.split("-").map(Number);
+  const formatter = new Intl.DateTimeFormat("en-GB", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC"
+  });
+  const target = new Date(Date.UTC(year, month - 1, day));
+  const text = formatter.format(target);
+  const input = page.getByTestId("jump-date-input");
+  if ((await input.inputValue()) === text) {
+    const adjacent = new Date(target);
+    adjacent.setUTCDate(adjacent.getUTCDate() + 1);
+    await input.fill(formatter.format(adjacent));
+    await input.press("Enter");
+    await expect(input).toHaveValue(formatter.format(adjacent));
+  }
+  await input.fill(text);
+  await expect(input).toHaveValue(text);
+  await input.press("Enter");
   await expect
     .poll(async () => {
       try {
@@ -61,7 +79,7 @@ export async function horizontalDrawTarget(page: Page, options: HorizontalDrawTa
     () => new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())))
   );
   const target = await page.evaluate(({ calendarId, dateKey, distance = 120 }) => {
-    const viewport = document.querySelector<HTMLElement>(".ic-viewport");
+    const viewport = document.querySelector<HTMLElement>(".quno-calendar-viewport");
     if (!viewport) return null;
     const viewportBox = viewport.getBoundingClientRect();
     const rows = Array.from(document.querySelectorAll<HTMLElement>('[data-testid="calendar-row"]'));
@@ -71,8 +89,8 @@ export async function horizontalDrawTarget(page: Page, options: HorizontalDrawTa
       if (calendarId && row.dataset.calendarId !== calendarId) continue;
       if (dateKey && day?.dataset.date !== dateKey) continue;
 
-      const grid = row.querySelector<HTMLElement>(".ic-row-grid");
-      const label = row.querySelector<HTMLElement>(".ic-row-label");
+      const grid = row.querySelector<HTMLElement>(".quno-calendar-row-grid");
+      const label = row.querySelector<HTMLElement>(".quno-calendar-row-label");
       if (!grid || !label) continue;
       const rowBox = row.getBoundingClientRect();
       const gridBox = grid.getBoundingClientRect();
@@ -92,7 +110,7 @@ export async function horizontalDrawTarget(page: Page, options: HorizontalDrawTa
       for (const y of yCandidates) {
         for (let x = left; x + distance <= right; x += 8) {
           const pointElement = document.elementFromPoint(x, y) as HTMLElement | null;
-          if (pointElement?.closest(".ic-row-grid") === grid && !pointElement.closest("[data-event-id]")) {
+          if (pointElement?.closest(".quno-calendar-row-grid") === grid && !pointElement.closest("[data-event-id]")) {
             return { startX: x, endX: x + distance, y };
           }
         }
@@ -107,10 +125,19 @@ export async function horizontalDrawTarget(page: Page, options: HorizontalDrawTa
   return target;
 }
 
+export async function openDrawnExternalDraft(page: Page, options: HorizontalDrawTargetOptions = {}) {
+  const target = await horizontalDrawTarget(page, options);
+  await page.mouse.move(target.startX, target.y);
+  await page.mouse.down();
+  await page.mouse.move(target.endX, target.y, { steps: 6 });
+  await page.mouse.up();
+  await expect(page.getByTestId("external-event-popup")).toBeVisible();
+}
+
 /** Finds empty, visibly exposed timeline space inside a vertical resource column. */
 export async function verticalDrawTarget(page: Page) {
   const target = await page.evaluate(() => {
-    const viewport = document.querySelector<HTMLElement>(".ic-viewport");
+    const viewport = document.querySelector<HTMLElement>(".quno-calendar-viewport");
     if (!viewport) return null;
     const viewportBox = viewport.getBoundingClientRect();
     for (const column of Array.from(document.querySelectorAll<HTMLElement>('[data-testid="calendar-column"]'))) {
@@ -147,7 +174,7 @@ export async function verticalDrawTarget(page: Page) {
 export async function viewportRelativeEventBox(page: Page, selector: string, textIncludes?: string) {
   return page.evaluate(
     ({ eventSelector, text }) => {
-      const viewport = document.querySelector<HTMLElement>(".ic-viewport");
+      const viewport = document.querySelector<HTMLElement>(".quno-calendar-viewport");
       if (!viewport) {
         return null;
       }
@@ -202,7 +229,7 @@ export async function firstViewportEventForPrefix(page: Page, prefix: string) {
     .toBe(true);
 
   const eventBox = await page.evaluate((eventPrefix) => {
-    const viewport = document.querySelector(".ic-viewport")?.getBoundingClientRect();
+    const viewport = document.querySelector(".quno-calendar-viewport")?.getBoundingClientRect();
     if (!viewport) return null;
     const safeTop = viewport.y + 92;
 
@@ -232,7 +259,7 @@ export async function firstViewportEventForPrefix(page: Page, prefix: string) {
 export async function firstCompactSingleLaneEvent(page: Page) {
   await page.waitForSelector('[data-testid="calendar-event"][data-lane-count="1"]');
   const eventBox = await page.evaluate(() => {
-    const viewport = document.querySelector(".ic-viewport")?.getBoundingClientRect();
+    const viewport = document.querySelector(".quno-calendar-viewport")?.getBoundingClientRect();
     if (!viewport) return null;
     const safeTop = viewport.y + 92;
 
@@ -279,7 +306,7 @@ export async function firstCompactSingleLaneEvent(page: Page) {
 export async function firstExpandableOverlappedEvent(page: Page) {
   await page.waitForSelector('[data-testid="calendar-event"][data-lane-count]');
   const eventBox = await page.evaluate(() => {
-    const viewport = document.querySelector(".ic-viewport")?.getBoundingClientRect();
+    const viewport = document.querySelector(".quno-calendar-viewport")?.getBoundingClientRect();
     if (!viewport) return null;
     const safeTop = viewport.y + 92;
 
@@ -325,7 +352,7 @@ export async function firstExpandableOverlappedEvent(page: Page) {
 export async function firstDuplicatedViewportEvent(page: Page) {
   await page.waitForSelector('[data-testid="calendar-event"]');
   const duplicate = await page.evaluate(() => {
-    const viewport = document.querySelector(".ic-viewport")?.getBoundingClientRect();
+    const viewport = document.querySelector(".quno-calendar-viewport")?.getBoundingClientRect();
     if (!viewport) return null;
     const safeTop = viewport.y + 92;
 
@@ -370,7 +397,7 @@ export async function firstDuplicatedViewportEvent(page: Page) {
 
 export async function topVisibleDayDate(page: Page) {
   const handles = await page.getByTestId("calendar-day").elementHandles();
-  const viewportBox = await page.locator(".ic-viewport").boundingBox();
+  const viewportBox = await page.locator(".quno-calendar-viewport").boundingBox();
   if (!viewportBox) {
     throw new Error("Calendar viewport not found");
   }
@@ -404,7 +431,7 @@ export async function topVisibleDayDate(page: Page) {
 
 export async function topVisibleDayState(page: Page) {
   return page.evaluate(() => {
-    const viewport = document.querySelector(".ic-viewport")?.getBoundingClientRect();
+    const viewport = document.querySelector(".quno-calendar-viewport")?.getBoundingClientRect();
     if (!viewport) {
       throw new Error("Calendar viewport not found");
     }
@@ -455,7 +482,7 @@ export async function selectPageText(page: Page) {
 
 export async function visibleDayDates(page: Page) {
   return page.evaluate(() => {
-    const viewport = document.querySelector(".ic-viewport")?.getBoundingClientRect();
+    const viewport = document.querySelector(".quno-calendar-viewport")?.getBoundingClientRect();
     if (!viewport) {
       return [];
     }
@@ -472,7 +499,7 @@ export async function visibleDayDates(page: Page) {
 }
 
 export async function verticalScrollRatio(page: Page) {
-  return page.locator(".ic-viewport").evaluate((element) => {
+  return page.locator(".quno-calendar-viewport").evaluate((element) => {
     const maxScrollTop = element.scrollHeight - element.clientHeight;
     return maxScrollTop <= 0 ? 0 : element.scrollTop / maxScrollTop;
   });
@@ -480,7 +507,7 @@ export async function verticalScrollRatio(page: Page) {
 
 export async function renderedDayOverscanFailures(page: Page, maxDistanceDays: number) {
   return page.evaluate((distanceLimit) => {
-    const viewport = document.querySelector(".ic-viewport")?.getBoundingClientRect();
+    const viewport = document.querySelector(".quno-calendar-viewport")?.getBoundingClientRect();
     if (!viewport) {
       return ["missing viewport"];
     }

@@ -1,4 +1,4 @@
-import type { CalendarView } from "../types";
+import type { CalendarView } from "#quno-demo/showcase/types";
 
 type ViewControlProps = {
   className: string;

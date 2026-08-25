@@ -1,6 +1,6 @@
 import { Clock3, Lock, Video } from "lucide-react";
-import type { EventRendererProps } from "quno-calendar";
-import { eventCardModel } from "../eventCardModel";
+import type { EventRendererProps } from "@quno/calendar/infinite-calendar";
+import { eventCardModel } from "#quno-demo/showcase/eventCardModel";
 import "./Demo1EventCard.css";
 
 export function Demo1EventCard(props: EventRendererProps) {

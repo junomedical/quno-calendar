@@ -9,7 +9,7 @@ type DemoStats = {
 const emptyStats: DemoStats = { frameMs: 0, visibleEventNodes: 0, totalCalendarNodes: 0 };
 
 function countVisibleEventNodes() {
-  const viewport = document.querySelector(".ic-viewport")?.getBoundingClientRect();
+  const viewport = document.querySelector(".quno-calendar-viewport")?.getBoundingClientRect();
   if (!viewport) {
     return 0;
   }
@@ -28,7 +28,7 @@ function countVisibleEventNodes() {
 }
 
 function countTotalCalendarNodes() {
-  const shell = document.querySelector(".ic-shell");
+  const shell = document.querySelector(".quno-calendar-shell");
   return shell ? shell.querySelectorAll("*").length + 1 : 0;
 }
 

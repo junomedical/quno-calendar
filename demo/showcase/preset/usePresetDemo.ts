@@ -1,9 +1,21 @@
 import { useCallback, useMemo, useRef, useState, type SetStateAction } from "react";
-import type { CalendarEvent, CalendarNavigationHandle, EventCreateRequest, EventMoveRequest } from "quno-calendar";
-import { appendCreatedEvent, applyMove, createDemoEvents, createRangeLoader, demoCalendars } from "../data";
-import { useDemoControls } from "../hooks/useDemoControls";
-import { useSimulatedApiLoader } from "../hooks/useSimulatedApiLoader";
-import { useSystemNow } from "../hooks/useSystemNow";
+import type { IsoDate } from "@quno/calendar";
+import type {
+  CalendarEvent,
+  QunoInfiniteCalendarHandle,
+  EventCreateRequest,
+  EventMoveRequest
+} from "@quno/calendar/infinite-calendar";
+import {
+  appendCreatedEvent,
+  applyMove,
+  createDemoEvents,
+  createRangeLoader,
+  demoCalendars
+} from "#quno-demo/showcase/data";
+import { useDemoControls } from "#quno-demo/showcase/hooks/useDemoControls";
+import { useSimulatedApiLoader } from "#quno-demo/showcase/hooks/useSimulatedApiLoader";
+import { useSystemNow } from "#quno-demo/showcase/hooks/useSystemNow";
 import type { DemoPreset } from "./types";
 
 export function usePresetDemo(preset: DemoPreset) {
@@ -11,10 +23,10 @@ export function usePresetDemo(preset: DemoPreset) {
   const [events, setEvents] = useState(() => createDemoEvents(preset.initialScale));
   const [message, setMessage] = useState(preset.messages.initial);
   const eventsRef = useRef(events);
-  const calendarRef = useRef<CalendarNavigationHandle>(null);
+  const calendarRef = useRef<QunoInfiniteCalendarHandle>(null);
   const controls = useDemoControls(preset.controls, preset.layout);
   const systemNow = useSystemNow();
-  const { jumpDate, jumpTime, setEditAvailabilities } = controls;
+  const { setJumpDate, setEditAvailabilities } = controls;
 
   const selectedCalendarIds = useMemo(
     () => demoCalendars.slice(0, controls.calendarCount).map((calendar) => calendar.id),
@@ -66,10 +78,14 @@ export function usePresetDemo(preset: DemoPreset) {
     [preset.messages, updateEvents]
   );
 
-  const goToDate = useCallback(() => {
-    calendarRef.current?.scrollToDateTime(jumpDate, jumpTime);
-    setMessage(`Scrolled to ${jumpDate} ${jumpTime}`);
-  }, [jumpDate, jumpTime]);
+  const goToDate = useCallback(
+    (date: IsoDate) => {
+      setJumpDate(date);
+      calendarRef.current?.scrollToDate(date);
+      setMessage(`Scrolled to ${date}`);
+    },
+    [setJumpDate]
+  );
 
   const setAvailabilityMode = useCallback(
     (checked: boolean) => {

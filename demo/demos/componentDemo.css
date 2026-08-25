@@ -1,0 +1,136 @@
+.component-demo {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  height: 100vh;
+  overflow-y: auto;
+  color: #17202a;
+  background: #eef3f7;
+}
+
+.component-demo__header {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 24px clamp(20px, 4vw, 54px);
+  background: #ffffff;
+  border-bottom: 1px solid #d8e0e7;
+}
+
+.component-demo__header p {
+  margin: 0 0 7px;
+  color: #246b5d;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.component-demo__header h1 {
+  margin: 0 0 6px;
+  font-size: clamp(28px, 4vw, 48px);
+  letter-spacing: -0.045em;
+  line-height: 1;
+}
+
+.component-demo__header span {
+  color: #5d6878;
+}
+
+.component-demo__header nav {
+  display: flex;
+  gap: 8px;
+}
+
+.component-demo__header a {
+  padding: 10px 14px;
+  color: #174c42;
+  background: #edf3ef;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 750;
+  text-decoration: none;
+}
+
+.component-demo__stage {
+  display: grid;
+  place-items: center;
+  min-height: 540px;
+  padding: clamp(24px, 6vw, 72px);
+}
+
+.component-demo__panel {
+  display: grid;
+  gap: 24px;
+  width: min(100%, 430px);
+}
+
+.component-demo__value {
+  margin: 0;
+  padding: 16px 18px;
+  color: #385048;
+  background: #ffffff;
+  border: 1px solid #d8e0e7;
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.date-parser-demo {
+  width: min(100%, 760px);
+}
+
+.date-parser-demo > input,
+.date-parser-demo select {
+  min-height: 44px;
+  padding: 0 12px;
+  color: #17202a;
+  background: #fff;
+  border: 1px solid #cbd7d1;
+  border-radius: 9px;
+}
+
+.date-parser-demo__samples {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.date-parser-demo__samples button {
+  padding: 7px 10px;
+  color: #174c42;
+  background: #edf3ef;
+  border: 1px solid #cadbd3;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.date-parser-demo__options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.date-parser-demo__options label {
+  display: grid;
+  gap: 6px;
+  color: #5d6878;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.date-parser-demo section h2 {
+  margin: 0 0 8px;
+  font-size: 14px;
+}
+
+@media (max-width: 680px) {
+  .component-demo__header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .date-parser-demo__options {
+    grid-template-columns: 1fr;
+  }
+}

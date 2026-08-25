@@ -1,5 +1,5 @@
 import { Video, Lock } from "lucide-react";
-import type { EventRendererProps } from "quno-calendar";
+import type { EventRendererProps } from "@quno/calendar/infinite-calendar";
 import { eventCardModel } from "./eventCardModel";
 import "./DemoEventCard.css";
 
@@ -18,8 +18,8 @@ import "./DemoEventCard.css";
  * shrink typography, or show distinct drag/new/drop-preview styles without
  * importing calendar internals.
  *
- * @see docs/architecture.md#event-renderer-contract
- * @see docs/usage.md#custom-event-rendering
+ * @see docs/infinite-calendar/architecture.md#event-renderer-contract
+ * @see docs/shared/usage.md#custom-event-rendering
  */
 export function DemoEventCard(props: EventRendererProps) {
   const { event, status } = props;

@@ -11,8 +11,8 @@ import {
   timelineWidth,
   xToMinute,
   yToMinute
-} from "../../../../src/lib/time/time";
-import { buildTimeTicks } from "../../../../src/lib/time/timelineTicks";
+} from "#quno-internal/timeline/time/time";
+import { buildTimeTicks } from "#quno-internal/timeline/time/timelineTicks";
 
 describe("timeline math", () => {
   const geometry = { startHour: 8, endHour: 18, zoom: 2, snapMinutes: 15 };

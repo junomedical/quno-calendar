@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildResourceExtents,
   resourceIndexesInWindow
-} from "../../../../src/lib/infinite/scroll/resources/resourceWindow";
+} from "#quno-internal/timeline/infinite/scroll/resources/resourceWindow";
 
 describe("resource window", () => {
   it("uses original variable-size extents and adds two-resource overscan", () => {

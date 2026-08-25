@@ -1,0 +1,49 @@
+/** Pure proposal/preview transforms for the React drag lifecycle. */
+import { eventCalendarIds, replaceEventCalendarMembership } from "#quno-internal/timeline/data/calendarEvents";
+import {
+  buildMoveProposal,
+  type CalendarHit
+} from "#quno-internal/timeline/infinite/interactions/timelineInteractionModel";
+import type {
+  CalendarEvent,
+  CalendarId,
+  EventMoveRequest,
+  QunoInfiniteCalendarSettings
+} from "#quno-internal/timeline/core/types";
+
+export type DragState = {
+  event: CalendarEvent;
+  sourceCalendarId: CalendarId;
+  offsetMinutes: number;
+  preview: EventMoveRequest | null;
+};
+
+export function proposalForDrag(
+  drag: DragState,
+  hit: CalendarHit,
+  settings: QunoInfiniteCalendarSettings,
+  draggingActiveDraft: boolean
+): EventMoveRequest {
+  const baseProposal = buildMoveProposal(drag.event, hit, drag.offsetMinutes, settings);
+  const currentCalendarIds = eventCalendarIds(drag.event);
+  const keepsDraftMembership = draggingActiveDraft && currentCalendarIds.length > 1;
+  return {
+    ...baseProposal,
+    proposedCalendarId: keepsDraftMembership ? drag.event.calendarId : baseProposal.proposedCalendarId,
+    sourceCalendarId: drag.sourceCalendarId,
+    proposedCalendarIds: keepsDraftMembership
+      ? currentCalendarIds
+      : replaceEventCalendarMembership(drag.event, drag.sourceCalendarId, baseProposal.proposedCalendarId)
+  };
+}
+
+export function previewEventForDrag(drag: DragState | null, draggingActiveDraft: boolean): CalendarEvent | null {
+  if (!drag?.preview || draggingActiveDraft) return null;
+  return {
+    ...drag.event,
+    calendarId: drag.preview.proposedCalendarId,
+    calendarIds: drag.preview.proposedCalendarIds,
+    start: drag.preview.proposedStart,
+    end: drag.preview.proposedEnd
+  };
+}

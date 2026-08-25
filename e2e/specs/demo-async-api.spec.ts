@@ -4,7 +4,7 @@ test("demo simulates delayed API loading without blocking calendar chrome", asyn
   const apiResponse = page.waitForResponse(
     (response) => response.url().includes("/api/demo-events") && response.request().method() === "POST"
   );
-  await page.goto("/");
+  await page.goto("/demo/infinite-calendar");
 
   await page.getByTestId("api-latency-select").selectOption("1000");
   await page.getByTestId("scale-select").selectOption("5000");

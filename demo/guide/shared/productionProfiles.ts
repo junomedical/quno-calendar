@@ -1,0 +1,68 @@
+export type FieldGuideProductionProfile = {
+  product: string;
+  entrypoint: string;
+  stylesheet: string | null;
+  artifacts: ReadonlyArray<{
+    label: string;
+    gzip: string;
+    raw: string;
+    budget: string;
+  }>;
+  runtime: string;
+  compatibility: string;
+  dependencies: string;
+  publicApi: ReadonlyArray<string>;
+};
+
+export const infiniteCalendarProduction: FieldGuideProductionProfile = {
+  product: "Quno/Infinite Calendar",
+  entrypoint: "@quno/calendar/infinite-calendar",
+  stylesheet: "@quno/calendar/infinite-calendar/styles.css",
+  artifacts: [
+    { label: "JavaScript", gzip: "31.76 KiB", raw: "128.76 KiB", budget: "≤ 32 KiB gzip" },
+    { label: "Optional CSS", gzip: "1.95 KiB", raw: "10.13 KiB", budget: "≤ 2 KiB gzip" }
+  ],
+  runtime: "React 18+ and React DOM peers",
+  compatibility: "Preact 10.18+ through compat aliases",
+  dependencies: "@tanstack/react-virtual stays external",
+  publicApi: ["QunoInfiniteCalendar", "defaultQunoInfiniteCalendarSettings", "calendar event and loader types"]
+};
+
+export const datepickerProduction: FieldGuideProductionProfile = {
+  product: "Quno/Datepicker",
+  entrypoint: "@quno/calendar/datepicker",
+  stylesheet: "@quno/calendar/datepicker/styles.css",
+  artifacts: [
+    { label: "JavaScript", gzip: "9.00 KiB", raw: "33.82 KiB", budget: "≤ 10 KiB gzip" },
+    { label: "Optional CSS", gzip: "3.20 KiB", raw: "19.84 KiB", budget: "≤ 3.5 KiB gzip" }
+  ],
+  runtime: "React 18+ and React DOM peers",
+  compatibility: "Preact 10.18+ through compat aliases",
+  dependencies: "No bundled date or positioning library",
+  publicApi: ["QunoDatePicker", "QunoDatePickerProps", "DateRange", "day customization and label types"]
+};
+
+export const dateInputProduction: FieldGuideProductionProfile = {
+  product: "Quno/Date Input",
+  entrypoint: "@quno/calendar/date-input",
+  stylesheet: "@quno/calendar/date-input/styles.css",
+  artifacts: [
+    { label: "JavaScript", gzip: "6.77 KiB", raw: "22.89 KiB", budget: "≤ 7 KiB gzip" },
+    { label: "Optional CSS", gzip: "0.58 KiB", raw: "2.29 KiB", budget: "≤ 1 KiB gzip" }
+  ],
+  runtime: "React 18+ and React DOM peers",
+  compatibility: "Preact 10.18+ through compat aliases",
+  dependencies: "No bundled date library",
+  publicApi: ["QunoDateInput", "QunoDateInputProps", "component label and formatter types"]
+};
+
+export const dateParserProduction: FieldGuideProductionProfile = {
+  product: "Quno/Date Parser",
+  entrypoint: "@quno/calendar/date-parser",
+  stylesheet: null,
+  artifacts: [{ label: "JavaScript", gzip: "4.49 KiB", raw: "15.49 KiB", budget: "≤ 6 KiB gzip" }],
+  runtime: "No UI framework runtime",
+  compatibility: "ESM, CommonJS, browser, Node, and SSR",
+  dependencies: "No runtime dependencies",
+  publicApi: ["parseDateInput", "tokenizeDateInput", "parser, token, language, and vocabulary types"]
+};

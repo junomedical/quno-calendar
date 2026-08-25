@@ -1,14 +1,14 @@
 import { expect, test } from "@playwright/test";
-import { goToWorkday } from "../helpers";
+import { goToWorkday } from "#quno-e2e/helpers";
 
 test.use({ locale: "de-DE" });
 
 test("localizes horizontal and vertical date chrome without clipping labels", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/demo/infinite-calendar");
   await goToWorkday(page, "2026-07-06");
 
   const horizontalLabel = page
-    .locator('[data-testid="calendar-day"][data-date="2026-07-06"] .ic-date-label:not(.icv-date-label)')
+    .locator('[data-testid="calendar-day"][data-date="2026-07-06"] .quno-calendar-date-label:not(.icv-date-label)')
     .filter({ hasText: "6. Juli, Montag" });
   await expect(horizontalLabel).toBeVisible();
   expect(

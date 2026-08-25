@@ -2,7 +2,7 @@
  * The calendar owns position, row geometry, and interaction state. This demo
  * card owns only product-level appointment visuals inside the provided shell.
  */
-.ic-event-shell.is-hovered .demo-event-card {
+.quno-calendar-event-shell.is-hovered .demo-event-card {
   /* Match the shell hover expansion without teaching the card about rows. */
   width: max-content;
   min-width: 100%;
@@ -170,7 +170,7 @@
   opacity: 0.55;
 }
 
-.ic-availability-shell.is-active-layer .demo-event-card.kind-availability {
+.quno-calendar-availability-shell.is-active-layer .demo-event-card.kind-availability {
   /* Availability editing mode promotes availability blocks to active objects. */
   opacity: 0.82;
   box-shadow:

@@ -4,7 +4,7 @@ import {
   normalizeAnchorDate,
   virtualDateWindowAround,
   virtualOffsetForDate
-} from "../../../../src/lib/date/dateVirtualization";
+} from "#quno-internal/timeline/date/dateVirtualization";
 
 describe("date virtualization", () => {
   it("walks dates forward and backward from the anchor", () => {

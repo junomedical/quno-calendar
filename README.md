@@ -1,109 +1,62 @@
-# Quno Calendar
+# @quno/calendar
 
-Reusable React infinite-calendar component with virtualized horizontal and vertical timeline views.
-
-This project is still a `0.1.x` release, but the package surface is intentionally small: render `CalendarRoot`, provide calendars, load visible event ranges, and own product-specific event cards through `eventRenderer`.
+Four focused date and scheduling primitives in one React-authored package. Version `0.6.0` supports React 18+ directly and Preact through tested `preact/compat` aliases.
 
 ## Install
 
 ```sh
-npm install quno-calendar
+npm install @quno/calendar react react-dom
 ```
+
+Import only the primitive and optional stylesheet you use:
 
 ```tsx
-import { CalendarRoot, type EventRendererProps, type LoadEvents } from "quno-calendar";
-import "quno-calendar/styles.css";
+import { QunoInfiniteCalendar } from "@quno/calendar/infinite-calendar";
+import "@quno/calendar/infinite-calendar/styles.css";
+
+import { QunoDatePicker } from "@quno/calendar/datepicker";
+import "@quno/calendar/datepicker/styles.css";
+
+import { QunoDateInput } from "@quno/calendar/date-input";
+import "@quno/calendar/date-input/styles.css";
+
+import { parseDateInput, tokenizeDateInput } from "@quno/calendar/date-parser";
 ```
 
-React and React DOM are peer dependencies. The package ships React 18-compatible ESM and CommonJS plus an explicit stylesheet; JavaScript imports are safe in Node/SSR.
+- **Quno/Infinite Calendar** virtualizes horizontal and vertical schedules with event loading, rendering, editing, zoom, navigation, and focus.
+- **Quno/Datepicker** paints, resizes, and moves one timezone-free date or inclusive range.
+- **Quno/Date Input** provides a native controlled or uncontrolled field for typed dates and ranges.
+- **Quno/Date Parser** recognizes formats, relative phrases, configurable weeks, ranges, and multilingual vocabulary without a UI runtime.
 
-## Minimal Example
+The headless `@quno/calendar` root exports shared contracts such as `IsoDate`, `DateRange`, `DateSelectionMode`, `WeekStart`, and safe calendar-day helpers. It exports no UI. JavaScript entry points are ESM/CommonJS compatible, SSR-safe, and never inject CSS. The separately exported stylesheets remain readable, unminified CSS in `dist`.
 
-```tsx
-const calendars = [{ id: "room-1", name: "Room 1" }];
+Calendar day keys use timezone-free `YYYY-MM-DD` values. Infinite Calendar event `start` and `end` remain timestamp strings with their local or offset semantics.
 
-const loadEvents: LoadEvents = async ({ startDate, endDate, calendarIds, signal }) => {
-  return fetch(`/api/events?start=${startDate}&end=${endDate}&calendars=${calendarIds.join(",")}`, { signal }).then(
-    (response) => response.json()
-  );
-};
+## Guides and records
 
-function EventCard({ event, status, style }: EventRendererProps) {
-  return (
-    <article style={style} data-status={status}>
-      <strong>{event.title}</strong>
-      {event.subtitle ? <span>{event.subtitle}</span> : null}
-    </article>
-  );
-}
+Run `npm run dev` and open `/` for the four-product overview. Each card links to a dedicated field guide and focused demo:
 
-export function Schedule() {
-  return (
-    <CalendarRoot
-      calendars={calendars}
-      selectedCalendarIds={["room-1"]}
-      loadEvents={loadEvents}
-      eventRenderer={EventCard}
-      view="infinite-horizontal"
-      settings={{ startHour: 8, endHour: 18, zoom: 1.2 }}
-    />
-  );
-}
+- `/guide/infinite-calendar`
+- `/guide/datepicker`
+- `/guide/date-input`
+- `/guide/date-parser`
+
+Start with the [documentation index](./docs/README.md). Shared records cover [usage](./docs/shared/usage.md),
+[migration](./docs/shared/migration.md), [architecture](./docs/shared/architecture.md),
+[taxonomy](./docs/shared/taxonomy.md), [testing](./docs/shared/testing.md), and
+[cross-product decisions](./docs/shared/decisions.md). Each product directory owns its own overview and decision log.
+Release history remains in the [changelog](./CHANGELOG.md).
+
+## Development
+
+```sh
+npm test
+npm run typecheck
+npm run lint
+npm run check:architecture
+npm run build
+npm run verify:package
+npm run test:compat
 ```
 
-Use `view="infinite-vertical"` when calendars should render as columns and time should run top-to-bottom inside each date.
-
-Calendar chrome colors are consumer-owned CSS variables with built-in defaults. Scope them through `className` or pass
-them through the typed `style` prop; for example, `--ic-surface`, `--ic-header-surface`, `--ic-cell-border`,
-`--ic-text`, and `--ic-now-accent`. Per-event `event.color` still takes precedence over the shared
-`--ic-event-accent` fallback. See [Calendar colors](./docs/usage.md#calendar-colors) for the complete palette.
-
-The date/resource grid renders without waiting for `loadEvents`. Cached events remain visible during delayed refreshes, and obsolete requests are cancelled or ignored. The optional abort signal is backward compatible with loaders that do not support cancellation. By default, seven calendar days are prefetched before and after the rendered dates; pass `eventPrefetchPolicy` to customize that buffer.
-
-## Interaction Model
-
-The calendar does not persist mutations. Drag/drop and drawn creation are proposed through callbacks:
-
-```tsx
-<CalendarRoot
-  {...props}
-  onEventMoveRequest={async (request) => {
-    await api.moveEvent(request);
-    return true;
-  }}
-  onEventCreateRequest={async (request) => {
-    return api.createEvent(request);
-  }}
-/>
-```
-
-For parent-owned create/edit forms, pass `activeDraft` and handle `onEventDraftRequest`, `onEventActivate`, and `onActiveDraftMoveRequest`.
-
-Use `calendarRef.current.focusEvent(event)` to reveal known participant calendars and position an event, and
-`removeVisibleEvent(eventId)` after parent-owned deletion to remove all loaded projections immediately.
-
-## Examples
-
-- [Step-by-step integration walkthrough](./demo/examples/integration-walkthrough/README.md)
-- [Examples guide](./demo/examples/README.md)
-- [Interactive integration field guide](./demo/examples/integration-walkthrough/README.md)
-
-`src/` contains the reusable library only. The separately documented [`demo/`](./demo/README.md) application contains
-the editorial integration guide and larger stress scenarios.
-
-## Deploy The Demo To Vercel
-
-Import the repository as a Vercel project with the repository root as its Root Directory. The checked-in
-`vercel.json` builds and publishes `dist-demo` (rather than the package artifact in `dist`), keeps client-side demo
-routes available on direct navigation, and deploys the demo event-delay transport at `POST /api/demo-events`.
-
-## Documentation
-
-- [Usage recipes](./docs/usage.md)
-- [Architecture overview](./docs/architecture.md)
-- [Responsibility domains and source maps](./docs/domains/README.md)
-- [Runtime flow guides and anchor taxonomy](./docs/flows/README.md)
-- [Interface taxonomy](./docs/taxonomy.md)
-- [Test plan](./docs/test-plan.md)
-- [Decision log](./docs/decisions.md)
-- [Changelog](./docs/changelog.md)
+Release preparation is local only. Publishing, deprecating old packages, and deleting archival repositories require separate authorization.

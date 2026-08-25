@@ -1,4 +1,4 @@
-import type { CalendarId } from "quno-calendar";
+import type { CalendarId } from "@quno/calendar/infinite-calendar";
 import { demoCalendars } from "./data";
 
 const personCalendarIds = new Set(demoCalendars.slice(0, 3).map((calendar) => calendar.id));

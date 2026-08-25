@@ -50,53 +50,63 @@ describe("architecture guard", () => {
     const result = runScript(architectureScript, sourceRoot);
     expect(result.status).toBe(1);
     expect(result.stderr).toMatch(/large\.ts: 208 non-comment lines \(module limit: 200\)/);
-    expect(result.stderr).toMatch(/large\.ts:1-123: tooLarge spans 123 source lines \(function limit: 120\)/);
+    expect(result.stderr).toMatch(/large\.ts:1-123: tooLarge has 123 non-comment lines \(function limit: 120\)/);
   });
 
-  it("rejects deep relative imports in favor of the library alias", () => {
+  it("rejects every parent-relative import in favor of a stable alias", () => {
     const sourceRoot = temporaryDirectory();
     const nestedDirectory = join(sourceRoot, "infinite", "rendering", "shared");
     mkdirSync(nestedDirectory, { recursive: true });
     writeFileSync(
       join(nestedDirectory, "eventShell.ts"),
-      'import type { CalendarEvent } from "../../../core/types";\nexport type Event = CalendarEvent;\n'
+      `import type { CalendarEvent } from "${["..", "core", "types"].join("/")}";\nexport type Event = CalendarEvent;\n`
     );
 
     const result = runScript(architectureScript, sourceRoot);
     expect(result.status).toBe(1);
-    expect(result.stderr).toContain("use #calendar-internal/* instead of deep relative import ../../../core/types");
+    const parentSpecifier = ["..", "core", "types"].join("/");
+    expect(result.stderr).toContain(
+      `use a configured @quno/calendar or #quno-* alias instead of parent-relative import ${parentSpecifier}`
+    );
   });
 });
 
 describe("bundle-size guard", () => {
-  it("prints raw and gzip sizes for passing ESM and CSS artifacts", () => {
+  function writePassingBundles(distRoot: string) {
+    for (const file of ["index.js", "infinite-calendar.js", "datepicker.js", "date-input.js", "date-parser.js"]) {
+      writeFileSync(join(distRoot, file), "export const value = 1;\n".repeat(10));
+    }
+    for (const file of ["infinite-calendar.css", "datepicker.css", "date-input.css"]) {
+      writeFileSync(join(distRoot, file), ".quno { display: grid; }\n".repeat(5));
+    }
+  }
+
+  it("prints raw and gzip sizes for every independent feature", () => {
     const distRoot = temporaryDirectory();
-    writeFileSync(join(distRoot, "quno-calendar.js"), "export const value = 1;\n".repeat(100));
-    writeFileSync(join(distRoot, "styles.css"), ".calendar { display: grid; }\n".repeat(20));
+    writePassingBundles(distRoot);
 
     const result = runScript(bundleScript, distRoot);
     expect(result.status).toBe(0);
-    expect(result.stdout).toMatch(/ESM .*: raw .* gzip/);
-    expect(result.stdout).toMatch(/CSS .*: raw .* gzip/);
+    expect(result.stdout).toMatch(/Infinite Calendar JavaScript .*: raw .* gzip/);
+    expect(result.stdout).toMatch(/Datepicker CSS .*: raw .* gzip/);
     expect(result.stdout).toContain("Bundle size check passed.");
   });
 
   it("fails clearly for missing build artifacts", () => {
     const result = runScript(bundleScript, temporaryDirectory());
     expect(result.status).toBe(1);
-    expect(result.stderr).toContain("Missing ESM bundle");
+    expect(result.stderr).toContain("Missing Shared root JavaScript bundle");
     expect(result.stderr).toContain("Build the library first with `npm run build:lib`.");
   });
 
-  it("enforces the 32 KiB ESM gzip ceiling", () => {
+  it("enforces the 32 KiB Infinite Calendar JavaScript gzip ceiling", () => {
     const distRoot = temporaryDirectory();
-    mkdirSync(distRoot, { recursive: true });
+    writePassingBundles(distRoot);
     const incompressibleSource = randomBytes(40 * 1024).toString("base64");
-    writeFileSync(join(distRoot, "quno-calendar.js"), incompressibleSource);
-    writeFileSync(join(distRoot, "styles.css"), ".calendar{}\n");
+    writeFileSync(join(distRoot, "infinite-calendar.js"), incompressibleSource);
 
     const result = runScript(bundleScript, distRoot);
     expect(result.status).toBe(1);
-    expect(result.stderr).toContain("ESM exceeds its gzip limit");
+    expect(result.stderr).toContain("Infinite Calendar JavaScript exceeds its gzip limit");
   });
 });

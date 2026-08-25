@@ -1,8 +1,8 @@
 import { expect, test } from "@playwright/test";
-import { firstViewportEventBox, goToWorkday, topVisibleDayState } from "../helpers";
+import { firstViewportEventBox, goToWorkday, openDrawnExternalDraft, topVisibleDayState } from "#quno-e2e/helpers";
 
 test("shows delayed external save errors in the edit popup", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/demo/infinite-calendar");
   await goToWorkday(page);
   const eventBox = await firstViewportEventBox(page);
 
@@ -25,12 +25,10 @@ test("shows delayed external save errors in the edit popup", async ({ page }) =>
 });
 
 test("marks a saved external create as appearing with a glint animation", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/demo/infinite-calendar");
   await goToWorkday(page, "2026-07-06");
   await expect(page.getByTestId("calendar-event").first()).toBeVisible();
-  await page.getByTestId("jump-time-input").fill("09:00");
-  await page.getByTestId("external-add-button").click();
-  await expect(page.getByTestId("external-event-popup")).toBeVisible();
+  await openDrawnExternalDraft(page, { dateKey: "2026-07-06" });
   await page.getByTestId("draft-title-input").fill("Appearing appointment");
   await page.getByTestId("draft-save-button").click();
   await expect(page.getByTestId("demo-message")).toContainText("Saved external create");
@@ -65,16 +63,14 @@ test("marks a saved external create as appearing with a glint animation", async 
 });
 
 test("does not pull the viewport back after manual scroll following external save", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/demo/infinite-calendar");
   await goToWorkday(page, "2026-07-06");
-  await page.getByTestId("jump-time-input").fill("09:00");
-  await page.getByTestId("external-add-button").click();
-  await expect(page.getByTestId("external-event-popup")).toBeVisible();
+  await openDrawnExternalDraft(page, { dateKey: "2026-07-06" });
   await page.getByTestId("draft-title-input").fill("Scroll after save");
   await page.getByTestId("draft-save-button").click();
   await expect(page.getByTestId("demo-message")).toContainText("Saved external create");
 
-  const viewport = page.locator(".ic-viewport");
+  const viewport = page.locator(".quno-calendar-viewport");
   await viewport.hover();
   const beforeWheel = await viewport.evaluate((element) => element.scrollTop);
   await page.mouse.wheel(0, 500);
@@ -93,7 +89,7 @@ test("does not pull the viewport back after manual scroll following external sav
 });
 
 test("renders a saved external create in the vertical view", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/demo/infinite-calendar");
   await page.getByTestId("view-infinite-vertical").check();
   await page.getByRole("spinbutton", { name: "Start" }).fill("8");
   await page.getByRole("spinbutton", { name: "End" }).fill("18");

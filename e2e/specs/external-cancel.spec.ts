@@ -1,14 +1,35 @@
 import { expect, test, type Page } from "@playwright/test";
-import { goToWorkday, horizontalDrawTarget, selectPageText, topVisibleDayDate, waitForDemoEvents } from "../helpers";
+import {
+  goToWorkday,
+  horizontalDrawTarget,
+  selectPageText,
+  topVisibleDayDate,
+  waitForDemoEvents
+} from "#quno-e2e/helpers";
+
+async function observeDraftFadeout(page: Page) {
+  await page.evaluate(() => {
+    delete document.documentElement.dataset.observedDraftExitAnimation;
+    const observer = new MutationObserver(() => {
+      const draft = document.querySelector<HTMLElement>('[data-testid="draft-event"][data-exiting="true"]');
+      if (!draft) return;
+      document.documentElement.dataset.observedDraftExitAnimation = getComputedStyle(draft).animationName;
+      observer.disconnect();
+    });
+    observer.observe(document.body, { attributes: true, childList: true, subtree: true });
+    window.setTimeout(() => observer.disconnect(), 2_000);
+  });
+}
 
 async function expectDraftFadeoutThenGone(page: Page) {
-  const exitingDraft = page.locator('[data-testid="draft-event"][data-exiting="true"]');
-  await expect(exitingDraft.first()).toBeVisible();
-  await expect(exitingDraft.first()).toHaveCSS("animation-name", "ic-draft-fade-out");
+  await expect
+    .poll(() => page.locator("html").getAttribute("data-observed-draft-exit-animation"))
+    .toBe("quno-calendar-draft-fade-out");
   await expect(page.getByTestId("draft-event")).toHaveCount(0);
 }
 
 async function cancelAndKeepRowAnchored(page: Page, selector: string, before: number) {
+  await observeDraftFadeout(page);
   await page.getByTestId("draft-cancel-button").click();
   await expectDraftFadeoutThenGone(page);
   await expect(page.getByTestId("external-event-popup")).toHaveCount(0);
@@ -16,7 +37,7 @@ async function cancelAndKeepRowAnchored(page: Page, selector: string, before: nu
     .poll(() =>
       page.evaluate(
         ({ selector, before }) => {
-          const viewport = document.querySelector<HTMLElement>(".ic-viewport");
+          const viewport = document.querySelector<HTMLElement>(".quno-calendar-viewport");
           const row = document.querySelector<HTMLElement>(selector);
           return viewport && row
             ? Math.abs(row.getBoundingClientRect().top - viewport.getBoundingClientRect().top - before)
@@ -30,7 +51,7 @@ async function cancelAndKeepRowAnchored(page: Page, selector: string, before: nu
 
 const rowViewportOffset = (page: Page, selector: string) =>
   page.evaluate((selector) => {
-    const viewport = document.querySelector<HTMLElement>(".ic-viewport");
+    const viewport = document.querySelector<HTMLElement>(".quno-calendar-viewport");
     const row = document.querySelector<HTMLElement>(selector);
     return viewport && row ? row.getBoundingClientRect().top - viewport.getBoundingClientRect().top : null;
   }, selector);
@@ -50,12 +71,10 @@ for (const scale of [5_000, 20_000]) {
     const dateKey = "2026-06-22";
     const calendarId = "marco-eggens";
     const rowSelector = `[data-testid="calendar-day"][data-date="${dateKey}"] [data-testid="calendar-row"][data-calendar-id="${calendarId}"]`;
-    await page.goto("/");
+    await page.goto("/demo/infinite-calendar");
     await page.getByTestId("api-latency-select").selectOption("0");
     await page.getByTestId("scale-select").selectOption(String(scale));
-    await page.getByTestId("jump-date-input").fill(dateKey);
-    await page.getByTestId("jump-time-input").fill("12:00");
-    await page.getByTestId("go-date-button").click();
+    await goToWorkday(page, dateKey);
     await waitForDemoEvents(page);
     await expect.poll(async () => topVisibleDayDateOrNull(page)).toBe(dateKey);
 
@@ -90,9 +109,9 @@ for (const scale of [5_000, 20_000]) {
 }
 
 test("keeps the calendar row position when cancelling external create", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/demo/infinite-calendar");
   await goToWorkday(page);
-  const viewport = page.locator(".ic-viewport");
+  const viewport = page.locator(".quno-calendar-viewport");
   const box = await viewport.boundingBox();
   expect(box).not.toBeNull();
   if (!box) return;
@@ -120,29 +139,15 @@ test("keeps the calendar row position when cancelling external create", async ({
 });
 
 test("keeps a later participant calendar row anchored when cancelling external create", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/demo/infinite-calendar");
   await page.locator(".time-range label").filter({ hasText: "Start" }).locator("input").fill("1");
-  await page.getByTestId("jump-date-input").fill("2026-07-08");
-  await page.getByTestId("jump-time-input").fill("01:00");
-  await page.getByTestId("go-date-button").click();
+  await goToWorkday(page, "2026-07-08");
 
-  const drawTarget = await page.evaluate(() => {
-    const row = document.querySelector<HTMLElement>(
-      '[data-testid="calendar-day"][data-date="2026-07-08"] [data-testid="calendar-row"][data-calendar-id="room-203"]'
-    );
-    const gridBox = row?.querySelector<HTMLElement>(".ic-row-grid")?.getBoundingClientRect();
-    const rowBox = row?.getBoundingClientRect();
-    if (!gridBox || !rowBox) {
-      return null;
-    }
-    return {
-      startX: gridBox.left + 40,
-      endX: gridBox.left + 260,
-      y: rowBox.top + rowBox.height / 2
-    };
+  const drawTarget = await horizontalDrawTarget(page, {
+    calendarId: "room-203",
+    dateKey: "2026-07-08",
+    distance: 220
   });
-  expect(drawTarget).not.toBeNull();
-  if (!drawTarget) return;
 
   await page.mouse.move(drawTarget.startX, drawTarget.y);
   await page.mouse.down();
@@ -167,11 +172,9 @@ test("keeps a later participant calendar row anchored when cancelling external c
 test("keeps the drawn Marco date focused after adding participants and cancelling external create", async ({
   page
 }) => {
-  await page.goto("/");
+  await page.goto("/demo/infinite-calendar");
   await page.getByTestId("scale-select").selectOption("5000");
-  await page.getByTestId("jump-date-input").fill("2026-06-22");
-  await page.getByTestId("jump-time-input").fill("12:00");
-  await page.getByTestId("go-date-button").click();
+  await goToWorkday(page, "2026-06-22");
 
   const drawTarget = await horizontalDrawTarget(page, {
     calendarId: "marco-eggens",
@@ -206,11 +209,9 @@ test("keeps the drawn Marco date focused after adding participants and cancellin
 test("keeps the drawn Bhuvin date focused after adding Marco and Surgery B then cancelling external create", async ({
   page
 }) => {
-  await page.goto("/");
+  await page.goto("/demo/infinite-calendar");
   await page.getByTestId("scale-select").selectOption("5000");
-  await page.getByTestId("jump-date-input").fill("2026-05-23");
-  await page.getByTestId("jump-time-input").fill("08:30");
-  await page.getByTestId("go-date-button").click();
+  await goToWorkday(page, "2026-05-23");
 
   const drawTarget = await horizontalDrawTarget(page, {
     calendarId: "dr-thakker",
@@ -248,11 +249,9 @@ test("does not transiently jump before recenter after cancelling a future multi-
   const future = new Date();
   future.setDate(future.getDate() + 22);
   const futureDate = `${future.getFullYear()}-${String(future.getMonth() + 1).padStart(2, "0")}-${String(future.getDate()).padStart(2, "0")}`;
-  await page.goto("/");
+  await page.goto("/demo/infinite-calendar");
   await page.getByTestId("scale-select").selectOption("5000");
-  await page.getByTestId("jump-date-input").fill(futureDate);
-  await page.getByTestId("jump-time-input").fill("08:45");
-  await page.getByTestId("go-date-button").click();
+  await goToWorkday(page, futureDate);
 
   const drawTarget = await horizontalDrawTarget(page, {
     calendarId: "marco-eggens",
@@ -270,9 +269,10 @@ test("does not transiently jump before recenter after cancelling a future multi-
   await page.getByTestId("draft-participant-surgery-a").check();
   await expect(page.getByTestId("draft-event")).toHaveCount(3);
 
+  await observeDraftFadeout(page);
   await page.getByTestId("draft-cancel-button").click();
   const immediateFocus = await page.evaluate((futureDate) => {
-    const viewport = document.querySelector<HTMLElement>(".ic-viewport");
+    const viewport = document.querySelector<HTMLElement>(".quno-calendar-viewport");
     const day = document.querySelector<HTMLElement>(`[data-testid="calendar-day"][data-date="${futureDate}"]`);
     const row = day?.querySelector<HTMLElement>('[data-testid="calendar-row"][data-calendar-id="marco-eggens"]');
     if (!viewport || !day || !row) return null;
@@ -294,15 +294,13 @@ test("does not transiently jump before recenter after cancelling a future multi-
 });
 
 test("keeps the same calendar row anchored when drawing again after cancelling external create", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/demo/infinite-calendar");
   await page.locator(".time-range label").filter({ hasText: "Start" }).locator("input").fill("1");
-  await page.getByTestId("jump-date-input").fill("2026-07-08");
-  await page.getByTestId("jump-time-input").fill("01:00");
-  await page.getByTestId("go-date-button").click();
+  await goToWorkday(page, "2026-07-08");
 
   const rowOffset = async () =>
     page.evaluate(() => {
-      const viewport = document.querySelector<HTMLElement>(".ic-viewport");
+      const viewport = document.querySelector<HTMLElement>(".quno-calendar-viewport");
       const row = document.querySelector<HTMLElement>(
         '[data-testid="calendar-day"][data-date="2026-07-09"] [data-testid="calendar-row"][data-calendar-id="dr-kirillov"]'
       );
@@ -312,30 +310,18 @@ test("keeps the same calendar row anchored when drawing again after cancelling e
 
   const draftOffset = async () =>
     page.evaluate(() => {
-      const viewport = document.querySelector<HTMLElement>(".ic-viewport");
+      const viewport = document.querySelector<HTMLElement>(".quno-calendar-viewport");
       const draft = document.querySelector<HTMLElement>('[data-testid="draft-event"][data-calendar-id="dr-kirillov"]');
       if (!viewport || !draft) return null;
       return draft.getBoundingClientRect().top - viewport.getBoundingClientRect().top;
     });
 
   const drawOnKirillovJuly9 = async () => {
-    const drawTarget = await page.evaluate(() => {
-      const row = document.querySelector<HTMLElement>(
-        '[data-testid="calendar-day"][data-date="2026-07-09"] [data-testid="calendar-row"][data-calendar-id="dr-kirillov"]'
-      );
-      const gridBox = row?.querySelector<HTMLElement>(".ic-row-grid")?.getBoundingClientRect();
-      const rowBox = row?.getBoundingClientRect();
-      if (!gridBox || !rowBox) {
-        return null;
-      }
-      return {
-        startX: gridBox.left + 50,
-        endX: gridBox.left + 270,
-        y: rowBox.top + rowBox.height / 2
-      };
+    const drawTarget = await horizontalDrawTarget(page, {
+      calendarId: "dr-kirillov",
+      dateKey: "2026-07-09",
+      distance: 220
     });
-    expect(drawTarget).not.toBeNull();
-    if (!drawTarget) return;
 
     await page.mouse.move(drawTarget.startX, drawTarget.y);
     await page.mouse.down();
@@ -353,6 +339,7 @@ test("keeps the same calendar row anchored when drawing again after cancelling e
     .poll(async () => Math.abs(((await draftOffset()) ?? Number.POSITIVE_INFINITY) - firstRowAnchor))
     .toBeLessThanOrEqual(4);
 
+  await observeDraftFadeout(page);
   await page.getByTestId("draft-cancel-button").click();
   await expectDraftFadeoutThenGone(page);
   await expect(page.getByTestId("external-event-popup")).toHaveCount(0);
@@ -375,4 +362,169 @@ test("keeps the same calendar row anchored when drawing again after cancelling e
       expect(Math.abs(nextDraftOffset - secondRowAnchor)).toBeLessThanOrEqual(4);
     }
   }
+});
+
+test("restores participant-filtered calendars without a delayed redraw or event refetch", async ({ page }) => {
+  await page.goto("/demo/infinite-calendar");
+  await waitForDemoEvents(page);
+  await page.getByTestId("api-latency-select").selectOption("1000");
+  await expect(page.getByTestId("api-loading-status")).toContainText("Loading events");
+  await expect(page.getByTestId("api-loading-status")).toHaveText("API idle", { timeout: 5_000 });
+  let eventApiRequests = 0;
+  page.on("request", (request) => {
+    if (request.url().includes("/api/demo-events")) eventApiRequests += 1;
+  });
+  const drawTarget = await horizontalDrawTarget(page, { distance: 240 });
+  await page.mouse.move(drawTarget.startX, drawTarget.y);
+  await page.mouse.down();
+  await page.mouse.move(drawTarget.endX, drawTarget.y, { steps: 5 });
+  await page.mouse.up();
+  await expect(page.getByTestId("external-event-popup")).toBeVisible();
+  await expect
+    .poll(async () =>
+      page
+        .getByTestId("calendar-row")
+        .evaluateAll((rows) =>
+          Array.from(new Set(rows.map((row) => (row as HTMLElement).dataset.calendarId).filter(Boolean)))
+        )
+    )
+    .toEqual(["dr-kirillov"]);
+  const draftShell = page.getByTestId("draft-event").first();
+  await expect(draftShell).toHaveCSS("contain", "paint");
+  await expect(draftShell).toHaveCSS("will-change", "opacity");
+  const cancellationFramesPromise = page.evaluate(async () => {
+    const frames: Array<{ committedEvents: number; days: number; rows: number }> = [];
+    const viewport = document.querySelector<HTMLElement>(".quno-calendar-viewport")!;
+    const visibleCount = (selector: string) => {
+      const viewportBox = viewport.getBoundingClientRect();
+      return Array.from(viewport.querySelectorAll<HTMLElement>(selector)).filter((element) => {
+        const box = element.getBoundingClientRect();
+        return box.bottom > viewportBox.top && box.top < viewportBox.bottom;
+      }).length;
+    };
+    const deadline = performance.now() + 1_700;
+    while (performance.now() < deadline) {
+      await new Promise((resolve) => requestAnimationFrame(resolve));
+      frames.push({
+        committedEvents: visibleCount('[data-testid="calendar-event"], [data-testid="availability-event"]'),
+        days: visibleCount('[data-testid="calendar-day"]'),
+        rows: visibleCount('[data-testid="calendar-row"]')
+      });
+    }
+    return frames;
+  });
+  const stabilityPromise = page.evaluate(async () => {
+    const expectedCalendarIds = ["dr-kirillov", "dr-thakker", "marco-eggens", "room-201", "room-202", "room-203"];
+    const viewport = document.querySelector<HTMLElement>(".quno-calendar-viewport")!;
+    const selector = '[data-testid="calendar-day"], [data-testid="calendar-row"], [data-testid="calendar-event"]';
+    let baselineNodes: HTMLElement[] | null = null;
+    let baselineBoxes: DOMRect[] = [];
+    let baselineScrollTop = 0;
+    let maxGeometryDelta = 0;
+    let removedSemanticNodes = 0;
+    let unexpectedMutations = 0;
+    const mutationDetails: string[] = [];
+    let sameNodes = true;
+    const observer = new MutationObserver((records) => {
+      if (!baselineNodes) return;
+      for (const record of records) {
+        const target = record.target instanceof HTMLElement ? record.target : record.target.parentElement;
+        const draftMutation = target?.closest('[data-testid="draft-event"]');
+        const removesOnlyDraft =
+          record.type === "childList" &&
+          record.removedNodes.length > 0 &&
+          Array.from(record.removedNodes).every(
+            (node) => node instanceof HTMLElement && node.matches('[data-testid="draft-event"]')
+          );
+        if (!draftMutation && !removesOnlyDraft) {
+          unexpectedMutations += 1;
+          if (mutationDetails.length < 20) {
+            mutationDetails.push(
+              `${record.type}:${record.attributeName ?? ""}:${target?.className ?? target?.nodeName ?? "unknown"}`
+            );
+          }
+        }
+        for (const removedNode of record.removedNodes) {
+          if (!(removedNode instanceof HTMLElement)) continue;
+          if (removedNode.matches(selector)) removedSemanticNodes += 1;
+          removedSemanticNodes += removedNode.querySelectorAll(selector).length;
+        }
+      }
+    });
+    observer.observe(viewport, { childList: true, subtree: true });
+    const deadline = performance.now() + 1_700;
+    while (performance.now() < deadline) {
+      await new Promise((resolve) => requestAnimationFrame(resolve));
+      const rows = Array.from(viewport.querySelectorAll<HTMLElement>('[data-testid="calendar-row"]'));
+      const calendarIds = Array.from(new Set(rows.map((row) => row.dataset.calendarId).filter(Boolean)));
+      if (calendarIds.join("|") !== expectedCalendarIds.join("|")) continue;
+      const nodes = Array.from(viewport.querySelectorAll<HTMLElement>(selector));
+      if (!baselineNodes) {
+        baselineNodes = nodes;
+        baselineBoxes = nodes.map((node) => node.getBoundingClientRect());
+        baselineScrollTop = viewport.scrollTop;
+        continue;
+      }
+      sameNodes &&=
+        nodes.length === baselineNodes.length && nodes.every((node, index) => node === baselineNodes![index]);
+      for (let index = 0; index < baselineNodes.length; index += 1) {
+        const before = baselineBoxes[index];
+        const after = baselineNodes[index].getBoundingClientRect();
+        maxGeometryDelta = Math.max(
+          maxGeometryDelta,
+          Math.abs(after.top - before.top),
+          Math.abs(after.left - before.left),
+          Math.abs(after.width - before.width),
+          Math.abs(after.height - before.height)
+        );
+      }
+    }
+    observer.disconnect();
+    return {
+      restored: baselineNodes !== null,
+      sameNodes,
+      scrollDelta: Math.abs(viewport.scrollTop - baselineScrollTop),
+      maxGeometryDelta,
+      removedSemanticNodes,
+      unexpectedMutations,
+      mutationDetails
+    };
+  });
+  await observeDraftFadeout(page);
+  await page.getByTestId("draft-cancel-button").click();
+  await expectDraftFadeoutThenGone(page);
+  const cancellationFrames = await cancellationFramesPromise;
+  const emptyFrames = cancellationFrames
+    .map((frame, index) => ({ ...frame, index }))
+    .filter((frame) => frame.days === 0 || frame.rows === 0 || frame.committedEvents === 0);
+  expect(cancellationFrames.length).toBeGreaterThan(0);
+  expect(
+    cancellationFrames.every((frame) => frame.days > 0),
+    JSON.stringify(emptyFrames)
+  ).toBe(true);
+  expect(
+    cancellationFrames.every((frame) => frame.rows > 0),
+    JSON.stringify(emptyFrames)
+  ).toBe(true);
+  expect(
+    cancellationFrames.every((frame) => frame.committedEvents > 0),
+    JSON.stringify(emptyFrames)
+  ).toBe(true);
+  await expect
+    .poll(async () =>
+      page
+        .getByTestId("calendar-row")
+        .evaluateAll((rows) =>
+          Array.from(new Set(rows.map((row) => (row as HTMLElement).dataset.calendarId).filter(Boolean)))
+        )
+    )
+    .toEqual(["dr-kirillov", "dr-thakker", "marco-eggens", "room-201", "room-202", "room-203"]);
+  const stability = await stabilityPromise;
+  expect(stability.restored).toBe(true);
+  expect(stability.sameNodes).toBe(true);
+  expect(stability.scrollDelta).toBe(0);
+  expect(stability.maxGeometryDelta).toBe(0);
+  expect(stability.removedSemanticNodes).toBe(0);
+  expect(stability.unexpectedMutations, stability.mutationDetails.join("\n")).toBe(0);
+  expect(eventApiRequests).toBe(0);
 });

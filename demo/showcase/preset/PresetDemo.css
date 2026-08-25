@@ -165,7 +165,7 @@
   background: var(--control-background);
 }
 
-.preset-sidebar :is(select, input[type="number"], input[type="date"], input[type="time"]) {
+.preset-sidebar :is(select, input[type="number"], input[type="date"], input[type="time"], .quno-date-picker-input) {
   width: 100%;
   height: var(--input-height);
   margin-top: var(--input-margin);
@@ -240,7 +240,7 @@
 }
 
 .preset-date-jump {
-  grid-template-columns: minmax(0, 1fr) var(--date-action-width);
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .preset-time-range {
@@ -255,17 +255,6 @@
 .demo2-date-jump,
 .demo3-date-jump {
   gap: 8px;
-}
-
-.preset-date-jump label:first-child {
-  grid-column: 1 / -1;
-}
-
-.demo2-date-jump button,
-.demo3-date-jump button {
-  align-self: end;
-  grid-template-columns: auto auto;
-  gap: 6px;
 }
 
 .preset-toggle {

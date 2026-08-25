@@ -1,5 +1,5 @@
 .icv-event-shell.is-hovered .demo2-event-card,
-.ic-event-shell.is-hovered .demo2-event-card {
+.quno-calendar-event-shell.is-hovered .demo2-event-card {
   width: 100%;
 }
 
@@ -106,7 +106,7 @@
   background: #16a34a;
 }
 
-.ic-availability-shell.is-active-layer .demo2-event-card.kind-availability {
+.quno-calendar-availability-shell.is-active-layer .demo2-event-card.kind-availability {
   opacity: 0.88;
   box-shadow:
     inset 0 0 0 1px rgba(22, 163, 74, 0.26),

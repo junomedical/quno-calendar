@@ -1,5 +1,5 @@
 import { Save, X } from "lucide-react";
-import type { ActiveEventDraft, CalendarEvent, CalendarId } from "quno-calendar";
+import type { ActiveEventDraft, CalendarEvent, CalendarId } from "@quno/calendar/infinite-calendar";
 import { demoCalendars } from "./data";
 import {
   addMinutesToIso,

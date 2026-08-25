@@ -1,11 +1,18 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { CalendarEvent, LoadEvents, LoadEventsArgs } from "../../../../src/lib/core/types";
-import { useEventRangeLoader } from "../../../../src/lib/infinite/events/loading/useEventRangeLoader";
+import type { CalendarEvent, LoadEvents, LoadEventsArgs } from "#quno-internal/timeline/core/types";
+import { useEventRangeLoader } from "#quno-internal/timeline/infinite/events/loading/useEventRangeLoader";
 
 type Deferred<T> = {
   promise: Promise<T>;
   resolve: (value: T) => void;
+};
+
+type LoaderSelectionProps = {
+  activeDraftDateKey?: string;
+  activeDraftLoadAnchorDateKey?: string;
+  selectedIds: string[];
+  visibleDateKeys: string[];
 };
 
 function deferred<T>(): Deferred<T> {
@@ -16,10 +23,10 @@ function deferred<T>(): Deferred<T> {
   return { promise, resolve };
 }
 
-function event(id: string, title = id): CalendarEvent {
+function event(id: string, title = id, calendarId = "calendar-a"): CalendarEvent {
   return {
     id,
-    calendarId: "calendar-a",
+    calendarId,
     title,
     start: "2026-07-18T09:00:00",
     end: "2026-07-18T10:00:00"
@@ -106,7 +113,51 @@ describe("useEventRangeLoader", () => {
     expect(result.current.eventsByDate["2026-07-18"]).toHaveLength(1);
   });
 
-  it("aborts obsolete generations and ignores their late responses", async () => {
+  it("reuses date buckets when a calendar selection narrows and returns within loaded coverage", async () => {
+    const events = [event("event-a"), event("event-b", "event-b", "calendar-b")];
+    const loadEvents = vi.fn<LoadEvents>(async () => events);
+    const visibleDateKeys = ["2026-07-18"];
+    const { result, rerender } = renderHook(
+      ({ activeDraftDateKey, activeDraftLoadAnchorDateKey, selectedIds, visibleDateKeys }: LoaderSelectionProps) =>
+        useEventRangeLoader({
+          activeDraftDateKey,
+          activeDraftLoadAnchorDateKey,
+          loadEvents,
+          selectedIds,
+          visibleDateKeys
+        }),
+      {
+        initialProps: {
+          activeDraftDateKey: undefined as string | undefined,
+          activeDraftLoadAnchorDateKey: "2026-07-18",
+          selectedIds: ["calendar-a", "calendar-b"],
+          visibleDateKeys
+        }
+      }
+    );
+
+    await waitFor(() => expect(result.current.eventsByDate["2026-07-18"]).toEqual(events));
+    const loadedSnapshot = result.current.eventsByDate;
+    rerender({
+      activeDraftDateKey: "2026-07-18",
+      activeDraftLoadAnchorDateKey: "2026-07-18",
+      selectedIds: ["calendar-a"],
+      visibleDateKeys: [...visibleDateKeys, "2026-07-19"]
+    });
+    await act(async () => Promise.resolve());
+    rerender({
+      activeDraftDateKey: undefined,
+      activeDraftLoadAnchorDateKey: "2026-07-18",
+      selectedIds: ["calendar-a", "calendar-b"],
+      visibleDateKeys
+    });
+    await act(async () => Promise.resolve());
+
+    expect(loadEvents).toHaveBeenCalledTimes(1);
+    expect(result.current.eventsByDate).toBe(loadedSnapshot);
+  });
+
+  it("aborts requests that do not cover the next selection and ignores their late responses", async () => {
     const requests: Array<{ args: LoadEventsArgs; response: Deferred<CalendarEvent[]> }> = [];
     const loadEvents = vi.fn<LoadEvents>((args) => {
       const response = deferred<CalendarEvent[]>();

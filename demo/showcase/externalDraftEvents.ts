@@ -1,4 +1,4 @@
-import type { CalendarEvent, CalendarId, EventCreateRequest } from "quno-calendar";
+import type { CalendarEvent, CalendarId, EventCreateRequest } from "@quno/calendar/infinite-calendar";
 import { demoCalendars } from "./data";
 
 export function buildExternalCreateDraft(

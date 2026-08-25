@@ -1,0 +1,109 @@
+.project-home {
+  height: 100vh;
+  overflow-y: auto;
+  color: #17202a;
+  background:
+    radial-gradient(circle at 12% 12%, rgb(42 107 96 / 16%), transparent 32rem),
+    linear-gradient(145deg, #f8faf7 0%, #eef3f7 100%);
+}
+
+.project-home__content {
+  width: min(1180px, calc(100% - 40px));
+  margin: 0 auto;
+  padding: clamp(72px, 11vh, 132px) 0 80px;
+}
+
+.project-home__eyebrow,
+.project-home__number {
+  color: #246b5d;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.project-home h1 {
+  max-width: 850px;
+  margin: 22px 0 28px;
+  font-size: clamp(48px, 7.8vw, 96px);
+  font-weight: 650;
+  letter-spacing: -0.065em;
+  line-height: 0.94;
+  text-wrap: balance;
+}
+
+.project-home__intro {
+  max-width: 680px;
+  margin: 0;
+  color: #536273;
+  font-size: clamp(18px, 2vw, 23px);
+  line-height: 1.55;
+}
+
+.project-home__cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: clamp(54px, 8vw, 88px);
+}
+
+.project-home__card {
+  display: flex;
+  min-height: 310px;
+  padding: clamp(24px, 3vw, 38px);
+  flex-direction: column;
+  color: inherit;
+  background: rgb(255 255 255 / 88%);
+  border: 1px solid rgb(23 32 42 / 12%);
+  border-radius: 20px;
+  box-shadow: 0 24px 60px rgb(23 32 42 / 8%);
+  text-decoration: none;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.project-home__card:hover,
+.project-home__card:focus-visible {
+  border-color: #246b5d;
+  box-shadow: 0 30px 72px rgb(23 32 42 / 13%);
+  outline: none;
+  transform: translateY(-4px);
+}
+
+.project-home__card h2 {
+  margin: 38px 0 16px;
+  font-size: clamp(25px, 2.6vw, 36px);
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.project-home__card p {
+  margin: 0 0 32px;
+  color: #5d6878;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.project-home__card strong {
+  margin-top: auto;
+  color: #174c42;
+  font-size: 14px;
+}
+
+@media (max-width: 800px) {
+  .project-home__cards {
+    grid-template-columns: 1fr;
+  }
+
+  .project-home__card {
+    min-height: 240px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .project-home__card {
+    transition: none;
+  }
+}

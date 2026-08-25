@@ -1,0 +1,108 @@
+.date-input-guide {
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.date-input-guide .story__toc-links {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.date-input-guide__example {
+  display: grid;
+  gap: 14px;
+  padding: 20px;
+  border: 1px solid #d9e1ec;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 16px 40px rgb(30 45 62 / 8%);
+}
+
+.date-input-guide__example .story__controls {
+  margin: 0;
+}
+
+.date-input-guide__example .quno-date-picker-input-root,
+.date-input-guide__example .quno-date-picker-input {
+  width: 100%;
+}
+
+.date-input-guide__value {
+  color: #536273;
+  font:
+    700 12px/1.4 ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    monospace;
+}
+
+.date-input-guide__ambiguous {
+  padding: 13px 14px;
+  border-radius: 10px;
+  color: #271d30;
+  background: #f5f1fa;
+  font-size: 16px;
+  font-weight: 750;
+}
+
+.date-input-guide__samples {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.date-input-guide__samples button {
+  padding: 6px 9px;
+  border: 1px solid #cfd8e6;
+  border-radius: 999px;
+  color: #174a8f;
+  background: #f5f8fc;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.date-input-parser-example {
+  display: grid;
+  gap: 12px;
+  width: min(100%, 420px);
+  padding: 20px;
+  border: 1px solid #d9e1ec;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 16px 40px rgb(30 45 62 / 8%);
+}
+
+.date-input-parser-example label {
+  color: #536273;
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.date-input-parser-example input,
+.date-input-parser-example pre {
+  margin: 0;
+  border: 1px solid #d9e1ec;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.date-input-parser-example input {
+  min-height: 48px;
+  padding: 0 14px;
+}
+
+.date-input-parser-example pre {
+  min-height: 132px;
+  padding: 18px;
+  overflow: auto;
+  color: #d8f6e8;
+  background: #172a25;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+@media (max-width: 640px) {
+  .date-input-guide .story__toc-links {
+    grid-template-columns: 1fr;
+  }
+}

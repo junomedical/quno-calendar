@@ -1,0 +1,87 @@
+.quno-date-picker {
+  box-sizing: border-box;
+  width: var(--quno-date-picker-width, min(100%, 420px));
+  color: var(--quno-date-picker-text, var(--quno-date-picker-text-default));
+  font-family: var(
+    --quno-date-picker-font-family,
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif
+  );
+  touch-action: pan-y;
+  user-select: none;
+}
+
+.quno-date-picker *,
+.quno-date-picker *::before,
+.quno-date-picker *::after {
+  box-sizing: border-box;
+}
+
+.quno-date-picker :where(button) {
+  font: inherit;
+}
+
+.quno-date-picker-selection-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 72px;
+  padding: 14px 16px;
+  border: 1px solid var(--quno-date-picker-border, var(--quno-date-picker-border-default));
+  border-radius: var(--quno-date-picker-header-radius, 12px);
+  background: var(
+    --quno-date-picker-selection-surface,
+    var(--quno-date-picker-surface, var(--quno-date-picker-surface-default))
+  );
+  box-shadow: var(--quno-date-picker-header-shadow, var(--quno-date-picker-header-shadow-default));
+}
+
+.quno-date-picker-selection-header > div {
+  display: grid;
+  gap: 4px;
+}
+
+.quno-date-picker-eyebrow {
+  color: var(--quno-date-picker-muted, var(--quno-date-picker-muted-default));
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.quno-date-picker-selection-header strong {
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.quno-date-picker-clear {
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--quno-date-picker-primary, var(--quno-date-picker-primary-default));
+  cursor: pointer;
+  font-weight: 650;
+}
+
+.quno-date-picker-clear:hover:not(:disabled),
+.quno-date-picker-clear:focus-visible {
+  background: var(--quno-date-picker-primary-soft, var(--quno-date-picker-primary-soft-default));
+}
+
+.quno-date-picker-clear:disabled {
+  color: var(--quno-date-picker-disabled, var(--quno-date-picker-disabled-default));
+  cursor: default;
+}
+
+.quno-date-picker-hint {
+  margin: 10px 8px 0;
+  color: var(--quno-date-picker-muted, var(--quno-date-picker-muted-default));
+  font-size: 12px;
+  line-height: 1.45;
+}

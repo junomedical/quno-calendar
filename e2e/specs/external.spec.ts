@@ -3,14 +3,15 @@ import {
   firstDuplicatedViewportEvent,
   firstViewportEventBox,
   goToWorkday,
+  openDrawnExternalDraft,
   selectPageText,
   topVisibleDayDate,
   viewportRelativeEventBox,
   waitForDemoEvents
-} from "../helpers";
+} from "#quno-e2e/helpers";
 
 test("keeps popup cancellation and scroll reset visible in the activity pane", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/demo/infinite-calendar");
   await goToWorkday(page);
   await waitForDemoEvents(page);
   const eventBox = await firstViewportEventBox(page);
@@ -46,10 +47,10 @@ test("keeps popup cancellation and scroll reset visible in the activity pane", a
 });
 
 test("supports drawing a new event area", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/demo/infinite-calendar");
   await goToWorkday(page);
   const initialEventCount = await page.getByTestId("calendar-event").count();
-  const viewport = page.locator(".ic-viewport");
+  const viewport = page.locator(".quno-calendar-viewport");
   const box = await viewport.boundingBox();
   expect(box).not.toBeNull();
   if (!box) return;
@@ -57,7 +58,7 @@ test("supports drawing a new event area", async ({ page }) => {
   const targetRowBeforeDraft = await page.evaluate(
     ({ x, y }) => {
       const row = document.elementFromPoint(x, y)?.closest<HTMLElement>('[data-testid="calendar-row"]');
-      const grid = row?.querySelector<HTMLElement>(".ic-row-grid");
+      const grid = row?.querySelector<HTMLElement>(".quno-calendar-row-grid");
       return row && grid
         ? {
             height: row.getBoundingClientRect().height,
@@ -93,7 +94,7 @@ test("supports drawing a new event area", async ({ page }) => {
   const targetRowDuringDraft = await page.evaluate(
     ({ x, y }) => {
       const row = document.elementFromPoint(x, y)?.closest<HTMLElement>('[data-testid="calendar-row"]');
-      const grid = row?.querySelector<HTMLElement>(".ic-row-grid");
+      const grid = row?.querySelector<HTMLElement>(".quno-calendar-row-grid");
       return row && grid
         ? {
             height: row.getBoundingClientRect().height,
@@ -113,7 +114,7 @@ test("supports drawing a new event area", async ({ page }) => {
   await page.evaluate(() => {
     const samples: number[] = [];
     const visibleCommittedEventCount = () => {
-      const viewport = document.querySelector<HTMLElement>(".ic-viewport")?.getBoundingClientRect();
+      const viewport = document.querySelector<HTMLElement>(".quno-calendar-viewport")?.getBoundingClientRect();
       if (!viewport) {
         return 0;
       }
@@ -202,7 +203,7 @@ test("supports drawing a new event area", async ({ page }) => {
     .getByTestId("draft-event")
     .first()
     .evaluate((element) => {
-      const viewport = document.querySelector<HTMLElement>(".ic-viewport");
+      const viewport = document.querySelector<HTMLElement>(".quno-calendar-viewport");
       if (!viewport) {
         return;
       }
@@ -214,7 +215,7 @@ test("supports drawing a new event area", async ({ page }) => {
   await expect
     .poll(async () =>
       page.evaluate(() => {
-        const viewport = document.querySelector<HTMLElement>(".ic-viewport");
+        const viewport = document.querySelector<HTMLElement>(".quno-calendar-viewport");
         const popup = document.querySelector<HTMLElement>('[data-testid="external-event-popup"]');
         const drafts = Array.from(document.querySelectorAll<HTMLElement>('[data-testid="draft-event"]'));
         if (!viewport || drafts.length === 0) {
@@ -271,7 +272,7 @@ test("supports drawing a new event area", async ({ page }) => {
   let blockDragSource: (DraftBoxSnapshot & { isHitTestable: true }) | undefined;
   for (let attempt = 0; attempt < 8 && !blockDragSource; attempt += 1) {
     blockDraftBoxesBefore = await page.getByTestId("draft-event").evaluateAll((elements) => {
-      const viewport = document.querySelector<HTMLElement>(".ic-viewport");
+      const viewport = document.querySelector<HTMLElement>(".quno-calendar-viewport");
       const viewportBox = viewport?.getBoundingClientRect();
       const popupBox = document
         .querySelector<HTMLElement>('[data-testid="external-event-popup"]')
@@ -282,7 +283,7 @@ test("supports drawing a new event area", async ({ page }) => {
           const box = draftElement.getBoundingClientRect();
           const gridBox = draftElement
             .closest('[data-testid="calendar-row"]')
-            ?.querySelector(".ic-row-grid")
+            ?.querySelector(".quno-calendar-row-grid")
             ?.getBoundingClientRect();
           const visibleLeft = Math.max(box.left, gridBox?.left ?? box.left, viewportBox?.left ?? box.left);
           const visibleRight = Math.min(
@@ -355,7 +356,7 @@ test("supports drawing a new event area", async ({ page }) => {
     attempt += 1
   ) {
     const currentBlockDragSource = await page.getByTestId("draft-event").evaluateAll((elements) => {
-      const viewportBox = document.querySelector<HTMLElement>(".ic-viewport")?.getBoundingClientRect();
+      const viewportBox = document.querySelector<HTMLElement>(".quno-calendar-viewport")?.getBoundingClientRect();
       const popupBox = document
         .querySelector<HTMLElement>('[data-testid="external-event-popup"]')
         ?.getBoundingClientRect();
@@ -364,7 +365,7 @@ test("supports drawing a new event area", async ({ page }) => {
         const box = draftElement.getBoundingClientRect();
         const gridBox = draftElement
           .closest('[data-testid="calendar-row"]')
-          ?.querySelector(".ic-row-grid")
+          ?.querySelector(".quno-calendar-row-grid")
           ?.getBoundingClientRect();
         const visibleLeft = Math.max(box.left, gridBox?.left ?? box.left, viewportBox?.left ?? box.left);
         const visibleRight = Math.min(
@@ -504,9 +505,9 @@ test("supports drawing a new event area", async ({ page }) => {
 });
 
 test("does not pull the viewport back after cancel when the user scrolls immediately", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/demo/infinite-calendar");
   await goToWorkday(page);
-  const viewport = page.locator(".ic-viewport");
+  const viewport = page.locator(".quno-calendar-viewport");
   const eventBox = await firstViewportEventBox(page);
 
   await page.mouse.click(eventBox.x + Math.min(16, eventBox.width / 2), eventBox.y + eventBox.height / 2);
@@ -527,9 +528,8 @@ test("does not pull the viewport back after cancel when the user scrolls immedia
 });
 
 test("keeps expanded calendar rows populated immediately after create cancel", async ({ page }) => {
-  await page.goto("/");
-  await page.getByRole("button", { name: "Add event" }).click();
-  await expect(page.getByTestId("external-event-popup")).toBeVisible();
+  await page.goto("/demo/infinite-calendar");
+  await openDrawnExternalDraft(page);
   await expect
     .poll(async () =>
       page
@@ -540,9 +540,7 @@ test("keeps expanded calendar rows populated immediately after create cancel", a
     )
     .toEqual(["dr-kirillov"]);
 
-  await page.getByTestId("jump-date-input").fill("2026-04-27");
-  await page.getByTestId("jump-time-input").fill("09:00");
-  await page.getByTestId("go-date-button").click();
+  await goToWorkday(page, "2026-04-27");
   await expect.poll(async () => topVisibleDayDate(page)).toBe("2026-04-27");
   await waitForDemoEvents(page);
 
@@ -565,7 +563,7 @@ test("keeps expanded calendar rows populated immediately after create cancel", a
       );
     };
     const sample = (remainingFrames: number) => {
-      const viewport = document.querySelector<HTMLElement>(".ic-viewport");
+      const viewport = document.querySelector<HTMLElement>(".quno-calendar-viewport");
       const viewportBox = viewport?.getBoundingClientRect();
       if (!viewport || !viewportBox) {
         samples.push({ visibleCalendarIds: [], nonDraftVisibleEventCount: 0, topDate: null });
@@ -594,7 +592,7 @@ test("keeps expanded calendar rows populated immediately after create cancel", a
         samples.push({
           visibleCalendarIds,
           nonDraftVisibleEventCount,
-          topDate: topDay?.querySelector(".ic-day-label")?.textContent?.trim() ?? null
+          topDate: topDay?.querySelector(".quno-calendar-day-label")?.textContent?.trim() ?? null
         });
       }
       if (remainingFrames > 0) {
@@ -624,7 +622,7 @@ test("keeps expanded calendar rows populated immediately after create cancel", a
 });
 
 test("keeps edit cancel anchored to the original first person", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/demo/infinite-calendar");
   await goToWorkday(page);
   const duplicate = await firstDuplicatedViewportEvent(page);
   const firstPersonParticipant = duplicate.boxes.find((box) => !box.calendarId.includes("room"));
@@ -670,11 +668,11 @@ test("keeps edit cancel anchored to the original first person", async ({ page })
 });
 
 test("supports external event editing popup without blocking calendar scroll", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/demo/infinite-calendar");
   await goToWorkday(page);
   await waitForDemoEvents(page);
   const editableEvent = await page.evaluate(() => {
-    const viewport = document.querySelector<HTMLElement>(".ic-viewport")?.getBoundingClientRect();
+    const viewport = document.querySelector<HTMLElement>(".quno-calendar-viewport")?.getBoundingClientRect();
     if (!viewport) return null;
     const popupSafeRight = window.innerWidth - 430;
     for (const element of Array.from(document.querySelectorAll<HTMLElement>('[data-testid="calendar-event"]'))) {
@@ -720,7 +718,7 @@ test("supports external event editing popup without blocking calendar scroll", a
   );
   expect(draftBoxBeforeScrollAway).not.toBeNull();
 
-  const viewport = page.locator(".ic-viewport");
+  const viewport = page.locator(".quno-calendar-viewport");
   const scrollTopBefore = await viewport.evaluate((element) => element.scrollTop);
   await viewport.evaluate((element) => {
     const maxScrollTop = element.scrollHeight - element.clientHeight;
@@ -745,17 +743,17 @@ test("supports external event editing popup without blocking calendar scroll", a
   }
 
   const originalDraftDate = await page.getByTestId("draft-date-input").inputValue();
-  const nextDraftDate = await page.evaluate((date) => {
+  const futureDraftDate = await page.evaluate((date) => {
     const next = new Date(`${date}T00:00:00`);
-    next.setDate(next.getDate() + 1);
+    next.setDate(next.getDate() + 45);
     return next.toISOString().slice(0, 10);
   }, originalDraftDate);
   const draftBoxBeforeFutureDate = await viewportRelativeEventBox(
     page,
     `[data-testid="draft-event"][data-event-id="${eventId}"]`
   );
-  await page.getByTestId("draft-date-input").fill(nextDraftDate);
-  await expect(page.getByTestId("draft-date-input")).toHaveValue(nextDraftDate);
+  await page.getByTestId("draft-date-input").fill(futureDraftDate);
+  await expect(page.getByTestId("draft-date-input")).toHaveValue(futureDraftDate);
   if (draftBoxBeforeFutureDate) {
     await expect
       .poll(async () => {
@@ -814,9 +812,9 @@ test("supports external event editing popup without blocking calendar scroll", a
   await page.mouse.up();
 
   const emptyGridPoint = await page.evaluate(() => {
-    const viewport = document.querySelector<HTMLElement>(".ic-viewport")?.getBoundingClientRect();
+    const viewport = document.querySelector<HTMLElement>(".quno-calendar-viewport")?.getBoundingClientRect();
     if (!viewport) return null;
-    for (const grid of Array.from(document.querySelectorAll<HTMLElement>(".ic-row-grid"))) {
+    for (const grid of Array.from(document.querySelectorAll<HTMLElement>(".quno-calendar-row-grid"))) {
       const gridBox = grid.getBoundingClientRect();
       if (gridBox.bottom < viewport.top || gridBox.top > viewport.bottom) {
         continue;
@@ -824,7 +822,7 @@ test("supports external event editing popup without blocking calendar scroll", a
       const y = Math.max(gridBox.top + 8, viewport.top + 96);
       for (let x = gridBox.left + 40; x < Math.min(gridBox.right - 180, viewport.right - 180); x += 80) {
         const target = document.elementFromPoint(x, y);
-        if (target?.closest(".ic-row-grid") && !target.closest("[data-event-id]")) {
+        if (target?.closest(".quno-calendar-row-grid") && !target.closest("[data-event-id]")) {
           return { startX: x, endX: x + 120, y };
         }
       }
@@ -846,7 +844,7 @@ test("supports external event editing popup without blocking calendar scroll", a
     `[data-testid="draft-event"][data-event-id="${eventId}"]`
   );
   const draftRowAnchorBeforeCancel = await page.evaluate((activeEventId) => {
-    const viewport = document.querySelector<HTMLElement>(".ic-viewport");
+    const viewport = document.querySelector<HTMLElement>(".quno-calendar-viewport");
     const draft = document.querySelector<HTMLElement>(`[data-testid="draft-event"][data-event-id="${activeEventId}"]`);
     const row = draft?.closest<HTMLElement>('[data-testid="calendar-row"]');
     if (!viewport || !row) {
@@ -865,7 +863,7 @@ test("supports external event editing popup without blocking calendar scroll", a
       .poll(async () =>
         page.evaluate(
           ({ activeEventId, before }) => {
-            const viewport = document.querySelector<HTMLElement>(".ic-viewport");
+            const viewport = document.querySelector<HTMLElement>(".quno-calendar-viewport");
             const event = document.querySelector<HTMLElement>(
               `[data-testid="calendar-event"][data-event-id="${activeEventId}"]`
             );
@@ -880,17 +878,15 @@ test("supports external event editing popup without blocking calendar scroll", a
       )
       .toBeLessThanOrEqual(4);
   }
-  await page.getByTestId("jump-date-input").fill("2026-07-06");
-  await page.getByTestId("jump-time-input").fill("14:45");
-  await page.getByTestId("go-date-button").click();
+  await goToWorkday(page, "2026-07-06");
   await expect(page.locator(`[data-testid="calendar-event"][data-event-id="${eventId}"]`).first()).toBeVisible();
 });
 
 test("does not start event creation outside row grid cells", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/demo/infinite-calendar");
   await goToWorkday(page);
   const nonInteractiveTargets = [
-    await page.locator(".ic-row-label").first().boundingBox(),
+    await page.locator(".quno-calendar-row-label").first().boundingBox(),
     await page.getByTestId("calendar-day-header").first().boundingBox(),
     await page.getByTestId("time-scale-header").boundingBox()
   ];

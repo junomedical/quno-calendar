@@ -1,0 +1,104 @@
+.field-guide-production {
+  position: relative;
+  display: grid;
+  gap: 14px;
+  margin-top: 34px;
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+}
+
+.field-guide-production__anchor {
+  position: absolute;
+  top: -40px;
+}
+
+.field-guide-production dl {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+}
+
+.field-guide-production__payload {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.field-guide-production__contract {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.field-guide-production dl > div,
+.field-guide-production__api {
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid var(--guide-line, #d5ddd7);
+  border-radius: 10px;
+  background: #fffefa;
+  box-shadow: 0 16px 40px rgb(23 76 66 / 7%);
+}
+
+.field-guide-production dt {
+  margin-bottom: 10px;
+  color: var(--guide-muted, #657069);
+  font-size: 10px;
+  font-weight: 780;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.field-guide-production dd {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  color: #53605a;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.field-guide-production dd strong {
+  color: var(--guide-accent, #1d6a59);
+  font-size: clamp(24px, 3vw, 34px);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.035em;
+  line-height: 1;
+}
+
+.field-guide-production dd small {
+  color: var(--guide-muted, #657069);
+}
+
+.field-guide-production code {
+  overflow-wrap: anywhere;
+  color: var(--guide-accent-dark, #174b40);
+  font-size: 12px;
+}
+
+.field-guide-production__api strong {
+  color: var(--guide-accent-dark, #174b40);
+}
+
+.field-guide-production__api p,
+.field-guide-production__note {
+  color: var(--guide-muted, #657069);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.field-guide-production__api p {
+  margin: 8px 0 0;
+}
+
+.field-guide-production__note {
+  margin: 0;
+}
+
+@media (max-width: 760px) {
+  .field-guide-production__contract {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .field-guide-production__payload,
+  .field-guide-production__contract {
+    grid-template-columns: 1fr;
+  }
+}

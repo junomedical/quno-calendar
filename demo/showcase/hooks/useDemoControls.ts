@@ -1,6 +1,7 @@
 import { useMemo, useState, type Dispatch, type SetStateAction } from "react";
-import type { CalendarView } from "../types";
-import type { DemoTimelineSettings } from "../zoom/DemoZoom";
+import type { CalendarView } from "#quno-demo/showcase/types";
+import type { DemoQunoInfiniteCalendarSettings } from "#quno-demo/showcase/zoom/DemoZoom";
+import type { IsoDate } from "@quno/calendar";
 
 export type DemoControlDefaults = {
   calendarView: CalendarView;
@@ -12,12 +13,11 @@ export type DemoControlDefaults = {
   excludeWeekends: boolean;
   editAvailabilities: boolean;
   apiLatencyMs?: number;
-  jumpDate?: string;
-  jumpTime?: string;
+  jumpDate?: IsoDate;
 };
 
 export type DemoLayoutSettings = Pick<
-  DemoTimelineSettings,
+  DemoQunoInfiniteCalendarSettings,
   | "rowHeight"
   | "dayHeaderHeight"
   | "labelWidth"
@@ -44,11 +44,9 @@ export type DemoControls = {
   setEditAvailabilities: Dispatch<SetStateAction<boolean>>;
   apiLatencyMs: number;
   setApiLatencyMs: Dispatch<SetStateAction<number>>;
-  jumpDate: string;
-  setJumpDate: Dispatch<SetStateAction<string>>;
-  jumpTime: string;
-  setJumpTime: Dispatch<SetStateAction<string>>;
-  settings: DemoTimelineSettings;
+  jumpDate: IsoDate;
+  setJumpDate: Dispatch<SetStateAction<IsoDate>>;
+  settings: DemoQunoInfiniteCalendarSettings;
 };
 
 export function useDemoControls(defaults: DemoControlDefaults, layout: DemoLayoutSettings): DemoControls {
@@ -60,10 +58,9 @@ export function useDemoControls(defaults: DemoControlDefaults, layout: DemoLayou
   const [excludeWeekends, setExcludeWeekends] = useState(defaults.excludeWeekends);
   const [editAvailabilities, setEditAvailabilities] = useState(defaults.editAvailabilities);
   const [apiLatencyMs, setApiLatencyMs] = useState(defaults.apiLatencyMs ?? 0);
-  const [jumpDate, setJumpDate] = useState(defaults.jumpDate ?? "2026-07-04");
-  const [jumpTime, setJumpTime] = useState(defaults.jumpTime ?? "09:00");
+  const [jumpDate, setJumpDate] = useState<IsoDate>(defaults.jumpDate ?? "2026-07-04");
 
-  const settings = useMemo<DemoTimelineSettings>(
+  const settings = useMemo<DemoQunoInfiniteCalendarSettings>(
     () => ({
       ...layout,
       startHour,
@@ -93,8 +90,6 @@ export function useDemoControls(defaults: DemoControlDefaults, layout: DemoLayou
     setApiLatencyMs,
     jumpDate,
     setJumpDate,
-    jumpTime,
-    setJumpTime,
     settings
   };
 }

@@ -1,7 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
-import { formatHorizontalDateLabel, formatMonthDayOrdinal, formatWeekday } from "../../../../src/lib/date/dateLabels";
-import { fromDateKey, toDateKey } from "../../../../src/lib/date/dateVirtualization";
-import { addCalendarMonths, parseIsoDate } from "../../../../src/lib/date/localDate";
+import {
+  formatHorizontalDateLabel,
+  formatMonthDayOrdinal,
+  formatWeekday
+} from "#quno-internal/timeline/date/dateLabels";
+import { fromDateKey, toDateKey } from "#quno-internal/timeline/date/dateVirtualization";
+import { addCalendarMonths, parseIsoDate } from "#quno-internal/timeline/date/localDate";
 
 describe("local date helpers", () => {
   it("parses a date key at local midnight without a UTC date shift", () => {
