@@ -75,8 +75,7 @@
 .calendar-article__toc,
 .article-demo-toolbar,
 .article-card-specimen figcaption,
-.article-code,
-.calendar-article__footer {
+.article-code {
   font-family:
     Inter,
     ui-sans-serif,
@@ -718,6 +717,63 @@
 
 .article-card-container-sample.is-short .article-card-container-sample__shell {
   height: 44px;
+}
+
+.article-card-resize-example {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+  background: #f3f6f2;
+  border: 1px solid #cbd5ce;
+  border-radius: 12px;
+}
+
+.article-card-resize-example__body {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.7fr) minmax(0, 1.3fr);
+  gap: 20px;
+}
+
+.article-card-resize-example__controls {
+  display: grid;
+  align-content: center;
+  gap: 14px;
+}
+
+.article-card-resize-example__controls label {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr) 48px;
+  align-items: center;
+  gap: 8px;
+  color: #4e5a54;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.article-card-resize-example__controls output {
+  color: #246b5d;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.article-card-resize-example__stage {
+  display: flex;
+  min-height: 144px;
+  padding: 12px;
+  align-items: flex-start;
+  overflow: auto;
+  background:
+    linear-gradient(rgba(85, 101, 94, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(85, 101, 94, 0.07) 1px, transparent 1px), #e9eeea;
+  background-size: 16px 16px;
+  border-radius: 8px;
+}
+
+.article-card-resize-example__shell {
+  max-width: 100%;
+  flex: 0 0 auto;
+  container-name: calendar-event;
+  container-type: size;
 }
 
 .article-card-specimen__shell.is-playing-cancelled {
@@ -1470,26 +1526,6 @@
   tab-size: 2;
 }
 
-.calendar-article__footer {
-  display: grid;
-  gap: 14px;
-  padding-top: 30px;
-  color: #566059;
-  border-top: 1px solid var(--article-line);
-  font-size: 14px;
-  line-height: 1.6;
-}
-
-.calendar-article__footer p {
-  margin: 0;
-}
-
-.calendar-article__footer a {
-  color: var(--article-green-dark);
-  font-weight: 700;
-  text-underline-offset: 3px;
-}
-
 @media (max-width: 760px) {
   .calendar-article__content {
     width: min(100% - 28px, 680px);
@@ -1523,6 +1559,10 @@
   }
 
   .article-card-container-example__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .article-card-resize-example__body {
     grid-template-columns: 1fr;
   }
 

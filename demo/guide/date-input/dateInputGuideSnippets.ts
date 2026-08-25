@@ -131,10 +131,3 @@ export const compositionSnippet = `const [value, setValue] = useState<DateRange 
 />
 
 // Both components share the same timezone-free DateRange.`;
-
-export const librarySizeSnippet = `import { QunoDateInput } from "@quno/calendar/date-input";
-import "@quno/calendar/date-input/styles.css"; // optional
-
-// Independently measured ESM output:
-// JavaScript: 6.77 KiB gzip / 22.89 KiB raw
-// Optional CSS: 0.58 KiB gzip / 2.29 KiB raw`;

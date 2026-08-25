@@ -7,16 +7,16 @@ calendar at `/demo/infinite-calendar`.
 The article teaches the calendar through focused live exhibits:
 
 1. Fit dense schedules into a clear view.
-2. Move through dates without limits.
+2. Move through dates without limits while immediately populating newly visible days.
 3. Keep busy schedules fast.
 4. Leverage the browser engine.
-5. Render useful event cards, including one renderer adapting to roomy, narrow, and short containers.
+5. Render useful event cards, including one renderer adapting to fixed specimens and a user-resizable container.
 6. Shape card structure for the occasion.
 7. Start with a read-only calendar.
 8. Add availability and event layers.
-9. Create, move, and edit content.
+9. Create, move, and edit content without snapping visible target rows, and restore the view on cancellation.
 10. Mark and return to the current time.
-11. Connect familiar date navigation with the shared Quno Date Input.
+11. Connect familiar date navigation with the shared Quno Date Input, including immediate Arrow Up/Down preview.
 12. Zoom without losing precision.
 13. Reveal time progressively.
 14. Theme the calendar.
@@ -28,7 +28,7 @@ The article teaches the calendar through focused live exhibits:
 20. Focus creation on one calendar.
 21. Keep the committed event in view.
 22. Keep React as the source of truth.
-23. Support motion without losing state.
+23. Support motion without losing state, beginning with an explicit New draft action.
 24. Put everything together.
 25. Ship the package.
 

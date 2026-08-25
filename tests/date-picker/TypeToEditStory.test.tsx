@@ -24,6 +24,9 @@ describe("date input field guide", () => {
       expect(screen.getByRole("heading", { name: title })).toBeInTheDocument();
     }
     expect(screen.getByRole("link", { name: "Date Parser field guide" })).toHaveAttribute("href", "/guide/date-parser");
+    const production = document.querySelector<HTMLElement>('[data-story-topic="library-size"]') as HTMLElement;
+    expect(within(production).queryByText(/^Implementation/)).not.toBeInTheDocument();
+    expect(within(production).queryByText("Import Date Input")).not.toBeInTheDocument();
   });
 
   it("opens the calendar when the button-like input gains focus and closes outside", async () => {

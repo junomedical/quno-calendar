@@ -48,7 +48,3 @@ parseDateInput(text, {
 export const tokenizeRecipe = `import { tokenizeDateInput } from "@quno/calendar/date-parser";
 
 const tokens = tokenizeDateInput("next 2 weeks");`;
-
-export const productionRecipe = `import { parseDateInput } from "@quno/calendar/date-parser";
-
-// Headless ESM/CommonJS entry: no React, DOM, or stylesheet.`;

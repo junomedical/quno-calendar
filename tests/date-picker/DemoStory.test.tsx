@@ -7,8 +7,11 @@ describe("datepicker field guide", () => {
 
     expect(
       screen.getByRole("heading", {
-        name: "Shape a date range as directly as you point to it."
+        name: "Date range selection you won't hate"
       })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Paint, drag and correct a range without going to forced from-to sequence.")
     ).toBeInTheDocument();
     expect(screen.getAllByRole("grid")).toHaveLength(14);
     const contents = screen.getByRole("navigation", {
@@ -23,6 +26,8 @@ describe("datepicker field guide", () => {
       "#day-handler"
     );
     expect(document.querySelector("#quick-jump")).toBeInTheDocument();
+    expect(screen.getByText(/Months follow the seasons/)).toBeInTheDocument();
+    expect(screen.getByText(/Sticky year labels keep the year readable during fast scrolling/)).toBeInTheDocument();
     expect(screen.queryByText("Why Quno")).not.toBeInTheDocument();
     expect(screen.queryByText("Quno approach")).not.toBeInTheDocument();
     expect(screen.getAllByText(/^Try it$/).length).toBeGreaterThan(5);

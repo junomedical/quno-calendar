@@ -58,7 +58,7 @@ export const StoryTopics = (): JSX.Element => (
       number="03"
       kicker="Quick navigation"
       title="Jump years without leaving the calendar."
-      copy="The month-and-year title opens an in-place navigator with a 100-year runway in either direction. Compact sticky-year blocks place a left rail beside month grids containing only their labeled year: January and February lead, complete rows run through November, and December closes on its own row. Year labels and month names share a distinct, theme-coordinated alternating text tone. Virtualization keeps the mounted page small and settled edge loading prevents iPhone momentum from cascading. A month, chevron, or Start/End jump restores the same six-week date view without changing the selected period."
+      copy="The month-and-year title opens an in-place navigator with a 100-year runway in either direction. Months follow the seasons: March–May, June–August, and September–November stay together, while December continues into January–February across the year boundary. Sticky year labels keep the year readable during fast scrolling. Year labels and month names share a distinct, theme-coordinated alternating text tone, while virtualization keeps the mounted page small and settled edge loading prevents iPhone momentum from cascading. A month, chevron, or Start/End jump restores the same six-week date view without changing the selected period."
       instruction="Click August 2026, flick or scroll through years, then choose a month. Open it again and click the title to close without jumping."
     >
       <QuickJumpExample />

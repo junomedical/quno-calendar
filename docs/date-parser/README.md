@@ -13,3 +13,6 @@ The parser supports explicit formats, preferred numeric order, bounded relative 
 ranges, expected-period ranking, English and German vocabularies, lexicon extensions, and tokenization without a UI or
 framework dependency. Lexicon extensions add aliases within that bounded grammar; they do not provide general locale
 or natural-language parsing.
+
+The field guide's production chapter presents the headless entry point, measured artifact, runtime contract, and public
+API directly without repeating them in a separate import implementation accordion.

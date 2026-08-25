@@ -486,6 +486,12 @@ The target is semantic rather than lane-index based. If a save introduces collis
 metrics that move the event into another overlap lane, restoration resolves the new event geometry and keeps that event
 at the captured viewport position.
 
+Capture the source event before staging a move, restore the anchor against the proposed event after rendering the
+controlled draft, and retain that original anchor until the review ends. Accept can keep the proposed event at its
+current viewport-relative position; Cancel should restore the same anchor against the original saved event (or the
+original drawn slot for a create draft). Set `allowNavigationFallback: false` when the workflow must stay inside the
+currently visible date and resource view.
+
 Patch the saved event into the loaded visible cache before clearing the controlled draft:
 
 ```tsx

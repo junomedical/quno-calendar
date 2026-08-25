@@ -14,7 +14,10 @@ describe("date parser field guide", () => {
       "#preferred-date-order"
     );
     expect(screen.getAllByText(/^Try it$/)).toHaveLength(8);
-    expect(screen.getAllByText(/^Implementation/)).toHaveLength(8);
+    expect(screen.getAllByText(/^Implementation/)).toHaveLength(7);
+    const production = document.querySelector<HTMLElement>('[data-story-topic="parser-production"]') as HTMLElement;
+    expect(within(production).queryByText(/^Implementation/)).not.toBeInTheDocument();
+    expect(within(production).queryByText("Import Date Parser")).not.toBeInTheDocument();
   });
 
   it("keeps parsing and tokenization interactive", () => {

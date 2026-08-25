@@ -6,6 +6,9 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ### Added
 
+- Added six package-wide guiding principles to the four-product home: Clean, Focused, Impressive, Unbundled, Natural,
+  and Preemptive.
+- Added a user-resizable event-card container lab that demonstrates the renderer's width and height container queries.
 - Added a focused React-controlled Infinite Calendar exhibit showing visible-calendar selection and zoom flowing through
   product-owned state while the calendar preserves its date and loaded content.
 - Added a concise four-card project home for Quno/Infinite Calendar, Quno/Datepicker, Quno/Date Input, and Quno/Date Parser. Each
@@ -22,6 +25,12 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ### Changed
 
+- Repositioned the Datepicker field guide around direct range selection and clarified that its long-distance month
+  navigator groups months by season while sticky year labels preserve context during fast scrolling.
+- Reframed the project home and Infinite Calendar guide around an opinionated approach to date and scheduling UI, and
+  simplified the calendar guide headline for complex schedules.
+- Updated the Infinite Calendar field-guide exhibits so scrolled dates receive events immediately, Date Input Arrow
+  Up/Down changes navigate without Enter, and the motion exhibit begins with New draft before Add or Cancel are enabled.
 - Split the Datepicker field guide’s single-day chapter into a picker-only `selectionMode="single"` demonstration and
   a dedicated range-enabled Date Input composition. In the composition, the input replaces the selected-period summary
   and Clear action, the picker appears only while the control has focus, and typed ranges move the visible picker month.
@@ -59,6 +68,9 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ### Removed
 
+- Removed the redundant Import Date Input and Import Date Parser implementation accordions from their production
+  chapters; the production facts continue to show entry points, optional CSS, runtimes, and public APIs directly.
+- Removed the explanatory footer and main-demo link from the end of the Infinite Calendar field guide.
 - Removed the old `timeline` and `date-picker` package subpaths and the old `QunoCalendar` facade names without
   compatibility exports.
 - Removed the infinite-calendar demo sidebar's time input and Add event button. New appointments in the demo now begin
@@ -68,6 +80,8 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ### Fixed
 
+- Kept parent-reviewed moves to another visible date or resource at their viewport-relative row instead of snapping the
+  row to the top, and restored the original event and view when a proposal is cancelled.
 - Made every English, German, and product-vocabulary sample in the Date Parser language exhibit resolve to a different
   visible day or range, so switching examples now demonstrates the parser output instead of repeating the same date.
 - Kept the Datepicker range-summary Clear action compact in the Acid and Candy field-guide themes instead of inheriting

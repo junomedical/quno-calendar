@@ -593,3 +593,18 @@ Without the synchronous range publication, cancelling a participant-filtered dra
 React mounted the dates at that offset. The cache and semantic anchors remained correct, but the viewport painted one
 or two empty frames. Frame-by-frame browser coverage now requires visible days, resource rows, and committed events
 through the complete cancel transition while retaining their settled DOM identities and making no API request.
+
+## 083 - Reviewed Mutations Preserve the Working View
+
+Date: 2026-08-25
+Status: Accepted
+
+The parent-reviewed mutation example captures a semantic viewport anchor before it stages a create or move proposal.
+When a saved appointment moves to another date or resource already in view, the controlled draft is restored against
+that anchor so its target row stays at the same viewport-relative position instead of jumping to the top. The parent
+retains the original anchor throughout review; Accept transfers the position to the committed event, while Cancel
+restores the saved source event or original creation slot with navigation fallback disabled.
+
+This makes review UI feel local to the work that initiated it and demonstrates the public anchor contract without
+moving persistence responsibility into the calendar. Manual scrolling can still cancel a pending restoration, so user
+intent takes precedence over the pre-proposal snapshot.

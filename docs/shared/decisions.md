@@ -76,3 +76,29 @@ because that repository was the consolidation source. Its identifier and text re
   range while retaining the shared controlled `DateRange`, focus-open behavior, and hidden duplicate selection header.
 - Consequences: The adjacent chapters now demonstrate distinct contracts: one isolates single-day picker behavior, and
   the other shows typed and painted range editing through one compact selection surface.
+
+## QUNO-007 - Present the package through six guiding principles
+
+- Date: 2026-08-25
+- Status: Accepted
+- Context: The four-product home explained what each primitive does but did not state the product values shared across
+  their elements and interactions. Readers could see individual features without a concise explanation of the choices
+  connecting them.
+- Decision: Introduce the package as an opinionated approach to date and scheduling UI, then place six principles after
+  the four product guides: Clean, Focused, Impressive, Unbundled, Natural, and Preemptive. Keep each principle short,
+  outcome-led, and independent of a specific component.
+- Consequences: The home communicates both the four separately importable ideas and the design stance joining them.
+  Product field guides remain responsible for proving those principles through live interactions and focused demos.
+
+## QUNO-008 - Keep production chapters free of duplicate import accordions
+
+- Date: 2026-08-25
+- Status: Accepted
+- Context: Date Input and Date Parser production chapters already present their entry point, stylesheet status, measured
+  artifacts, runtime, dependencies, compatibility, and public API in the shared production-facts component. A separate
+  implementation accordion repeated only a subset of those facts immediately above the complete presentation.
+- Decision: Remove the Import Date Input and Import Date Parser implementation accordions from their production
+  chapters. Keep copyable implementation recipes on task-oriented chapters and keep complete import and artifact facts
+  visible in the shared production presentation.
+- Consequences: The two production endings are shorter and avoid duplicate payload guidance without hiding their
+  entry-point or stylesheet contracts. Other field-guide chapters retain their focused implementation recipes.

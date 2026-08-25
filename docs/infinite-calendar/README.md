@@ -14,3 +14,7 @@ rendering, creation and movement, navigation, zoom, and visual focus.
 
 Day keys use shared timezone-free `IsoDate` values. Event `start` and `end` remain timestamp strings and retain their
 local or offset semantics.
+
+The field guide keeps its interaction contracts live: newly scrolled dates populate without a simulated delay, event
+cards can be resized in place, parent-reviewed mutations preserve their working row and restore the original view on
+Cancel, Date Input arrow changes navigate immediately, and motion begins from an explicit draft action.

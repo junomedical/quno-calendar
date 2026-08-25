@@ -3,6 +3,8 @@ import {
   applyEventMove,
   type ActiveEventDraft,
   type CalendarEvent,
+  type CalendarViewportAnchor,
+  type CalendarViewportAnchorTarget,
   type QunoInfiniteCalendarHandle,
   type EventCreateRequest,
   type EventMoveRequest,
@@ -10,6 +12,7 @@ import {
   type LoadEvents
 } from "@quno/calendar/infinite-calendar";
 import { useCallback, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 import { CalendarDemoShell } from "./ArticleDemos";
 import {
   abortableDelay,
@@ -23,6 +26,28 @@ import {
 } from "./articleSupport";
 
 const introductoryCalendarIds = ["provider-a", "room-1"];
+
+function eventAnchorTarget(
+  event: CalendarEvent,
+  calendarId = event.calendarId,
+  requireVisible = false
+): CalendarViewportAnchorTarget {
+  return {
+    eventId: event.id,
+    calendarId,
+    dateKey: event.start.slice(0, 10) as CalendarViewportAnchorTarget["dateKey"],
+    time: event.start.slice(11, 16),
+    requireVisible
+  };
+}
+
+function slotAnchorTarget(event: CalendarEvent): CalendarViewportAnchorTarget {
+  return {
+    calendarId: event.calendarId,
+    dateKey: event.start.slice(0, 10) as CalendarViewportAnchorTarget["dateKey"],
+    time: event.start.slice(11, 16)
+  };
+}
 
 export function ReadOnlyArticleDemo() {
   return (
@@ -51,6 +76,8 @@ export function DragCreateArticleDemo() {
   const [events, setEvents] = useState(articleEvents);
   const eventsRef = useRef(events);
   const createdSequenceRef = useRef(0);
+  const proposalAnchorRef = useRef<CalendarViewportAnchor | null>(null);
+  const sourceEventRef = useRef<CalendarEvent | null>(null);
   const [pendingDraft, setPendingDraft] = useState<ActiveEventDraft | null>(null);
   const [activity, setActivity] = useState(
     "Drag a saved card or draw a range. Nothing changes until the parent accepts the proposal."
@@ -59,12 +86,22 @@ export function DragCreateArticleDemo() {
 
   const loadEvents = useCallback<LoadEvents>(async (request) => filterEvents(eventsRef.current, request), []);
   const moveEvent = useCallback((request: EventMoveRequest) => {
-    setPendingDraft({
-      mode: "edit",
-      event: applyEventMove(request.event, request),
-      sourceEventId: request.event.id
+    const movedEvent = applyEventMove(request.event, request);
+    const anchor =
+      calendarRef.current?.captureViewportAnchor(eventAnchorTarget(request.event, request.sourceCalendarId, true)) ??
+      null;
+    proposalAnchorRef.current = anchor;
+    sourceEventRef.current = request.event;
+    flushSync(() => {
+      setPendingDraft({ mode: "edit", event: movedEvent, sourceEventId: request.event.id });
+      setActivity(`Review the move for “${request.event.title}”. Saved data is unchanged.`);
     });
-    setActivity(`Review the move for “${request.event.title}”. Saved data is unchanged.`);
+    calendarRef.current?.restoreViewportAnchor(anchor, {
+      target: eventAnchorTarget(movedEvent, request.proposedCalendarId),
+      afterRecenter: true,
+      allowNavigationFallback: false,
+      cancelOnManualScroll: true
+    });
     return false;
   }, []);
   const stageCreateDraft = useCallback((request: EventCreateRequest) => {
@@ -80,8 +117,18 @@ export function DragCreateArticleDemo() {
       color: "#246b5d",
       kind: "appointment"
     };
-    setPendingDraft({ mode: "create", event });
-    setActivity("Review the new appointment. Saved data is unchanged.");
+    const anchor = calendarRef.current?.captureViewportAnchor(slotAnchorTarget(event)) ?? null;
+    proposalAnchorRef.current = anchor;
+    sourceEventRef.current = null;
+    flushSync(() => {
+      setPendingDraft({ mode: "create", event });
+      setActivity("Review the new appointment. Saved data is unchanged.");
+    });
+    calendarRef.current?.restoreViewportAnchor(anchor, {
+      target: eventAnchorTarget(event),
+      afterRecenter: true,
+      cancelOnManualScroll: true
+    });
   }, []);
   const acceptPendingDraft = () => {
     if (!pendingDraft) return;
@@ -89,31 +136,56 @@ export function DragCreateArticleDemo() {
       ...pendingDraft.event,
       subtitle: pendingDraft.mode === "create" ? "Accepted by the parent" : pendingDraft.event.subtitle
     };
-    setEvents((current) =>
-      pendingDraft.mode === "create"
-        ? [...current, committedEvent]
-        : current.map((event) => (event.id === pendingDraft.sourceEventId ? committedEvent : event))
-    );
-    setPendingDraft(null);
-    calendarRef.current?.commitVisibleEvent(committedEvent, {
-      appearing: true,
-      previousEventId: pendingDraft.sourceEventId
+    const anchor =
+      calendarRef.current?.captureViewportAnchor(eventAnchorTarget(pendingDraft.event, undefined, true)) ??
+      proposalAnchorRef.current;
+    flushSync(() => {
+      setEvents((current) =>
+        pendingDraft.mode === "create"
+          ? [...current, committedEvent]
+          : current.map((event) => (event.id === pendingDraft.sourceEventId ? committedEvent : event))
+      );
+      calendarRef.current?.commitVisibleEvent(committedEvent, {
+        appearing: true,
+        previousEventId: pendingDraft.sourceEventId
+      });
+      setPendingDraft(null);
+      setActivity(
+        pendingDraft.mode === "create"
+          ? "Accepted the new appointment. Parent state and the visible calendar now match."
+          : `Accepted the move for “${pendingDraft.event.title}”. Parent state and the visible calendar now match.`
+      );
     });
-    setActivity(
-      pendingDraft.mode === "create"
-        ? "Accepted the new appointment. Parent state and the visible calendar now match."
-        : `Accepted the move for “${pendingDraft.event.title}”. Parent state and the visible calendar now match.`
-    );
+    calendarRef.current?.restoreViewportAnchor(anchor, {
+      target: eventAnchorTarget(committedEvent),
+      afterRecenter: false,
+      cancelOnManualScroll: true
+    });
+    proposalAnchorRef.current = null;
+    sourceEventRef.current = null;
   };
   const cancelPendingDraft = () => {
     if (!pendingDraft) return;
+    const anchor = proposalAnchorRef.current;
+    const sourceEvent = sourceEventRef.current;
+    const target = sourceEvent ? eventAnchorTarget(sourceEvent) : slotAnchorTarget(pendingDraft.event);
     calendarRef.current?.releaseActiveDraft({ animation: "fade-out", durationMs: 320 });
-    setActivity(
-      pendingDraft.mode === "create"
-        ? "Cancelled the new appointment. Saved data was left untouched."
-        : `Cancelled the move for “${pendingDraft.event.title}”. Saved data was left untouched.`
-    );
-    setPendingDraft(null);
+    flushSync(() => {
+      setActivity(
+        pendingDraft.mode === "create"
+          ? "Cancelled the new appointment. Saved data was left untouched, and the view was restored."
+          : `Cancelled the move for “${pendingDraft.event.title}”. Saved data and the original view were restored.`
+      );
+      setPendingDraft(null);
+    });
+    calendarRef.current?.restoreViewportAnchor(anchor, {
+      target,
+      afterRecenter: true,
+      allowNavigationFallback: false,
+      cancelOnManualScroll: true
+    });
+    proposalAnchorRef.current = null;
+    sourceEventRef.current = null;
   };
 
   return (

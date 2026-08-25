@@ -16,9 +16,7 @@ test("legacy guides redirect to the infinite-calendar field guide", async ({ pag
   for (const route of ["/story", "/examples/integration-walkthrough"]) {
     await page.goto(route);
     await expect(page).toHaveURL(/\/guide\/infinite-calendar$/);
-    await expect(
-      page.getByRole("heading", { name: "A simple, fast calendar for businesses with complex schedules." })
-    ).toBeVisible();
+    await expect(page.getByRole("heading", { name: "A simple, fast calendar for complex schedules." })).toBeVisible();
   }
 });
 
@@ -86,6 +84,18 @@ test("datepicker field guide keeps picker geometry stable", async ({ page }) => 
 
 test("project home links each component card to its dedicated field guide and demo", async ({ page }) => {
   await page.goto("/");
+  await expect(page.getByRole("heading", { name: "Opinionated approach to dates and schedules UI" })).toBeVisible();
+  await expect(page.locator(".project-home__intro")).toContainText("Four different ideas in the date UI elements");
+  const principles = page.getByRole("region", { name: "Guiding principles" });
+  await expect(principles.locator(".project-home__principle")).toHaveCount(6);
+  await expect(principles.getByRole("heading", { level: 3 })).toHaveText([
+    "Clean",
+    "Focused",
+    "Impressive",
+    "Unbundled",
+    "Natural",
+    "Preemptive"
+  ]);
   const routes = [
     ["Explore the calendar guide", "/guide/infinite-calendar", "/demo/infinite-calendar", ".quno-calendar-viewport"],
     ["Explore the Datepicker guide", "/guide/datepicker", "/demo/datepicker", ".quno-date-picker"],
@@ -99,6 +109,10 @@ test("project home links each component card to its dedicated field guide and de
   );
   expect(Math.abs(desktopBoxes[0].width - desktopBoxes[3].width)).toBeLessThan(2);
   expect(desktopBoxes[2].top).toBeGreaterThan(desktopBoxes[0].bottom);
+  const desktopPrincipleBoxes = await principles
+    .locator(".project-home__principle")
+    .evaluateAll((elements) => elements.map((element) => element.getBoundingClientRect()));
+  expect(Math.abs(desktopPrincipleBoxes[0].top - desktopPrincipleBoxes[1].top)).toBeLessThan(2);
   for (const [label, guideHref, demoHref, demoSelector] of routes) {
     const card = page.getByRole("link", { name: label });
     await expect(card).toHaveAttribute("href", guideHref);
@@ -116,6 +130,10 @@ test("project home links each component card to its dedicated field guide and de
   expect(mobileBoxes[1].top).toBeGreaterThan(mobileBoxes[0].bottom);
   expect(mobileBoxes[2].top).toBeGreaterThan(mobileBoxes[1].bottom);
   expect(mobileBoxes[3].top).toBeGreaterThan(mobileBoxes[2].bottom);
+  const mobilePrincipleBoxes = await principles
+    .locator(".project-home__principle")
+    .evaluateAll((elements) => elements.map((element) => element.getBoundingClientRect()));
+  expect(mobilePrincipleBoxes[1].top).toBeGreaterThan(mobilePrincipleBoxes[0].bottom);
 });
 
 test("date input field guide follows the task-oriented component contract", async ({ page }) => {
@@ -148,6 +166,9 @@ test("date input field guide follows the task-oriented component contract", asyn
     "href",
     "/guide/date-parser"
   );
+  const production = guide.locator("#library-size");
+  await expect(production.getByText(/^Implementation/)).toHaveCount(0);
+  await expect(production.getByText("Import Date Input")).toHaveCount(0);
 });
 
 test("date parser guide keeps parsing semantics headless and interactive", async ({ page }) => {
@@ -172,6 +193,9 @@ test("date parser guide keeps parsing semantics headless and interactive", async
     await expect(output).toContainText(`"start": "${expectedStart}"`);
   }
   await expect(output).toContainText('"end": "2026-08-23"');
+  const production = guide.locator("#parser-production");
+  await expect(production.getByText(/^Implementation/)).toHaveCount(0);
+  await expect(production.getByText("Import Date Parser")).toHaveCount(0);
 });
 
 test("editorial table of contents presents the feature chapters and navigates the article scroller", async ({
@@ -276,7 +300,7 @@ test("all four guides separate exact payloads from runtime contracts", async ({ 
     ["infinite-calendar", "31.76 KiB gzip", "1.95 KiB gzip", "@quno/calendar/infinite-calendar"],
     ["datepicker", "9.00 KiB gzip", "3.20 KiB gzip", "@quno/calendar/datepicker"],
     ["date-input", "6.77 KiB gzip", "0.58 KiB gzip", "@quno/calendar/date-input"],
-    ["date-parser", "4.49 KiB gzip", "No stylesheet", "@quno/calendar/date-parser"]
+    ["date-parser", "4.45 KiB gzip", "No stylesheet", "@quno/calendar/date-parser"]
   ] as const;
 
   for (const [route, javascript, styles, entrypoint] of guides) {
@@ -333,6 +357,13 @@ test("editorial Quno date input navigates directly to a selected date", async ({
   await demo.getByRole("button", { name: "Previous day" }).click();
   await expect(demo.getByLabel("Destination date")).toHaveValue("8 July 2026");
   await expect(demo.getByText("Wednesday procedure")).toBeInViewport();
+
+  await demo.getByLabel("Destination date").evaluate((input: HTMLInputElement) => input.setSelectionRange(0, 0));
+  await demo.getByLabel("Destination date").press("ArrowUp");
+  await expect(demo.getByText("Showing 2026-07-09")).toBeVisible();
+  await expect(demo.locator('[data-testid="calendar-day"][data-date="2026-07-09"]')).toBeInViewport();
+  await demo.getByLabel("Destination date").press("ArrowDown");
+  await expect(demo.getByText("Showing 2026-07-08")).toBeVisible();
 
   await demo.getByRole("button", { name: "Today", exact: true }).click();
   await expect(demo.locator(".quno-calendar-now-pin.is-current")).toBeInViewport();
@@ -491,13 +522,12 @@ test("editorial article preserves its inline calendar through full-screen expans
   const calendar = demo.getByTestId("quno-calendar-timeline");
   const viewport = demo.locator(".quno-calendar-viewport");
 
-  await expect(
-    page.getByRole("heading", { name: "A simple, fast calendar for businesses with complex schedules." })
-  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "A simple, fast calendar for complex schedules." })).toBeVisible();
+  await expect(article.locator(".calendar-article__footer")).toHaveCount(0);
   await expect(page.getByRole("navigation", { name: "Integration walkthrough steps" })).toHaveCount(0);
   await expect(article).toHaveCSS("overflow-y", "auto");
   await expect(calendar).toBeVisible();
-  await expect(demo.getByText("Treatment consultation").first()).toBeVisible();
+  await expect(demo.getByText("Morning appointment").first()).toBeVisible();
   expect(await article.evaluate((element) => element.scrollHeight > element.clientHeight)).toBe(true);
 
   await viewport.evaluate((element) => {
@@ -562,10 +592,23 @@ test("editorial calendars keep date typography compact and expose scroll settlem
   if (!viewportBox) return;
   await viewport.dispatchEvent("wheel", { bubbles: true, cancelable: true, deltaY: 180 });
   await viewport.evaluate((element) => {
-    element.scrollTop += 120;
+    element.scrollTop += element.clientHeight * 4;
   });
   await expect(chip).toHaveText("scrolled");
   await expect(chip).toHaveText("repositioned", { timeout: 3_000 });
+  const visibleEventIds = await demo.locator('[data-event-id^="scrolling-"]').evaluateAll(
+    (events, viewportElement) => {
+      const viewportBox = (viewportElement as HTMLElement).getBoundingClientRect();
+      return events
+        .filter((event) => {
+          const box = event.getBoundingClientRect();
+          return box.bottom > viewportBox.top && box.top < viewportBox.bottom;
+        })
+        .map((event) => event.getAttribute("data-event-id"));
+    },
+    await viewport.elementHandle()
+  );
+  expect(visibleEventIds.length).toBeGreaterThan(0);
 });
 
 test("every editorial calendar example offers the shared full-screen control", async ({ page }) => {
@@ -665,6 +708,17 @@ test("editorial article uses one external card renderer for specimens and calend
   await expect(short.locator(".article-event-card__kicker")).not.toHaveCSS("display", "none");
   await expect(short.locator(".article-event-card__subtitle")).toHaveCSS("display", "none");
   await expect(short.locator(".article-event-card__time")).toHaveCSS("display", "none");
+
+  const resizeExample = demo.getByTestId("article-card-resize-example");
+  const resizableShell = resizeExample.getByTestId("article-resizable-card-shell");
+  await resizeExample.getByLabel("Card width").fill("100");
+  await expect.poll(async () => (await resizableShell.boundingBox())?.width ?? 0).toBeCloseTo(100, 0);
+  await expect(resizableShell.locator(".article-event-card__kicker")).toHaveCSS("display", "none");
+  await resizeExample.getByLabel("Card width").fill("260");
+  await resizeExample.getByLabel("Card height").fill("44");
+  await expect.poll(async () => (await resizableShell.boundingBox())?.height ?? 0).toBeCloseTo(44, 0);
+  await expect(resizableShell.locator(".article-event-card__kicker")).not.toHaveCSS("display", "none");
+  await expect(resizableShell.locator(".article-event-card__subtitle")).toHaveCSS("display", "none");
 
   const added = demo.locator('[data-motion="added"]');
   await demo.getByRole("button", { name: "Replay added event animation" }).click();
@@ -819,21 +873,32 @@ test("editorial drag/create exhibit stages parent-owned changes for accept or ca
   const demo = await revealLazyArticleDemo(page, "drag and create calendar example", "article-drag-create-demo");
   const mutationState = demo.getByTestId("article-mutation-state");
   const event = demo.locator(
-    '[data-testid="calendar-event"][data-event-id="consultation-a"][data-calendar-id="provider-a"]'
+    '[data-testid="calendar-event"][data-event-id="follow-up-a"][data-calendar-id="provider-a"]'
   );
   await expect(mutationState).toHaveText("No pending change");
   await expect(demo.getByRole("button", { name: "Accept change" })).toHaveCount(0);
   const eventBox = await event.boundingBox();
   expect(eventBox).not.toBeNull();
   if (!eventBox) return;
+  const viewport = demo.locator(".quno-calendar-viewport");
+  const beforeMoveScroll = await viewport.evaluate((element) => ({ left: element.scrollLeft, top: element.scrollTop }));
+  const targetRow = demo.locator(
+    '[data-testid="calendar-day"][data-date="2026-07-06"] [data-testid="calendar-row"][data-calendar-id="room-1"] .quno-calendar-row-grid'
+  );
+  const targetRowBox = await targetRow.boundingBox();
+  expect(targetRowBox).not.toBeNull();
+  if (!targetRowBox) return;
   await page.mouse.move(eventBox.x + 12, eventBox.y + eventBox.height / 2);
   await page.mouse.down();
-  await page.mouse.move(eventBox.x + 70, eventBox.y + eventBox.height / 2);
+  await page.mouse.move(eventBox.x + 70, targetRowBox.y + targetRowBox.height / 2);
   await expect(event).toHaveAttribute("data-status", "dragging");
   await page.mouse.up();
   await expect(mutationState).toHaveText("Move pending");
-  await expect(demo.getByText(/Review the move for “Treatment consultation”/)).toBeVisible();
-  await expect(demo.getByTestId("draft-event").first()).toBeVisible();
+  await expect(demo.getByText(/Review the move for “Post-op follow-up”/)).toBeVisible();
+  const movedDraft = demo.getByTestId("draft-event").first();
+  await expect(movedDraft).toBeVisible();
+  await expect(movedDraft).toHaveAttribute("data-calendar-id", "room-1");
+  await expect.poll(async () => Math.abs(((await movedDraft.boundingBox())?.y ?? 0) - eventBox.y)).toBeLessThan(3);
   const acceptButton = demo.getByRole("button", { name: "Accept change" });
   const cancelButton = demo.getByRole("button", { name: "Cancel change" });
   await expect(acceptButton).toBeVisible();
@@ -849,8 +914,11 @@ test("editorial drag/create exhibit stages parent-owned changes for accept or ca
   await expect(exitingDraft).toHaveCSS("animation-name", "quno-calendar-draft-fade-out");
   await expect(exitingDraft).toHaveCSS("animation-duration", "0.32s");
   await expect(demo.getByTestId("draft-event")).toHaveCount(0);
-  await expect(demo.getByText(/Cancelled the move for “Treatment consultation”/)).toBeVisible();
+  await expect(demo.getByText(/Cancelled the move for “Post-op follow-up”/)).toBeVisible();
   await expect.poll(async () => Math.abs(((await event.boundingBox())?.x ?? 0) - eventBox.x)).toBeLessThan(3);
+  await expect
+    .poll(() => viewport.evaluate((element) => ({ left: element.scrollLeft, top: element.scrollTop })))
+    .toEqual(beforeMoveScroll);
 
   const grid = demo.locator(
     '[data-testid="calendar-day"][data-date="2026-07-06"] [data-testid="calendar-row"][data-calendar-id="room-1"] .quno-calendar-row-grid'
@@ -1282,6 +1350,13 @@ test("editorial motion demo animates both add and cancel outcomes", async ({ pag
   await page.goto("/guide");
   const demo = await revealLazyArticleDemo(page, "appearing event example", "article-motion-demo");
   await expect(demo.getByText("Treatment consultation")).toBeVisible();
+  const newDraftButton = demo.getByRole("button", { name: "New draft" });
+  const addEventButton = demo.getByRole("button", { name: "Add event" });
+  const cancelEventButton = demo.getByRole("button", { name: "Cancel event" });
+  await expect(newDraftButton).toBeEnabled();
+  await expect(addEventButton).toBeDisabled();
+  await expect(cancelEventButton).toBeDisabled();
+  await newDraftButton.click();
   const initialDraft = demo.getByTestId("draft-event");
   await expect(initialDraft).toBeVisible();
   const initialDraftBox = await initialDraft.boundingBox();
@@ -1291,16 +1366,16 @@ test("editorial motion demo animates both add and cancel outcomes", async ({ pag
   await demo.locator(".quno-calendar-viewport").evaluate((element) => {
     element.scrollTop += 900;
   });
-  await demo.getByRole("button", { name: "Add event" }).click();
+  await addEventButton.click();
   const inserted = demo.locator('[data-event-id^="article-appearing-"]').first();
   await expect(inserted).toBeVisible();
   await expect(inserted).toHaveAttribute("data-status", "appearing");
   await expect(inserted.locator(".article-event-card")).toHaveAttribute("data-render-status", "appearing");
   await expect(inserted).toHaveAttribute("data-status", "existing", { timeout: 3_000 });
-  await demo.getByRole("button", { name: "New draft" }).click();
+  await newDraftButton.click();
   const draft = demo.getByTestId("draft-event");
   await expect(draft).toBeVisible();
-  await demo.getByRole("button", { name: "Cancel event" }).click();
+  await cancelEventButton.click();
   await expect(demo.locator('[data-testid="draft-event"][data-exiting="true"]')).toBeVisible();
   await expect(draft).toHaveCount(0, { timeout: 2_000 });
 });

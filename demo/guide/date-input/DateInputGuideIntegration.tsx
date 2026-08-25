@@ -11,7 +11,6 @@ import {
 import {
   accessibilitySnippet,
   compositionSnippet,
-  librarySizeSnippet,
   localizationSnippet,
   parserConnectionSnippet
 } from "./dateInputGuideSnippets";
@@ -92,7 +91,6 @@ export function DateInputGuideIntegration() {
         title="Ship Date Input independently."
         copy="Date Input JavaScript is 6.77 KiB gzip. Its optional stylesheet is a separate 0.58 KiB gzip import; neither number includes external application runtimes."
         instruction="Compare JavaScript, optional CSS, runtime contracts, and the public surface without treating them as one payload."
-        howTo={recipe("Import Date Input", "Add its optional stylesheet only when useful.", librarySizeSnippet)}
       >
         <FieldGuideProduction profile={dateInputProduction} anchorIds={["dependencies"]} />
       </StoryFeature>

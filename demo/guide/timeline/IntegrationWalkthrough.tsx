@@ -123,10 +123,17 @@ const zoomSnippet = `const [zoom, setZoom] = useState(1.25);
 
 const navigationSnippet = `const calendarRef = useRef<QunoInfiniteCalendarHandle>(null);
 
+const previewArrowDate = (event) => {
+  if (!["ArrowUp", "ArrowDown"].includes(event.key)) return;
+  const input = event.currentTarget;
+  requestAnimationFrame(() => navigate(parseDate(input.value)));
+};
+
 <QunoDateInput
   value={{ start: date, end: date }}
   selectionMode="single"
   expectedRange={expectedRange}
+  onKeyDown={previewArrowDate}
   onChange={(selection) => {
     if (!selection) return;
     setDate(selection.start);
@@ -322,7 +329,7 @@ export function IntegrationWalkthrough({ embedded = false }: { embedded?: boolea
     <FieldGuidePage
       className="calendar-article"
       product="Quno/Infinite Calendar"
-      title="A simple, fast calendar for businesses with complex schedules."
+      title="A simple, fast calendar for complex schedules."
       intro={
         <p>Move through dense schedules, keep events readable, and preserve focus while data and layouts change.</p>
       }
@@ -364,10 +371,15 @@ export function IntegrationWalkthrough({ embedded = false }: { embedded?: boolea
           visible dates, then recenters that window after scrolling stops while preserving the exact position inside the
           day. Moving three years costs roughly the same as moving three days.
         </p>
+        <p>
+          Event loading follows the same moving window. This exhibit produces each requested date range immediately, so
+          appointments are already present when a newly scrolled day enters the viewport instead of appearing after a
+          simulated loading delay.
+        </p>
         <Callout>
           Open the calendar full screen, drag the scrollbar, or keep scrolling through dates. The chip changes from
-          “scrolled” to “repositioned” when the bounded window settles. Closing the overlay returns to this exact
-          article position; the calendar itself never remounts.
+          “scrolled” to “repositioned” when the bounded window settles, while every new visible date stays populated.
+          Closing the overlay returns to this exact article position; the calendar itself never remounts.
         </Callout>
         <DemoBreakout>
           <InfiniteCalendarDemo />
@@ -457,6 +469,10 @@ export function IntegrationWalkthrough({ embedded = false }: { embedded?: boolea
         </p>
         <CodeBlock code={rendererSnippet} title="Render a product-specific event card" />
         <CodeBlock code={containerQuerySnippet} title="Keep the most useful content for the available space" />
+        <Callout>
+          Move the Width and Height controls in the resize lab. The same renderer removes supporting details only as its
+          own container becomes narrow or short; the surrounding page size does not decide.
+        </Callout>
         <DemoBreakout>
           <LazyArticleDemo label="event card examples">
             <EventCardsDemo />
@@ -534,12 +550,13 @@ export function IntegrationWalkthrough({ embedded = false }: { embedded?: boolea
         </p>
         <p>
           Drawing and dragging create an optimistic draft without changing saved events. Accept commits it to
-          application state and the visible cache; Cancel removes it and restores the saved schedule. The interaction
-          stays fast without pretending that persistence has already succeeded.
+          application state and the visible cache. Moving to another visible date or resource keeps the target at the
+          same viewport position instead of snapping its row to the top; Cancel removes the draft and restores both the
+          saved schedule and the pre-proposal view.
         </p>
         <Callout>
-          Drag a saved card or draw on empty timeline space. The proposed position remains visible while the saved event
-          data stays untouched, so validation or confirmation UI can run before persistence.
+          Drag a saved card to another visible date or resource. Its row stays where you were working; choose Cancel and
+          the original event and viewport return together. Drawing on empty timeline space follows the same review flow.
         </Callout>
         <CodeBlock code={mutationSnippet} title="Stage a proposal, then accept or cancel it" />
         <DemoBreakout>
@@ -579,6 +596,10 @@ export function IntegrationWalkthrough({ embedded = false }: { embedded?: boolea
           navigation handle. Products can connect the same handle to a command palette, search result, or deep link
           without learning how the infinite date window works.
         </p>
+        <Callout>
+          Place the caret over part of the date and press Arrow Up or Arrow Down. Each recognized change moves the
+          calendar immediately; Enter is still available when typing a complete replacement.
+        </Callout>
         <CodeBlock code={navigationSnippet} title="Connect any product control to calendar navigation" />
         <DemoBreakout>
           <LazyArticleDemo label="date navigation example">
@@ -830,8 +851,8 @@ export function IntegrationWalkthrough({ embedded = false }: { embedded?: boolea
           can remove the transition for people who need less motion.
         </p>
         <Callout>
-          This exhibit zooms into the active 09:00–14:00 window and uses a taller lane, making the draft location and
-          the renderer’s appearing or cancellation treatment easier to inspect.
+          Start with New draft, then choose Add event or Cancel event. The exhibit enables outcome controls only after a
+          draft exists and keeps the 09:00–14:00 window tall enough to inspect either transition.
         </Callout>
         <DemoBreakout>
           <LazyArticleDemo label="appearing event example">
@@ -873,14 +894,6 @@ export function IntegrationWalkthrough({ embedded = false }: { embedded?: boolea
         </p>
         <FieldGuideProduction profile={infiniteCalendarProduction} testId="article-package-footprint" />
       </ArticleSection>
-
-      <footer className="calendar-article__footer">
-        <p>
-          This guide demonstrates when to use read-only access, editing, availability, orientation, loading, focus, and
-          motion. To explore the same API with unrestricted data and controls, open the{" "}
-          <a href="/demo/infinite-calendar">main calendar demo</a>.
-        </p>
-      </footer>
     </FieldGuidePage>
   );
 }

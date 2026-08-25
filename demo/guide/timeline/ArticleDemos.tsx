@@ -1,3 +1,4 @@
+import { addDays, type IsoDate } from "@quno/calendar";
 import {
   QunoInfiniteCalendar,
   type ActiveEventDraft,
@@ -93,6 +94,27 @@ const creationLaneEvents: CalendarEvent[] = [
   }
 ];
 const loadCreationLaneEvents: LoadEvents = async (request) => filterEvents(creationLaneEvents, request);
+const scrollingEventColors = ["#246b5d", "#c77b45", "#6372a7", "#9b6a9e"];
+const loadScrollingEvents: LoadEvents = async ({ calendarIds, endDate, startDate }) => {
+  const events: CalendarEvent[] = [];
+  let date = startDate;
+  while (date <= endDate) {
+    calendarIds.forEach((calendarId, index) => {
+      events.push({
+        id: `scrolling-${date}-${calendarId}`,
+        calendarId,
+        title: index % 2 === 0 ? "Morning appointment" : "Schedule review",
+        subtitle: "Ready as soon as the date enters view",
+        start: `${date}T${index % 2 === 0 ? "09:30" : "13:15"}:00`,
+        end: `${date}T${index % 2 === 0 ? "10:30" : "14:15"}:00`,
+        color: scrollingEventColors[index % scrollingEventColors.length],
+        kind: index % 2 === 0 ? "appointment" : "consultation"
+      });
+    });
+    date = addDays(date as IsoDate, 1);
+  }
+  return events;
+};
 
 export function InfiniteCalendarDemo() {
   const activityRootRef = useRef<HTMLDivElement>(null);
@@ -102,7 +124,7 @@ export function InfiniteCalendarDemo() {
     <CalendarDemoShell
       className="article-calendar-demo--infinite"
       data-testid="article-infinite-demo"
-      note="Scroll the calendar and pause to see the bounded date window settle"
+      note="Events are generated immediately as each bounded date window enters view"
       tools={
         <span className={`article-settlement-chip is-${settlement}`} data-testid="article-settlement-chip">
           {settlement}
@@ -115,7 +137,7 @@ export function InfiniteCalendarDemo() {
           calendars={articleCalendars}
           eventRenderer={ArticleEventCard}
           initialDateKey={articleDateKey}
-          loadEvents={loadArticleEvents}
+          loadEvents={loadScrollingEvents}
           selectedCalendarIds={visibleCalendarIds}
           settings={articleSettings}
         />
@@ -126,6 +148,8 @@ export function InfiniteCalendarDemo() {
 
 export function EventCardsDemo() {
   const responsiveEvent = articleEvents[2];
+  const [cardWidth, setCardWidth] = useState(260);
+  const [cardHeight, setCardHeight] = useState(92);
   const specimens = [
     { label: "Appointment", event: articleEvents[2], status: "existing" as const, className: "" },
     { label: "Consultation", event: articleEvents[1], status: "existing" as const, className: "" },
@@ -213,6 +237,57 @@ export function EventCardsDemo() {
               </div>
             </figure>
           ))}
+        </div>
+      </div>
+      <div className="article-card-resize-example" data-testid="article-card-resize-example">
+        <div className="article-card-container-example__intro">
+          <strong>Resize one live container</strong>
+          <span>Watch secondary information leave only when the card runs out of room.</span>
+        </div>
+        <div className="article-card-resize-example__body">
+          <div className="article-card-resize-example__controls">
+            <label>
+              <span>Width</span>
+              <input
+                aria-label="Card width"
+                max="360"
+                min="90"
+                onChange={(event) => setCardWidth(Number(event.target.value))}
+                type="range"
+                value={cardWidth}
+              />
+              <output>{cardWidth}px</output>
+            </label>
+            <label>
+              <span>Height</span>
+              <input
+                aria-label="Card height"
+                max="120"
+                min="28"
+                onChange={(event) => setCardHeight(Number(event.target.value))}
+                type="range"
+                value={cardHeight}
+              />
+              <output>{cardHeight}px</output>
+            </label>
+          </div>
+          <div
+            className="article-card-resize-example__stage"
+            style={
+              {
+                "--event-accent": responsiveEvent.color,
+                "--event-accent-muted": "#eef5f1"
+              } as CSSProperties
+            }
+          >
+            <div
+              className="article-card-resize-example__shell"
+              data-testid="article-resizable-card-shell"
+              style={{ width: cardWidth, height: cardHeight }}
+            >
+              <ArticleEventCard {...specimenProps(responsiveEvent, "existing")} />
+            </div>
+          </div>
         </div>
       </div>
       <CalendarDemoShell
@@ -492,7 +567,7 @@ export function MotionDemo() {
   const calendarRef = useRef<QunoInfiniteCalendarHandle>(null);
   const eventsRef = useRef<CalendarEvent[]>(articleEvents.slice(0, 3));
   const sequenceRef = useRef(0);
-  const [activeDraft, setActiveDraft] = useState<ActiveEventDraft | null>(() => createMotionDraft(0));
+  const [activeDraft, setActiveDraft] = useState<ActiveEventDraft | null>(null);
   const loadEvents = useCallback<LoadEvents>(async (request) => filterEvents(eventsRef.current, request), []);
 
   const addEvent = () => {

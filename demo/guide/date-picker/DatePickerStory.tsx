@@ -25,8 +25,8 @@ export const DatePickerStory = ({ embedded = false }: { embedded?: boolean }): J
   return (
     <FieldGuidePage
       product="Quno/Datepicker"
-      title="Shape a date range as directly as you point to it."
-      intro={<p>Paint, resize, move, and correct a range without restarting a forced From–To sequence.</p>}
+      title="Date range selection you won't hate"
+      intro={<p>Paint, drag and correct a range without going to forced from-to sequence.</p>}
       demoHref="/demo/datepicker"
       contents={contents}
       meta={["Interactive examples", "Copyable recipes", "React + Preact"]}

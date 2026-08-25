@@ -12,7 +12,6 @@ import {
   formatsRecipe,
   languageRecipe,
   orderRecipe,
-  productionRecipe,
   rangeRecipe,
   relativeRecipe,
   tokenizeRecipe
@@ -145,7 +144,6 @@ export function DateParserFieldGuide() {
         title="Ship Date Parser independently."
         copy="Date Parser JavaScript is 4.45 KiB gzip. It has no stylesheet, UI framework runtime, or runtime dependency."
         instruction="Review its JavaScript artifact, runtime contract, and public surface without a UI payload."
-        howTo={recipe("Import Date Parser", "Use the headless entry by itself.", productionRecipe)}
       >
         <FieldGuideProduction profile={dateParserProduction} />
       </StoryFeature>

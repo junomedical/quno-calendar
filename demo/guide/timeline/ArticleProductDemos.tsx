@@ -1,5 +1,6 @@
 import type { DateRange, IsoDate } from "@quno/calendar";
 import { QunoDateInput } from "@quno/calendar/date-input";
+import { parseDateInput } from "@quno/calendar/date-parser";
 import {
   QunoInfiniteCalendar,
   applyEventMove,
@@ -293,6 +294,18 @@ export function NavigationControlsDemo() {
             expectedRange={navigationExpectedRange}
             onChange={(next) => {
               if (next) navigate(next.start);
+            }}
+            onKeyDown={(event) => {
+              if (event.key !== "ArrowUp" && event.key !== "ArrowDown") return;
+              const input = event.currentTarget;
+              window.requestAnimationFrame(() => {
+                const result = parseDateInput(input.value, {
+                  expectedRange: navigationExpectedRange,
+                  selectionMode: "single",
+                  referenceDate: date
+                });
+                if (result.status === "success") navigate(result.value.start);
+              });
             }}
             selectionMode="single"
             value={inputValue}

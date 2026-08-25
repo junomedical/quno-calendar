@@ -25,8 +25,18 @@ test("single-day mode and focused range-input composition stay distinct", async 
   await editor.press("Enter");
   await expect(editor).toHaveValue("");
   await expect(composition.locator('[data-selected="true"]')).toHaveCount(0);
-  await page.getByRole("heading", { name: "Shape a date range as directly as you point to it." }).click();
+  await page.getByRole("heading", { name: "Date range selection you won't hate" }).click();
   await expect(composition.getByRole("grid")).toHaveCount(0);
+});
+
+test("quick navigation explains seasonal month groups and keeps years sticky", async ({ page }) => {
+  await page.goto("/guide/datepicker#quick-jump");
+
+  const quickJump = page.locator("#quick-jump");
+  await expect(quickJump).toContainText("Months follow the seasons");
+  await expect(quickJump).toContainText("Sticky year labels keep the year readable during fast scrolling");
+  await quickJump.getByRole("button", { name: /Open month and year navigation/ }).click();
+  await expect(quickJump.locator('[data-slot="year-heading"]').first()).toHaveCSS("position", "sticky");
 });
 
 test("explicit state cards form a two-by-two grid", async ({ page }) => {
