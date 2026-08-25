@@ -1,11 +1,12 @@
 import { DATE_INPUT_LEXICON } from "./dateInputLexicon";
 import type { DateInputLexicon, DateInputParserLanguage } from "./dateInputTypes";
 
-type RelativeWord = Exclude<keyof DateInputLexicon, "monthNames" | "weekdayNames">;
+type RelativeWord = Exclude<keyof DateInputLexicon, "monthNames" | "weekdayNames" | "datePartMarkers">;
 
 export type DateInputVocabulary = {
   months: Record<string, number>;
   weekdays: Record<string, number>;
+  datePartMarkers: string[];
   words: Partial<Record<RelativeWord, string[]>>;
 };
 
@@ -23,8 +24,9 @@ const addWords = (vocabulary: DateInputVocabulary, lexicon: Partial<DateInputLex
       vocabulary.weekdays[normalizeDateInputWord(alias)] = Number(weekday);
     })
   );
+  lexicon.datePartMarkers?.forEach((marker) => vocabulary.datePartMarkers.push(normalizeDateInputWord(marker)));
   Object.entries(lexicon).forEach(([name, aliases]) => {
-    if (name !== "monthNames" && name !== "weekdayNames")
+    if (name !== "monthNames" && name !== "weekdayNames" && name !== "datePartMarkers")
       (aliases as ReadonlyArray<string>)?.forEach((word) => {
         const words = vocabulary.words[name as RelativeWord] ?? [];
         words.push(normalizeDateInputWord(word));
@@ -37,7 +39,7 @@ export const createDateInputVocabulary = (
   languages: ReadonlyArray<DateInputParserLanguage>,
   extension?: Partial<DateInputLexicon>
 ): DateInputVocabulary => {
-  const vocabulary: DateInputVocabulary = { months: {}, weekdays: {}, words: {} };
+  const vocabulary: DateInputVocabulary = { months: {}, weekdays: {}, datePartMarkers: [], words: {} };
   languages.forEach((language) => addWords(vocabulary, DATE_INPUT_LEXICON[language]));
   if (extension) addWords(vocabulary, extension);
   return vocabulary;

@@ -989,3 +989,15 @@ future identifiers are documented in [Date Input decisions](../date-input/decisi
   last/this/next named weekdays. Keep rolling durations independent of calendar-week boundaries.
 - Consequences: Input and picker can share one setting and return matching week ranges for Sunday-, Monday-, or any
   other first weekday. Existing consumers retain Monday-first behavior unless they opt into another value.
+
+## QDP-121 — Keep expressive theme actions compact
+
+- Date: 2026-08-25
+- Status: Accepted; refines QDP-063
+- Context: The field guide's editorial type scale can reach live examples through inheritance. Acid's heavy display face
+  and Candy's serif face turned the range-summary Clear action into a 20px, roughly 50px-high control that competed with
+  the selected period and overwhelmed the narrow themed headers.
+- Decision: Constrain the Acid and Candy Clear action to a 12px label, compact padding, and an explicit line height in
+  their theme-scoped CSS. Leave the component default and every other theme unchanged.
+- Consequences: Both expressive themes retain their typefaces and accessible button semantics while the secondary
+  Clear action returns to the visual weight expected inside the range summary.

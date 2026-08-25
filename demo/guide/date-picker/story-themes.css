@@ -94,6 +94,13 @@
   --quno-date-picker-pills-wrap: wrap;
 }
 
+.story__theme--acid .quno-date-picker-clear,
+.story__theme--candy .quno-date-picker-clear {
+  padding: 5px 7px;
+  font-size: 12px;
+  line-height: 1.2;
+}
+
 @media (max-width: 440px) {
   .story__theme--candy {
     --quno-date-picker-pill-reveal-distance: 90px;

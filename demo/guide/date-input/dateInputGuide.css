@@ -101,42 +101,8 @@
   line-height: 1.55;
 }
 
-.date-input-guide__facts {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-  margin: 0;
-}
-
-.date-input-guide__facts div {
-  padding: 14px;
-  border: 1px solid #d9e1ec;
-  border-radius: 12px;
-  background: #fff;
-}
-
-.date-input-guide__facts dt {
-  color: #607085;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.date-input-guide__facts dd {
-  margin: 5px 0 0;
-  color: #174a8f;
-  font-size: 13px;
-  font-weight: 750;
-  line-height: 1.35;
-}
-
 @media (max-width: 640px) {
   .date-input-guide .story__toc-links {
-    grid-template-columns: 1fr;
-  }
-
-  .date-input-guide__facts {
     grid-template-columns: 1fr;
   }
 }

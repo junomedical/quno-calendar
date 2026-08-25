@@ -17,7 +17,8 @@ const contents = [
   ["#localization", "07", "Localize dates and weeks"],
   ["#theming", "08", "Theme with scoped tokens"],
   ["#single-day", "09", "Choose one day"],
-  ["#idea", "10", "Understand and ship the model"]
+  ["#single-day-input", "10", "Combine with Date Input"],
+  ["#idea", "11", "Understand and ship the model"]
 ] as const;
 
 export const DatePickerStory = ({ embedded = false }: { embedded?: boolean }): JSX.Element => {
@@ -38,15 +39,6 @@ export const DatePickerStory = ({ embedded = false }: { embedded?: boolean }): J
       <ArchitectureStory />
 
       <FootprintStory />
-
-      <section className="story__integration" id="reference">
-        <span>Complete reference</span>
-        <h3>Keep the full API contract nearby</h3>
-        <p>
-          Controlled and uncontrolled state, localization, forms, every public slot, and the deferred V1 scope are
-          documented in <strong>docs/shared/usage.md</strong>.
-        </p>
-      </section>
     </FieldGuidePage>
   );
 };

@@ -1,17 +1,16 @@
 import { StoryFeature } from "#quno-demo/guide/date-picker/StoryFeature";
 import { StoryHowTo } from "#quno-demo/guide/date-picker/StoryHowTo";
 import { TypeToEditExample } from "#quno-demo/guide/date-picker/TypeToEditExample";
+import { FieldGuideProduction } from "#quno-demo/guide/shared/FieldGuideProduction";
+import { dateInputProduction } from "#quno-demo/guide/shared/productionProfiles";
 import {
   AccessibleDateInputExample,
-  DateInputDependencyFacts,
-  DateInputLibrarySizeFacts,
   LocalizedDateInputExample,
   ParserConfiguredInputExample
 } from "./DateInputGuideExamples";
 import {
   accessibilitySnippet,
   compositionSnippet,
-  dependenciesSnippet,
   librarySizeSnippet,
   localizationSnippet,
   parserConnectionSnippet
@@ -90,26 +89,12 @@ export function DateInputGuideIntegration() {
         id="library-size"
         number="08"
         kicker="Production"
-        title="Ship the field independently."
-        copy="Date Input is independently importable, SSR-safe, and measured separately from the calendar, Datepicker, and headless parser entry."
-        instruction="Compare the current artifacts and runtime contracts with their release budgets."
+        title="Ship Date Input independently."
+        copy="Date Input JavaScript is 6.77 KiB gzip. Its optional stylesheet is a separate 0.58 KiB gzip import; neither number includes external application runtimes."
+        instruction="Compare JavaScript, optional CSS, runtime contracts, and the public surface without treating them as one payload."
         howTo={recipe("Import Date Input", "Add its optional stylesheet only when useful.", librarySizeSnippet)}
       >
-        <DateInputLibrarySizeFacts />
-        <DateInputDependencyFacts />
-      </StoryFeature>
-
-      <StoryFeature
-        id="dependencies"
-        number="08"
-        kicker="Dependencies"
-        title="Know what the field brings with it."
-        copy="React is a peer, Preact is supported through compat aliases, styles stay optional, and JavaScript never injects CSS."
-        instruction="Import only the component entry and optional stylesheet."
-        howTo={recipe("Review dependencies", "Keep product runtimes shared.", dependenciesSnippet)}
-        subsection
-      >
-        <DateInputDependencyFacts />
+        <FieldGuideProduction profile={dateInputProduction} anchorIds={["dependencies"]} />
       </StoryFeature>
     </>
   );

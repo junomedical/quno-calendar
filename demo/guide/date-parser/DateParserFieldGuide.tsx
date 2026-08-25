@@ -4,11 +4,14 @@ import "#quno-demo/guide/date-picker/story-topics.css";
 import { StoryFeature } from "#quno-demo/guide/date-picker/StoryFeature";
 import { StoryHowTo } from "#quno-demo/guide/date-picker/StoryHowTo";
 import { FieldGuidePage } from "#quno-demo/guide/shared/FieldGuidePage";
-import { DateParserProductionFacts, PreferredOrderParserExample, TokenParserExample } from "./DateParserExamples";
+import { FieldGuideProduction } from "#quno-demo/guide/shared/FieldGuideProduction";
+import { dateParserProduction } from "#quno-demo/guide/shared/productionProfiles";
+import { JapaneseParserExample, PreferredOrderParserExample, TokenParserExample } from "./DateParserExamples";
 import {
   expectedRecipe,
   formatsRecipe,
   languageRecipe,
+  japaneseRecipe,
   orderRecipe,
   productionRecipe,
   rangeRecipe,
@@ -23,8 +26,9 @@ const contents = [
   ["#range-parsing", "04", "Parse inclusive ranges"],
   ["#expected-period", "05", "Rank a useful period"],
   ["#multiple-languages", "06", "Recognize languages together"],
-  ["#tokenization", "07", "Inspect the headless grammar"],
-  ["#parser-production", "08", "Ship without a UI runtime"]
+  ["#internationalization", "07", "Adapt locale-specific syntax"],
+  ["#tokenization", "08", "Inspect the headless grammar"],
+  ["#parser-production", "09", "Ship without a UI runtime"]
 ] as const;
 
 const recipe = (title: string, copy: string, code: string) => (
@@ -115,19 +119,34 @@ export function DateParserFieldGuide() {
         kicker="Languages and lexicon"
         title="Let languages and product vocabulary live together."
         copy="Recognition languages do not dictate output locale, and lexicon extensions add deliberate product wording."
-        instruction="Try English, German, and the custom prior week phrase."
+        instruction="Try each English, German, and product-specific phrase. Every sample resolves to a visibly different day or range."
         howTo={recipe("Extend recognition", "List languages and explicit aliases.", languageRecipe)}
       >
         <DateInputParserExample
           initialText="12 June 2026"
           parserLanguages={["en", "de"]}
           lexicon={{ previous: ["prior"] }}
-          samples={["12 June 2026", "12 Juni 2026", "today", "heute", "prior week"]}
+          samples={["12 June 2026", "14 Juli 2026", "tomorrow", "gestern", "prior week"]}
         />
       </StoryFeature>
       <StoryFeature
-        id="tokenization"
+        id="internationalization"
         number="07"
+        kicker="Internationalization"
+        title="Teach the parser a locale’s date markers."
+        copy="Locale-specific syntax can stay explicit and product-owned. Add Japanese year, month, and day markers through the lexicon, then parse the familiar YYYY年M月D日 form directly."
+        instruction="Turn Date markers off to see the raw Japanese date become invalid, then turn them on to resolve 2026年8月25日. The complete setup change stays visible beside the result."
+        howTo={recipe(
+          "Add Japanese date markers",
+          "Extend syntax without adding a built-in parser language.",
+          japaneseRecipe
+        )}
+      >
+        <JapaneseParserExample />
+      </StoryFeature>
+      <StoryFeature
+        id="tokenization"
+        number="08"
         kicker="Headless grammar"
         title="Inspect recognition before resolving a value."
         copy="Tokenization exposes words, numbers, date separators, and range separators without rendering a component."
@@ -138,14 +157,14 @@ export function DateParserFieldGuide() {
       </StoryFeature>
       <StoryFeature
         id="parser-production"
-        number="08"
+        number="09"
         kicker="Production"
-        title="Ship parsing without a UI runtime."
-        copy="Date Parser has no framework or stylesheet dependency and imports safely in browser, Node, ESM, CommonJS, and SSR contexts."
-        instruction="Review the independently measured payload and runtime contract."
+        title="Ship Date Parser independently."
+        copy="Date Parser JavaScript is 4.49 KiB gzip. It has no stylesheet, UI framework runtime, or runtime dependency."
+        instruction="Review its JavaScript artifact, runtime contract, and public surface without a UI payload."
         howTo={recipe("Import Date Parser", "Use the headless entry by itself.", productionRecipe)}
       >
-        <DateParserProductionFacts />
+        <FieldGuideProduction profile={dateParserProduction} />
       </StoryFeature>
     </FieldGuidePage>
   );

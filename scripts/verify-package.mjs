@@ -84,6 +84,10 @@ const loadEvents: LoadEvents = async ({ startDate }) => [{
 function EventCard({ event, style }: EventRendererProps) { return <div style={style}>{event.title}</div>; }
 const value: DateRange = { start: "2026-08-24", end: addDays("2026-08-24", 1) };
 parseDateInput("tomorrow", { referenceDate: "2026-08-24", expectedRange: value });
+parseDateInput("2026年8月25日", {
+  expectedRange: value,
+  lexicon: { datePartMarkers: ["年", "月", "日"] }
+});
 tokenizeDateInput("tomorrow");
 createRoot(document.getElementById("root")!).render(<>
   <QunoDatePicker value={value} /><QunoDateInput expectedRange={value} value={value} />

@@ -1,6 +1,7 @@
 import type { JSX } from "react";
 import { BestGuessExample, PaintExample, SegmentMoveExample, WrongGuessExample } from "./InteractionExamples";
 import { SingleDayExample } from "./SingleDayExample";
+import { SingleDayInputExample } from "./SingleDayInputExample";
 import {
   HiddenRowExample,
   MotionExample,
@@ -15,8 +16,9 @@ import {
   basicUsageSnippet,
   customDaysSnippet,
   localizationSnippet,
-  themingSnippet,
+  singleDayInputSnippet,
   singleDaySnippet,
+  themingSnippet,
   weekStartSnippet
 } from "./storySnippets";
 
@@ -202,19 +204,37 @@ export const StoryTopics = (): JSX.Element => (
       id="single-day"
       number="14"
       kicker="Single-day mode"
-      title="One day, through typing or picking."
-      copy="Set selectionMode to single on both family members to keep the shared value to one calendar day. Dragging chooses the day where it ends, while typed ranges and multi-day relative periods remain unrecognized."
-      instruction="Try 12 juni, then drag from 10 to 18: only the released day is selected. Try next month to see it remain unrecognized."
+      title="Configure the picker for one day."
+      copy="Set selectionMode to single on QunoDatePicker to keep every committed value to one calendar day. The public DateRange shape stays unchanged, with matching start and end dates."
+      instruction="Click another date, then drag from 10 to 18. Only the day where the pointer is released stays selected."
       howTo={
         <StoryHowTo
           title="Single-day selection"
           language="TSX"
-          copy="Keep the DateRange state shape; single mode always emits identical start and end dates."
+          copy="Set the Datepicker mode directly; it always emits identical start and end dates."
           code={singleDaySnippet}
         />
       }
     >
       <SingleDayExample />
+    </StoryFeature>
+    <StoryFeature
+      id="single-day-input"
+      number="15"
+      kicker="Date Input composition"
+      title="Combines with Date Input beautifully."
+      copy="Replace the Datepicker’s selected-day summary and Clear action with QunoDateInput. The picker appears only while focus remains in the composed control, and both public components share one controlled value."
+      instruction="Focus the date input to reveal the picker. Type 12 juni or choose a date, then click elsewhere to close it."
+      howTo={
+        <StoryHowTo
+          title="Use Date Input as the selection surface"
+          language="TSX + CSS"
+          copy="Open the single-day picker on focus and hide its duplicate selection header."
+          code={singleDayInputSnippet}
+        />
+      }
+    >
+      <SingleDayInputExample />
     </StoryFeature>
   </>
 );

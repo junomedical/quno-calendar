@@ -14,7 +14,7 @@ describe("datepicker field guide", () => {
     const contents = screen.getByRole("navigation", {
       name: "Table of contents"
     });
-    expect(within(contents).getAllByRole("link")).toHaveLength(10);
+    expect(within(contents).getAllByRole("link")).toHaveLength(11);
     expect(within(contents).queryByRole("link", { name: /Interactive demo/ })).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: "All components" })).toHaveAttribute("href", "/");
     expect(screen.getByRole("link", { name: /Demo/ })).toHaveAttribute("href", "/demo/datepicker");
@@ -49,9 +49,16 @@ describe("datepicker field guide", () => {
     expect(screen.getByRole("grid", { name: "Sélecteur de période: août 2026" })).toBeInTheDocument();
     expect(document.querySelector("#week-starts")).toBeInTheDocument();
     expect(within(contents).getByRole("link", { name: /Choose one day/ })).toHaveAttribute("href", "#single-day");
+    expect(within(contents).getByRole("link", { name: /Combine with Date Input/ })).toHaveAttribute(
+      "href",
+      "#single-day-input"
+    );
     expect(document.querySelector('[data-story-topic="natural-input"]')).not.toBeInTheDocument();
-    expect(screen.getAllByText(/KiB/).length).toBeGreaterThan(2);
-    expect(screen.getByText(/docs\/shared\/usage\.md/)).toBeInTheDocument();
+    expect(screen.getByText("9.00 KiB gzip")).toBeInTheDocument();
+    expect(screen.getByText("3.20 KiB gzip")).toBeInTheDocument();
+    expect(screen.getByText("Public API at a glance")).toBeInTheDocument();
+    expect(screen.getByText(/QunoDatePicker · QunoDatePickerProps/)).toBeInTheDocument();
+    expect(screen.queryByText(/docs\/shared\/usage\.md/)).not.toBeInTheDocument();
   });
 
   it("keeps the quick jump example interactive", () => {
@@ -84,23 +91,45 @@ describe("datepicker field guide", () => {
     expect(firstWeekday()).toBe("Sat");
   });
 
-  it("uses the selected day itself as the single-day editor", () => {
+  it("keeps single-day mode focused on Datepicker configuration", () => {
     render(<DatePickerStory />);
     const topic = document.querySelector<HTMLElement>('[data-story-topic="single-day"]');
     expect(topic).not.toBeNull();
-    const editor = within(topic as HTMLElement).getByRole("textbox", { name: "Selected day" });
-    expect(within(topic as HTMLElement).getAllByRole("textbox")).toHaveLength(1);
-    expect(editor).toHaveValue("19 August 2026");
-
-    fireEvent.input(editor, { target: { value: "12 June 2026" } });
-    fireEvent.keyDown(editor, { key: "Enter" });
-    expect(editor).toHaveValue("12 June 2026");
+    expect(within(topic as HTMLElement).queryByRole("textbox")).not.toBeInTheDocument();
+    expect(within(topic as HTMLElement).getByText("Selected day")).toBeInTheDocument();
+    expect(within(topic as HTMLElement).getByRole("button", { name: "Clear" })).toBeInTheDocument();
 
     const pickedDay = topic?.querySelector<HTMLElement>('[data-date="2026-08-18"]');
     expect(pickedDay).not.toBeNull();
     fireEvent.pointerDown(pickedDay as HTMLElement);
     fireEvent.pointerUp(pickedDay as HTMLElement);
-    expect(editor).toHaveValue("18 August 2026");
+    expect(pickedDay).toHaveAttribute("data-selected", "true");
+  });
+
+  it("opens the single-day picker only from its Date Input selection surface", () => {
+    render(<DatePickerStory />);
+    const topic = document.querySelector<HTMLElement>('[data-story-topic="single-day-input"]') as HTMLElement;
+    const editor = within(topic).getByRole("textbox", { name: "Choose a day" });
+
+    expect(within(topic).queryByRole("grid")).not.toBeInTheDocument();
+    fireEvent.focus(editor);
+    expect(within(topic).getByRole("grid")).toBeInTheDocument();
+    expect(topic.querySelector('[data-slot="selection-header"]')).not.toBeVisible();
+
+    fireEvent.input(editor, { target: { value: "12 juni" } });
+    fireEvent.keyDown(editor, { key: "Enter" });
+    expect(editor).toHaveValue("12 June 2026");
+    expect(topic.querySelector('[data-date="2026-06-12"]')).toHaveAttribute("data-selected", "true");
+  });
+
+  it("opens the range picker from the selected-period input", () => {
+    render(<DatePickerStory />);
+    const topic = document.querySelector<HTMLElement>("#difference") as HTMLElement;
+    const input = within(topic).getByRole("textbox", { name: "Choose a period" });
+
+    expect(within(topic).queryByRole("grid")).not.toBeInTheDocument();
+    fireEvent.focus(input);
+    expect(within(topic).getByRole("grid")).toHaveAccessibleName("Date range picker: August 2026");
   });
 
   it("keeps the theming story interactive", () => {

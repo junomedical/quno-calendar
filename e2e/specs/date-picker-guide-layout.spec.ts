@@ -1,15 +1,34 @@
 import { expect, test } from "@playwright/test";
 
-test("single-day editing uses one field and state cards form a two-by-two grid", async ({ page }) => {
+test("single-day mode and focused Date Input composition stay distinct", async ({ page }) => {
   await page.goto("/guide/datepicker");
 
   const singleDay = page.locator("#single-day");
-  const editor = singleDay.getByRole("textbox", { name: "Selected day" });
-  await expect(editor).toHaveCount(1);
-  await expect(singleDay.locator('.story__single-day-picker > [data-slot="selection-header"]')).toBeHidden();
-  await expect(editor).toHaveValue("19 August 2026");
+  await expect(singleDay.getByRole("textbox")).toHaveCount(0);
+  await expect(singleDay.locator('[data-slot="selection-header"]')).toBeVisible();
   await singleDay.locator('[data-date="2026-08-18"]').click();
-  await expect(editor).toHaveValue("18 August 2026");
+  await expect(singleDay.locator('[data-date="2026-08-18"]')).toHaveAttribute("data-selected", "true");
+
+  const composition = page.locator("#single-day-input");
+  const editor = composition.getByRole("textbox", { name: "Choose a day" });
+  await expect(composition.getByRole("grid")).toHaveCount(0);
+  await editor.focus();
+  await expect(composition.getByRole("grid")).toBeVisible();
+  await expect(composition.locator('[data-slot="selection-header"]')).toBeHidden();
+  await editor.fill("12 juni");
+  await editor.press("Enter");
+  await expect(editor).toHaveValue("12 June 2026");
+  await expect(composition.locator('[data-date="2026-06-12"]')).toHaveAttribute("data-selected", "true");
+  await editor.fill("");
+  await editor.press("Enter");
+  await expect(editor).toHaveValue("");
+  await expect(composition.locator('[data-selected="true"]')).toHaveCount(0);
+  await page.getByRole("heading", { name: "Shape a date range as directly as you point to it." }).click();
+  await expect(composition.getByRole("grid")).toHaveCount(0);
+});
+
+test("explicit state cards form a two-by-two grid", async ({ page }) => {
+  await page.goto("/guide/datepicker#idea");
 
   const cards = page.locator("#idea .story__idea-grid article");
   await expect(cards).toHaveCount(4);

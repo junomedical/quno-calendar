@@ -348,10 +348,15 @@ week. All seven English weekday names and their common abbreviations are recogni
 Compose `QunoDateInput` with `QunoDatePicker` by passing the same controlled `DateRange` and `onChange` to both public
 entry points. When an input update changes only one endpoint, move the picker’s visible month to that changed date;
 when both endpoints change, fall back to the nearest off-screen endpoint. The independently imported date-input payload
-is currently 6.71 KiB gzip for JavaScript and 0.56 KiB gzip for its optional stylesheet. It uses the React 18+ peer,
+is currently 6.77 KiB gzip for JavaScript and 0.58 KiB gzip for its optional stylesheet. It uses the React 18+ peer,
 supports Preact 10.18+ through `preact/compat`, imports safely in SSR, and has no date-library runtime dependency. The
 combined package’s TanStack virtualizer dependency belongs to Infinite Calendar and is not imported by the
 date-input entry.
+
+For a compact single-day field, let `QunoDateInput` replace the picker’s selected-day summary and Clear action. Open a
+`selectionMode="single"` picker while focus remains in the composed control, hide its duplicate selection header with
+the public `selection-header` slot, and close it when focus or an outside pointer leaves. Typing and picking continue to
+share one controlled `DateRange`; an empty committed input clears that value without a second action.
 
 ## Quno/Date Parser
 
@@ -371,6 +376,16 @@ const tokens = tokenizeDateInput("next Monday");
 ```
 
 The parser recognizes explicit formats, relative dates and calendar periods, inclusive ranges, multilingual vocabulary, and consumer lexicon extensions. It remains timezone-free and safe to import in ESM, CommonJS, Node, and SSR.
+
+Locale-specific numeric markers can be added without introducing another built-in parser language. For example,
+Japanese year, month, and day markers make the familiar `YYYY年M月D日` form explicit:
+
+```ts
+parseDateInput("2026年8月25日", {
+  expectedRange,
+  lexicon: { datePartMarkers: ["年", "月", "日"] }
+});
+```
 
 ## Compose Quno/Datepicker and Quno/Infinite Calendar
 

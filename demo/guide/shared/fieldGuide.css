@@ -251,21 +251,17 @@
 }
 
 /* Existing live-example geometry keeps its feature classes; the guide chrome owns their editorial treatment. */
-.field-guide .story__wide,
-.field-guide .story__integration {
+.field-guide .story__wide {
   width: 100%;
   margin: 0 0 132px;
 }
 
-.field-guide .story__section-heading > span,
-.field-guide .story__metrics strong,
-.field-guide .date-input-guide__facts dd {
+.field-guide .story__section-heading > span {
   color: var(--guide-accent);
 }
 
 .field-guide .story__section-heading > h2,
-.field-guide .story__section-heading > h3,
-.field-guide .story__integration > h3 {
+.field-guide .story__section-heading > h3 {
   margin: 0 0 28px;
   font-family: Georgia, Cambria, "Times New Roman", serif;
   font-size: clamp(34px, 4.7vw, 50px);
@@ -276,19 +272,14 @@
 
 .field-guide .story__section-heading p,
 .field-guide .story__idea-grid p,
-.field-guide .story__metrics small,
-.field-guide .story__measurement,
-.field-guide .date-input-guide__value,
-.field-guide .date-input-guide__facts dt {
+.field-guide .date-input-guide__value {
   color: var(--guide-muted);
 }
 
 .field-guide .story__comparison,
 .field-guide .story__idea-grid article,
-.field-guide .story__metrics > div,
 .field-guide .date-input-guide__example,
-.field-guide .date-input-parser-example,
-.field-guide .date-input-guide__facts div {
+.field-guide .date-input-parser-example {
   border-color: var(--guide-line);
   background: #fffefa;
   box-shadow: 0 16px 40px rgb(23 76 66 / 7%);
@@ -301,21 +292,6 @@
   color: var(--guide-accent-dark);
   background: #edf3ef;
   border-color: #cadbd3;
-}
-
-.field-guide .story__integration {
-  padding-top: 36px;
-  border-top: 1px solid var(--guide-line);
-  scroll-margin-top: 36px;
-}
-
-.field-guide .story__integration > span {
-  color: var(--guide-accent);
-  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
-  font-size: 12px;
-  font-weight: 760;
-  letter-spacing: 0.13em;
-  text-transform: uppercase;
 }
 
 @media (max-width: 640px) {

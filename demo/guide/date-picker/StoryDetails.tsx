@@ -1,5 +1,8 @@
 import type { JSX } from "react";
 import { FieldGuideRecipe } from "#quno-demo/guide/shared/FieldGuideFeature";
+import { FieldGuideProduction } from "#quno-demo/guide/shared/FieldGuideProduction";
+import { datepickerProduction } from "#quno-demo/guide/shared/productionProfiles";
+import { TypeToEditExample } from "./TypeToEditExample";
 
 const comparisons = [
   ["Forced order", "Choose From first, then choose To", "Click, paint, resize, or move in any order"],
@@ -57,8 +60,12 @@ export const DifferenceStory = (): JSX.Element => (
     </div>
     <aside className="field-guide__try">
       <strong>Try it</strong>
-      Compare how each model corrects an existing range without restarting selection.
+      Focus the selected-period input to open the picker. Type a new endpoint or choose dates directly; both edit the
+      same range.
     </aside>
+    <div className="field-guide__example">
+      <TypeToEditExample />
+    </div>
     <FieldGuideRecipe
       title="Use one range model"
       language="TS"
@@ -115,31 +122,13 @@ export const ArchitectureStory = (): JSX.Element => (
 export const FootprintStory = (): JSX.Element => (
   <section className="story__wide story__footprint" id="footprint">
     <div className="story__section-heading">
-      <span>Production footprint</span>
-      <h3>About 12.05 KiB gzip for the picker’s default theme</h3>
+      <span>Production</span>
+      <h3>Ship Datepicker independently.</h3>
       <p>
-        The independently imported Datepicker supports React 18+, tested Preact compatibility, SSR, and optional CSS.
+        Datepicker JavaScript is 9.00 KiB gzip. Its optional stylesheet is a separate 3.20 KiB gzip import; neither
+        number includes external application runtimes.
       </p>
     </div>
-    <div className="story__metrics">
-      <div>
-        <strong>9.00 KiB</strong>
-        <span>Picker JavaScript gzip</span>
-        <small>33.82 KiB raw</small>
-      </div>
-      <div>
-        <strong>3.05 KiB</strong>
-        <span>Picker CSS gzip</span>
-        <small>17.61 KiB raw</small>
-      </div>
-      <div>
-        <strong>React 18+</strong>
-        <span>Runtime peer</span>
-        <small>Preact 10.18+ through compat aliases</small>
-      </div>
-    </div>
-    <p className="story__measurement">
-      Measured from the current production build with <code>npm run report:size</code>.
-    </p>
+    <FieldGuideProduction profile={datepickerProduction} anchorIds={["reference"]} />
   </section>
 );

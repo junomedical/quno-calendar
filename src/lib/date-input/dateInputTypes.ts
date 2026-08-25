@@ -18,6 +18,7 @@ export type DateInputToken = {
 export type DateInputLexicon = {
   monthNames?: Partial<Record<number, ReadonlyArray<string>>>;
   weekdayNames?: Partial<Record<number, ReadonlyArray<string>>>;
+  datePartMarkers?: ReadonlyArray<string>;
   today?: ReadonlyArray<string>;
   yesterday?: ReadonlyArray<string>;
   tomorrow?: ReadonlyArray<string>;

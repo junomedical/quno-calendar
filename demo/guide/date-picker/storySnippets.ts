@@ -87,33 +87,39 @@ export const themingSnippet = `.booking-dates {
 /* component.tsx */
 <QunoDatePicker className="booking-dates" />`;
 
-export const naturalInputSnippet = `import { useState } from 'react';
+export const singleDayInputSnippet = `import { type FocusEvent, useState } from 'react';
 import { QunoDatePicker, type DateRange } from '@quno/calendar/datepicker';
 import { QunoDateInput } from '@quno/calendar/date-input';
 import '@quno/calendar/date-input/styles.css';
 
-const [dates, setDates] = useState<DateRange | null>(null);
+const [date, setDate] = useState<DateRange | null>(null);
 const [open, setOpen] = useState(false);
 const expectedRange = { start: '2025-08-19', end: '2026-08-19' };
+const closeAfterFocusLeaves = (event: FocusEvent<HTMLDivElement>) => {
+  if (!event.currentTarget.contains(event.relatedTarget as Node)) setOpen(false);
+};
 
-<QunoDateInput
-  value={dates}
-  onChange={setDates}
-  onFocus={() => setOpen(true)}
-  expectedRange={expectedRange}
-  preferredDateOrder="dmy"
-  parserLanguages={['en', 'de']}
-/>
-{open && <QunoDatePicker value={dates} onChange={setDates} />};`;
+<div onFocus={() => setOpen(true)} onBlur={closeAfterFocusLeaves}>
+  <QunoDateInput
+    value={date}
+    onChange={setDate}
+    expectedRange={expectedRange}
+    selectionMode="single"
+  />
+  {open && (
+    <QunoDatePicker
+      className="day-field__picker"
+      value={date}
+      onChange={setDate}
+      selectionMode="single"
+    />
+  )}
+</div>
+
+/* .day-field__picker [data-slot='selection-header'] { display: none; } */`;
 
 export const singleDaySnippet = `const [date, setDate] = useState<DateRange | null>(null);
 
-<QunoDateInput
-  value={date}
-  onChange={setDate}
-  expectedRange={expectedRange}
-  selectionMode="single"
-/>
 <QunoDatePicker
   value={date}
   onChange={setDate}

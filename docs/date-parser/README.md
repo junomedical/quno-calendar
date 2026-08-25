@@ -11,4 +11,5 @@ Quno/Date Parser owns dependency-free recognition and tokenization of timezone-f
 
 The parser supports explicit formats, preferred numeric order, bounded relative phrases, configurable week starts,
 ranges, expected-period ranking, English and German vocabularies, lexicon extensions, and tokenization without a UI or
-framework dependency.
+framework dependency. Lexicon-owned date-part markers can adapt locale-specific forms such as Japanese
+`YYYY年M月D日` without adding another built-in parser language.

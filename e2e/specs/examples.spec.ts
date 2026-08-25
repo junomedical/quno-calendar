@@ -153,16 +153,33 @@ test("date input field guide follows the task-oriented component contract", asyn
 test("date parser guide keeps parsing semantics headless and interactive", async ({ page }) => {
   await page.goto("/guide/date-parser");
   const guide = page.locator('[data-field-guide="Quno/Date Parser"]');
-  await expect(guide.getByRole("navigation", { name: "Table of contents" }).getByRole("link")).toHaveCount(8);
+  await expect(guide.getByRole("navigation", { name: "Table of contents" }).getByRole("link")).toHaveCount(9);
   await guide.locator("#preferred-date-order").getByRole("button", { name: "MDY" }).click();
   await expect(guide.locator("#preferred-date-order output")).toHaveText("2026-03-04");
   await guide.locator("#relative-dates").getByRole("button", { name: "this week" }).click();
   await expect(guide.locator("#relative-dates .date-input-parser-example pre")).toContainText('"start": "2026-08-23"');
   await expect(guide.locator("#relative-dates .date-input-parser-example pre")).toContainText('"end": "2026-08-29"');
-  await guide.locator("#multiple-languages").getByRole("button", { name: "12 Juni 2026" }).click();
-  await expect(guide.locator("#multiple-languages .date-input-parser-example pre")).toContainText(
-    '"start": "2026-06-12"'
-  );
+  const languages = guide.locator("#multiple-languages");
+  const output = languages.locator(".date-input-parser-example pre");
+  for (const [sample, expectedStart] of [
+    ["12 June 2026", "2026-06-12"],
+    ["14 Juli 2026", "2026-07-14"],
+    ["tomorrow", "2026-08-26"],
+    ["gestern", "2026-08-24"],
+    ["prior week", "2026-08-17"]
+  ]) {
+    await languages.getByRole("button", { name: sample }).click();
+    await expect(output).toContainText(`"start": "${expectedStart}"`);
+  }
+  await expect(output).toContainText('"end": "2026-08-23"');
+
+  const internationalization = guide.locator("#internationalization");
+  const japaneseOutput = internationalization.locator(".date-input-parser-example pre");
+  await expect(internationalization).toContainText('lexicon.datePartMarkers = ["年", "月", "日"]');
+  await expect(internationalization.getByRole("textbox", { name: "Japanese date" })).toHaveValue("2026年8月25日");
+  await expect(japaneseOutput).toContainText('"start": "2026-08-25"');
+  await internationalization.getByRole("button", { name: "Date markers on" }).click();
+  await expect(japaneseOutput).toContainText('"status": "invalid"');
 });
 
 test("editorial table of contents presents the feature chapters and navigates the article scroller", async ({
@@ -262,20 +279,27 @@ test("editorial CSS-native exhibit keeps stable chrome browser-positioned", asyn
     .toBeLessThanOrEqual(1);
 });
 
-test("editorial payload leads with gzip size and separates external dependencies", async ({ page }) => {
-  await page.goto("/guide");
-  const footprint = page.getByTestId("article-package-footprint");
-  await footprint.scrollIntoViewIfNeeded();
-  await expect(page.getByRole("heading", { name: "Ship the package" })).toBeVisible();
-  await expect(footprint.locator("dt").filter({ hasText: "JavaScript" })).toBeVisible();
-  await expect(footprint).toContainText("31.85 KiB gzip");
-  await expect(footprint).toContainText("128.92 KiB raw");
-  await expect(footprint.locator("dt").filter({ hasText: "Total package" })).toBeVisible();
-  await expect(footprint).toContainText("33.65 KiB gzip");
-  await expect(footprint.locator("dt").filter({ hasText: "External runtime" })).toBeVisible();
-  await expect(footprint).toContainText("@tanstack/react-virtual");
-  await expect(footprint).toContainText("React + React DOM");
-  await expect(footprint.locator("dt").filter({ hasText: "Bundled copies" })).toBeVisible();
+test("all four guides separate exact payloads from runtime contracts", async ({ page }) => {
+  const guides = [
+    ["infinite-calendar", "31.76 KiB gzip", "1.95 KiB gzip", "@quno/calendar/infinite-calendar"],
+    ["datepicker", "9.00 KiB gzip", "3.20 KiB gzip", "@quno/calendar/datepicker"],
+    ["date-input", "6.77 KiB gzip", "0.58 KiB gzip", "@quno/calendar/date-input"],
+    ["date-parser", "4.49 KiB gzip", "No stylesheet", "@quno/calendar/date-parser"]
+  ] as const;
+
+  for (const [route, javascript, styles, entrypoint] of guides) {
+    await page.goto(`/guide/${route}`);
+    const production = page.locator(".field-guide-production");
+    await production.scrollIntoViewIfNeeded();
+    await expect(production.getByText(javascript, { exact: true })).toBeVisible();
+    await expect(production.getByText(styles, { exact: true })).toBeVisible();
+    await expect(production.getByText(entrypoint, { exact: true })).toBeVisible();
+    await expect(production.getByText("Public API at a glance", { exact: true })).toBeVisible();
+    await expect(production).not.toContainText("Total package");
+    await expect(production).toContainText(
+      route === "date-parser" ? "no CSS artifact or combined total" : "JavaScript and CSS are separate imports"
+    );
+  }
 });
 
 test("editorial current-time marker provides a shared reference and can be restored", async ({ page }) => {

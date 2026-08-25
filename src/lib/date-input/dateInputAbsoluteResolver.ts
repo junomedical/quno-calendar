@@ -60,8 +60,11 @@ const extract = (
   for (const token of tokens) {
     if (token.type === "date-separator" && separator(token.value)) continue;
     if (token.type === "number") values.push({ value: Number(token.value), digits: token.value.length });
-    else if (token.type === "word" && month === undefined) {
-      const resolvedMonth = vocabulary.months[normalizeDateInputWord(token.value)];
+    else if (token.type === "word") {
+      const word = normalizeDateInputWord(token.value);
+      if (vocabulary.datePartMarkers.includes(word)) continue;
+      if (month !== undefined) return null;
+      const resolvedMonth = vocabulary.months[word];
       if (resolvedMonth) month = resolvedMonth;
       else return null;
     } else return null;

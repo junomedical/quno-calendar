@@ -24,6 +24,8 @@ import {
 import { DragCreateArticleDemo, PrefetchLoadingDemo, ReadOnlyArticleDemo } from "./ArticleRecipeDemos";
 import { ReactStateDemo } from "./ReactStateDemo";
 import { FieldGuidePage } from "#quno-demo/guide/shared/FieldGuidePage";
+import { FieldGuideProduction } from "#quno-demo/guide/shared/FieldGuideProduction";
+import { infiniteCalendarProduction } from "#quno-demo/guide/shared/productionProfiles";
 import "./integrationWalkthrough.css";
 
 const rendererSnippet = `function EventCard({ event, status, laneCount, style }) {
@@ -859,70 +861,17 @@ export function IntegrationWalkthrough({ embedded = false }: { embedded?: boolea
         </DemoBreakout>
       </ArticleSection>
 
-      <ArticleSection id="package-footprint" number="25" title="Ship the package">
+      <ArticleSection id="package-footprint" number="25" title="Ship Infinite Calendar independently">
         <p>
-          Quno/Infinite Calendar adds 33.65 KiB gzip of its own JavaScript and CSS to a production application. Because
-          a calendar often appears on a product’s busiest screens, this transfer payload affects download, parsing,
-          startup, and the time before the rest of the product is usable.
+          Infinite Calendar JavaScript is 31.76 KiB gzip. Its optional stylesheet is a separate 1.95 KiB gzip import;
+          neither number includes React, React DOM, or the external virtualizer supplied by the application.
         </p>
         <p>
-          The production build keeps React, React DOM, and the virtualizer external instead of copying dependencies
-          already supplied by the application. The package total below therefore covers Quno/Infinite Calendar itself;
-          the dependency summary makes the additional runtime requirements explicit.
+          Keeping the artifacts separate makes the cost of behavior, default styling, and application-owned runtimes
+          explicit. Products can import JavaScript without CSS, and server code can import JavaScript without document
+          access.
         </p>
-        <div className="article-footprint" data-testid="article-package-footprint">
-          <dl aria-label="Production transfer payload">
-            <div>
-              <dt>JavaScript</dt>
-              <dd>
-                <strong>31.85 KiB gzip</strong>
-                <span>128.92 KiB raw</span>
-              </dd>
-            </div>
-            <div>
-              <dt>Styles</dt>
-              <dd>
-                <strong>1.80 KiB gzip</strong>
-                <span>8.73 KiB raw</span>
-              </dd>
-            </div>
-            <div>
-              <dt>Total package</dt>
-              <dd>
-                <strong>33.65 KiB gzip</strong>
-                <span>137.65 KiB raw</span>
-              </dd>
-            </div>
-          </dl>
-          <dl aria-label="External production dependencies">
-            <div>
-              <dt>External runtime</dt>
-              <dd>
-                <strong>1</strong>
-                <span>@tanstack/react-virtual</span>
-              </dd>
-            </div>
-            <div>
-              <dt>Peer runtimes</dt>
-              <dd>
-                <strong>2</strong>
-                <span>React + React DOM</span>
-              </dd>
-            </div>
-            <div>
-              <dt>Bundled copies</dt>
-              <dd>
-                <strong>0</strong>
-                <span>Application copies stay shared</span>
-              </dd>
-            </div>
-          </dl>
-        </div>
-        <p className="article-footprint__note">
-          Measured from the production package build with maximum gzip compression, before consumer tree-shaking.
-          External runtime and peer dependencies are not included. The bundle guard caps JavaScript at 32 KiB gzip and
-          CSS at 2 KiB gzip.
-        </p>
+        <FieldGuideProduction profile={infiniteCalendarProduction} testId="article-package-footprint" />
       </ArticleSection>
 
       <footer className="calendar-article__footer">

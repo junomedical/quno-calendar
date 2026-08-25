@@ -19,7 +19,7 @@ describe("date input field guide", () => {
       "Use the same parsing contract everywhere.",
       "Let typing and direct manipulation share one value.",
       "Keep the field understandable to every input method.",
-      "Ship the field independently."
+      "Ship Date Input independently."
     ]) {
       expect(screen.getByRole("heading", { name: title })).toBeInTheDocument();
     }

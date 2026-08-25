@@ -136,12 +136,5 @@ export const librarySizeSnippet = `import { QunoDateInput } from "@quno/calendar
 import "@quno/calendar/date-input/styles.css"; // optional
 
 // Independently measured ESM output:
-// JavaScript: 6.71 KiB gzip / 7 KiB budget
-// CSS: 0.56 KiB gzip / 1 KiB budget`;
-
-export const dependenciesSnippet = `import { QunoDateInput } from "@quno/calendar/date-input";
-import "@quno/calendar/date-input/styles.css"; // optional
-
-// React 18+ is the runtime peer.
-// Preact 10.18+ is supported through preact/compat aliases.
-// The entry is SSR-safe and has no date-library dependency.`;
+// JavaScript: 6.77 KiB gzip / 22.89 KiB raw
+// Optional CSS: 0.58 KiB gzip / 2.29 KiB raw`;
