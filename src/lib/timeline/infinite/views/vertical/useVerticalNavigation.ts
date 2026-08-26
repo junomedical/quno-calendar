@@ -17,7 +17,7 @@ import type { IsoDate } from "#quno-internal/shared/dateRangeModel";
 
 type VerticalNavigationArgs = {
   ref: ForwardedRef<CalendarViewHandle>;
-  containerRef: RefObject<HTMLDivElement>;
+  containerRef: RefObject<HTMLDivElement | null>;
   settings: QunoInfiniteCalendarSettings;
   now: Date;
   scrollToDate: QunoInfiniteCalendarHandle["scrollToDate"];

@@ -2,4 +2,5 @@
 export type PendingScrollTarget = {
   dateKey: string;
   offsetWithinDate: number;
+  eagerRange?: boolean;
 };

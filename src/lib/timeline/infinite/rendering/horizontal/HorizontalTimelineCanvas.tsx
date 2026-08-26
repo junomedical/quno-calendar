@@ -16,7 +16,7 @@ type HorizontalTimelineCanvasProps = {
   ariaLabel: string;
   className?: string;
   style?: CalendarViewComponentProps["style"];
-  containerRef: RefObject<HTMLDivElement>;
+  containerRef: RefObject<HTMLDivElement | null>;
   isDragging: boolean;
   canStartDraft: boolean;
   onScroll: UIEventHandler<HTMLDivElement>;
@@ -69,7 +69,7 @@ export function HorizontalTimelineCanvas({
         className={["quno-calendar-viewport", isDragging ? "is-dragging" : "", canStartDraft ? "is-create-enabled" : ""]
           .filter(Boolean)
           .join(" ")}
-        ref={containerRef}
+        ref={containerRef as RefObject<HTMLDivElement>}
         onScroll={onScroll}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}

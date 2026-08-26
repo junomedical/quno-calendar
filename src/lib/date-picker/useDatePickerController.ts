@@ -18,6 +18,7 @@ import {
 } from "./datePickerInteraction";
 import { updateSingleDayInteraction } from "./datePickerSingleInteraction";
 import { createFinishDatePickerDrag } from "./finishDatePickerDrag";
+import { dayIsDisabled, interactionEndpointsAreEnabled } from "./datePickerDisabledDays";
 import type { DatePickerController, DatePickerControllerOptions, MonthChangeSource } from "./datePickerControllerTypes";
 import type { DatePickerInteraction } from "./datePickerTypes";
 import { useDatePickerNavigation } from "./useDatePickerNavigation";
@@ -28,6 +29,7 @@ export const useDatePickerController = ({
   selectionMode,
   initialMonth,
   weekStartsOn,
+  disabledDays,
   autoNavigateDelay,
   autoNavigateRepeatDelay,
   onChange,
@@ -85,6 +87,7 @@ export const useDatePickerController = ({
   const cyclePreview = clickCycle ? advanceDateClickCycle(clickCycle).value : null;
 
   const beginDrag = (date: IsoDate): void => {
+    if (dayIsDisabled(disabledDays, date)) return;
     stopEdgeNavigation();
     setInteraction(
       selectionMode === "single"
@@ -94,9 +97,11 @@ export const useDatePickerController = ({
   };
 
   const enterDay = (date: IsoDate): void => {
-    setInteraction((current) =>
-      selectionMode === "single" ? updateSingleDayInteraction(current, date) : updateInteraction(current, date)
-    );
+    setInteraction((current) => {
+      const next =
+        selectionMode === "single" ? updateSingleDayInteraction(current, date) : updateInteraction(current, date);
+      return interactionEndpointsAreEnabled(disabledDays, next) ? next : current;
+    });
   };
 
   const finishDrag = createFinishDatePickerDrag({
@@ -105,6 +110,7 @@ export const useDatePickerController = ({
     commit,
     interaction,
     selectionMode,
+    disabledDays,
     setClickCycle,
     setInteraction,
     stopEdgeNavigation,

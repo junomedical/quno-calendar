@@ -77,6 +77,7 @@ export type QunoDatePickerDayCellContext = {
   isToday: boolean;
   isWeekend: boolean;
   isOutside: boolean;
+  isDisabled: boolean;
   isSelected: boolean;
   isCommitted: boolean;
   isRangeStart: boolean;
@@ -92,6 +93,8 @@ export type QunoDatePickerDayCellProps = {
 export type QunoDatePickerDayCellCustomizer = (
   context: QunoDatePickerDayCellContext
 ) => QunoDatePickerDayCellProps | undefined;
+
+export type QunoDatePickerDisabledDayMatcher = (date: IsoDate) => boolean;
 
 export type QunoDatePickerSlot =
   | "root"
@@ -137,6 +140,7 @@ export type QunoDatePickerProps = {
   weekStartsOn?: WeekStart;
   className?: string;
   classNames?: QunoDatePickerClassNames;
+  disabledDays?: QunoDatePickerDisabledDayMatcher;
   getDayCellProps?: QunoDatePickerDayCellCustomizer;
   calendarFooter?: ReactNode;
   autoNavigateDelay?: number;
@@ -150,6 +154,7 @@ export type ResolvedDatePickerConfig = {
   labels: QunoDatePickerLabels;
   formatters: QunoDatePickerFormatters;
   classNames?: QunoDatePickerClassNames;
+  disabledDays?: QunoDatePickerDisabledDayMatcher;
   getDayCellProps?: QunoDatePickerDayCellCustomizer;
 };
 

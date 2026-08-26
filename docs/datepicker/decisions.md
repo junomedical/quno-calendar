@@ -1001,3 +1001,19 @@ future identifiers are documented in [Date Input decisions](../date-input/decisi
   their theme-scoped CSS. Leave the component default and every other theme unchanged.
 - Consequences: Both expressive themes retain their typefaces and accessible button semantics while the secondary
   Clear action returns to the visual weight expected inside the range summary.
+
+## QDP-122 — Disabled days constrain endpoints and fail closed
+
+- Date: 2026-08-26
+- Status: Accepted; resolves the disabled-date deferral in QDP-008 and preserves QDP-043
+- Context: Booking products need unavailable dates to remain visible and styled, including while parent-owned
+  availability is still loading or has failed. Presentation-only day props cannot safely decide whether a gesture may
+  commit, and an async interaction callback would leave a click or drag without an immediate result.
+- Decision: Add the synchronous `disabledDays(date)` matcher and expose its result as `isDisabled` to
+  `getDayCellProps`. A disabled date cannot become a single-day selection or a range start or end through clicking,
+  painting, endpoint resizing, whole-range movement, hidden-week overflow, or outside-month navigation. Disabled dates
+  may remain inside a range whose endpoints are enabled. Consumers own async status maps and return disabled for
+  unresolved or failed entries. Existing controlled values are rendered, not rewritten, when their status changes.
+- Consequences: Every gesture has deterministic fail-closed behavior while products can independently render loading,
+  error, holiday, or availability classes. Consumers must revalidate persisted controlled values when their business
+  rules change, and async work never runs from the synchronous matcher.

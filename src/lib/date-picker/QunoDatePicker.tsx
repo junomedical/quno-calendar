@@ -20,6 +20,7 @@ export const QunoDatePicker = ({
   weekStartsOn = 1,
   className,
   classNames,
+  disabledDays,
   getDayCellProps,
   calendarFooter,
   autoNavigateDelay = 400,
@@ -37,6 +38,7 @@ export const QunoDatePicker = ({
     labels: { ...DEFAULT_LABELS, ...modeLabels, ...labels },
     formatters: { ...DEFAULT_FORMATTERS, ...formatters },
     classNames,
+    disabledDays,
     getDayCellProps
   };
   const controller = useDatePickerController({
@@ -45,6 +47,7 @@ export const QunoDatePicker = ({
     selectionMode,
     initialMonth,
     weekStartsOn,
+    disabledDays,
     autoNavigateDelay,
     autoNavigateRepeatDelay,
     onChange,
@@ -114,6 +117,7 @@ export type {
   QunoDatePickerDayCellContext,
   QunoDatePickerDayCellCustomizer,
   QunoDatePickerDayCellProps,
+  QunoDatePickerDisabledDayMatcher,
   QunoDatePickerFormatters,
   QunoDatePickerLabels,
   QunoDatePickerProps,

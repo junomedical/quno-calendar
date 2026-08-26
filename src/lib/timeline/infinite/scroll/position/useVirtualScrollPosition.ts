@@ -38,7 +38,7 @@ export function useVirtualScrollPosition({
   topVisibleOffsetRef
 }: UseVirtualScrollPositionArgs) {
   const scrollToVisibleDateOffset = useCallback(
-    (dateKey: string, offsetWithinDate: number, preferBaseGeometry = false) => {
+    (dateKey: string, offsetWithinDate: number, preferBaseGeometry = false, eagerRange = false) => {
       const index = clampVirtualDateIndex(dateKeyToIndex(dateKey), virtualWindow.count);
       // A structural vertical resize must not reuse the virtualizer's pre-commit
       // measurements; uniform base geometry is authoritative for that restore.
@@ -46,6 +46,13 @@ export function useVirtualScrollPosition({
         ? index * baseDayHeight
         : (virtualizer.getOffsetForIndex(index, "start")?.[0] ?? index * baseDayHeight);
       const targetOffset = baseOffset + Math.max(0, offsetWithinDate);
+      if (eagerRange) {
+        // Structural DOM scrolling is immediate, but the native scroll event
+        // reaches the virtualizer later. Carry that target eagerly so its
+        // queued React projection cannot paint the old range at the new top.
+        virtualizer.scrollOffset = targetOffset;
+        virtualizer.calculateRange();
+      }
       if (preferBaseGeometry && containerRef.current) {
         containerRef.current.scrollTop = targetOffset;
       } else {

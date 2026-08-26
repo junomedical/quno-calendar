@@ -15,3 +15,6 @@ does not re-export parser utilities, and composition with Datepicker remains con
 
 The field guide's production chapter presents the Date Input entry point, optional stylesheet, measured artifacts, and
 runtime contracts directly without repeating them in a separate import implementation accordion.
+
+The package's separate React 19 consumer fixture typechecks and mounts Date Input together with the other public UI
+subpaths; the normal development dependency remains React 18 so both supported type generations stay covered.

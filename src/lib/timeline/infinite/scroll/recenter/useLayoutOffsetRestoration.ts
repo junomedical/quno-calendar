@@ -33,8 +33,15 @@ type UseLayoutOffsetRestorationArgs = {
   clearScrollEndTimer: () => void;
   measureVirtualizer: () => void;
   isDateInVirtualViewport: (dateKey: string) => boolean;
-  scrollToVisibleDateOffset: (dateKey: string, offsetWithinDate: number, preferBaseGeometry?: boolean) => void;
+  scrollToVisibleDateOffset: (
+    dateKey: string,
+    offsetWithinDate: number,
+    preferBaseGeometry?: boolean,
+    eagerRange?: boolean
+  ) => void;
   setAnchorDateKey: (updater: (current: string) => string) => void;
+  projectRange: () => void;
+  eagerRange: boolean;
   resolveOffsetOnLayoutChange?: ResolveOffsetOnLayoutChange;
 };
 
@@ -85,6 +92,8 @@ export function useLayoutOffsetRestoration({
   isDateInVirtualViewport,
   scrollToVisibleDateOffset,
   setAnchorDateKey,
+  projectRange,
+  eagerRange,
   resolveOffsetOnLayoutChange
 }: UseLayoutOffsetRestorationArgs) {
   const previousLayoutSignatureRef = useRef("");
@@ -161,12 +170,14 @@ export function useLayoutOffsetRestoration({
       scrollToVisibleDateOffset(
         topDateKey,
         offsetWithinDate,
-        Boolean(resolveOffsetOnLayoutChange) || dateSequenceChanged
+        Boolean(resolveOffsetOnLayoutChange) || dateSequenceChanged,
+        eagerRange
       );
+      if (eagerRange) projectRange();
       return scheduleSettledAlignment();
     }
     // A different window consumes this target in useVirtualWindowNavigation's layout effect.
-    pendingScrollTargetRef.current = { dateKey: topDateKey, offsetWithinDate };
+    pendingScrollTargetRef.current = { dateKey: topDateKey, offsetWithinDate, eagerRange };
     setAnchorDateKey(() => topDateKey);
     return scheduleSettledAlignment();
   }, [
@@ -178,6 +189,8 @@ export function useLayoutOffsetRestoration({
     measureVirtualizer,
     isDateInVirtualViewport,
     pendingScrollTargetRef,
+    projectRange,
+    eagerRange,
     resolveOffsetOnLayoutChange,
     scrollToVisibleDateOffset,
     setAnchorDateKey,

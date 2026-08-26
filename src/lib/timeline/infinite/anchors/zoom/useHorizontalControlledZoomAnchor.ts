@@ -3,7 +3,7 @@ import { minuteToX } from "#quno-internal/timeline/time/time";
 import { TIMELINE_LEFT_GUTTER_PX } from "#quno-internal/timeline/time/timelineTicks";
 
 type HorizontalControlledZoomAnchorArgs = {
-  containerRef: RefObject<HTMLDivElement>;
+  containerRef: RefObject<HTMLDivElement | null>;
   effectiveZoom: number;
   endHour: number;
   labelWidth: number;

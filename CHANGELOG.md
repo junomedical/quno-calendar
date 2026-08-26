@@ -6,6 +6,11 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ### Added
 
+- Added Datepicker `disabledDays`, typed `isDisabled` day-cell context, native disabled state, and endpoint guards for
+  click, paint, resize, range movement, single-day selection, and outside-month navigation. The field guide now shows
+  delayed parent-owned availability with loading and failure states kept unselectable.
+- Added a packed React 19 compatibility fixture that typechecks and builds all public products, mounts the virtualized
+  calendar in a development browser, and rejects console warnings, errors, and page exceptions.
 - Added a closing Created by section to the project home crediting Dmitry Kirillov, Director of Product at
   Qunomedical, with a direct email link for questions, suggestions, and opportunities.
 - Added six package-wide guiding principles to the four-product home: Clean, Focused, Impressive, Unbundled, Natural,
@@ -87,6 +92,8 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ### Fixed
 
+- Removed React 19's synchronous virtualizer-update warning by using TanStack Virtual's queued notification path, and
+  aligned internal refs with both React 18 and React 19 type contracts.
 - Kept parent-reviewed moves to another visible date or resource at their viewport-relative row instead of snapping the
   row to the top, and restored the original event and view when a proposal is cancelled.
 - Made every English, German, and product-vocabulary sample in the Date Parser language exhibit resolve to a different

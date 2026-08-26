@@ -127,3 +127,17 @@ because that repository was the consolidation source. Its identifier and text re
   Keep the attribution separate from the four equal product cards and the six guiding principles.
 - Consequences: Readers can identify the work's creator and know that contact is welcome without changing the product
   directory, guide navigation, or package API.
+
+## QUNO-011 - Verify React 19 without replacing the React 18 baseline
+
+- Date: 2026-08-26
+- Status: Accepted
+- Context: The peer range supports React 18 and newer, but a React 18-only repository can miss newer ref declaration
+  constraints and development lifecycle warnings. Replacing the main runtime would stop exercising the oldest
+  supported React generation, while a production-only build would hide development warnings.
+- Decision: Keep React 18 as the repository development dependency and add a separate packed React 19 consumer. It
+  typechecks and builds every public product, mounts Datepicker, Date Input, and the real virtualized Infinite Calendar
+  under Strict Mode in a development Chromium page, and fails on console warnings, console errors, or page exceptions.
+  Keep the Preact compatibility fixture separate.
+- Consequences: React 18, React 19, and Preact compatibility regressions remain independently attributable. The React 19
+  fixture requires a built package and an installed Chromium browser, and CI runs it after package verification.

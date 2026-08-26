@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { addDays, isWithinRange, todayIso, type IsoDate, type WeekStart } from "#quno-internal/shared/dateRangeModel";
 import type { DatePickerController } from "./datePickerControllerTypes";
 import type { ResolvedDatePickerConfig } from "./datePickerTypes";
+import { dayIsDisabled } from "./datePickerDisabledDays";
 import type { JSX } from "react";
 
 type Props = {
@@ -16,6 +17,84 @@ type StripMode = { type: "weekdays" } | { type: "previous-dates"; pointerIndex: 
 const targetIndex = (target: EventTarget | null, weekdays: number[]): number => {
   const element = (target as HTMLElement | null)?.closest<HTMLElement>("[data-day-index]");
   return weekdays.indexOf(Number(element?.dataset.dayIndex));
+};
+
+type OverflowDayProps = {
+  config: ResolvedDatePickerConfig;
+  controller: DatePickerController;
+  date: IsoDate;
+  dayIndex: number;
+  index: number;
+  selected: boolean;
+  today: IsoDate;
+  onReveal: (index: number) => void;
+  onFinish: (date: IsoDate) => void;
+};
+
+const OverflowDay = ({
+  config,
+  controller,
+  date,
+  dayIndex,
+  index,
+  selected,
+  today,
+  onReveal,
+  onFinish
+}: OverflowDayProps): JSX.Element => {
+  const isStart = controller.renderedSelection?.start === date;
+  const isEnd = controller.renderedSelection?.end === date;
+  const committed = controller.selection ? isWithinRange(date, controller.selection) : false;
+  const disabled = dayIsDisabled(config.disabledDays, date);
+  const customProps = config.getDayCellProps?.({
+    date,
+    weekday: dayIndex as WeekStart,
+    isToday: date === today,
+    isWeekend: dayIndex === 0 || dayIndex === 6,
+    isOutside: true,
+    isDisabled: disabled,
+    isSelected: selected,
+    isCommitted: committed,
+    isRangeStart: isStart,
+    isRangeEnd: isEnd
+  });
+  return (
+    <span
+      className={cx(
+        "quno-date-picker-day",
+        "quno-date-picker-day--outside",
+        "quno-date-picker-overflow-day",
+        selected && "quno-date-picker-day--selected",
+        isStart && "quno-date-picker-day--start",
+        isEnd && "quno-date-picker-day--end",
+        disabled && "quno-date-picker-day--disabled",
+        config.classNames?.day,
+        config.classNames?.overflowDay,
+        customProps?.className
+      )}
+      style={customProps?.style}
+      title={customProps?.title}
+      data-slot="overflow-day"
+      data-day-index={dayIndex}
+      data-date={date}
+      data-touch-date={date}
+      data-touch-index={index}
+      data-selected={selected ? "true" : undefined}
+      data-range-start={isStart ? "true" : undefined}
+      data-range-end={isEnd ? "true" : undefined}
+      data-outside="true"
+      data-disabled={disabled ? "true" : undefined}
+      aria-disabled={disabled || undefined}
+      onPointerEnter={(event) => event.pointerType !== "touch" && onReveal(index)}
+      onPointerUp={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        onFinish(date);
+      }}
+    >
+      <span>{Number(date.slice(-2))}</span>
+    </span>
+  );
 };
 
 export const WeekdayStrip = ({ controller, config, touchOverflowIndex }: Props): JSX.Element => {
@@ -86,56 +165,19 @@ export const WeekdayStrip = ({ controller, config, touchOverflowIndex }: Props):
             </span>
           );
         }
-        const isStart = renderedSelection?.start === date;
-        const isEnd = renderedSelection?.end === date;
-        const committed = controller.selection ? isWithinRange(date, controller.selection) : false;
-        const customProps = config.getDayCellProps?.({
-          date,
-          weekday: dayIndex as WeekStart,
-          isToday: date === today,
-          isWeekend: dayIndex === 0 || dayIndex === 6,
-          isOutside: true,
-          isSelected: selected,
-          isCommitted: committed,
-          isRangeStart: isStart,
-          isRangeEnd: isEnd
-        });
         return (
-          <span
+          <OverflowDay
             key={dayIndex}
-            className={cx(
-              "quno-date-picker-day",
-              "quno-date-picker-day--outside",
-              "quno-date-picker-overflow-day",
-              selected && "quno-date-picker-day--selected",
-              isStart && "quno-date-picker-day--start",
-              isEnd && "quno-date-picker-day--end",
-              classNames?.day,
-              classNames?.overflowDay,
-              customProps?.className
-            )}
-            style={customProps?.style}
-            title={customProps?.title}
-            data-slot="overflow-day"
-            data-day-index={dayIndex}
-            data-date={date}
-            data-touch-date={date}
-            data-touch-index={index}
-            data-selected={selected ? "true" : undefined}
-            data-range-start={isStart ? "true" : undefined}
-            data-range-end={isEnd ? "true" : undefined}
-            data-outside="true"
-            onPointerEnter={(event) => {
-              if (event.pointerType !== "touch") revealAt(index);
-            }}
-            onPointerUp={(event) => {
-              event.preventDefault();
-              event.stopPropagation();
-              finishAt(date);
-            }}
-          >
-            <span>{Number(date.slice(-2))}</span>
-          </span>
+            config={config}
+            controller={controller}
+            date={date}
+            dayIndex={dayIndex}
+            index={index}
+            selected={selected}
+            today={today}
+            onReveal={revealAt}
+            onFinish={finishAt}
+          />
         );
       })}
     </div>

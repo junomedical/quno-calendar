@@ -1,4 +1,4 @@
-import type { DatePickerInteraction } from "./datePickerTypes";
+import type { DatePickerInteraction, QunoDatePickerDisabledDayMatcher } from "./datePickerTypes";
 import type {
   DateRange,
   DateSelectionMode,
@@ -15,6 +15,7 @@ export type DatePickerControllerOptions = {
   selectionMode: DateSelectionMode;
   initialMonth?: IsoDate;
   weekStartsOn: WeekStart;
+  disabledDays?: QunoDatePickerDisabledDayMatcher;
   autoNavigateDelay: number;
   autoNavigateRepeatDelay: number;
   onChange?: (value: DateRange | null) => void;

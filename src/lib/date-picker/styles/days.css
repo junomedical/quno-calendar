@@ -34,10 +34,19 @@
   position: absolute;
 }
 
-.quno-date-picker-day:hover > span,
+.quno-date-picker-day:hover:not(:disabled, [data-disabled="true"]) > span,
 .quno-date-picker-day:focus-visible > span {
   outline: 2px solid var(--quno-date-picker-primary, var(--quno-date-picker-primary-default));
   outline-offset: 1px;
+}
+
+.quno-date-picker-day--disabled {
+  color: var(--quno-date-picker-disabled, var(--quno-date-picker-disabled-default));
+  cursor: not-allowed;
+}
+
+.quno-date-picker-day--disabled > span {
+  opacity: 0.62;
 }
 
 .quno-date-picker-grid[data-dragging="move"] .quno-date-picker-day:hover > span {

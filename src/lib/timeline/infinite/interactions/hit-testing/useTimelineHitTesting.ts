@@ -7,7 +7,7 @@ import type { TimelinePointer } from "./hitTestingTypes";
 import { timelineGridAtPoint, timelineGridIdentity } from "./timelineHitTarget";
 
 type SharedArgs = {
-  containerRef: RefObject<HTMLDivElement>;
+  containerRef: RefObject<HTMLDivElement | null>;
   settings: QunoInfiniteCalendarSettings;
   selectedIds: CalendarId[];
 };

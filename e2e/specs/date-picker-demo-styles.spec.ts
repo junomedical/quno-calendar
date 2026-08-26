@@ -29,3 +29,28 @@ test("acid and candy themes keep the range Clear control compact", async ({ page
     expect((await clear.boundingBox())?.height).toBeLessThanOrEqual(26);
   }
 });
+
+test("delayed day states remain disabled until availability succeeds", async ({ page }) => {
+  await page.goto("/guide/datepicker#day-handler");
+  const topic = page.locator("#day-handler");
+  const available = topic.locator('[data-date="2026-08-10"]');
+  const unavailable = topic.locator('[data-date="2026-08-12"]');
+  const failed = topic.locator('[data-date="2026-08-24"]');
+
+  await expect(available).toBeDisabled();
+  await expect(available).toHaveClass(/story__day--loading/);
+  await expect(available.locator("span")).toHaveCSS("animation-name", "story-day-loading");
+  await expect(topic.getByText("Availability loaded")).toBeVisible();
+
+  await expect(available).toBeEnabled();
+  await expect(unavailable).toBeDisabled();
+  await expect(unavailable.locator("span")).toHaveCSS("text-decoration-line", "line-through");
+  await expect(failed).toBeDisabled();
+  await expect(failed).toHaveClass(/story__day--error/);
+  await expect(failed.locator("span")).toHaveCSS("text-decoration-line", "line-through");
+
+  await available.click();
+  await expect(available).toHaveAttribute("data-selected", "true");
+  await unavailable.click({ force: true });
+  await expect(unavailable).not.toHaveAttribute("data-range-end");
+});
