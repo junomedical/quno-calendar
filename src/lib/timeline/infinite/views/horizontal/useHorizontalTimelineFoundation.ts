@@ -11,7 +11,7 @@
  *
  * @see docs/infinite-calendar/flows/async-loading-and-layout.md
  */
-import { useMemo, useState, type ForwardedRef } from "react";
+import { useEffect, useMemo, useState, type ForwardedRef } from "react";
 import type { CalendarInternalViewProps, CalendarViewHandle } from "#quno-internal/timeline/core/internalTypes";
 import { useDayMetrics } from "#quno-internal/timeline/infinite/events/metrics/useDayMetrics";
 import { useEventRangeLoader } from "#quno-internal/timeline/infinite/events/loading/useEventRangeLoader";
@@ -45,6 +45,16 @@ export function useHorizontalTimelineFoundation({
     now
   });
   const { renderedCalendars, hiddenCalendarIds } = useRetainedCalendarRows(selectedCalendars, props.activeDraft);
+  const [createTransitionActive, setCreateTransitionActive] = useState(false);
+  useEffect(() => {
+    const mode = props.activeDraft?.mode;
+    if (mode) {
+      setCreateTransitionActive(mode === "create");
+      return;
+    }
+    const timer = window.setTimeout(() => setCreateTransitionActive(false), 600);
+    return () => window.clearTimeout(timer);
+  }, [props.activeDraft?.mode]);
   const [windowAnchorDateKey, setWindowAnchorDateKey] = useState<string>(initialAnchorDateKey);
   const baseDayHeight = settings.dayHeaderHeight + renderedCalendars.length * settings.rowHeight;
   const renderedCalendarIds = useMemo(() => renderedCalendars.map((calendar) => calendar.id), [renderedCalendars]);
@@ -61,6 +71,7 @@ export function useHorizontalTimelineFoundation({
     verticalLayoutSignature,
     topDateAlignmentKey: "",
     isInteractionActive,
+    eagerRange: props.activeDraft?.mode === "create" || createTransitionActive,
     layoutAnchorDateKey: props.activeDraft ? eventDateKey(props.activeDraft.event) : undefined
   });
   const viewportMetricsStore = useViewportMetricsStore(virtualTimeline.containerRef);

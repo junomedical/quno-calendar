@@ -54,7 +54,7 @@ export function useExternalEventDrafts({
     if (!shouldFilterCalendars) {
       return selectedCalendarIds;
     }
-    return activeDraftParticipants;
+    return activeDraftParticipants.length > 0 ? activeDraftParticipants : selectedCalendarIds;
   }, [activeDraft, activeDraftParticipants, draftParticipantsChanged, selectedCalendarIds]);
   const canSaveActiveDraft = !activeDraft || activeDraftParticipants.length > 0;
 
@@ -223,6 +223,13 @@ export function useExternalEventDrafts({
           setDraftParticipantsChanged(true);
           setActiveDraft({ ...activeDraft, event: nextEvent });
         });
+        if (nextEvent.calendarIds?.length === 0) {
+          restoreSlotAnchor(anchor, nextEvent, {
+            afterRecenter: true,
+            cancelOnManualScroll: true
+          });
+          return;
+        }
         restoreEventAnchor(anchor, nextEvent, {
           afterRecenter: true,
           allowNavigationFallback: false,
@@ -233,7 +240,7 @@ export function useExternalEventDrafts({
       setDraftParticipantsChanged(true);
       setActiveDraft({ ...activeDraft, event: nextEvent });
     },
-    [activeDraft, activeDraftLastSeenAnchorRef, captureEventAnchor, restoreEventAnchor]
+    [activeDraft, activeDraftLastSeenAnchorRef, captureEventAnchor, restoreEventAnchor, restoreSlotAnchor]
   );
 
   const { saveActiveDraft, cancelActiveDraft } = useExternalDraftCommit({

@@ -38,6 +38,7 @@ export type {
   QunoDatePickerDayCellContext,
   QunoDatePickerDayCellCustomizer,
   QunoDatePickerDayCellProps,
+  QunoDatePickerDisabledDayMatcher,
   QunoDatePickerFormatters,
   QunoDatePickerLabels,
   QunoDatePickerProps,

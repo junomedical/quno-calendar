@@ -43,11 +43,11 @@ describe("datepicker field guide", () => {
     expect(screen.getByText("paint · resize · move")).toBeInTheDocument();
     expect(
       screen.getByRole("heading", {
-        name: "Mark the dates that matter to your product."
+        name: "Mark and disable the dates that matter."
       })
     ).toBeInTheDocument();
-    expect(screen.getByText(/isNonWorking = weekday === 3/)).toBeInTheDocument();
-    expect(screen.getByText(/isHoliday = date === '2026-08-27'/)).toBeInTheDocument();
+    expect(screen.getByText(/statusFor\(date\) !== 'available'/)).toBeInTheDocument();
+    expect(screen.getByText(/loadAvailability\(calendarGrid\(visibleMonth\)\)/)).toBeInTheDocument();
     expect(screen.getByText("Holiday: 27 Aug")).toBeInTheDocument();
     expect(screen.getByText("Période sélectionnée")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Effacer" })).toBeInTheDocument();

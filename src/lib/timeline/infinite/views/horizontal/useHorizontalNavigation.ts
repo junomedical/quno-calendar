@@ -15,7 +15,7 @@ import type { IsoDate } from "#quno-internal/shared/dateRangeModel";
  */
 type HorizontalNavigationArgs = {
   forwardedRef: ForwardedRef<CalendarViewHandle>;
-  containerRef: RefObject<HTMLDivElement>;
+  containerRef: RefObject<HTMLDivElement | null>;
   effectiveSettings: QunoInfiniteCalendarSettings;
   now: Date;
   scrollToDate: QunoInfiniteCalendarHandle["scrollToDate"];

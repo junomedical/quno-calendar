@@ -26,4 +26,5 @@ jobs:
       - run: npm run build:demo
       - run: npm run verify:package
       - run: npm run test:compat
+      - run: npm run test:compat:react19
       - run: npm pack --dry-run

@@ -29,7 +29,8 @@ event timestamps.
 - Date Input may import the internal parser responsibility domain.
 - Datepicker, Date Input, and Infinite Calendar do not import one another.
 - Demo compositions may import several public entry points.
-- React and React DOM remain runtime peers. Preact support uses tested `preact/compat` aliases.
+- React and React DOM remain runtime peers. The repository develops against React 18, verifies React 19 in a packed
+  consumer fixture, and tests Preact through `preact/compat` aliases.
 - Framework runtimes and `@tanstack/react-virtual` remain external to generated feature bundles.
 
 ## Packaging

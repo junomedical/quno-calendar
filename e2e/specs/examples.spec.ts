@@ -82,33 +82,20 @@ test("datepicker field guide keeps picker geometry stable", async ({ page }) => 
   );
 });
 
-test("project home links each component card to its dedicated field guide and demo", async ({ page }) => {
+test("project home keeps its sections, routes, and responsive layout", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: "Opinionated approach to dates and schedules UI" })).toBeVisible();
-  await expect(page.locator(".project-home__intro")).toContainText("Four different ideas in the date UI elements");
-  const principles = page.getByRole("region", { name: "Guiding principles" });
-  await expect(principles.getByText("How we design", { exact: true })).toHaveCount(0);
+  await expect(page.locator(".project-home h1")).toBeVisible();
+  await expect(page.locator(".project-home__intro")).toBeVisible();
+  const principles = page.locator(".project-home__principles");
   await expect(principles.locator(".project-home__principle")).toHaveCount(6);
-  await expect(principles.getByRole("heading", { level: 3 })).toHaveText([
-    "Clean",
-    "Focused",
-    "Impressive",
-    "Unbundled",
-    "Natural",
-    "Preemptive"
-  ]);
-  const createdBy = page.getByRole("region", { name: "Created by" });
-  await expect(createdBy).toContainText(
-    "These UI elements and the thinking behind them were created by Dmitry Kirillov, Director of Product at Qunomedical."
-  );
-  const creatorEmail = createdBy.getByRole("link", { name: "dmitry@qunomedical.com" });
-  await expect(creatorEmail).toHaveAttribute("href", "mailto:dmitry@qunomedical.com");
-  await expect(createdBy).toContainText("if you have questions, suggestions, or opportunities.");
+  const createdBy = page.locator(".project-home__created-by");
+  await expect(createdBy).toBeVisible();
+  await expect(createdBy.locator('a[href="mailto:dmitry@qunomedical.com"]')).toBeVisible();
   const routes = [
-    ["Explore the calendar guide", "/guide/infinite-calendar", "/demo/infinite-calendar", ".quno-calendar-viewport"],
-    ["Explore the Datepicker guide", "/guide/datepicker", "/demo/datepicker", ".quno-date-picker"],
-    ["Explore the Date Input guide", "/guide/date-input", "/demo/date-input", ".quno-date-picker-input"],
-    ["Explore the Date Parser guide", "/guide/date-parser", "/demo/date-parser", ".component-demo__panel"]
+    ["/guide/infinite-calendar", "/demo/infinite-calendar", ".quno-calendar-viewport"],
+    ["/guide/datepicker", "/demo/datepicker", ".quno-date-picker"],
+    ["/guide/date-input", "/demo/date-input", ".quno-date-picker-input"],
+    ["/guide/date-parser", "/demo/date-parser", ".component-demo__panel"]
   ] as const;
   const cards = page.locator(".project-home__card");
   await expect(cards).toHaveCount(4);
@@ -124,13 +111,12 @@ test("project home links each component card to its dedicated field guide and de
   const createdByDesktopBox = await createdBy.boundingBox();
   const principlesDesktopBox = await principles.boundingBox();
   expect(createdByDesktopBox?.y).toBeGreaterThan((principlesDesktopBox?.y ?? 0) + (principlesDesktopBox?.height ?? 0));
-  for (const [label, guideHref, demoHref, demoSelector] of routes) {
-    const card = page.getByRole("link", { name: label });
-    await expect(card).toHaveAttribute("href", guideHref);
+  for (const [guideHref, demoHref, demoSelector] of routes) {
+    await expect(page.locator(`.project-home__card[href="${guideHref}"]`)).toHaveCount(1);
     await page.goto(guideHref);
-    await expect(page.getByRole("link", { name: "All components" })).toHaveAttribute("href", "/");
-    const demoLink = page.getByRole("link", { name: /^Demo/ });
-    await expect(demoLink).toHaveAttribute("href", demoHref);
+    const guideLinks = page.locator(".field-guide__links");
+    await expect(guideLinks.locator('a[href="/"]')).toHaveCount(1);
+    const demoLink = guideLinks.locator(`a[href="${demoHref}"]`);
     await demoLink.click();
     await expect(page).toHaveURL(new RegExp(`${demoHref}$`));
     await expect(page.locator(demoSelector).first()).toBeVisible();

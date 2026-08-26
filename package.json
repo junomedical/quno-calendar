@@ -71,6 +71,7 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "test:compat": "node scripts/verify-preact-compat.mjs",
+    "test:compat:react19": "node scripts/verify-react-19-compat.mjs",
     "verify:package": "npm run build:lib && npm run check:bundle-size && node scripts/verify-package.mjs",
     "preview": "vite preview --host 127.0.0.1 --outDir dist-demo"
   },

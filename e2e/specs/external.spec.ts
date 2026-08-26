@@ -462,14 +462,11 @@ test("supports drawing a new event area", async ({ page }) => {
       page
         .getByTestId("calendar-row")
         .evaluateAll((rows) =>
-          Array.from(new Set(rows.map((row) => (row as HTMLElement).dataset.calendarId).filter(Boolean)))
+          Array.from(new Set(rows.map((row) => (row as HTMLElement).dataset.calendarId).filter(Boolean))).sort()
         )
     )
-    .toEqual(["dr-thakker"]);
-  await expect(page.locator('[data-testid="calendar-row"][data-calendar-id="dr-thakker"]').first()).toHaveAttribute(
-    "data-retained-hidden",
-    "true"
-  );
+    .toEqual(["dr-kirillov", "dr-thakker", "marco-eggens", "room-201", "room-202", "room-203"]);
+  await expect(page.locator('[data-testid="calendar-row"][data-retained-hidden="true"]')).toHaveCount(0);
   await expect(page.locator('[data-testid="draft-event"][data-calendar-id="dr-thakker"]')).toHaveCount(0);
   await page.getByTestId("draft-participant-dr-thakker").check();
   await expect(page.getByTestId("draft-save-button")).toBeEnabled();
@@ -502,6 +499,26 @@ test("supports drawing a new event area", async ({ page }) => {
       .toBeLessThanOrEqual(24);
   }
   expect(await page.getByTestId("calendar-event").count()).toBeGreaterThan(initialEventCount);
+});
+
+test("keeps the drawn date focused while a create draft has no participants", async ({ page }) => {
+  await page.goto("/demo/infinite-calendar");
+  await goToWorkday(page, "2026-09-24");
+  await waitForDemoEvents(page);
+  await openDrawnExternalDraft(page, { calendarId: "dr-kirillov", dateKey: "2026-09-24" });
+
+  const kirillov = page.getByTestId("draft-participant-dr-kirillov");
+  await kirillov.uncheck();
+  await expect(kirillov).toBeFocused();
+  await expect(page.getByTestId("draft-save-button")).toBeDisabled();
+  await expect(page.getByTestId("draft-event")).toHaveCount(0);
+  await expect.poll(async () => topVisibleDayDate(page)).toBe("2026-09-24");
+
+  const thakker = page.getByTestId("draft-participant-dr-thakker");
+  await thakker.check();
+  await expect(thakker).toBeFocused();
+  await expect(page.locator('[data-testid="draft-event"][data-calendar-id="dr-thakker"]')).toBeVisible();
+  await expect.poll(async () => topVisibleDayDate(page)).toBe("2026-09-24");
 });
 
 test("does not pull the viewport back after cancel when the user scrolls immediately", async ({ page }) => {

@@ -20,7 +20,7 @@ type VerticalTimelineCanvasProps = {
   ariaLabel: string;
   className?: string;
   style?: CalendarViewComponentProps["style"];
-  containerRef: RefObject<HTMLDivElement>;
+  containerRef: RefObject<HTMLDivElement | null>;
   isDragging: boolean;
   canStartDraft: boolean;
   onScroll: () => void;
@@ -77,7 +77,7 @@ export function VerticalTimelineCanvas({
         ]
           .filter(Boolean)
           .join(" ")}
-        ref={containerRef}
+        ref={containerRef as RefObject<HTMLDivElement>}
         onScroll={onScroll}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}

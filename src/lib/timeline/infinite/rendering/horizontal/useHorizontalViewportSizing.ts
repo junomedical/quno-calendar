@@ -12,7 +12,7 @@ import { TIMELINE_LEFT_GUTTER_PX } from "#quno-internal/timeline/time/timelineTi
  * timeline narrower than its viewport and therefore never emits a zoom change.
  */
 export function useHorizontalViewportSizing(
-  containerRef: RefObject<HTMLDivElement>,
+  containerRef: RefObject<HTMLDivElement | null>,
   settings: QunoInfiniteCalendarSettings
 ) {
   const [viewportWidth, setViewportWidth] = useState(0);

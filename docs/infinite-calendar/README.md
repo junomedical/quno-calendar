@@ -17,4 +17,10 @@ local or offset semantics.
 
 The field guide keeps its interaction contracts live: newly scrolled dates populate without a simulated delay, event
 cards can be resized in place, parent-reviewed mutations preserve their working row and restore the original view on
-Cancel, Date Input arrow changes navigate immediately, and motion begins from an explicit draft action.
+Cancel, Date Input arrow changes navigate immediately, and motion begins from an explicit draft action. An external
+create draft with no participants keeps the normal calendar set and drawn date visible while its unassigned preview
+and Save action remain unavailable.
+
+TanStack Virtual notifications use its queued React update path. Layout restoration requests an ordinary React
+projection before paint, keeping React 19 development free of the virtualizer `flushSync` lifecycle warning while
+semantic anchor and frame-stability browser coverage continues to guard against empty intermediate views.

@@ -9,6 +9,7 @@ import {
   type MonthDirection
 } from "#quno-internal/shared/dateRangeModel";
 import type { QunoDatePickerDayCellContext, ResolvedDatePickerConfig } from "./datePickerTypes";
+import { dayIsDisabled } from "./datePickerDisabledDays";
 import { useDayPointer } from "./useDayPointer";
 import type { JSX } from "react";
 
@@ -91,12 +92,14 @@ export const CalendarGrid = ({
           inCyclePreview &&
           (index % 7 === 6 || !isWithinRange(dates[index + 1], cyclePreview));
         const weekday = fromIsoDate(date).getUTCDay() as QunoDatePickerDayCellContext["weekday"];
+        const disabled = dayIsDisabled(config.disabledDays, date);
         const customProps = getDayCellProps?.({
           date,
           weekday,
           isToday: date === today,
           isWeekend: weekday === 0 || weekday === 6,
           isOutside: !inVisibleMonth,
+          isDisabled: disabled,
           isSelected: displayed,
           isCommitted: committed,
           isRangeStart: isStart,
@@ -114,6 +117,7 @@ export const CalendarGrid = ({
               committed && "quno-date-picker-day--committed",
               isStart && "quno-date-picker-day--start",
               isEnd && "quno-date-picker-day--end",
+              disabled && "quno-date-picker-day--disabled",
               classNames?.day,
               customProps?.className
             )}
@@ -130,10 +134,12 @@ export const CalendarGrid = ({
             data-range-start={isStart ? "true" : undefined}
             data-range-end={isEnd ? "true" : undefined}
             data-outside={inVisibleMonth ? undefined : "true"}
+            data-disabled={disabled ? "true" : undefined}
             data-selected={displayed ? "true" : undefined}
             data-committed={committed ? "true" : undefined}
             aria-label={formatters.dayLabel(date, locale)}
             aria-selected={committed}
+            disabled={disabled}
             onPointerDown={(event) => {
               onOverflowChange(null);
               pointer.beginPointer(event, date);

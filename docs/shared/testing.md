@@ -88,6 +88,9 @@ Vitest unit tests live in `tests/unit` and mirror the source module grouping.
 - The Datepicker guide keeps its standalone single-day picker separate from the focused Date Input composition. The
   composition opens a range-enabled picker, hides duplicate selection chrome, commits a complete multilingual typed
   range, renders its start/interior/end states, clears through the shared input, and closes when focus leaves.
+- The Datepicker day-state chapter begins with all unresolved dates disabled, then enables only successful availability
+  checks. Unit and Chromium computed-style coverage verify loading, enabled, unavailable, holiday, and failed states,
+  plus the rule that disabled dates cannot become single selections or range endpoints.
 - The Date Parser guide exposes eight headless chapters and verifies absolute/relative formats, DMY/MDY preference,
   configurable week starts, ranges, expected-period ranking, simultaneous English/German recognition, lexicon
   extension, tokenization, SSR safety, and its independent payload. Its focused demo recognizes the visible English and
@@ -284,7 +287,11 @@ orientation, availability, loading, visual-focus, and motion assertions formerly
 - `npm run build:lib` emits ESM, UMD, declarations, and a package stylesheet subpath.
 - `npm run check:bundle-size` enforces the 32KiB ESM and 2KiB stylesheet gzip ceilings against a fresh library build.
 - `npm run verify:package` checks an explicit stylesheet asset, confirms no runtime `date-fns` or style injection, loads the package through Node CommonJS and ESM without `document`, then installs it into a temporary Vite React app and builds the consumer.
-- CI runs install, formatting, typecheck, lint, unit tests, Chromium Playwright tests, and package verification.
+- `npm run test:compat` builds the packed public products through Preact compatibility aliases.
+- `npm run test:compat:react19` typechecks and builds a packed React 19 consumer, mounts its real virtualized calendar in
+  a development Chromium page, and fails on warnings, errors, or exceptions.
+- CI runs install, formatting, architecture checks, typecheck, lint, unit tests, Chromium Playwright tests, demo and
+  package builds, Preact and React 19 fixtures, size reporting, and a dry-run package archive.
 
 ## Performance Budgets
 

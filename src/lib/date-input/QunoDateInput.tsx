@@ -56,7 +56,7 @@ export const QunoDateInput = ({
   );
   const composing = useRef(false);
   const committed = useRef<DateRange | null>(selection);
-  const spinMemory = useRef<DateInputSpinMemory | undefined>();
+  const spinMemory = useRef<DateInputSpinMemory | undefined>(undefined);
 
   useEffect(() => {
     if (controlled) {

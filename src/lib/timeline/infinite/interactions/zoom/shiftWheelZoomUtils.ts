@@ -3,7 +3,7 @@ import type { CalendarViewComponentProps, QunoInfiniteCalendarSettings } from "#
 import { MAX_ZOOM, MIN_ZOOM } from "./zoomLimits";
 
 export type SharedZoomArgs = {
-  containerRef: RefObject<HTMLDivElement>;
+  containerRef: RefObject<HTMLDivElement | null>;
   settings: QunoInfiniteCalendarSettings;
   onZoomChange?: CalendarViewComponentProps["onZoomChange"];
   clearScrollEndTimer: () => void;
@@ -114,7 +114,7 @@ export function scheduleZoomCommit(commit: () => void, restore: () => void, rest
   });
 }
 
-export function useCapturedWheel(ref: RefObject<HTMLDivElement>, listener: (event: WheelEvent) => void) {
+export function useCapturedWheel(ref: RefObject<HTMLDivElement | null>, listener: (event: WheelEvent) => void) {
   useEffect(() => {
     const element = ref.current;
     if (!element) return;

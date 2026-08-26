@@ -25,8 +25,15 @@ type UseVirtualWindowNavigationArgs = {
   topVisibleOffsetRef: MutableRefObject<number>;
   pendingScrollTargetRef: MutableRefObject<PendingScrollTarget | null>;
   updateVisibleSnapshot: () => boolean;
-  scrollToVisibleDateOffset: (dateKey: string, offsetWithinDate: number) => void;
+  scrollToVisibleDateOffset: (
+    dateKey: string,
+    offsetWithinDate: number,
+    preferBaseGeometry?: boolean,
+    eagerRange?: boolean
+  ) => void;
   setAnchorDateKey: (updater: (current: string) => string) => void;
+  projectRange: () => void;
+  eagerRange: boolean;
 };
 
 export function useVirtualWindowNavigation({
@@ -39,19 +46,26 @@ export function useVirtualWindowNavigation({
   pendingScrollTargetRef,
   updateVisibleSnapshot,
   scrollToVisibleDateOffset,
-  setAnchorDateKey
+  setAnchorDateKey,
+  projectRange,
+  eagerRange
 }: UseVirtualWindowNavigationArgs) {
   const recenterVirtualWindow = useCallback(
     (dateKey: string, offsetWithinDate: number) => {
       const normalizedDateKey = normalizeAnchorDate(dateKey, excludedWeekdays);
       const normalizedOffset = Math.max(0, offsetWithinDate);
-      pendingScrollTargetRef.current = { dateKey: normalizedDateKey, offsetWithinDate: normalizedOffset };
+      pendingScrollTargetRef.current = {
+        dateKey: normalizedDateKey,
+        offsetWithinDate: normalizedOffset,
+        eagerRange
+      };
       topVisibleDateRef.current = normalizedDateKey;
       topVisibleOffsetRef.current = normalizedOffset;
       if (normalizedDateKey === currentWindowAnchorDateKey) {
         // Same-anchor recenter still resets the bounded scrollbar around its center.
         pendingScrollTargetRef.current = null;
-        scrollToVisibleDateOffset(normalizedDateKey, normalizedOffset);
+        scrollToVisibleDateOffset(normalizedDateKey, normalizedOffset, false, eagerRange);
+        if (eagerRange) projectRange();
         return;
       }
       setAnchorDateKey(() => normalizedDateKey);
@@ -60,6 +74,8 @@ export function useVirtualWindowNavigation({
       currentWindowAnchorDateKey,
       excludedWeekdays,
       pendingScrollTargetRef,
+      projectRange,
+      eagerRange,
       scrollToVisibleDateOffset,
       setAnchorDateKey,
       topVisibleDateRef,
@@ -82,12 +98,13 @@ export function useVirtualWindowNavigation({
       // Imperative navigation supersedes a lower-priority settled-scroll recenter.
       clearScrollEndTimer();
       const normalizedDateKey = normalizeAnchorDate(dateKey, excludedWeekdays);
-      pendingScrollTargetRef.current = { dateKey: normalizedDateKey, offsetWithinDate: 0 };
+      pendingScrollTargetRef.current = { dateKey: normalizedDateKey, offsetWithinDate: 0, eagerRange };
       topVisibleDateRef.current = normalizedDateKey;
       topVisibleOffsetRef.current = 0;
       if (normalizedDateKey === currentWindowAnchorDateKey) {
         pendingScrollTargetRef.current = null;
-        scrollToVisibleDateOffset(normalizedDateKey, 0);
+        scrollToVisibleDateOffset(normalizedDateKey, 0, false, eagerRange);
+        if (eagerRange) projectRange();
         return;
       }
       setAnchorDateKey(() => normalizedDateKey);
@@ -97,6 +114,8 @@ export function useVirtualWindowNavigation({
       currentWindowAnchorDateKey,
       excludedWeekdays,
       pendingScrollTargetRef,
+      projectRange,
+      eagerRange,
       scrollToVisibleDateOffset,
       setAnchorDateKey,
       topVisibleDateRef,
@@ -109,8 +128,9 @@ export function useVirtualWindowNavigation({
     if (!pendingTarget) return;
     // Consume once after the new date model exposes a measured or estimated offset.
     pendingScrollTargetRef.current = null;
-    scrollToVisibleDateOffset(pendingTarget.dateKey, pendingTarget.offsetWithinDate);
-  }, [currentWindowAnchorDateKey, pendingScrollTargetRef, scrollToVisibleDateOffset]);
+    scrollToVisibleDateOffset(pendingTarget.dateKey, pendingTarget.offsetWithinDate, false, pendingTarget.eagerRange);
+    if (pendingTarget.eagerRange) projectRange();
+  }, [currentWindowAnchorDateKey, pendingScrollTargetRef, projectRange, scrollToVisibleDateOffset]);
 
   return { clearScrollEndTimer, scrollToDate, updateTopVisibleDate };
 }

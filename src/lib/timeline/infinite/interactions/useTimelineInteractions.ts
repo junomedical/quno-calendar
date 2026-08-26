@@ -140,7 +140,10 @@ export function useTimelineInteractions(args: UseTimelineInteractionsArgs) {
     draftState: draft.draftState,
     dragPreviewEvent: drag.dragPreviewEvent,
     releaseActiveDraft,
-    renderedDraftEvent: args.activeDraft?.event ?? draft.draftState?.event ?? releasedDraft?.draft.event ?? null,
+    renderedDraftEvent:
+      args.activeDraft?.event.calendarIds?.length === 0
+        ? null
+        : (args.activeDraft?.event ?? draft.draftState?.event ?? releasedDraft?.draft.event ?? null),
     renderedDraftStatus,
     renderedDraftIsDraggable: Boolean(args.activeDraft && args.onActiveDraftMoveRequest),
     renderedDraftIsExiting: Boolean(!args.activeDraft && !draft.draftState && releasedDraft),

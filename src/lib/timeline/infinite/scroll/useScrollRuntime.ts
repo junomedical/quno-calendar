@@ -13,7 +13,7 @@
  * @see docs/infinite-calendar/flows/virtual-scroll-and-recenter.md
  */
 import { useVirtualizer, type Virtualizer } from "@tanstack/react-virtual";
-import { useCallback, useLayoutEffect, useMemo, useRef } from "react";
+import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { QunoInfiniteCalendarSettings } from "#quno-internal/timeline/core/types";
 import { VIRTUAL_DAY_NODE_OVERSCAN } from "./scrollConstants";
 import { createVirtualDateModel } from "./window/dateModel";
@@ -35,6 +35,7 @@ type UseVirtualTimelineWindowArgs = {
   verticalLayoutSignature: string;
   topDateAlignmentKey: string;
   isInteractionActive: boolean;
+  eagerRange?: boolean;
   layoutAnchorDateKey?: string;
   resolveOffsetOnLayoutChange?: ResolveOffsetOnLayoutChange;
 };
@@ -74,6 +75,7 @@ export function useScrollRuntime({
   verticalLayoutSignature,
   topDateAlignmentKey,
   isInteractionActive,
+  eagerRange = false,
   layoutAnchorDateKey,
   resolveOffsetOnLayoutChange
 }: UseVirtualTimelineWindowArgs) {
@@ -92,7 +94,7 @@ export function useScrollRuntime({
     estimateSize: () => baseDayHeight,
     getItemKey: dateKeyForIndex,
     overscan: VIRTUAL_DAY_NODE_OVERSCAN,
-    useFlushSync: true,
+    useFlushSync: false,
     initialRect: { width: 1400, height: 1100 },
     initialOffset: virtualWindow.anchorIndex * baseDayHeight
   });
@@ -110,6 +112,10 @@ export function useScrollRuntime({
     topVisibleDateRef,
     topVisibleOffsetRef
   });
+  const [, setLayoutProjectionVersion] = useState(0);
+  const projectRange = useCallback(() => {
+    setLayoutProjectionVersion((version) => version + 1);
+  }, []);
   const { clearScrollEndTimer, scrollToDate, updateTopVisibleDate } = useVirtualWindowNavigation({
     containerRef,
     excludedWeekdays: settings.excludedWeekdays,
@@ -120,7 +126,9 @@ export function useScrollRuntime({
     pendingScrollTargetRef,
     updateVisibleSnapshot,
     scrollToVisibleDateOffset,
-    setAnchorDateKey
+    setAnchorDateKey,
+    projectRange,
+    eagerRange
   });
 
   const measureVirtualizer = useCallback(() => {
@@ -145,6 +153,8 @@ export function useScrollRuntime({
     isDateInVirtualViewport,
     scrollToVisibleDateOffset,
     setAnchorDateKey,
+    projectRange,
+    eagerRange,
     resolveOffsetOnLayoutChange
   });
 

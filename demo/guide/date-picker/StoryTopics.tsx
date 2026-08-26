@@ -131,14 +131,14 @@ export const StoryTopics = (): JSX.Element => (
       id="day-handler"
       number="10"
       kicker="Day handler"
-      title="Mark the dates that matter to your product."
-      copy="Give the component one function that runs for every date. It can add a class, color, or tooltip for Today, weekends, non-working days, holidays, or availability. The datepicker still owns clicks, dragging, focus, and screen-reader labels, so styling a date cannot break selection."
-      instruction="Today has an orange ring, weekends are brown, every Wednesday is crossed out, and 27 August is marked by its exact date. The calendar remains fully interactive."
+      title="Mark and disable the dates that matter."
+      copy="Style each date with getDayCellProps and control whether it can become a selection endpoint with disabledDays. Availability stays parent-owned: while a delayed check is loading—or if it fails—the date remains disabled, so unresolved state can never become a start, end, or single-day selection. Disabled dates may still appear inside a valid range."
+      instruction="Wait for availability to load, then choose an enabled weekday. Weekends, Wednesdays, the 27 August holiday, and the failed check on 24 August cannot become endpoints. Navigate once to see the next month fail closed while it loads."
       howTo={
         <StoryHowTo
-          title="Custom day attributes"
+          title="Load and disable day states"
           language="TSX"
-          copy="Return presentation-only props from typed date context; the component keeps every interaction handler."
+          copy="Keep asynchronous availability in parent state. Return presentation props separately, and disable every date until its check explicitly succeeds."
           code={customDaysSnippet}
         />
       }

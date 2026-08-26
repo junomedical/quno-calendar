@@ -17,3 +17,8 @@ itself before separately composing a range-enabled picker with a focused Quno/Da
 The guide presents range selection as direct manipulation instead of a forced from-to sequence. Its in-place month
 navigator follows seasonal groups—March–May, June–August, September–November, and December continuing into
 January–February—while sticky year labels preserve context during fast scrolling.
+
+`disabledDays` prevents a date from becoming a standalone selection or a range start or end. Disabled dates may remain
+inside an otherwise valid inclusive range. Async availability stays in consumer state: unresolved and failed checks
+should return `true` from `disabledDays`, while `getDayCellProps` independently presents loading, error, holiday, or
+other product states. The field guide demonstrates this fail-closed delayed-loading pattern.

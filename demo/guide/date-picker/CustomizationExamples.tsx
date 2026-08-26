@@ -1,46 +1,35 @@
 import { useState } from "react";
 import type { JSX } from "react";
-import { QunoDatePicker, type QunoDatePickerDayCellCustomizer, type WeekStart } from "@quno/calendar/datepicker";
+import { QunoDatePicker, type WeekStart } from "@quno/calendar/datepicker";
+import { useDelayedDayAvailability } from "./useDelayedDayAvailability";
 
 const themes = ["quno", "warm", "violet", "acid", "candy"] as const;
 
-const businessDay: QunoDatePickerDayCellCustomizer = ({ date, isToday, isWeekend, weekday }) => ({
-  className: [
-    isToday && "story__day--today",
-    isWeekend && "story__day--weekend",
-    weekday === 3 && "story__day--non-working",
-    date === "2026-08-27" && "story__day--holiday"
-  ]
-    .filter(Boolean)
-    .join(" "),
-  title: isToday
-    ? "Today"
-    : date === "2026-08-27"
-      ? "Clinic holiday"
-      : weekday === 3
-        ? "Non-working day"
-        : isWeekend
-          ? "Weekend"
-          : undefined
-});
-
-export const DayHandlerExample = (): JSX.Element => (
-  <div className="story__controlled-example">
-    <div className="story__legend" aria-label="Day style legend">
-      <span data-kind="today">Today</span>
-      <span data-kind="weekend">Weekend</span>
-      <span data-kind="off">Non-working</span>
-      <span data-kind="holiday">Holiday: 27 Aug</span>
+export const DayHandlerExample = (): JSX.Element => {
+  const { disabledDays, getDayCellProps, loadingCount, setVisibleMonth } = useDelayedDayAvailability("2026-08-01");
+  return (
+    <div className="story__controlled-example">
+      <div className="story__legend" aria-label="Day state legend">
+        <span data-kind="loading">Checking</span>
+        <span data-kind="weekend">Weekend</span>
+        <span data-kind="off">Unavailable</span>
+        <span data-kind="holiday">Holiday: 27 Aug</span>
+        <span data-kind="error">Check failed: 24 Aug</span>
+      </div>
+      <output className="story__day-status" aria-live="polite">
+        {loadingCount > 0 ? `Checking ${loadingCount} dates…` : "Availability loaded"}
+      </output>
+      <QunoDatePicker
+        className="story__picker"
+        initialMonth="2026-08-01"
+        labels={{ hint: "" }}
+        disabledDays={disabledDays}
+        getDayCellProps={getDayCellProps}
+        onVisibleMonthChange={setVisibleMonth}
+      />
     </div>
-    <QunoDatePicker
-      className="story__picker"
-      defaultValue={{ start: "2026-08-10", end: "2026-08-18" }}
-      initialMonth="2026-08-01"
-      labels={{ hint: "" }}
-      getDayCellProps={businessDay}
-    />
-  </div>
-);
+  );
+};
 
 export const LocalizationExample = (): JSX.Element => (
   <QunoDatePicker

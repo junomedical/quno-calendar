@@ -8,31 +8,47 @@ const [dates, setDates] = useState<DateRange | null>(null);
 
 <QunoDatePicker value={dates} onChange={setDates} />;`;
 
-export const customDaysSnippet = `import {
+export const customDaysSnippet = `import { useEffect, useState } from 'react';
+import {
   QunoDatePicker,
+  calendarGrid,
+  type IsoDate,
   type QunoDatePickerDayCellCustomizer,
 } from '@quno/calendar/datepicker';
 
-const styleDay: QunoDatePickerDayCellCustomizer = ({
-  date,
-  isToday,
-  isWeekend,
-  weekday,
-}) => {
-  const isNonWorking = weekday === 3; // Sunday is 0; Wednesday is 3.
-  const isHoliday = date === '2026-08-27';
+type DayStatus = 'loading' | 'available' | 'disabled' | 'error';
+const [visibleMonth, setVisibleMonth] = useState<IsoDate>('2026-08-01');
+const [status, setStatus] = useState<Partial<Record<IsoDate, DayStatus>>>({});
+const [failedMonth, setFailedMonth] = useState<IsoDate | null>(null);
+
+useEffect(() => {
+  void loadAvailability(calendarGrid(visibleMonth)).then(
+    (next) => setStatus((current) => ({ ...current, ...next })),
+    () => setFailedMonth(visibleMonth),
+  );
+}, [visibleMonth]);
+
+const statusFor = (date: IsoDate): DayStatus =>
+  status[date] ?? (failedMonth === visibleMonth ? 'error' : 'loading');
+const disabledDays = (date: IsoDate) => statusFor(date) !== 'available';
+const styleDay: QunoDatePickerDayCellCustomizer = ({ date, isToday }) => {
+  const dayStatus = statusFor(date);
   return {
     className: [
       isToday && 'booking-date--today',
-      isWeekend && 'booking-date--weekend',
-      isNonWorking && 'booking-date--non-working',
-      isHoliday && 'booking-date--holiday',
+      dayStatus === 'loading' && 'booking-date--loading',
+      dayStatus === 'disabled' && 'booking-date--unavailable',
+      dayStatus === 'error' && 'booking-date--error',
     ].filter(Boolean).join(' '),
-    title: isHoliday ? 'Clinic holiday' : undefined,
+    title: dayStatus === 'loading' ? 'Checking availability' : undefined,
   };
 };
 
-<QunoDatePicker getDayCellProps={styleDay} />;`;
+<QunoDatePicker
+  disabledDays={disabledDays}
+  getDayCellProps={styleDay}
+  onVisibleMonthChange={setVisibleMonth}
+/>;`;
 
 export const localizationSnippet = `<QunoDatePicker
   locale="fr-FR"

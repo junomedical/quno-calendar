@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { DateInputFieldGuide } from "#quno-demo/guide/date-input/DateInputFieldGuide";
 
 describe("date input field guide", () => {
@@ -47,10 +47,9 @@ describe("date input field guide", () => {
     fireEvent.blur(input);
     expect(within(topic as HTMLElement).getByRole("textbox")).toBeInTheDocument();
     expect(within(control).queryByRole("button", { name: "Clear" })).not.toBeInTheDocument();
-    await new Promise((resolve) => setTimeout(resolve, 0));
-    document.dispatchEvent(new Event("pointerdown", { bubbles: true }));
-    await new Promise((resolve) => setTimeout(resolve, 0));
-    expect(within(topic as HTMLElement).queryByRole("grid")).not.toBeInTheDocument();
+    await act(async () => new Promise((resolve) => setTimeout(resolve, 0)));
+    act(() => document.dispatchEvent(new Event("pointerdown", { bubbles: true })));
+    await waitFor(() => expect(within(topic as HTMLElement).queryByRole("grid")).not.toBeInTheDocument());
   });
 
   it("focuses the only changed endpoint and falls back to the nearest off-screen date", async () => {
@@ -60,8 +59,7 @@ describe("date input field guide", () => {
     fireEvent.focus(input);
     input.setSelectionRange(1, 1);
     fireEvent.keyDown(input, { key: "ArrowUp" });
-    await new Promise((resolve) => setTimeout(resolve, 0));
-    expect(within(topic).getByRole("grid")).toHaveAccessibleName("Date range picker: May 2026");
+    await waitFor(() => expect(within(topic).getByRole("grid")).toHaveAccessibleName("Date range picker: May 2026"));
     expect(topic.querySelector(".story__picker")).toHaveClass("story__picker--draft");
     fireEvent.input(input, { target: { value: "21 May 2026 – 18 December 2026" } });
     fireEvent.keyDown(input, { key: "Enter" });
@@ -97,8 +95,7 @@ describe("date input field guide", () => {
     fireEvent.mouseDown(clear);
     fireEvent.mouseUp(clear);
     fireEvent.click(clear);
-    await new Promise((resolve) => setTimeout(resolve, 0));
-    expect(input).toHaveAttribute("placeholder", "Choose a period");
+    await waitFor(() => expect(input).toHaveAttribute("placeholder", "Choose a period"));
     fireEvent.input(input, { target: { value: "not a date" } });
     fireEvent.blur(input);
     expect(input).toHaveAttribute("aria-invalid", "true");

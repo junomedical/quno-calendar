@@ -299,6 +299,28 @@ function TravelDates() {
 
 Use `selectionMode="single"` when the product chooses one day while retaining the `DateRange` state shape. `initialMonth` controls only the initial view; navigation and Clear do not unexpectedly change one another. Consumer customization is presentational through scoped `--quno-date-picker-*` properties, typed `classNames`, stable `data-slot`/state attributes, and `getDayCellProps`.
 
+Keep asynchronous day availability in parent state. `disabledDays` is synchronous so every pointer and keyboard
+decision has an immediate answer; treat missing and failed results as disabled, and use `getDayCellProps` only to
+present their state:
+
+```tsx
+type DayStatus = "loading" | "available" | "disabled" | "error";
+const [statuses, setStatuses] = useState<Partial<Record<IsoDate, DayStatus>>>({});
+const statusFor = (date: IsoDate): DayStatus => statuses[date] ?? "loading";
+
+<QunoDatePicker
+  disabledDays={(date) => statusFor(date) !== "available"}
+  getDayCellProps={({ date, isDisabled }) => ({
+    className: `booking-day--${statusFor(date)}`,
+    title: isDisabled ? "Not available" : undefined
+  })}
+/>;
+```
+
+A disabled date cannot be selected alone or become a range start or end. It may occur inside a range whose endpoints
+are enabled. A controlled value is never rewritten when availability changes; the consumer remains responsible for
+revalidating persisted values.
+
 ## Quno/Date Input
 
 ```tsx
@@ -399,7 +421,10 @@ Do not convert event timestamps with the picker’s UTC day arithmetic. Only the
 
 ## React, Preact, SSR, and production builds
 
-React 18+ is the authored runtime. For Preact, install `preact` and map `react`, `react-dom`, `react-dom/test-utils`, and their JSX runtime imports to the corresponding `preact/compat` or `preact` modules in the consumer bundler. For Vite:
+React 18+ is the authored runtime. React 19 is checked through a packed consumer typecheck, production build, and
+warning-free development-browser mount. For Preact, install `preact` and map `react`, `react-dom`,
+`react-dom/test-utils`, and their JSX runtime imports to the corresponding `preact/compat` or `preact` modules in the
+consumer bundler. For Vite:
 
 ```ts
 resolve: {
