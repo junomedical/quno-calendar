@@ -87,6 +87,7 @@
   border-radius: 6px;
   background: #edf4ff;
   color: #174a8f;
+  font-size: 13px;
 }
 
 @media (max-width: 820px) {

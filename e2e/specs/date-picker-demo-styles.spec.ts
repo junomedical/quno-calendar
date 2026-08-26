@@ -30,6 +30,13 @@ test("acid and candy themes keep the range Clear control compact", async ({ page
   }
 });
 
+test("value-model chips keep compact typography", async ({ page }) => {
+  await page.goto("/guide/datepicker#idea");
+  const chips = page.locator(".story__idea-grid code");
+  await expect(chips).toHaveCount(4);
+  await expect(chips.first()).toHaveCSS("font-size", "13px");
+});
+
 test("delayed day states remain disabled until availability succeeds", async ({ page }) => {
   await page.goto("/guide/datepicker#day-handler");
   const topic = page.locator("#day-handler");
