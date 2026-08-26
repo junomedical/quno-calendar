@@ -212,7 +212,7 @@ export function DefaultDemo() {
             loadEvents={simulatedApi.loadEvents}
             eventVersion={eventVersion}
             eventRenderer={DemoEventCard}
-            activeDraft={drafts.calendarDraft}
+            activeDraft={drafts.activeDraft}
             onEventMoveRequest={handleMove}
             onEventCreateRequest={handleCreate}
             onEventDraftRequest={drafts.openCreateDraft}

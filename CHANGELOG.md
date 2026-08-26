@@ -92,6 +92,8 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ### Fixed
 
+- Kept external create drafts anchored to their drawn date while the participant list is empty; the demo now shows its
+  normal calendar set, hides the unassigned preview, and preserves checkbox focus until a participant is selected.
 - Removed React 19's synchronous virtualizer-update warning by using TanStack Virtual's queued notification path, and
   aligned internal refs with both React 18 and React 19 type contracts.
 - Kept parent-reviewed moves to another visible date or resource at their viewport-relative row instead of snapping the

@@ -637,3 +637,17 @@ The empty-frame concern from Decision 082 remains a required outcome, but it is 
 geometry, identity, and computed-style browser coverage instead of a synchronous React escape hatch. A separate packed
 React 19 development fixture rejects console warnings, errors, and exceptions while the React 18 and Preact fixtures
 remain independent.
+
+## 086 - Empty Create Draft Membership Preserves Context
+
+Date: 2026-08-26
+Status: Accepted
+
+An externally controlled create draft may temporarily have an explicit empty `calendarIds` list while its editor stays
+open. The calendar does not render that unassigned draft in its fallback `calendarId` row. The demo treats the empty
+participant filter as the normal visible-calendar set, keeps Save disabled, and restores against the drawn slot rather
+than an event target that cannot exist without a membership.
+
+This keeps the drawn date and editor focus stable while calendars are toggled off and on. Selecting a participant
+renders the same active draft again without closing and reopening its lifecycle or navigating away from the working
+date.
