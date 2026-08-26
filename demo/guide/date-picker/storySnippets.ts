@@ -19,23 +19,17 @@ import {
 type DayStatus = 'loading' | 'available' | 'disabled' | 'error';
 const [visibleMonth, setVisibleMonth] = useState<IsoDate>('2026-08-01');
 const [status, setStatus] = useState<Partial<Record<IsoDate, DayStatus>>>({});
+const [failedMonth, setFailedMonth] = useState<IsoDate | null>(null);
 
 useEffect(() => {
-  const dates = calendarGrid(visibleMonth);
-  const timer = window.setTimeout(async () => {
-    try {
-      const next = await loadAvailability(dates);
-      setStatus((current) => ({ ...current, ...next }));
-    } catch {
-      setStatus((current) => Object.fromEntries(
-        dates.map((date) => [date, current[date] ?? 'error'])
-      ));
-    }
-  }, 400);
-  return () => window.clearTimeout(timer);
+  void loadAvailability(calendarGrid(visibleMonth)).then(
+    (next) => setStatus((current) => ({ ...current, ...next })),
+    () => setFailedMonth(visibleMonth),
+  );
 }, [visibleMonth]);
 
-const statusFor = (date: IsoDate): DayStatus => status[date] ?? 'loading';
+const statusFor = (date: IsoDate): DayStatus =>
+  status[date] ?? (failedMonth === visibleMonth ? 'error' : 'loading');
 const disabledDays = (date: IsoDate) => statusFor(date) !== 'available';
 const styleDay: QunoDatePickerDayCellCustomizer = ({ date, isToday }) => {
   const dayStatus = statusFor(date);

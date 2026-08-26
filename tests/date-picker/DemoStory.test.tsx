@@ -47,7 +47,7 @@ describe("datepicker field guide", () => {
       })
     ).toBeInTheDocument();
     expect(screen.getByText(/statusFor\(date\) !== 'available'/)).toBeInTheDocument();
-    expect(screen.getByText(/loadAvailability\(dates\)/)).toBeInTheDocument();
+    expect(screen.getByText(/loadAvailability\(calendarGrid\(visibleMonth\)\)/)).toBeInTheDocument();
     expect(screen.getByText("Holiday: 27 Aug")).toBeInTheDocument();
     expect(screen.getByText("Période sélectionnée")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Effacer" })).toBeInTheDocument();
