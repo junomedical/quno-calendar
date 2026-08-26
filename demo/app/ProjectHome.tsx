@@ -94,8 +94,7 @@ export function ProjectHome() {
           <h2 id="created-by-title">Created by</h2>
           <p>
             These UI elements and the thinking behind them were created by <strong>Dmitry&nbsp;Kirillov</strong>,
-            Director of Product at Qunomedical. Reach out to me at{" "}
-            <a href="mailto:dmitry@qunomedical.com">dmitry@qunomedical.com</a> if you have questions, suggestions, or
+            working at Qunomedical. Reach out to me at <a href="mailto:dmitry@qunomedical.com">dmitry@qunomedical.com</a> if you have questions, suggestions, or
             opportunities.
           </p>
         </section>

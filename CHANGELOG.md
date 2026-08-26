@@ -11,8 +11,6 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
   delayed parent-owned availability with loading and failure states kept unselectable.
 - Added a packed React 19 compatibility fixture that typechecks and builds all public products, mounts the virtualized
   calendar in a development browser, and rejects console warnings, errors, and page exceptions.
-- Added a closing Created by section to the project home crediting Dmitry Kirillov, Director of Product at
-  Qunomedical, with a direct email link for questions, suggestions, and opportunities.
 - Added six package-wide guiding principles to the four-product home: Clean, Focused, Impressive, Unbundled, Natural,
   and Preemptive.
 - Added a user-resizable event-card container lab that demonstrates the renderer's width and height container queries.
