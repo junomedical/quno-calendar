@@ -54,9 +54,10 @@ export function useExternalEventDrafts({
     if (!shouldFilterCalendars) {
       return selectedCalendarIds;
     }
-    return activeDraftParticipants;
+    return activeDraftParticipants.length > 0 ? activeDraftParticipants : selectedCalendarIds;
   }, [activeDraft, activeDraftParticipants, draftParticipantsChanged, selectedCalendarIds]);
   const canSaveActiveDraft = !activeDraft || activeDraftParticipants.length > 0;
+  const calendarDraft = activeDraft?.mode === "create" && !canSaveActiveDraft ? null : activeDraft;
 
   const clearActiveDraft = useCallback(() => {
     setActiveDraft(null);
@@ -270,6 +271,7 @@ export function useExternalEventDrafts({
 
   return {
     activeDraft,
+    calendarDraft,
     visibleCalendarIds,
     canSaveActiveDraft,
     resetActiveDraft: clearActiveDraft,

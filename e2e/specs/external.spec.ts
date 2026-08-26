@@ -465,11 +465,8 @@ test("supports drawing a new event area", async ({ page }) => {
           Array.from(new Set(rows.map((row) => (row as HTMLElement).dataset.calendarId).filter(Boolean)))
         )
     )
-    .toEqual(["dr-thakker"]);
-  await expect(page.locator('[data-testid="calendar-row"][data-calendar-id="dr-thakker"]').first()).toHaveAttribute(
-    "data-retained-hidden",
-    "true"
-  );
+    .toEqual(["dr-kirillov", "dr-thakker", "marco-eggens", "room-201", "room-202", "room-203"]);
+  await expect(page.locator('[data-testid="calendar-row"][data-retained-hidden="true"]')).toHaveCount(0);
   await expect(page.locator('[data-testid="draft-event"][data-calendar-id="dr-thakker"]')).toHaveCount(0);
   await page.getByTestId("draft-participant-dr-thakker").check();
   await expect(page.getByTestId("draft-save-button")).toBeEnabled();
