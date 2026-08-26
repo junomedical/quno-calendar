@@ -90,6 +90,15 @@ export function ProjectHome() {
             ))}
           </div>
         </section>
+        <section className="project-home__created-by" aria-labelledby="created-by-title">
+          <h2 id="created-by-title">Created by</h2>
+          <p>
+            These UI elements and the thinking behind them were created by <strong>Dmitry Kirillov</strong>, Director of
+            Product at Qunomedical. Reach out to me at{" "}
+            <a href="mailto:dmitry@qunomedical.com">dmitry@qunomedical.com</a> if you have questions, suggestions, or
+            opportunities.
+          </p>
+        </section>
       </section>
     </main>
   );

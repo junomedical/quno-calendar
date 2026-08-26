@@ -76,9 +76,10 @@ Vitest unit tests live in `tests/unit` and mirror the source module grouping.
 
 ## Playwright Tests
 
-- The project home renders exactly four equal product cards with punchy descriptions and dedicated field-guide links. Each
-  guide exposes visible All components and Demo links to the project directory and its matching component route, while
-  legacy guide URLs redirect to the appropriate canonical guide.
+- The project home renders exactly four equal product cards with punchy descriptions and dedicated field-guide links,
+  followed by six guiding principles and a distinct Created by section with Dmitry Kirillov's direct email link below
+  them. Each guide exposes visible All components and Demo links to the project directory and its matching component
+  route, while legacy guide URLs redirect to the appropriate canonical guide.
 - All four guides share the same computed warm theme, product-first hero, metadata, numbered contents, accessible
   navigation, Try it callouts, collapsible copyable Implementation recipes, Demo link, and responsive behavior.
 - The Date Input guide exposes eight component-focused chapters. Its live examples switch selection mode and locale,

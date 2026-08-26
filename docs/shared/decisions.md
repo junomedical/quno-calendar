@@ -115,3 +115,15 @@ because that repository was the consolidation source. Its identifier and text re
   and runtime facts.
 - Consequences: Production chapters end sooner and every remaining fact is specific and comparable. Public APIs remain
   documented where their individual behavior has enough context to be useful.
+
+## QUNO-010 - Credit the product thinking on the project home
+
+- Date: 2026-08-26
+- Status: Accepted
+- Context: The project home explains the four UI primitives and the principles connecting them, but it does not identify
+  the person responsible for the UI elements and their product thinking or invite conversation about the work.
+- Decision: End the project home with a distinct Created by section crediting Dmitry Kirillov, Director of Product at
+  Qunomedical, and provide `dmitry@qunomedical.com` as a direct email link for questions, suggestions, and opportunities.
+  Keep the attribution separate from the four equal product cards and the six guiding principles.
+- Consequences: Readers can identify the work's creator and know that contact is welcome without changing the product
+  directory, guide navigation, or package API.
