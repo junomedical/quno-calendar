@@ -6,6 +6,8 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ### Added
 
+- Added a closing Created by section to the project home crediting Dmitry Kirillov, Director of Product at
+  Qunomedical, with a direct email link for questions, suggestions, and opportunities.
 - Added six package-wide guiding principles to the four-product home: Clean, Focused, Impressive, Unbundled, Natural,
   and Preemptive.
 - Added a user-resizable event-card container lab that demonstrates the renderer's width and height container queries.

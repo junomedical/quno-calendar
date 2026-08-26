@@ -34,7 +34,8 @@ Calendar day keys use timezone-free `YYYY-MM-DD` values. Infinite Calendar event
 
 ## Guides and records
 
-Run `npm run dev` and open `/` for the four-product overview. Each card links to a dedicated field guide and focused demo:
+Run `npm run dev` and open `/` for the four-product overview, its shared guiding principles, and creator attribution.
+Each card links to a dedicated field guide and focused demo:
 
 - `/guide/infinite-calendar`
 - `/guide/datepicker`

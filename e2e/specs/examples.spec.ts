@@ -97,6 +97,13 @@ test("project home links each component card to its dedicated field guide and de
     "Natural",
     "Preemptive"
   ]);
+  const createdBy = page.getByRole("region", { name: "Created by" });
+  await expect(createdBy).toContainText(
+    "These UI elements and the thinking behind them were created by Dmitry Kirillov, Director of Product at Qunomedical."
+  );
+  const creatorEmail = createdBy.getByRole("link", { name: "dmitry@qunomedical.com" });
+  await expect(creatorEmail).toHaveAttribute("href", "mailto:dmitry@qunomedical.com");
+  await expect(createdBy).toContainText("if you have questions, suggestions, or opportunities.");
   const routes = [
     ["Explore the calendar guide", "/guide/infinite-calendar", "/demo/infinite-calendar", ".quno-calendar-viewport"],
     ["Explore the Datepicker guide", "/guide/datepicker", "/demo/datepicker", ".quno-date-picker"],
@@ -114,6 +121,9 @@ test("project home links each component card to its dedicated field guide and de
     .locator(".project-home__principle")
     .evaluateAll((elements) => elements.map((element) => element.getBoundingClientRect()));
   expect(Math.abs(desktopPrincipleBoxes[0].top - desktopPrincipleBoxes[1].top)).toBeLessThan(2);
+  const createdByDesktopBox = await createdBy.boundingBox();
+  const principlesDesktopBox = await principles.boundingBox();
+  expect(createdByDesktopBox?.y).toBeGreaterThan((principlesDesktopBox?.y ?? 0) + (principlesDesktopBox?.height ?? 0));
   for (const [label, guideHref, demoHref, demoSelector] of routes) {
     const card = page.getByRole("link", { name: label });
     await expect(card).toHaveAttribute("href", guideHref);
@@ -135,6 +145,9 @@ test("project home links each component card to its dedicated field guide and de
     .locator(".project-home__principle")
     .evaluateAll((elements) => elements.map((element) => element.getBoundingClientRect()));
   expect(mobilePrincipleBoxes[1].top).toBeGreaterThan(mobilePrincipleBoxes[0].bottom);
+  const createdByMobileBox = await createdBy.boundingBox();
+  const principlesMobileBox = await principles.boundingBox();
+  expect(createdByMobileBox?.y).toBeGreaterThan((principlesMobileBox?.y ?? 0) + (principlesMobileBox?.height ?? 0));
 });
 
 test("date input field guide follows the task-oriented component contract", async ({ page }) => {
