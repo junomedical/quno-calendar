@@ -69,6 +69,11 @@ context and overrides conflicting day presentation on the horizontal row or vert
 label/header. Both return only `className`, `style`, or `title`; fixed virtual geometry, event layers, hit-testing, and
 accessibility state stay inside the calendar.
 
+`getCalendarHourProps` receives one visible clock-hour interval and the active view. Its presentation projects onto
+horizontal or vertical hour bands and their visible time labels. Hour bands paint above date/resource backgrounds but
+below availability, event, draft, current-time, and pointer-interaction layers; fixed position and size remain
+calendar-owned.
+
 - `view="infinite-horizontal"`: dates flow down, calendars are rows, time runs left-to-right.
 - `view="infinite-vertical"`: dates flow down, calendars are columns, time runs top-to-bottom.
 

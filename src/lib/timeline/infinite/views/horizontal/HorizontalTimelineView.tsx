@@ -1,4 +1,5 @@
-import { forwardRef } from "react";
+import { forwardRef, useMemo } from "react";
+import { calendarHourPresentations } from "#quno-internal/timeline/core/calendarCellPresentation";
 import type { CalendarInternalViewProps, CalendarViewHandle } from "#quno-internal/timeline/core/internalTypes";
 import { HorizontalTimelineCanvas } from "#quno-internal/timeline/infinite/rendering/horizontal/HorizontalTimelineCanvas";
 import { useHorizontalTimelineRuntime } from "./useHorizontalTimelineRuntime";
@@ -15,6 +16,11 @@ import "#quno-internal/timeline/infinite/rendering/styles/calendar.css";
 export const InfiniteTimelineView = forwardRef<CalendarViewHandle, CalendarInternalViewProps>(
   function InfiniteTimelineView(props, ref) {
     const runtime = useHorizontalTimelineRuntime(props, ref);
+    const hourPresentations = useMemo(
+      () =>
+        calendarHourPresentations(runtime.sizing.effectiveSettings, "infinite-horizontal", props.getCalendarHourProps),
+      [props.getCalendarHourProps, runtime.sizing.effectiveSettings]
+    );
     return (
       <HorizontalTimelineCanvas
         ariaLabel={props.ariaLabel ?? "Calendar"}
@@ -30,6 +36,7 @@ export const InfiniteTimelineView = forwardRef<CalendarViewHandle, CalendarInter
         onPointerCancel={runtime.interactions.handlePointerCancel}
         virtualHeight={runtime.virtualTimeline.virtualizer.getTotalSize()}
         timeTicks={runtime.timeTicks}
+        calendarHourPresentations={hourPresentations}
         showNowLine={runtime.showNowLine}
         nowMinute={runtime.nowMinute}
         renderItems={runtime.virtualTimeline.renderItems}
@@ -43,6 +50,7 @@ export const InfiniteTimelineView = forwardRef<CalendarViewHandle, CalendarInter
           todayKey: runtime.todayKey,
           getCalendarCellProps: props.getCalendarCellProps,
           getCalendarDayProps: props.getCalendarDayProps,
+          calendarHourPresentations: hourPresentations,
           showNowLine: runtime.showNowLine,
           nowMinute: runtime.nowMinute,
           interactionMode: runtime.interactionMode,

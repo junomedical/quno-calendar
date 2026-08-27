@@ -6,11 +6,11 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ### Added
 
-- Added Infinite Calendar `getCalendarDayProps` and `getCalendarCellProps` with typed date, weekday, Today/weekend,
-  calendar, and orientation context. Date-wide presentation now covers the complete day and its visible header, while
-  resource presentation can override matching horizontal rows or vertical columns—including resource labels and
-  headers—for treatments such as weekend shading and equipment colors. A dedicated field-guide chapter demonstrates
-  both callbacks separately from whole-calendar theming.
+- Added Infinite Calendar `getCalendarDayProps`, `getCalendarHourProps`, and `getCalendarCellProps` with typed date,
+  clock-hour, weekday, Today/weekend, calendar, and orientation context. Date-wide presentation covers the complete day
+  and its visible header; hour presentation covers time bands and labels; resource presentation can override matching
+  horizontal rows or vertical columns—including resource labels and headers. A dedicated field-guide chapter
+  demonstrates weekend, lunch-hour, and equipment treatments separately from whole-calendar theming.
 - Added Datepicker `disabledDays`, typed `isDisabled` day-cell context, native disabled state, and endpoint guards for
   click, paint, resize, range movement, single-day selection, and outside-month navigation. The field guide now shows
   delayed parent-owned availability with loading and failure states kept unselectable.
@@ -35,8 +35,8 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ### Changed
 
-- Raised the Infinite Calendar JavaScript gzip ceiling from 32 KiB to 33 KiB for the new cell-presentation contract;
-  the measured ESM artifact is now 133.71 KiB raw and 32.80 KiB gzip after composing day and cell presentation.
+- Raised the Infinite Calendar JavaScript gzip ceiling from 32 KiB to 34 KiB for the new presentation callbacks; the
+  measured ESM artifact is now 136.83 KiB raw and 33.44 KiB gzip after composing day, hour, and cell presentation.
 - Replaced the event-card resize lab's width and height sliders with one browser-native draggable corner. The demo's
   resize behavior, dimension limits, and responsive content changes are now fully CSS-defined.
 - Removed the vague Public API at a glance row from all four production chapters and the redundant How we design
@@ -153,7 +153,7 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 - Full Chromium verification has one unrelated blocker in
   `e2e/specs/vertical.spec.ts:444`: after the drawn draft's only participant is unchecked, the first matching resource
   column remains visible instead of receiving `data-retained-hidden="true"`. The other 115 Chromium tests pass,
-  including the new day/row/column styling coverage. The focused Firefox styling run is environment-blocked because its
+  including the new day/hour/row/column styling coverage. The focused Firefox styling run is environment-blocked because its
   headless browser cannot map the software framebuffer in the macOS sandbox; Chromium and WebKit styling runs pass.
 
 ## 0.6.0 - 2026-08-24

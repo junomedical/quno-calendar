@@ -194,10 +194,20 @@ const getCalendarCellProps = ({ calendar }) => {
   };
 };
 
+const getCalendarHourProps = ({ hour }) =>
+  hour === 12
+    ? {
+        className: "lunch-hour",
+        style: { backgroundColor: "#dff5e8" },
+        title: "Lunch hour"
+      }
+    : undefined;
+
 <QunoInfiniteCalendar
   {...calendarProps}
   getCalendarCellProps={getCalendarCellProps}
   getCalendarDayProps={getCalendarDayProps}
+  getCalendarHourProps={getCalendarHourProps}
 />
 `;
 
@@ -328,7 +338,7 @@ const articleContents = [
   ["#zoom", "12", "Zoom without losing precision"],
   ["#time-precision", "13", "Reveal time progressively"],
   ["#styling", "14", "Theme the calendar"],
-  ["#calendar-cell-styling", "15", "Style days, rows, and columns from data"],
+  ["#calendar-cell-styling", "15", "Style days, hours, rows, and columns from data"],
   ["#date-localization", "16", "Localize dates and product labels"],
   ["#overlap-lanes", "17", "Resolve overlapping content"],
   ["#hover-reveal", "18", "Reveal events beneath a hover"],
@@ -709,23 +719,24 @@ export function IntegrationWalkthrough({ embedded = false }: { embedded?: boolea
         </DemoBreakout>
       </ArticleSection>
 
-      <ArticleSection id="calendar-cell-styling" number="15" title="Style days, rows, and columns from data">
+      <ArticleSection id="calendar-cell-styling" number="15" title="Style days, hours, rows, and columns from data">
         <p>
           Operational meaning often belongs to one date and resource rather than the calendar’s overall theme. Weekend
-          capacity may need a warm background, while equipment lanes need a distinct color wherever they appear.
+          capacity may need a warm background, equipment lanes need a distinct color, and lunch needs a visible band.
         </p>
         <p>
           <code>getCalendarDayProps</code> styles a complete date and its visible header from date, weekday,
           Today/weekend, and view context. <code>getCalendarCellProps</code> then adds resource-specific presentation to
-          a matching horizontal row or vertical column without taking ownership of layout, events, or interaction.
+          a matching horizontal row or vertical column. <code>getCalendarHourProps</code> styles a visible clock-hour
+          band and its time label in either orientation without taking ownership of layout, events, or interaction.
         </p>
-        <CodeBlock code={calendarCellStylingSnippet} title="Style each date and resource cell from its context" />
+        <CodeBlock code={calendarCellStylingSnippet} title="Style dates, clock hours, and resources from context" />
         <Callout>
-          Switch between Rows and Columns. The complete weekend—including its date header—stays warm, while the
-          equipment resource stays blue in either orientation.
+          Switch between Rows and Columns. The complete weekend stays warm, equipment stays blue, and the 12:00 lunch
+          band plus its time label stay green in either orientation.
         </Callout>
         <DemoBreakout>
-          <LazyArticleDemo label="calendar day and cell styling">
+          <LazyArticleDemo label="calendar day, hour, and cell styling">
             <CalendarCellStylingDemo />
           </LazyArticleDemo>
         </DemoBreakout>
@@ -950,7 +961,7 @@ export function IntegrationWalkthrough({ embedded = false }: { embedded?: boolea
 
       <ArticleSection id="package-footprint" number="26" title="Ship Infinite Calendar independently">
         <p>
-          Infinite Calendar JavaScript is 32.80 KiB gzip. Its optional stylesheet is a separate 1.94 KiB gzip import;
+          Infinite Calendar JavaScript is 33.44 KiB gzip. Its optional stylesheet is a separate 1.95 KiB gzip import;
           neither number includes React, React DOM, or the external virtualizer supplied by the application.
         </p>
         <p>

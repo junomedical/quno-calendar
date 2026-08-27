@@ -7,6 +7,10 @@ import { fromDateKey } from "#quno-internal/timeline/date/dateVirtualization";
 import { VERTICAL_TIMELINE_GUTTER_PX } from "./VerticalTimelineDay";
 import type { QunoInfiniteCalendarCellProps, QunoInfiniteCalendarDayProps } from "#quno-internal/timeline/core/types";
 import type { VerticalTimelineDayProps } from "./types";
+import {
+  CalendarHourBands,
+  calendarHourLabelProps
+} from "#quno-internal/timeline/infinite/rendering/shared/CalendarHourBands";
 
 type VerticalDayChromeProps = {
   day: VerticalTimelineDayProps;
@@ -102,6 +106,7 @@ export function VerticalDayChrome({
         style={{ width: day.labelWidth, height: day.boardHeight }}
       >
         <div className="icv-time-pane-content" style={{ width: day.labelWidth, height: day.boardHeight }}>
+          <CalendarHourBands hours={day.calendarHourPresentations} orientation="vertical" settings={day.settings} />
           <div
             className="icv-time-tick-track"
             style={{
@@ -109,18 +114,31 @@ export function VerticalDayChrome({
               height: day.boardHeight - VERTICAL_TIMELINE_GUTTER_PX * 2
             }}
           >
-            {day.timeTicks.map((tick) => (
-              <span
-                className={["icv-time-tick", tick.isHour ? "is-hour" : "", tick.showLabel ? "" : "is-label-hidden"]
-                  .filter(Boolean)
-                  .join(" ")}
-                key={`${day.dateKey}-time-${tick.minute}`}
-                aria-hidden={!tick.showLabel}
-                style={{ top: `${tick.positionPercent}%` }}
-              >
-                {formatVerticalTimeTick(tick.minute, tick.isHour)}
-              </span>
-            ))}
+            {day.timeTicks.map((tick) => {
+              const hourProps = tick.isHour
+                ? calendarHourLabelProps(day.calendarHourPresentations, tick.minute)
+                : undefined;
+              return (
+                <span
+                  className={[
+                    "icv-time-tick",
+                    tick.isHour ? "is-hour" : "",
+                    tick.showLabel ? "" : "is-label-hidden",
+                    hourProps?.className
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                  data-slot={hourProps ? "calendar-hour-label" : undefined}
+                  data-hour={hourProps ? tick.minute / 60 : undefined}
+                  key={`${day.dateKey}-time-${tick.minute}`}
+                  aria-hidden={!tick.showLabel}
+                  style={{ ...hourProps?.style, top: `${tick.positionPercent}%` }}
+                  title={hourProps?.title}
+                >
+                  {formatVerticalTimeTick(tick.minute, tick.isHour)}
+                </span>
+              );
+            })}
           </div>
         </div>
       </div>

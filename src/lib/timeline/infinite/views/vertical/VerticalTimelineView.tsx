@@ -40,7 +40,8 @@ function useVerticalViewSetup(props: CalendarInternalViewProps, now: Date) {
 function verticalPresentationProps(props: CalendarInternalViewProps) {
   return {
     getCalendarCellProps: props.getCalendarCellProps,
-    getCalendarDayProps: props.getCalendarDayProps
+    getCalendarDayProps: props.getCalendarDayProps,
+    getCalendarHourProps: props.getCalendarHourProps
   };
 }
 

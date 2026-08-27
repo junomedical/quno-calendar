@@ -53,7 +53,7 @@ describe("InfiniteTimelineView", () => {
     expect(shell).toHaveStyle({ minHeight: "320px" });
   });
 
-  it("customizes date sections, rows, and columns through typed presentation callbacks", () => {
+  it("customizes date sections, hours, rows, and columns through typed presentation callbacks", () => {
     const getCalendarDayProps = vi.fn((context) => ({
       className: context.isWeekend ? "consumer-weekend-day" : "consumer-workday",
       style: { backgroundColor: "moccasin" },
@@ -66,9 +66,15 @@ describe("InfiniteTimelineView", () => {
       },
       title: `${context.calendar.name} on ${context.date}`
     }));
+    const getCalendarHourProps = vi.fn((context) =>
+      context.hour === 12
+        ? { className: "consumer-lunch-hour", style: { backgroundColor: "honeydew" }, title: "Lunch hour" }
+        : undefined
+    );
     const horizontal = renderCalendar({
       getCalendarCellProps,
       getCalendarDayProps,
+      getCalendarHourProps,
       initialDateKey: "2026-07-04",
       loadEvents: async () => [],
       selectedCalendarIds: ["calendar-a", "calendar-b"]
@@ -100,13 +106,28 @@ describe("InfiniteTimelineView", () => {
       isToday: true,
       isWeekend: true
     });
+    expect(horizontalCell?.querySelector('[data-slot="calendar-hour"][data-hour="12"]')).toHaveClass(
+      "consumer-lunch-hour"
+    );
+    expect(horizontal.container.querySelector('[data-slot="calendar-hour-label"][data-hour="12"]')).toHaveAttribute(
+      "title",
+      "Lunch hour"
+    );
+    expect(getCalendarHourProps).toHaveBeenCalledWith({
+      hour: 12,
+      startMinute: 720,
+      endMinute: 780,
+      view: "infinite-horizontal"
+    });
 
     horizontal.unmount();
     getCalendarCellProps.mockClear();
     getCalendarDayProps.mockClear();
+    getCalendarHourProps.mockClear();
     const vertical = renderCalendar({
       getCalendarCellProps,
       getCalendarDayProps,
+      getCalendarHourProps,
       initialDateKey: "2026-07-04",
       loadEvents: async () => [],
       selectedCalendarIds: ["calendar-a", "calendar-b"],
@@ -135,6 +156,19 @@ describe("InfiniteTimelineView", () => {
         isWeekend: true
       })
     );
+    expect(verticalCell?.querySelector('[data-slot="calendar-hour"][data-hour="12"]')).toHaveAttribute(
+      "style",
+      expect.stringContaining("background-color: honeydew")
+    );
+    expect(vertical.container.querySelector('[data-slot="calendar-hour-label"][data-hour="12"]')).toHaveClass(
+      "consumer-lunch-hour"
+    );
+    expect(getCalendarHourProps).toHaveBeenCalledWith({
+      hour: 12,
+      startMinute: 720,
+      endMinute: 780,
+      view: "infinite-vertical"
+    });
   });
 
   it("uses initialDateKey as the initial virtual range anchor", async () => {

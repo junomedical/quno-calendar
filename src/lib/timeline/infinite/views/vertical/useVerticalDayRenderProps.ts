@@ -3,6 +3,7 @@
  * view/cache/interaction models -> stable props consumed by every virtual date
  */
 import { useMemo } from "react";
+import { calendarHourPresentations } from "#quno-internal/timeline/core/calendarCellPresentation";
 import type {
   CalendarId,
   CalendarRow,
@@ -38,6 +39,7 @@ type VerticalDayRenderPropsArgs = {
   eventRenderer: EventRenderer;
   getCalendarCellProps?: CalendarViewComponentProps["getCalendarCellProps"];
   getCalendarDayProps?: CalendarViewComponentProps["getCalendarDayProps"];
+  getCalendarHourProps?: CalendarViewComponentProps["getCalendarHourProps"];
   geometryRegistration: ViewportGeometryRegistration;
   activeRestoreTarget: CalendarViewportAnchorTarget | null;
   viewportMetricsStore: ViewportMetricsStore;
@@ -59,6 +61,7 @@ export function useVerticalDayRenderProps({
   eventRenderer,
   getCalendarCellProps,
   getCalendarDayProps,
+  getCalendarHourProps,
   geometryRegistration,
   activeRestoreTarget,
   viewportMetricsStore,
@@ -66,6 +69,10 @@ export function useVerticalDayRenderProps({
   forceAllResources
 }: VerticalDayRenderPropsArgs): VerticalDayRenderProps {
   const timeTicks = useMemo(() => buildTimeTicks(settings), [settings]);
+  const hourPresentations = useMemo(
+    () => calendarHourPresentations(settings, "infinite-vertical", getCalendarHourProps),
+    [getCalendarHourProps, settings]
+  );
   const nowState = buildVerticalNowState(now, settings);
   return {
     boardHeight: geometry.timelineHeight,
@@ -93,6 +100,7 @@ export function useVerticalDayRenderProps({
     eventRenderer,
     getCalendarCellProps,
     getCalendarDayProps,
+    calendarHourPresentations: hourPresentations,
     geometryRegistration,
     activeRestoreTarget,
     viewportMetricsStore,

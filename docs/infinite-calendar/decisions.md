@@ -704,3 +704,22 @@ slots expose the new boundary alongside the existing cell slots.
 The composed date presentation raises the measured ESM artifact from Decision 087's 131.71 KiB raw and 32.40 KiB gzip
 to 133.71 KiB raw and 32.80 KiB gzip. It remains within the accepted 33 KiB gzip ceiling and does not change the
 optional stylesheet budget.
+
+## 090 - Clock-Hour Presentation Projects Across Both Time Axes
+
+Date: 2026-08-27
+Status: Accepted; refines Decisions 087–089
+
+Products need time-based treatments such as lunch, shift changes, or non-bookable clock hours independently from a
+date or resource theme. `getCalendarHourProps(context)` therefore receives a zero-based hour, the visible interval's
+clipped start and end minutes, and the active view. It returns the same presentation-only `className`, `style`, and
+`title` surface as the date and resource callbacks.
+
+The callback resolves each visible clock hour once per view. Its result projects onto every resource content band and
+the corresponding visible time label in horizontal and vertical layouts. Bands paint above day/resource backgrounds
+and below availability, events, drafts, current-time markers, and pointer interaction. The calendar retains fixed band
+geometry and exposes stable `calendar-hour` and `calendar-hour-label` slots.
+
+The hour projection raises the measured artifact to 136.83 KiB raw and 33.44 KiB gzip and the optional stylesheet to
+10.21 KiB raw and 1.95 KiB gzip. The Infinite Calendar JavaScript ceiling moves from Decision 089's 33 KiB to 34 KiB;
+the stylesheet remains inside its existing 2 KiB gzip ceiling.

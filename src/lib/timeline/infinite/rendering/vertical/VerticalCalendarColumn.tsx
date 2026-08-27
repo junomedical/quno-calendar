@@ -14,6 +14,7 @@ import {
   TransientLayer
 } from "#quno-internal/timeline/infinite/rendering/shared/EventLayers";
 import type { VerticalCalendarColumnProps } from "./types";
+import { CalendarHourBands } from "#quno-internal/timeline/infinite/rendering/shared/CalendarHourBands";
 import {
   positionColumnLayoutItems,
   verticalEventBox,
@@ -58,6 +59,7 @@ export const VerticalCalendarColumn = memo(function VerticalCalendarColumn({
   preparedCell,
   isHidden = false,
   calendarCellProps,
+  calendarHourPresentations,
   settings,
   boardHeight,
   gridCellHeight,
@@ -121,6 +123,7 @@ export const VerticalCalendarColumn = memo(function VerticalCalendarColumn({
         backgroundPosition: `0 ${VERTICAL_TIMELINE_GUTTER_PX}px`
       }}
     >
+      <CalendarHourBands hours={calendarHourPresentations} orientation="vertical" settings={settings} />
       <AvailabilityLayer
         events={availabilityEvents}
         calendarId={calendar.id}

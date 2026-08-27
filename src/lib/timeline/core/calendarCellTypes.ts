@@ -47,3 +47,19 @@ export type QunoInfiniteCalendarDayProps = QunoInfiniteCalendarCellProps;
 export type QunoInfiniteCalendarDayCustomizer = (
   context: QunoInfiniteCalendarDayContext
 ) => QunoInfiniteCalendarDayProps | undefined;
+
+/** Product context for one visible clock-hour interval. */
+export type QunoInfiniteCalendarHourContext = {
+  hour: number;
+  startMinute: number;
+  endMinute: number;
+  view: CalendarView;
+};
+
+/** Presentation-only props for one clock-hour band and label. */
+export type QunoInfiniteCalendarHourProps = QunoInfiniteCalendarCellProps;
+
+/** Assigns product-owned presentation to visible clock-hour bands. */
+export type QunoInfiniteCalendarHourCustomizer = (
+  context: QunoInfiniteCalendarHourContext
+) => QunoInfiniteCalendarHourProps | undefined;

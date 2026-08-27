@@ -8,6 +8,7 @@ import {
   type QunoInfiniteCalendarHandle,
   type QunoInfiniteCalendarCellCustomizer,
   type QunoInfiniteCalendarDayCustomizer,
+  type QunoInfiniteCalendarHourCustomizer,
   type DayNameGenerator,
   type EventCreateRequest,
   type EventMoveRequest,
@@ -477,6 +478,14 @@ export function CalendarCellStylingDemo() {
       title: `${calendar.name} equipment`
     };
   }, []);
+  const getCalendarHourProps = useCallback<QunoInfiniteCalendarHourCustomizer>(({ hour }) => {
+    if (hour !== 12) return undefined;
+    return {
+      className: "article-lunch-hour",
+      style: { backgroundColor: "#dff5e8" },
+      title: "Lunch hour"
+    };
+  }, []);
 
   return (
     <CalendarDemoShell
@@ -501,6 +510,7 @@ export function CalendarCellStylingDemo() {
           eventRenderer={ArticleEventCard}
           getCalendarCellProps={getCalendarCellProps}
           getCalendarDayProps={getCalendarDayProps}
+          getCalendarHourProps={getCalendarHourProps}
           initialDateKey="2026-07-04"
           key={view}
           loadEvents={loadNavigationEvents}

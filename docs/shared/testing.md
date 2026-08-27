@@ -205,7 +205,9 @@ orientation, availability, loading, visual-focus, and motion assertions formerly
 - Vertical virtual scrolling changes visible dates.
 - `getCalendarDayProps` receives the same typed weekend and date identity in both orientations, and
   `getCalendarCellProps` adds resource identity. The field guide verifies assigned weekend backgrounds on date labels,
-  rows, and columns plus equipment overrides in both projections.
+  rows, and columns plus equipment overrides in both projections. `getCalendarHourProps` receives the same clipped
+  clock-hour interval in either view; computed-style and geometry checks cover its horizontal and vertical bands and
+  visible labels.
 - Rendered day DOM nodes are pruned to the visible viewport plus five day sections of overscan.
 - Vertical scrollbar dragging is bounded to one month before/after the visible date. Interior positions keep the
   1.2-second idle delay, while the absolute top and bottom use the 240 ms edge delay before recentering around the new

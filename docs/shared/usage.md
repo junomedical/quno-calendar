@@ -155,7 +155,7 @@ properties. Set them on the calendar class or any ancestor; the library retains 
 `QunoInfiniteCalendarStyle` contract. `--quno-calendar-vertical-header-bg` remains a vertical-only compatibility override; new themes should
 use `--quno-calendar-header-surface`.
 
-## Calendar Day, Row, And Column Styling
+## Calendar Day, Hour, Row, And Column Styling
 
 Use `getCalendarDayProps` for date-wide presentation and `getCalendarCellProps` for a specific date/resource
 intersection. A day result styles its date section, visible date header, and every resource cell. A cell result then
@@ -163,10 +163,15 @@ adds or overrides presentation for the matching horizontal row or vertical colum
 header. Both typed contexts include the `IsoDate`, weekday, active view, and Today/weekend flags; the cell context also
 includes the complete `CalendarRow`.
 
+Use `getCalendarHourProps` for clock-time presentation shared across dates and resources. Its context reports the
+zero-based `hour`, clipped `startMinute` and `endMinute`, and active view. The returned presentation paints the hour
+band above day/resource backgrounds but below events, and also styles its visible time label.
+
 ```tsx
 import type {
   QunoInfiniteCalendarCellCustomizer,
-  QunoInfiniteCalendarDayCustomizer
+  QunoInfiniteCalendarDayCustomizer,
+  QunoInfiniteCalendarHourCustomizer
 } from "@quno/calendar/infinite-calendar";
 
 const getCalendarDayProps: QunoInfiniteCalendarDayCustomizer = ({ isWeekend }) =>
@@ -188,10 +193,20 @@ const getCalendarCellProps: QunoInfiniteCalendarCellCustomizer = ({ calendar }) 
   };
 };
 
+const getCalendarHourProps: QunoInfiniteCalendarHourCustomizer = ({ hour }) =>
+  hour === 12
+    ? {
+        className: "lunch-hour",
+        style: { backgroundColor: "#dff5e8" },
+        title: "Lunch hour"
+      }
+    : undefined;
+
 <QunoInfiniteCalendar
   {...calendarProps}
   getCalendarDayProps={getCalendarDayProps}
   getCalendarCellProps={getCalendarCellProps}
+  getCalendarHourProps={getCalendarHourProps}
 />;
 ```
 
@@ -199,7 +214,8 @@ The callbacks may return only `className`, `style`, and `title`; they cannot rep
 accessibility state. Cell presentation overrides conflicting day presentation, and fixed geometry wins over returned
 layout properties. Date sections, headers, and labels expose `calendar-day`, `calendar-day-header`, and
 `calendar-day-label` slots. Grid surfaces and resource labels/headers expose `calendar-cell` and `calendar-cell-label`.
-Keep callbacks created inside a React component referentially stable when possible.
+Hour bands and labels expose `calendar-hour` and `calendar-hour-label`. Keep callbacks created inside a React component
+referentially stable when possible.
 
 ## Delayed Or Cancellable APIs
 

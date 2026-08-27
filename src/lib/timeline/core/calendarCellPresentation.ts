@@ -7,7 +7,10 @@ import type {
   QunoInfiniteCalendarCellProps,
   QunoInfiniteCalendarDayContext,
   QunoInfiniteCalendarDayCustomizer,
-  QunoInfiniteCalendarDayProps
+  QunoInfiniteCalendarDayProps,
+  QunoInfiniteCalendarHourCustomizer,
+  QunoInfiniteCalendarHourProps,
+  QunoInfiniteCalendarSettings
 } from "./types";
 
 type CalendarCellPresentationArgs = {
@@ -71,4 +74,30 @@ export function mergeCalendarPresentation(
     style: { ...dayProps.style, ...cellProps.style },
     title: cellProps.title ?? dayProps.title
   };
+}
+
+export type CalendarHourPresentation = {
+  hour: number;
+  startMinute: number;
+  endMinute: number;
+  props: QunoInfiniteCalendarHourProps;
+};
+
+/** Resolves every visible hour once for reuse by content bands and time labels. */
+export function calendarHourPresentations(
+  settings: Pick<QunoInfiniteCalendarSettings, "startHour" | "endHour">,
+  view: CalendarView,
+  getCalendarHourProps?: QunoInfiniteCalendarHourCustomizer
+): CalendarHourPresentation[] {
+  if (!getCalendarHourProps) return [];
+  const timelineStart = settings.startHour * 60;
+  const timelineEnd = settings.endHour * 60;
+  const presentations: CalendarHourPresentation[] = [];
+  for (let hour = Math.floor(settings.startHour); hour < Math.ceil(settings.endHour); hour += 1) {
+    const startMinute = Math.max(timelineStart, hour * 60);
+    const endMinute = Math.min(timelineEnd, (hour + 1) * 60);
+    const props = getCalendarHourProps({ hour, startMinute, endMinute, view });
+    if (props && endMinute > startMinute) presentations.push({ hour, startMinute, endMinute, props });
+  }
+  return presentations;
 }

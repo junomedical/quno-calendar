@@ -7,7 +7,8 @@ import type {
   CalendarRow,
   CalendarView,
   QunoInfiniteCalendarCellCustomizer,
-  QunoInfiniteCalendarDayCustomizer
+  QunoInfiniteCalendarDayCustomizer,
+  QunoInfiniteCalendarHourCustomizer
 } from "./calendarCellTypes";
 import type {
   CalendarFocusOptions,
@@ -31,7 +32,10 @@ export type {
   QunoInfiniteCalendarCellProps,
   QunoInfiniteCalendarDayContext,
   QunoInfiniteCalendarDayCustomizer,
-  QunoInfiniteCalendarDayProps
+  QunoInfiniteCalendarDayProps,
+  QunoInfiniteCalendarHourContext,
+  QunoInfiniteCalendarHourCustomizer,
+  QunoInfiniteCalendarHourProps
 } from "./calendarCellTypes";
 export type {
   CalendarViewportAnchor,
@@ -166,6 +170,7 @@ export type CalendarViewComponentProps = {
   eventRenderer: EventRenderer;
   getCalendarCellProps?: QunoInfiniteCalendarCellCustomizer;
   getCalendarDayProps?: QunoInfiniteCalendarDayCustomizer;
+  getCalendarHourProps?: QunoInfiniteCalendarHourCustomizer;
   className?: string;
   style?: CalendarStyle;
   ariaLabel?: string;

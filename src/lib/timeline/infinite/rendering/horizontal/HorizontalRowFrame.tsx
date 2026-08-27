@@ -1,4 +1,5 @@
 import { useCallback, type PropsWithChildren, type PointerEvent } from "react";
+import type { CalendarHourPresentation } from "#quno-internal/timeline/core/calendarCellPresentation";
 import type {
   CalendarId,
   CalendarRow,
@@ -9,6 +10,7 @@ import { minuteToX } from "#quno-internal/timeline/time/time";
 import { TIMELINE_LEFT_GUTTER_PX } from "#quno-internal/timeline/time/timelineTicks";
 import type { ViewportGeometryRegistration } from "#quno-internal/timeline/infinite/anchors/parent/viewportAnchorTypes";
 import type { HorizontalRowLayoutItems } from "./types";
+import { CalendarHourBands } from "#quno-internal/timeline/infinite/rendering/shared/CalendarHourBands";
 
 /** Row chrome: resource label + time grid + hover hit surface around event layers. */
 
@@ -19,6 +21,7 @@ type HorizontalRowFrameProps = PropsWithChildren<{
   rowHeight: number;
   isHidden: boolean;
   calendarCellProps?: QunoInfiniteCalendarCellProps;
+  calendarHourPresentations: CalendarHourPresentation[];
   settings: QunoInfiniteCalendarSettings;
   timelineWidth: number;
   gridCellWidth: number;
@@ -44,6 +47,7 @@ export function HorizontalRowFrame({
   rowHeight,
   isHidden,
   calendarCellProps,
+  calendarHourPresentations,
   settings,
   timelineWidth,
   gridCellWidth,
@@ -108,6 +112,7 @@ export function HorizontalRowFrame({
           backgroundSize: `${gridCellWidth}px 100%`
         }}
       >
+        <CalendarHourBands hours={calendarHourPresentations} orientation="horizontal" settings={settings} />
         {showNowLine ? (
           <div
             className={`quno-calendar-now-line ${nowLineClassName}`}

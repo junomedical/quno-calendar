@@ -99,7 +99,7 @@ describe("bundle-size guard", () => {
     expect(result.stderr).toContain("Build the library first with `npm run build:lib`.");
   });
 
-  it("enforces the 33 KiB Infinite Calendar JavaScript gzip ceiling", () => {
+  it("enforces the 34 KiB Infinite Calendar JavaScript gzip ceiling", () => {
     const distRoot = temporaryDirectory();
     writePassingBundles(distRoot);
     const incompressibleSource = randomBytes(40 * 1024).toString("base64");

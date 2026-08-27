@@ -3,6 +3,7 @@
  * view coordinator -> day contract -> column and interaction contracts
  */
 import type { PointerEvent as ReactPointerEvent } from "react";
+import type { CalendarHourPresentation } from "#quno-internal/timeline/core/calendarCellPresentation";
 import type {
   CalendarEvent,
   CalendarId,
@@ -55,6 +56,7 @@ export type VerticalTimelineDayProps = {
   todayKey: string;
   getCalendarCellProps?: QunoInfiniteCalendarCellCustomizer;
   getCalendarDayProps?: QunoInfiniteCalendarDayCustomizer;
+  calendarHourPresentations: CalendarHourPresentation[];
   showNowLine: boolean;
   nowMinute: number;
   interactionMode: "events" | "availability";
@@ -90,6 +92,7 @@ export type VerticalCalendarColumnProps = {
   preparedCell: PreparedEventCell;
   isHidden?: boolean;
   calendarCellProps?: QunoInfiniteCalendarCellProps;
+  calendarHourPresentations: CalendarHourPresentation[];
   settings: QunoInfiniteCalendarSettings;
   boardHeight: number;
   gridCellHeight: number;

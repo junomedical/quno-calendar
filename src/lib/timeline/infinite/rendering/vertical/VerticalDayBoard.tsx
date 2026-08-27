@@ -54,6 +54,7 @@ export function VerticalDayBoard({
             preparedCell={day.preparedCellForColumn(day.dateKey, calendar.id)}
             isHidden={isHidden}
             calendarCellProps={calendarCellProps.get(calendar.id)}
+            calendarHourPresentations={day.calendarHourPresentations}
             settings={day.settings}
             boardHeight={day.boardHeight}
             gridCellHeight={cadenceHeight}

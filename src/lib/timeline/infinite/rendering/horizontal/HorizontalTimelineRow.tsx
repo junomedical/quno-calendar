@@ -74,6 +74,7 @@ export const InfiniteTimelineRow = memo(function InfiniteTimelineRow({
   preparedCell,
   isHidden = false,
   calendarCellProps,
+  calendarHourPresentations,
   settings,
   width,
   showNowLine,
@@ -117,6 +118,7 @@ export const InfiniteTimelineRow = memo(function InfiniteTimelineRow({
       rowHeight={rowHeight}
       isHidden={isHidden}
       calendarCellProps={calendarCellProps}
+      calendarHourPresentations={calendarHourPresentations}
       settings={settings}
       timelineWidth={width}
       gridCellWidth={Math.max(1, settings.zoom * gridCadenceMinutes(settings.zoom))}

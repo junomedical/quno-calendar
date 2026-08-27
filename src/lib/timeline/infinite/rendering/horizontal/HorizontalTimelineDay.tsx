@@ -33,7 +33,6 @@ export function InfiniteTimelineDay(props: HorizontalTimelineDayProps) {
     todayKey,
     geometryRegistration,
     viewportMetricsStore,
-    forceAllResources,
     measureElement,
     getRowHeight
   } = props;
@@ -46,7 +45,7 @@ export function InfiniteTimelineDay(props: HorizontalTimelineDayProps) {
     dragPreviewEvent: props.dragPreviewEvent,
     activeRestoreTarget: props.activeRestoreTarget,
     viewportMetricsStore,
-    forceAllResources,
+    forceAllResources: props.forceAllResources,
     getRowHeight
   });
   const calendarDayProps = calendarDayPresentation({
@@ -106,6 +105,7 @@ export function InfiniteTimelineDay(props: HorizontalTimelineDayProps) {
             preparedCell={props.preparedCellForRow(dateKey, calendar.id)}
             isHidden={isHidden}
             calendarCellProps={calendarCellProps}
+            calendarHourPresentations={props.calendarHourPresentations}
             settings={settings}
             width={width}
             showNowLine={props.showNowLine}
