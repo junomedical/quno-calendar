@@ -14,14 +14,18 @@ export type CalendarRow = {
 /** Concrete timeline layouts supported by the calendar. */
 export type CalendarView = "infinite-horizontal" | "infinite-vertical";
 
-/** Product context for one rendered date/resource row or column. */
-export type QunoInfiniteCalendarCellContext = {
+/** Product context for one rendered date section. */
+export type QunoInfiniteCalendarDayContext = {
   date: IsoDate;
   weekday: WeekStart;
-  calendar: CalendarRow;
   view: CalendarView;
   isToday: boolean;
   isWeekend: boolean;
+};
+
+/** Product context for one rendered date/resource row or column. */
+export type QunoInfiniteCalendarCellContext = QunoInfiniteCalendarDayContext & {
+  calendar: CalendarRow;
 };
 
 /** Presentation-only props for one rendered date/resource row or column. */
@@ -35,3 +39,11 @@ export type QunoInfiniteCalendarCellProps = {
 export type QunoInfiniteCalendarCellCustomizer = (
   context: QunoInfiniteCalendarCellContext
 ) => QunoInfiniteCalendarCellProps | undefined;
+
+/** Presentation-only props for one rendered date section and its header. */
+export type QunoInfiniteCalendarDayProps = QunoInfiniteCalendarCellProps;
+
+/** Assigns product-owned presentation to a date section and its cells. */
+export type QunoInfiniteCalendarDayCustomizer = (
+  context: QunoInfiniteCalendarDayContext
+) => QunoInfiniteCalendarDayProps | undefined;

@@ -53,9 +53,14 @@ describe("InfiniteTimelineView", () => {
     expect(shell).toHaveStyle({ minHeight: "320px" });
   });
 
-  it("customizes date/resource rows and columns through one typed cell callback", () => {
+  it("customizes date sections, rows, and columns through typed presentation callbacks", () => {
+    const getCalendarDayProps = vi.fn((context) => ({
+      className: context.isWeekend ? "consumer-weekend-day" : "consumer-workday",
+      style: { backgroundColor: "moccasin" },
+      title: `Day ${context.date}`
+    }));
     const getCalendarCellProps = vi.fn((context) => ({
-      className: context.isWeekend ? "consumer-weekend" : "consumer-workday",
+      className: "consumer-calendar-cell",
       style: {
         backgroundColor: context.calendar.id === "calendar-b" ? "lavender" : "papayawhip"
       },
@@ -63,6 +68,7 @@ describe("InfiniteTimelineView", () => {
     }));
     const horizontal = renderCalendar({
       getCalendarCellProps,
+      getCalendarDayProps,
       initialDateKey: "2026-07-04",
       loadEvents: async () => [],
       selectedCalendarIds: ["calendar-a", "calendar-b"]
@@ -71,7 +77,7 @@ describe("InfiniteTimelineView", () => {
       '[data-slot="calendar-cell"][data-date="2026-07-04"][data-calendar-id="calendar-b"]'
     );
 
-    expect(horizontalCell).toHaveClass("consumer-weekend");
+    expect(horizontalCell).toHaveClass("consumer-weekend-day", "consumer-calendar-cell");
     expect(horizontalCell).toHaveAttribute("style", expect.stringContaining("background-color: lavender"));
     expect(horizontalCell).toHaveAttribute("title", "Calendar B on 2026-07-04");
     expect(getCalendarCellProps).toHaveBeenCalledWith({
@@ -82,11 +88,25 @@ describe("InfiniteTimelineView", () => {
       isToday: true,
       isWeekend: true
     });
+    const horizontalDayLabel = horizontal.container.querySelector(
+      '[data-slot="calendar-day-label"][title="Day 2026-07-04"]'
+    );
+    expect(horizontalDayLabel).toHaveClass("consumer-weekend-day");
+    expect(horizontalDayLabel).toHaveAttribute("style", expect.stringContaining("background-color: moccasin"));
+    expect(getCalendarDayProps).toHaveBeenCalledWith({
+      date: "2026-07-04",
+      weekday: 6,
+      view: "infinite-horizontal",
+      isToday: true,
+      isWeekend: true
+    });
 
     horizontal.unmount();
     getCalendarCellProps.mockClear();
+    getCalendarDayProps.mockClear();
     const vertical = renderCalendar({
       getCalendarCellProps,
+      getCalendarDayProps,
       initialDateKey: "2026-07-04",
       loadEvents: async () => [],
       selectedCalendarIds: ["calendar-a", "calendar-b"],
@@ -96,9 +116,19 @@ describe("InfiniteTimelineView", () => {
       '[data-slot="calendar-cell"][data-date="2026-07-04"][data-calendar-id="calendar-b"]'
     );
 
-    expect(verticalCell).toHaveClass("consumer-weekend");
+    expect(verticalCell).toHaveClass("consumer-weekend-day", "consumer-calendar-cell");
     expect(verticalCell).toHaveAttribute("style", expect.stringContaining("background-color: lavender"));
     expect(getCalendarCellProps).toHaveBeenCalledWith(
+      expect.objectContaining({
+        date: "2026-07-04",
+        view: "infinite-vertical",
+        isWeekend: true
+      })
+    );
+    expect(
+      vertical.container.querySelector('[data-slot="calendar-day-label"][title="Day 2026-07-04"]')
+    ).toHaveAttribute("style", expect.stringContaining("background-color: moccasin"));
+    expect(getCalendarDayProps).toHaveBeenCalledWith(
       expect.objectContaining({
         date: "2026-07-04",
         view: "infinite-vertical",

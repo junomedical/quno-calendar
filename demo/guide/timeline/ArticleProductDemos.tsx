@@ -7,6 +7,7 @@ import {
   type CalendarEvent,
   type QunoInfiniteCalendarHandle,
   type QunoInfiniteCalendarCellCustomizer,
+  type QunoInfiniteCalendarDayCustomizer,
   type DayNameGenerator,
   type EventCreateRequest,
   type EventMoveRequest,
@@ -459,13 +460,21 @@ export function ThemeDemo() {
 
 export function CalendarCellStylingDemo() {
   const [view, setView] = useState<"infinite-horizontal" | "infinite-vertical">("infinite-horizontal");
-  const getCalendarCellProps = useCallback<QunoInfiniteCalendarCellCustomizer>(({ calendar, isWeekend }) => {
-    const isEquipment = calendar.id.startsWith("equipment");
-    if (!isWeekend && !isEquipment) return undefined;
+  const getCalendarDayProps = useCallback<QunoInfiniteCalendarDayCustomizer>(({ isWeekend }) => {
+    if (!isWeekend) return undefined;
     return {
-      className: isEquipment ? "article-equipment-cell" : "article-weekend-cell",
-      style: { backgroundColor: isEquipment ? "#e8f1ff" : "#fff3e3" },
-      title: isEquipment ? `${calendar.name} equipment` : "Weekend"
+      className: "article-weekend-day",
+      style: { backgroundColor: "#fff3e3" },
+      title: "Weekend"
+    };
+  }, []);
+  const getCalendarCellProps = useCallback<QunoInfiniteCalendarCellCustomizer>(({ calendar }) => {
+    const isEquipment = calendar.id.startsWith("equipment");
+    if (!isEquipment) return undefined;
+    return {
+      className: "article-equipment-cell",
+      style: { backgroundColor: "#e8f1ff" },
+      title: `${calendar.name} equipment`
     };
   }, []);
 
@@ -491,6 +500,7 @@ export function CalendarCellStylingDemo() {
           calendars={articleCalendars}
           eventRenderer={ArticleEventCard}
           getCalendarCellProps={getCalendarCellProps}
+          getCalendarDayProps={getCalendarDayProps}
           initialDateKey="2026-07-04"
           key={view}
           loadEvents={loadNavigationEvents}

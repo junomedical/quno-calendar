@@ -1,5 +1,9 @@
 import { useCallback } from "react";
-import { calendarCellPresentation } from "#quno-internal/timeline/core/calendarCellPresentation";
+import {
+  calendarCellPresentation,
+  calendarDayPresentation,
+  mergeCalendarPresentation
+} from "#quno-internal/timeline/core/calendarCellPresentation";
 import { TIMELINE_LEFT_GUTTER_PX } from "#quno-internal/timeline/time/timelineTicks";
 import { HorizontalDayHeader } from "./HorizontalDayHeader";
 import type { HorizontalTimelineDayProps } from "./types";
@@ -27,8 +31,6 @@ export function InfiniteTimelineDay(props: HorizontalTimelineDayProps) {
     selectedCalendars,
     hiddenCalendarIds,
     todayKey,
-    showNowLine,
-    nowMinute,
     geometryRegistration,
     viewportMetricsStore,
     forceAllResources,
@@ -47,6 +49,12 @@ export function InfiniteTimelineDay(props: HorizontalTimelineDayProps) {
     forceAllResources,
     getRowHeight
   });
+  const calendarDayProps = calendarDayPresentation({
+    dateKey,
+    todayKey,
+    view: "infinite-horizontal",
+    getCalendarDayProps: props.getCalendarDayProps
+  });
   const setDayElement = useCallback(
     (element: HTMLDivElement | null) => {
       measureElement(element);
@@ -57,12 +65,15 @@ export function InfiniteTimelineDay(props: HorizontalTimelineDayProps) {
 
   return (
     <div
-      className="quno-calendar-day"
+      className={["quno-calendar-day", calendarDayProps?.className].filter(Boolean).join(" ")}
+      data-slot="calendar-day"
       data-testid="calendar-day"
       data-date={dateKey}
       data-index={item.index}
       ref={setDayElement}
+      title={calendarDayProps?.title}
       style={{
+        ...calendarDayProps?.style,
         top: item.start,
         height: dayHeight,
         width: "100%",
@@ -73,13 +84,16 @@ export function InfiniteTimelineDay(props: HorizontalTimelineDayProps) {
         const calendar = selectedCalendars[resourceIndex];
         const extent = rowExtents[resourceIndex];
         const isHidden = hiddenCalendarIds.has(calendar.id);
-        const calendarCellProps = calendarCellPresentation({
-          calendar,
-          dateKey,
-          todayKey,
-          view: "infinite-horizontal",
-          getCalendarCellProps: props.getCalendarCellProps
-        });
+        const calendarCellProps = mergeCalendarPresentation(
+          calendarDayProps,
+          calendarCellPresentation({
+            calendar,
+            dateKey,
+            todayKey,
+            view: "infinite-horizontal",
+            getCalendarCellProps: props.getCalendarCellProps
+          })
+        );
 
         return (
           <InfiniteTimelineRow
@@ -94,9 +108,9 @@ export function InfiniteTimelineDay(props: HorizontalTimelineDayProps) {
             calendarCellProps={calendarCellProps}
             settings={settings}
             width={width}
-            showNowLine={showNowLine}
+            showNowLine={props.showNowLine}
             nowLineClassName={dateKey === todayKey ? "is-current" : "is-reference"}
-            nowMinute={nowMinute}
+            nowMinute={props.nowMinute}
             interactionMode={props.interactionMode}
             hoveredEvent={props.hoveredEvent}
             dragEventId={props.dragEventId}
@@ -122,8 +136,9 @@ export function InfiniteTimelineDay(props: HorizontalTimelineDayProps) {
         settings={settings}
         timelineWidth={width}
         todayKey={todayKey}
-        showNowLine={showNowLine}
-        nowMinute={nowMinute}
+        showNowLine={props.showNowLine}
+        nowMinute={props.nowMinute}
+        calendarDayProps={calendarDayProps}
       />
     </div>
   );

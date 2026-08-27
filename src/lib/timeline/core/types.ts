@@ -2,7 +2,13 @@ import type { CSSProperties, ReactNode } from "react";
 import type { IsoDate } from "#quno-internal/shared/dateRangeModel";
 import type { DayNameGenerator } from "#quno-internal/timeline/date/dateLabels";
 import type { CalendarStyle } from "./calendarTheme";
-import type { CalendarId, CalendarRow, CalendarView, QunoInfiniteCalendarCellCustomizer } from "./calendarCellTypes";
+import type {
+  CalendarId,
+  CalendarRow,
+  CalendarView,
+  QunoInfiniteCalendarCellCustomizer,
+  QunoInfiniteCalendarDayCustomizer
+} from "./calendarCellTypes";
 import type {
   CalendarFocusOptions,
   CalendarFocusRequest,
@@ -22,7 +28,10 @@ export type {
   CalendarView,
   QunoInfiniteCalendarCellContext,
   QunoInfiniteCalendarCellCustomizer,
-  QunoInfiniteCalendarCellProps
+  QunoInfiniteCalendarCellProps,
+  QunoInfiniteCalendarDayContext,
+  QunoInfiniteCalendarDayCustomizer,
+  QunoInfiniteCalendarDayProps
 } from "./calendarCellTypes";
 export type {
   CalendarViewportAnchor,
@@ -156,6 +165,7 @@ export type CalendarViewComponentProps = {
   appearingEventIds?: EventId[];
   eventRenderer: EventRenderer;
   getCalendarCellProps?: QunoInfiniteCalendarCellCustomizer;
+  getCalendarDayProps?: QunoInfiniteCalendarDayCustomizer;
   className?: string;
   style?: CalendarStyle;
   ariaLabel?: string;

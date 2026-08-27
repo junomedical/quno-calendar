@@ -21,7 +21,7 @@ The article teaches the calendar through focused live exhibits:
 12. Zoom without losing precision.
 13. Reveal time progressively.
 14. Theme the calendar.
-15. Style rows and columns from data.
+15. Style days, rows, and columns from data.
 16. Localize dates and product labels.
 17. Resolve overlapping content.
 18. Reveal events beneath a hover.
@@ -39,7 +39,7 @@ The article teaches the calendar through focused live exhibits:
 [`ArticleSystemDemos.tsx`](./ArticleSystemDemos.tsx) owns the layer and visual-focus labs, and
 [`ArticleRecipeDemos.tsx`](./ArticleRecipeDemos.tsx) owns the read-only, drag/create, and preloading exhibits.
 [`ArticleProductDemos.tsx`](./ArticleProductDemos.tsx) owns CSS-native chrome, current-time, navigation, progressive
-precision, theming, row/column styling, custom card structure, date localization, and final-composition exhibits.
+precision, theming, day/row/column styling, custom card structure, date localization, and final-composition exhibits.
 [`ReactStateDemo.tsx`](./ReactStateDemo.tsx) owns the focused controlled-props and callback exhibit.
 [`articleSupport.tsx`](./articleSupport.tsx) contains deterministic fixtures and the external event renderer. Every live
 calendar imports the public `@quno/calendar/infinite-calendar` entrypoint.

@@ -155,35 +155,51 @@ properties. Set them on the calendar class or any ancestor; the library retains 
 `QunoInfiniteCalendarStyle` contract. `--quno-calendar-vertical-header-bg` remains a vertical-only compatibility override; new themes should
 use `--quno-calendar-header-surface`.
 
-## Calendar Row And Column Styling
+## Calendar Day, Row, And Column Styling
 
-Use `getCalendarCellProps` to assign product presentation to each date/resource intersection. The same callback styles
-calendar rows in the horizontal view and calendar columns in the vertical view, including their resource label or
-header. Its typed context includes the `IsoDate`, weekday, complete `CalendarRow`, active view, and Today/weekend flags.
+Use `getCalendarDayProps` for date-wide presentation and `getCalendarCellProps` for a specific date/resource
+intersection. A day result styles its date section, visible date header, and every resource cell. A cell result then
+adds or overrides presentation for the matching horizontal row or vertical column, including its resource label or
+header. Both typed contexts include the `IsoDate`, weekday, active view, and Today/weekend flags; the cell context also
+includes the complete `CalendarRow`.
 
 ```tsx
-import type { QunoInfiniteCalendarCellCustomizer } from "@quno/calendar/infinite-calendar";
+import type {
+  QunoInfiniteCalendarCellCustomizer,
+  QunoInfiniteCalendarDayCustomizer
+} from "@quno/calendar/infinite-calendar";
 
-const getCalendarCellProps: QunoInfiniteCalendarCellCustomizer = ({ calendar, isWeekend }) => {
-  const isEquipment = calendar.id.startsWith("equipment-");
-  if (!isWeekend && !isEquipment) return undefined;
+const getCalendarDayProps: QunoInfiniteCalendarDayCustomizer = ({ isWeekend }) =>
+  isWeekend
+    ? {
+        className: "weekend-day",
+        style: { backgroundColor: "#fff3e3" },
+        title: "Weekend"
+      }
+    : undefined;
+
+const getCalendarCellProps: QunoInfiniteCalendarCellCustomizer = ({ calendar }) => {
+  if (!calendar.id.startsWith("equipment-")) return undefined;
 
   return {
-    className: isEquipment ? "equipment-cell" : "weekend-cell",
-    style: {
-      backgroundColor: isEquipment ? "#e8f1ff" : "#fff3e3"
-    },
-    title: isEquipment ? `${calendar.name} equipment` : "Weekend"
+    className: "equipment-cell",
+    style: { backgroundColor: "#e8f1ff" },
+    title: `${calendar.name} equipment`
   };
 };
 
-<QunoInfiniteCalendar {...calendarProps} getCalendarCellProps={getCalendarCellProps} />;
+<QunoInfiniteCalendar
+  {...calendarProps}
+  getCalendarDayProps={getCalendarDayProps}
+  getCalendarCellProps={getCalendarCellProps}
+/>;
 ```
 
-The callback may return only `className`, `style`, and `title`; it cannot replace interaction handlers or accessibility
-state. Fixed row/column geometry still wins over returned layout properties. The styled grid surface exposes
-`data-slot="calendar-cell"`, while its resource label or header exposes `data-slot="calendar-cell-label"`. Keep a
-callback created inside a React component referentially stable when possible.
+The callbacks may return only `className`, `style`, and `title`; they cannot replace interaction handlers or
+accessibility state. Cell presentation overrides conflicting day presentation, and fixed geometry wins over returned
+layout properties. Date sections, headers, and labels expose `calendar-day`, `calendar-day-header`, and
+`calendar-day-label` slots. Grid surfaces and resource labels/headers expose `calendar-cell` and `calendar-cell-label`.
+Keep callbacks created inside a React component referentially stable when possible.
 
 ## Delayed Or Cancellable APIs
 

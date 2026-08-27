@@ -8,6 +8,7 @@ import type {
   EventRenderStatus,
   QunoInfiniteCalendarCellCustomizer,
   QunoInfiniteCalendarCellProps,
+  QunoInfiniteCalendarDayCustomizer,
   QunoInfiniteCalendarSettings
 } from "#quno-internal/timeline/core/types";
 import type {
@@ -45,6 +46,7 @@ export type HorizontalTimelineDayProps = {
   hiddenCalendarIds: Set<CalendarId>;
   todayKey: string;
   getCalendarCellProps?: QunoInfiniteCalendarCellCustomizer;
+  getCalendarDayProps?: QunoInfiniteCalendarDayCustomizer;
   showNowLine: boolean;
   nowMinute: number;
   interactionMode: "events" | "availability";

@@ -684,3 +684,23 @@ from typed cell context.
 This preserves the one-topic-per-chapter editorial contract and makes the new public callback discoverable without
 implying that data-driven cell treatments are theme tokens. Existing chapter hashes remain stable; later chapter
 numbers advance by one and the guide now contains 26 items.
+
+## 089 - Date Presentation Composes With Resource Presentation
+
+Date: 2026-08-27
+Status: Accepted; refines Decisions 087 and 088
+
+Weekend and holiday treatments often belong to a complete date, including its visible date header, rather than only
+the resource content inside it. `getCalendarDayProps(context)` therefore receives date, weekday, Today/weekend, and
+active-view context and may return the same presentation-only `className`, `style`, and `title` values as
+`getCalendarCellProps`.
+
+Day presentation projects onto the date section, visible date chrome, and each resource cell in both orientations.
+Resource-cell presentation composes after it and wins conflicting styles or titles, allowing an equipment color to
+override a weekend background without losing the date-wide class. Fixed geometry, accessibility, event layering, and
+interaction handlers remain calendar-owned. Stable `calendar-day`, `calendar-day-header`, and `calendar-day-label`
+slots expose the new boundary alongside the existing cell slots.
+
+The composed date presentation raises the measured ESM artifact from Decision 087's 131.71 KiB raw and 32.40 KiB gzip
+to 133.71 KiB raw and 32.80 KiB gzip. It remains within the accepted 33 KiB gzip ceiling and does not change the
+optional stylesheet budget.

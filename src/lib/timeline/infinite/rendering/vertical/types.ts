@@ -12,6 +12,7 @@ import type {
   EventRenderStatus,
   QunoInfiniteCalendarCellCustomizer,
   QunoInfiniteCalendarCellProps,
+  QunoInfiniteCalendarDayCustomizer,
   QunoInfiniteCalendarSettings
 } from "#quno-internal/timeline/core/types";
 import type { EventColumnLayoutItem, PreparedEventCell } from "#quno-internal/timeline/infinite/events/layout/layout";
@@ -53,6 +54,7 @@ export type VerticalTimelineDayProps = {
   timeTicks: ReturnType<typeof buildTimeTicks>;
   todayKey: string;
   getCalendarCellProps?: QunoInfiniteCalendarCellCustomizer;
+  getCalendarDayProps?: QunoInfiniteCalendarDayCustomizer;
   showNowLine: boolean;
   nowMinute: number;
   interactionMode: "events" | "availability";

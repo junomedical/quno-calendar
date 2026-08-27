@@ -5,7 +5,7 @@
 import { formatMonthDayOrdinal, formatWeekday } from "#quno-internal/timeline/date/dateLabels";
 import { fromDateKey } from "#quno-internal/timeline/date/dateVirtualization";
 import { VERTICAL_TIMELINE_GUTTER_PX } from "./VerticalTimelineDay";
-import type { QunoInfiniteCalendarCellProps } from "#quno-internal/timeline/core/types";
+import type { QunoInfiniteCalendarCellProps, QunoInfiniteCalendarDayProps } from "#quno-internal/timeline/core/types";
 import type { VerticalTimelineDayProps } from "./types";
 
 type VerticalDayChromeProps = {
@@ -14,6 +14,7 @@ type VerticalDayChromeProps = {
   gridTemplateColumns: string;
   renderedColumnIndexes: number[];
   calendarCellProps: Map<string, QunoInfiniteCalendarCellProps | undefined>;
+  calendarDayProps?: QunoInfiniteCalendarDayProps;
 };
 
 /** Sticky date/resource header plus the sticky vertical time scale. */
@@ -22,7 +23,8 @@ export function VerticalDayChrome({
   dayWidth,
   gridTemplateColumns,
   renderedColumnIndexes,
-  calendarCellProps
+  calendarCellProps,
+  calendarDayProps
 }: VerticalDayChromeProps) {
   const date = fromDateKey(day.dateKey);
   const customDayName = day.settings.dayNameGenerator ? formatWeekday(date, day.settings) : null;
@@ -30,14 +32,25 @@ export function VerticalDayChrome({
   return (
     <>
       <div
-        className="icv-day-header"
+        className={["icv-day-header", calendarDayProps?.className].filter(Boolean).join(" ")}
+        data-slot="calendar-day-header"
         data-testid="calendar-day-header"
         data-date={day.dateKey}
-        style={{ height: day.settings.dayHeaderHeight, minWidth: dayWidth }}
+        title={calendarDayProps?.title}
+        style={{ ...calendarDayProps?.style, height: day.settings.dayHeaderHeight, minWidth: dayWidth }}
       >
         <div
-          className="quno-calendar-left-label quno-calendar-date-label icv-date-label"
-          style={{ width: day.labelWidth }}
+          className={[
+            "quno-calendar-left-label",
+            "quno-calendar-date-label",
+            "icv-date-label",
+            calendarDayProps?.className
+          ]
+            .filter(Boolean)
+            .join(" ")}
+          data-slot="calendar-day-label"
+          style={{ ...calendarDayProps?.style, width: day.labelWidth }}
+          title={calendarDayProps?.title}
         >
           {customDayName === null ? (
             <>
