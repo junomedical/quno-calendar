@@ -6,6 +6,10 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ### Added
 
+- Added Infinite Calendar `getCalendarCellProps` with typed date, weekday, Today/weekend, calendar, and orientation
+  context. One presentation-only callback can now highlight horizontal rows or vertical columns—including resource
+  labels and headers—for treatments such as weekend shading and equipment colors. A dedicated field-guide chapter
+  demonstrates the callback separately from whole-calendar theming.
 - Added Datepicker `disabledDays`, typed `isDisabled` day-cell context, native disabled state, and endpoint guards for
   click, paint, resize, range movement, single-day selection, and outside-month navigation. The field guide now shows
   delayed parent-owned availability with loading and failure states kept unselectable.
@@ -30,6 +34,8 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ### Changed
 
+- Raised the Infinite Calendar JavaScript gzip ceiling from 32 KiB to 33 KiB for the new cell-presentation contract;
+  the measured ESM artifact is now 131.71 KiB raw and 32.40 KiB gzip.
 - Replaced the event-card resize lab's width and height sliders with one browser-native draggable corner. The demo's
   resize behavior, dimension limits, and responsive content changes are now fully CSS-defined.
 - Removed the vague Public API at a glance row from all four production chapters and the redundant How we design
@@ -56,7 +62,7 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
   editable Selected day field that both typing and calendar picking update. The explicit-state cards now use a readable
   two-by-two layout instead of four narrow columns.
 - Unified all four field guides on the warm Infinite Calendar editorial theme, shared page rhythm, product names,
-  numbered contents, Try it callouts, and collapsible Implementation recipes. The Infinite Calendar guide keeps its 25
+  numbered contents, Try it callouts, and collapsible Implementation recipes. The Infinite Calendar guide keeps its 26
   focused topics as independently numbered chapters so unrelated demos are never grouped under one apparent task.
 - Renamed the public surfaces to `@quno/calendar/infinite-calendar` and `@quno/calendar/datepicker`, and renamed the
   calendar facade to `QunoInfiniteCalendar`, `QunoInfiniteCalendarProps`, `QunoInfiniteCalendarHandle`, and
@@ -140,6 +146,14 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
   around its center. The equivalent scroll position and replacement month-window anchor now commit without a painted
   intermediate date tree.
 - Kept an in-progress controlled single-date input draft intact across unrelated parent rerenders.
+
+### Verification
+
+- Full Chromium verification has one unrelated blocker in
+  `e2e/specs/vertical.spec.ts:444`: after the drawn draft's only participant is unchecked, the first matching resource
+  column remains visible instead of receiving `data-retained-hidden="true"`. The other 115 Chromium tests pass,
+  including the new row/column styling coverage. The focused Firefox styling run is environment-blocked because its
+  headless browser cannot map the software framebuffer in the macOS sandbox; Chromium and WebKit styling runs pass.
 
 ## 0.6.0 - 2026-08-24
 

@@ -3,6 +3,10 @@
 Quno/Infinite Calendar owns virtualized horizontal and vertical schedules, timestamped events, async loading, event
 rendering, creation and movement, navigation, zoom, and visual focus.
 
+`getCalendarCellProps` assigns presentation-only classes, inline styles, or titles from typed date, weekend, calendar,
+and orientation context. One callback styles resource rows in the horizontal view and resource columns in the vertical
+view, including their visible labels or headers, without taking ownership of geometry or interaction behavior.
+
 - Public entry point: `@quno/calendar/infinite-calendar`
 - Live field guide: `/guide/infinite-calendar`
 - Focused demo: `/demo/infinite-calendar`

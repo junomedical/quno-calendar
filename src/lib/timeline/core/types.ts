@@ -2,19 +2,37 @@ import type { CSSProperties, ReactNode } from "react";
 import type { IsoDate } from "#quno-internal/shared/dateRangeModel";
 import type { DayNameGenerator } from "#quno-internal/timeline/date/dateLabels";
 import type { CalendarStyle } from "./calendarTheme";
-
-/** Stable identifier for a rendered calendar row. */
-export type CalendarId = string;
+import type { CalendarId, CalendarRow, CalendarView, QunoInfiniteCalendarCellCustomizer } from "./calendarCellTypes";
+import type {
+  CalendarFocusOptions,
+  CalendarFocusRequest,
+  CalendarFocusRequestResult,
+  CalendarFocusResult,
+  CalendarVisibilityRequest
+} from "./calendarFocusTypes";
+import type {
+  CalendarViewportAnchor,
+  CalendarViewportAnchorRestoreOptions,
+  CalendarViewportAnchorTarget,
+  CalendarVisibleEventCommitOptions
+} from "./calendarViewportTypes";
+export type {
+  CalendarId,
+  CalendarRow,
+  CalendarView,
+  QunoInfiniteCalendarCellContext,
+  QunoInfiniteCalendarCellCustomizer,
+  QunoInfiniteCalendarCellProps
+} from "./calendarCellTypes";
+export type {
+  CalendarViewportAnchor,
+  CalendarViewportAnchorRestoreOptions,
+  CalendarViewportAnchorTarget,
+  CalendarVisibleEventCommitOptions
+} from "./calendarViewportTypes";
 
 /** Stable identifier for an appointment, availability block, or draft event. */
 export type EventId = string;
-
-/** User-selectable calendar row metadata. */
-export type CalendarRow = {
-  id: CalendarId;
-  name: string;
-  color?: string;
-};
 
 /** Event data accepted by the reusable calendar renderer. */
 export type CalendarEvent = {
@@ -128,68 +146,6 @@ export type EventActivateRequest = {
   renderedCalendarId: CalendarId;
 };
 
-/** Target used for preserving a rendered event or calendar slot in the viewport. */
-export type CalendarViewportAnchorTarget = {
-  eventId?: EventId;
-  calendarId?: CalendarId;
-  dateKey?: IsoDate;
-  time?: string;
-  requireVisible?: boolean;
-};
-
-/** Opaque viewport anchor captured by `QunoInfiniteCalendar` and restored after parent layout changes. */
-export type CalendarViewportAnchor = {
-  snapshot: {
-    top: number;
-    left: number;
-  };
-  target: CalendarViewportAnchorTarget;
-};
-
-/** Options for restoring a captured viewport anchor. */
-export type CalendarViewportAnchorRestoreOptions = {
-  target?: CalendarViewportAnchorTarget;
-  afterRecenter?: boolean;
-  allowNavigationFallback?: boolean;
-  cancelOnManualScroll?: boolean;
-};
-
-/** Options for patching one committed event into the currently loaded visible cache. */
-export type CalendarVisibleEventCommitOptions = {
-  previousEventId?: EventId;
-  appearing?: boolean;
-};
-
-/** One declarative request to reveal and focus a known event. */
-export type CalendarFocusRequest = {
-  requestId: string | number;
-  event: CalendarEvent;
-  preferredCalendarId?: CalendarId;
-};
-
-/** Options accepted by the imperative event-focus command. */
-export type CalendarFocusOptions = {
-  preferredCalendarId?: CalendarId;
-};
-
-/** Result of a declarative or imperative event-focus request. */
-export type CalendarFocusResult = {
-  eventId: EventId;
-  renderedCalendarId?: CalendarId;
-  status: "focused" | "unavailable" | "cancelled";
-};
-
-/** Parent-owned calendar visibility update requested by calendar behavior. */
-export type CalendarVisibilityRequest = {
-  calendarIds: CalendarId[];
-  reason: "focus-event";
-};
-
-/** Declarative focus result correlated to its request id. */
-export type CalendarFocusRequestResult = CalendarFocusResult & {
-  requestId: CalendarFocusRequest["requestId"];
-};
-
 /** Common props passed from the shell to a concrete calendar view. */
 export type CalendarViewComponentProps = {
   calendars: CalendarRow[];
@@ -199,6 +155,7 @@ export type CalendarViewComponentProps = {
   eventVersion?: number | string;
   appearingEventIds?: EventId[];
   eventRenderer: EventRenderer;
+  getCalendarCellProps?: QunoInfiniteCalendarCellCustomizer;
   className?: string;
   style?: CalendarStyle;
   ariaLabel?: string;
@@ -234,9 +191,6 @@ export type QunoInfiniteCalendarHandle = {
   releaseActiveDraft: (options?: ActiveDraftReleaseOptions) => void;
   focusEvent: (event: CalendarEvent, options?: CalendarFocusOptions) => Promise<CalendarFocusResult>;
 };
-
-/** Concrete timeline layouts supported by the calendar. */
-export type CalendarView = "infinite-horizontal" | "infinite-vertical";
 
 /** Public reusable calendar shell props. */
 export type QunoInfiniteCalendarProps = CalendarViewComponentProps & {

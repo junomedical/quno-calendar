@@ -5,6 +5,7 @@
 import { formatMonthDayOrdinal, formatWeekday } from "#quno-internal/timeline/date/dateLabels";
 import { fromDateKey } from "#quno-internal/timeline/date/dateVirtualization";
 import { VERTICAL_TIMELINE_GUTTER_PX } from "./VerticalTimelineDay";
+import type { QunoInfiniteCalendarCellProps } from "#quno-internal/timeline/core/types";
 import type { VerticalTimelineDayProps } from "./types";
 
 type VerticalDayChromeProps = {
@@ -12,6 +13,7 @@ type VerticalDayChromeProps = {
   dayWidth: number;
   gridTemplateColumns: string;
   renderedColumnIndexes: number[];
+  calendarCellProps: Map<string, QunoInfiniteCalendarCellProps | undefined>;
 };
 
 /** Sticky date/resource header plus the sticky vertical time scale. */
@@ -19,7 +21,8 @@ export function VerticalDayChrome({
   day,
   dayWidth,
   gridTemplateColumns,
-  renderedColumnIndexes
+  renderedColumnIndexes,
+  calendarCellProps
 }: VerticalDayChromeProps) {
   const date = fromDateKey(day.dateKey);
   const customDayName = day.settings.dayNameGenerator ? formatWeekday(date, day.settings) : null;
@@ -58,16 +61,20 @@ export function VerticalDayChrome({
           {renderedColumnIndexes.map((resourceIndex) => {
             const calendar = day.selectedCalendars[resourceIndex];
             const isHidden = day.hiddenCalendarIds.has(calendar.id);
+            const customProps = calendarCellProps.get(calendar.id);
             return (
               <div
-                className="icv-calendar-header-cell"
+                className={["icv-calendar-header-cell", customProps?.className].filter(Boolean).join(" ")}
+                data-slot="calendar-cell-label"
                 data-retained-hidden={isHidden ? "true" : undefined}
                 aria-hidden={isHidden || undefined}
                 style={{
+                  ...customProps?.style,
                   visibility: isHidden ? "hidden" : undefined,
                   pointerEvents: isHidden ? "none" : undefined,
                   gridColumn: resourceIndex + 1
                 }}
+                title={customProps?.title}
                 key={calendar.id}
               >
                 {calendar.name}

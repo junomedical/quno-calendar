@@ -36,6 +36,7 @@ type VerticalDayRenderPropsArgs = {
   appearingEventIds: Set<string>;
   focusedEventTarget?: CalendarFocusedEventTarget | null;
   eventRenderer: EventRenderer;
+  getCalendarCellProps?: CalendarViewComponentProps["getCalendarCellProps"];
   geometryRegistration: ViewportGeometryRegistration;
   activeRestoreTarget: CalendarViewportAnchorTarget | null;
   viewportMetricsStore: ViewportMetricsStore;
@@ -55,6 +56,7 @@ export function useVerticalDayRenderProps({
   appearingEventIds,
   focusedEventTarget,
   eventRenderer,
+  getCalendarCellProps,
   geometryRegistration,
   activeRestoreTarget,
   viewportMetricsStore,
@@ -87,6 +89,7 @@ export function useVerticalDayRenderProps({
     draftEventIsExiting: interactions.renderedDraftIsExiting,
     draftEventReleaseDurationMs: interactions.renderedDraftReleaseDurationMs,
     eventRenderer,
+    getCalendarCellProps,
     geometryRegistration,
     activeRestoreTarget,
     viewportMetricsStore,

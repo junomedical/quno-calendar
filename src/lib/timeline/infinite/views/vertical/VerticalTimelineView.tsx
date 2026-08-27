@@ -128,6 +128,7 @@ export const InfiniteVerticalTimelineView = forwardRef<CalendarViewHandle, Calen
       appearingEventIds: eventStore.appearingEventIds,
       focusedEventTarget: props.focusedEventTarget,
       eventRenderer: props.eventRenderer,
+      getCalendarCellProps: props.getCalendarCellProps,
       geometryRegistration: navigation.geometryRegistration,
       activeRestoreTarget: navigation.activeRestoreTarget,
       viewportMetricsStore: viewport.viewportMetricsStore,

@@ -16,19 +16,17 @@ export {
   type ActiveDraftReleaseOptions,
   type ActiveEventDraft,
   type CalendarEvent,
-  type CalendarFocusOptions,
-  type CalendarFocusRequest,
-  type CalendarFocusRequestResult,
-  type CalendarFocusResult,
   type CalendarId,
   type QunoInfiniteCalendarHandle,
+  type QunoInfiniteCalendarCellContext,
+  type QunoInfiniteCalendarCellCustomizer,
+  type QunoInfiniteCalendarCellProps,
   type QunoInfiniteCalendarProps,
   type CalendarRow,
   type CalendarVisibleEventCommitOptions,
   type CalendarViewportAnchor,
   type CalendarViewportAnchorRestoreOptions,
   type CalendarViewportAnchorTarget,
-  type CalendarVisibilityRequest,
   type CalendarView,
   type EventActivateRequest,
   type EventCreateRequest,
@@ -44,3 +42,10 @@ export {
   type LoadEventsArgs,
   type QunoInfiniteCalendarSettings
 } from "./core/types";
+export type {
+  CalendarFocusOptions,
+  CalendarFocusRequest,
+  CalendarFocusRequestResult,
+  CalendarFocusResult,
+  CalendarVisibilityRequest
+} from "./core/calendarFocusTypes";

@@ -155,6 +155,36 @@ properties. Set them on the calendar class or any ancestor; the library retains 
 `QunoInfiniteCalendarStyle` contract. `--quno-calendar-vertical-header-bg` remains a vertical-only compatibility override; new themes should
 use `--quno-calendar-header-surface`.
 
+## Calendar Row And Column Styling
+
+Use `getCalendarCellProps` to assign product presentation to each date/resource intersection. The same callback styles
+calendar rows in the horizontal view and calendar columns in the vertical view, including their resource label or
+header. Its typed context includes the `IsoDate`, weekday, complete `CalendarRow`, active view, and Today/weekend flags.
+
+```tsx
+import type { QunoInfiniteCalendarCellCustomizer } from "@quno/calendar/infinite-calendar";
+
+const getCalendarCellProps: QunoInfiniteCalendarCellCustomizer = ({ calendar, isWeekend }) => {
+  const isEquipment = calendar.id.startsWith("equipment-");
+  if (!isWeekend && !isEquipment) return undefined;
+
+  return {
+    className: isEquipment ? "equipment-cell" : "weekend-cell",
+    style: {
+      backgroundColor: isEquipment ? "#e8f1ff" : "#fff3e3"
+    },
+    title: isEquipment ? `${calendar.name} equipment` : "Weekend"
+  };
+};
+
+<QunoInfiniteCalendar {...calendarProps} getCalendarCellProps={getCalendarCellProps} />;
+```
+
+The callback may return only `className`, `style`, and `title`; it cannot replace interaction handlers or accessibility
+state. Fixed row/column geometry still wins over returned layout properties. The styled grid surface exposes
+`data-slot="calendar-cell"`, while its resource label or header exposes `data-slot="calendar-cell-label"`. Keep a
+callback created inside a React component referentially stable when possible.
+
 ## Delayed Or Cancellable APIs
 
 `loadEvents` is a non-blocking data boundary. The calendar renders its date/resource grid immediately and keeps the last cached events visible while a request is slow, retried, or refreshed. Loading indicators should therefore live outside geometry-sensitive calendar rows and columns.
@@ -535,7 +565,10 @@ If a parent-owned flow intentionally reloads through `eventVersion`, pass the co
 When cancelling a form, release the controlled draft before clearing parent state if the draft should fade out in place:
 
 ```tsx
-calendarRef.current?.releaseActiveDraft({ animation: "fade-out", durationMs: 420 });
+calendarRef.current?.releaseActiveDraft({
+  animation: "fade-out",
+  durationMs: 420
+});
 setActiveDraft(null);
 ```
 
@@ -581,7 +614,10 @@ Use the imperative handle for parent-owned navigation. Keep zoom controlled thro
 
 ```tsx
 const calendarRef = useRef<QunoInfiniteCalendarHandle>(null);
-const [date, setDate] = useState<DateRange>({ start: "2026-07-04", end: "2026-07-04" });
+const [date, setDate] = useState<DateRange>({
+  start: "2026-07-04",
+  end: "2026-07-04"
+});
 
 <QunoDateInput
   expectedRange={{ start: "1900-01-01", end: "2100-12-31" }}
@@ -632,7 +668,11 @@ For controlled navigation, pass a unique request id. Re-rendering the same id do
 ```tsx
 <QunoInfiniteCalendar
   {...calendarProps}
-  focusRequest={{ requestId: selectionVersion, event, preferredCalendarId: "room-1" }}
+  focusRequest={{
+    requestId: selectionVersion,
+    event,
+    preferredCalendarId: "room-1"
+  }}
   onCalendarVisibilityRequest={({ calendarIds }) => setSelectedCalendarIds(calendarIds)}
   onFocusRequestComplete={(result) => reportFocusResult(result)}
 />
@@ -653,7 +693,9 @@ instances without reloading the range:
 
 ```tsx
 const saved = await api.updateEvent(updatedEvent);
-calendarRef.current?.commitVisibleEvent(saved, { previousEventId: updatedEvent.id });
+calendarRef.current?.commitVisibleEvent(saved, {
+  previousEventId: updatedEvent.id
+});
 
 await api.deleteEvent(saved.id);
 calendarRef.current?.removeVisibleEvent(saved.id);

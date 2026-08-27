@@ -1,4 +1,5 @@
 import { useCallback } from "react";
+import { calendarCellPresentation } from "#quno-internal/timeline/core/calendarCellPresentation";
 import { TIMELINE_LEFT_GUTTER_PX } from "#quno-internal/timeline/time/timelineTicks";
 import { HorizontalDayHeader } from "./HorizontalDayHeader";
 import type { HorizontalTimelineDayProps } from "./types";
@@ -72,6 +73,13 @@ export function InfiniteTimelineDay(props: HorizontalTimelineDayProps) {
         const calendar = selectedCalendars[resourceIndex];
         const extent = rowExtents[resourceIndex];
         const isHidden = hiddenCalendarIds.has(calendar.id);
+        const calendarCellProps = calendarCellPresentation({
+          calendar,
+          dateKey,
+          todayKey,
+          view: "infinite-horizontal",
+          getCalendarCellProps: props.getCalendarCellProps
+        });
 
         return (
           <InfiniteTimelineRow
@@ -83,6 +91,7 @@ export function InfiniteTimelineDay(props: HorizontalTimelineDayProps) {
             rowEvents={isHidden ? EMPTY_ROW_EVENTS : props.eventsForRow(dateKey, calendar.id)}
             preparedCell={props.preparedCellForRow(dateKey, calendar.id)}
             isHidden={isHidden}
+            calendarCellProps={calendarCellProps}
             settings={settings}
             width={width}
             showNowLine={showNowLine}

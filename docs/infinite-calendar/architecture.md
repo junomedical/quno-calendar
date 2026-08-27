@@ -63,6 +63,11 @@ Date Input may consume the parser implementation internally but does not re-expo
 
 `QunoInfiniteCalendar` accepts calendars, selected calendar ids, a range loader, an optional `eventPrefetchPolicy`, an external renderer, controlled settings, interaction callbacks, and an optional imperative ref.
 
+The optional `getCalendarCellProps` presentation boundary receives one typed date/resource context for either view and
+returns only `className`, `style`, or `title`. Horizontal rows and vertical columns project that same result onto the
+grid surface and resource label/header. Fixed virtual geometry, event layers, hit-testing, and accessibility state stay
+inside the calendar.
+
 - `view="infinite-horizontal"`: dates flow down, calendars are rows, time runs left-to-right.
 - `view="infinite-vertical"`: dates flow down, calendars are columns, time runs top-to-bottom.
 

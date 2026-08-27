@@ -95,7 +95,7 @@ Vitest unit tests live in `tests/unit` and mirror the source module grouping.
   configurable week starts, ranges, expected-period ranking, simultaneous English/German recognition, lexicon
   extension, tokenization, SSR safety, and its independent payload. Its focused demo recognizes the visible English and
   German samples together by default, including an absolute-to-relative weekday range.
-- The Infinite Calendar guide keeps a 25-entry, one-topic-per-chapter table of contents. Existing chapter hashes remain
+- The Infinite Calendar guide keeps a 26-entry, one-topic-per-chapter table of contents. Existing chapter hashes remain
   canonical anchors, and heavy exhibits mount lazily as they approach the shared guide scroller.
 - Chapter 01 explains why complex business scheduling needs a dedicated calendar before introducing horizontal time,
   vertically stacked resources, and the familiar vertical mouse-wheel or touchpad axis.
@@ -203,6 +203,8 @@ orientation, availability, loading, visual-focus, and motion assertions formerly
   across a pending 1.2-second idle-recenter deadline keeps the draft and visible date tree mounted at the same
   viewport-relative geometry until pointer release.
 - Vertical virtual scrolling changes visible dates.
+- `getCalendarCellProps` receives the same typed weekend, date, and resource identity in both orientations; the field
+  guide verifies that assigned weekend and equipment backgrounds compute on horizontal rows and vertical columns.
 - Rendered day DOM nodes are pruned to the visible viewport plus five day sections of overscan.
 - Vertical scrollbar dragging is bounded to one month before/after the visible date. Interior positions keep the
   1.2-second idle delay, while the absolute top and bottom use the 240 ms edge delay before recentering around the new

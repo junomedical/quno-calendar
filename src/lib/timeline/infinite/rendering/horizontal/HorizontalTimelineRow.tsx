@@ -18,7 +18,12 @@ function useEventProjections(settings: HorizontalTimelineRowProps["settings"], r
   const availability = useMemo(
     () => (event: CalendarEvent) => {
       const geometry = horizontalEventGeometry(event, settings);
-      return { ...geometry, top: 0, hoverMaxWidth: geometry.width, height: rowHeight };
+      return {
+        ...geometry,
+        top: 0,
+        hoverMaxWidth: geometry.width,
+        height: rowHeight
+      };
     },
     [rowHeight, settings]
   );
@@ -68,6 +73,7 @@ export const InfiniteTimelineRow = memo(function InfiniteTimelineRow({
   rowEvents,
   preparedCell,
   isHidden = false,
+  calendarCellProps,
   settings,
   width,
   showNowLine,
@@ -110,6 +116,7 @@ export const InfiniteTimelineRow = memo(function InfiniteTimelineRow({
       top={top}
       rowHeight={rowHeight}
       isHidden={isHidden}
+      calendarCellProps={calendarCellProps}
       settings={settings}
       timelineWidth={width}
       gridCellWidth={Math.max(1, settings.zoom * gridCadenceMinutes(settings.zoom))}

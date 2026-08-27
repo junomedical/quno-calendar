@@ -41,6 +41,7 @@ export const InfiniteTimelineView = forwardRef<CalendarViewHandle, CalendarInter
           selectedCalendars: runtime.renderedCalendars,
           hiddenCalendarIds: runtime.hiddenCalendarIds,
           todayKey: runtime.todayKey,
+          getCalendarCellProps: props.getCalendarCellProps,
           showNowLine: runtime.showNowLine,
           nowMinute: runtime.nowMinute,
           interactionMode: runtime.interactionMode,

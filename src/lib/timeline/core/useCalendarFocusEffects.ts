@@ -1,13 +1,6 @@
 import { useEffect, type Dispatch, type MutableRefObject, type SetStateAction } from "react";
-import type {
-  CalendarEvent,
-  CalendarFocusRequest,
-  CalendarFocusResult,
-  CalendarFocusRequestResult,
-  CalendarId,
-  QunoInfiniteCalendarProps,
-  CalendarViewportAnchor
-} from "./types";
+import type { CalendarEvent, CalendarId, QunoInfiniteCalendarProps, CalendarViewportAnchor } from "./types";
+import type { CalendarFocusRequest, CalendarFocusResult, CalendarFocusRequestResult } from "./calendarFocusTypes";
 import type { CalendarFocusedEventTarget, CalendarViewHandle } from "./internalTypes";
 import type { IsoDate } from "#quno-internal/shared/dateRangeModel";
 

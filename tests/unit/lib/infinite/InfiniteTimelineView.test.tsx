@@ -18,7 +18,9 @@ const now = new Date("2026-07-04T09:30:00");
 const settings = { startHour: 8, endHour: 18, zoom: 1, excludedWeekdays: [] };
 const defaultRenderer = ({ event, style }: EventRendererProps) => <div style={style}>{event.title}</div>;
 type TestCalendarProps = Partial<QunoInfiniteCalendarProps> &
-  Pick<QunoInfiniteCalendarProps, "loadEvents"> & { ref?: Ref<QunoInfiniteCalendarHandle> };
+  Pick<QunoInfiniteCalendarProps, "loadEvents"> & {
+    ref?: Ref<QunoInfiniteCalendarHandle>;
+  };
 
 function calendar(props: TestCalendarProps) {
   return (
@@ -49,6 +51,60 @@ describe("InfiniteTimelineView", () => {
     expect(shell).toHaveAccessibleName("Public schedule");
     expect(shell).toHaveClass("quno-calendar-shell", "custom-calendar");
     expect(shell).toHaveStyle({ minHeight: "320px" });
+  });
+
+  it("customizes date/resource rows and columns through one typed cell callback", () => {
+    const getCalendarCellProps = vi.fn((context) => ({
+      className: context.isWeekend ? "consumer-weekend" : "consumer-workday",
+      style: {
+        backgroundColor: context.calendar.id === "calendar-b" ? "lavender" : "papayawhip"
+      },
+      title: `${context.calendar.name} on ${context.date}`
+    }));
+    const horizontal = renderCalendar({
+      getCalendarCellProps,
+      initialDateKey: "2026-07-04",
+      loadEvents: async () => [],
+      selectedCalendarIds: ["calendar-a", "calendar-b"]
+    });
+    const horizontalCell = horizontal.container.querySelector(
+      '[data-slot="calendar-cell"][data-date="2026-07-04"][data-calendar-id="calendar-b"]'
+    );
+
+    expect(horizontalCell).toHaveClass("consumer-weekend");
+    expect(horizontalCell).toHaveAttribute("style", expect.stringContaining("background-color: lavender"));
+    expect(horizontalCell).toHaveAttribute("title", "Calendar B on 2026-07-04");
+    expect(getCalendarCellProps).toHaveBeenCalledWith({
+      calendar: calendars[1],
+      date: "2026-07-04",
+      weekday: 6,
+      view: "infinite-horizontal",
+      isToday: true,
+      isWeekend: true
+    });
+
+    horizontal.unmount();
+    getCalendarCellProps.mockClear();
+    const vertical = renderCalendar({
+      getCalendarCellProps,
+      initialDateKey: "2026-07-04",
+      loadEvents: async () => [],
+      selectedCalendarIds: ["calendar-a", "calendar-b"],
+      view: "infinite-vertical"
+    });
+    const verticalCell = vertical.container.querySelector(
+      '[data-slot="calendar-cell"][data-date="2026-07-04"][data-calendar-id="calendar-b"]'
+    );
+
+    expect(verticalCell).toHaveClass("consumer-weekend");
+    expect(verticalCell).toHaveAttribute("style", expect.stringContaining("background-color: lavender"));
+    expect(getCalendarCellProps).toHaveBeenCalledWith(
+      expect.objectContaining({
+        date: "2026-07-04",
+        view: "infinite-vertical",
+        isWeekend: true
+      })
+    );
   });
 
   it("uses initialDateKey as the initial virtual range anchor", async () => {
@@ -178,7 +234,12 @@ describe("InfiniteTimelineView", () => {
     ];
     const loadEvents = vi.fn(async () => loaderEvents);
 
-    const { rerender } = renderCalendar({ loadEvents, eventVersion: 0, eventRenderer: renderer, settings });
+    const { rerender } = renderCalendar({
+      loadEvents,
+      eventVersion: 0,
+      eventRenderer: renderer,
+      settings
+    });
 
     expect(await screen.findByText("Before Version")).toBeInTheDocument();
     loaderEvents = [
@@ -191,7 +252,14 @@ describe("InfiniteTimelineView", () => {
       }
     ];
 
-    rerender(calendar({ loadEvents, eventVersion: 1, eventRenderer: renderer, settings }));
+    rerender(
+      calendar({
+        loadEvents,
+        eventVersion: 1,
+        eventRenderer: renderer,
+        settings
+      })
+    );
 
     expect(await screen.findByText("After Version")).toBeInTheDocument();
     expect(screen.queryByText("Before Version")).not.toBeInTheDocument();
@@ -214,7 +282,12 @@ describe("InfiniteTimelineView", () => {
     ];
     const loadEvents = vi.fn(async () => loaderEvents);
 
-    const { rerender } = renderCalendar({ loadEvents, eventVersion: 0, eventRenderer: renderer, settings });
+    const { rerender } = renderCalendar({
+      loadEvents,
+      eventVersion: 0,
+      eventRenderer: renderer,
+      settings
+    });
 
     expect(await screen.findByText("Before Version")).toBeInTheDocument();
     loaderEvents = [
@@ -235,7 +308,13 @@ describe("InfiniteTimelineView", () => {
     ];
 
     rerender(
-      calendar({ loadEvents, eventVersion: 1, appearingEventIds: ["event-b"], eventRenderer: renderer, settings })
+      calendar({
+        loadEvents,
+        eventVersion: 1,
+        appearingEventIds: ["event-b"],
+        eventRenderer: renderer,
+        settings
+      })
     );
 
     expect(await screen.findByText("Requested Appearing")).toBeInTheDocument();
@@ -248,7 +327,13 @@ describe("InfiniteTimelineView", () => {
     });
 
     rerender(
-      calendar({ loadEvents, eventVersion: 2, appearingEventIds: ["event-b"], eventRenderer: renderer, settings })
+      calendar({
+        loadEvents,
+        eventVersion: 2,
+        appearingEventIds: ["event-b"],
+        eventRenderer: renderer,
+        settings
+      })
     );
 
     expect(await screen.findByText("Requested Appearing")).toBeInTheDocument();

@@ -13,12 +13,13 @@ import {
 import { AvailabilityLayerDemo, EventFocusDemo } from "./ArticleSystemDemos";
 import {
   CssNativeDemo,
+  CalendarCellStylingDemo,
   CustomCardStructureDemo,
   DateLocalizationDemo,
   EverythingTogetherDemo,
   NavigationControlsDemo,
   ProgressiveTimeRevealDemo,
-  StylingDemo,
+  ThemeDemo,
   TimeMarkerDemo
 } from "./ArticleProductDemos";
 import { DragCreateArticleDemo, PrefetchLoadingDemo, ReadOnlyArticleDemo } from "./ArticleRecipeDemos";
@@ -157,7 +158,7 @@ const previewArrowDate = (event) => {
 
 <QunoInfiniteCalendar ref={calendarRef} {...calendarProps} />`;
 
-const stylingSnippet = `const settings = {
+const themeSnippet = `const settings = {
   rowHeight: density === "compact" ? 42 : 58,
   dayHeaderHeight: density === "compact" ? 36 : 46,
   labelWidth: density === "compact" ? 150 : 190
@@ -173,6 +174,25 @@ const stylingSnippet = `const settings = {
 .product-calendar.theme-night {
   --quno-calendar-cell-border: #33443f;
 }`;
+
+const calendarCellStylingSnippet = `const getCalendarCellProps = ({ calendar, isWeekend }) => {
+  const isEquipment = calendar.id.startsWith("equipment");
+  if (!isWeekend && !isEquipment) return undefined;
+
+  return {
+    className: isEquipment ? "equipment-cell" : "weekend-cell",
+    style: {
+      backgroundColor: isEquipment ? "#e8f1ff" : "#fff3e3"
+    },
+    title: isEquipment ? \`\${calendar.name} equipment\` : "Weekend"
+  };
+};
+
+<QunoInfiniteCalendar
+  {...calendarProps}
+  getCalendarCellProps={getCalendarCellProps}
+/>
+`;
 
 const dateLocalizationSnippet = `import type { DayNameGenerator } from "@quno/calendar/infinite-calendar";
 
@@ -301,17 +321,18 @@ const articleContents = [
   ["#zoom", "12", "Zoom without losing precision"],
   ["#time-precision", "13", "Reveal time progressively"],
   ["#styling", "14", "Theme the calendar"],
-  ["#date-localization", "15", "Localize dates and product labels"],
-  ["#overlap-lanes", "16", "Resolve overlapping content"],
-  ["#hover-reveal", "17", "Reveal events beneath a hover"],
-  ["#preloading", "18", "Preload events before they enter the view"],
-  ["#late-loading", "19", "Keep a stable position during late loading"],
-  ["#creation-lane", "20", "Focus creation on one calendar"],
-  ["#visual-focus", "21", "Keep the committed event in view"],
-  ["#react-integration", "22", "Keep React as the source of truth"],
-  ["#motion", "23", "Support motion without losing state"],
-  ["#everything-together", "24", "Put everything together"],
-  ["#package-footprint", "25", "Ship the package"]
+  ["#calendar-cell-styling", "15", "Style rows and columns from data"],
+  ["#date-localization", "16", "Localize dates and product labels"],
+  ["#overlap-lanes", "17", "Resolve overlapping content"],
+  ["#hover-reveal", "18", "Reveal events beneath a hover"],
+  ["#preloading", "19", "Preload events before they enter the view"],
+  ["#late-loading", "20", "Keep a stable position during late loading"],
+  ["#creation-lane", "21", "Focus creation on one calendar"],
+  ["#visual-focus", "22", "Keep the committed event in view"],
+  ["#react-integration", "23", "Keep React as the source of truth"],
+  ["#motion", "24", "Support motion without losing state"],
+  ["#everything-together", "25", "Put everything together"],
+  ["#package-footprint", "26", "Ship the package"]
 ] as const;
 
 const syntaxKeywords = new Set([
@@ -669,15 +690,41 @@ export function IntegrationWalkthrough({ embedded = false }: { embedded?: boolea
           control colors, borders, typography, cards, and the current-time marker. Products can create distinct themes
           without changing calendar behavior.
         </p>
-        <CodeBlock code={stylingSnippet} title="Combine geometry settings with scoped CSS" />
+        <CodeBlock code={themeSnippet} title="Combine geometry settings with scoped CSS" />
+        <Callout>
+          Switch between Clinical, Compact, and Night. Each preset changes the whole calendar’s density and visual
+          language while preserving its behavior.
+        </Callout>
         <DemoBreakout>
           <LazyArticleDemo label="calendar styling presets">
-            <StylingDemo />
+            <ThemeDemo />
           </LazyArticleDemo>
         </DemoBreakout>
       </ArticleSection>
 
-      <ArticleSection id="date-localization" number="15" title="Localize dates and product labels">
+      <ArticleSection id="calendar-cell-styling" number="15" title="Style rows and columns from data">
+        <p>
+          Operational meaning often belongs to one date and resource rather than the calendar’s overall theme. Weekend
+          capacity may need a warm background, while equipment lanes need a distinct color wherever they appear.
+        </p>
+        <p>
+          <code>getCalendarCellProps</code> receives typed date, weekday, Today/weekend, calendar, and view context. It
+          can assign a class, inline style, or title to the matching horizontal row or vertical column without taking
+          ownership of layout, events, or interaction.
+        </p>
+        <CodeBlock code={calendarCellStylingSnippet} title="Style each date and resource cell from its context" />
+        <Callout>
+          Switch between Rows and Columns. Weekend cells stay warm and the equipment resource stays blue in either
+          orientation.
+        </Callout>
+        <DemoBreakout>
+          <LazyArticleDemo label="calendar cell styling">
+            <CalendarCellStylingDemo />
+          </LazyArticleDemo>
+        </DemoBreakout>
+      </ArticleSection>
+
+      <ArticleSection id="date-localization" number="16" title="Localize dates and product labels">
         <p>
           Dates should read naturally wherever the calendar is used. That can mean another language and regional format,
           or a more conversational vocabulary such as Today, Tomorrow, and Yesterday.
@@ -700,7 +747,7 @@ export function IntegrationWalkthrough({ embedded = false }: { embedded?: boolea
         </DemoBreakout>
       </ArticleSection>
 
-      <ArticleSection id="overlap-lanes" number="16" title="Resolve overlapping content">
+      <ArticleSection id="overlap-lanes" number="17" title="Resolve overlapping content">
         <p>
           Overlap is normal in business scheduling: one person, room, or machine can be connected to several events
           around the same time. Those collisions need to stay visible without making every quiet row unnecessarily
@@ -722,7 +769,7 @@ export function IntegrationWalkthrough({ embedded = false }: { embedded?: boolea
         </DemoBreakout>
       </ArticleSection>
 
-      <ArticleSection id="hover-reveal" number="17" title="Reveal events beneath a hover">
+      <ArticleSection id="hover-reveal" number="18" title="Reveal events beneath a hover">
         <p>
           Compact overlap cards preserve density, but they cannot always show enough text. Hover temporarily expands the
           card being read without making the other events underneath it unreachable.
@@ -744,7 +791,7 @@ export function IntegrationWalkthrough({ embedded = false }: { embedded?: boolea
         </DemoBreakout>
       </ArticleSection>
 
-      <ArticleSection id="preloading" number="18" title="Preload events before they enter the view">
+      <ArticleSection id="preloading" number="19" title="Preload events before they enter the view">
         <p>
           The next place a user will visit is often predictable: tomorrow, the following week, or a known upcoming
           booking. Waiting until arrival creates a visible pause, while loading an entire year wastes network, memory,
@@ -768,7 +815,7 @@ export function IntegrationWalkthrough({ embedded = false }: { embedded?: boolea
         </DemoBreakout>
       </ArticleSection>
 
-      <ArticleSection id="late-loading" number="19" title="Keep a stable position during late loading">
+      <ArticleSection id="late-loading" number="20" title="Keep a stable position during late loading">
         <p>
           New data should update the schedule, not move the user. A delayed response can add collisions above the
           viewport, change row height, and otherwise shift the appointment someone was reading or about to select.
@@ -794,7 +841,7 @@ export function IntegrationWalkthrough({ embedded = false }: { embedded?: boolea
         </DemoBreakout>
       </ArticleSection>
 
-      <ArticleSection id="creation-lane" number="20" title="Focus creation on one calendar">
+      <ArticleSection id="creation-lane" number="21" title="Focus creation on one calendar">
         <p>
           Once a person has been chosen, the booking decision becomes simpler: find the best opening in that person’s
           schedule. Unrelated rows only compete for attention.
@@ -811,7 +858,7 @@ export function IntegrationWalkthrough({ embedded = false }: { embedded?: boolea
         </DemoBreakout>
       </ArticleSection>
 
-      <ArticleSection id="visual-focus" number="21" title="Keep the committed event in view">
+      <ArticleSection id="visual-focus" number="22" title="Keep the committed event in view">
         <p>
           Saving a draft, opening a search result, assigning another resource, or adding a collision can move the event
           someone cares about. A successful action is confusing if its result ends up clipped or offscreen.
@@ -829,7 +876,7 @@ export function IntegrationWalkthrough({ embedded = false }: { embedded?: boolea
         </DemoBreakout>
       </ArticleSection>
 
-      <ArticleSection id="react-integration" number="22" title="Keep React as the source of truth">
+      <ArticleSection id="react-integration" number="23" title="Keep React as the source of truth">
         <p>
           Quno/Infinite Calendar behaves like a React component, not a second application hidden inside one. Your app
           remains the source of truth for resources, permissions, persistence, settings, and product UI; the calendar
@@ -852,7 +899,7 @@ export function IntegrationWalkthrough({ embedded = false }: { embedded?: boolea
         <CodeBlock code={completeSnippet} title="Complete minimal integration" />
       </ArticleSection>
 
-      <ArticleSection id="motion" number="23" title="Support motion without losing state">
+      <ArticleSection id="motion" number="24" title="Support motion without losing state">
         <p>
           Motion can make a dense interface easier to understand. A brief glint confirms that an event was saved; a fade
           shows that a draft was cancelled. Neither should move neighboring events or interrupt the task.
@@ -873,7 +920,7 @@ export function IntegrationWalkthrough({ embedded = false }: { embedded?: boolea
         </DemoBreakout>
       </ArticleSection>
 
-      <ArticleSection id="everything-together" number="24" title="Put everything together">
+      <ArticleSection id="everything-together" number="25" title="Put everything together">
         <p>
           The focused examples explain one decision at a time. A real scheduling screen brings them together:
           navigation, zoom, remote data, overlap handling, editing, product-specific cards, and clear save feedback.
@@ -894,9 +941,9 @@ export function IntegrationWalkthrough({ embedded = false }: { embedded?: boolea
         </DemoBreakout>
       </ArticleSection>
 
-      <ArticleSection id="package-footprint" number="25" title="Ship Infinite Calendar independently">
+      <ArticleSection id="package-footprint" number="26" title="Ship Infinite Calendar independently">
         <p>
-          Infinite Calendar JavaScript is 31.76 KiB gzip. Its optional stylesheet is a separate 1.95 KiB gzip import;
+          Infinite Calendar JavaScript is 32.40 KiB gzip. Its optional stylesheet is a separate 1.94 KiB gzip import;
           neither number includes React, React DOM, or the external virtualizer supplied by the application.
         </p>
         <p>

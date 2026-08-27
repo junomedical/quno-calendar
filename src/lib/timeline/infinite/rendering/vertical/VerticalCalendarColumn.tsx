@@ -25,7 +25,13 @@ function useEventProjections(settings: VerticalCalendarColumnProps["settings"]) 
   const event = useCallback(
     (calendarEvent: CalendarEvent) => {
       const box = verticalEventBox(calendarEvent, settings);
-      return { left: 0, top: box.top, width: "100%", hoverMaxWidth: "100%", height: box.height };
+      return {
+        left: 0,
+        top: box.top,
+        width: "100%",
+        hoverMaxWidth: "100%",
+        height: box.height
+      };
     },
     [settings]
   );
@@ -51,6 +57,7 @@ export const VerticalCalendarColumn = memo(function VerticalCalendarColumn({
   rowEvents,
   preparedCell,
   isHidden = false,
+  calendarCellProps,
   settings,
   boardHeight,
   gridCellHeight,
@@ -87,16 +94,22 @@ export const VerticalCalendarColumn = memo(function VerticalCalendarColumn({
 
   return (
     <div
-      className={isAlternate ? "icv-calendar-column-grid is-alternate" : "icv-calendar-column-grid"}
+      className={["icv-calendar-column-grid", isAlternate ? "is-alternate" : "", calendarCellProps?.className]
+        .filter(Boolean)
+        .join(" ")}
       data-testid="calendar-column"
+      data-slot="calendar-cell"
+      data-date={dateKey}
       data-calendar-id={calendar.id}
       data-retained-hidden={isHidden ? "true" : undefined}
       data-event-count={rowEvents.length}
+      title={calendarCellProps?.title}
       ref={setResourceElement}
       aria-hidden={isHidden || undefined}
       onMouseLeave={onHoverLeave}
       onPointerMove={(pointerEvent) => onHoverMove(pointerEvent, layoutItems, calendar.id)}
       style={{
+        ...calendarCellProps?.style,
         gridColumn,
         minHeight: boardHeight,
         visibility: isHidden ? "hidden" : undefined,

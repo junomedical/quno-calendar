@@ -21,24 +21,25 @@ The article teaches the calendar through focused live exhibits:
 12. Zoom without losing precision.
 13. Reveal time progressively.
 14. Theme the calendar.
-15. Localize dates and product labels.
-16. Resolve overlapping content.
-17. Reveal events beneath a hover.
-18. Preload events before they enter the view.
-19. Keep a stable position during late loading.
-20. Focus creation on one calendar.
-21. Keep the committed event in view.
-22. Keep React as the source of truth.
-23. Support motion without losing state, beginning with an explicit New draft action.
-24. Put everything together.
-25. Ship the package.
+15. Style rows and columns from data.
+16. Localize dates and product labels.
+17. Resolve overlapping content.
+18. Reveal events beneath a hover.
+19. Preload events before they enter the view.
+20. Keep a stable position during late loading.
+21. Focus creation on one calendar.
+22. Keep the committed event in view.
+23. Keep React as the source of truth.
+24. Support motion without losing state, beginning with an explicit New draft action.
+25. Put everything together.
+26. Ship the package.
 
 [`IntegrationWalkthrough.tsx`](./IntegrationWalkthrough.tsx) owns the narrative and progressive code examples.
 [`ArticleDemos.tsx`](./ArticleDemos.tsx) owns the foundational interactive exhibits,
 [`ArticleSystemDemos.tsx`](./ArticleSystemDemos.tsx) owns the layer and visual-focus labs, and
 [`ArticleRecipeDemos.tsx`](./ArticleRecipeDemos.tsx) owns the read-only, drag/create, and preloading exhibits.
 [`ArticleProductDemos.tsx`](./ArticleProductDemos.tsx) owns CSS-native chrome, current-time, navigation, progressive
-precision, styling, custom card structure, date localization, and final-composition exhibits.
+precision, theming, row/column styling, custom card structure, date localization, and final-composition exhibits.
 [`ReactStateDemo.tsx`](./ReactStateDemo.tsx) owns the focused controlled-props and callback exhibit.
 [`articleSupport.tsx`](./articleSupport.tsx) contains deterministic fixtures and the external event renderer. Every live
 calendar imports the public `@quno/calendar/infinite-calendar` entrypoint.
