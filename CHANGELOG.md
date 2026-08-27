@@ -148,14 +148,6 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
   intermediate date tree.
 - Kept an in-progress controlled single-date input draft intact across unrelated parent rerenders.
 
-### Verification
-
-- Full Chromium verification has one unrelated blocker in
-  `e2e/specs/vertical.spec.ts:444`: after the drawn draft's only participant is unchecked, the first matching resource
-  column remains visible instead of receiving `data-retained-hidden="true"`. The other 115 Chromium tests pass,
-  including the new day/hour/row/column styling coverage. The focused Firefox styling run is environment-blocked because its
-  headless browser cannot map the software framebuffer in the macOS sandbox; Chromium and WebKit styling runs pass.
-
 ## 0.6.0 - 2026-08-24
 
 ### Added
