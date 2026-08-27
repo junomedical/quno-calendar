@@ -3,6 +3,7 @@
  * visible resource indexes -> now indicator + independent resource columns
  */
 import { VerticalCalendarColumn } from "./VerticalCalendarColumn";
+import type { QunoInfiniteCalendarCellProps } from "#quno-internal/timeline/core/types";
 import type { VerticalTimelineDayProps } from "./types";
 import { verticalMinuteToY } from "./verticalGeometry";
 
@@ -11,6 +12,7 @@ type VerticalDayBoardProps = {
   cadenceHeight: number;
   gridTemplateColumns: string;
   renderedColumnIndexes: number[];
+  calendarCellProps: Map<string, QunoInfiniteCalendarCellProps | undefined>;
 };
 
 /** Date board: global time indicator -> visible resource columns -> event layers. */
@@ -18,7 +20,8 @@ export function VerticalDayBoard({
   day,
   cadenceHeight,
   gridTemplateColumns,
-  renderedColumnIndexes
+  renderedColumnIndexes,
+  calendarCellProps
 }: VerticalDayBoardProps) {
   return (
     <div
@@ -50,6 +53,8 @@ export function VerticalDayBoard({
             rowEvents={isHidden ? [] : day.eventsForColumn(day.dateKey, calendar.id)}
             preparedCell={day.preparedCellForColumn(day.dateKey, calendar.id)}
             isHidden={isHidden}
+            calendarCellProps={calendarCellProps.get(calendar.id)}
+            calendarHourPresentations={day.calendarHourPresentations}
             settings={day.settings}
             boardHeight={day.boardHeight}
             gridCellHeight={cadenceHeight}

@@ -496,9 +496,18 @@ test("allows manual vertical scrolling after a drawn draft opens the popup", asy
   );
   await page.getByTestId(`draft-participant-${draftCalendarId}`).uncheck();
   await expect(page.getByTestId("draft-save-button")).toBeDisabled();
-  await expect(
-    page.locator(`[data-testid="calendar-column"][data-calendar-id="${draftCalendarId}"]`).first()
-  ).toHaveAttribute("data-retained-hidden", "true");
+  await expect
+    .poll(async () =>
+      page
+        .getByTestId("calendar-column")
+        .evaluateAll((columns) =>
+          Array.from(
+            new Set(columns.map((column) => (column as HTMLElement).dataset.calendarId).filter(Boolean))
+          ).sort()
+        )
+    )
+    .toEqual(["dr-kirillov", "dr-thakker", "marco-eggens", "room-201", "room-202", "room-203"]);
+  await expect(page.locator('[data-testid="calendar-column"][data-retained-hidden="true"]')).toHaveCount(0);
   await expect(page.locator(`[data-testid="draft-event"][data-calendar-id="${draftCalendarId}"]`)).toHaveCount(0);
   await page.getByTestId(`draft-participant-${draftCalendarId}`).check();
   await expect(page.getByTestId("draft-save-button")).toBeEnabled();

@@ -3,6 +3,11 @@
 Quno/Infinite Calendar owns virtualized horizontal and vertical schedules, timestamped events, async loading, event
 rendering, creation and movement, navigation, zoom, and visual focus.
 
+`getCalendarDayProps` assigns date-wide presentation to a complete day and its visible header. `getCalendarCellProps`
+adds resource-specific classes, inline styles, or titles from typed date, weekend, calendar, and orientation context.
+`getCalendarHourProps` styles clock-hour bands and their visible labels across both orientations. Together they style
+days, hours, horizontal rows, and vertical columns without taking ownership of geometry or interaction behavior.
+
 - Public entry point: `@quno/calendar/infinite-calendar`
 - Live field guide: `/guide/infinite-calendar`
 - Focused demo: `/demo/infinite-calendar`

@@ -18,7 +18,9 @@ const now = new Date("2026-07-04T09:30:00");
 const settings = { startHour: 8, endHour: 18, zoom: 1, excludedWeekdays: [] };
 const defaultRenderer = ({ event, style }: EventRendererProps) => <div style={style}>{event.title}</div>;
 type TestCalendarProps = Partial<QunoInfiniteCalendarProps> &
-  Pick<QunoInfiniteCalendarProps, "loadEvents"> & { ref?: Ref<QunoInfiniteCalendarHandle> };
+  Pick<QunoInfiniteCalendarProps, "loadEvents"> & {
+    ref?: Ref<QunoInfiniteCalendarHandle>;
+  };
 
 function calendar(props: TestCalendarProps) {
   return (
@@ -49,6 +51,124 @@ describe("InfiniteTimelineView", () => {
     expect(shell).toHaveAccessibleName("Public schedule");
     expect(shell).toHaveClass("quno-calendar-shell", "custom-calendar");
     expect(shell).toHaveStyle({ minHeight: "320px" });
+  });
+
+  it("customizes date sections, hours, rows, and columns through typed presentation callbacks", () => {
+    const getCalendarDayProps = vi.fn((context) => ({
+      className: context.isWeekend ? "consumer-weekend-day" : "consumer-workday",
+      style: { backgroundColor: "moccasin" },
+      title: `Day ${context.date}`
+    }));
+    const getCalendarCellProps = vi.fn((context) => ({
+      className: "consumer-calendar-cell",
+      style: {
+        backgroundColor: context.calendar.id === "calendar-b" ? "lavender" : "papayawhip"
+      },
+      title: `${context.calendar.name} on ${context.date}`
+    }));
+    const getCalendarHourProps = vi.fn((context) =>
+      context.hour === 12
+        ? { className: "consumer-lunch-hour", style: { backgroundColor: "honeydew" }, title: "Lunch hour" }
+        : undefined
+    );
+    const horizontal = renderCalendar({
+      getCalendarCellProps,
+      getCalendarDayProps,
+      getCalendarHourProps,
+      initialDateKey: "2026-07-04",
+      loadEvents: async () => [],
+      selectedCalendarIds: ["calendar-a", "calendar-b"]
+    });
+    const horizontalCell = horizontal.container.querySelector(
+      '[data-slot="calendar-cell"][data-date="2026-07-04"][data-calendar-id="calendar-b"]'
+    );
+
+    expect(horizontalCell).toHaveClass("consumer-weekend-day", "consumer-calendar-cell");
+    expect(horizontalCell).toHaveAttribute("style", expect.stringContaining("background-color: lavender"));
+    expect(horizontalCell).toHaveAttribute("title", "Calendar B on 2026-07-04");
+    expect(getCalendarCellProps).toHaveBeenCalledWith({
+      calendar: calendars[1],
+      date: "2026-07-04",
+      weekday: 6,
+      view: "infinite-horizontal",
+      isToday: true,
+      isWeekend: true
+    });
+    const horizontalDayLabel = horizontal.container.querySelector(
+      '[data-slot="calendar-day-label"][title="Day 2026-07-04"]'
+    );
+    expect(horizontalDayLabel).toHaveClass("consumer-weekend-day");
+    expect(horizontalDayLabel).toHaveAttribute("style", expect.stringContaining("background-color: moccasin"));
+    expect(getCalendarDayProps).toHaveBeenCalledWith({
+      date: "2026-07-04",
+      weekday: 6,
+      view: "infinite-horizontal",
+      isToday: true,
+      isWeekend: true
+    });
+    expect(horizontalCell?.querySelector('[data-slot="calendar-hour"][data-hour="12"]')).toHaveClass(
+      "consumer-lunch-hour"
+    );
+    expect(horizontal.container.querySelector('[data-slot="calendar-hour-label"][data-hour="12"]')).toHaveAttribute(
+      "title",
+      "Lunch hour"
+    );
+    expect(getCalendarHourProps).toHaveBeenCalledWith({
+      hour: 12,
+      startMinute: 720,
+      endMinute: 780,
+      view: "infinite-horizontal"
+    });
+
+    horizontal.unmount();
+    getCalendarCellProps.mockClear();
+    getCalendarDayProps.mockClear();
+    getCalendarHourProps.mockClear();
+    const vertical = renderCalendar({
+      getCalendarCellProps,
+      getCalendarDayProps,
+      getCalendarHourProps,
+      initialDateKey: "2026-07-04",
+      loadEvents: async () => [],
+      selectedCalendarIds: ["calendar-a", "calendar-b"],
+      view: "infinite-vertical"
+    });
+    const verticalCell = vertical.container.querySelector(
+      '[data-slot="calendar-cell"][data-date="2026-07-04"][data-calendar-id="calendar-b"]'
+    );
+
+    expect(verticalCell).toHaveClass("consumer-weekend-day", "consumer-calendar-cell");
+    expect(verticalCell).toHaveAttribute("style", expect.stringContaining("background-color: lavender"));
+    expect(getCalendarCellProps).toHaveBeenCalledWith(
+      expect.objectContaining({
+        date: "2026-07-04",
+        view: "infinite-vertical",
+        isWeekend: true
+      })
+    );
+    expect(
+      vertical.container.querySelector('[data-slot="calendar-day-label"][title="Day 2026-07-04"]')
+    ).toHaveAttribute("style", expect.stringContaining("background-color: moccasin"));
+    expect(getCalendarDayProps).toHaveBeenCalledWith(
+      expect.objectContaining({
+        date: "2026-07-04",
+        view: "infinite-vertical",
+        isWeekend: true
+      })
+    );
+    expect(verticalCell?.querySelector('[data-slot="calendar-hour"][data-hour="12"]')).toHaveAttribute(
+      "style",
+      expect.stringContaining("background-color: honeydew")
+    );
+    expect(vertical.container.querySelector('[data-slot="calendar-hour-label"][data-hour="12"]')).toHaveClass(
+      "consumer-lunch-hour"
+    );
+    expect(getCalendarHourProps).toHaveBeenCalledWith({
+      hour: 12,
+      startMinute: 720,
+      endMinute: 780,
+      view: "infinite-vertical"
+    });
   });
 
   it("uses initialDateKey as the initial virtual range anchor", async () => {
@@ -178,7 +298,12 @@ describe("InfiniteTimelineView", () => {
     ];
     const loadEvents = vi.fn(async () => loaderEvents);
 
-    const { rerender } = renderCalendar({ loadEvents, eventVersion: 0, eventRenderer: renderer, settings });
+    const { rerender } = renderCalendar({
+      loadEvents,
+      eventVersion: 0,
+      eventRenderer: renderer,
+      settings
+    });
 
     expect(await screen.findByText("Before Version")).toBeInTheDocument();
     loaderEvents = [
@@ -191,7 +316,14 @@ describe("InfiniteTimelineView", () => {
       }
     ];
 
-    rerender(calendar({ loadEvents, eventVersion: 1, eventRenderer: renderer, settings }));
+    rerender(
+      calendar({
+        loadEvents,
+        eventVersion: 1,
+        eventRenderer: renderer,
+        settings
+      })
+    );
 
     expect(await screen.findByText("After Version")).toBeInTheDocument();
     expect(screen.queryByText("Before Version")).not.toBeInTheDocument();
@@ -214,7 +346,12 @@ describe("InfiniteTimelineView", () => {
     ];
     const loadEvents = vi.fn(async () => loaderEvents);
 
-    const { rerender } = renderCalendar({ loadEvents, eventVersion: 0, eventRenderer: renderer, settings });
+    const { rerender } = renderCalendar({
+      loadEvents,
+      eventVersion: 0,
+      eventRenderer: renderer,
+      settings
+    });
 
     expect(await screen.findByText("Before Version")).toBeInTheDocument();
     loaderEvents = [
@@ -235,7 +372,13 @@ describe("InfiniteTimelineView", () => {
     ];
 
     rerender(
-      calendar({ loadEvents, eventVersion: 1, appearingEventIds: ["event-b"], eventRenderer: renderer, settings })
+      calendar({
+        loadEvents,
+        eventVersion: 1,
+        appearingEventIds: ["event-b"],
+        eventRenderer: renderer,
+        settings
+      })
     );
 
     expect(await screen.findByText("Requested Appearing")).toBeInTheDocument();
@@ -248,7 +391,13 @@ describe("InfiniteTimelineView", () => {
     });
 
     rerender(
-      calendar({ loadEvents, eventVersion: 2, appearingEventIds: ["event-b"], eventRenderer: renderer, settings })
+      calendar({
+        loadEvents,
+        eventVersion: 2,
+        appearingEventIds: ["event-b"],
+        eventRenderer: renderer,
+        settings
+      })
     );
 
     expect(await screen.findByText("Requested Appearing")).toBeInTheDocument();

@@ -20,7 +20,11 @@ flowchart LR
 | [`index.ts`](../../../src/lib/index.ts)                                                           | Defines the supported package exports and public compatibility boundary.               |
 | [`QunoInfiniteCalendar.tsx`](../../../src/lib/timeline/core/QunoInfiniteCalendar.tsx)             | Selects horizontal or vertical projection from public props.                           |
 | [`internalTypes.ts`](../../../src/lib/timeline/core/internalTypes.ts)                             | Separates view handles and focused-instance state from the public contract.            |
-| [`types.ts`](../../../src/lib/timeline/core/types.ts)                                             | Defines the public API, events, settings, renderers, navigation, and anchor contracts. |
+| [`types.ts`](../../../src/lib/timeline/core/types.ts)                                             | Defines shared public events, settings, renderers, and component contracts.            |
+| [`calendarCellTypes.ts`](../../../src/lib/timeline/core/calendarCellTypes.ts)                     | Defines calendar identity, orientation, and date/hour/resource presentation contracts. |
+| [`calendarCellPresentation.ts`](../../../src/lib/timeline/core/calendarCellPresentation.ts)       | Resolves orientation-neutral date, hour, and resource presentation.                    |
+| [`calendarFocusTypes.ts`](../../../src/lib/timeline/core/calendarFocusTypes.ts)                   | Defines declarative and imperative event-focus contracts.                              |
+| [`calendarViewportTypes.ts`](../../../src/lib/timeline/core/calendarViewportTypes.ts)             | Defines viewport anchors and targeted visible-cache commit options.                    |
 | [`useCalendarFocusCoordinator.ts`](../../../src/lib/timeline/core/useCalendarFocusCoordinator.ts) | Coordinates focus, participant reveal, cancellation, and highlight state.              |
 | [`useCalendarFocusEffects.ts`](../../../src/lib/timeline/core/useCalendarFocusEffects.ts)         | Settles focus requests and owns transient cancellation/highlight effects.              |
 | [`calendarEvents.ts`](../../../src/lib/timeline/data/calendarEvents.ts)                           | Implements exported event membership and immutable move helpers.                       |

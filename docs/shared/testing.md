@@ -95,7 +95,7 @@ Vitest unit tests live in `tests/unit` and mirror the source module grouping.
   configurable week starts, ranges, expected-period ranking, simultaneous English/German recognition, lexicon
   extension, tokenization, SSR safety, and its independent payload. Its focused demo recognizes the visible English and
   German samples together by default, including an absolute-to-relative weekday range.
-- The Infinite Calendar guide keeps a 25-entry, one-topic-per-chapter table of contents. Existing chapter hashes remain
+- The Infinite Calendar guide keeps a 26-entry, one-topic-per-chapter table of contents. Existing chapter hashes remain
   canonical anchors, and heavy exhibits mount lazily as they approach the shared guide scroller.
 - Chapter 01 explains why complex business scheduling needs a dedicated calendar before introducing horizontal time,
   vertically stacked resources, and the familiar vertical mouse-wheel or touchpad axis.
@@ -203,6 +203,11 @@ orientation, availability, loading, visual-focus, and motion assertions formerly
   across a pending 1.2-second idle-recenter deadline keeps the draft and visible date tree mounted at the same
   viewport-relative geometry until pointer release.
 - Vertical virtual scrolling changes visible dates.
+- `getCalendarDayProps` receives the same typed weekend and date identity in both orientations, and
+  `getCalendarCellProps` adds resource identity. The field guide verifies assigned weekend backgrounds on date labels,
+  rows, and columns plus equipment overrides in both projections. `getCalendarHourProps` receives the same clipped
+  clock-hour interval in either view; computed-style and geometry checks cover its horizontal and vertical bands and
+  visible labels.
 - Rendered day DOM nodes are pruned to the visible viewport plus five day sections of overscan.
 - Vertical scrollbar dragging is bounded to one month before/after the visible date. Interior positions keep the
   1.2-second idle delay, while the absolute top and bottom use the 240 ms edge delay before recentering around the new

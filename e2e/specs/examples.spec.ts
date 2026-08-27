@@ -203,7 +203,7 @@ test("editorial table of contents presents the feature chapters and navigates th
 }) => {
   await page.goto("/guide");
   const contents = page.getByRole("navigation", { name: "Table of contents" });
-  await expect(contents.getByRole("link")).toHaveCount(25);
+  await expect(contents.getByRole("link")).toHaveCount(26);
   const chapterBreakoutCounts = await page
     .locator(".calendar-article__section")
     .evaluateAll((sections) =>
@@ -212,11 +212,15 @@ test("editorial table of contents presents the feature chapters and navigates th
           [...section.children].filter((child) => child.classList.contains("calendar-article__breakout")).length
       )
     );
-  expect(chapterBreakoutCounts).toHaveLength(25);
+  expect(chapterBreakoutCounts).toHaveLength(26);
   expect(chapterBreakoutCounts.every((count) => count <= 1)).toBe(true);
   await expect(contents.getByRole("link", { name: /Fit dense schedules into a clear view/ })).toHaveAttribute(
     "href",
     "#horizontal-first"
+  );
+  await expect(contents.getByRole("link", { name: /Style days, hours, rows, and columns from data/ })).toHaveAttribute(
+    "href",
+    "#calendar-cell-styling"
   );
   const horizontalSection = page.locator("#horizontal-first");
   await expect(page.getByRole("heading", { name: "Fit dense schedules into a clear view" })).toBeVisible();
@@ -297,7 +301,7 @@ test("editorial CSS-native exhibit keeps stable chrome browser-positioned", asyn
 
 test("all four guides separate exact payloads from runtime contracts", async ({ page }) => {
   const guides = [
-    ["infinite-calendar", "31.76 KiB gzip", "1.95 KiB gzip", "@quno/calendar/infinite-calendar"],
+    ["infinite-calendar", "33.44 KiB gzip", "1.95 KiB gzip", "@quno/calendar/infinite-calendar"],
     ["datepicker", "9.00 KiB gzip", "3.20 KiB gzip", "@quno/calendar/datepicker"],
     ["date-input", "6.77 KiB gzip", "0.58 KiB gzip", "@quno/calendar/date-input"],
     ["date-parser", "4.45 KiB gzip", "No stylesheet", "@quno/calendar/date-parser"]

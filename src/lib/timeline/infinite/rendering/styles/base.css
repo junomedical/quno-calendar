@@ -39,6 +39,12 @@
   left: 0;
 }
 
+.quno-calendar-hour-band {
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+}
+
 .quno-calendar-day-header-band {
   position: absolute;
   z-index: 0;

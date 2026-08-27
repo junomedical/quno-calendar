@@ -26,11 +26,12 @@ flowchart LR
 
 ### Shared
 
-| Source file                                                                                      | Responsibility                                                                        |
-| ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------- |
-| [`EventShell.tsx`](../../../src/lib/timeline/infinite/rendering/shared/EventShell.tsx)           | Hosts the external renderer inside geometry- and status-controlled shell layers.      |
-| [`EventLayers.tsx`](../../../src/lib/timeline/infinite/rendering/shared/EventLayers.tsx)         | Shares committed, availability, draft, and preview state while views supply geometry. |
-| [`TimeScaleHeader.tsx`](../../../src/lib/timeline/infinite/rendering/shared/TimeScaleHeader.tsx) | Renders the sticky horizontal time scale, tick labels, and current-time pin.          |
+| Source file                                                                                          | Responsibility                                                                        |
+| ---------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| [`EventShell.tsx`](../../../src/lib/timeline/infinite/rendering/shared/EventShell.tsx)               | Hosts the external renderer inside geometry- and status-controlled shell layers.      |
+| [`EventLayers.tsx`](../../../src/lib/timeline/infinite/rendering/shared/EventLayers.tsx)             | Shares committed, availability, draft, and preview state while views supply geometry. |
+| [`CalendarHourBands.tsx`](../../../src/lib/timeline/infinite/rendering/shared/CalendarHourBands.tsx) | Projects product-owned hour presentation onto horizontal and vertical time geometry.  |
+| [`TimeScaleHeader.tsx`](../../../src/lib/timeline/infinite/rendering/shared/TimeScaleHeader.tsx)     | Renders the sticky horizontal time scale, tick labels, and current-time pin.          |
 
 ### Horizontal
 

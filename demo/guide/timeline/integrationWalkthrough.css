@@ -1098,6 +1098,7 @@
 
 .article-navigation-controls input,
 .article-summary-controls select,
+.article-cell-styling-select,
 .article-localization-tools select {
   height: 34px;
   padding: 0 8px;

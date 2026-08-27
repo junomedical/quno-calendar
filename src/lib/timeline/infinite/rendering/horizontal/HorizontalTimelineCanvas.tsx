@@ -1,4 +1,5 @@
 import type { PointerEventHandler, RefObject, UIEventHandler } from "react";
+import type { CalendarHourPresentation } from "#quno-internal/timeline/core/calendarCellPresentation";
 import type { CalendarViewComponentProps } from "#quno-internal/timeline/core/types";
 import { InfiniteTimeScaleHeader } from "#quno-internal/timeline/infinite/rendering/shared/TimeScaleHeader";
 import { InfiniteTimelineDay } from "./HorizontalTimelineDay";
@@ -26,6 +27,7 @@ type HorizontalTimelineCanvasProps = {
   onPointerCancel: PointerEventHandler<HTMLDivElement>;
   virtualHeight: number;
   timeTicks: ReturnType<typeof buildTimeTicks>;
+  calendarHourPresentations: CalendarHourPresentation[];
   showNowLine: boolean;
   nowMinute: number;
   renderItems: HorizontalTimelineDayProps["item"][];
@@ -48,6 +50,7 @@ export function HorizontalTimelineCanvas({
   onPointerCancel,
   virtualHeight,
   timeTicks,
+  calendarHourPresentations,
   showNowLine,
   nowMinute,
   renderItems,
@@ -88,6 +91,7 @@ export function HorizontalTimelineCanvas({
             settings={dayProps.settings}
             width={dayProps.width}
             timeTicks={timeTicks}
+            calendarHourPresentations={calendarHourPresentations}
             showNowLine={showNowLine}
             nowMinute={nowMinute}
           />

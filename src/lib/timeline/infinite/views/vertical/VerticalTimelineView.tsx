@@ -37,6 +37,14 @@ function useVerticalViewSetup(props: CalendarInternalViewProps, now: Date) {
   });
 }
 
+function verticalPresentationProps(props: CalendarInternalViewProps) {
+  return {
+    getCalendarCellProps: props.getCalendarCellProps,
+    getCalendarDayProps: props.getCalendarDayProps,
+    getCalendarHourProps: props.getCalendarHourProps
+  };
+}
+
 /** Infinite date timeline with resources as columns and time on the vertical axis. */
 export const InfiniteVerticalTimelineView = forwardRef<CalendarViewHandle, CalendarInternalViewProps>(
   function InfiniteVerticalTimelineView(props, ref) {
@@ -128,6 +136,7 @@ export const InfiniteVerticalTimelineView = forwardRef<CalendarViewHandle, Calen
       appearingEventIds: eventStore.appearingEventIds,
       focusedEventTarget: props.focusedEventTarget,
       eventRenderer: props.eventRenderer,
+      ...verticalPresentationProps(props),
       geometryRegistration: navigation.geometryRegistration,
       activeRestoreTarget: navigation.activeRestoreTarget,
       viewportMetricsStore: viewport.viewportMetricsStore,

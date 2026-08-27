@@ -1,9 +1,16 @@
 import { useCallback, type PropsWithChildren, type PointerEvent } from "react";
-import type { CalendarId, CalendarRow, QunoInfiniteCalendarSettings } from "#quno-internal/timeline/core/types";
+import type { CalendarHourPresentation } from "#quno-internal/timeline/core/calendarCellPresentation";
+import type {
+  CalendarId,
+  CalendarRow,
+  QunoInfiniteCalendarCellProps,
+  QunoInfiniteCalendarSettings
+} from "#quno-internal/timeline/core/types";
 import { minuteToX } from "#quno-internal/timeline/time/time";
 import { TIMELINE_LEFT_GUTTER_PX } from "#quno-internal/timeline/time/timelineTicks";
 import type { ViewportGeometryRegistration } from "#quno-internal/timeline/infinite/anchors/parent/viewportAnchorTypes";
 import type { HorizontalRowLayoutItems } from "./types";
+import { CalendarHourBands } from "#quno-internal/timeline/infinite/rendering/shared/CalendarHourBands";
 
 /** Row chrome: resource label + time grid + hover hit surface around event layers. */
 
@@ -13,6 +20,8 @@ type HorizontalRowFrameProps = PropsWithChildren<{
   top: number;
   rowHeight: number;
   isHidden: boolean;
+  calendarCellProps?: QunoInfiniteCalendarCellProps;
+  calendarHourPresentations: CalendarHourPresentation[];
   settings: QunoInfiniteCalendarSettings;
   timelineWidth: number;
   gridCellWidth: number;
@@ -37,6 +46,8 @@ export function HorizontalRowFrame({
   top,
   rowHeight,
   isHidden,
+  calendarCellProps,
+  calendarHourPresentations,
   settings,
   timelineWidth,
   gridCellWidth,
@@ -70,15 +81,27 @@ export function HorizontalRowFrame({
         pointerEvents: isHidden ? "none" : undefined
       }}
     >
-      <div className="quno-calendar-left-label quno-calendar-row-label" style={{ width: settings.labelWidth }}>
+      <div
+        className={["quno-calendar-left-label", "quno-calendar-row-label", calendarCellProps?.className]
+          .filter(Boolean)
+          .join(" ")}
+        data-slot="calendar-cell-label"
+        style={{ ...calendarCellProps?.style, width: settings.labelWidth }}
+        title={calendarCellProps?.title}
+      >
         {calendar.name}
       </div>
       <div
-        className="quno-calendar-row-grid"
+        className={["quno-calendar-row-grid", calendarCellProps?.className].filter(Boolean).join(" ")}
+        data-slot="calendar-cell"
+        data-date={dateKey}
+        data-calendar-id={calendar.id}
         data-event-count={eventCount}
+        title={calendarCellProps?.title}
         onMouseLeave={onHoverLeave}
         onPointerMove={(event) => onHoverMove(event, layoutItems, calendar.id, rowHeight)}
         style={{
+          ...calendarCellProps?.style,
           left: settings.labelWidth,
           width: TIMELINE_LEFT_GUTTER_PX + timelineWidth,
           height: rowHeight,
@@ -89,11 +112,14 @@ export function HorizontalRowFrame({
           backgroundSize: `${gridCellWidth}px 100%`
         }}
       >
+        <CalendarHourBands hours={calendarHourPresentations} orientation="horizontal" settings={settings} />
         {showNowLine ? (
           <div
             className={`quno-calendar-now-line ${nowLineClassName}`}
             data-testid="current-time-line"
-            style={{ left: TIMELINE_LEFT_GUTTER_PX + minuteToX(nowMinute, settings) }}
+            style={{
+              left: TIMELINE_LEFT_GUTTER_PX + minuteToX(nowMinute, settings)
+            }}
           />
         ) : null}
         {children}

@@ -6,6 +6,9 @@ import {
   applyEventMove,
   type CalendarEvent,
   type QunoInfiniteCalendarHandle,
+  type QunoInfiniteCalendarCellCustomizer,
+  type QunoInfiniteCalendarDayCustomizer,
+  type QunoInfiniteCalendarHourCustomizer,
   type DayNameGenerator,
   type EventCreateRequest,
   type EventMoveRequest,
@@ -51,7 +54,10 @@ const navigationEvents: CalendarEvent[] = [
   }
 ];
 const loadNavigationEvents: LoadEvents = async (request) => filterEvents(navigationEvents, request);
-const navigationExpectedRange: DateRange = { start: "2025-01-01", end: "2027-12-31" };
+const navigationExpectedRange: DateRange = {
+  start: "2025-01-01",
+  end: "2027-12-31"
+};
 
 type CardGrouping = "product" | "patient" | "room";
 type StructuredArticleEvent = CalendarEvent & {
@@ -156,7 +162,13 @@ export function CustomCardStructureDemo() {
           initialDateKey={articleDateKey}
           loadEvents={loadStructuredCardEvents}
           selectedCalendarIds={["provider-a"]}
-          settings={{ ...articleSettings, startHour: 8, endHour: 17, rowHeight: 72, zoom: 1.4 }}
+          settings={{
+            ...articleSettings,
+            startHour: 8,
+            endHour: 17,
+            rowHeight: 72,
+            zoom: 1.4
+          }}
         />
       </div>
     </CalendarDemoShell>
@@ -404,11 +416,23 @@ type ArticleTheme = "clinical" | "compact" | "night";
 
 const themeSettings: Record<ArticleTheme, Partial<QunoInfiniteCalendarSettings>> = {
   clinical: { ...articleSettings, rowHeight: 58, labelWidth: 190, zoom: 1.15 },
-  compact: { ...articleSettings, rowHeight: 42, dayHeaderHeight: 36, labelWidth: 150, zoom: 0.95 },
-  night: { ...articleSettings, rowHeight: 56, dayHeaderHeight: 46, labelWidth: 180, zoom: 1.2 }
+  compact: {
+    ...articleSettings,
+    rowHeight: 42,
+    dayHeaderHeight: 36,
+    labelWidth: 150,
+    zoom: 0.95
+  },
+  night: {
+    ...articleSettings,
+    rowHeight: 56,
+    dayHeaderHeight: 46,
+    labelWidth: 180,
+    zoom: 1.2
+  }
 };
 
-export function StylingDemo() {
+export function ThemeDemo() {
   const [theme, setTheme] = useState<ArticleTheme>("clinical");
 
   return (
@@ -419,7 +443,7 @@ export function StylingDemo() {
     >
       <div className="article-calendar-frame">
         <QunoInfiniteCalendar
-          ariaLabel="Styleable calendar presets"
+          ariaLabel="Calendar theme presets"
           calendars={articleCalendars}
           className={`article-themed-calendar theme-${theme}`}
           eventRenderer={ArticleEventCard}
@@ -435,11 +459,81 @@ export function StylingDemo() {
   );
 }
 
+export function CalendarCellStylingDemo() {
+  const [view, setView] = useState<"infinite-horizontal" | "infinite-vertical">("infinite-horizontal");
+  const getCalendarDayProps = useCallback<QunoInfiniteCalendarDayCustomizer>(({ isWeekend }) => {
+    if (!isWeekend) return undefined;
+    return {
+      className: "article-weekend-day",
+      style: { backgroundColor: "#fff3e3" },
+      title: "Weekend"
+    };
+  }, []);
+  const getCalendarCellProps = useCallback<QunoInfiniteCalendarCellCustomizer>(({ calendar }) => {
+    const isEquipment = calendar.id.startsWith("equipment");
+    if (!isEquipment) return undefined;
+    return {
+      className: "article-equipment-cell",
+      style: { backgroundColor: "#e8f1ff" },
+      title: `${calendar.name} equipment`
+    };
+  }, []);
+  const getCalendarHourProps = useCallback<QunoInfiniteCalendarHourCustomizer>(({ hour }) => {
+    if (hour !== 12) return undefined;
+    return {
+      className: "article-lunch-hour",
+      style: { backgroundColor: "#dff5e8" },
+      title: "Lunch hour"
+    };
+  }, []);
+
+  return (
+    <CalendarDemoShell
+      data-testid="article-cell-styling-demo"
+      note="Presentation follows each date and resource while calendar geometry remains owned by the component"
+      tools={
+        <select
+          aria-label="Calendar styling orientation"
+          className="article-cell-styling-select"
+          onChange={(event) => setView(event.target.value as typeof view)}
+          value={view}
+        >
+          <option value="infinite-horizontal">Rows</option>
+          <option value="infinite-vertical">Columns</option>
+        </select>
+      }
+    >
+      <div className="article-calendar-frame">
+        <QunoInfiniteCalendar
+          ariaLabel="Calendar cell styling"
+          calendars={articleCalendars}
+          eventRenderer={ArticleEventCard}
+          getCalendarCellProps={getCalendarCellProps}
+          getCalendarDayProps={getCalendarDayProps}
+          getCalendarHourProps={getCalendarHourProps}
+          initialDateKey="2026-07-04"
+          key={view}
+          loadEvents={loadNavigationEvents}
+          now={articleNow}
+          selectedCalendarIds={["provider-a", "room-1", "equipment-1"]}
+          settings={articleSettings}
+          view={view}
+        />
+      </div>
+    </CalendarDemoShell>
+  );
+}
+
 type DateLabelMode = "english" | "japanese" | "human" | "robot";
 
 const articleReferenceDate = new Date("2026-07-06T12:00:00");
-const englishWeekdayFormatter = new Intl.DateTimeFormat("en-US", { weekday: "long" });
-const dayMonthFormatter = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short" });
+const englishWeekdayFormatter = new Intl.DateTimeFormat("en-US", {
+  weekday: "long"
+});
+const dayMonthFormatter = new Intl.DateTimeFormat("en-GB", {
+  day: "numeric",
+  month: "short"
+});
 
 const humanDayName: DayNameGenerator = (date) => {
   const distance = localCalendarDayNumber(date) - localCalendarDayNumber(articleReferenceDate);
@@ -465,8 +559,20 @@ const dateLabelOptions: Array<{
   sampleLanguage: string;
   dayNameGenerator?: DayNameGenerator;
 }> = [
-  { id: "english", label: "English", locale: "en-US", sample: "July 6th, Monday", sampleLanguage: "en" },
-  { id: "japanese", label: "日本語", locale: "ja-JP", sample: "7月6日, 月曜日", sampleLanguage: "ja" },
+  {
+    id: "english",
+    label: "English",
+    locale: "en-US",
+    sample: "July 6th, Monday",
+    sampleLanguage: "en"
+  },
+  {
+    id: "japanese",
+    label: "日本語",
+    locale: "ja-JP",
+    sample: "7月6日, 月曜日",
+    sampleLanguage: "ja"
+  },
   {
     id: "human",
     label: "Human",

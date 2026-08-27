@@ -1,6 +1,8 @@
 import { minuteToX } from "#quno-internal/timeline/time/time";
+import type { CalendarHourPresentation } from "#quno-internal/timeline/core/calendarCellPresentation";
 import type { QunoInfiniteCalendarSettings } from "#quno-internal/timeline/core/types";
 import { TIMELINE_LEFT_GUTTER_PX } from "#quno-internal/timeline/time/timelineTicks";
+import { CalendarHourBands, calendarHourLabelProps } from "./CalendarHourBands";
 
 type TimeTick = {
   minute: number;
@@ -14,6 +16,7 @@ type InfiniteTimeScaleHeaderProps = {
   settings: QunoInfiniteCalendarSettings;
   width: number;
   timeTicks: TimeTick[];
+  calendarHourPresentations: CalendarHourPresentation[];
   showNowLine: boolean;
   nowMinute: number;
 };
@@ -27,6 +30,7 @@ export function InfiniteTimeScaleHeader({
   settings,
   width,
   timeTicks,
+  calendarHourPresentations,
   showNowLine,
   nowMinute
 }: InfiniteTimeScaleHeaderProps) {
@@ -46,6 +50,7 @@ export function InfiniteTimeScaleHeader({
           width: TIMELINE_LEFT_GUTTER_PX + width
         }}
       >
+        <CalendarHourBands hours={calendarHourPresentations} orientation="horizontal" settings={settings} />
         {showNowLine ? (
           <div
             className="quno-calendar-now-pin is-current"
@@ -59,22 +64,29 @@ export function InfiniteTimeScaleHeader({
           />
         ) : null}
         <div className="quno-calendar-time-tick-track" style={{ left: TIMELINE_LEFT_GUTTER_PX, width, height: "100%" }}>
-          {timeTicks.map((tick) => (
-            <span
-              className={[
-                "quno-calendar-time-tick",
-                tick.isHour ? "is-hour" : "",
-                tick.showLabel ? "" : "is-label-hidden"
-              ]
-                .filter(Boolean)
-                .join(" ")}
-              key={`sticky-${tick.minute}`}
-              aria-hidden={!tick.showLabel}
-              style={{ left: `${tick.positionPercent}%` }}
-            >
-              {tick.isHour ? tick.label : <sup>{tick.label}</sup>}
-            </span>
-          ))}
+          {timeTicks.map((tick) => {
+            const hourProps = tick.isHour ? calendarHourLabelProps(calendarHourPresentations, tick.minute) : undefined;
+            return (
+              <span
+                className={[
+                  "quno-calendar-time-tick",
+                  tick.isHour ? "is-hour" : "",
+                  tick.showLabel ? "" : "is-label-hidden",
+                  hourProps?.className
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+                data-slot={hourProps ? "calendar-hour-label" : undefined}
+                data-hour={hourProps ? tick.minute / 60 : undefined}
+                key={`sticky-${tick.minute}`}
+                aria-hidden={!tick.showLabel}
+                style={{ ...hourProps?.style, left: `${tick.positionPercent}%` }}
+                title={hourProps?.title}
+              >
+                {tick.isHour ? tick.label : <sup>{tick.label}</sup>}
+              </span>
+            );
+          })}
         </div>
       </div>
     </div>

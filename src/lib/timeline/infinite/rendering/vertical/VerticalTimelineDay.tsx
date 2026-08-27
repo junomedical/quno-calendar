@@ -3,6 +3,11 @@
  * day props -> resource window -> sticky chrome + layered board
  */
 import { useCallback } from "react";
+import {
+  calendarCellPresentation,
+  calendarDayPresentation,
+  mergeCalendarPresentation
+} from "#quno-internal/timeline/core/calendarCellPresentation";
 import { VerticalDayBoard } from "./VerticalDayBoard";
 import { VerticalDayChrome } from "./VerticalDayChrome";
 import type { VerticalTimelineDayProps } from "./types";
@@ -14,6 +19,30 @@ export { VERTICAL_TIMELINE_GUTTER_PX, verticalMinuteToY } from "./verticalGeomet
 /** One virtual date section; detailed rendering belongs to its child layers. */
 export function VerticalTimelineDay(day: VerticalTimelineDayProps) {
   const window = useVerticalDayWindow(day);
+  const calendarDayProps = calendarDayPresentation({
+    dateKey: day.dateKey,
+    todayKey: day.todayKey,
+    view: "infinite-vertical",
+    getCalendarDayProps: day.getCalendarDayProps
+  });
+  const calendarCellProps = new Map(
+    window.renderedColumnIndexes.map((resourceIndex) => {
+      const calendar = day.selectedCalendars[resourceIndex];
+      return [
+        calendar.id,
+        mergeCalendarPresentation(
+          calendarDayProps,
+          calendarCellPresentation({
+            calendar,
+            dateKey: day.dateKey,
+            todayKey: day.todayKey,
+            view: "infinite-vertical",
+            getCalendarCellProps: day.getCalendarCellProps
+          })
+        )
+      ] as const;
+    })
+  );
   const setDayElement = useCallback(
     (element: HTMLDivElement | null) => day.geometryRegistration.registerDayElement(day.dateKey, element),
     [day.dateKey, day.geometryRegistration]
@@ -21,12 +50,15 @@ export function VerticalTimelineDay(day: VerticalTimelineDayProps) {
 
   return (
     <div
-      className="quno-calendar-day icv-day"
+      className={["quno-calendar-day", "icv-day", calendarDayProps?.className].filter(Boolean).join(" ")}
+      data-slot="calendar-day"
       data-testid="calendar-day"
       data-date={day.dateKey}
       data-index={day.dayIndex}
       ref={setDayElement}
+      title={calendarDayProps?.title}
       style={{
+        ...calendarDayProps?.style,
         top: day.top,
         height: day.dayHeight,
         width: "100%",
@@ -38,12 +70,15 @@ export function VerticalTimelineDay(day: VerticalTimelineDayProps) {
         dayWidth={window.dayWidth}
         gridTemplateColumns={window.gridTemplateColumns}
         renderedColumnIndexes={window.renderedColumnIndexes}
+        calendarCellProps={calendarCellProps}
+        calendarDayProps={calendarDayProps}
       />
       <VerticalDayBoard
         day={day}
         cadenceHeight={window.cadenceHeight}
         gridTemplateColumns={window.gridTemplateColumns}
         renderedColumnIndexes={window.renderedColumnIndexes}
+        calendarCellProps={calendarCellProps}
       />
     </div>
   );

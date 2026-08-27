@@ -651,3 +651,75 @@ than an event target that cannot exist without a membership.
 This keeps the drawn date and editor focus stable while calendars are toggled off and on. Selecting a participant
 renders the same active draft again without closing and reopening its lifecycle or navigating away from the working
 date.
+
+## 087 - Date And Resource Cells Share One Presentation Callback
+
+Date: 2026-08-27
+Status: Accepted
+
+Products need date-aware and resource-aware treatments such as weekend shading or a distinct equipment color, but a
+horizontal-only row hook would not transfer to the vertical projection. `getCalendarCellProps(context)` therefore owns
+presentation for the logical date/resource cell in both views. Its typed context reports date, weekday, Today/weekend
+state, calendar metadata, and active view; it may return only `className`, `style`, and `title`.
+
+Horizontal rows and vertical columns apply the result to their grid surface and visible resource label or header. The
+calendar retains fixed geometry, event layering, interaction handlers, accessibility state, and virtualization. Stable
+`calendar-cell` and `calendar-cell-label` slots let stylesheet consumers distinguish data from chrome without exposing
+private orientation components.
+
+The typed callback and its two orientation projections increase the measured ESM artifact to 32.40 KiB gzip, so the
+Infinite Calendar JavaScript ceiling moves from 32 KiB to 33 KiB. The field guide reports the new 131.71 KiB raw and
+32.40 KiB gzip artifact independently from the unchanged optional stylesheet budget.
+
+## 088 - Cell Presentation Has Its Own Field-Guide Chapter
+
+Date: 2026-08-27
+Status: Accepted; refines Decision 087
+
+Whole-calendar theming and per-cell presentation solve different product tasks. The Infinite Calendar field guide keeps
+theme presets in their existing chapter and teaches `getCalendarCellProps` in a new, independently numbered chapter.
+The focused exhibit switches between horizontal rows and vertical columns while applying weekend and equipment colors
+from typed cell context.
+
+This preserves the one-topic-per-chapter editorial contract and makes the new public callback discoverable without
+implying that data-driven cell treatments are theme tokens. Existing chapter hashes remain stable; later chapter
+numbers advance by one and the guide now contains 26 items.
+
+## 089 - Date Presentation Composes With Resource Presentation
+
+Date: 2026-08-27
+Status: Accepted; refines Decisions 087 and 088
+
+Weekend and holiday treatments often belong to a complete date, including its visible date header, rather than only
+the resource content inside it. `getCalendarDayProps(context)` therefore receives date, weekday, Today/weekend, and
+active-view context and may return the same presentation-only `className`, `style`, and `title` values as
+`getCalendarCellProps`.
+
+Day presentation projects onto the date section, visible date chrome, and each resource cell in both orientations.
+Resource-cell presentation composes after it and wins conflicting styles or titles, allowing an equipment color to
+override a weekend background without losing the date-wide class. Fixed geometry, accessibility, event layering, and
+interaction handlers remain calendar-owned. Stable `calendar-day`, `calendar-day-header`, and `calendar-day-label`
+slots expose the new boundary alongside the existing cell slots.
+
+The composed date presentation raises the measured ESM artifact from Decision 087's 131.71 KiB raw and 32.40 KiB gzip
+to 133.71 KiB raw and 32.80 KiB gzip. It remains within the accepted 33 KiB gzip ceiling and does not change the
+optional stylesheet budget.
+
+## 090 - Clock-Hour Presentation Projects Across Both Time Axes
+
+Date: 2026-08-27
+Status: Accepted; refines Decisions 087–089
+
+Products need time-based treatments such as lunch, shift changes, or non-bookable clock hours independently from a
+date or resource theme. `getCalendarHourProps(context)` therefore receives a zero-based hour, the visible interval's
+clipped start and end minutes, and the active view. It returns the same presentation-only `className`, `style`, and
+`title` surface as the date and resource callbacks.
+
+The callback resolves each visible clock hour once per view. Its result projects onto every resource content band and
+the corresponding visible time label in horizontal and vertical layouts. Bands paint above day/resource backgrounds
+and below availability, events, drafts, current-time markers, and pointer interaction. The calendar retains fixed band
+geometry and exposes stable `calendar-hour` and `calendar-hour-label` slots.
+
+The hour projection raises the measured artifact to 136.83 KiB raw and 33.44 KiB gzip and the optional stylesheet to
+10.21 KiB raw and 1.95 KiB gzip. The Infinite Calendar JavaScript ceiling moves from Decision 089's 33 KiB to 34 KiB;
+the stylesheet remains inside its existing 2 KiB gzip ceiling.

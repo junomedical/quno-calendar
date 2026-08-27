@@ -3,6 +3,7 @@
  * view coordinator -> day contract -> column and interaction contracts
  */
 import type { PointerEvent as ReactPointerEvent } from "react";
+import type { CalendarHourPresentation } from "#quno-internal/timeline/core/calendarCellPresentation";
 import type {
   CalendarEvent,
   CalendarId,
@@ -10,6 +11,9 @@ import type {
   CalendarViewportAnchorTarget,
   EventRenderer,
   EventRenderStatus,
+  QunoInfiniteCalendarCellCustomizer,
+  QunoInfiniteCalendarCellProps,
+  QunoInfiniteCalendarDayCustomizer,
   QunoInfiniteCalendarSettings
 } from "#quno-internal/timeline/core/types";
 import type { EventColumnLayoutItem, PreparedEventCell } from "#quno-internal/timeline/infinite/events/layout/layout";
@@ -18,7 +22,10 @@ import type { ViewportGeometryRegistration } from "#quno-internal/timeline/infin
 import type { ViewportMetricsStore } from "#quno-internal/timeline/infinite/scroll/resources/viewportMetricsStore";
 import type { CalendarFocusedEventTarget } from "#quno-internal/timeline/core/internalTypes";
 
-export type VerticalHoveredEvent = { eventId: string; calendarId: CalendarId } | null;
+export type VerticalHoveredEvent = {
+  eventId: string;
+  calendarId: CalendarId;
+} | null;
 
 export type VerticalHoverMove = (
   event: ReactPointerEvent<HTMLDivElement>,
@@ -47,6 +54,9 @@ export type VerticalTimelineDayProps = {
   hiddenCalendarIds: Set<CalendarId>;
   timeTicks: ReturnType<typeof buildTimeTicks>;
   todayKey: string;
+  getCalendarCellProps?: QunoInfiniteCalendarCellCustomizer;
+  getCalendarDayProps?: QunoInfiniteCalendarDayCustomizer;
+  calendarHourPresentations: CalendarHourPresentation[];
   showNowLine: boolean;
   nowMinute: number;
   interactionMode: "events" | "availability";
@@ -81,6 +91,8 @@ export type VerticalCalendarColumnProps = {
   rowEvents: CalendarEvent[];
   preparedCell: PreparedEventCell;
   isHidden?: boolean;
+  calendarCellProps?: QunoInfiniteCalendarCellProps;
+  calendarHourPresentations: CalendarHourPresentation[];
   settings: QunoInfiniteCalendarSettings;
   boardHeight: number;
   gridCellHeight: number;

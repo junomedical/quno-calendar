@@ -1,7 +1,8 @@
 import { useCallback, useRef, useState, type RefObject } from "react";
 import { eventCalendarIds } from "#quno-internal/timeline/data/calendarEvents";
 import { fromDateKey, isWeekdayExcluded } from "#quno-internal/timeline/date/dateVirtualization";
-import type { CalendarEvent, CalendarFocusOptions, CalendarFocusResult, QunoInfiniteCalendarProps } from "./types";
+import type { CalendarEvent, QunoInfiniteCalendarProps } from "./types";
+import type { CalendarFocusOptions, CalendarFocusResult } from "./calendarFocusTypes";
 import type { CalendarFocusedEventTarget, CalendarViewHandle } from "./internalTypes";
 import { eventDateAndTime, useCalendarFocusEffects, type PendingFocus } from "./useCalendarFocusEffects";
 

@@ -1,4 +1,5 @@
 import type { Key, PointerEvent, RefCallback } from "react";
+import type { CalendarHourPresentation } from "#quno-internal/timeline/core/calendarCellPresentation";
 import type {
   CalendarEvent,
   CalendarId,
@@ -6,6 +7,9 @@ import type {
   CalendarViewportAnchorTarget,
   EventRenderer,
   EventRenderStatus,
+  QunoInfiniteCalendarCellCustomizer,
+  QunoInfiniteCalendarCellProps,
+  QunoInfiniteCalendarDayCustomizer,
   QunoInfiniteCalendarSettings
 } from "#quno-internal/timeline/core/types";
 import type {
@@ -42,6 +46,9 @@ export type HorizontalTimelineDayProps = {
   selectedCalendars: CalendarRow[];
   hiddenCalendarIds: Set<CalendarId>;
   todayKey: string;
+  getCalendarCellProps?: QunoInfiniteCalendarCellCustomizer;
+  getCalendarDayProps?: QunoInfiniteCalendarDayCustomizer;
+  calendarHourPresentations: CalendarHourPresentation[];
   showNowLine: boolean;
   nowMinute: number;
   interactionMode: "events" | "availability";
@@ -83,6 +90,8 @@ export type HorizontalTimelineRowProps = {
   rowEvents: CalendarEvent[];
   preparedCell: PreparedEventCell;
   isHidden?: boolean;
+  calendarCellProps?: QunoInfiniteCalendarCellProps;
+  calendarHourPresentations: CalendarHourPresentation[];
   settings: QunoInfiniteCalendarSettings;
   width: number;
   showNowLine: boolean;

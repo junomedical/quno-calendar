@@ -6,6 +6,11 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ### Added
 
+- Added Infinite Calendar `getCalendarDayProps`, `getCalendarHourProps`, and `getCalendarCellProps` with typed date,
+  clock-hour, weekday, Today/weekend, calendar, and orientation context. Date-wide presentation covers the complete day
+  and its visible header; hour presentation covers time bands and labels; resource presentation can override matching
+  horizontal rows or vertical columns—including resource labels and headers. A dedicated field-guide chapter
+  demonstrates weekend, lunch-hour, and equipment treatments separately from whole-calendar theming.
 - Added Datepicker `disabledDays`, typed `isDisabled` day-cell context, native disabled state, and endpoint guards for
   click, paint, resize, range movement, single-day selection, and outside-month navigation. The field guide now shows
   delayed parent-owned availability with loading and failure states kept unselectable.
@@ -30,6 +35,8 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ### Changed
 
+- Raised the Infinite Calendar JavaScript gzip ceiling from 32 KiB to 34 KiB for the new presentation callbacks; the
+  measured ESM artifact is now 136.83 KiB raw and 33.44 KiB gzip after composing day, hour, and cell presentation.
 - Replaced the event-card resize lab's width and height sliders with one browser-native draggable corner. The demo's
   resize behavior, dimension limits, and responsive content changes are now fully CSS-defined.
 - Removed the vague Public API at a glance row from all four production chapters and the redundant How we design
@@ -56,7 +63,7 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
   editable Selected day field that both typing and calendar picking update. The explicit-state cards now use a readable
   two-by-two layout instead of four narrow columns.
 - Unified all four field guides on the warm Infinite Calendar editorial theme, shared page rhythm, product names,
-  numbered contents, Try it callouts, and collapsible Implementation recipes. The Infinite Calendar guide keeps its 25
+  numbered contents, Try it callouts, and collapsible Implementation recipes. The Infinite Calendar guide keeps its 26
   focused topics as independently numbered chapters so unrelated demos are never grouped under one apparent task.
 - Renamed the public surfaces to `@quno/calendar/infinite-calendar` and `@quno/calendar/datepicker`, and renamed the
   calendar facade to `QunoInfiniteCalendar`, `QunoInfiniteCalendarProps`, `QunoInfiniteCalendarHandle`, and
