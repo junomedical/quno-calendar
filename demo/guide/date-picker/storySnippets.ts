@@ -103,19 +103,36 @@ export const themingSnippet = `.booking-dates {
 /* component.tsx */
 <QunoDatePicker className="booking-dates" />`;
 
-export const rangeInputSnippet = `import { type FocusEvent, useState } from 'react';
+export const rangeInputSnippet = `import { type FocusEvent, useEffect, useRef, useState } from 'react';
 import { QunoDatePicker, type DateRange } from '@quno/calendar/datepicker';
 import { QunoDateInput } from '@quno/calendar/date-input';
 import '@quno/calendar/date-input/styles.css';
 
 const [period, setPeriod] = useState<DateRange | null>(null);
 const [open, setOpen] = useState(false);
+const pointerStartedInside = useRef(false);
 const expectedRange = { start: '2025-08-19', end: '2026-08-19' };
 const closeAfterFocusLeaves = (event: FocusEvent<HTMLDivElement>) => {
+  if (pointerStartedInside.current) return;
   if (!event.currentTarget.contains(event.relatedTarget as Node)) setOpen(false);
 };
+const finishInsidePointer = () => {
+  setTimeout(() => { pointerStartedInside.current = false; }, 0);
+};
+useEffect(() => {
+  document.addEventListener('pointerup', finishInsidePointer);
+  document.addEventListener('pointercancel', finishInsidePointer);
+  return () => {
+    document.removeEventListener('pointerup', finishInsidePointer);
+    document.removeEventListener('pointercancel', finishInsidePointer);
+  };
+}, []);
 
-<div onFocus={() => setOpen(true)} onBlur={closeAfterFocusLeaves}>
+<div
+  onFocus={() => setOpen(true)}
+  onBlur={closeAfterFocusLeaves}
+  onPointerDownCapture={() => { pointerStartedInside.current = true; }}
+>
   <QunoDateInput
     value={period}
     onChange={setPeriod}

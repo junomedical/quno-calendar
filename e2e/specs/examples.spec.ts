@@ -162,6 +162,14 @@ test("date input field guide follows the task-oriented component contract", asyn
   await expect(guide.locator("#picker-composition").getByRole("grid")).toHaveAccessibleName(
     "Date range picker: December 2026"
   );
+  await guide.locator('#picker-composition [data-slot="pill"][data-endpoint="start"]').click();
+  await expect(guide.locator("#picker-composition").getByRole("grid")).toHaveAccessibleName(
+    "Date range picker: May 2026"
+  );
+  await guide.locator('#picker-composition [data-slot="pill"][data-endpoint="end"]').click();
+  await expect(guide.locator("#picker-composition").getByRole("grid")).toHaveAccessibleName(
+    "Date range picker: December 2026"
+  );
   await expect(guide.getByRole("link", { name: "Date Parser field guide" })).toHaveAttribute(
     "href",
     "/guide/date-parser"

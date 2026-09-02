@@ -1,7 +1,7 @@
 import { QunoDatePicker, type DateRange, type IsoDate } from "@quno/calendar/datepicker";
 import { QunoDateInput } from "@quno/calendar/date-input";
 import { parseDateInput } from "@quno/calendar/date-parser";
-import type { JSX, KeyboardEventHandler } from "react";
+import type { FocusEvent, JSX, KeyboardEventHandler } from "react";
 import { useEffect, useRef, useState } from "react";
 
 const expectedRange: DateRange = { start: "2025-08-19", end: "2026-08-19" };
@@ -33,6 +33,7 @@ export const TypeToEditExample = (): JSX.Element => {
   const [calendarMonth, setCalendarMonth] = useState<IsoDate>(initialMonth);
   const [calendarRevision, setCalendarRevision] = useState(0);
   const rootRef = useRef<HTMLDivElement>(null);
+  const pointerStartedInside = useRef(false);
 
   useEffect(() => {
     if (!open) return;
@@ -41,8 +42,19 @@ export const TypeToEditExample = (): JSX.Element => {
       setOpen(false);
       setPreview(null);
     };
+    const finishInsidePointer = (): void => {
+      setTimeout(() => {
+        pointerStartedInside.current = false;
+      }, 0);
+    };
     document.addEventListener("pointerdown", closeOutside);
-    return () => document.removeEventListener("pointerdown", closeOutside);
+    document.addEventListener("pointerup", finishInsidePointer);
+    document.addEventListener("pointercancel", finishInsidePointer);
+    return () => {
+      document.removeEventListener("pointerdown", closeOutside);
+      document.removeEventListener("pointerup", finishInsidePointer);
+      document.removeEventListener("pointercancel", finishInsidePointer);
+    };
   }, [open]);
 
   const moveCalendar = (next: DateRange | null, preferredDate?: IsoDate | null): void => {
@@ -77,16 +89,21 @@ export const TypeToEditExample = (): JSX.Element => {
     const input = event.currentTarget;
     setTimeout(() => previewDraft(input.value), 0);
   };
-  const closeWhenFocusLeaves = (): void => {
-    setTimeout(() => {
-      if (rootRef.current?.contains(document.activeElement)) return;
-      setOpen(false);
-      setPreview(null);
-    }, 0);
+  const closeWhenFocusLeaves = (event: FocusEvent<HTMLDivElement>): void => {
+    if (pointerStartedInside.current) return;
+    if (event.currentTarget.contains(event.relatedTarget as Node | null)) return;
+    setOpen(false);
+    setPreview(null);
   };
-
   return (
-    <div className="story__type-to-edit" ref={rootRef}>
+    <div
+      className="story__type-to-edit"
+      ref={rootRef}
+      onBlurCapture={closeWhenFocusLeaves}
+      onPointerDownCapture={() => {
+        pointerStartedInside.current = true;
+      }}
+    >
       <header className="story__type-to-edit-summary">
         <div className="story__type-to-edit-input story__type-to-edit-input--summary">
           <QunoDateInput
@@ -102,7 +119,6 @@ export const TypeToEditExample = (): JSX.Element => {
             onKeyDown={previewArrow}
             onBlur={() => {
               setFocused(false);
-              closeWhenFocusLeaves();
             }}
             expectedRange={expectedRange}
             referenceDate="2026-08-19"

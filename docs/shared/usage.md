@@ -439,8 +439,12 @@ date-input entry.
 
 For a compact range field, let `QunoDateInput` replace the picker’s selected-period summary and Clear action. Open a
 `selectionMode="range"` picker while focus remains in the composed control, hide its duplicate selection header with
-the public `selection-header` slot, and close it when focus or an outside pointer leaves. Typing and picking continue to
-share one controlled `DateRange`; an empty committed input clears that value without a second action.
+the public `selection-header` slot, and close it when focus or an outside pointer leaves. Use the blur event’s
+`relatedTarget` to recognize focus moving to a picker control, and retain whether a pointer action began inside the
+composition until its click settles. Start or End shortcuts can remove themselves after jumping months, and WebKit
+does not necessarily focus a clicked button, so a delayed `document.activeElement` check can mistake either internal
+click for an outside blur. Typing and picking continue to share one controlled `DateRange`; an empty committed input
+clears that value without a second action.
 
 ## Quno/Date Parser
 

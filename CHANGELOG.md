@@ -97,6 +97,8 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ### Fixed
 
+- Kept focused Date Input calendar popups open when their off-screen Start or End shortcuts are clicked. Popup
+  compositions now retain internal pointer intent while classifying the blur before the clicked shortcut navigates.
 - Kept external create drafts anchored to their drawn date while the participant list is empty; the demo now shows its
   normal calendar set, hides the unassigned preview, and preserves checkbox focus until a participant is selected.
 - Removed React 19's synchronous virtualizer-update warning by using TanStack Virtual's queued notification path, and
