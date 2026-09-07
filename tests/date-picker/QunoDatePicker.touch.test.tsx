@@ -19,7 +19,7 @@ const hitElement = (element: Element): void => {
 describe("QunoDatePicker touch painting", () => {
   it("resolves the destination under an implicitly captured touch pointer", () => {
     const onChange = vi.fn();
-    render(<QunoDatePicker initialMonth="2026-08-01" onChange={onChange} />);
+    render(<QunoDatePicker initialMonth="2026-08-01" onChange={({ value }) => onChange(value)} />);
     const origin = day("2026-08-04");
 
     fireEvent.pointerDown(origin, {
@@ -38,7 +38,7 @@ describe("QunoDatePicker touch painting", () => {
 
   it("keeps the last valid date while the finger crosses a grid gap", () => {
     const onChange = vi.fn();
-    render(<QunoDatePicker initialMonth="2026-08-01" onChange={onChange} />);
+    render(<QunoDatePicker initialMonth="2026-08-01" onChange={({ value }) => onChange(value)} />);
     const origin = day("2026-08-04");
 
     fireEvent.pointerDown(origin, { pointerId: 8, pointerType: "touch" });
@@ -75,7 +75,7 @@ describe("QunoDatePicker touch painting", () => {
 
   it("discards the transient range when the touch pointer is cancelled", () => {
     const onChange = vi.fn();
-    render(<QunoDatePicker initialMonth="2026-08-01" onChange={onChange} />);
+    render(<QunoDatePicker initialMonth="2026-08-01" onChange={({ value }) => onChange(value)} />);
     const origin = day("2026-08-04");
 
     fireEvent.pointerDown(origin, {
@@ -97,7 +97,7 @@ describe("QunoDatePicker touch painting", () => {
       <QunoDatePicker
         defaultValue={{ start: "2026-08-10", end: "2026-08-18" }}
         initialMonth="2026-08-01"
-        onChange={onChange}
+        onChange={({ value }) => onChange(value)}
       />
     );
     const origin = day("2026-08-10");

@@ -6,7 +6,7 @@ import { clickDay, day, drag, slot } from "./datePickerTestUtils";
 describe("QunoDatePicker selection", () => {
   it("supports empty, single-day, edited range, and clear", () => {
     const changes: Array<DateRange | null> = [];
-    render(<QunoDatePicker initialMonth="2026-08-01" onChange={(value) => changes.push(value)} />);
+    render(<QunoDatePicker initialMonth="2026-08-01" onChange={({ value }) => changes.push(value)} />);
 
     clickDay("2026-08-10");
     expect(changes.at(-1)).toEqual({
@@ -38,7 +38,7 @@ describe("QunoDatePicker selection", () => {
         defaultValue={{ start: "2026-08-10", end: "2026-08-20" }}
         initialMonth="2026-08-01"
         selectionMode="single"
-        onChange={onChange}
+        onChange={({ value }) => onChange(value)}
       />
     );
 
@@ -74,7 +74,7 @@ describe("QunoDatePicker selection", () => {
       <QunoDatePicker
         defaultValue={{ start: "2026-08-10", end: "2026-08-20" }}
         initialMonth="2026-08-01"
-        onChange={onChange}
+        onChange={({ value }) => onChange(value)}
       />
     );
 
@@ -93,7 +93,7 @@ describe("QunoDatePicker selection", () => {
       <QunoDatePicker
         defaultValue={{ start: "2026-08-10", end: "2026-08-20" }}
         initialMonth="2026-08-01"
-        onChange={onChange}
+        onChange={({ value }) => onChange(value)}
       />
     );
 
@@ -113,7 +113,7 @@ describe("QunoDatePicker selection", () => {
       <QunoDatePicker
         defaultValue={{ start: "2026-08-10", end: "2026-08-15" }}
         initialMonth="2026-08-01"
-        onChange={onChange}
+        onChange={({ value }) => onChange(value)}
       />
     );
 
@@ -150,7 +150,7 @@ describe("QunoDatePicker selection", () => {
       <QunoDatePicker
         defaultValue={{ start: "2026-08-10", end: "2026-08-20" }}
         initialMonth="2026-08-01"
-        onChange={onChange}
+        onChange={({ value }) => onChange(value)}
       />
     );
 

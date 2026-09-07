@@ -1,6 +1,12 @@
 import type { CalendarId } from "#quno-internal/timeline/core/types";
 
-export function calendarIdsCover(available: ReadonlySet<CalendarId>, required: ReadonlySet<CalendarId>): boolean {
+export function calendarIdsCover({
+  available,
+  required
+}: {
+  available: ReadonlySet<CalendarId>;
+  required: ReadonlySet<CalendarId>;
+}): boolean {
   for (const calendarId of required) {
     if (!available.has(calendarId)) return false;
   }
@@ -15,12 +21,12 @@ export class DateCalendarCoverage {
     this.calendarIdsByDate.clear();
   }
 
-  covers(dateKey: string, calendarIds: ReadonlySet<CalendarId>): boolean {
+  covers({ dateKey, calendarIds }: { dateKey: string; calendarIds: ReadonlySet<CalendarId> }): boolean {
     const coveredCalendarIds = this.calendarIdsByDate.get(dateKey);
-    return Boolean(coveredCalendarIds && calendarIdsCover(coveredCalendarIds, calendarIds));
+    return Boolean(coveredCalendarIds && calendarIdsCover({ available: coveredCalendarIds, required: calendarIds }));
   }
 
-  replace(dateKeys: Iterable<string>, calendarIds: ReadonlySet<CalendarId>): void {
+  replace({ dateKeys, calendarIds }: { dateKeys: Iterable<string>; calendarIds: ReadonlySet<CalendarId> }): void {
     for (const dateKey of dateKeys) {
       this.calendarIdsByDate.set(dateKey, new Set(calendarIds));
     }

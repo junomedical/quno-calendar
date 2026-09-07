@@ -11,24 +11,27 @@ const SHOW_QUARTER_LABELS_MIN_ZOOM = 2;
 const STABLE_TICK_CADENCE_MINUTES = 5;
 
 /** Chooses the shared visual-grid and label cadence. */
-export function gridCadenceMinutes(zoom: number): number {
+export function gridCadenceMinutes({ zoom }: { zoom: number }): number {
   return zoom > FINE_GRID_ZOOM_THRESHOLD ? 5 : 15;
 }
 
 /** Returns the rendered time-grid node nearest a minute. */
-export function nearestTimeNodeMinute(
-  minute: number,
-  settings: Pick<QunoInfiniteCalendarSettings, "startHour" | "endHour" | "zoom">
-): number {
-  const cadenceMinutes = gridCadenceMinutes(settings.zoom);
+export function nearestTimeNodeMinute({
+  minute,
+  settings
+}: {
+  minute: number;
+  settings: Pick<QunoInfiniteCalendarSettings, "startHour" | "endHour" | "zoom">;
+}): number {
+  const cadenceMinutes = gridCadenceMinutes({ zoom: settings.zoom });
   const nodeMinute = Math.round(minute / cadenceMinutes) * cadenceMinutes;
   return Math.min(timelineEndMinute(settings), Math.max(timelineStartMinute(settings), nodeMinute));
 }
 
 /** Builds sticky-header ticks without allowing dense labels to overlap. */
 export function buildTimeTicks(settings: QunoInfiniteCalendarSettings) {
-  const quarterHourSpacing = pixelsPerMinute(settings.zoom) * 15;
-  const isFineCadence = gridCadenceMinutes(settings.zoom) === STABLE_TICK_CADENCE_MINUTES;
+  const quarterHourSpacing = pixelsPerMinute({ zoom: settings.zoom }) * 15;
+  const isFineCadence = gridCadenceMinutes({ zoom: settings.zoom }) === STABLE_TICK_CADENCE_MINUTES;
   const startMinute = timelineStartMinute(settings);
   const endMinute = timelineEndMinute(settings);
   const totalMinutes = Math.max(1, endMinute - startMinute);
@@ -50,7 +53,7 @@ export function buildTimeTicks(settings: QunoInfiniteCalendarSettings) {
     ticks.push({
       minute,
       positionPercent: (relativeMinute / totalMinutes) * 100,
-      label: isHour ? formatHourLabel(minute) : String(minute % 60),
+      label: isHour ? formatHourLabel({ minute }) : String(minute % 60),
       isHour,
       showLabel
     });

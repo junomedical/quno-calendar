@@ -2,7 +2,11 @@
 export class MinHeap<T> {
   private readonly values: T[] = [];
 
-  constructor(private readonly compare: (left: T, right: T) => number) {}
+  private readonly compare: (args: { left: T; right: T }) => number;
+
+  constructor({ compare }: { compare: (args: { left: T; right: T }) => number }) {
+    this.compare = compare;
+  }
 
   get size(): number {
     return this.values.length;
@@ -12,9 +16,9 @@ export class MinHeap<T> {
     return this.values[0];
   }
 
-  push(value: T): void {
+  push({ value }: { value: T }): void {
     this.values.push(value);
-    this.bubbleUp(this.values.length - 1);
+    this.bubbleUp({ startIndex: this.values.length - 1 });
   }
 
   pop(): T | undefined {
@@ -23,18 +27,18 @@ export class MinHeap<T> {
 
     if (this.values.length > 0 && last !== undefined) {
       this.values[0] = last;
-      this.bubbleDown(0);
+      this.bubbleDown({ startIndex: 0 });
     }
 
     return first;
   }
 
-  private bubbleUp(startIndex: number): void {
+  private bubbleUp({ startIndex }: { startIndex: number }): void {
     let index = startIndex;
 
     while (index > 0) {
       const parentIndex = Math.floor((index - 1) / 2);
-      if (this.compare(this.values[index], this.values[parentIndex]) >= 0) {
+      if (this.compare({ left: this.values[index], right: this.values[parentIndex] }) >= 0) {
         return;
       }
 
@@ -43,7 +47,7 @@ export class MinHeap<T> {
     }
   }
 
-  private bubbleDown(startIndex: number): void {
+  private bubbleDown({ startIndex }: { startIndex: number }): void {
     let index = startIndex;
 
     while (true) {
@@ -51,10 +55,16 @@ export class MinHeap<T> {
       const rightIndex = leftIndex + 1;
       let smallestIndex = index;
 
-      if (leftIndex < this.values.length && this.compare(this.values[leftIndex], this.values[smallestIndex]) < 0) {
+      if (
+        leftIndex < this.values.length &&
+        this.compare({ left: this.values[leftIndex], right: this.values[smallestIndex] }) < 0
+      ) {
         smallestIndex = leftIndex;
       }
-      if (rightIndex < this.values.length && this.compare(this.values[rightIndex], this.values[smallestIndex]) < 0) {
+      if (
+        rightIndex < this.values.length &&
+        this.compare({ left: this.values[rightIndex], right: this.values[smallestIndex] }) < 0
+      ) {
         smallestIndex = rightIndex;
       }
       if (smallestIndex === index) {

@@ -1,13 +1,13 @@
-import { classNames as cx } from "./classNames";
+import { classNames as cx } from "#quno-internal/shared/classNames";
 import {
   fromIsoDate,
   isInMonth,
   isWithinRange,
   todayIso,
   type DateRange,
-  type IsoDate,
-  type MonthDirection
+  type IsoDate
 } from "#quno-internal/shared/dateRangeModel";
+import { type MonthDirection } from "#quno-internal/date-picker/datePickerModel";
 import type { QunoDatePickerDayCellContext, ResolvedDatePickerConfig } from "./datePickerTypes";
 import { dayIsDisabled } from "./datePickerDisabledDays";
 import { useDayPointer } from "./useDayPointer";
@@ -24,11 +24,11 @@ type Props = {
   selection: DateRange | null;
   renderedSelection: DateRange | null;
   config: ResolvedDatePickerConfig;
-  onBegin: (date: IsoDate) => void;
-  onEnter: (date: IsoDate) => void;
-  onFinish: (date: IsoDate) => void;
+  onBegin: (args: { date: IsoDate }) => void;
+  onEnter: (args: { date: IsoDate }) => void;
+  onFinish: (args: { date: IsoDate }) => void;
   onCancel: () => void;
-  onOverflowChange: (index: number | null) => void;
+  onOverflowChange: (args: { index: number | null }) => void;
 };
 
 export const CalendarGrid = ({
@@ -54,45 +54,45 @@ export const CalendarGrid = ({
     interactionActive,
     begin: onBegin,
     enter: ({ date, overflowIndex }) => {
-      onOverflowChange(overflowIndex);
-      onEnter(date);
+      onOverflowChange({ index: overflowIndex });
+      onEnter({ date });
     },
     finish: ({ date }) => {
-      onOverflowChange(null);
-      onFinish(date);
+      onOverflowChange({ index: null });
+      onFinish({ date });
     },
     cancel: () => {
-      onOverflowChange(null);
+      onOverflowChange({ index: null });
       onCancel();
     }
   });
   return (
     <div
-      className={cx("quno-date-picker-grid", classNames?.grid)}
+      className={cx({ values: ["quno-date-picker-grid", classNames?.grid] })}
       data-slot="grid"
       data-dragging={movingSelection ? "move" : undefined}
       data-interaction-active={interactionActive ? "true" : undefined}
       data-month-motion={monthMotion === -1 ? "previous" : monthMotion === 1 ? "next" : undefined}
       role="grid"
-      aria-label={`${labels.calendar}: ${formatters.month(visibleMonth, locale)}`}
+      aria-label={`${labels.calendar}: ${formatters.month({ month: visibleMonth, locale })}`}
     >
       {dates.map((date, index) => {
-        const inVisibleMonth = isInMonth(date, visibleMonth);
-        const committed = selection ? isWithinRange(date, selection) : false;
-        const displayed = renderedSelection ? isWithinRange(date, renderedSelection) : false;
+        const inVisibleMonth = isInMonth({ date, month: visibleMonth });
+        const committed = selection ? isWithinRange({ date, range: selection }) : false;
+        const displayed = renderedSelection ? isWithinRange({ date, range: renderedSelection }) : false;
         const isStart = renderedSelection?.start === date;
         const isEnd = renderedSelection?.end === date;
-        const inCyclePreview = cyclePreview ? isWithinRange(date, cyclePreview) : false;
+        const inCyclePreview = cyclePreview ? isWithinRange({ date, range: cyclePreview }) : false;
         const previewRowStart =
           cyclePreview !== null &&
           inCyclePreview &&
-          (index % 7 === 0 || !isWithinRange(dates[index - 1], cyclePreview));
+          (index % 7 === 0 || !isWithinRange({ date: dates[index - 1], range: cyclePreview }));
         const previewRowEnd =
           cyclePreview !== null &&
           inCyclePreview &&
-          (index % 7 === 6 || !isWithinRange(dates[index + 1], cyclePreview));
-        const weekday = fromIsoDate(date).getUTCDay() as QunoDatePickerDayCellContext["weekday"];
-        const disabled = dayIsDisabled(config.disabledDays, date);
+          (index % 7 === 6 || !isWithinRange({ date: dates[index + 1], range: cyclePreview }));
+        const weekday = fromIsoDate({ value: date }).getUTCDay() as QunoDatePickerDayCellContext["weekday"];
+        const disabled = dayIsDisabled({ matcher: config.isDayDisabled, date });
         const customProps = getDayCellProps?.({
           date,
           weekday,
@@ -110,17 +110,19 @@ export const CalendarGrid = ({
             key={date}
             type="button"
             role="gridcell"
-            className={cx(
-              "quno-date-picker-day",
-              !inVisibleMonth && "quno-date-picker-day--outside",
-              displayed && "quno-date-picker-day--selected",
-              committed && "quno-date-picker-day--committed",
-              isStart && "quno-date-picker-day--start",
-              isEnd && "quno-date-picker-day--end",
-              disabled && "quno-date-picker-day--disabled",
-              classNames?.day,
-              customProps?.className
-            )}
+            className={cx({
+              values: [
+                "quno-date-picker-day",
+                !inVisibleMonth && "quno-date-picker-day--outside",
+                displayed && "quno-date-picker-day--selected",
+                committed && "quno-date-picker-day--committed",
+                isStart && "quno-date-picker-day--start",
+                isEnd && "quno-date-picker-day--end",
+                disabled && "quno-date-picker-day--disabled",
+                classNames?.day,
+                customProps?.className
+              ]
+            })}
             style={customProps?.style}
             title={customProps?.title}
             data-slot="day"
@@ -137,25 +139,29 @@ export const CalendarGrid = ({
             data-disabled={disabled ? "true" : undefined}
             data-selected={displayed ? "true" : undefined}
             data-committed={committed ? "true" : undefined}
-            aria-label={formatters.dayLabel(date, locale)}
+            aria-label={formatters.dayLabel({ date, locale })}
             aria-selected={committed}
             disabled={disabled}
             onPointerDown={(event) => {
-              onOverflowChange(null);
-              pointer.beginPointer(event, date);
+              onOverflowChange({ index: null });
+              pointer.beginPointer({ event, date });
             }}
             onPointerMove={pointer.movePointer}
             onPointerEnter={(event) => {
               if (event.pointerType === "touch") return;
-              onOverflowChange(null);
-              onEnter(date);
+              onOverflowChange({ index: null });
+              onEnter({ date });
             }}
-            onPointerUp={(event) => pointer.finishPointer(event, date)}
+            onPointerUp={(event) => pointer.finishPointer({ event, fallback: date })}
             onPointerCancel={pointer.cancelPointer}
           >
             <span>{Number(date.slice(-2))}</span>
             {(isStart || isEnd) && (
-              <i className={cx("quno-date-picker-handle", classNames?.handle)} data-slot="handle" aria-hidden="true" />
+              <i
+                className={cx({ values: ["quno-date-picker-handle", classNames?.handle] })}
+                data-slot="handle"
+                aria-hidden="true"
+              />
             )}
           </button>
         );

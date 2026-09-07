@@ -41,7 +41,7 @@ export function CommittedLayer<Item extends CommittedItem>({
     return (
       <EventShell
         {...shellProps}
-        {...project(item, isHovered)}
+        {...project({ item, hovered: isHovered })}
         event={item.event}
         status={status}
         zIndex={isHovered ? 30 : item.lane + 2}
@@ -120,7 +120,7 @@ type TransientLayerProps = SharedLayerProps & {
   draftEventIsExiting: boolean;
   draftEventReleaseDurationMs?: number;
   dragPreviewEvent: CalendarEvent | null;
-  project: (event: CalendarEvent, preview: boolean) => EventProjection;
+  project: (args: { event: CalendarEvent; preview: boolean }) => EventProjection;
 };
 
 export function TransientLayer({
@@ -137,15 +137,15 @@ export function TransientLayer({
   shellClassName,
   ...shellProps
 }: TransientLayerProps) {
-  const belongs = (event: CalendarEvent | null) =>
-    Boolean(event && eventDateKey(event) === dateKey && eventBelongsToCalendar(event, calendarId));
+  const belongs = ({ event }: { event: CalendarEvent | null }) =>
+    Boolean(event && eventDateKey(event) === dateKey && eventBelongsToCalendar({ event, calendarId }));
 
   return (
     <>
-      {draftEvent && belongs(draftEvent) ? (
+      {draftEvent && belongs({ event: draftEvent }) ? (
         <EventShell
           {...shellProps}
-          {...project(draftEvent, false)}
+          {...project({ event: draftEvent, preview: false })}
           event={draftEvent}
           status={draftEventStatus}
           zIndex={55}
@@ -168,10 +168,10 @@ export function TransientLayer({
           releaseDurationMs={draftEventReleaseDurationMs}
         />
       ) : null}
-      {dragPreviewEvent && belongs(dragPreviewEvent) ? (
+      {dragPreviewEvent && belongs({ event: dragPreviewEvent }) ? (
         <EventShell
           {...shellProps}
-          {...project(dragPreviewEvent, true)}
+          {...project({ event: dragPreviewEvent, preview: true })}
           event={dragPreviewEvent}
           status="drop-preview"
           zIndex={60}

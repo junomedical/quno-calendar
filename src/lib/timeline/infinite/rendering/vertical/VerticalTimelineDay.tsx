@@ -23,28 +23,28 @@ export function VerticalTimelineDay(day: VerticalTimelineDayProps) {
     dateKey: day.dateKey,
     todayKey: day.todayKey,
     view: "infinite-vertical",
-    getCalendarDayProps: day.getCalendarDayProps
+    getDayProps: day.getDayProps
   });
   const calendarCellProps = new Map(
     window.renderedColumnIndexes.map((resourceIndex) => {
       const calendar = day.selectedCalendars[resourceIndex];
       return [
         calendar.id,
-        mergeCalendarPresentation(
-          calendarDayProps,
-          calendarCellPresentation({
+        mergeCalendarPresentation({
+          dayProps: calendarDayProps,
+          cellProps: calendarCellPresentation({
             calendar,
             dateKey: day.dateKey,
             todayKey: day.todayKey,
             view: "infinite-vertical",
-            getCalendarCellProps: day.getCalendarCellProps
+            getDayCellProps: day.getDayCellProps
           })
-        )
+        })
       ] as const;
     })
   );
-  const setDayElement = useCallback(
-    (element: HTMLDivElement | null) => day.geometryRegistration.registerDayElement(day.dateKey, element),
+  const setDayElement = useCallback<import("react").RefCallback<HTMLDivElement>>(
+    (element: HTMLDivElement | null) => day.geometryRegistration.registerDayElement({ dateKey: day.dateKey, element }),
     [day.dateKey, day.geometryRegistration]
   );
 

@@ -162,6 +162,14 @@ test("date input field guide follows the task-oriented component contract", asyn
   await expect(guide.locator("#picker-composition").getByRole("grid")).toHaveAccessibleName(
     "Date range picker: December 2026"
   );
+  await guide.locator('#picker-composition [data-slot="pill"][data-endpoint="start"]').click();
+  await expect(guide.locator("#picker-composition").getByRole("grid")).toHaveAccessibleName(
+    "Date range picker: May 2026"
+  );
+  await guide.locator('#picker-composition [data-slot="pill"][data-endpoint="end"]').click();
+  await expect(guide.locator("#picker-composition").getByRole("grid")).toHaveAccessibleName(
+    "Date range picker: December 2026"
+  );
   await expect(guide.getByRole("link", { name: "Date Parser field guide" })).toHaveAttribute(
     "href",
     "/guide/date-parser"
@@ -301,10 +309,10 @@ test("editorial CSS-native exhibit keeps stable chrome browser-positioned", asyn
 
 test("all four guides separate exact payloads from runtime contracts", async ({ page }) => {
   const guides = [
-    ["infinite-calendar", "33.44 KiB gzip", "1.95 KiB gzip", "@quno/calendar/infinite-calendar"],
-    ["datepicker", "9.00 KiB gzip", "3.20 KiB gzip", "@quno/calendar/datepicker"],
-    ["date-input", "6.77 KiB gzip", "0.58 KiB gzip", "@quno/calendar/date-input"],
-    ["date-parser", "4.45 KiB gzip", "No stylesheet", "@quno/calendar/date-parser"]
+    ["infinite-calendar", "36.30 KiB gzip", "1.95 KiB gzip", "@quno/calendar/infinite-calendar"],
+    ["datepicker", "9.81 KiB gzip", "3.22 KiB gzip", "@quno/calendar/datepicker"],
+    ["date-input", "7.65 KiB gzip", "0.58 KiB gzip", "@quno/calendar/date-input"],
+    ["date-parser", "5.11 KiB gzip", "No stylesheet", "@quno/calendar/date-parser"]
   ] as const;
 
   for (const [route, javascript, styles, entrypoint] of guides) {

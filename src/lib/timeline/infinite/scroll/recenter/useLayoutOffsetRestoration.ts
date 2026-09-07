@@ -14,11 +14,11 @@ import { useLayoutEffect, useRef, type MutableRefObject } from "react";
 import { normalizeAnchorDate } from "#quno-internal/timeline/date/dateVirtualization";
 import type { PendingScrollTarget } from "#quno-internal/timeline/infinite/scroll/position/scrollPositionTypes";
 
-export type ResolveOffsetOnLayoutChange = (
-  offsetWithinDate: number,
-  previousBaseDayHeight: number,
-  nextBaseDayHeight: number
-) => number;
+export type ResolveOffsetOnLayoutChange = (args: {
+  offsetWithinDate: number;
+  previousBaseDayHeight: number;
+  nextBaseDayHeight: number;
+}) => number;
 
 type UseLayoutOffsetRestorationArgs = {
   baseDayHeight: number;
@@ -32,43 +32,55 @@ type UseLayoutOffsetRestorationArgs = {
   pendingScrollTargetRef: MutableRefObject<PendingScrollTarget | null>;
   clearScrollEndTimer: () => void;
   measureVirtualizer: () => void;
-  isDateInVirtualViewport: (dateKey: string) => boolean;
-  scrollToVisibleDateOffset: (
-    dateKey: string,
-    offsetWithinDate: number,
-    preferBaseGeometry?: boolean,
-    eagerRange?: boolean
-  ) => void;
-  setAnchorDateKey: (updater: (current: string) => string) => void;
+  isDateInVirtualViewport: (args: { dateKey: string }) => boolean;
+  scrollToVisibleDateOffset: (args: {
+    dateKey: string;
+    offsetWithinDate: number;
+    preferBaseGeometry?: boolean;
+    eagerRange?: boolean;
+  }) => void;
+  setAnchorDateKey: import("react").Dispatch<import("react").SetStateAction<string>>;
   projectRange: () => void;
   eagerRange: boolean;
   resolveOffsetOnLayoutChange?: ResolveOffsetOnLayoutChange;
 };
 
-function structuralOffset(
-  alignToDateTop: boolean,
-  offsetWithinDate: number,
-  previousBaseDayHeight: number,
-  nextBaseDayHeight: number,
-  resolveOffset?: ResolveOffsetOnLayoutChange
-) {
+function structuralOffset({
+  alignToDateTop,
+  offsetWithinDate,
+  previousBaseDayHeight,
+  nextBaseDayHeight,
+  resolveOffset
+}: {
+  alignToDateTop: boolean;
+  offsetWithinDate: number;
+  previousBaseDayHeight: number;
+  nextBaseDayHeight: number;
+  resolveOffset?: ResolveOffsetOnLayoutChange;
+}) {
   if (alignToDateTop) return 0;
-  if (resolveOffset) return resolveOffset(offsetWithinDate, previousBaseDayHeight, nextBaseDayHeight);
+  if (resolveOffset) return resolveOffset({ offsetWithinDate, previousBaseDayHeight, nextBaseDayHeight });
   return Math.min(offsetWithinDate, Math.max(0, nextBaseDayHeight - 1));
 }
 
-function scheduleSettledDateAlignment(
-  enabled: boolean,
-  dateKey: string,
-  offsetWithinDate: number,
-  preferBaseGeometry: boolean,
-  scrollToVisibleDateOffset: UseLayoutOffsetRestorationArgs["scrollToVisibleDateOffset"]
-) {
+function scheduleSettledDateAlignment({
+  enabled,
+  dateKey,
+  offsetWithinDate,
+  preferBaseGeometry,
+  scrollToVisibleDateOffset
+}: {
+  enabled: boolean;
+  dateKey: string;
+  offsetWithinDate: number;
+  preferBaseGeometry: boolean;
+  scrollToVisibleDateOffset: UseLayoutOffsetRestorationArgs["scrollToVisibleDateOffset"];
+}) {
   if (!enabled) return undefined;
   let settledFrame = 0;
   const layoutFrame = window.requestAnimationFrame(() => {
     settledFrame = window.requestAnimationFrame(() => {
-      scrollToVisibleDateOffset(dateKey, offsetWithinDate, preferBaseGeometry);
+      scrollToVisibleDateOffset({ dateKey, offsetWithinDate, preferBaseGeometry });
     });
   });
   return () => {
@@ -122,13 +134,13 @@ export function useLayoutOffsetRestoration({
 
     const possibleLayoutAnchorDateKey = layoutAnchorDateKey ?? previousLayoutAnchorDateKeyRef.current;
     const transitionLayoutAnchorDateKey =
-      possibleLayoutAnchorDateKey && isDateInVirtualViewport(possibleLayoutAnchorDateKey)
+      possibleLayoutAnchorDateKey && isDateInVirtualViewport({ dateKey: possibleLayoutAnchorDateKey })
         ? possibleLayoutAnchorDateKey
         : undefined;
-    const topDateKey = normalizeAnchorDate(
-      transitionLayoutAnchorDateKey ?? topVisibleDateRef.current,
+    const topDateKey = normalizeAnchorDate({
+      dateKey: transitionLayoutAnchorDateKey ?? topVisibleDateRef.current,
       excludedWeekdays
-    );
+    });
     const excludedWeekdaysKey = excludedWeekdays.join("|");
     const dateSequenceChanged = previousExcludedWeekdaysKeyRef.current !== excludedWeekdaysKey;
     const alignTopVisibleDate =
@@ -137,13 +149,13 @@ export function useLayoutOffsetRestoration({
     // changes use a conservative date-local clamp. Async row metrics use another path.
     const offsetWithinDate = Math.max(
       0,
-      structuralOffset(
-        Boolean(transitionLayoutAnchorDateKey) || alignTopVisibleDate,
-        topVisibleOffsetRef.current,
-        previousBaseDayHeightRef.current,
-        baseDayHeight,
-        resolveOffsetOnLayoutChange
-      )
+      structuralOffset({
+        alignToDateTop: Boolean(transitionLayoutAnchorDateKey) || alignTopVisibleDate,
+        offsetWithinDate: topVisibleOffsetRef.current,
+        previousBaseDayHeight: previousBaseDayHeightRef.current,
+        nextBaseDayHeight: baseDayHeight,
+        resolveOffset: resolveOffsetOnLayoutChange
+      })
     );
     clearScrollEndTimer();
     previousLayoutSignatureRef.current = verticalLayoutSignature;
@@ -156,23 +168,23 @@ export function useLayoutOffsetRestoration({
     topVisibleOffsetRef.current = offsetWithinDate;
 
     const scheduleSettledAlignment = () =>
-      scheduleSettledDateAlignment(
-        alignTopVisibleDate || dateSequenceChanged,
-        topDateKey,
-        alignTopVisibleDate ? 0 : offsetWithinDate,
-        Boolean(resolveOffsetOnLayoutChange),
+      scheduleSettledDateAlignment({
+        enabled: alignTopVisibleDate || dateSequenceChanged,
+        dateKey: topDateKey,
+        offsetWithinDate: alignTopVisibleDate ? 0 : offsetWithinDate,
+        preferBaseGeometry: Boolean(resolveOffsetOnLayoutChange),
         scrollToVisibleDateOffset
-      );
+      });
 
     if (topDateKey === currentWindowAnchorDateKey) {
       // Avoid rebuilding an already-correct date model; restore its local point now.
       pendingScrollTargetRef.current = null;
-      scrollToVisibleDateOffset(
-        topDateKey,
+      scrollToVisibleDateOffset({
+        dateKey: topDateKey,
         offsetWithinDate,
-        Boolean(resolveOffsetOnLayoutChange) || dateSequenceChanged,
+        preferBaseGeometry: Boolean(resolveOffsetOnLayoutChange) || dateSequenceChanged,
         eagerRange
-      );
+      });
       if (eagerRange) projectRange();
       return scheduleSettledAlignment();
     }

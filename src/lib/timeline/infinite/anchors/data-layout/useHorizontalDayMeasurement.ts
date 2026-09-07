@@ -33,8 +33,8 @@ type HorizontalDayMeasurementArgs = {
   baseRowHeight: number;
   calendarIds: readonly CalendarId[];
   containerRef: RefObject<HTMLDivElement | null>;
-  dateKeyForIndex: (index: number) => string;
-  dateKeyToIndex: (dateKey: string) => number;
+  dateKeyForIndex: (args: { index: number }) => string;
+  dateKeyToIndex: (args: { dateKey: string }) => number;
   dayHeaderHeight: number;
   dayMetricsByDate: DayMetrics;
   layoutSignature: string;
@@ -67,25 +67,32 @@ export function useHorizontalDayMeasurement({
     const viewport = containerRef.current;
     const snapshot =
       viewport && preserveVisibleResource && !structuralLayoutChanged
-        ? resolveVisibleDateSnapshot(
-            viewport.scrollTop,
-            (offset) => virtualizer.getVirtualItemForOffset(offset),
-            virtualizer.getVirtualItems(),
+        ? resolveVisibleDateSnapshot({
+            scrollTop: viewport.scrollTop,
+            getItemForOffset: ({ offset }) => virtualizer.getVirtualItemForOffset(offset),
+            virtualItems: virtualizer.getVirtualItems(),
             dateKeyForIndex
-          )
+          })
         : null;
     const previousGeometry = { calendarIds: previousCalendarIdsRef.current, dayHeaderHeight, baseRowHeight };
     const nextGeometry = { calendarIds, dayHeaderHeight, baseRowHeight };
     const anchor = snapshot
-      ? captureHorizontalDataLayoutAnchor(
-          snapshot.dateKey,
-          snapshot.offsetWithinDate,
-          previousMetrics.get(snapshot.dateKey),
-          previousGeometry
-        )
+      ? captureHorizontalDataLayoutAnchor({
+          dateKey: snapshot.dateKey,
+          offsetWithinDate: snapshot.offsetWithinDate,
+          metric: previousMetrics.get(snapshot.dateKey),
+          geometry: previousGeometry
+        })
       : null;
 
-    resizeAffectedDays(previousMetrics, dayMetricsByDate, baseDayHeight, dateKeyToIndex, virtualItemCount, virtualizer);
+    resizeAffectedDays({
+      previousMetrics,
+      nextMetrics: dayMetricsByDate,
+      baseDayHeight,
+      dateKeyToIndex,
+      virtualItemCount,
+      virtualizer
+    });
     previousMetricsRef.current = dayMetricsByDate;
     previousLayoutSignatureRef.current = layoutSignature;
     previousCalendarIdsRef.current = calendarIds;
@@ -94,10 +101,14 @@ export function useHorizontalDayMeasurement({
     // `resizeItem` invalidates cached prefix positions; materialize them before
     // asking for the translated date start in this same pre-paint effect.
     virtualizer.getVirtualItems();
-    const index = dateKeyToIndex(anchor.dateKey);
+    const index = dateKeyToIndex({ dateKey: anchor.dateKey });
     const dateStart = virtualizer.getOffsetForIndex(index, "start")?.[0];
     if (dateStart === undefined) return;
-    const nextOffset = resolveHorizontalDataLayoutOffset(anchor, dayMetricsByDate.get(anchor.dateKey), nextGeometry);
+    const nextOffset = resolveHorizontalDataLayoutOffset({
+      anchor,
+      metric: dayMetricsByDate.get(anchor.dateKey),
+      geometry: nextGeometry
+    });
     const nextScrollTop = dateStart + nextOffset;
     if (Math.abs(viewport.scrollTop - nextScrollTop) > 0.5) {
       virtualizer.scrollToOffset(nextScrollTop, { align: "start" });
@@ -118,21 +129,28 @@ export function useHorizontalDayMeasurement({
   ]);
 }
 
-function resizeAffectedDays(
-  previousMetrics: DayMetrics,
-  nextMetrics: DayMetrics,
-  baseDayHeight: number,
-  dateKeyToIndex: (dateKey: string) => number,
-  virtualItemCount: number,
-  virtualizer: DayVirtualizer
-) {
+function resizeAffectedDays({
+  previousMetrics,
+  nextMetrics,
+  baseDayHeight,
+  dateKeyToIndex,
+  virtualItemCount,
+  virtualizer
+}: {
+  previousMetrics: DayMetrics;
+  nextMetrics: DayMetrics;
+  baseDayHeight: number;
+  dateKeyToIndex: (args: { dateKey: string }) => number;
+  virtualItemCount: number;
+  virtualizer: DayVirtualizer;
+}) {
   const affectedDateKeys = new Set([...previousMetrics.keys(), ...nextMetrics.keys()]);
   if (affectedDateKeys.size === 0) {
     virtualizer.measure();
     return;
   }
   for (const dateKey of affectedDateKeys) {
-    const index = dateKeyToIndex(dateKey);
+    const index = dateKeyToIndex({ dateKey });
     if (index >= 0 && index < virtualItemCount) {
       virtualizer.resizeItem(index, nextMetrics.get(dateKey)?.height ?? baseDayHeight);
     }

@@ -54,18 +54,20 @@ export function InfiniteTimeScaleHeader({
         {showNowLine ? (
           <div
             className="quno-calendar-now-pin is-current"
-            style={{ left: TIMELINE_LEFT_GUTTER_PX + minuteToX(nowMinute, settings) }}
+            style={{ left: TIMELINE_LEFT_GUTTER_PX + minuteToX({ minute: nowMinute, geometry: settings }) }}
           />
         ) : null}
         {showNowLine ? (
           <div
             className="quno-calendar-now-header-line is-current"
-            style={{ left: TIMELINE_LEFT_GUTTER_PX + minuteToX(nowMinute, settings) }}
+            style={{ left: TIMELINE_LEFT_GUTTER_PX + minuteToX({ minute: nowMinute, geometry: settings }) }}
           />
         ) : null}
         <div className="quno-calendar-time-tick-track" style={{ left: TIMELINE_LEFT_GUTTER_PX, width, height: "100%" }}>
           {timeTicks.map((tick) => {
-            const hourProps = tick.isHour ? calendarHourLabelProps(calendarHourPresentations, tick.minute) : undefined;
+            const hourProps = tick.isHour
+              ? calendarHourLabelProps({ hours: calendarHourPresentations, minute: tick.minute })
+              : undefined;
             return (
               <span
                 className={[

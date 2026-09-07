@@ -6,7 +6,7 @@ import { useState } from 'react';
 
 const [dates, setDates] = useState<DateRange | null>(null);
 
-<QunoDatePicker value={dates} onChange={setDates} />;`;
+<QunoDatePicker value={dates} onChange={({ value }) => setDates(value)} />;`;
 
 export const customDaysSnippet = `import { useEffect, useState } from 'react';
 import {
@@ -22,7 +22,7 @@ const [status, setStatus] = useState<Partial<Record<IsoDate, DayStatus>>>({});
 const [failedMonth, setFailedMonth] = useState<IsoDate | null>(null);
 
 useEffect(() => {
-  void loadAvailability(calendarGrid(visibleMonth)).then(
+  void loadAvailability(calendarGrid({ month: visibleMonth })).then(
     (next) => setStatus((current) => ({ ...current, ...next })),
     () => setFailedMonth(visibleMonth),
   );
@@ -30,7 +30,7 @@ useEffect(() => {
 
 const statusFor = (date: IsoDate): DayStatus =>
   status[date] ?? (failedMonth === visibleMonth ? 'error' : 'loading');
-const disabledDays = (date: IsoDate) => statusFor(date) !== 'available';
+const isDayDisabled = (date: IsoDate) => statusFor(date) !== 'available';
 const styleDay: QunoDatePickerDayCellCustomizer = ({ date, isToday }) => {
   const dayStatus = statusFor(date);
   return {
@@ -45,9 +45,9 @@ const styleDay: QunoDatePickerDayCellCustomizer = ({ date, isToday }) => {
 };
 
 <QunoDatePicker
-  disabledDays={disabledDays}
+  isDayDisabled={({ date }) => isDayDisabled(date)}
   getDayCellProps={styleDay}
-  onVisibleMonthChange={setVisibleMonth}
+  onVisibleMonthChange={({ month }) => setVisibleMonth(month)}
 />;`;
 
 export const localizationSnippet = `<QunoDatePicker
@@ -103,22 +103,39 @@ export const themingSnippet = `.booking-dates {
 /* component.tsx */
 <QunoDatePicker className="booking-dates" />`;
 
-export const rangeInputSnippet = `import { type FocusEvent, useState } from 'react';
+export const rangeInputSnippet = `import { type FocusEvent, useEffect, useRef, useState } from 'react';
 import { QunoDatePicker, type DateRange } from '@quno/calendar/datepicker';
 import { QunoDateInput } from '@quno/calendar/date-input';
 import '@quno/calendar/date-input/styles.css';
 
 const [period, setPeriod] = useState<DateRange | null>(null);
 const [open, setOpen] = useState(false);
+const pointerStartedInside = useRef(false);
 const expectedRange = { start: '2025-08-19', end: '2026-08-19' };
 const closeAfterFocusLeaves = (event: FocusEvent<HTMLDivElement>) => {
+  if (pointerStartedInside.current) return;
   if (!event.currentTarget.contains(event.relatedTarget as Node)) setOpen(false);
 };
+const finishInsidePointer = () => {
+  setTimeout(() => { pointerStartedInside.current = false; }, 0);
+};
+useEffect(() => {
+  document.addEventListener('pointerup', finishInsidePointer);
+  document.addEventListener('pointercancel', finishInsidePointer);
+  return () => {
+    document.removeEventListener('pointerup', finishInsidePointer);
+    document.removeEventListener('pointercancel', finishInsidePointer);
+  };
+}, []);
 
-<div onFocus={() => setOpen(true)} onBlur={closeAfterFocusLeaves}>
+<div
+  onFocus={() => setOpen(true)}
+  onBlur={closeAfterFocusLeaves}
+  onPointerDownCapture={() => { pointerStartedInside.current = true; }}
+>
   <QunoDateInput
     value={period}
-    onChange={setPeriod}
+    onChange={({ value }) => setPeriod(value)}
     expectedRange={expectedRange}
     selectionMode="range"
   />
@@ -126,7 +143,7 @@ const closeAfterFocusLeaves = (event: FocusEvent<HTMLDivElement>) => {
     <QunoDatePicker
       className="period-field__picker"
       value={period}
-      onChange={setPeriod}
+      onChange={({ value }) => setPeriod(value)}
       selectionMode="range"
     />
   )}
@@ -138,6 +155,6 @@ export const singleDaySnippet = `const [date, setDate] = useState<DateRange | nu
 
 <QunoDatePicker
   value={date}
-  onChange={setDate}
+  onChange={({ value }) => setDate(value)}
   selectionMode="single"
 />;`;

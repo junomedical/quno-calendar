@@ -15,7 +15,7 @@ flowchart LR
   Viewport --> Projection
   Gestures --> Projection
   Projection --> Layers["memoized render layers"]
-  Layers --> Renderer["external eventRenderer"]
+  Layers --> Renderer["external renderEvent"]
 ```
 
 The central performance rule is simple: network work can add or refresh event shells, but it never owns the grid.
@@ -63,13 +63,13 @@ Date Input may consume the parser implementation internally but does not re-expo
 
 `QunoInfiniteCalendar` accepts calendars, selected calendar ids, a range loader, an optional `eventPrefetchPolicy`, an external renderer, controlled settings, interaction callbacks, and an optional imperative ref.
 
-The optional `getCalendarDayProps` presentation boundary receives typed date context and projects its result across the
-date section, visible date header, and resource cells. `getCalendarCellProps` receives a more specific date/resource
+The optional `getDayProps` presentation boundary receives typed date context and projects its result across the
+date section, visible date header, and resource cells. `getDayCellProps` receives a more specific date/resource
 context and overrides conflicting day presentation on the horizontal row or vertical column plus its resource
 label/header. Both return only `className`, `style`, or `title`; fixed virtual geometry, event layers, hit-testing, and
 accessibility state stay inside the calendar.
 
-`getCalendarHourProps` receives one visible clock-hour interval and the active view. Its presentation projects onto
+`getHourProps` receives one visible clock-hour interval and the active view. Its presentation projects onto
 horizontal or vertical hour bands and their visible time labels. Hour bands paint above date/resource backgrounds but
 below availability, event, draft, current-time, and pointer-interaction layers; fixed position and size remain
 calendar-owned.
@@ -77,8 +77,8 @@ calendar-owned.
 - `view="infinite-horizontal"`: dates flow down, calendars are rows, time runs left-to-right.
 - `view="infinite-vertical"`: dates flow down, calendars are columns, time runs top-to-bottom.
 
-Date-header text is also settings-owned. `settings.dateLocale` flows directly to the date-label formatter in both
-orientations, while `settings.dayNameGenerator` can replace the complete displayed label without changing date
+Date-header text is configured through component-level `locale` and `formatters.dayLabel`. Both orientations
+receive the same ISO-date formatter context, which can replace the complete displayed label without changing date
 virtualization or date-key identity. Generated vertical labels use one primary line; default vertical labels retain
 their month/day and weekday lines. When no locale is supplied, `Intl.DateTimeFormat` uses the current runtime locale;
 server-rendered applications should pass an explicit locale when server and browser defaults may differ.
@@ -121,11 +121,11 @@ flowchart TD
   Anchors --> Views
   Rendering --> Views
   Views --> Shell["EventShell geometry boundary"]
-  Shell --> External["consumer eventRenderer"]
+  Shell --> External["consumer renderEvent"]
   Demo["demo and examples"] --> Entry
 ```
 
-Feature domains do not import views or demo code. Scroll publishes visible positions; events decides what to prefetch. Anchors translate semantic focus using scroll and event geometry without becoming part of either engine. Product card markup stays outside the library internals: rendering positions `EventShell`, then calls `eventRenderer` with event, status, lane, overlap, and full-size style data.
+Feature domains do not import views or demo code. Scroll publishes visible positions; events decides what to prefetch. Anchors translate semantic focus using scroll and event geometry without becoming part of either engine. Product card markup stays outside the library internals: rendering positions `EventShell`, then calls `renderEvent` with event, status, lane, overlap, and full-size style data.
 Each `EventShell` is also a named `calendar-event` size container. Product renderers can therefore adapt their content
 hierarchy to the shell's own width and height with CSS container queries, without viewport media queries or
 layout-measurement state in React.
@@ -369,7 +369,7 @@ Zoom is a geometry update, not a calendar-content lifecycle. Changes in `setting
 - Never key the calendar, a date, a resource row or column, an event shell, or time ticks by zoom. Mounted semantic nodes must retain identity while their position and size styles change.
 - Keep controlled zoom state as close as possible to the calendar and its zoom input. Unrelated application chrome, settings, popups, and data controllers must not subscribe to it.
 - Do not write sidebar control DOM on every gesture frame. Keep wheel/touch projection immediate, then synchronize its thumb and readout once the gesture settles. Direct slider display stays immediate while its calendar projection is limited to the latest value once per animation frame.
-- Keep prepared membership, overlap, and resource metrics independent of zoom. An unchanged external `eventRenderer` must not run again merely because its event shell moved or resized.
+- Keep prepared membership, overlap, and resource metrics independent of zoom. An unchanged external `renderEvent` must not run again merely because its event shell moved or resized.
 - Keep tick cadence in the DOM independent of visual grid cadence. Hide labels with attributes/classes; do not add, remove, or replace label children at a zoom threshold.
 - Apply scroll-anchor correction in a layout effect before paint. Do not blank, fade, skeletonize, or remount the calendar during correction.
 - Accumulate raw mouse-wheel and touchpad zoom steps within a display frame, then perform one controlled projection and anchor restore using the first focused node. A newer external controlled value must cancel the queued wheel commit.

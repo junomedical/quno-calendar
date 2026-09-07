@@ -44,7 +44,7 @@ type FocusEffectsArgs = Pick<
   lastDeclarativeRequestIdRef: MutableRefObject<CalendarFocusRequest["requestId"] | null>;
   viewRef: MutableRefObject<CalendarViewHandle | null>;
   setFocusedEventTarget: Dispatch<SetStateAction<CalendarFocusedEventTarget | null>>;
-  focusEvent: (event: CalendarEvent, options?: { preferredCalendarId?: CalendarId }) => Promise<CalendarFocusResult>;
+  focusEvent: (args: { event: CalendarEvent } & { preferredCalendarId?: CalendarId }) => Promise<CalendarFocusResult>;
   finishPending: (result: CalendarFocusResult) => void;
   cancelActiveFocus: () => void;
 };
@@ -82,13 +82,16 @@ export function useCalendarFocusEffects({
     setFocusedEventTarget({ eventId: pendingFocus.event.id, calendarId: pendingFocus.targetCalendarId });
     if (!viewRef.current?.isEventFullyVisible(target)) {
       if (pendingFocus.anchor) {
-        viewRef.current?.restoreViewportAnchor(pendingFocus.anchor, {
-          target,
-          afterRecenter: true,
-          cancelOnManualScroll: true
+        viewRef.current?.restoreViewportAnchor({
+          anchor: pendingFocus.anchor,
+          ...{
+            target,
+            afterRecenter: true,
+            cancelOnManualScroll: true
+          }
         });
       } else {
-        viewRef.current?.scrollToDateTime(dateKey, time);
+        viewRef.current?.scrollToDateTime({ date: dateKey, time });
       }
     }
     finishPending({
@@ -117,10 +120,12 @@ export function useCalendarFocusEffects({
   useEffect(() => {
     if (!focusRequest || lastDeclarativeRequestIdRef.current === focusRequest.requestId) return;
     lastDeclarativeRequestIdRef.current = focusRequest.requestId;
-    void focusEvent(focusRequest.event, { preferredCalendarId: focusRequest.preferredCalendarId }).then((result) => {
-      const requestResult: CalendarFocusRequestResult = { ...result, requestId: focusRequest.requestId };
-      onFocusRequestComplete?.(requestResult);
-    });
+    void focusEvent({ event: focusRequest.event, ...{ preferredCalendarId: focusRequest.preferredCalendarId } }).then(
+      (result) => {
+        const requestResult: CalendarFocusRequestResult = { ...result, requestId: focusRequest.requestId };
+        onFocusRequestComplete?.(requestResult);
+      }
+    );
   }, [focusEvent, focusRequest, lastDeclarativeRequestIdRef, onFocusRequestComplete]);
 
   useEffect(() => {

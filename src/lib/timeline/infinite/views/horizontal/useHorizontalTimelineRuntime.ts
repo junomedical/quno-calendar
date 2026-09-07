@@ -16,10 +16,13 @@ import { useHorizontalTimelineFoundation } from "./useHorizontalTimelineFoundati
  * data foundation + hit testing -> pointer interactions -> render-ready state
  *                            zoom requests and public committers --^
  */
-export function useHorizontalTimelineRuntime(
-  props: CalendarInternalViewProps,
-  forwardedRef: ForwardedRef<CalendarViewHandle>
-) {
+export function useHorizontalTimelineRuntime({
+  props,
+  forwardedRef
+}: {
+  props: CalendarInternalViewProps;
+  forwardedRef: ForwardedRef<CalendarViewHandle>;
+}) {
   const now = props.now ?? new Date();
   const interactionMode = props.interactionMode ?? "events";
   const [isInteractionActive, setIsInteractionActive] = useState(false);
@@ -87,6 +90,6 @@ export function useHorizontalTimelineRuntime(
     nowMinute,
     showNowLine,
     timeTicks,
-    todayKey: toDateKey(now)
+    todayKey: toDateKey({ date: now })
   };
 }

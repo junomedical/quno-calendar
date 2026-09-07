@@ -55,10 +55,10 @@ import { QunoDatePicker } from "@quno/calendar/datepicker";
 import { QunoDateInput } from "@quno/calendar/date-input";
 import { parseDateInput } from "@quno/calendar/date-parser";
 const value = { start: "2026-08-24", end: "2026-08-24" };
-parseDateInput("today", { expectedRange: value, referenceDate: value.start });
+parseDateInput({ text: "today", ...({ expectedRange: value, referenceDate: value.start }) });
 render(<><QunoDatePicker value={value} /><QunoDateInput expectedRange={value} value={value} />
   <QunoInfiniteCalendar calendars={[{ id: "team", name: "Team" }]} selectedCalendarIds={["team"]}
-    loadEvents={async () => []} eventRenderer={() => null} initialDateKey="2026-08-24" /></>, document.getElementById("root"));
+    loadEvents={async () => []} renderEvent={() => null} initialDateKey="2026-08-24" /></>, document.getElementById("root"));
 `
 );
 execFileSync("npm", ["install", "--prefer-offline", "--no-audit", "--no-fund"], {

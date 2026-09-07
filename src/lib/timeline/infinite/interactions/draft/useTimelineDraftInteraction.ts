@@ -37,7 +37,11 @@ export function useTimelineDraftInteraction({
 
   const startDraft = useCallback(
     (hit: CalendarHit) => {
-      setDraftState({ start: hit, current: hit, event: buildDraftEvent(hit, hit, draftKind) });
+      setDraftState({
+        start: hit,
+        current: hit,
+        event: buildDraftEvent({ startHit: hit, endHit: hit, kind: draftKind })
+      });
     },
     [draftKind]
   );
@@ -55,7 +59,7 @@ export function useTimelineDraftInteraction({
       setDraftState({
         start: draftState.start,
         current: hit,
-        event: buildDraftEvent(draftState.start, hit, draftKind)
+        event: buildDraftEvent({ startHit: draftState.start, endHit: hit, kind: draftKind })
       });
       return true;
     },
@@ -72,7 +76,7 @@ export function useTimelineDraftInteraction({
     }
 
     const draft = draftState.event;
-    if (minutesSinceStartOfDay(draft.end) > minutesSinceStartOfDay(draft.start)) {
+    if (minutesSinceStartOfDay({ value: draft.end }) > minutesSinceStartOfDay({ value: draft.start })) {
       const request = {
         start: draft.start,
         end: draft.end,

@@ -2,7 +2,10 @@
 
 ## Unit Tests
 
-Vitest unit tests live in `tests/unit` and mirror the source module grouping.
+Vitest unit tests live in `tests/unit`, `tests/date-picker`, `tests/date-input`, and `tests/date-parser`.
+Public contract tests verify named arguments, formatter contexts, notification payloads, and ISO guard narrowing.
+Compile-time consumers reject removed names, positional signatures, duplicate exports, and parser-private types.
+Architecture checks enforce object arguments and product dependency direction, including headless type imports.
 
 - Date virtualization with excluded weekdays.
 - Natural-date parsing covers complete previous day/week/month/year periods, the current configured calendar week,
@@ -14,7 +17,7 @@ Vitest unit tests live in `tests/unit` and mirror the source module grouping.
   simultaneous multilingual recognition, picker composition, library size, and dependencies. Each keeps a
   public-entry-point exhibit, Try it guidance, and a copyable recipe.
 - Date labels localize month/day and weekday text for explicit and runtime locales, preserve English ordinal ordering,
-  and let a custom day-name generator replace the complete label using the local date and configured locale.
+  and let a custom `formatters.dayLabel` replace the complete label using an ISO date and configured locale.
 - Variable-size resource prefix extents, binary-searched windows across 50 logical resources, two-resource overscan,
   offscreen pruning, and pinned resource indexes.
 - Date/calendar membership indexing preserves multi-calendar object identity and ignores unselected memberships.
@@ -203,9 +206,9 @@ orientation, availability, loading, visual-focus, and motion assertions formerly
   across a pending 1.2-second idle-recenter deadline keeps the draft and visible date tree mounted at the same
   viewport-relative geometry until pointer release.
 - Vertical virtual scrolling changes visible dates.
-- `getCalendarDayProps` receives the same typed weekend and date identity in both orientations, and
-  `getCalendarCellProps` adds resource identity. The field guide verifies assigned weekend backgrounds on date labels,
-  rows, and columns plus equipment overrides in both projections. `getCalendarHourProps` receives the same clipped
+- `getDayProps` receives the same typed weekend and date identity in both orientations, and
+  `getDayCellProps` adds resource identity. The field guide verifies assigned weekend backgrounds on date labels,
+  rows, and columns plus equipment overrides in both projections. `getHourProps` receives the same clipped
   clock-hour interval in either view; computed-style and geometry checks cover its horizontal and vertical bands and
   visible labels.
 - Rendered day DOM nodes are pruned to the visible viewport plus five day sections of overscan.
@@ -316,3 +319,7 @@ At 1280×720 with 50 resources and 20,000 total events/year:
 - Vertical horizontal scroll keeps the time pane fixed on the left.
 - Overlapping events expand on hover and come to the front.
 - Rejected moves revert after drop.
+
+Clock-dependent default-demo scenarios set a fixed working-day morning in the browser while leaving timers running.
+The virtualizer item-key adapter must retain identity across ordinary renders; navigation, zoom, and dense-layout
+browser tests guard that boundary. Named-contract budgets are 37 KiB gzip for Infinite Calendar and 8 KiB for Date Input.

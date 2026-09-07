@@ -5,7 +5,7 @@ const expectedRange = { start: "2025-08-25", end: "2027-08-25" } as const;
 
 export function PreferredOrderParserExample() {
   const [order, setOrder] = useState<Extract<DateInputDateOrder, "dmy" | "mdy">>("dmy");
-  const result = parseDateInput("3/4/2026", { expectedRange, preferredDateOrder: order });
+  const result = parseDateInput({ text: "3/4/2026", ...{ expectedRange, preferredDateOrder: order } });
   return (
     <div className="date-input-guide__example">
       <div className="story__controls" aria-label="Preferred date order">
@@ -30,7 +30,7 @@ export function TokenParserExample() {
       <label htmlFor="token-parser-input">Text to tokenize</label>
       <input id="token-parser-input" value={text} onChange={(event) => setText(event.target.value)} />
       <pre aria-live="polite">
-        <code>{JSON.stringify(tokenizeDateInput(text), null, 2)}</code>
+        <code>{JSON.stringify(tokenizeDateInput({ text }), null, 2)}</code>
       </pre>
     </div>
   );

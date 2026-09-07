@@ -36,14 +36,25 @@ export function useTimelineDragInteraction({
   const [dragState, setDragState] = useState<DragState | null>(null);
   const isFinishingRef = useRef(false);
 
-  const startDrag = useCallback((event: CalendarEvent, sourceCalendarId: CalendarId, offsetMinutes: number) => {
-    setDragState({
+  const startDrag = useCallback(
+    ({
       event,
       sourceCalendarId,
-      offsetMinutes,
-      preview: null
-    });
-  }, []);
+      offsetMinutes
+    }: {
+      event: CalendarEvent;
+      sourceCalendarId: CalendarId;
+      offsetMinutes: number;
+    }) => {
+      setDragState({
+        event,
+        sourceCalendarId,
+        offsetMinutes,
+        preview: null
+      });
+    },
+    []
+  );
 
   const updateDragFromPoint = useCallback(
     (event: PointerLike) => {
@@ -57,12 +68,12 @@ export function useTimelineDragInteraction({
       }
 
       const draggingActiveDraft = isActiveDraftEvent(dragState.event);
-      const proposal = proposalForDrag(dragState, hit, settings, draggingActiveDraft);
-      if (draggingActiveDraft && !sameMoveRequest(proposal, dragState.preview)) {
+      const proposal = proposalForDrag({ drag: dragState, hit, settings, draggingActiveDraft });
+      if (draggingActiveDraft && !sameMoveRequest({ a: proposal, b: dragState.preview })) {
         onActiveDraftMoveRequest?.(proposal);
       }
       setDragState((current) => {
-        if (!current || sameMoveRequest(proposal, current.preview)) {
+        if (!current || sameMoveRequest({ a: proposal, b: current.preview })) {
           return current;
         }
         return { ...current, preview: proposal };
@@ -111,7 +122,7 @@ export function useTimelineDragInteraction({
   }, []);
 
   const draggingActiveDraft = Boolean(dragState && isActiveDraftEvent(dragState.event));
-  const dragPreviewEvent = previewEventForDrag(dragState, draggingActiveDraft);
+  const dragPreviewEvent = previewEventForDrag({ drag: dragState, draggingActiveDraft });
 
   return {
     dragState,

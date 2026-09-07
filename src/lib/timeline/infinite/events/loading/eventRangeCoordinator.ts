@@ -32,15 +32,19 @@ export type EventRangeRequest = {
   id: number;
 };
 
-function normalizedPrefetchDays(value: number): number {
+function normalizedPrefetchDays({ value }: { value: number }): number {
   return Number.isFinite(value) ? Math.max(0, Math.trunc(value)) : 0;
 }
 
-export function eventLoadDateKeys(
-  visibleDateKeys: readonly string[],
-  selectedCalendarIds: readonly CalendarId[],
-  policy: EventPrefetchPolicy
-): string[] {
+export function eventLoadDateKeys({
+  visibleDateKeys,
+  selectedCalendarIds,
+  policy
+}: {
+  visibleDateKeys: readonly string[];
+  selectedCalendarIds: readonly CalendarId[];
+  policy: EventPrefetchPolicy;
+}): string[] {
   const sortedVisibleDateKeys = [...new Set(visibleDateKeys)].sort();
   if (sortedVisibleDateKeys.length === 0) {
     return [];
@@ -50,27 +54,30 @@ export function eventLoadDateKeys(
     visibleDateKeys: sortedVisibleDateKeys as IsoDate[],
     selectedCalendarIds: [...selectedCalendarIds]
   });
-  const beforeDays = normalizedPrefetchDays(requestedWindow.beforeDays);
-  const afterDays = normalizedPrefetchDays(requestedWindow.afterDays);
+  const beforeDays = normalizedPrefetchDays({ value: requestedWindow.beforeDays });
+  const afterDays = normalizedPrefetchDays({ value: requestedWindow.afterDays });
   const dateKeys = new Set(sortedVisibleDateKeys);
-  const firstDate = fromDateKey(sortedVisibleDateKeys[0]);
-  const lastDate = fromDateKey(sortedVisibleDateKeys[sortedVisibleDateKeys.length - 1]);
+  const firstDate = fromDateKey({ dateKey: sortedVisibleDateKeys[0] });
+  const lastDate = fromDateKey({ dateKey: sortedVisibleDateKeys[sortedVisibleDateKeys.length - 1] });
 
   for (let offset = 1; offset <= beforeDays; offset += 1) {
-    dateKeys.add(toDateKey(addCalendarDays(firstDate, -offset)));
+    dateKeys.add(toDateKey({ date: addCalendarDays({ date: firstDate, amount: -offset }) }));
   }
   for (let offset = 1; offset <= afterDays; offset += 1) {
-    dateKeys.add(toDateKey(addCalendarDays(lastDate, offset)));
+    dateKeys.add(toDateKey({ date: addCalendarDays({ date: lastDate, amount: offset }) }));
   }
   return [...dateKeys].sort();
 }
 
-function contiguousDateGroups(dateKeys: string[]): string[][] {
+function contiguousDateGroups({ dateKeys }: { dateKeys: string[] }): string[][] {
   const groups: string[][] = [];
   for (const dateKey of [...dateKeys].sort()) {
     const currentGroup = groups[groups.length - 1];
     const previousDateKey = currentGroup?.[currentGroup.length - 1];
-    if (!previousDateKey || toDateKey(addCalendarDays(fromDateKey(previousDateKey), 1)) !== dateKey) {
+    if (
+      !previousDateKey ||
+      toDateKey({ date: addCalendarDays({ date: fromDateKey({ dateKey: previousDateKey }), amount: 1 }) }) !== dateKey
+    ) {
       groups.push([dateKey]);
     } else {
       currentGroup.push(dateKey);
@@ -98,7 +105,10 @@ export class EventRangeCoordinator {
   updateSelectedCalendarIds(calendarIds: Iterable<CalendarId>): void {
     this.selectedCalendarIds = new Set(calendarIds);
     for (const request of this.activeRequests.values()) {
-      if (this.selectedCalendarIds.size === 0 || !calendarIdsCover(request.calendarIds, this.selectedCalendarIds)) {
+      if (
+        this.selectedCalendarIds.size === 0 ||
+        !calendarIdsCover({ available: request.calendarIds, required: this.selectedCalendarIds })
+      ) {
         this.cancel(request);
       }
     }
@@ -117,10 +127,11 @@ export class EventRangeCoordinator {
 
   missingLoadRanges(): Array<{ dateKeys: string[]; startDate: IsoDate; endDate: IsoDate }> {
     const missingDateKeys = [...this.loadDates].filter(
-      (dateKey) => !this.coverage.covers(dateKey, this.selectedCalendarIds) && !this.isLoading(dateKey)
+      (dateKey) =>
+        !this.coverage.covers({ dateKey, calendarIds: this.selectedCalendarIds }) && !this.isLoading({ dateKey })
     );
-    return contiguousDateGroups(missingDateKeys).flatMap((dateKeys) => {
-      const range = dateRangeFromKeys(dateKeys as IsoDate[]);
+    return contiguousDateGroups({ dateKeys: missingDateKeys }).flatMap((dateKeys) => {
+      const range = dateRangeFromKeys({ dateKeys: dateKeys as IsoDate[] });
       return range ? [{ dateKeys, ...range }] : [];
     });
   }
@@ -137,16 +148,16 @@ export class EventRangeCoordinator {
     return request;
   }
 
-  accept(request: EventRangeRequest, events: CalendarEvent[]): boolean {
+  accept({ request, events }: { request: EventRangeRequest; events: CalendarEvent[] }): boolean {
     // Correctness does not depend on AbortSignal support in the consumer loader.
     if (!this.isCurrent(request)) {
       return false;
     }
     // Replacement, loaded knowledge, load-window protection, and eviction form one transaction.
-    const renderedEventsChanged = this.cache.replaceDates(request.dateKeys, events);
-    this.coverage.replace(request.dateKeys, request.calendarIds);
+    const renderedEventsChanged = this.cache.replaceDates({ dateKeys: request.dateKeys, events });
+    this.coverage.replace({ dateKeys: request.dateKeys, calendarIds: request.calendarIds });
     this.cache.touchDates(this.loadDates);
-    const evictedDateKeys = this.cache.trim(this.loadDates);
+    const evictedDateKeys = this.cache.trim({ protectedDateKeys: this.loadDates });
     this.coverage.delete(evictedDateKeys);
     this.release(request);
     return renderedEventsChanged || evictedDateKeys.length > 0;
@@ -156,20 +167,20 @@ export class EventRangeCoordinator {
     this.release(request);
   }
 
-  hasEvent(eventId: EventId): boolean {
-    return this.cache.hasEvent(eventId);
+  hasEvent({ eventId }: { eventId: EventId }): boolean {
+    return this.cache.hasEvent({ eventId });
   }
 
-  patchMovedEvent(eventId: EventId, event: CalendarEvent): boolean {
-    return this.cache.patchMovedEvent(eventId, event);
+  patchMovedEvent({ eventId, event }: { eventId: EventId; event: CalendarEvent }): boolean {
+    return this.cache.patchMovedEvent({ eventId, movedEvent: event });
   }
 
-  patchCommittedEvent(event: CalendarEvent, previousEventId?: EventId): boolean {
-    return this.cache.patchCommittedEvent(event, previousEventId);
+  patchCommittedEvent({ event, previousEventId }: { event: CalendarEvent; previousEventId?: EventId }): boolean {
+    return this.cache.patchCommittedEvent({ event, previousEventId });
   }
 
-  removeEvent(eventId: EventId): boolean {
-    return this.cache.deleteEvent(eventId);
+  removeEvent({ eventId }: { eventId: EventId }): boolean {
+    return this.cache.deleteEvent({ eventId });
   }
 
   toRecord(): Record<string, CalendarEvent[]> {
@@ -188,9 +199,11 @@ export class EventRangeCoordinator {
     );
   }
 
-  private isLoading(dateKey: string): boolean {
+  private isLoading({ dateKey }: { dateKey: string }): boolean {
     return [...this.activeRequests.values()].some(
-      (request) => request.dateKeys.has(dateKey) && calendarIdsCover(request.calendarIds, this.selectedCalendarIds)
+      (request) =>
+        request.dateKeys.has(dateKey) &&
+        calendarIdsCover({ available: request.calendarIds, required: this.selectedCalendarIds })
     );
   }
 

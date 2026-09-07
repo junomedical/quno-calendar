@@ -14,10 +14,18 @@ import { HorizontalRowFrame } from "./HorizontalRowFrame";
 import { committedEventHoverWidth, horizontalEventGeometry } from "./horizontalEventGeometry";
 import type { HorizontalTimelineRowProps } from "./types";
 
-function useEventProjections(settings: HorizontalTimelineRowProps["settings"], rowHeight: number, width: number) {
+function useEventProjections({
+  settings,
+  rowHeight,
+  width
+}: {
+  settings: HorizontalTimelineRowProps["settings"];
+  rowHeight: number;
+  width: number;
+}) {
   const availability = useMemo(
     () => (event: CalendarEvent) => {
-      const geometry = horizontalEventGeometry(event, settings);
+      const geometry = horizontalEventGeometry({ event, settings });
       return {
         ...geometry,
         top: 0,
@@ -28,28 +36,30 @@ function useEventProjections(settings: HorizontalTimelineRowProps["settings"], r
     [rowHeight, settings]
   );
   const transient = useMemo(
-    () => (event: CalendarEvent, preview: boolean) => {
-      const geometry = horizontalEventGeometry(event, settings);
-      return {
-        ...geometry,
-        top: preview ? 6 : 0,
-        hoverMaxWidth: geometry.width,
-        height: preview ? rowHeight - 12 : rowHeight
-      };
-    },
+    () =>
+      ({ event, preview }: { event: CalendarEvent; preview: boolean }) => {
+        const geometry = horizontalEventGeometry({ event, settings });
+        return {
+          ...geometry,
+          top: preview ? 6 : 0,
+          hoverMaxWidth: geometry.width,
+          height: preview ? rowHeight - 12 : rowHeight
+        };
+      },
     [rowHeight, settings]
   );
   const committed = useMemo(
-    () => (item: EventLayoutItem, hovered: boolean) => {
-      const left = TIMELINE_LEFT_GUTTER_PX + item.left;
-      return {
-        left,
-        top: hovered ? 0 : item.top,
-        width: item.width,
-        hoverMaxWidth: committedEventHoverWidth(left, item.width, width),
-        height: hovered ? rowHeight : item.height
-      };
-    },
+    () =>
+      ({ item, hovered }: { item: EventLayoutItem; hovered: boolean }) => {
+        const left = TIMELINE_LEFT_GUTTER_PX + item.left;
+        return {
+          left,
+          top: hovered ? 0 : item.top,
+          width: item.width,
+          hoverMaxWidth: committedEventHoverWidth({ eventLeft: left, eventWidth: item.width, timelineWidth: width }),
+          height: hovered ? rowHeight : item.height
+        };
+      },
     [rowHeight, width]
   );
   return { availability, transient, committed };
@@ -92,7 +102,7 @@ export const InfiniteTimelineRow = memo(function InfiniteTimelineRow({
   draftEventIsDraggable,
   draftEventIsExiting,
   draftEventReleaseDurationMs,
-  eventRenderer,
+  renderEvent,
   geometryRegistration,
   onHoverMove,
   onHoverLeave,
@@ -100,11 +110,14 @@ export const InfiniteTimelineRow = memo(function InfiniteTimelineRow({
 }: HorizontalTimelineRowProps) {
   const rowSettings = useMemo(() => ({ ...settings, rowHeight }), [rowHeight, settings]);
   const availabilityEvents = useMemo(() => rowEvents.filter((event) => event.kind === "availability"), [rowEvents]);
-  const layoutItems = useMemo(() => layoutPreparedEventsForRow(preparedCell, rowSettings), [preparedCell, rowSettings]);
-  const project = useEventProjections(settings, rowHeight, width);
+  const layoutItems = useMemo(
+    () => layoutPreparedEventsForRow({ preparedCell, settings: rowSettings }),
+    [preparedCell, rowSettings]
+  );
+  const project = useEventProjections({ settings, rowHeight, width });
   const sharedLayerProps = {
     calendarId: calendar.id,
-    eventRenderer,
+    renderEvent,
     geometryRegistration,
     eventInteractionEnabled,
     onEventPointerDown
@@ -121,7 +134,7 @@ export const InfiniteTimelineRow = memo(function InfiniteTimelineRow({
       calendarHourPresentations={calendarHourPresentations}
       settings={settings}
       timelineWidth={width}
-      gridCellWidth={Math.max(1, settings.zoom * gridCadenceMinutes(settings.zoom))}
+      gridCellWidth={Math.max(1, settings.zoom * gridCadenceMinutes({ zoom: settings.zoom }))}
       eventCount={rowEvents.length}
       showNowLine={showNowLine}
       nowLineClassName={nowLineClassName}

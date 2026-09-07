@@ -12,7 +12,7 @@ export const SingleDayExample = (): JSX.Element => {
     <div className="story__single-day">
       <QunoDatePicker
         value={value}
-        onChange={setValue}
+        onChange={({ value }) => setValue(value)}
         initialMonth="2026-08-01"
         selectionMode="single"
         labels={{ selectedPeriod: "Selected day", hint: "Choose one day." }}

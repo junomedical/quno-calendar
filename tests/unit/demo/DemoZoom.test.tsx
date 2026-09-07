@@ -42,7 +42,7 @@ describe("demo zoom render boundary", () => {
           calendars={[{ id: "calendar-a", name: "Calendar A" }]}
           selectedCalendarIds={["calendar-a"]}
           loadEvents={async () => []}
-          eventRenderer={() => null}
+          renderEvent={() => null}
           settings={settings}
         />
         <DemoZoomControl className="zoom-control" />

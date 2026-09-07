@@ -3,9 +3,9 @@
 Quno/Infinite Calendar owns virtualized horizontal and vertical schedules, timestamped events, async loading, event
 rendering, creation and movement, navigation, zoom, and visual focus.
 
-`getCalendarDayProps` assigns date-wide presentation to a complete day and its visible header. `getCalendarCellProps`
+`getDayProps` assigns date-wide presentation to a complete day and its visible header. `getDayCellProps`
 adds resource-specific classes, inline styles, or titles from typed date, weekend, calendar, and orientation context.
-`getCalendarHourProps` styles clock-hour bands and their visible labels across both orientations. Together they style
+`getHourProps` styles clock-hour bands and their visible labels across both orientations. Together they style
 days, hours, horizontal rows, and vertical columns without taking ownership of geometry or interaction behavior.
 
 - Public entry point: `@quno/calendar/infinite-calendar`
@@ -29,3 +29,10 @@ and Save action remain unavailable.
 TanStack Virtual notifications use its queued React update path. Layout restoration requests an ordinary React
 projection before paint, keeping React 19 development free of the virtualizer `flushSync` lifecycle warning while
 semantic anchor and frame-stability browser coverage continues to guard against empty intermediate views.
+
+## Named contracts
+
+Use `renderEvent`, component-level `locale` and `formatters.dayLabel({ date, locale })`, plus `getDayProps`,
+`getDayCellProps`, and `getHourProps` for presentation. Navigation commands and zoom notifications use named objects.
+
+See the [breaking migration](../shared/migration.md#unreleased-named-contracts-and-product-ownership).

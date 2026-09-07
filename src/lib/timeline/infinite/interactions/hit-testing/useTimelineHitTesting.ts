@@ -12,14 +12,22 @@ type SharedArgs = {
   selectedIds: CalendarId[];
 };
 
-function useTimelineHitTesting(
-  { containerRef, selectedIds }: SharedArgs,
-  gridSelector: string,
-  excludedSelector: string,
-  minuteAtPoint: (container: HTMLDivElement, grid: HTMLElement, point: TimelinePointer) => number | null
-) {
+type HitTestingArgs = SharedArgs & {
+  gridSelector: string;
+  excludedSelector: string;
+  minuteAtPoint: (context: { container: HTMLDivElement; grid: HTMLElement; point: TimelinePointer }) => number | null;
+};
+
+function useTimelineHitTesting({
+  containerRef,
+  selectedIds,
+  gridSelector,
+  excludedSelector,
+  minuteAtPoint
+}: HitTestingArgs) {
   const gridAtPoint = useCallback(
-    (point: TimelinePointer) => timelineGridAtPoint(containerRef.current, point, gridSelector, excludedSelector),
+    (point: TimelinePointer) =>
+      timelineGridAtPoint({ container: containerRef.current, point, gridSelector, excludedSelector }),
     [containerRef, excludedSelector, gridSelector]
   );
   const isTimelinePoint = useCallback((point: TimelinePointer) => Boolean(gridAtPoint(point)), [gridAtPoint]);
@@ -28,8 +36,8 @@ function useTimelineHitTesting(
       const container = containerRef.current;
       const grid = gridAtPoint(point);
       if (!container || !grid) return null;
-      const identity = timelineGridIdentity(grid, selectedIds);
-      const minute = minuteAtPoint(container, grid, point);
+      const identity = timelineGridIdentity({ grid, selectedIds });
+      const minute = minuteAtPoint({ container, grid, point });
       return identity && minute !== null ? { ...identity, minute } : null;
     },
     [containerRef, gridAtPoint, minuteAtPoint, selectedIds]
@@ -41,41 +49,50 @@ type HorizontalArgs = SharedArgs & { effectiveSettings: QunoInfiniteCalendarSett
 
 export function useHorizontalTimelineHitTesting(args: HorizontalArgs) {
   const minuteAtPoint = useCallback(
-    (container: HTMLDivElement, _grid: HTMLElement, point: TimelinePointer) => {
+    ({ container, point }: { container: HTMLDivElement; grid: HTMLElement; point: TimelinePointer }) => {
       const x =
         point.clientX -
         container.getBoundingClientRect().left +
         container.scrollLeft -
         args.settings.labelWidth -
         TIMELINE_LEFT_GUTTER_PX;
-      return x < 0 ? null : snapMinute(xToMinute(x, args.effectiveSettings), args.settings.snapMinutes);
+      return x < 0
+        ? null
+        : snapMinute({
+            minute: xToMinute({ x, geometry: args.effectiveSettings }),
+            snapMinutes: args.settings.snapMinutes
+          });
     },
     [args.effectiveSettings, args.settings]
   );
-  return useTimelineHitTesting(
-    args,
-    ".quno-calendar-row-grid",
-    ".quno-calendar-left-label, .quno-calendar-day-header, .quno-calendar-day-header-band, .quno-calendar-time-scale-header",
+  return useTimelineHitTesting({
+    ...args,
+    gridSelector: ".quno-calendar-row-grid",
+    excludedSelector:
+      ".quno-calendar-left-label, .quno-calendar-day-header, .quno-calendar-day-header-band, .quno-calendar-time-scale-header",
     minuteAtPoint
-  );
+  });
 }
 
 type VerticalArgs = SharedArgs & { dayTimelineHeight: number; timelineGutterPx: number };
 
 export function useVerticalTimelineHitTesting(args: VerticalArgs) {
   const minuteAtPoint = useCallback(
-    (_container: HTMLDivElement, grid: HTMLElement, point: TimelinePointer) => {
+    ({ grid, point }: { container: HTMLDivElement; grid: HTMLElement; point: TimelinePointer }) => {
       const timelineY = point.clientY - grid.getBoundingClientRect().top;
       return timelineY < 0 || timelineY > args.dayTimelineHeight
         ? null
-        : snapMinute(yToMinute(timelineY - args.timelineGutterPx, args.settings), args.settings.snapMinutes);
+        : snapMinute({
+            minute: yToMinute({ y: timelineY - args.timelineGutterPx, geometry: args.settings }),
+            snapMinutes: args.settings.snapMinutes
+          });
     },
     [args.dayTimelineHeight, args.settings, args.timelineGutterPx]
   );
-  return useTimelineHitTesting(
-    args,
-    ".icv-calendar-column-grid",
-    ".icv-time-pane, .icv-day-header, .icv-calendar-header-grid",
+  return useTimelineHitTesting({
+    ...args,
+    gridSelector: ".icv-calendar-column-grid",
+    excludedSelector: ".icv-time-pane, .icv-day-header, .icv-calendar-header-grid",
     minuteAtPoint
-  );
+  });
 }

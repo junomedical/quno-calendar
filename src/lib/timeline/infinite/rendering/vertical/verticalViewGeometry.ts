@@ -29,12 +29,17 @@ export function buildVerticalLayoutSignature(settings: QunoInfiniteCalendarSetti
   return `${settings.dayHeaderHeight}:${settings.startHour}:${settings.endHour}:${settings.zoom}:${settings.excludedWeekdays.join("|")}`;
 }
 
-export function resolveVerticalDateOffset(
-  offsetWithinDate: number,
-  previousDayHeight: number,
-  nextDayHeight: number,
-  dayHeaderHeight: number
-): number {
+export function resolveVerticalDateOffset({
+  offsetWithinDate,
+  previousDayHeight,
+  nextDayHeight,
+  dayHeaderHeight
+}: {
+  offsetWithinDate: number;
+  previousDayHeight: number;
+  nextDayHeight: number;
+  dayHeaderHeight: number;
+}): number {
   if (offsetWithinDate <= dayHeaderHeight) {
     return Math.min(offsetWithinDate, Math.max(0, nextDayHeight - 1));
   }
@@ -44,10 +49,10 @@ export function resolveVerticalDateOffset(
   return Math.min(Math.max(0, nextDayHeight - 1), dayHeaderHeight + relativeTimelineOffset * nextTimelineHeight);
 }
 
-export function buildVerticalNowState(now: Date, settings: QunoInfiniteCalendarSettings) {
+export function buildVerticalNowState({ now, settings }: { now: Date; settings: QunoInfiniteCalendarSettings }) {
   const minute = now.getHours() * 60 + now.getMinutes();
   return {
-    dateKey: toDateKey(now),
+    dateKey: toDateKey({ date: now }),
     minute,
     showLine: minute >= timelineStartMinute(settings) && minute <= timelineEndMinute(settings)
   };

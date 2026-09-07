@@ -14,7 +14,7 @@ describe("QunoDateInput controlled drafts", () => {
           <QunoDateInput
             aria-label="Date"
             expectedRange={expectedRange}
-            onChange={(next) => next && setValue(next)}
+            onChange={({ value: next }) => next && setValue(next)}
             selectionMode="single"
             value={value}
           />

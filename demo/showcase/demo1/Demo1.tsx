@@ -29,7 +29,7 @@ const compactPreset: DemoPreset = {
     verticalColumnOverlapGrowth: 60,
     verticalEventHoverMinHeight: 54
   },
-  eventRenderer: Demo1EventCard,
+  renderEvent: Demo1EventCard,
   messages: {
     initial: "Compact horizontal board",
     datasetLoaded: (scale) => `Loaded ${scale.toLocaleString()} compact events/year`,

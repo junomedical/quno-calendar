@@ -10,13 +10,13 @@ flowchart LR
   Canvas --> Day["Date chrome"]
   Day --> Resource["Resource row / column"]
   Resource --> Layers["Availability, committed, transient"]
-  Layers --> Shell["External eventRenderer shell"]
+  Layers --> Shell["External renderEvent shell"]
   Styles["Shared + orientation CSS"] --> Canvas
 ```
 
 ## Contracts And Invariants
 
-- Product-specific event content remains external through `eventRenderer`.
+- Product-specific event content remains external through `renderEvent`.
 - Event shell geometry is isolated from arbitrary renderer content.
 - Native sticky positioning owns headers and labels.
 - Cross-axis windowing preserves original spacer size and resource offsets.

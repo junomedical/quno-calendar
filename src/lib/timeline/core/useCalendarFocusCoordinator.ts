@@ -55,10 +55,10 @@ export function useCalendarFocusCoordinator({
   }, [finishPending, viewRef]);
 
   const focusEvent = useCallback(
-    (event: CalendarEvent, options: CalendarFocusOptions = {}): Promise<CalendarFocusResult> => {
+    ({ event, ...options }: { event: CalendarEvent } & CalendarFocusOptions): Promise<CalendarFocusResult> => {
       cancelActiveFocus();
       const { dateKey, time } = eventDateAndTime(event);
-      if (isWeekdayExcluded(fromDateKey(dateKey), excludedWeekdays)) {
+      if (isWeekdayExcluded({ date: fromDateKey({ dateKey }), excludedWeekdays })) {
         return Promise.resolve({ eventId: event.id, status: "unavailable" });
       }
       const knownCalendarIds = new Set(calendars.map((calendar) => calendar.id));
@@ -79,11 +79,11 @@ export function useCalendarFocusCoordinator({
         if (participantIds.includes(calendar.id)) desiredSet.add(calendar.id);
       }
       const desiredCalendarIds = [...desiredSet];
-      const visibleAnchorCalendarId = visibleFocusAnchorCalendarId(
+      const visibleAnchorCalendarId = visibleFocusAnchorCalendarId({
         participantIds,
         selectedCalendarIds,
         preferredCalendarId
-      );
+      });
       const anchor = visibleAnchorCalendarId
         ? viewRef.current.captureViewportAnchor({
             eventId: event.id,
@@ -133,11 +133,15 @@ export function useCalendarFocusCoordinator({
   return { focusEvent, focusedEventTarget };
 }
 
-export function visibleFocusAnchorCalendarId(
-  participantIds: string[],
-  selectedCalendarIds: string[],
-  preferredCalendarId?: string
-) {
+export function visibleFocusAnchorCalendarId({
+  participantIds,
+  selectedCalendarIds,
+  preferredCalendarId
+}: {
+  participantIds: string[];
+  selectedCalendarIds: string[];
+  preferredCalendarId?: string;
+}) {
   if (
     preferredCalendarId &&
     participantIds.includes(preferredCalendarId) &&

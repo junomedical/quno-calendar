@@ -11,10 +11,13 @@ import { TIMELINE_LEFT_GUTTER_PX } from "#quno-internal/timeline/time/timelineTi
  * The requested zoom remains parent-owned. The local floor only prevents a
  * timeline narrower than its viewport and therefore never emits a zoom change.
  */
-export function useHorizontalViewportSizing(
-  containerRef: RefObject<HTMLDivElement | null>,
-  settings: QunoInfiniteCalendarSettings
-) {
+export function useHorizontalViewportSizing({
+  containerRef,
+  settings
+}: {
+  containerRef: RefObject<HTMLDivElement | null>;
+  settings: QunoInfiniteCalendarSettings;
+}) {
   const [viewportWidth, setViewportWidth] = useState(0);
   const horizontalRenderZoomFloor = useMemo(() => {
     const availableTimelineWidth = Math.max(0, viewportWidth - settings.labelWidth - TIMELINE_LEFT_GUTTER_PX);

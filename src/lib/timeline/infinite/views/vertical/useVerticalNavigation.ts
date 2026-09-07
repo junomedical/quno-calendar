@@ -1,6 +1,6 @@
 /**
  * Vertical navigation and public imperative API.
- * date/time requests + geometry registry -> scroll operations and anchor-safe ref methods
+ * date/time requests + geometry registry -> scroll operations and anchor-safe forwardedRef methods
  */
 import { useCallback, useImperativeHandle, type ForwardedRef, type RefObject } from "react";
 import type { QunoInfiniteCalendarHandle, QunoInfiniteCalendarSettings } from "#quno-internal/timeline/core/types";
@@ -16,19 +16,19 @@ import { useViewportAnchoring } from "#quno-internal/timeline/infinite/anchors/p
 import type { IsoDate } from "#quno-internal/shared/dateRangeModel";
 
 type VerticalNavigationArgs = {
-  ref: ForwardedRef<CalendarViewHandle>;
+  forwardedRef: ForwardedRef<CalendarViewHandle>;
   containerRef: RefObject<HTMLDivElement | null>;
   settings: QunoInfiniteCalendarSettings;
   now: Date;
   scrollToDate: QunoInfiniteCalendarHandle["scrollToDate"];
-  rememberVisibleDateOffset: (dateKey: string, offsetWithinDate: number) => void;
+  rememberVisibleDateOffset: (args: { dateKey: string; offsetWithinDate: number }) => void;
   commitVisibleEvent: QunoInfiniteCalendarHandle["commitVisibleEvent"];
   removeVisibleEvent: QunoInfiniteCalendarHandle["removeVisibleEvent"];
   releaseActiveDraft: QunoInfiniteCalendarHandle["releaseActiveDraft"];
 };
 
 export function useVerticalNavigation({
-  ref,
+  forwardedRef,
   containerRef,
   settings,
   now,
@@ -39,7 +39,7 @@ export function useVerticalNavigation({
   releaseActiveDraft
 }: VerticalNavigationArgs) {
   const scrollToTimeInDate = useCallback(
-    (dateKey: IsoDate, time: string) => {
+    ({ dateKey, time }: { dateKey: IsoDate; time: string }) => {
       const scrollElement = containerRef.current;
       if (!scrollElement || !/^\d{2}:\d{2}$/.test(time)) return;
       const dayElement = scrollElement.querySelector<HTMLElement>(
@@ -48,19 +48,19 @@ export function useVerticalNavigation({
       if (!dayElement) return;
       const offsetWithinDate = Math.max(
         0,
-        settings.dayHeaderHeight + verticalMinuteToY(parseClockToMinutes(time), settings) - 48
+        settings.dayHeaderHeight + verticalMinuteToY({ minute: parseClockToMinutes({ clock: time }), settings }) - 48
       );
-      rememberVisibleDateOffset(dateKey, offsetWithinDate);
+      rememberVisibleDateOffset({ dateKey, offsetWithinDate });
       scrollElement.scrollTop = Math.max(0, dayElement.offsetTop + offsetWithinDate);
     },
     [containerRef, rememberVisibleDateOffset, settings]
   );
   const scrollToDateTime = useCallback(
-    (dateKey: IsoDate, time: string) => {
-      scrollToDate(dateKey);
+    ({ date: dateKey, time }: { date: IsoDate; time: string }) => {
+      scrollToDate({ date: dateKey });
       window.requestAnimationFrame(() => {
-        scrollToTimeInDate(dateKey, time);
-        window.requestAnimationFrame(() => scrollToTimeInDate(dateKey, time));
+        scrollToTimeInDate({ dateKey, time });
+        window.requestAnimationFrame(() => scrollToTimeInDate({ dateKey, time }));
       });
     },
     [scrollToDate, scrollToTimeInDate]
@@ -78,15 +78,15 @@ export function useVerticalNavigation({
   });
 
   useImperativeHandle(
-    ref,
+    forwardedRef,
     () => ({
       scrollToDate,
       scrollToDateTime,
       scrollToToday: () =>
-        scrollToDateTime(
-          toDateKey(now),
-          `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`
-        ),
+        scrollToDateTime({
+          date: toDateKey({ date: now }),
+          time: `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`
+        }),
       captureViewportAnchor: anchoring.captureViewportAnchor,
       isEventFullyVisible: anchoring.isEventFullyVisible,
       restoreViewportAnchor: anchoring.restoreViewportAnchor,

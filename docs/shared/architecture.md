@@ -33,6 +33,20 @@ event timestamps.
   consumer fixture, and tests Preact through `preact/compat` aliases.
 - Framework runtimes and `@tanstack/react-virtual` remain external to generated feature bundles.
 
+## Named function boundaries
+
+Production functions take one named object, including private helpers and commands; zero-argument functions remain
+unchanged. Existing object requests are passed directly. Native React/DOM events, refs, state setters, array iteration,
+promises, and virtualizer callbacks keep their required signatures through explicit types and boundary adapters.
+
+Date Parser owns its implementation and types, and Date Input consumes it internally. Shared date primitives remain
+in the headless layer; picker actions live with Datepicker. Shared runtime helpers have one public home at the root.
+Parser internals and input formatting types do not leak through the parser public facade. Timeline local-date helpers
+remain distinct from timezone-free arithmetic. Horizontal/vertical projections continue to share event preparation
+while retaining their own geometry and scheduling.
+
+`check:architecture` verifies object signatures and dependency direction as well as module and function size limits.
+
 ## Packaging
 
 Every JavaScript entry emits ESM, CommonJS, and declarations without accessing `document` during import. UI stylesheets

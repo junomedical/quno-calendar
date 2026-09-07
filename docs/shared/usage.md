@@ -61,7 +61,7 @@ function EventCard({ event, status, style }: EventRendererProps) {
   calendars={calendars}
   selectedCalendarIds={["provider-a"]}
   loadEvents={loadEvents}
-  eventRenderer={EventCard}
+  renderEvent={EventCard}
   view="infinite-horizontal"
 />;
 ```
@@ -75,7 +75,7 @@ Repository example: the read-only chapter in
 
 ## Custom Event Card Structure
 
-The calendar owns the event shell’s time geometry; `eventRenderer` owns the content hierarchy inside it. Products can
+The calendar owns the event shell’s time geometry; `renderEvent` owns the content hierarchy inside it. Products can
 therefore extend their event records with domain fields and choose which field leads the card for the current workflow:
 
 ```tsx
@@ -101,7 +101,7 @@ function ProductEventCard({ event, style }: EventRendererProps) {
   );
 }
 
-<QunoInfiniteCalendar {...calendarProps} eventRenderer={ProductEventCard} />;
+<QunoInfiniteCalendar {...calendarProps} renderEvent={ProductEventCard} />;
 ```
 
 Changing renderer hierarchy does not alter event times, overlap lanes, loading, or shell geometry. Keep the renderer
@@ -157,13 +157,13 @@ use `--quno-calendar-header-surface`.
 
 ## Calendar Day, Hour, Row, And Column Styling
 
-Use `getCalendarDayProps` for date-wide presentation and `getCalendarCellProps` for a specific date/resource
+Use `getDayProps` for date-wide presentation and `getDayCellProps` for a specific date/resource
 intersection. A day result styles its date section, visible date header, and every resource cell. A cell result then
 adds or overrides presentation for the matching horizontal row or vertical column, including its resource label or
 header. Both typed contexts include the `IsoDate`, weekday, active view, and Today/weekend flags; the cell context also
 includes the complete `CalendarRow`.
 
-Use `getCalendarHourProps` for clock-time presentation shared across dates and resources. Its context reports the
+Use `getHourProps` for clock-time presentation shared across dates and resources. Its context reports the
 zero-based `hour`, clipped `startMinute` and `endMinute`, and active view. The returned presentation paints the hour
 band above day/resource backgrounds but below events, and also styles its visible time label.
 
@@ -174,7 +174,7 @@ import type {
   QunoInfiniteCalendarHourCustomizer
 } from "@quno/calendar/infinite-calendar";
 
-const getCalendarDayProps: QunoInfiniteCalendarDayCustomizer = ({ isWeekend }) =>
+const getDayProps: QunoInfiniteCalendarDayCustomizer = ({ isWeekend }) =>
   isWeekend
     ? {
         className: "weekend-day",
@@ -183,7 +183,7 @@ const getCalendarDayProps: QunoInfiniteCalendarDayCustomizer = ({ isWeekend }) =
       }
     : undefined;
 
-const getCalendarCellProps: QunoInfiniteCalendarCellCustomizer = ({ calendar }) => {
+const getDayCellProps: QunoInfiniteCalendarCellCustomizer = ({ calendar }) => {
   if (!calendar.id.startsWith("equipment-")) return undefined;
 
   return {
@@ -193,7 +193,7 @@ const getCalendarCellProps: QunoInfiniteCalendarCellCustomizer = ({ calendar }) 
   };
 };
 
-const getCalendarHourProps: QunoInfiniteCalendarHourCustomizer = ({ hour }) =>
+const getHourProps: QunoInfiniteCalendarHourCustomizer = ({ hour }) =>
   hour === 12
     ? {
         className: "lunch-hour",
@@ -204,9 +204,9 @@ const getCalendarHourProps: QunoInfiniteCalendarHourCustomizer = ({ hour }) =>
 
 <QunoInfiniteCalendar
   {...calendarProps}
-  getCalendarDayProps={getCalendarDayProps}
-  getCalendarCellProps={getCalendarCellProps}
-  getCalendarHourProps={getCalendarHourProps}
+  getDayProps={getDayProps}
+  getDayCellProps={getDayCellProps}
+  getHourProps={getHourProps}
 />;
 ```
 
@@ -307,38 +307,28 @@ Repository example: the horizontal/vertical overlap comparison in
 
 ## Date Labels And Localization
 
-Date labels use the browser or server runtime locale by default. Set `settings.dateLocale` to a BCP 47 locale string
-or locale priority list when the product needs deterministic output, especially during server rendering. The same
-setting applies to horizontal date headers and both lines of vertical date headers.
-
-Use `dayNameGenerator` when the product should own the complete displayed label:
+Date labels use the browser or server runtime locale by default. Set component-level `locale` to a BCP 47 locale string
+or locale priority list for deterministic output. Use `formatters.dayLabel` to replace the complete label in either
+orientation. Its context contains a timezone-free `IsoDate` and the configured locale:
 
 ```tsx
-import type { DayNameGenerator } from "@quno/calendar/infinite-calendar";
+import { formatIsoDate } from "@quno/calendar";
+import type { QunoInfiniteCalendarFormatters } from "@quno/calendar/infinite-calendar";
 
-const dayNameGenerator: DayNameGenerator = (date, locale) =>
-  new Intl.DateTimeFormat(locale, {
-    day: "numeric",
-    month: "short",
-    year: "numeric"
-  }).format(date);
+const formatters: QunoInfiniteCalendarFormatters = {
+  dayLabel: ({ date, locale }) =>
+    formatIsoDate({
+      value: date,
+      locale,
+      options: { day: "numeric", month: "short", year: "numeric" }
+    })
+};
 
-<QunoInfiniteCalendar
-  {...calendarProps}
-  settings={{
-    ...settings,
-    dateLocale: "de-DE",
-    dayNameGenerator
-  }}
-/>;
+<QunoInfiniteCalendar {...calendarProps} locale="de-DE" formatters={formatters} />;
 ```
 
-The generator receives the local calendar `Date` and the configured locale, and its return value replaces the complete
-default label. This lets a product render `Tomorrow`, `6 Jul 2026`, or a machine sequence without a built-in date being
-prepended. In the vertical view, generated labels use the primary line rather than retaining the default two-line
-month/day and weekday structure. Keep the function referentially stable when it is created inside a React component.
-Without a generator, English labels retain ordinal days and respect locale ordering (`July 4th` in `en-US`, `4th July`
-in `en-GB`); other locales use their native month/day formatting.
+A custom label occupies the vertical primary line. Without an override, the default two-line vertical composition and
+English ordinal days remain unchanged. Keep formatter functions stable when declaring them inside React components.
 
 Repository example: the date-localization chapter in
 [`ArticleProductDemos.tsx`](../../demo/guide/timeline/ArticleProductDemos.tsx).
@@ -355,13 +345,13 @@ import "@quno/calendar/datepicker/styles.css";
 
 function TravelDates() {
   const [value, setValue] = useState<DateRange | null>(null);
-  return <QunoDatePicker value={value} onChange={setValue} weekStartsOn={1} />;
+  return <QunoDatePicker value={value} onChange={({ value }) => setValue(value)} weekStartsOn={1} />;
 }
 ```
 
 Use `selectionMode="single"` when the product chooses one day while retaining the `DateRange` state shape. `initialMonth` controls only the initial view; navigation and Clear do not unexpectedly change one another. Consumer customization is presentational through scoped `--quno-date-picker-*` properties, typed `classNames`, stable `data-slot`/state attributes, and `getDayCellProps`.
 
-Keep asynchronous day availability in parent state. `disabledDays` is synchronous so every pointer and keyboard
+Keep asynchronous day availability in parent state. `isDayDisabled` is synchronous so every pointer and keyboard
 decision has an immediate answer; treat missing and failed results as disabled, and use `getDayCellProps` only to
 present their state:
 
@@ -371,7 +361,7 @@ const [statuses, setStatuses] = useState<Partial<Record<IsoDate, DayStatus>>>({}
 const statusFor = (date: IsoDate): DayStatus => statuses[date] ?? "loading";
 
 <QunoDatePicker
-  disabledDays={(date) => statusFor(date) !== "available"}
+  isDayDisabled={({ date }) => statusFor(date) !== "available"}
   getDayCellProps={({ date, isDisabled }) => ({
     className: `booking-day--${statusFor(date)}`,
     title: isDisabled ? "Not available" : undefined
@@ -390,16 +380,19 @@ import { QunoDateInput } from "@quno/calendar/date-input";
 import { parseDateInput, tokenizeDateInput } from "@quno/calendar/date-parser";
 import "@quno/calendar/date-input/styles.css";
 
-const parsed = parseDateInput("previous week", {
-  expectedRange: { start: "2025-01-01", end: "2027-12-31" },
-  referenceDate: "2026-08-24",
-  weekStartsOn: 0,
-  locale: "en-GB"
+const parsed = parseDateInput({
+  text: "previous week",
+  ...{
+    expectedRange: { start: "2025-01-01", end: "2027-12-31" },
+    referenceDate: "2026-08-24",
+    weekStartsOn: 0,
+    locale: "en-GB"
+  }
 });
 
 <QunoDateInput
   value={value}
-  onChange={setValue}
+  onChange={({ value }) => setValue(value)}
   expectedRange={{ start: "2025-01-01", end: "2027-12-31" }}
   referenceDate="2026-08-24"
   weekStartsOn={0}
@@ -439,8 +432,12 @@ date-input entry.
 
 For a compact range field, let `QunoDateInput` replace the picker’s selected-period summary and Clear action. Open a
 `selectionMode="range"` picker while focus remains in the composed control, hide its duplicate selection header with
-the public `selection-header` slot, and close it when focus or an outside pointer leaves. Typing and picking continue to
-share one controlled `DateRange`; an empty committed input clears that value without a second action.
+the public `selection-header` slot, and close it when focus or an outside pointer leaves. Use the blur event’s
+`relatedTarget` to recognize focus moving to a picker control, and retain whether a pointer action began inside the
+composition until its click settles. Start or End shortcuts can remove themselves after jumping months, and WebKit
+does not necessarily focus a clicked button, so a delayed `document.activeElement` check can mistake either internal
+click for an outside blur. Typing and picking continue to share one controlled `DateRange`; an empty committed input
+clears that value without a second action.
 
 ## Quno/Date Parser
 
@@ -449,14 +446,17 @@ Import parsing and tokenization from the headless entry point. It has no stylesh
 ```ts
 import { parseDateInput, tokenizeDateInput } from "@quno/calendar/date-parser";
 
-const result = parseDateInput("this week", {
-  expectedRange: { start: "2025-01-01", end: "2027-12-31" },
-  referenceDate: "2026-08-24",
-  weekStartsOn: 1,
-  preferredDateOrder: "dmy",
-  parserLanguages: ["en", "de"]
+const result = parseDateInput({
+  text: "this week",
+  ...{
+    expectedRange: { start: "2025-01-01", end: "2027-12-31" },
+    referenceDate: "2026-08-24",
+    weekStartsOn: 1,
+    preferredDateOrder: "dmy",
+    parserLanguages: ["en", "de"]
+  }
 });
-const tokens = tokenizeDateInput("next Monday");
+const tokens = tokenizeDateInput({ text: "next Monday" });
 ```
 
 The parser recognizes explicit formats, relative dates and calendar periods, inclusive ranges, multilingual vocabulary, and consumer lexicon extensions. It remains timezone-free and safe to import in ESM, CommonJS, Node, and SSR.
@@ -472,8 +472,8 @@ const calendarRef = useRef<QunoInfiniteCalendarHandle>(null);
 
 <QunoDatePicker
   selectionMode="single"
-  onChange={(selection) => {
-    if (selection) calendarRef.current?.scrollToDate(selection.start);
+  onChange={({ value: selection }) => {
+    if (selection) calendarRef.current?.scrollToDate({ date: selection.start });
   }}
 />
 <QunoInfiniteCalendar ref={calendarRef} {...timelineProps} />
@@ -522,7 +522,7 @@ these callbacks is read-only.
 />
 ```
 
-Returning `false` from `onEventMoveRequest` rejects a drop. Returning a created event from `onEventCreateRequest` lets the visible cache show the committed event immediately. Newly committed visible events briefly receive `status: "appearing"` in `eventRenderer` props so product renderers can play a save/create highlight. For parent-owned save flows, update your own event store and call `commitVisibleEvent` so the loaded visible cache changes one record instead of reloading the range.
+Returning `false` from `onEventMoveRequest` rejects a drop. Returning a created event from `onEventCreateRequest` lets the visible cache show the committed event immediately. Newly committed visible events briefly receive `status: "appearing"` in `renderEvent` props so product renderers can play a save/create highlight. For parent-owned save flows, update your own event store and call `commitVisibleEvent` so the loaded visible cache changes one record instead of reloading the range.
 
 Repository example: the parent-owned mutation chapter in
 [`ArticleRecipeDemos.tsx`](../../demo/guide/timeline/ArticleRecipeDemos.tsx) stages move and create
@@ -557,15 +557,18 @@ const anchor = calendarRef.current?.captureViewportAnchor({
 
 setActiveDraft(null);
 
-calendarRef.current?.restoreViewportAnchor(anchor, {
-  target: {
-    eventId: savedEvent.id,
-    calendarId: savedEvent.calendarId,
-    dateKey: savedEvent.start.slice(0, 10),
-    time: "09:30"
-  },
-  afterRecenter: true,
-  cancelOnManualScroll: true
+calendarRef.current?.restoreViewportAnchor({
+  anchor: anchor,
+  ...{
+    target: {
+      eventId: savedEvent.id,
+      calendarId: savedEvent.calendarId,
+      dateKey: savedEvent.start.slice(0, 10),
+      time: "09:30"
+    },
+    afterRecenter: true,
+    cancelOnManualScroll: true
+  }
 });
 ```
 
@@ -584,9 +587,12 @@ Patch the saved event into the loaded visible cache before clearing the controll
 ```tsx
 setEvents((current) => current.map((event) => (event.id === previousEventId ? savedEvent : event)));
 
-calendarRef.current?.commitVisibleEvent(savedEvent, {
-  previousEventId,
-  appearing: true
+calendarRef.current?.commitVisibleEvent({
+  event: savedEvent,
+  ...{
+    previousEventId,
+    appearing: true
+  }
 });
 
 setActiveDraft(null);
@@ -655,14 +661,19 @@ const [date, setDate] = useState<DateRange>({
   expectedRange={{ start: "1900-01-01", end: "2100-12-31" }}
   selectionMode="single"
   value={date}
-  onChange={(next) => {
+  onChange={({ value: next }) => {
     if (!next) return;
     setDate(next);
-    calendarRef.current?.scrollToDate(next.start);
+    calendarRef.current?.scrollToDate({ date: next.start });
   }}
 />;
 
-<QunoInfiniteCalendar ref={calendarRef} {...calendarProps} settings={{ ...settings, zoom }} onZoomChange={setZoom} />;
+<QunoInfiniteCalendar
+  ref={calendarRef}
+  {...calendarProps}
+  settings={{ ...settings, zoom }}
+  onZoomChange={({ zoom }) => setZoom(zoom)}
+/>;
 ```
 
 Date pickers, search results, command palettes, and “Today” controls can call the same handle without knowing the
@@ -692,7 +703,7 @@ const calendarRef = useRef<QunoInfiniteCalendarHandle>(null);
   onCalendarVisibilityRequest={({ calendarIds }) => setSelectedCalendarIds(calendarIds)}
 />;
 
-await calendarRef.current?.focusEvent(event, { preferredCalendarId: "room-1" });
+await calendarRef.current?.focusEvent({ event: event, ...{ preferredCalendarId: "room-1" } });
 ```
 
 For controlled navigation, pass a unique request id. Re-rendering the same id does not repeat the focus operation.
@@ -725,12 +736,15 @@ instances without reloading the range:
 
 ```tsx
 const saved = await api.updateEvent(updatedEvent);
-calendarRef.current?.commitVisibleEvent(saved, {
-  previousEventId: updatedEvent.id
+calendarRef.current?.commitVisibleEvent({
+  event: saved,
+  ...{
+    previousEventId: updatedEvent.id
+  }
 });
 
 await api.deleteEvent(saved.id);
-calendarRef.current?.removeVisibleEvent(saved.id);
+calendarRef.current?.removeVisibleEvent({ eventId: saved.id });
 ```
 
 These methods only patch loaded calendar cache. The parent remains responsible for persistence and for keeping future

@@ -185,14 +185,14 @@ export function createRangeLoader(events: CalendarEvent[]): LoadEvents {
       return (
         dateKey >= startDate &&
         dateKey <= endDate &&
-        Array.from(selected).some((calendarId) => eventBelongsToCalendar(event, calendarId))
+        Array.from(selected).some((calendarId) => eventBelongsToCalendar({ event, calendarId }))
       );
     });
   };
 }
 
 export function applyMove(events: CalendarEvent[], request: EventMoveRequest): CalendarEvent[] {
-  return events.map((event) => (event.id === request.event.id ? applyEventMove(event, request) : event));
+  return events.map((event) => (event.id === request.event.id ? applyEventMove({ event, request }) : event));
 }
 
 export function appendCreatedEvent(events: CalendarEvent[], request: EventCreateRequest): CalendarEvent[] {

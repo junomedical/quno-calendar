@@ -7,7 +7,7 @@ export type EventProjection = Pick<EventShellProps, "left" | "top" | "width" | "
 export type CommittedItem = Pick<EventShellProps, "event" | "lane" | "laneCount" | "isOverlapping">;
 export type SharedLayerProps = {
   calendarId: CalendarId;
-  eventRenderer: EventRenderer;
+  renderEvent: EventRenderer;
   geometryRegistration: ViewportGeometryRegistration;
   onEventPointerDown: NonNullable<EventShellProps["onEventPointerDown"]>;
   eventInteractionEnabled: boolean;
@@ -20,7 +20,7 @@ export type CommittedLayerProps<Item extends CommittedItem> = SharedLayerProps &
   dragEventId?: string;
   appearingEventIds: Set<string>;
   focusedEventTarget?: CalendarFocusedEventTarget | null;
-  project: (item: Item, hovered: boolean) => EventProjection;
+  project: (args: { item: Item; hovered: boolean }) => EventProjection;
 };
 export type AvailabilityLayerProps = SharedLayerProps & {
   events: CalendarEvent[];

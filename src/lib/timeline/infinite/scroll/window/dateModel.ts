@@ -12,24 +12,31 @@ import {
  */
 export type VirtualDateModel = {
   virtualWindow: VirtualDateWindow;
-  dateKeyToIndex: (dateKey: string) => number;
-  dateKeyForIndex: (index: number) => string;
+  dateKeyToIndex: (args: { dateKey: string }) => number;
+  dateKeyForIndex: (args: { index: number }) => string;
 };
 
-export function createVirtualDateModel(anchorDateKey: string, excludedWeekdays: number[]): VirtualDateModel {
-  const virtualWindow = virtualDateWindowAround(anchorDateKey, excludedWeekdays);
+export function createVirtualDateModel({
+  anchorDateKey,
+  excludedWeekdays
+}: {
+  anchorDateKey: string;
+  excludedWeekdays: number[];
+}): VirtualDateModel {
+  const virtualWindow = virtualDateWindowAround({ anchorDateKey, excludedWeekdays });
   return {
     virtualWindow,
-    dateKeyToIndex: (dateKey) =>
-      virtualOffsetForDate(
-        virtualWindow.startDateKey,
-        normalizeAnchorDate(dateKey, excludedWeekdays),
+    dateKeyToIndex: ({ dateKey }) =>
+      virtualOffsetForDate({
+        anchorDateKey: virtualWindow.startDateKey,
+        targetDateKey: normalizeAnchorDate({ dateKey, excludedWeekdays }),
         excludedWeekdays
-      ),
-    dateKeyForIndex: (index) => dateAtVirtualOffset(virtualWindow.startDateKey, index, excludedWeekdays)
+      }),
+    dateKeyForIndex: ({ index }) =>
+      dateAtVirtualOffset({ anchorDateKey: virtualWindow.startDateKey, offset: index, excludedWeekdays })
   };
 }
 
-export function clampVirtualDateIndex(index: number, count: number) {
+export function clampVirtualDateIndex({ index, count }: { index: number; count: number }) {
   return Math.max(0, Math.min(count - 1, index));
 }

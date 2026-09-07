@@ -15,11 +15,15 @@ import "#quno-internal/timeline/infinite/rendering/styles/calendar.css";
  */
 export const InfiniteTimelineView = forwardRef<CalendarViewHandle, CalendarInternalViewProps>(
   function InfiniteTimelineView(props, ref) {
-    const runtime = useHorizontalTimelineRuntime(props, ref);
+    const runtime = useHorizontalTimelineRuntime({ props, forwardedRef: ref });
     const hourPresentations = useMemo(
       () =>
-        calendarHourPresentations(runtime.sizing.effectiveSettings, "infinite-horizontal", props.getCalendarHourProps),
-      [props.getCalendarHourProps, runtime.sizing.effectiveSettings]
+        calendarHourPresentations({
+          settings: runtime.sizing.effectiveSettings,
+          view: "infinite-horizontal",
+          getHourProps: props.getHourProps
+        }),
+      [props.getHourProps, runtime.sizing.effectiveSettings]
     );
     return (
       <HorizontalTimelineCanvas
@@ -43,13 +47,15 @@ export const InfiniteTimelineView = forwardRef<CalendarViewHandle, CalendarInter
         dateKeyForIndex={runtime.virtualTimeline.dateKeyForIndex}
         getDayHeight={runtime.dayMetrics.getDayHeight}
         dayProps={{
+          locale: props.locale,
+          formatters: props.formatters,
           settings: runtime.sizing.effectiveSettings,
           width: runtime.sizing.width,
           selectedCalendars: runtime.renderedCalendars,
           hiddenCalendarIds: runtime.hiddenCalendarIds,
           todayKey: runtime.todayKey,
-          getCalendarCellProps: props.getCalendarCellProps,
-          getCalendarDayProps: props.getCalendarDayProps,
+          getDayCellProps: props.getDayCellProps,
+          getDayProps: props.getDayProps,
           calendarHourPresentations: hourPresentations,
           showNowLine: runtime.showNowLine,
           nowMinute: runtime.nowMinute,
@@ -66,7 +72,7 @@ export const InfiniteTimelineView = forwardRef<CalendarViewHandle, CalendarInter
           draftEventIsDraggable: runtime.interactions.renderedDraftIsDraggable,
           draftEventIsExiting: runtime.interactions.renderedDraftIsExiting,
           draftEventReleaseDurationMs: runtime.interactions.renderedDraftReleaseDurationMs,
-          eventRenderer: props.eventRenderer,
+          renderEvent: props.renderEvent,
           geometryRegistration: runtime.navigation.registration,
           viewportMetricsStore: runtime.viewportMetricsStore,
           forceAllResources: runtime.virtualTimeline.retainAllResources,

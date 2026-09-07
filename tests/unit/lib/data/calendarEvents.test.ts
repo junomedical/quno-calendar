@@ -17,17 +17,21 @@ const event: CalendarEvent = {
 
 describe("calendar event membership", () => {
   it("matches events against any assigned calendar", () => {
-    expect(eventBelongsToCalendar(event, "doctor-a")).toBe(true);
-    expect(eventBelongsToCalendar(event, "room-1")).toBe(true);
-    expect(eventBelongsToCalendar(event, "room-2")).toBe(false);
+    expect(eventBelongsToCalendar({ event, calendarId: "doctor-a" })).toBe(true);
+    expect(eventBelongsToCalendar({ event, calendarId: "room-1" })).toBe(true);
+    expect(eventBelongsToCalendar({ event, calendarId: "room-2" })).toBe(false);
   });
 
   it("keeps membership intact when dropping on an already assigned calendar", () => {
-    expect(replaceEventCalendarMembership(event, "doctor-a", "room-1")).toEqual(["doctor-a", "room-1"]);
+    expect(
+      replaceEventCalendarMembership({ event, sourceCalendarId: "doctor-a", proposedCalendarId: "room-1" })
+    ).toEqual(["doctor-a", "room-1"]);
   });
 
   it("replaces the dragged row calendar when dropping on a new calendar", () => {
-    expect(replaceEventCalendarMembership(event, "room-1", "room-2")).toEqual(["doctor-a", "room-2"]);
+    expect(replaceEventCalendarMembership({ event, sourceCalendarId: "room-1", proposedCalendarId: "room-2" })).toEqual(
+      ["doctor-a", "room-2"]
+    );
   });
 
   it("applies a move to time and all proposed calendars", () => {
@@ -40,7 +44,7 @@ describe("calendar event membership", () => {
       proposedEnd: "2026-07-07T12:00:00.000Z"
     };
 
-    expect(applyEventMove(event, request)).toMatchObject({
+    expect(applyEventMove({ event, request })).toMatchObject({
       calendarId: "room-2",
       calendarIds: ["doctor-a", "room-2"],
       start: "2026-07-07T11:00:00.000Z",

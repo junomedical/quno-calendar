@@ -1,4 +1,5 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { useEffect, useState } from "react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import {
   QunoInfiniteCalendar,
@@ -26,7 +27,7 @@ function settings(zoom: number): Partial<QunoInfiniteCalendarSettings> {
 describe("EventShell zoom isolation", () => {
   it("updates shell geometry without re-running the external renderer", async () => {
     const loadEvents = vi.fn<LoadEvents>(async () => [loadedEvent]);
-    const eventRenderer = vi.fn(({ event, status }: EventRendererProps) => (
+    const renderEvent = vi.fn(({ event, status }: EventRendererProps) => (
       <div data-testid="isolated-event-content" data-status={status}>
         {event.title}
       </div>
@@ -36,7 +37,7 @@ describe("EventShell zoom isolation", () => {
         calendars={calendars}
         selectedCalendarIds={selectedCalendarIds}
         loadEvents={loadEvents}
-        eventRenderer={eventRenderer}
+        renderEvent={renderEvent}
         initialDateKey="2026-07-04"
         now={now}
         settings={settings(zoom)}
@@ -52,7 +53,7 @@ describe("EventShell zoom isolation", () => {
     const leftBeforeZoom = shellBeforeZoom.style.left;
     const widthBeforeZoom = shellBeforeZoom.style.width;
     const loadCallCount = loadEvents.mock.calls.length;
-    eventRenderer.mockClear();
+    renderEvent.mockClear();
 
     rerender(calendar(2));
 
@@ -62,7 +63,39 @@ describe("EventShell zoom isolation", () => {
     });
     expect(screen.getByTestId("isolated-event-content")).toBe(contentBeforeZoom);
     expect(contentBeforeZoom.closest("[data-testid='calendar-event']")).toBe(shellBeforeZoom);
-    expect(eventRenderer).not.toHaveBeenCalled();
+    expect(renderEvent).not.toHaveBeenCalled();
     expect(loadEvents).toHaveBeenCalledTimes(loadCallCount);
   });
+});
+
+it("preserves renderer state through geometry changes and unmounts a replaced renderer", async () => {
+  const cleanup = vi.fn();
+  const loadEvents: LoadEvents = async () => [loadedEvent];
+  function StatefulCard() {
+    const [count, setCount] = useState(0);
+    useEffect(() => cleanup, []);
+    return <button onClick={() => setCount(count + 1)}>Count {count}</button>;
+  }
+  function ReplacementCard() {
+    return <span>Replacement card</span>;
+  }
+  const calendar = (zoom: number, renderEvent = StatefulCard) => (
+    <QunoInfiniteCalendar
+      calendars={calendars}
+      selectedCalendarIds={selectedCalendarIds}
+      loadEvents={loadEvents}
+      renderEvent={renderEvent}
+      initialDateKey="2026-07-04"
+      now={now}
+      settings={settings(zoom)}
+    />
+  );
+  const { rerender } = render(calendar(1));
+  fireEvent.click(await screen.findByRole("button", { name: "Count 0" }));
+  rerender(calendar(2));
+  expect(screen.getByRole("button", { name: "Count 1" })).toBeInTheDocument();
+  expect(cleanup).not.toHaveBeenCalled();
+  rerender(calendar(2, ReplacementCard));
+  expect(await screen.findByText("Replacement card")).toBeInTheDocument();
+  expect(cleanup).toHaveBeenCalledOnce();
 });

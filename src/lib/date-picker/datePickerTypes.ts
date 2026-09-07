@@ -1,11 +1,5 @@
-import type {
-  DateAction as ModelDateAction,
-  DateSelectionMode,
-  DateRange,
-  Endpoint,
-  IsoDate,
-  WeekStart
-} from "#quno-internal/shared/dateRangeModel";
+import type { DateSelectionMode, DateRange, IsoDate, WeekStart } from "#quno-internal/shared/dateRangeModel";
+import type { DateAction as ModelDateAction, Endpoint } from "#quno-internal/date-picker/datePickerModel";
 import type { CSSProperties, ReactNode } from "react";
 
 export type IdleInteraction = {
@@ -63,12 +57,12 @@ export type QunoDatePickerLabels = {
 };
 
 export type QunoDatePickerFormatters = {
-  date: (date: IsoDate, locale: string) => string;
-  month: (month: IsoDate, locale: string) => string;
-  monthOption: (month: IsoDate, locale: string) => string;
-  year: (month: IsoDate, locale: string) => string;
-  dayLabel: (date: IsoDate, locale: string) => string;
-  weekday: (dayIndex: number, locale: string) => string;
+  date: (args: { date: IsoDate; locale: string }) => string;
+  month: (args: { month: IsoDate; locale: string }) => string;
+  monthOption: (args: { month: IsoDate; locale: string }) => string;
+  year: (args: { month: IsoDate; locale: string }) => string;
+  dayLabel: (args: { date: IsoDate; locale: string }) => string;
+  weekday: (args: { weekday: number; locale: string }) => string;
 };
 
 export type QunoDatePickerDayCellContext = {
@@ -94,7 +88,7 @@ export type QunoDatePickerDayCellCustomizer = (
   context: QunoDatePickerDayCellContext
 ) => QunoDatePickerDayCellProps | undefined;
 
-export type QunoDatePickerDisabledDayMatcher = (date: IsoDate) => boolean;
+export type QunoDatePickerDisabledDayPredicate = (args: { date: IsoDate }) => boolean;
 
 export type QunoDatePickerSlot =
   | "root"
@@ -140,13 +134,13 @@ export type QunoDatePickerProps = {
   weekStartsOn?: WeekStart;
   className?: string;
   classNames?: QunoDatePickerClassNames;
-  disabledDays?: QunoDatePickerDisabledDayMatcher;
+  isDayDisabled?: QunoDatePickerDisabledDayPredicate;
   getDayCellProps?: QunoDatePickerDayCellCustomizer;
   calendarFooter?: ReactNode;
   autoNavigateDelay?: number;
   autoNavigateRepeatDelay?: number;
-  onChange?: (value: DateRange | null) => void;
-  onVisibleMonthChange?: (month: IsoDate) => void;
+  onChange?: (args: { value: DateRange | null }) => void;
+  onVisibleMonthChange?: (args: { month: IsoDate }) => void;
 };
 
 export type ResolvedDatePickerConfig = {
@@ -154,7 +148,7 @@ export type ResolvedDatePickerConfig = {
   labels: QunoDatePickerLabels;
   formatters: QunoDatePickerFormatters;
   classNames?: QunoDatePickerClassNames;
-  disabledDays?: QunoDatePickerDisabledDayMatcher;
+  isDayDisabled?: QunoDatePickerDisabledDayPredicate;
   getDayCellProps?: QunoDatePickerDayCellCustomizer;
 };
 
