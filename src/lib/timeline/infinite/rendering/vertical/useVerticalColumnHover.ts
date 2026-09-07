@@ -8,20 +8,24 @@ import type { EventColumnLayoutItem } from "#quno-internal/timeline/infinite/eve
 import type { VerticalHoveredEvent } from "./VerticalTimelineDay";
 
 type VerticalColumnHoverArgs = {
-  blocked: boolean;
+  disabled: boolean;
   setHoveredEvent: Dispatch<SetStateAction<VerticalHoveredEvent>>;
 };
 
-export function useVerticalColumnHover({ blocked, setHoveredEvent }: VerticalColumnHoverArgs) {
-  const clearHover = useCallback(() => setHoveredEvent(null), [setHoveredEvent]);
+export function useVerticalColumnHover({ disabled, setHoveredEvent }: VerticalColumnHoverArgs) {
+  const clearHoveredEvent = useCallback(() => setHoveredEvent(null), [setHoveredEvent]);
   const updateHoverFromColumn = useCallback(
-    (
-      event: ReactPointerEvent<HTMLDivElement>,
-      layoutItems: EventColumnLayoutItem[],
-      renderedCalendarId: CalendarId
-    ) => {
-      if (blocked) {
-        clearHover();
+    ({
+      event,
+      layoutItems,
+      renderedCalendarId
+    }: {
+      event: ReactPointerEvent<HTMLDivElement>;
+      layoutItems: EventColumnLayoutItem[];
+      renderedCalendarId: CalendarId;
+    }) => {
+      if (disabled) {
+        clearHoveredEvent();
         return;
       }
       const rect = event.currentTarget.getBoundingClientRect();
@@ -34,8 +38,8 @@ export function useVerticalColumnHover({ blocked, setHoveredEvent }: VerticalCol
       });
       setHoveredEvent(hovered ? { eventId: hovered.event.id, calendarId: renderedCalendarId } : null);
     },
-    [blocked, clearHover, setHoveredEvent]
+    [disabled, clearHoveredEvent, setHoveredEvent]
   );
 
-  return { clearHover, updateHoverFromColumn };
+  return { clearHoveredEvent, updateHoverFromColumn };
 }

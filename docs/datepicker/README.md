@@ -18,7 +18,14 @@ The guide presents range selection as direct manipulation instead of a forced fr
 navigator follows seasonal groups—March–May, June–August, September–November, and December continuing into
 January–February—while sticky year labels preserve context during fast scrolling.
 
-`disabledDays` prevents a date from becoming a standalone selection or a range start or end. Disabled dates may remain
+`isDayDisabled` prevents a date from becoming a standalone selection or a range start or end. Disabled dates may remain
 inside an otherwise valid inclusive range. Async availability stays in consumer state: unresolved and failed checks
-should return `true` from `disabledDays`, while `getDayCellProps` independently presents loading, error, holiday, or
+should return `true` from `isDayDisabled`, while `getDayCellProps` independently presents loading, error, holiday, or
 other product states. The field guide demonstrates this fail-closed delayed-loading pattern.
+
+## Named contracts
+
+Datepicker owns its interaction algorithms. Shared runtime date helpers are imported from the headless root.
+Use `isDayDisabled({ date })`, `getDayCellProps(context)`, object-context `formatters`, and `onChange({ value })`.
+
+See the [breaking migration](../shared/migration.md#unreleased-named-contracts-and-product-ownership).

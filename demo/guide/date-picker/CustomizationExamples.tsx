@@ -6,7 +6,7 @@ import { useDelayedDayAvailability } from "./useDelayedDayAvailability";
 const themes = ["quno", "warm", "violet", "acid", "candy"] as const;
 
 export const DayHandlerExample = (): JSX.Element => {
-  const { disabledDays, getDayCellProps, loadingCount, setVisibleMonth } = useDelayedDayAvailability("2026-08-01");
+  const { isDayDisabled, getDayCellProps, loadingCount, setVisibleMonth } = useDelayedDayAvailability("2026-08-01");
   return (
     <div className="story__controlled-example">
       <div className="story__legend" aria-label="Day state legend">
@@ -23,9 +23,9 @@ export const DayHandlerExample = (): JSX.Element => {
         className="story__picker"
         initialMonth="2026-08-01"
         labels={{ hint: "" }}
-        disabledDays={disabledDays}
+        isDayDisabled={({ date }) => isDayDisabled(date)}
         getDayCellProps={getDayCellProps}
-        onVisibleMonthChange={setVisibleMonth}
+        onVisibleMonthChange={({ month }) => setVisibleMonth(month)}
       />
     </div>
   );

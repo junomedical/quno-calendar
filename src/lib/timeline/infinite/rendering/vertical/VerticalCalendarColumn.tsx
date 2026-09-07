@@ -25,7 +25,7 @@ import {
 function useEventProjections(settings: VerticalCalendarColumnProps["settings"]) {
   const event = useCallback(
     (calendarEvent: CalendarEvent) => {
-      const box = verticalEventBox(calendarEvent, settings);
+      const box = verticalEventBox({ event: calendarEvent, settings });
       return {
         left: 0,
         top: box.top,
@@ -37,7 +37,7 @@ function useEventProjections(settings: VerticalCalendarColumnProps["settings"]) 
     [settings]
   );
   const committed = useCallback(
-    (item: EventColumnLayoutItem, hovered: boolean) => {
+    ({ item, hovered }: { item: EventColumnLayoutItem; hovered: boolean }) => {
       const width = hovered ? "100%" : `calc(${item.widthPercent}% - ${VERTICAL_COLUMN_GAP_PX * 2}px)`;
       return {
         left: hovered ? "0%" : `calc(${item.leftPercent}% + ${VERTICAL_COLUMN_GAP_PX}px)`,
@@ -75,7 +75,7 @@ export const VerticalCalendarColumn = memo(function VerticalCalendarColumn({
   draftEventIsDraggable,
   draftEventIsExiting,
   draftEventReleaseDurationMs,
-  eventRenderer,
+  renderEvent,
   geometryRegistration,
   gridColumn,
   isAlternate,
@@ -85,12 +85,13 @@ export const VerticalCalendarColumn = memo(function VerticalCalendarColumn({
 }: VerticalCalendarColumnProps) {
   const availabilityEvents = useMemo(() => rowEvents.filter((event) => event.kind === "availability"), [rowEvents]);
   const layoutItems = useMemo(
-    () => positionColumnLayoutItems(layoutPreparedEventsForColumn(preparedCell, settings)),
+    () => positionColumnLayoutItems({ items: layoutPreparedEventsForColumn({ preparedCell, settings }) }),
     [preparedCell, settings]
   );
   const project = useEventProjections(settings);
-  const setResourceElement = useCallback(
-    (element: HTMLDivElement | null) => geometryRegistration.registerResourceElement(dateKey, calendar.id, element),
+  const setResourceElement = useCallback<import("react").RefCallback<HTMLDivElement>>(
+    (element: HTMLDivElement | null) =>
+      geometryRegistration.registerResourceElement({ dateKey, calendarId: calendar.id, element }),
     [calendar.id, dateKey, geometryRegistration]
   );
 
@@ -109,7 +110,9 @@ export const VerticalCalendarColumn = memo(function VerticalCalendarColumn({
       ref={setResourceElement}
       aria-hidden={isHidden || undefined}
       onMouseLeave={onHoverLeave}
-      onPointerMove={(pointerEvent) => onHoverMove(pointerEvent, layoutItems, calendar.id)}
+      onPointerMove={(pointerEvent) =>
+        onHoverMove({ event: pointerEvent, layoutItems, renderedCalendarId: calendar.id })
+      }
       style={{
         ...calendarCellProps?.style,
         gridColumn,
@@ -132,7 +135,7 @@ export const VerticalCalendarColumn = memo(function VerticalCalendarColumn({
         appearingEventIds={appearingEventIds}
         focusedEventTarget={focusedEventTarget}
         eventInteractionEnabled={eventInteractionEnabled}
-        eventRenderer={eventRenderer}
+        renderEvent={renderEvent}
         geometryRegistration={geometryRegistration}
         onEventPointerDown={onEventPointerDown}
         project={project.event}
@@ -147,7 +150,7 @@ export const VerticalCalendarColumn = memo(function VerticalCalendarColumn({
         appearingEventIds={appearingEventIds}
         focusedEventTarget={focusedEventTarget}
         eventInteractionEnabled={eventInteractionEnabled}
-        eventRenderer={eventRenderer}
+        renderEvent={renderEvent}
         geometryRegistration={geometryRegistration}
         onEventPointerDown={onEventPointerDown}
         project={project.committed}
@@ -163,10 +166,10 @@ export const VerticalCalendarColumn = memo(function VerticalCalendarColumn({
         draftEventReleaseDurationMs={draftEventReleaseDurationMs}
         dragPreviewEvent={dragPreviewEvent}
         eventInteractionEnabled={eventInteractionEnabled}
-        eventRenderer={eventRenderer}
+        renderEvent={renderEvent}
         geometryRegistration={geometryRegistration}
         onEventPointerDown={onEventPointerDown}
-        project={project.event}
+        project={({ event }) => project.event(event)}
         shellClassName="icv-event-shell"
       />
     </div>

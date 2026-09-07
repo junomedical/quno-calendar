@@ -6,7 +6,7 @@ type StructuralRenderWindowArgs = {
   resourceTransitionKey: string;
   topVisibleDateKey: string;
   itemCount: number;
-  dateKeyToIndex: (dateKey: string) => number;
+  dateKeyToIndex: (args: { dateKey: string }) => number;
 };
 
 /** Pins semantic base geometry until a changed date/layout model has settled. */
@@ -29,7 +29,7 @@ export function useStructuralRenderWindow({
   if (previousTransitionKeyRef.current !== transitionKey) {
     overrideRef.current = {
       transitionKey,
-      anchorIndex: clampVirtualDateIndex(dateKeyToIndex(topVisibleDateKey), itemCount),
+      anchorIndex: clampVirtualDateIndex({ index: dateKeyToIndex({ dateKey: topVisibleDateKey }), count: itemCount }),
       retainAllResources: previousResourceTransitionKeyRef.current !== resourceTransitionKey
     };
   }

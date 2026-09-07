@@ -39,7 +39,7 @@ export function AvailabilityLayerDemo() {
   const loadEvents = useCallback<LoadEvents>(async (request) => filterEvents(eventsRef.current, request), []);
   const moveEvent = useCallback((request: EventMoveRequest) => {
     setEvents((current) =>
-      current.map((event) => (event.id === request.event.id ? applyEventMove(event, request) : event))
+      current.map((event) => (event.id === request.event.id ? applyEventMove({ event, request }) : event))
     );
     setActivity(request.event.kind === "availability" ? "Availability moved" : "Appointment moved");
     return true;
@@ -70,7 +70,7 @@ export function AvailabilityLayerDemo() {
           ariaLabel="Availability editing layer calendar"
           calendars={availabilityCalendars}
           className={`article-availability-calendar${mode === "availability" ? " is-editing-availability" : ""}`}
-          eventRenderer={ArticleEventCard}
+          renderEvent={ArticleEventCard}
           initialDateKey={articleDateKey}
           interactionMode={mode}
           loadEvents={loadEvents}
@@ -166,9 +166,12 @@ export function EventFocusDemo() {
   const loadEvents = useCallback<LoadEvents>(async (request) => filterEvents(eventsRef.current, request), []);
 
   const focusCommittedEvent = (eventId: string, nextEvent: CalendarEvent) => {
-    calendarRef.current?.commitVisibleEvent(nextEvent, {
-      appearing: true,
-      previousEventId: eventId
+    calendarRef.current?.commitVisibleEvent({
+      event: nextEvent,
+      ...{
+        appearing: true,
+        previousEventId: eventId
+      }
     });
     window.requestAnimationFrame(() => {
       setFocusRequest({
@@ -190,7 +193,7 @@ export function EventFocusDemo() {
 
   const addCollisions = () => {
     eventsRef.current = [...eventsRef.current, ...focusCollisions];
-    focusCollisions.forEach((event) => calendarRef.current?.commitVisibleEvent(event));
+    focusCollisions.forEach((event) => calendarRef.current?.commitVisibleEvent({ event }));
     window.requestAnimationFrame(() => {
       setFocusRequest({
         requestId: `collisions-${Date.now()}`,
@@ -226,7 +229,7 @@ export function EventFocusDemo() {
           activeDraft={activeDraft}
           ariaLabel="Event visual focus and lane changes calendar"
           calendars={availabilityCalendars}
-          eventRenderer={ArticleEventCard}
+          renderEvent={ArticleEventCard}
           focusRequest={focusRequest}
           initialDateKey={articleDateKey}
           loadEvents={loadEvents}

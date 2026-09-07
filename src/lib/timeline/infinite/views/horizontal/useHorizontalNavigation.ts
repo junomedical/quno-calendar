@@ -16,7 +16,7 @@ import type { IsoDate } from "#quno-internal/shared/dateRangeModel";
 type HorizontalNavigationArgs = {
   forwardedRef: ForwardedRef<CalendarViewHandle>;
   containerRef: RefObject<HTMLDivElement | null>;
-  effectiveSettings: QunoInfiniteCalendarSettings;
+  settings: QunoInfiniteCalendarSettings;
   now: Date;
   scrollToDate: QunoInfiniteCalendarHandle["scrollToDate"];
 };
@@ -24,35 +24,36 @@ type HorizontalNavigationArgs = {
 export function useHorizontalNavigation({
   forwardedRef,
   containerRef,
-  effectiveSettings,
+  settings,
   now,
   scrollToDate
 }: HorizontalNavigationArgs) {
   const scrollToTime = useCallback(
-    (time: string) => {
+    ({ time }: { time: string }) => {
       const scrollElement = containerRef.current;
       if (!scrollElement || !/^\d{2}:\d{2}$/.test(time)) return;
-      const targetX = TIMELINE_LEFT_GUTTER_PX + minuteToX(parseClockToMinutes(time), effectiveSettings);
+      const targetX =
+        TIMELINE_LEFT_GUTTER_PX + minuteToX({ minute: parseClockToMinutes({ clock: time }), geometry: settings });
       scrollElement.scrollLeft = Math.max(0, targetX - 48);
     },
-    [containerRef, effectiveSettings]
+    [containerRef, settings]
   );
   const scrollToDateTime = useCallback(
-    (dateKey: IsoDate, time: string) => {
-      scrollToDate(dateKey);
-      scrollToTime(time);
-      window.requestAnimationFrame(() => scrollToTime(time));
+    ({ date: dateKey, time }: { date: IsoDate; time: string }) => {
+      scrollToDate({ date: dateKey });
+      scrollToTime({ time });
+      window.requestAnimationFrame(() => scrollToTime({ time }));
     },
     [scrollToDate, scrollToTime]
   );
   const anchoring = useViewportAnchoring({
     containerRef,
-    settings: effectiveSettings,
+    settings: settings,
     orientation: "horizontal",
     scrollToDateTime,
     visibilityInsets: {
-      left: effectiveSettings.labelWidth,
-      top: effectiveSettings.dayHeaderHeight
+      left: settings.labelWidth,
+      top: settings.dayHeaderHeight
     }
   });
   const { captureViewportAnchor, isEventFullyVisible, restoreViewportAnchor, cancelViewportAnchorRestore } = anchoring;
@@ -66,16 +67,16 @@ export function useHorizontalNavigation({
       scrollToDate,
       scrollToDateTime,
       scrollToToday: () =>
-        scrollToDateTime(
-          toDateKey(now),
-          `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`
-        ),
+        scrollToDateTime({
+          date: toDateKey({ date: now }),
+          time: `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`
+        }),
       captureViewportAnchor,
       isEventFullyVisible,
       restoreViewportAnchor,
       cancelViewportAnchorRestore,
-      commitVisibleEvent: (event, options) => commitVisibleEventRef.current(event, options),
-      removeVisibleEvent: (eventId) => removeVisibleEventRef.current(eventId),
+      commitVisibleEvent: ({ event, ...options }) => commitVisibleEventRef.current({ event, ...options }),
+      removeVisibleEvent: ({ eventId }) => removeVisibleEventRef.current({ eventId }),
       releaseActiveDraft: (options) => releaseActiveDraftRef.current(options)
     }),
     [

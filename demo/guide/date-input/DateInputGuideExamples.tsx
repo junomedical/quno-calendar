@@ -33,7 +33,7 @@ export function DateInputModeExample() {
         key={mode}
         aria-label={`${mode} date input`}
         expectedRange={expectedRange}
-        onChange={setValue}
+        onChange={({ value }) => setValue(value)}
         referenceDate="2026-08-25"
         selectionMode={mode}
         value={value}
@@ -51,7 +51,7 @@ export function KeyboardDateInputExample() {
         aria-label="Keyboard editable date"
         defaultValue={oneDay}
         expectedRange={expectedRange}
-        onChange={setValue}
+        onChange={({ value }) => setValue(value)}
         referenceDate="2026-08-25"
       />
       <Value value={value} />
@@ -66,7 +66,7 @@ export function ControlledDateInputExample() {
       <QunoDateInput
         aria-label="Controlled date"
         expectedRange={expectedRange}
-        onChange={setValue}
+        onChange={({ value }) => setValue(value)}
         referenceDate="2026-08-25"
         value={value}
       />
@@ -80,10 +80,13 @@ export function ControlledDateInputExample() {
 
 export function PreferredDateOrderExample() {
   const [order, setOrder] = useState<Extract<DateInputDateOrder, "dmy" | "mdy">>("dmy");
-  const result = parseDateInput("3/4/2026", {
-    expectedRange,
-    preferredDateOrder: order,
-    referenceDate: "2026-08-25"
+  const result = parseDateInput({
+    text: "3/4/2026",
+    ...{
+      expectedRange,
+      preferredDateOrder: order,
+      referenceDate: "2026-08-25"
+    }
   });
   return (
     <div className="date-input-guide__example">
@@ -109,7 +112,7 @@ export function RangeDateInputExample() {
       <QunoDateInput
         aria-label="Travel period"
         expectedRange={expectedRange}
-        onChange={setValue}
+        onChange={({ value }) => setValue(value)}
         referenceDate="2026-08-25"
         value={value}
       />
@@ -135,7 +138,7 @@ export function LocalizedDateInputExample() {
         aria-label="Localized date"
         expectedRange={expectedRange}
         locale={locale}
-        onChange={setValue}
+        onChange={({ value }) => setValue(value)}
         referenceDate="2026-08-25"
         value={value}
       />
@@ -151,7 +154,7 @@ export function ParserConfiguredInputExample() {
       <QunoDateInput
         aria-label="Sunday-first date range"
         expectedRange={expectedRange}
-        onChange={setValue}
+        onChange={({ value }) => setValue(value)}
         referenceDate="2026-08-25"
         value={value}
         weekStartsOn={0}
@@ -170,7 +173,7 @@ export function AccessibleDateInputExample() {
         id="accessible-date-input"
         expectedRange={expectedRange}
         labels={{ placeholder: "Type a date" }}
-        onChange={setValue}
+        onChange={({ value }) => setValue(value)}
         referenceDate="2026-08-25"
         value={value}
       />

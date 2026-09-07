@@ -14,7 +14,7 @@ export type ReleasedDraft = {
 };
 
 /** Retains a controlled draft just long enough to render its release animation. */
-export function useReleasedDraft(activeDraft?: ActiveEventDraft | null) {
+export function useReleasedDraft({ activeDraft }: { activeDraft?: ActiveEventDraft | null } = {}) {
   const [releasedDraft, setReleasedDraft] = useState<ReleasedDraft | null>(null);
   const activeDraftRef = useRef<ActiveEventDraft | null>(activeDraft ?? null);
   const timerRef = useRef<number | null>(null);

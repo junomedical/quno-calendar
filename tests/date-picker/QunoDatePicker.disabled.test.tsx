@@ -5,7 +5,7 @@ import { clickDay, day, slot } from "./datePickerTestUtils";
 
 const disabled =
   (...dates: IsoDate[]) =>
-  (date: IsoDate): boolean =>
+  ({ date }: { date: IsoDate }): boolean =>
     dates.includes(date);
 
 describe("QunoDatePicker disabled days", () => {
@@ -14,9 +14,9 @@ describe("QunoDatePicker disabled days", () => {
     render(
       <QunoDatePicker
         initialMonth="2026-08-01"
-        disabledDays={disabled("2026-08-12")}
+        isDayDisabled={disabled("2026-08-12")}
         getDayCellProps={({ isDisabled }) => ({ className: isDisabled ? "consumer-disabled" : undefined })}
-        onChange={onChange}
+        onChange={({ value }) => onChange(value)}
       />
     );
 
@@ -33,8 +33,8 @@ describe("QunoDatePicker disabled days", () => {
       <QunoDatePicker
         initialMonth="2026-08-01"
         selectionMode="single"
-        disabledDays={disabled("2026-08-18")}
-        onChange={onChange}
+        isDayDisabled={disabled("2026-08-18")}
+        onChange={({ value }) => onChange(value)}
       />
     );
 
@@ -44,7 +44,13 @@ describe("QunoDatePicker disabled days", () => {
 
   it("allows disabled interior dates when both range endpoints are enabled", () => {
     const onChange = vi.fn();
-    render(<QunoDatePicker initialMonth="2026-08-01" disabledDays={disabled("2026-08-11")} onChange={onChange} />);
+    render(
+      <QunoDatePicker
+        initialMonth="2026-08-01"
+        isDayDisabled={disabled("2026-08-11")}
+        onChange={({ value }) => onChange(value)}
+      />
+    );
 
     fireEvent.pointerDown(day("2026-08-10"));
     fireEvent.pointerEnter(day("2026-08-12"));
@@ -60,8 +66,8 @@ describe("QunoDatePicker disabled days", () => {
       <QunoDatePicker
         defaultValue={{ start: "2026-08-10", end: "2026-08-20" }}
         initialMonth="2026-08-01"
-        disabledDays={disabled("2026-08-19")}
-        onChange={onChange}
+        isDayDisabled={disabled("2026-08-19")}
+        onChange={({ value }) => onChange(value)}
       />
     );
 
@@ -79,8 +85,8 @@ describe("QunoDatePicker disabled days", () => {
       <QunoDatePicker
         defaultValue={{ start: "2026-08-10", end: "2026-08-12" }}
         initialMonth="2026-08-01"
-        disabledDays={disabled("2026-08-16")}
-        onChange={onChange}
+        isDayDisabled={disabled("2026-08-16")}
+        onChange={({ value }) => onChange(value)}
       />
     );
 
@@ -97,8 +103,8 @@ describe("QunoDatePicker disabled days", () => {
     render(
       <QunoDatePicker
         initialMonth="2026-08-01"
-        disabledDays={disabled("2026-09-02")}
-        onVisibleMonthChange={onVisibleMonthChange}
+        isDayDisabled={disabled("2026-09-02")}
+        onVisibleMonthChange={({ month }) => onVisibleMonthChange(month)}
       />
     );
 
@@ -114,8 +120,8 @@ describe("QunoDatePicker disabled days", () => {
       <QunoDatePicker
         value={value}
         initialMonth="2026-08-01"
-        disabledDays={disabled("2026-08-10")}
-        onChange={onChange}
+        isDayDisabled={disabled("2026-08-10")}
+        onChange={({ value }) => onChange(value)}
       />
     );
 

@@ -54,7 +54,7 @@ function FocusHarness({
       calendars={calendars}
       selectedCalendarIds={selectedCalendarIds}
       loadEvents={loadEvents}
-      eventRenderer={EventCard}
+      renderEvent={EventCard}
       now={new Date("2026-07-04T09:30:00")}
       initialDateKey="2026-07-04"
       settings={{ startHour: 8, endHour: 18, zoom: 1, excludedWeekdays: excludeWeekends ? [0, 6] : [] }}
@@ -69,10 +69,20 @@ function FocusHarness({
 
 describe("Calendar focus coordinator", () => {
   it("anchors an already-visible preferred instance before another participant", () => {
-    expect(visibleFocusAnchorCalendarId(["calendar-a", "calendar-b"], ["calendar-a", "calendar-b"], "calendar-b")).toBe(
-      "calendar-b"
-    );
-    expect(visibleFocusAnchorCalendarId(["calendar-a", "calendar-b"], ["calendar-a"], "calendar-b")).toBe("calendar-a");
+    expect(
+      visibleFocusAnchorCalendarId({
+        participantIds: ["calendar-a", "calendar-b"],
+        selectedCalendarIds: ["calendar-a", "calendar-b"],
+        preferredCalendarId: "calendar-b"
+      })
+    ).toBe("calendar-b");
+    expect(
+      visibleFocusAnchorCalendarId({
+        participantIds: ["calendar-a", "calendar-b"],
+        selectedCalendarIds: ["calendar-a"],
+        preferredCalendarId: "calendar-b"
+      })
+    ).toBe("calendar-a");
   });
 
   it("reveals all participants and focuses the preferred local instance", async () => {
@@ -86,7 +96,7 @@ describe("Calendar focus coordinator", () => {
     await screen.findByText("Shared event");
     let focusPromise: Promise<Awaited<ReturnType<QunoInfiniteCalendarHandle["focusEvent"]>>> | undefined;
     act(() => {
-      focusPromise = calendarRef.current?.focusEvent(event, { preferredCalendarId: "calendar-b" });
+      focusPromise = calendarRef.current?.focusEvent({ event, ...{ preferredCalendarId: "calendar-b" } });
     });
     const result = await focusPromise;
 
@@ -142,7 +152,7 @@ describe("Calendar focus coordinator", () => {
     render(<FocusHarness calendarRef={calendarRef} loadEvents={async () => []} />);
     const unknownEvent = { ...event, calendarId: "missing", calendarIds: ["missing"] };
 
-    await expect(calendarRef.current?.focusEvent(unknownEvent)).resolves.toEqual({
+    await expect(calendarRef.current?.focusEvent({ event: unknownEvent })).resolves.toEqual({
       eventId: event.id,
       status: "unavailable"
     });
@@ -163,7 +173,7 @@ describe("Calendar focus coordinator", () => {
 
     let result: Awaited<ReturnType<QunoInfiniteCalendarHandle["focusEvent"]>> | undefined;
     await act(async () => {
-      result = await calendarRef.current?.focusEvent(event, { preferredCalendarId: "calendar-b" });
+      result = await calendarRef.current?.focusEvent({ event, ...{ preferredCalendarId: "calendar-b" } });
     });
     expect(result).toEqual({
       eventId: event.id,
@@ -181,14 +191,14 @@ describe("Calendar focus coordinator", () => {
         calendars={calendars}
         selectedCalendarIds={["calendar-a"]}
         loadEvents={async () => [event]}
-        eventRenderer={EventCard}
+        renderEvent={EventCard}
         initialDateKey="2026-07-04"
       />
     );
     await screen.findByText("Shared event");
     let focusPromise: ReturnType<QunoInfiniteCalendarHandle["focusEvent"]> | undefined;
     act(() => {
-      focusPromise = calendarRef.current?.focusEvent(event, { preferredCalendarId: "calendar-b" });
+      focusPromise = calendarRef.current?.focusEvent({ event, ...{ preferredCalendarId: "calendar-b" } });
     });
     fireEvent.wheel(window);
 

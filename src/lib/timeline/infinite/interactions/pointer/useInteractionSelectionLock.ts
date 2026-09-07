@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 
 /** Prevents browser text selection while a calendar pointer gesture is active. */
-export function useInteractionSelectionLock(active: boolean) {
+export function useInteractionSelectionLock({ active }: { active: boolean }) {
   useEffect(() => {
     if (!active) {
       return;

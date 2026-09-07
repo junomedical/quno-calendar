@@ -55,19 +55,19 @@ export function useDayMetrics({
     for (const dateKey of dateKeys) {
       let height = dayHeaderHeight;
       const rowHeights = new Map<CalendarId, number>();
-      const visibleEvents = withoutActiveDraftSourceEvents(eventsByDate[dateKey] ?? [], activeDraft);
-      const eventsByCalendar = indexEventsByCalendar(visibleEvents, calendarIds);
+      const visibleEvents = withoutActiveDraftSourceEvents({ events: eventsByDate[dateKey] ?? [], activeDraft });
+      const eventsByCalendar = indexEventsByCalendar({ events: visibleEvents, calendarIds });
 
       for (const calendar of selectedCalendars) {
         const rowKey = `${dateKey}:${calendar.id}`;
         const committedRowEvents = eventsByCalendar.get(calendar.id) ?? [];
-        const preparedCell = prepareEventCell(
-          committedRowEvents.filter((event) => event.kind !== "availability"),
-          preparationSettings
-        );
+        const preparedCell = prepareEventCell({
+          events: committedRowEvents.filter((event) => event.kind !== "availability"),
+          settings: preparationSettings
+        });
         rowEvents.set(rowKey, committedRowEvents);
         preparedCells.set(rowKey, preparedCell);
-        const preparedRowHeight = rowHeightForPreparedCell(preparedCell, { rowHeight });
+        const preparedRowHeight = rowHeightForPreparedCell({ preparedCell, settings: { rowHeight } });
         rowHeights.set(calendar.id, preparedRowHeight);
         height += preparedRowHeight;
       }
@@ -79,23 +79,25 @@ export function useDayMetrics({
   }, [activeDraft, dayHeaderHeight, eventsByDate, preparationSettings, rowHeight, selectedCalendars]);
 
   const eventsForRow = useCallback(
-    (dateKey: string, calendarId: CalendarId) => rowEventsByKey.get(`${dateKey}:${calendarId}`) ?? [],
+    ({ dateKey, calendarId }: { dateKey: string; calendarId: CalendarId }) =>
+      rowEventsByKey.get(`${dateKey}:${calendarId}`) ?? [],
     [rowEventsByKey]
   );
 
   const getDayHeight = useCallback(
-    (dateKey: string) => dayMetricsByDate.get(dateKey)?.height ?? baseDayHeight,
+    ({ dateKey }: { dateKey: string }) => dayMetricsByDate.get(dateKey)?.height ?? baseDayHeight,
     [baseDayHeight, dayMetricsByDate]
   );
 
   const preparedCellForRow = useCallback(
-    (dateKey: string, calendarId: CalendarId) =>
+    ({ dateKey, calendarId }: { dateKey: string; calendarId: CalendarId }) =>
       preparedCellsByKey.get(`${dateKey}:${calendarId}`) ?? EMPTY_PREPARED_CELL,
     [preparedCellsByKey]
   );
 
   const getRowHeight = useCallback(
-    (dateKey: string, calendarId: CalendarId) => dayMetricsByDate.get(dateKey)?.rowHeights.get(calendarId) ?? rowHeight,
+    ({ dateKey, calendarId }: { dateKey: string; calendarId: CalendarId }) =>
+      dayMetricsByDate.get(dateKey)?.rowHeights.get(calendarId) ?? rowHeight,
     [dayMetricsByDate, rowHeight]
   );
 

@@ -1,6 +1,6 @@
 import { Calendar } from "./Calendar";
-import { classNames as cx } from "./classNames";
-import { monthRelation } from "#quno-internal/shared/dateRangeModel";
+import { classNames as cx } from "#quno-internal/shared/classNames";
+import { monthRelation } from "#quno-internal/date-picker/datePickerModel";
 import { DEFAULT_FORMATTERS, DEFAULT_LABELS } from "./datePickerFormatters";
 import { OffscreenPills } from "./OffscreenPills";
 import { SelectionHeader } from "./SelectionHeader";
@@ -20,7 +20,7 @@ export const QunoDatePicker = ({
   weekStartsOn = 1,
   className,
   classNames,
-  disabledDays,
+  isDayDisabled,
   getDayCellProps,
   calendarFooter,
   autoNavigateDelay = 400,
@@ -38,7 +38,7 @@ export const QunoDatePicker = ({
     labels: { ...DEFAULT_LABELS, ...modeLabels, ...labels },
     formatters: { ...DEFAULT_FORMATTERS, ...formatters },
     classNames,
-    disabledDays,
+    isDayDisabled,
     getDayCellProps
   };
   const controller = useDatePickerController({
@@ -47,7 +47,7 @@ export const QunoDatePicker = ({
     selectionMode,
     initialMonth,
     weekStartsOn,
-    disabledDays,
+    isDayDisabled,
     autoNavigateDelay,
     autoNavigateRepeatDelay,
     onChange,
@@ -55,14 +55,14 @@ export const QunoDatePicker = ({
   });
   const endpointPositions = controller.selection
     ? [
-        monthRelation(controller.selection.start, controller.visibleMonth),
-        monthRelation(controller.selection.end, controller.visibleMonth)
+        monthRelation({ date: controller.selection.start, month: controller.visibleMonth }),
+        monthRelation({ date: controller.selection.end, month: controller.visibleMonth })
       ]
     : [];
 
   return (
     <section
-      className={cx("quno-date-picker", className, classNames?.root)}
+      className={cx({ values: ["quno-date-picker", className, classNames?.root] })}
       data-slot="root"
       data-pill-before={endpointPositions.includes("before") || undefined}
       data-pill-after={endpointPositions.includes("after") || undefined}
@@ -77,8 +77,8 @@ export const QunoDatePicker = ({
         position="before"
         monthChangeSource={controller.monthChangeSource}
         config={config}
-        onJump={(date) => {
-          controller.jumpToEndpoint(date);
+        onJump={({ date }) => {
+          controller.jumpToEndpoint({ date });
           setMonthNavigationOpen(false);
         }}
       />
@@ -86,7 +86,7 @@ export const QunoDatePicker = ({
         controller={controller}
         config={config}
         monthNavigationOpen={monthNavigationOpen}
-        onMonthNavigationOpenChange={setMonthNavigationOpen}
+        onMonthNavigationOpenChange={({ open }) => setMonthNavigationOpen(open)}
         footer={calendarFooter}
       />
       <OffscreenPills
@@ -96,13 +96,13 @@ export const QunoDatePicker = ({
         position="after"
         monthChangeSource={controller.monthChangeSource}
         config={config}
-        onJump={(date) => {
-          controller.jumpToEndpoint(date);
+        onJump={({ date }) => {
+          controller.jumpToEndpoint({ date });
           setMonthNavigationOpen(false);
         }}
       />
       {config.labels.hint && (
-        <p className={cx("quno-date-picker-hint", classNames?.hint)} data-slot="hint">
+        <p className={cx({ values: ["quno-date-picker-hint", classNames?.hint] })} data-slot="hint">
           {config.labels.hint}
         </p>
       )}
@@ -117,7 +117,7 @@ export type {
   QunoDatePickerDayCellContext,
   QunoDatePickerDayCellCustomizer,
   QunoDatePickerDayCellProps,
-  QunoDatePickerDisabledDayMatcher,
+  QunoDatePickerDisabledDayPredicate,
   QunoDatePickerFormatters,
   QunoDatePickerLabels,
   QunoDatePickerProps,

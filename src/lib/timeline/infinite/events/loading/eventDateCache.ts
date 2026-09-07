@@ -23,27 +23,31 @@ export class EventDateCache {
   private readonly lastAccessByDate = new Map<string, number>();
   private accessSequence = 0;
 
-  constructor(private readonly maximumDateBuckets = MAX_CACHED_DATE_BUCKETS) {}
+  private readonly maximumDateBuckets: number;
+
+  constructor({ maximumDateBuckets = MAX_CACHED_DATE_BUCKETS }: { maximumDateBuckets?: number } = {}) {
+    this.maximumDateBuckets = maximumDateBuckets;
+  }
 
   get size(): number {
     return this.buckets.size;
   }
 
-  hasDate(dateKey: string): boolean {
+  hasDate({ dateKey }: { dateKey: string }): boolean {
     return this.buckets.has(dateKey);
   }
 
-  hasEvent(eventId: EventId): boolean {
+  hasEvent({ eventId }: { eventId: EventId }): boolean {
     return this.dateByEventId.has(eventId);
   }
 
-  replaceDates(dateKeys: Iterable<string>, events: CalendarEvent[]): boolean {
+  replaceDates({ dateKeys, events }: { dateKeys: Iterable<string>; events: CalendarEvent[] }): boolean {
     const replacedDateKeys = new Set(dateKeys);
     let renderedEventsChanged = false;
     // Successful empty responses still need concrete buckets and loaded semantics.
     for (const dateKey of replacedDateKeys) {
       renderedEventsChanged = (this.buckets.get(dateKey)?.size ?? 0) > 0 || renderedEventsChanged;
-      this.replaceWithEmptyBucket(dateKey);
+      this.replaceWithEmptyBucket({ dateKey });
     }
 
     // The last record for an id wins before any secondary-index mutation occurs.
@@ -57,12 +61,12 @@ export class EventDateCache {
     return renderedEventsChanged || uniqueEvents.size > 0;
   }
 
-  patchMovedEvent(eventId: EventId, movedEvent: CalendarEvent): boolean {
-    if (eventId === movedEvent.id && this.replaceSameDateEvent(eventId, movedEvent)) {
+  patchMovedEvent({ eventId, movedEvent }: { eventId: EventId; movedEvent: CalendarEvent }): boolean {
+    if (eventId === movedEvent.id && this.replaceSameDateEvent({ previousEventId: eventId, event: movedEvent })) {
       return true;
     }
-    const removed = this.removeEvent(eventId);
-    const destinationLoaded = this.hasDate(eventDateKey(movedEvent));
+    const removed = this.removeEvent({ eventId });
+    const destinationLoaded = this.hasDate({ dateKey: eventDateKey(movedEvent) });
     // Do not manufacture a bucket for an offscreen/unloaded destination.
     if (destinationLoaded) {
       this.upsert(movedEvent);
@@ -70,44 +74,44 @@ export class EventDateCache {
     return removed || destinationLoaded;
   }
 
-  patchCommittedEvent(event: CalendarEvent, previousEventId?: EventId): boolean {
+  patchCommittedEvent({ event, previousEventId }: { event: CalendarEvent; previousEventId?: EventId }): boolean {
     const replacedEventId = previousEventId ?? event.id;
-    if (this.replaceSameDateEvent(replacedEventId, event)) {
+    if (this.replaceSameDateEvent({ previousEventId: replacedEventId, event })) {
       return true;
     }
-    let changed = this.deleteEvent(event.id);
+    let changed = this.deleteEvent({ eventId: event.id });
     if (previousEventId && previousEventId !== event.id) {
-      changed = this.deleteEvent(previousEventId) || changed;
+      changed = this.deleteEvent({ eventId: previousEventId }) || changed;
     }
 
-    const destinationLoaded = this.hasDate(eventDateKey(event));
+    const destinationLoaded = this.hasDate({ dateKey: eventDateKey(event) });
     if (destinationLoaded) {
       this.upsert(event);
     }
     return changed || destinationLoaded;
   }
 
-  deleteEvent(eventId: EventId): boolean {
-    return this.removeEvent(eventId);
+  deleteEvent({ eventId }: { eventId: EventId }): boolean {
+    return this.removeEvent({ eventId });
   }
 
   touchDates(dateKeys: Iterable<string>): void {
     for (const dateKey of dateKeys) {
       if (this.buckets.has(dateKey)) {
-        this.touch(dateKey);
+        this.touch({ dateKey });
       }
     }
   }
 
-  trim(protectedDateKeys: ReadonlySet<string>): string[] {
+  trim({ protectedDateKeys }: { protectedDateKeys: ReadonlySet<string> }): string[] {
     const evictedDateKeys: string[] = [];
     while (this.buckets.size > this.maximumDateBuckets) {
       // Visible protection is preferred; the fallback keeps the hard size bound absolute.
-      const dateKey = this.oldestEvictableDate(protectedDateKeys) ?? this.oldestDate();
+      const dateKey = this.oldestEvictableDate({ protectedDateKeys }) ?? this.oldestDate();
       if (!dateKey) {
         break;
       }
-      this.deleteDate(dateKey);
+      this.deleteDate({ dateKey });
       evictedDateKeys.push(dateKey);
     }
     return evictedDateKeys;
@@ -121,13 +125,19 @@ export class EventDateCache {
     return record;
   }
 
-  private replaceWithEmptyBucket(dateKey: string): void {
-    this.deleteDate(dateKey);
+  private replaceWithEmptyBucket({ dateKey }: { dateKey: string }): void {
+    this.deleteDate({ dateKey });
     this.buckets.set(dateKey, new Map());
-    this.touch(dateKey);
+    this.touch({ dateKey });
   }
 
-  private replaceSameDateEvent(previousEventId: EventId, event: CalendarEvent): boolean {
+  private replaceSameDateEvent({
+    previousEventId,
+    event
+  }: {
+    previousEventId: EventId;
+    event: CalendarEvent;
+  }): boolean {
     const dateKey = this.dateByEventId.get(previousEventId);
     if (!dateKey || dateKey !== eventDateKey(event)) {
       return false;
@@ -150,7 +160,7 @@ export class EventDateCache {
       this.dateByEventId.delete(previousEventId);
     }
     this.dateByEventId.set(event.id, dateKey);
-    this.touch(dateKey);
+    this.touch({ dateKey });
     return true;
   }
 
@@ -160,7 +170,7 @@ export class EventDateCache {
     if (previousDateKey && previousDateKey !== nextDateKey) {
       // Moving an id between date buckets must not leave a duplicate source record.
       this.buckets.get(previousDateKey)?.delete(event.id);
-      this.touch(previousDateKey);
+      this.touch({ dateKey: previousDateKey });
     }
 
     let bucket = this.buckets.get(nextDateKey);
@@ -170,21 +180,21 @@ export class EventDateCache {
     }
     bucket.set(event.id, event);
     this.dateByEventId.set(event.id, nextDateKey);
-    this.touch(nextDateKey);
+    this.touch({ dateKey: nextDateKey });
   }
 
-  private removeEvent(eventId: EventId): boolean {
+  private removeEvent({ eventId }: { eventId: EventId }): boolean {
     const dateKey = this.dateByEventId.get(eventId);
     if (!dateKey) {
       return false;
     }
     this.dateByEventId.delete(eventId);
     this.buckets.get(dateKey)?.delete(eventId);
-    this.touch(dateKey);
+    this.touch({ dateKey });
     return true;
   }
 
-  private deleteDate(dateKey: string): void {
+  private deleteDate({ dateKey }: { dateKey: string }): void {
     const bucket = this.buckets.get(dateKey);
     if (bucket) {
       for (const eventId of bucket.keys()) {
@@ -197,20 +207,22 @@ export class EventDateCache {
     this.lastAccessByDate.delete(dateKey);
   }
 
-  private touch(dateKey: string): void {
+  private touch({ dateKey }: { dateKey: string }): void {
     this.accessSequence += 1;
     this.lastAccessByDate.set(dateKey, this.accessSequence);
   }
 
-  private oldestEvictableDate(protectedDateKeys: ReadonlySet<string>): string | undefined {
-    return this.oldestDate((dateKey) => !protectedDateKeys.has(dateKey));
+  private oldestEvictableDate({ protectedDateKeys }: { protectedDateKeys: ReadonlySet<string> }): string | undefined {
+    return this.oldestDate({ predicate: ({ dateKey }) => !protectedDateKeys.has(dateKey) });
   }
 
-  private oldestDate(predicate: (dateKey: string) => boolean = () => true): string | undefined {
+  private oldestDate({ predicate = () => true }: { predicate?: (args: { dateKey: string }) => boolean } = {}):
+    | string
+    | undefined {
     let oldestDateKey: string | undefined;
     let oldestAccess = Number.POSITIVE_INFINITY;
     for (const dateKey of this.buckets.keys()) {
-      if (!predicate(dateKey)) {
+      if (!predicate({ dateKey })) {
         continue;
       }
       const access = this.lastAccessByDate.get(dateKey) ?? 0;

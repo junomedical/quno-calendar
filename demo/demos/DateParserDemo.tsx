@@ -69,12 +69,12 @@ export function DateParserDemo() {
         <section>
           <h2>Resolved output</h2>
           <pre className="component-demo__value" aria-live="polite">
-            {JSON.stringify(parseDateInput(text, options), null, 2)}
+            {JSON.stringify(parseDateInput({ text, ...options }), null, 2)}
           </pre>
         </section>
         <section>
           <h2>Tokens</h2>
-          <pre className="component-demo__value">{JSON.stringify(tokenizeDateInput(text), null, 2)}</pre>
+          <pre className="component-demo__value">{JSON.stringify(tokenizeDateInput({ text }), null, 2)}</pre>
         </section>
       </div>
     </ComponentDemoShell>

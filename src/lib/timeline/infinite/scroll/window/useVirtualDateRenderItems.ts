@@ -12,9 +12,9 @@ type UseVirtualDateRenderItemsArgs = {
   baseDayHeight: number;
   forcedBaseGeometryAnchorIndex?: number;
   layoutAnchorDateKey?: string;
-  dateKeyToIndex: (dateKey: string) => number;
-  dateKeyForIndex: (index: number) => string;
-  offsetForIndex: (index: number) => number | undefined;
+  dateKeyToIndex: (args: { dateKey: string }) => number;
+  dateKeyForIndex: (args: { index: number }) => string;
+  offsetForIndex: (args: { index: number }) => number | undefined;
 };
 
 export function useVirtualDateRenderItems({
@@ -53,7 +53,7 @@ export function useVirtualDateRenderItems({
     ]
   );
   const visibleDateKeys = useMemo(
-    () => renderItems.map((item) => semanticDateKeyForRenderItem(item, dateKeyForIndex)),
+    () => renderItems.map((item) => semanticDateKeyForRenderItem({ item, dateKeyForIndex })),
     [dateKeyForIndex, renderItems]
   );
   return { renderItems, visibleDateKeys };

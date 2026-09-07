@@ -30,7 +30,11 @@ export function useTimelineViewSetup({
   );
   const selectedIds = useMemo(() => selectedCalendars.map((calendar) => calendar.id), [selectedCalendars]);
   const initialAnchorDateKey = useMemo(
-    () => normalizeAnchorDate(initialDateKey ?? toDateKey(now), settings.excludedWeekdays),
+    () =>
+      normalizeAnchorDate({
+        dateKey: initialDateKey ?? toDateKey({ date: now }),
+        excludedWeekdays: settings.excludedWeekdays
+      }),
     [initialDateKey, now, settings.excludedWeekdays]
   );
 

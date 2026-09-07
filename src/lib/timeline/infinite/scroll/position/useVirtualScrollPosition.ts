@@ -21,8 +21,8 @@ type UseVirtualScrollPositionArgs = {
   virtualizer: Virtualizer<HTMLDivElement, Element>;
   virtualWindow: VirtualDateWindow;
   baseDayHeight: number;
-  dateKeyToIndex: (dateKey: string) => number;
-  dateKeyForIndex: (index: number) => string;
+  dateKeyToIndex: (args: { dateKey: string }) => number;
+  dateKeyForIndex: (args: { index: number }) => string;
   topVisibleDateRef: MutableRefObject<string>;
   topVisibleOffsetRef: MutableRefObject<number>;
 };
@@ -38,8 +38,18 @@ export function useVirtualScrollPosition({
   topVisibleOffsetRef
 }: UseVirtualScrollPositionArgs) {
   const scrollToVisibleDateOffset = useCallback(
-    (dateKey: string, offsetWithinDate: number, preferBaseGeometry = false, eagerRange = false) => {
-      const index = clampVirtualDateIndex(dateKeyToIndex(dateKey), virtualWindow.count);
+    ({
+      dateKey,
+      offsetWithinDate,
+      preferBaseGeometry = false,
+      eagerRange = false
+    }: {
+      dateKey: string;
+      offsetWithinDate: number;
+      preferBaseGeometry?: boolean;
+      eagerRange?: boolean;
+    }) => {
+      const index = clampVirtualDateIndex({ index: dateKeyToIndex({ dateKey }), count: virtualWindow.count });
       // A structural vertical resize must not reuse the virtualizer's pre-commit
       // measurements; uniform base geometry is authoritative for that restore.
       const baseOffset = preferBaseGeometry
@@ -66,12 +76,12 @@ export function useVirtualScrollPosition({
     const container = containerRef.current;
     if (!container) return false;
     // The resolver's one-pixel probe assigns exact boundaries to the next date.
-    const snapshot = resolveVisibleDateSnapshot(
-      container.scrollTop,
-      (offset) => virtualizer.getVirtualItemForOffset(offset),
-      virtualizer.getVirtualItems(),
+    const snapshot = resolveVisibleDateSnapshot({
+      scrollTop: container.scrollTop,
+      getItemForOffset: ({ offset }) => virtualizer.getVirtualItemForOffset(offset),
+      virtualItems: virtualizer.getVirtualItems(),
       dateKeyForIndex
-    );
+    });
     // Large jumps can briefly outrun mounted items; retain the previous valid refs.
     if (!snapshot) return false;
     topVisibleDateRef.current = snapshot.dateKey;

@@ -17,6 +17,8 @@ async function visibleTimelineCenterMinuteOffset(page: Page) {
 }
 
 test("coalesces a touchpad wheel burst into one anchored timeline projection", async ({ page }) => {
+  // This scenario needs working-hour events, independently of the machine clock.
+  await page.clock.setFixedTime(new Date("2026-07-06T09:00:00+02:00"));
   await page.goto("/demo/infinite-calendar");
   await waitForDemoEvents(page);
 

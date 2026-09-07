@@ -60,40 +60,56 @@ export function hitTestCalendar(input: HitTestInput): CalendarHit | null {
     return null;
   }
 
-  const rawMinute = xToMinute(x, settings);
+  const rawMinute = xToMinute({ x, geometry: settings });
   return {
-    dateKey: dateAtVirtualOffset(input.anchorDateKey, dayIndex - input.anchorIndex, settings.excludedWeekdays),
+    dateKey: dateAtVirtualOffset({
+      anchorDateKey: input.anchorDateKey,
+      offset: dayIndex - input.anchorIndex,
+      excludedWeekdays: settings.excludedWeekdays
+    }),
     calendarId: input.selectedCalendarIds[rowIndex],
-    minute: snapMinute(rawMinute, settings.snapMinutes),
+    minute: snapMinute({ minute: rawMinute, snapMinutes: settings.snapMinutes }),
     dayIndex,
     rowIndex
   };
 }
 
 /** Builds the parent validation payload for a drag/drop move preview. */
-export function buildMoveProposal(
-  event: CalendarEvent,
-  hit: CalendarHit,
-  pointerOffsetMinutes: number,
-  settings: Pick<QunoInfiniteCalendarSettings, "startHour" | "endHour" | "snapMinutes">
-) {
-  const durationMinutes = Math.max(1, minutesSinceStartOfDay(event.end) - minutesSinceStartOfDay(event.start));
-  const startMinute = snapMinute(hit.minute - pointerOffsetMinutes, settings.snapMinutes);
-  const clamped = clampEventToTimeline(startMinute, durationMinutes, settings);
+export function buildMoveProposal({
+  event,
+  hit,
+  pointerOffsetMinutes,
+  settings
+}: {
+  event: CalendarEvent;
+  hit: CalendarHit;
+  pointerOffsetMinutes: number;
+  settings: Pick<QunoInfiniteCalendarSettings, "startHour" | "endHour" | "snapMinutes">;
+}) {
+  const durationMinutes = Math.max(
+    1,
+    minutesSinceStartOfDay({ value: event.end }) - minutesSinceStartOfDay({ value: event.start })
+  );
+  const startMinute = snapMinute({ minute: hit.minute - pointerOffsetMinutes, snapMinutes: settings.snapMinutes });
+  const clamped = clampEventToTimeline({ startMinute, durationMinutes, geometry: settings });
   return {
     event,
-    proposedStart: dateKeyAndMinuteToIso(hit.dateKey, clamped.startMinute),
-    proposedEnd: dateKeyAndMinuteToIso(hit.dateKey, clamped.endMinute),
+    proposedStart: dateKeyAndMinuteToIso({ dateKey: hit.dateKey, minute: clamped.startMinute }),
+    proposedEnd: dateKeyAndMinuteToIso({ dateKey: hit.dateKey, minute: clamped.endMinute }),
     proposedCalendarId: hit.calendarId
   };
 }
 
 /** Builds the externally rendered draft event for a drawn creation range. */
-export function buildDraftEvent(
-  startHit: CalendarHit,
-  endHit: CalendarHit,
-  kind: CalendarEvent["kind"] = "draft"
-): CalendarEvent {
+export function buildDraftEvent({
+  startHit,
+  endHit,
+  kind = "draft"
+}: {
+  startHit: CalendarHit;
+  endHit: CalendarHit;
+  kind?: CalendarEvent["kind"];
+}): CalendarEvent {
   const startMinute = Math.min(startHit.minute, endHit.minute);
   const endMinute = Math.max(startHit.minute, endHit.minute);
   const isAvailability = kind === "availability";
@@ -103,8 +119,8 @@ export function buildDraftEvent(
     calendarIds: [startHit.calendarId],
     title: isAvailability ? "Available" : "New appointment",
     subtitle: isAvailability ? "Availability draft" : "Draft",
-    start: dateKeyAndMinuteToIso(startHit.dateKey, startMinute),
-    end: dateKeyAndMinuteToIso(startHit.dateKey, Math.max(endMinute, startMinute + 15)),
+    start: dateKeyAndMinuteToIso({ dateKey: startHit.dateKey, minute: startMinute }),
+    end: dateKeyAndMinuteToIso({ dateKey: startHit.dateKey, minute: Math.max(endMinute, startMinute + 15) }),
     kind
   };
 }

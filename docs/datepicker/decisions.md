@@ -1017,3 +1017,10 @@ future identifiers are documented in [Date Input decisions](../date-input/decisi
 - Consequences: Every gesture has deterministic fail-closed behavior while products can independently render loading,
   error, holiday, or availability classes. Consumers must revalidate persisted controlled values when their business
   rules change, and async work never runs from the synchronous matcher.
+
+## Shared contract update — 2026-09-05
+
+[QUNO-012](../shared/decisions.md#quno-012---give-library-functions-named-contracts-and-align-product-ownership)
+supersedes historical positional signatures and customization names for this product. The accepted interaction,
+presentation, and geometry behavior in this ledger remains in force. See the
+[migration guide](../shared/migration.md#unreleased-named-contracts-and-product-ownership) for exact replacements.

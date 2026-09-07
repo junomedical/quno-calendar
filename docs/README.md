@@ -10,6 +10,9 @@ use the shared records for package-wide contracts and release work.
 | Quno/Date Input        | `@quno/calendar/date-input`        | [Date Input](./date-input/README.md)               | `/guide/date-input`        |
 | Quno/Date Parser       | `@quno/calendar/date-parser`       | [Date Parser](./date-parser/README.md)             | `/guide/date-parser`       |
 
+The [named-contract migration](./shared/migration.md#unreleased-named-contracts-and-product-ownership) maps the
+current breaking API cleanup. Product decision records preserve the historical signatures they supersede.
+
 ## Shared package records
 
 - [Architecture](./shared/architecture.md) defines public surfaces, dependency direction, framework compatibility,

@@ -28,8 +28,21 @@ export function useVerticalViewportWindow({
   const [windowAnchorDateKey, setWindowAnchorDateKey] = useState(initialAnchorDateKey);
   const [isInteractionActive, setInteractionActive] = useState(false);
   const resolveOffsetOnLayoutChange = useCallback(
-    (offsetWithinDate: number, previousDayHeight: number, nextDayHeight: number) =>
-      resolveVerticalDateOffset(offsetWithinDate, previousDayHeight, nextDayHeight, settings.dayHeaderHeight),
+    ({
+      offsetWithinDate,
+      previousBaseDayHeight: previousDayHeight,
+      nextBaseDayHeight: nextDayHeight
+    }: {
+      offsetWithinDate: number;
+      previousBaseDayHeight: number;
+      nextBaseDayHeight: number;
+    }) =>
+      resolveVerticalDateOffset({
+        offsetWithinDate,
+        previousDayHeight,
+        nextDayHeight,
+        dayHeaderHeight: settings.dayHeaderHeight
+      }),
     [settings.dayHeaderHeight]
   );
   const timeline = useScrollRuntime({
@@ -49,7 +62,7 @@ export function useVerticalViewportWindow({
 
   useLayoutEffect(() => {
     for (const dateKey of visibleDateKeys) {
-      const index = dateKeyToIndex(dateKey);
+      const index = dateKeyToIndex({ dateKey });
       if (index >= 0 && index < virtualWindow.count) {
         virtualizer.resizeItem(index, dayHeight);
       }
@@ -64,9 +77,12 @@ export function useVerticalViewportWindow({
 }
 
 /** Bridges the interaction/window dependency without coupling hit testing back into virtualization. */
-export function useVerticalInteractionWindowSync(
-  setInteractionActive: Dispatch<SetStateAction<boolean>>,
-  interactionActive: boolean
-) {
+export function useVerticalInteractionWindowSync({
+  setInteractionActive,
+  interactionActive
+}: {
+  setInteractionActive: Dispatch<SetStateAction<boolean>>;
+  interactionActive: boolean;
+}) {
   useEffect(() => setInteractionActive(interactionActive), [interactionActive, setInteractionActive]);
 }

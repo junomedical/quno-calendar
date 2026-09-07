@@ -62,8 +62,8 @@ describe("QunoDatePicker month and year navigation", () => {
       <QunoDatePicker
         initialMonth="2026-08-01"
         defaultValue={{ start: "2026-08-10", end: "2026-08-18" }}
-        onChange={onChange}
-        onVisibleMonthChange={onVisibleMonthChange}
+        onChange={({ value }) => onChange(value)}
+        onVisibleMonthChange={({ month }) => onVisibleMonthChange(month)}
       />
     );
 
@@ -185,8 +185,8 @@ describe("QunoDatePicker month and year navigation", () => {
           monthNavigation: "Month jump choices"
         }}
         formatters={{
-          monthOption: (month) => `M${month.slice(5, 7)}`,
-          year: (month) => `Y${month.slice(0, 4)}`
+          monthOption: ({ month }) => `M${month.slice(5, 7)}`,
+          year: ({ month }) => `Y${month.slice(0, 4)}`
         }}
         classNames={{
           monthNavigation: "consumer-month-navigation",

@@ -18,3 +18,10 @@ runtime contracts directly without repeating them in a separate import implement
 
 The package's separate React 19 consumer fixture typechecks and mounts Date Input together with the other public UI
 subpaths; the normal development dependency remains React 18 so both supported type generations stay covered.
+
+## Named contracts
+
+Date Input consumes the headless implementation owned by Date Parser. Use `formatters.range({ value, locale })`,
+`parserLanguages`, and `onChange({ value })`; native input events retain React event signatures.
+
+See the [breaking migration](../shared/migration.md#unreleased-named-contracts-and-product-ownership).

@@ -14,11 +14,16 @@ export type VirtualDateRenderItem = {
 const ISO_DATE_KEY = /^\d{4}-\d{2}-\d{2}$/;
 
 /** Keeps a virtual item's semantic date while a new date-index sequence settles. */
-export function semanticDateKeyForRenderItem(
-  item: Pick<VirtualDateRenderItem, "key" | "index">,
-  dateKeyForIndex: (index: number) => string
-): string {
-  return typeof item.key === "string" && ISO_DATE_KEY.test(item.key) ? item.key : dateKeyForIndex(item.index);
+export function semanticDateKeyForRenderItem({
+  item,
+  dateKeyForIndex
+}: {
+  item: Pick<VirtualDateRenderItem, "key" | "index">;
+  dateKeyForIndex: (args: { index: number }) => string;
+}): string {
+  return typeof item.key === "string" && ISO_DATE_KEY.test(item.key)
+    ? item.key
+    : dateKeyForIndex({ index: item.index });
 }
 
 type BuildRenderItemsArgs = {
@@ -28,9 +33,9 @@ type BuildRenderItemsArgs = {
   baseDayHeight: number;
   forcedBaseGeometryAnchorIndex?: number;
   layoutAnchorDateKey?: string;
-  dateKeyToIndex: (dateKey: string) => number;
-  itemKeyForIndex?: (index: number) => Key;
-  offsetForIndex: (index: number) => number | undefined;
+  dateKeyToIndex: (args: { dateKey: string }) => number;
+  itemKeyForIndex?: (args: { index: number }) => Key;
+  offsetForIndex: (args: { index: number }) => number | undefined;
 };
 
 const FALLBACK_ITEM_COUNT = 9;
@@ -62,7 +67,7 @@ export function buildVirtualDateRenderItems({
       : Array.from({ length: baseGeometryItemCount }, (_, index) => {
           const dayIndex = baseGeometryStartIndex + index;
           return {
-            key: itemKeyForIndex?.(dayIndex) ?? `fallback-${dayIndex}`,
+            key: itemKeyForIndex?.({ index: dayIndex }) ?? `fallback-${dayIndex}`,
             index: dayIndex,
             start: dayIndex * baseDayHeight,
             size: baseDayHeight
@@ -70,7 +75,7 @@ export function buildVirtualDateRenderItems({
         });
 
   if (!layoutAnchorDateKey) return baseItems;
-  const pinnedIndex = dateKeyToIndex(layoutAnchorDateKey);
+  const pinnedIndex = dateKeyToIndex({ dateKey: layoutAnchorDateKey });
   const isAlreadyRendered = baseItems.some((item) => item.index === pinnedIndex);
   if (pinnedIndex < 0 || pinnedIndex >= count || isAlreadyRendered) return baseItems;
 
@@ -79,7 +84,7 @@ export function buildVirtualDateRenderItems({
     {
       key: `layout-anchor-${layoutAnchorDateKey}`,
       index: pinnedIndex,
-      start: offsetForIndex(pinnedIndex) ?? pinnedIndex * baseDayHeight,
+      start: offsetForIndex({ index: pinnedIndex }) ?? pinnedIndex * baseDayHeight,
       size: baseDayHeight
     }
   ].sort((left, right) => left.start - right.start);

@@ -140,3 +140,25 @@ because that repository was the consolidation source. Its identifier and text re
   Keep the Preact compatibility fixture separate.
 - Consequences: React 18, React 19, and Preact compatibility regressions remain independently attributable. The React 19
   fixture requires a built package and an installed Chromium browser, and CI runs it after package verification.
+
+## QUNO-012 - Give library functions named contracts and align product ownership
+
+- Date: 2026-09-05
+- Status: Accepted; supersedes positional signatures and customization names in QUNO-001 and the affected product records
+- Context: The independent entry points retained parser implementation in the input domain, duplicate helper exports,
+  mixed singular/plural formatter configuration, and positional callbacks that made similar integrations inconsistent.
+- Decision: Use one named object for every library-owned function with arguments. Keep zero-argument commands and
+  externally imposed React, DOM, collection, and virtualizer signatures, with explicitly typed adapters at those
+  boundaries. Standardize text overrides as `formatters`, presentation as `getDayProps`, `getDayCellProps`, and
+  `getHourProps`, disabled-date matching as `isDayDisabled`, and React event rendering as `renderEvent`. Selection and
+  zoom notifications use named payloads. Timeline locale and day-label formatters are component props; day labels
+  receive `IsoDate`. Retain only plural `parserLanguages`. Make Date Parser own its implementation and headless types,
+  place picker interaction algorithms in Datepicker, and export shared runtime helpers only from the root.
+- Consequences: This is a clean public break documented in the migration guide, with no compatibility aliases.
+  Formatting output, selection semantics, native events, geometry, loading, and timezone distinctions are preserved.
+  Architecture checks enforce signatures and dependency direction; public type guards reject removed interfaces.
+
+- Size tradeoff: The mandated object argument convention adds property names and request construction throughout
+  production code. Measured ESM output exceeds the prior Infinite Calendar 34 KiB and Date Input 7 KiB gzip ceilings;
+  accept 37 KiB and 8 KiB respectively for this break. Retain all other budgets and report measured artifacts in the
+  field guides. Native virtualizer adapters must remain referentially stable to avoid invalidating measurements.

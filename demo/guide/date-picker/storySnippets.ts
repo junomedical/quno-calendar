@@ -6,7 +6,7 @@ import { useState } from 'react';
 
 const [dates, setDates] = useState<DateRange | null>(null);
 
-<QunoDatePicker value={dates} onChange={setDates} />;`;
+<QunoDatePicker value={dates} onChange={({ value }) => setDates(value)} />;`;
 
 export const customDaysSnippet = `import { useEffect, useState } from 'react';
 import {
@@ -22,7 +22,7 @@ const [status, setStatus] = useState<Partial<Record<IsoDate, DayStatus>>>({});
 const [failedMonth, setFailedMonth] = useState<IsoDate | null>(null);
 
 useEffect(() => {
-  void loadAvailability(calendarGrid(visibleMonth)).then(
+  void loadAvailability(calendarGrid({ month: visibleMonth })).then(
     (next) => setStatus((current) => ({ ...current, ...next })),
     () => setFailedMonth(visibleMonth),
   );
@@ -30,7 +30,7 @@ useEffect(() => {
 
 const statusFor = (date: IsoDate): DayStatus =>
   status[date] ?? (failedMonth === visibleMonth ? 'error' : 'loading');
-const disabledDays = (date: IsoDate) => statusFor(date) !== 'available';
+const isDayDisabled = (date: IsoDate) => statusFor(date) !== 'available';
 const styleDay: QunoDatePickerDayCellCustomizer = ({ date, isToday }) => {
   const dayStatus = statusFor(date);
   return {
@@ -45,9 +45,9 @@ const styleDay: QunoDatePickerDayCellCustomizer = ({ date, isToday }) => {
 };
 
 <QunoDatePicker
-  disabledDays={disabledDays}
+  isDayDisabled={({ date }) => isDayDisabled(date)}
   getDayCellProps={styleDay}
-  onVisibleMonthChange={setVisibleMonth}
+  onVisibleMonthChange={({ month }) => setVisibleMonth(month)}
 />;`;
 
 export const localizationSnippet = `<QunoDatePicker
@@ -135,7 +135,7 @@ useEffect(() => {
 >
   <QunoDateInput
     value={period}
-    onChange={setPeriod}
+    onChange={({ value }) => setPeriod(value)}
     expectedRange={expectedRange}
     selectionMode="range"
   />
@@ -143,7 +143,7 @@ useEffect(() => {
     <QunoDatePicker
       className="period-field__picker"
       value={period}
-      onChange={setPeriod}
+      onChange={({ value }) => setPeriod(value)}
       selectionMode="range"
     />
   )}
@@ -155,6 +155,6 @@ export const singleDaySnippet = `const [date, setDate] = useState<DateRange | nu
 
 <QunoDatePicker
   value={date}
-  onChange={setDate}
+  onChange={({ value }) => setDate(value)}
   selectionMode="single"
 />;`;

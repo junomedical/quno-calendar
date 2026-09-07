@@ -31,6 +31,11 @@ import { parseDateInput, tokenizeDateInput } from "@quno/calendar/date-parser";
 
 The headless `@quno/calendar` root exports shared contracts such as `IsoDate`, `DateRange`, `DateSelectionMode`, `WeekStart`, and safe calendar-day helpers. It exports no UI. JavaScript entry points are ESM/CommonJS compatible, SSR-safe, and never inject CSS. The separately exported stylesheets remain readable, unminified CSS in `dist`.
 
+Library functions and customization callbacks receive named objects: `addDays({ date, amount })`,
+`parseDateInput({ text, expectedRange })`, and `onChange({ value })`. Text overrides use `formatters`; presentation
+uses `getDayProps`, `getDayCellProps`, and `getHourProps` where supported. See the
+[breaking migration](./docs/shared/migration.md#unreleased-named-contracts-and-product-ownership).
+
 Calendar day keys use timezone-free `YYYY-MM-DD` values. Infinite Calendar event `start` and `end` remain timestamp strings with their local or offset semantics.
 
 ## Guides and records

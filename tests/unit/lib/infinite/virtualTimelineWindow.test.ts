@@ -11,16 +11,16 @@ import { resolveVisibleDateSnapshot } from "#quno-internal/timeline/infinite/scr
 
 describe("virtual timeline date model", () => {
   it("uses one normalized date sequence for both mapping directions", () => {
-    const model = createVirtualDateModel("2026-07-04", [0, 6]);
+    const model = createVirtualDateModel({ anchorDateKey: "2026-07-04", excludedWeekdays: [0, 6] });
 
     expect(model.virtualWindow.anchorDateKey).toBe("2026-07-06");
-    expect(model.dateKeyForIndex(model.dateKeyToIndex("2026-07-11"))).toBe("2026-07-13");
+    expect(model.dateKeyForIndex({ index: model.dateKeyToIndex({ dateKey: "2026-07-11" }) })).toBe("2026-07-13");
   });
 
   it("clamps navigation indexes to the bounded window", () => {
-    expect(clampVirtualDateIndex(-4, 20)).toBe(0);
-    expect(clampVirtualDateIndex(25, 20)).toBe(19);
-    expect(clampVirtualDateIndex(8, 20)).toBe(8);
+    expect(clampVirtualDateIndex({ index: -4, count: 20 })).toBe(0);
+    expect(clampVirtualDateIndex({ index: 25, count: 20 })).toBe(19);
+    expect(clampVirtualDateIndex({ index: 8, count: 20 })).toBe(8);
   });
 });
 
@@ -28,8 +28,12 @@ describe("virtual timeline render items", () => {
   it("keeps the item's semantic date while a replacement index sequence settles", () => {
     const staleIndexItem = { key: "2026-07-06", index: 30 };
 
-    expect(semanticDateKeyForRenderItem(staleIndexItem, () => "2026-07-20")).toBe("2026-07-06");
-    expect(semanticDateKeyForRenderItem({ key: "layout-anchor", index: 30 }, () => "2026-07-20")).toBe("2026-07-20");
+    expect(semanticDateKeyForRenderItem({ item: staleIndexItem, dateKeyForIndex: () => "2026-07-20" })).toBe(
+      "2026-07-06"
+    );
+    expect(
+      semanticDateKeyForRenderItem({ item: { key: "layout-anchor", index: 30 }, dateKeyForIndex: () => "2026-07-20" })
+    ).toBe("2026-07-20");
   });
 
   it("provides the same nine-item centered fallback before measurement", () => {
@@ -74,7 +78,7 @@ describe("virtual timeline render items", () => {
       baseDayHeight: 200,
       forcedBaseGeometryAnchorIndex: 15,
       dateKeyToIndex: () => 0,
-      itemKeyForIndex: (index) => `date-${index}`,
+      itemKeyForIndex: ({ index }) => `date-${index}`,
       offsetForIndex: () => undefined
     });
 
@@ -109,16 +113,33 @@ describe("top visible date snapshots", () => {
   const dateKeyForIndex = (index: number) => `date-${index}`;
 
   it("preserves the offset within the item returned by the virtualizer", () => {
-    const snapshot = resolveVisibleDateSnapshot(150, () => items[1], items, dateKeyForIndex);
+    const snapshot = resolveVisibleDateSnapshot({
+      scrollTop: 150,
+      getItemForOffset: () => items[1],
+      virtualItems: items,
+      dateKeyForIndex: ({ index }) => dateKeyForIndex(index)
+    });
     expect(snapshot).toEqual({ dateKey: "date-1", offsetWithinDate: 50 });
   });
 
   it("uses the next item at an exact boundary when falling back", () => {
-    const snapshot = resolveVisibleDateSnapshot(99, () => undefined, items, dateKeyForIndex);
+    const snapshot = resolveVisibleDateSnapshot({
+      scrollTop: 99,
+      getItemForOffset: () => undefined,
+      virtualItems: items,
+      dateKeyForIndex: ({ index }) => dateKeyForIndex(index)
+    });
     expect(snapshot).toEqual({ dateKey: "date-1", offsetWithinDate: 0 });
   });
 
   it("returns null when no virtual item contains the scroll position", () => {
-    expect(resolveVisibleDateSnapshot(500, () => undefined, items, dateKeyForIndex)).toBeNull();
+    expect(
+      resolveVisibleDateSnapshot({
+        scrollTop: 500,
+        getItemForOffset: () => undefined,
+        virtualItems: items,
+        dateKeyForIndex: ({ index }) => dateKeyForIndex(index)
+      })
+    ).toBeNull();
   });
 });

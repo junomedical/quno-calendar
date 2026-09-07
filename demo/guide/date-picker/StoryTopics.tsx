@@ -132,7 +132,7 @@ export const StoryTopics = (): JSX.Element => (
       number="10"
       kicker="Day handler"
       title="Mark and disable the dates that matter."
-      copy="Style each date with getDayCellProps and control whether it can become a selection endpoint with disabledDays. Availability stays parent-owned: while a delayed check is loading—or if it fails—the date remains disabled, so unresolved state can never become a start, end, or single-day selection. Disabled dates may still appear inside a valid range."
+      copy="Style each date with getDayCellProps and control whether it can become a selection endpoint with isDayDisabled. Availability stays parent-owned: while a delayed check is loading—or if it fails—the date remains disabled, so unresolved state can never become a start, end, or single-day selection. Disabled dates may still appear inside a valid range."
       instruction="Wait for availability to load, then choose an enabled weekday. Weekends, Wednesdays, the 27 August holiday, and the failed check on 24 August cannot become endpoints. Navigate once to see the next month fail closed while it loads."
       howTo={
         <StoryHowTo

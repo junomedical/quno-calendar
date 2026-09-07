@@ -10,11 +10,11 @@ import type {
   EventRenderStatus,
   QunoInfiniteCalendarSettings
 } from "#quno-internal/timeline/core/types";
-import { useInteractionSelectionLock } from "./pointer/useInteractionSelectionLock";
-import { useReleasedDraft } from "./draft/useReleasedDraft";
-import { useGlobalPointerContinuation } from "./pointer/useGlobalPointerContinuation";
-import { useTimelineDragInteraction } from "./drag/useTimelineDragInteraction";
-import { useTimelineDraftInteraction } from "./draft/useTimelineDraftInteraction";
+import { useInteractionSelectionLock } from "#quno-internal/timeline/infinite/interactions/pointer/useInteractionSelectionLock";
+import { useReleasedDraft } from "#quno-internal/timeline/infinite/interactions/draft/useReleasedDraft";
+import { useGlobalPointerContinuation } from "#quno-internal/timeline/infinite/interactions/pointer/useGlobalPointerContinuation";
+import { useTimelineDragInteraction } from "#quno-internal/timeline/infinite/interactions/drag/useTimelineDragInteraction";
+import { useTimelineDraftInteraction } from "#quno-internal/timeline/infinite/interactions/draft/useTimelineDraftInteraction";
 
 export type HoveredTimelineEvent = { eventId: string; calendarId: CalendarId } | null;
 type PointerLike = Pick<PointerEvent | ReactPointerEvent, "clientX" | "clientY">;
@@ -34,10 +34,16 @@ type UseTimelineInteractionsArgs = {
   applyCreatedEventToLoadedEvents: (event: CalendarEvent) => void;
 };
 
+type EventPointerDownArgs = {
+  event: ReactPointerEvent<HTMLDivElement>;
+  calendarEvent: CalendarEvent;
+  renderedCalendarId: CalendarId;
+};
+
 /** Coordinates the single Pointer Events lifecycle shared by both projections. */
 export function useTimelineInteractions(args: UseTimelineInteractionsArgs) {
   const [hoveredEvent, setHoveredEvent] = useState<HoveredTimelineEvent>(null);
-  const { releasedDraft, releaseActiveDraft } = useReleasedDraft(args.activeDraft);
+  const { releasedDraft, releaseActiveDraft } = useReleasedDraft({ activeDraft: args.activeDraft });
   const isActiveDraftEvent = useCallback(
     (event: CalendarEvent) => Boolean(args.activeDraft && event.id === args.activeDraft.event.id),
     [args.activeDraft]
@@ -61,7 +67,7 @@ export function useTimelineInteractions(args: UseTimelineInteractionsArgs) {
   const isInteractionActive = Boolean(drag.dragState || draft.draftState);
   const canStartDraft = Boolean(args.onEventCreateRequest || args.onEventDraftRequest);
   const canInteractWithPersistedEvents = Boolean(args.onEventMoveRequest || args.onEventActivate);
-  useInteractionSelectionLock(isInteractionActive);
+  useInteractionSelectionLock({ active: isInteractionActive });
   const { updateDragFromPoint, finishDrag, cancelDrag } = drag;
   const { updateDraftFromPoint, finishDraft, cancelDraft } = draft;
 
@@ -82,11 +88,7 @@ export function useTimelineInteractions(args: UseTimelineInteractionsArgs) {
     setHoveredEvent(null);
   };
 
-  const handleEventPointerDown = (
-    event: ReactPointerEvent<HTMLDivElement>,
-    calendarEvent: CalendarEvent,
-    renderedCalendarId: CalendarId
-  ) => {
+  const handleEventPointerDown = ({ event, calendarEvent, renderedCalendarId }: EventPointerDownArgs) => {
     event.stopPropagation();
     if (args.activeDraft && !isActiveDraftEvent(calendarEvent)) return;
     if ((args.interactionMode === "availability") !== (calendarEvent.kind === "availability")) return;
@@ -96,8 +98,12 @@ export function useTimelineInteractions(args: UseTimelineInteractionsArgs) {
     if (!canInteract) return;
     event.preventDefault();
     event.currentTarget.setPointerCapture(event.pointerId);
-    const pointerMinute = args.getHit(event)?.minute ?? minutesSinceStartOfDay(calendarEvent.start);
-    drag.startDrag(calendarEvent, renderedCalendarId, pointerMinute - minutesSinceStartOfDay(calendarEvent.start));
+    const pointerMinute = args.getHit(event)?.minute ?? minutesSinceStartOfDay({ value: calendarEvent.start });
+    drag.startDrag({
+      event: calendarEvent,
+      sourceCalendarId: renderedCalendarId,
+      offsetMinutes: pointerMinute - minutesSinceStartOfDay({ value: calendarEvent.start })
+    });
     setHoveredEvent(null);
   };
 

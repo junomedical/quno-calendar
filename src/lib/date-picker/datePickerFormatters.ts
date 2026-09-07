@@ -1,48 +1,64 @@
 import type { QunoDatePickerFormatters, QunoDatePickerLabels } from "./datePickerTypes";
-import type { IsoDate } from "#quno-internal/shared/dateRangeModel";
+import { formatIsoDate, toIsoDate, type IsoDate } from "#quno-internal/shared/dateRangeModel";
 
-const format = (date: Date, locale: string, options: Intl.DateTimeFormatOptions): string => {
-  options.timeZone = "UTC";
-  return new Intl.DateTimeFormat(locale, options).format(date);
-};
-
-const formatIso = (date: IsoDate, locale: string, options: Intl.DateTimeFormatOptions): string =>
-  format(new Date(`${date}T00:00:00Z`), locale, options);
-
-const formatDate = (date: IsoDate, locale: string): string =>
-  formatIso(date, locale, {
-    day: "numeric",
-    month: "short",
-    year: "numeric"
+const formatDate = ({ date, locale }: { date: IsoDate; locale: string }): string =>
+  formatIsoDate({
+    value: date,
+    locale,
+    options: {
+      day: "numeric",
+      month: "short",
+      year: "numeric"
+    }
   });
 
-const formatMonth = (month: IsoDate, locale: string): string =>
-  formatIso(month, locale, {
-    month: "long",
-    year: "numeric"
+const formatMonth = ({ month, locale }: { month: IsoDate; locale: string }): string =>
+  formatIsoDate({
+    value: month,
+    locale,
+    options: {
+      month: "long",
+      year: "numeric"
+    }
   });
 
-const formatMonthOption = (month: IsoDate, locale: string): string =>
-  formatIso(month, locale, {
-    month: "short"
+const formatMonthOption = ({ month, locale }: { month: IsoDate; locale: string }): string =>
+  formatIsoDate({
+    value: month,
+    locale,
+    options: {
+      month: "short"
+    }
   });
 
-const formatYear = (month: IsoDate, locale: string): string =>
-  formatIso(month, locale, {
-    year: "numeric"
+const formatYear = ({ month, locale }: { month: IsoDate; locale: string }): string =>
+  formatIsoDate({
+    value: month,
+    locale,
+    options: {
+      year: "numeric"
+    }
   });
 
-const formatDayLabel = (date: IsoDate, locale: string): string =>
-  formatIso(date, locale, {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric"
+const formatDayLabel = ({ date, locale }: { date: IsoDate; locale: string }): string =>
+  formatIsoDate({
+    value: date,
+    locale,
+    options: {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      year: "numeric"
+    }
   });
 
-const formatWeekday = (dayIndex: number, locale: string): string =>
-  format(new Date(Date.UTC(2026, 7, 2 + dayIndex)), locale, {
-    weekday: "short"
+const formatWeekday = ({ weekday: dayIndex, locale }: { weekday: number; locale: string }): string =>
+  formatIsoDate({
+    value: toIsoDate({ date: new Date(Date.UTC(2026, 7, 2 + dayIndex)) }),
+    locale,
+    options: {
+      weekday: "short"
+    }
   });
 
 export const DEFAULT_LABELS: QunoDatePickerLabels = {

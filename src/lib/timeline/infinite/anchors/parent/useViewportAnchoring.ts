@@ -21,7 +21,15 @@ type AnchoringArgs = {
   visibilityInsets?: { left?: number; top?: number };
 };
 
-function insetViewportBox(viewport: HTMLElement, leftInset = 0, topInset = 0) {
+function insetViewportBox({
+  viewport,
+  leftInset = 0,
+  topInset = 0
+}: {
+  viewport: HTMLElement;
+  leftInset?: number;
+  topInset?: number;
+}) {
   const box = viewport.getBoundingClientRect();
   return {
     left: box.left + leftInset,
@@ -33,10 +41,13 @@ function insetViewportBox(viewport: HTMLElement, leftInset = 0, topInset = 0) {
   } as DOMRect;
 }
 
-function captureAnchor(
-  target: CalendarViewportAnchorTarget,
-  resolveSnapshot: (target: CalendarViewportAnchorTarget) => CalendarViewportAnchor["snapshot"] | null
-) {
+function captureAnchor({
+  target,
+  resolveSnapshot
+}: {
+  target: CalendarViewportAnchorTarget;
+  resolveSnapshot: (target: CalendarViewportAnchorTarget) => CalendarViewportAnchor["snapshot"] | null;
+}) {
   const snapshot = resolveSnapshot(target);
   return snapshot ? { snapshot, target } : null;
 }
@@ -68,13 +79,14 @@ export function useViewportAnchoring(args: AnchoringArgs) {
       const viewport = args.containerRef.current;
       if (!viewport) return null;
       const viewportBox = viewport.getBoundingClientRect();
-      const event = registry.event(target, viewportBox);
-      if (event) return relativeSnapshot(event, viewportBox);
+      const event = registry.event({ target, viewportBox });
+      if (event) return relativeSnapshot({ element: event, viewportBox });
       if (!target.dateKey || !target.calendarId) return null;
-      const resource = registry.resource(target.dateKey, target.calendarId);
+      const resource = registry.resource({ dateKey: target.dateKey, calendarId: target.calendarId });
       if (!resource) return null;
       const resourceBox = resource.getBoundingClientRect();
-      const minute = target.time && /^\d{2}:\d{2}$/.test(target.time) ? parseClockToMinutes(target.time) : null;
+      const minute =
+        target.time && /^\d{2}:\d{2}$/.test(target.time) ? parseClockToMinutes({ clock: target.time }) : null;
       if (args.orientation === "horizontal") {
         return {
           top: resourceBox.top - viewportBox.top,
@@ -83,7 +95,7 @@ export function useViewportAnchoring(args: AnchoringArgs) {
             viewportBox.left +
             args.settings.labelWidth +
             TIMELINE_LEFT_GUTTER_PX +
-            (minute === null ? 0 : minuteToX(minute, args.settings))
+            (minute === null ? 0 : minuteToX({ minute, geometry: args.settings }))
         };
       }
       return {
@@ -91,7 +103,7 @@ export function useViewportAnchoring(args: AnchoringArgs) {
           resourceBox.top -
           viewportBox.top +
           (args.verticalTimelineGutterPx ?? 0) +
-          (minute === null ? 0 : minuteToY(minute, args.settings)),
+          (minute === null ? 0 : minuteToY({ minute, geometry: args.settings })),
         left: resourceBox.left - viewportBox.left
       };
     },
@@ -99,7 +111,7 @@ export function useViewportAnchoring(args: AnchoringArgs) {
   );
 
   const captureViewportAnchor = useCallback(
-    (target: CalendarViewportAnchorTarget): CalendarViewportAnchor | null => captureAnchor(target, resolveSnapshot),
+    (target: CalendarViewportAnchorTarget): CalendarViewportAnchor | null => captureAnchor({ target, resolveSnapshot }),
     [resolveSnapshot]
   );
 
@@ -107,16 +119,20 @@ export function useViewportAnchoring(args: AnchoringArgs) {
     (target: CalendarViewportAnchorTarget) => {
       const viewport = args.containerRef.current;
       if (!viewport) return false;
-      return registry.eventFullyVisible(
+      return registry.eventFullyVisible({
         target,
-        insetViewportBox(viewport, args.visibilityInsets?.left, args.visibilityInsets?.top)
-      );
+        viewportBox: insetViewportBox({
+          viewport,
+          leftInset: args.visibilityInsets?.left,
+          topInset: args.visibilityInsets?.top
+        })
+      });
     },
     [args.containerRef, args.visibilityInsets?.left, args.visibilityInsets?.top, registry]
   );
 
   const restoreViewportAnchor = useCallback(
-    (anchor: CalendarViewportAnchor | null, options: CalendarViewportAnchorRestoreOptions = {}) => {
+    ({ anchor, ...options }: { anchor: CalendarViewportAnchor | null } & CalendarViewportAnchorRestoreOptions) => {
       if (!anchor) return;
       cancelViewportAnchorRestore();
       const viewport = args.containerRef.current;
@@ -142,11 +158,11 @@ export function useViewportAnchoring(args: AnchoringArgs) {
 
   const registration: ViewportGeometryRegistration = useMemo(
     () => ({
-      registerDayElement: (dateKey, element) => registry.registerDay(dateKey, element),
-      registerResourceElement: (dateKey, calendarId, element) =>
-        registry.registerResource(dateKey, calendarId, element),
-      registerEventElement: (eventId, calendarId, element, previousElement) =>
-        registry.registerEvent(eventId, calendarId, element, previousElement)
+      registerDayElement: ({ dateKey, element }) => registry.registerDay({ dateKey, element }),
+      registerResourceElement: ({ dateKey, calendarId, element }) =>
+        registry.registerResource({ dateKey, calendarId, element }),
+      registerEventElement: ({ eventId, calendarId, element, previousElement }) =>
+        registry.registerEvent({ eventId, calendarId, element, previousElement })
     }),
     [registry]
   );

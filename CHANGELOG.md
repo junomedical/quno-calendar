@@ -6,12 +6,12 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ### Added
 
-- Added Infinite Calendar `getCalendarDayProps`, `getCalendarHourProps`, and `getCalendarCellProps` with typed date,
+- Added Infinite Calendar `getDayProps`, `getHourProps`, and `getDayCellProps` with typed date,
   clock-hour, weekday, Today/weekend, calendar, and orientation context. Date-wide presentation covers the complete day
   and its visible header; hour presentation covers time bands and labels; resource presentation can override matching
   horizontal rows or vertical columns—including resource labels and headers. A dedicated field-guide chapter
   demonstrates weekend, lunch-hour, and equipment treatments separately from whole-calendar theming.
-- Added Datepicker `disabledDays`, typed `isDisabled` day-cell context, native disabled state, and endpoint guards for
+- Added Datepicker `isDayDisabled`, typed `isDisabled` day-cell context, native disabled state, and endpoint guards for
   click, paint, resize, range movement, single-day selection, and outside-month navigation. The field guide now shows
   delayed parent-owned availability with loading and failure states kept unselectable.
 - Added a packed React 19 compatibility fixture that typechecks and builds all public products, mounts the virtualized
@@ -34,6 +34,19 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
   parsing accept the datepicker's `weekStartsOn` values from `0` (Sunday) through `6` (Saturday), defaulting to Monday.
 
 ### Changed
+
+- Accepted the object-contract bundle tradeoff: Infinite Calendar's gzip budget is now 37 KiB (previously 34 KiB) and
+  Date Input's is 8 KiB (previously 7 KiB); the other JavaScript and stylesheet budgets are unchanged.
+
+- **Breaking:** Standardized public and private library functions on named object arguments, with native callback
+  signatures preserved. Unified `formatters`, `renderEvent`, presentation getters, and `isDayDisabled`; moved timeline
+  locale/formatting to component props, changed selection/zoom notifications to named payloads, and retained only
+  `parserLanguages`. See `docs/shared/migration.md` for replacements; no deprecated aliases remain.
+- Moved parser implementation and types into Date Parser, separated relative arithmetic from recognition and picker
+  actions from shared date primitives, and gave shared runtime helpers one root entry point. Removed parser-private
+  exports, duplicate input formatter types, repeated formatting/class-name helpers, and unused picker input CSS.
+- Added function-contract and dependency-direction guards plus public consumer type tests; grouped input and parser
+  tests under their owning products and updated all four live guides and compatibility fixtures.
 
 - Raised the Infinite Calendar JavaScript gzip ceiling from 32 KiB to 34 KiB for the new presentation callbacks; the
   measured ESM artifact is now 136.83 KiB raw and 33.44 KiB gzip after composing day, hour, and cell presentation.
@@ -96,6 +109,10 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
   dedicated styling chapter remains the place to try calendar themes.
 
 ### Fixed
+
+- Kept the native virtualizer item-key adapter stable across renders during the object-contract migration, preserving
+  navigation and dense-layout anchoring. Made five existing browser scenarios independent of the machine clock by
+  fixing their browser date/time to a working-day morning; the same five failures were reproduced on unchanged HEAD.
 
 - Kept focused Date Input calendar popups open when their off-screen Start or End shortcuts are clicked. Popup
   compositions now retain internal pointer intent while classifying the blur before the clicked shortcut navigates.

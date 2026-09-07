@@ -40,7 +40,7 @@ Use code identifiers such as `QunoInfiniteCalendar` and `QunoDatePicker` only fo
 | Date sequence          | The virtual vertical list of included dates. Excluded weekdays are removed from this sequence.                                                     | date virtualization helpers                                                                                                 |
 | Day section            | One rendered virtual date, including its date header and calendar rows.                                                                            | `InfiniteTimelineDay`, `[data-testid="calendar-day"]`                                                                       |
 | Date header            | The sticky row that labels a day. Its left cell contains the date label, and its right side continues the gray day band across the timeline board. | `.quno-calendar-day-header`                                                                                                 |
-| Date label             | The localized left sticky text cell inside a date header. A custom day-name generator owns its complete text.                                      | `.quno-calendar-date-label`                                                                                                 |
+| Date label             | The localized left sticky text cell inside a date header. A custom `formatters.dayLabel` callback owns its complete text.                          | `.quno-calendar-date-label`                                                                                                 |
 | Vertical date label    | The smaller localized label used by the vertical timeline: two default lines for month/day and weekday, or one generated primary line.             | `.icv-date-label`, `.icv-date-main`, `.icv-date-weekday`                                                                    |
 | Time scale             | The single sticky top header that shows hour/minute labels. It is not repeated for every day.                                                      | `TimeScaleHeader`, `.quno-calendar-time-scale-header`                                                                       |
 | Time label             | A visible number in the time scale, such as `9`, `15`, or `30`. Minute labels may render as superscript.                                           | `.quno-calendar-time-tick`                                                                                                  |
@@ -85,7 +85,7 @@ Use code identifiers such as `QunoInfiniteCalendar` and `QunoDatePicker` only fo
 | Availability          | A background schedulable interval, usually full row height, shown with `kind: "availability"`.                                                                                | `kind: "availability"`                     |
 | Multi-calendar event  | One event that belongs to more than one calendar and renders once in each matching selected calendar row.                                                                     | `calendarIds`                              |
 | Event shell           | The calendar-owned positioned wrapper that controls geometry, hover size, z-index, and CSS variables.                                                                         | `EventShell`, `.quno-calendar-event-shell` |
-| Event card            | The product-owned visual content rendered inside an event shell. The demo card is only one possible renderer.                                                                 | `eventRenderer`, `.demo-event-card`        |
+| Event card            | The product-owned visual content rendered inside an event shell. The demo card is only one possible renderer.                                                                 | `renderEvent`, `.demo-event-card`          |
 | Availability shell    | An event shell used for an availability event. It is pointer-transparent in event mode and active in availability mode.                                                       | `.quno-calendar-availability-shell`        |
 | Draft                 | A temporary event shown while the user draws a new time range.                                                                                                                | `draft-new-event`, `status="new"`          |
 | Active draft          | A parent-owned create or edit preview rendered while an external popup is open. Create active drafts render as `new`; edit active drafts replace their source event visually. | `activeDraft`                              |
@@ -179,3 +179,12 @@ flowchart LR
   OverlapLane --> EventShell["Event shell"]
   EventShell --> EventCard["Event card"]
 ```
+
+## Function vocabulary
+
+- `formatters`: named text-formatting callbacks receiving date/range and locale context.
+- `getDayProps`, `getDayCellProps`, `getHourProps`: presentation-only overrides where the product supports that surface.
+- `isDayDisabled`: synchronous Datepicker predicate receiving `{ date }`.
+- `renderEvent`: consumer-owned React event-card rendering, preserving component lifecycle.
+- `onChange`, `onVisibleMonthChange`, `onZoomChange`: notifications receiving `{ value }`, `{ month }`, and `{ zoom }`.
+- Function arguments are named objects; component props use the same convention. Native event objects retain their host contract.

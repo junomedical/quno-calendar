@@ -1,6 +1,6 @@
 import type { CSSProperties, ReactNode } from "react";
 import type { IsoDate } from "#quno-internal/shared/dateRangeModel";
-import type { DayNameGenerator } from "#quno-internal/timeline/date/dateLabels";
+import type { CalendarDateLabelOptions } from "./calendarFormatterTypes";
 import type { CalendarStyle } from "./calendarTheme";
 import type {
   CalendarId,
@@ -70,10 +70,6 @@ export type QunoInfiniteCalendarSettings = {
   zoom: number;
   snapMinutes: number;
   excludedWeekdays: number[];
-  /** Locale used by date labels. The runtime locale is used when omitted. */
-  dateLocale?: string | readonly string[];
-  /** Optional replacement for the complete rendered date label. */
-  dayNameGenerator?: DayNameGenerator;
   rowHeight: number;
   dayHeaderHeight: number;
   labelWidth: number;
@@ -160,17 +156,17 @@ export type EventActivateRequest = {
 };
 
 /** Common props passed from the shell to a concrete calendar view. */
-export type CalendarViewComponentProps = {
+export type CalendarViewComponentProps = CalendarDateLabelOptions & {
   calendars: CalendarRow[];
   selectedCalendarIds: CalendarId[];
   loadEvents: LoadEvents;
   eventPrefetchPolicy?: EventPrefetchPolicy;
   eventVersion?: number | string;
   appearingEventIds?: EventId[];
-  eventRenderer: EventRenderer;
-  getCalendarCellProps?: QunoInfiniteCalendarCellCustomizer;
-  getCalendarDayProps?: QunoInfiniteCalendarDayCustomizer;
-  getCalendarHourProps?: QunoInfiniteCalendarHourCustomizer;
+  renderEvent: EventRenderer;
+  getDayCellProps?: QunoInfiniteCalendarCellCustomizer;
+  getDayProps?: QunoInfiniteCalendarDayCustomizer;
+  getHourProps?: QunoInfiniteCalendarHourCustomizer;
   className?: string;
   style?: CalendarStyle;
   ariaLabel?: string;
@@ -184,7 +180,7 @@ export type CalendarViewComponentProps = {
   onEventDraftRequest?: (request: EventCreateRequest) => void;
   onEventActivate?: (request: EventActivateRequest) => void;
   onActiveDraftMoveRequest?: (request: EventMoveRequest) => void;
-  onZoomChange?: (zoom: number) => void;
+  onZoomChange?: (args: { zoom: number }) => void;
   focusRequest?: CalendarFocusRequest | null;
   onCalendarVisibilityRequest?: (request: CalendarVisibilityRequest) => void;
   onFocusRequestComplete?: (result: CalendarFocusRequestResult) => void;
@@ -192,19 +188,18 @@ export type CalendarViewComponentProps = {
 
 /** Imperative navigation methods exposed by `QunoInfiniteCalendar`. */
 export type QunoInfiniteCalendarHandle = {
-  scrollToDate: (dateKey: IsoDate) => void;
-  scrollToDateTime: (dateKey: IsoDate, time: string) => void;
+  scrollToDate: (args: { date: IsoDate }) => void;
+  scrollToDateTime: (args: { date: IsoDate; time: string }) => void;
   scrollToToday: () => void;
   captureViewportAnchor: (target: CalendarViewportAnchorTarget) => CalendarViewportAnchor | null;
   restoreViewportAnchor: (
-    anchor: CalendarViewportAnchor | null,
-    options?: CalendarViewportAnchorRestoreOptions
+    args: { anchor: CalendarViewportAnchor | null } & CalendarViewportAnchorRestoreOptions
   ) => void;
   cancelViewportAnchorRestore: () => void;
-  commitVisibleEvent: (event: CalendarEvent, options?: CalendarVisibleEventCommitOptions) => void;
-  removeVisibleEvent: (eventId: EventId) => void;
+  commitVisibleEvent: (args: { event: CalendarEvent } & CalendarVisibleEventCommitOptions) => void;
+  removeVisibleEvent: (args: { eventId: EventId }) => void;
   releaseActiveDraft: (options?: ActiveDraftReleaseOptions) => void;
-  focusEvent: (event: CalendarEvent, options?: CalendarFocusOptions) => Promise<CalendarFocusResult>;
+  focusEvent: (args: { event: CalendarEvent } & CalendarFocusOptions) => Promise<CalendarFocusResult>;
 };
 
 /** Public reusable calendar shell props. */

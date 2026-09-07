@@ -71,7 +71,7 @@ export const RangeInputExample = (): JSX.Element => {
     >
       <QunoDateInput
         value={value}
-        onChange={changeFromInput}
+        onChange={({ value }) => changeFromInput(value)}
         onFocus={() => setOpen(true)}
         expectedRange={expectedRange}
         referenceDate="2026-08-19"
@@ -87,8 +87,8 @@ export const RangeInputExample = (): JSX.Element => {
             key={calendarRevision}
             className="story__date-input-composition-picker"
             value={value}
-            onChange={setValue}
-            onVisibleMonthChange={setCalendarMonth}
+            onChange={({ value }) => setValue(value)}
+            onVisibleMonthChange={({ month }) => setCalendarMonth(month)}
             initialMonth={calendarMonth}
             selectionMode="range"
             labels={{ selectedPeriod: "Selected period", hint: "Choose an inclusive period." }}

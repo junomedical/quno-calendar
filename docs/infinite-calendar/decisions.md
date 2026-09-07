@@ -723,3 +723,10 @@ geometry and exposes stable `calendar-hour` and `calendar-hour-label` slots.
 The hour projection raises the measured artifact to 136.83 KiB raw and 33.44 KiB gzip and the optional stylesheet to
 10.21 KiB raw and 1.95 KiB gzip. The Infinite Calendar JavaScript ceiling moves from Decision 089's 33 KiB to 34 KiB;
 the stylesheet remains inside its existing 2 KiB gzip ceiling.
+
+## Shared contract update — 2026-09-05
+
+[QUNO-012](../shared/decisions.md#quno-012---give-library-functions-named-contracts-and-align-product-ownership)
+supersedes historical positional signatures and customization names for this product. The accepted interaction,
+presentation, and geometry behavior in this ledger remains in force. See the
+[migration guide](../shared/migration.md#unreleased-named-contracts-and-product-ownership) for exact replacements.

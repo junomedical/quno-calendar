@@ -10,7 +10,7 @@ export type DemoPreset = {
   initialScale: number;
   controls: DemoControlDefaults;
   layout: DemoLayoutSettings;
-  eventRenderer: EventRenderer;
+  renderEvent: EventRenderer;
   messages: {
     initial: string;
     datasetLoaded: (scale: number) => string;

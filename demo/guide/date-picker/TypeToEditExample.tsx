@@ -74,11 +74,14 @@ export const TypeToEditExample = (): JSX.Element => {
     setValue(next);
   };
   const previewDraft = (text: string): void => {
-    const result = parseDateInput(text, {
-      expectedRange,
-      referenceDate: "2026-08-19",
-      preferredDateOrder: "dmy",
-      parserLanguages: ["en", "de"]
+    const result = parseDateInput({
+      text,
+      ...{
+        expectedRange,
+        referenceDate: "2026-08-19",
+        preferredDateOrder: "dmy",
+        parserLanguages: ["en", "de"]
+      }
     });
     if (result.status !== "success") return;
     moveCalendar(result.value, onlyChangedDate(preview ?? value, result.value));
@@ -108,7 +111,7 @@ export const TypeToEditExample = (): JSX.Element => {
         <div className="story__type-to-edit-input story__type-to-edit-input--summary">
           <QunoDateInput
             value={value}
-            onChange={changeInputValue}
+            onChange={({ value }) => changeInputValue(value)}
             onFocus={() => {
               setFocused(true);
               setOpen(true);
@@ -140,8 +143,8 @@ export const TypeToEditExample = (): JSX.Element => {
             key={calendarRevision}
             className={`story__picker story__picker--without-summary story__picker--type-to-edit${preview ? " story__picker--draft" : ""}`}
             value={preview ?? value}
-            onChange={changeValue}
-            onVisibleMonthChange={setCalendarMonth}
+            onChange={({ value }) => changeValue(value)}
+            onVisibleMonthChange={({ month }) => setCalendarMonth(month)}
             initialMonth={calendarMonth}
             labels={{ hint: "" }}
           />

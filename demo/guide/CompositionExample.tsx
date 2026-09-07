@@ -31,8 +31,8 @@ const recipe = `const calendarRef = useRef<QunoInfiniteCalendarHandle>(null);
 
 <QunoDatePicker
   selectionMode="single"
-  onChange={(selection) => {
-    if (selection) calendarRef.current?.scrollToDate(selection.start);
+  onChange={({ value: selection }) => {
+    if (selection) calendarRef.current?.scrollToDate({ date: selection.start });
   }}
 />
 <QunoInfiniteCalendar ref={calendarRef} {...timelineProps} />`;
@@ -45,7 +45,7 @@ export function CompositionExample() {
   });
   const selectDate = useCallback((next: DateRange | null) => {
     setSelection(next);
-    if (next) calendarRef.current?.scrollToDate(next.start);
+    if (next) calendarRef.current?.scrollToDate({ date: next.start });
   }, []);
   const timelineStyle = { height: 430 } satisfies CSSProperties;
 
@@ -57,11 +57,16 @@ export function CompositionExample() {
         <strong>Try it:</strong> choose one date; the independent timeline scrolls to that day.
       </p>
       <div className="guide-composition__demo">
-        <QunoDatePicker initialMonth="2026-08-01" onChange={selectDate} selectionMode="single" value={selection} />
+        <QunoDatePicker
+          initialMonth="2026-08-01"
+          onChange={({ value }) => selectDate(value)}
+          selectionMode="single"
+          value={selection}
+        />
         <QunoInfiniteCalendar
           ariaLabel="Date-picker controlled schedule"
           calendars={calendars}
-          eventRenderer={EventCard}
+          renderEvent={EventCard}
           initialDateKey="2026-08-24"
           loadEvents={loadEvents}
           ref={calendarRef}

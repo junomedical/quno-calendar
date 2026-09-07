@@ -40,7 +40,7 @@ export function VerticalDayBoard({
         <div
           className="icv-now-line"
           data-testid="current-time-line"
-          style={{ top: verticalMinuteToY(day.nowMinute, day.settings) }}
+          style={{ top: verticalMinuteToY({ minute: day.nowMinute, settings: day.settings }) }}
         />
       ) : null}
       {renderedColumnIndexes.map((resourceIndex) => {
@@ -50,8 +50,8 @@ export function VerticalDayBoard({
           <VerticalCalendarColumn
             calendar={calendar}
             dateKey={day.dateKey}
-            rowEvents={isHidden ? [] : day.eventsForColumn(day.dateKey, calendar.id)}
-            preparedCell={day.preparedCellForColumn(day.dateKey, calendar.id)}
+            rowEvents={isHidden ? [] : day.eventsForColumn({ dateKey: day.dateKey, calendarId: calendar.id })}
+            preparedCell={day.preparedCellForColumn({ dateKey: day.dateKey, calendarId: calendar.id })}
             isHidden={isHidden}
             calendarCellProps={calendarCellProps.get(calendar.id)}
             calendarHourPresentations={day.calendarHourPresentations}
@@ -70,7 +70,7 @@ export function VerticalDayBoard({
             draftEventIsDraggable={day.draftEventIsDraggable}
             draftEventIsExiting={day.draftEventIsExiting}
             draftEventReleaseDurationMs={day.draftEventReleaseDurationMs}
-            eventRenderer={day.eventRenderer}
+            renderEvent={day.renderEvent}
             geometryRegistration={day.geometryRegistration}
             gridColumn={resourceIndex + 1}
             isAlternate={resourceIndex % 2 === 0}

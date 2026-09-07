@@ -114,7 +114,7 @@ export const ArchitectureStory = (): JSX.Element => (
       title="Keep state responsibilities separate"
       language="TSX"
       copy="Control the public range without coupling it to the visible month."
-      code={'<QunoDatePicker value={range} onChange={setRange} initialMonth="2026-08" />'}
+      code={'<QunoDatePicker value={range} onChange={({ value }) => setRange(value)} initialMonth="2026-08-01" />'}
     />
   </section>
 );
