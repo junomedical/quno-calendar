@@ -11,7 +11,7 @@ return values, date semantics, CSS tokens, slots, and native React event signatu
 | -------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
 | `parseDateInput(text, options)`                                                  | `parseDateInput({ text, ...options })`                                                                            |
 | `tokenizeDateInput(text)`                                                        | `tokenizeDateInput({ text })`                                                                                     |
-| `addDays(date, amount)` and positional date helpers                              | `addDeays({ date, amount })`; pass each helper's named fields                                                      |
+| `addDays(date, amount)` and positional date helpers                              | `addDeays({ date, amount })`; pass each helper's named fields                                                     |
 | Datepicker shared runtime helper exports                                         | Import the same helpers from `@quno/calendar`                                                                     |
 | Picker/input `onChange(value)`                                                   | `onChange({ value })`                                                                                             |
 | `onVisibleMonthChange(month)` / `onZoomChange(zoom)`                             | `onVisibleMonthChange({ month })` / `onZoomChange({ zoom })`                                                      |
