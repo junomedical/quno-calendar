@@ -49,7 +49,17 @@ function useEventProjections(settings: VerticalCalendarColumnProps["settings"]) 
     },
     [settings.verticalEventHoverMinHeight]
   );
-  return { event, committed };
+  const availability = useCallback(
+    ({ item }: { item: EventColumnLayoutItem }) => ({
+      left: `${item.leftPercent}%`,
+      top: item.top,
+      width: `${item.widthPercent}%`,
+      hoverMaxWidth: `${item.widthPercent}%`,
+      height: item.height
+    }),
+    []
+  );
+  return { event, committed, availability };
 }
 
 export const VerticalCalendarColumn = memo(function VerticalCalendarColumn({
@@ -83,9 +93,18 @@ export const VerticalCalendarColumn = memo(function VerticalCalendarColumn({
   onHoverLeave,
   onEventPointerDown
 }: VerticalCalendarColumnProps) {
-  const availabilityEvents = useMemo(() => rowEvents.filter((event) => event.kind === "availability"), [rowEvents]);
   const layoutItems = useMemo(
-    () => positionColumnLayoutItems({ items: layoutPreparedEventsForColumn({ preparedCell, settings }) }),
+    () =>
+      positionColumnLayoutItems({
+        items: layoutPreparedEventsForColumn({ preparedCell: preparedCell.events, settings })
+      }),
+    [preparedCell, settings]
+  );
+  const availabilityItems = useMemo(
+    () =>
+      positionColumnLayoutItems({
+        items: layoutPreparedEventsForColumn({ preparedCell: preparedCell.availability, settings })
+      }),
     [preparedCell, settings]
   );
   const project = useEventProjections(settings);
@@ -128,7 +147,7 @@ export const VerticalCalendarColumn = memo(function VerticalCalendarColumn({
     >
       <CalendarHourBands hours={calendarHourPresentations} orientation="vertical" settings={settings} />
       <AvailabilityLayer
-        events={availabilityEvents}
+        items={availabilityItems}
         calendarId={calendar.id}
         interactionMode={interactionMode}
         dragEventId={dragEventId}
@@ -138,7 +157,7 @@ export const VerticalCalendarColumn = memo(function VerticalCalendarColumn({
         renderEvent={renderEvent}
         geometryRegistration={geometryRegistration}
         onEventPointerDown={onEventPointerDown}
-        project={project.event}
+        project={project.availability}
         shellClassName="icv-event-shell"
       />
       <CommittedLayer

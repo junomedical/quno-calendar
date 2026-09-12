@@ -6,6 +6,8 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ### Added
 
+- Added inclusive Datepicker `limitDateFrom` and `limitDateTo` selection bounds. Out-of-window dates are disabled before
+  `isDayDisabled` runs, allowing consumer availability loaders to skip dates whose result is already known.
 - Added Infinite Calendar `getDayProps`, `getHourProps`, and `getDayCellProps` with typed date,
   clock-hour, weekday, Today/weekend, calendar, and orientation context. Date-wide presentation covers the complete day
   and its visible header; hour presentation covers time bands and labels; resource presentation can override matching
@@ -35,8 +37,22 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ### Changed
 
-- Accepted the object-contract bundle tradeoff: Infinite Calendar's gzip budget is now 37 KiB (previously 34 KiB) and
-  Date Input's is 8 KiB (previously 7 KiB); the other JavaScript and stylesheet budgets are unchanged.
+- Gave overlapping availability deterministic lanes independent from appointments in both calendar orientations.
+  Resource rows and columns now grow to the greater layer depth, and availability renderers receive meaningful
+  `lane`, `laneCount`, and `isOverlapping` metadata. This intentionally changes geometry for resources with parallel
+  availability windows without changing `CalendarEvent` or adding public configuration.
+- Coalesced Infinite Calendar pointer previews, Datepicker captured-pointer painting, and quick-jump virtual scrolling
+  to one latest-value publication per animation frame while preserving synchronous release and commit behavior.
+- Reused unchanged event-bucket snapshots and date preparation, memoized static Datepicker structure, compiled Date
+  Input analysis per configuration, and deferred ordinary recognition decoration without changing parser or input
+  commit contracts.
+- Updated measured ESM artifacts and accepted ceilings for the added responsiveness machinery: Infinite Calendar is
+  37.56 KiB gzip with a 38 KiB ceiling, Datepicker is 10.47 KiB with a 10.5 KiB ceiling, and Date Input remains within
+  its 8 KiB ceiling at 7.82 KiB.
+
+- Accepted the cumulative object-contract and responsiveness tradeoff: Infinite Calendar's gzip budget is now 38 KiB
+  (previously 34 KiB), Datepicker's is 10.5 KiB, and Date Input's is 8 KiB (previously 7 KiB); the other JavaScript and
+  stylesheet budgets are unchanged.
 
 - **Breaking:** Standardized public and private library functions on named object arguments, with native callback
   signatures preserved. Unified `formatters`, `renderEvent`, presentation getters, and `isDayDisabled`; moved timeline
@@ -109,6 +125,11 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
   dedicated styling chapter remains the place to try calendar themes.
 
 ### Fixed
+
+- Prevented settled Infinite Calendar recentering from briefly painting uniform-height placeholder dates over already
+  measured variable-height days, which could make availability-expanded rows jump and then return.
+- Kept compact overlapping availability labels inside their card bounds by using a single-line lane label and removing
+  secondary content at mini-lane sizes.
 
 - Kept the native virtualizer item-key adapter stable across renders during the object-contract migration, preserving
   navigation and dense-layout anchoring. Made five existing browser scenarios independent of the machine clock by

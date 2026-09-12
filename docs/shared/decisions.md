@@ -162,3 +162,29 @@ because that repository was the consolidation source. Its identifier and text re
   production code. Measured ESM output exceeds the prior Infinite Calendar 34 KiB and Date Input 7 KiB gzip ceilings;
   accept 37 KiB and 8 KiB respectively for this break. Retain all other budgets and report measured artifacts in the
   field guides. Native virtualizer adapters must remain referentially stable to avoid invalidating measurements.
+
+## QUNO-013 - Bound High-Frequency Work To Display Frames
+
+- Date: 2026-09-08
+- Status: Accepted
+- Context: Pointer streams and native scroll bursts can arrive more often than the browser can paint. Repeating
+  hit-testing, virtual-window publication, or recognition setup for every raw event spends main-thread time without
+  producing an observable intermediate frame.
+- Decision: Calendar drag/draw and Datepicker touch/pen painting retain only the latest coordinates per animation
+  frame, while pointer release synchronously processes its final coordinates before committing. Datepicker quick-jump
+  scrolling publishes the latest viewport sample once per frame and keeps its existing 120ms settled-edge extension.
+  Cancellation, capture loss, Escape, close, and unmount discard queued work. Date Input compiles normalized parser
+  options and vocabulary once per configuration and returns tokens with parse results internally; native draft/caret
+  writes and Enter, blur, Arrow, partial-range, and IME completion remain synchronous, while ordinary recognition
+  decoration may publish through a React transition.
+- Consequences: The implementation applies splitting, batching, prioritizing, deferring, and repeated-work elimination
+  only to measured high-frequency paths. Existing two-axis virtualization, bounded caches, memoized cards, async cache
+  transitions, frame-coalesced zoom, and transform/opacity draft motion remain the primary foundations. Workers would
+  add startup, serialization, and an asynchronous parser contract for tiny strings; `IntersectionObserver`, broad
+  `will-change`, a FLIP rewrite, and custom priority queues add complexity or memory without reducing these bounded hot
+  paths, so they are intentionally not introduced.
+
+- Size tradeoff: Datepicker's frame scheduler, prepared day descriptors, and hard selection limits raise its ESM
+  artifact to 42.17 KiB raw and 10.47 KiB gzip, so its
+  JavaScript ceiling moves from 10 KiB to 10.5 KiB. Date Input measures 29.83 KiB raw and 7.82 KiB gzip and remains
+  inside its existing 8 KiB ceiling.

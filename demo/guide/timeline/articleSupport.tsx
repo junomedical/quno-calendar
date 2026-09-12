@@ -215,7 +215,7 @@ export function abortableDelay(durationMs: number, signal?: AbortSignal) {
   });
 }
 
-export function ArticleEventCard({ event, status, style, laneCount }: EventRendererProps) {
+export function ArticleEventCard({ event, status, style, lane, laneCount, isOverlapping }: EventRendererProps) {
   const isAvailability = event.kind === "availability";
   const isConsultation = event.kind === "consultation";
   const isBlocked = event.kind === "blocked";
@@ -233,10 +233,19 @@ export function ArticleEventCard({ event, status, style, laneCount }: EventRende
     .join(" ");
 
   return (
-    <article className={className} data-render-status={status} style={style}>
+    <article
+      className={className}
+      data-render-status={status}
+      data-lane={lane}
+      data-lane-count={laneCount}
+      data-overlapping={isOverlapping || undefined}
+      style={style}
+    >
       <span className="article-event-card__kicker">
         {isAvailability
-          ? "Availability"
+          ? laneCount > 1
+            ? `Avail. ${lane + 1}/${laneCount}`
+            : "Availability"
           : isBlocked
             ? "Locked"
             : isConsultation
@@ -244,7 +253,7 @@ export function ArticleEventCard({ event, status, style, laneCount }: EventRende
               : isDraft
                 ? "Draft"
                 : "Appointment"}
-        {laneCount > 1 ? ` · ${laneCount} lanes` : ""}
+        {laneCount > 1 && !isAvailability ? ` · ${laneCount} lanes` : ""}
       </span>
       <strong>{event.title}</strong>
       {event.subtitle ? <span className="article-event-card__subtitle">{event.subtitle}</span> : null}

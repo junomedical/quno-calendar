@@ -12,6 +12,7 @@
  */
 import type { CalendarEvent, EventId } from "#quno-internal/timeline/core/types";
 import { eventDateKey } from "#quno-internal/timeline/infinite/events/eventDateKey";
+import { EventBucketSnapshots } from "./eventBucketSnapshots";
 
 export const MAX_CACHED_DATE_BUCKETS = 120;
 
@@ -19,6 +20,7 @@ type EventBucket = Map<EventId, CalendarEvent>;
 
 export class EventDateCache {
   private readonly buckets = new Map<string, EventBucket>();
+  private readonly bucketSnapshots = new EventBucketSnapshots();
   private readonly dateByEventId = new Map<EventId, string>();
   private readonly lastAccessByDate = new Map<string, number>();
   private accessSequence = 0;
@@ -118,16 +120,13 @@ export class EventDateCache {
   }
 
   toRecord(): Record<string, CalendarEvent[]> {
-    const record: Record<string, CalendarEvent[]> = {};
-    for (const [dateKey, events] of this.buckets) {
-      record[dateKey] = [...events.values()];
-    }
-    return record;
+    return this.bucketSnapshots.toRecord({ buckets: this.buckets });
   }
 
   private replaceWithEmptyBucket({ dateKey }: { dateKey: string }): void {
     this.deleteDate({ dateKey });
     this.buckets.set(dateKey, new Map());
+    this.bucketSnapshots.invalidate({ dateKey });
     this.touch({ dateKey });
   }
 
@@ -159,6 +158,7 @@ export class EventDateCache {
       );
       this.dateByEventId.delete(previousEventId);
     }
+    this.bucketSnapshots.invalidate({ dateKey });
     this.dateByEventId.set(event.id, dateKey);
     this.touch({ dateKey });
     return true;
@@ -170,6 +170,7 @@ export class EventDateCache {
     if (previousDateKey && previousDateKey !== nextDateKey) {
       // Moving an id between date buckets must not leave a duplicate source record.
       this.buckets.get(previousDateKey)?.delete(event.id);
+      this.bucketSnapshots.invalidate({ dateKey: previousDateKey });
       this.touch({ dateKey: previousDateKey });
     }
 
@@ -179,6 +180,7 @@ export class EventDateCache {
       this.buckets.set(nextDateKey, bucket);
     }
     bucket.set(event.id, event);
+    this.bucketSnapshots.invalidate({ dateKey: nextDateKey });
     this.dateByEventId.set(event.id, nextDateKey);
     this.touch({ dateKey: nextDateKey });
   }
@@ -190,6 +192,7 @@ export class EventDateCache {
     }
     this.dateByEventId.delete(eventId);
     this.buckets.get(dateKey)?.delete(eventId);
+    this.bucketSnapshots.invalidate({ dateKey });
     this.touch({ dateKey });
     return true;
   }
@@ -204,6 +207,7 @@ export class EventDateCache {
       }
     }
     this.buckets.delete(dateKey);
+    this.bucketSnapshots.invalidate({ dateKey });
     this.lastAccessByDate.delete(dateKey);
   }
 

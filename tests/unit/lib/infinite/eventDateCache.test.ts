@@ -48,6 +48,30 @@ describe("EventDateCache", () => {
     });
   });
 
+  it("retains immutable snapshots for every untouched date bucket", () => {
+    const cache = new EventDateCache();
+    cache.replaceDates({ dateKeys: ["2026-07-18"], events: [event("event-a", "2026-07-18")] });
+    cache.replaceDates({ dateKeys: ["2026-07-19"], events: [event("event-b", "2026-07-19")] });
+    cache.replaceDates({ dateKeys: ["2026-07-20"], events: [event("event-c", "2026-07-20")] });
+    const before = cache.toRecord();
+
+    cache.patchMovedEvent({ eventId: "event-a", movedEvent: event("event-a", "2026-07-20", "moved") });
+    const afterMove = cache.toRecord();
+    expect(afterMove["2026-07-18"]).not.toBe(before["2026-07-18"]);
+    expect(afterMove["2026-07-20"]).not.toBe(before["2026-07-20"]);
+    expect(afterMove["2026-07-19"]).toBe(before["2026-07-19"]);
+
+    cache.patchCommittedEvent({ event: event("event-b", "2026-07-19", "edited") });
+    const afterCommit = cache.toRecord();
+    expect(afterCommit["2026-07-19"]).not.toBe(afterMove["2026-07-19"]);
+    expect(afterCommit["2026-07-20"]).toBe(afterMove["2026-07-20"]);
+
+    cache.deleteEvent({ eventId: "event-b" });
+    const afterDelete = cache.toRecord();
+    expect(afterDelete["2026-07-19"]).not.toBe(afterCommit["2026-07-19"]);
+    expect(afterDelete["2026-07-20"]).toBe(afterCommit["2026-07-20"]);
+  });
+
   it("keeps same-date event order across committed edits and accepted moves", () => {
     const cache = new EventDateCache();
     const dateKey = "2026-07-18";

@@ -8,9 +8,9 @@ const projectRoot = resolve(".");
 const distRoot = resolve(process.argv[2] ?? "dist");
 const bundles = [
   { label: "Shared root JavaScript", path: resolve(distRoot, "index.js"), gzipLimit: 2 * KIB },
-  { label: "Infinite Calendar JavaScript", path: resolve(distRoot, "infinite-calendar.js"), gzipLimit: 37 * KIB },
+  { label: "Infinite Calendar JavaScript", path: resolve(distRoot, "infinite-calendar.js"), gzipLimit: 38 * KIB },
   { label: "Infinite Calendar CSS", path: resolve(distRoot, "infinite-calendar.css"), gzipLimit: 2 * KIB },
-  { label: "Datepicker JavaScript", path: resolve(distRoot, "datepicker.js"), gzipLimit: 10 * KIB },
+  { label: "Datepicker JavaScript", path: resolve(distRoot, "datepicker.js"), gzipLimit: 10.5 * KIB },
   { label: "Datepicker CSS", path: resolve(distRoot, "datepicker.css"), gzipLimit: 3.5 * KIB },
   { label: "Date input JavaScript", path: resolve(distRoot, "date-input.js"), gzipLimit: 8 * KIB },
   { label: "Date input CSS", path: resolve(distRoot, "date-input.css"), gzipLimit: 1 * KIB },

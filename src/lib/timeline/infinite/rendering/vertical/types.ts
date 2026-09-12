@@ -17,7 +17,7 @@ import type {
   QunoInfiniteCalendarDayCustomizer,
   QunoInfiniteCalendarSettings
 } from "#quno-internal/timeline/core/types";
-import type { EventColumnLayoutItem, PreparedEventCell } from "#quno-internal/timeline/infinite/events/layout/layout";
+import type { EventColumnLayoutItem, PreparedEventLayers } from "#quno-internal/timeline/infinite/events/layout/layout";
 import type { buildTimeTicks } from "#quno-internal/timeline/time/timelineTicks";
 import type { ViewportGeometryRegistration } from "#quno-internal/timeline/infinite/anchors/parent/viewportAnchorTypes";
 import type { ViewportMetricsStore } from "#quno-internal/timeline/infinite/scroll/resources/viewportMetricsStore";
@@ -78,7 +78,7 @@ export type VerticalTimelineDayProps = CalendarDateLabelOptions & {
   viewportMetricsStore: ViewportMetricsStore;
   forceAllResources: boolean;
   eventsForColumn: (args: { dateKey: string; calendarId: CalendarId }) => CalendarEvent[];
-  preparedCellForColumn: (args: { dateKey: string; calendarId: CalendarId }) => PreparedEventCell;
+  preparedCellForColumn: (args: { dateKey: string; calendarId: CalendarId }) => PreparedEventLayers;
   columnWidthForDateCalendar: (args: { dateKey: string; calendarId: CalendarId }) => number;
   onHoverMove: VerticalHoverMove;
   onHoverLeave: () => void;
@@ -90,7 +90,7 @@ export type VerticalCalendarColumnProps = {
   calendar: CalendarRow;
   dateKey: string;
   rowEvents: CalendarEvent[];
-  preparedCell: PreparedEventCell;
+  preparedCell: PreparedEventLayers;
   isHidden?: boolean;
   calendarCellProps?: QunoInfiniteCalendarCellProps;
   calendarHourPresentations: CalendarHourPresentation[];

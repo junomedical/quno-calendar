@@ -1,12 +1,12 @@
 import { classNames as inputClass } from "#quno-internal/shared/classNames";
 import { useDateInputFormat } from "./useDateInputFormat";
 import { spinDateInput, type DateInputSpinMemory } from "./dateInputKeyboard";
-import { parseDateInput } from "#quno-internal/date-parser/dateInputParser";
+import { createDateInputAnalyzer } from "#quno-internal/date-parser/dateInputParser";
 import { equalDateRanges, recognitionOf } from "./dateInputViewHelpers";
 import { singleDay, type DateRange } from "#quno-internal/shared/dateRangeModel";
 import type { QunoDateInputProps } from "./dateInputTypes";
 import type { FormEventHandler, JSX } from "react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { startTransition, useEffect, useMemo, useRef, useState } from "react";
 
 export const QunoDateInput = ({
   value,
@@ -67,21 +67,21 @@ export const QunoDateInput = ({
     }
   }, [controlled, format, selection]);
 
-  const parse = ({ text }: { text: string }) =>
-    parseDateInput({
-      text,
-      ...{
-        expectedRange,
-        selectionMode,
-        referenceDate,
-        weekStartsOn,
-        locale,
-        preferredDateOrder,
-
-        parserLanguages,
-        lexicon
-      }
-    });
+  const parserOptions = useMemo(
+    () => ({
+      expectedRange,
+      selectionMode,
+      referenceDate,
+      weekStartsOn,
+      locale,
+      preferredDateOrder,
+      parserLanguages,
+      lexicon
+    }),
+    [expectedRange, lexicon, locale, parserLanguages, preferredDateOrder, referenceDate, selectionMode, weekStartsOn]
+  );
+  const analyzer = useMemo(() => createDateInputAnalyzer(parserOptions), [parserOptions]);
+  const parse = ({ text }: { text: string }) => analyzer.analyze({ text }).result;
 
   const commit = (): void => {
     if (composing.current) return;
@@ -115,7 +115,7 @@ export const QunoDateInput = ({
     setInvalid(false);
     if (!composing.current) {
       const result = parse({ text: next });
-      setRecognition(recognitionOf(result));
+      startTransition(() => setRecognition(recognitionOf(result)));
       if (result.status === "partial-range" && next.length >= draft.length) {
         const formatted = `${format({ value: result.value })} – `;
         event.currentTarget.value = formatted;
@@ -163,6 +163,7 @@ export const QunoDateInput = ({
                 parserLanguages,
                 lexicon
               },
+              analyzer,
               format,
               memory: spinMemory.current
             });

@@ -1,5 +1,5 @@
 import { useDatePickerSelection } from "./useDatePickerSelection";
-import { useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { compareDates, startOfMonth, singleDay, todayIso, type IsoDate } from "#quno-internal/shared/dateRangeModel";
 import { calendarGrid, type MonthDirection } from "#quno-internal/date-picker/datePickerModel";
 import {
@@ -15,6 +15,16 @@ import { dayIsDisabled, interactionEndpointsAreEnabled } from "./datePickerDisab
 import type { DatePickerController, DatePickerControllerOptions, MonthChangeSource } from "./datePickerControllerTypes";
 import type { DatePickerInteraction } from "./datePickerTypes";
 import { useDatePickerNavigation } from "./useDatePickerNavigation";
+
+function useLiveInteraction() {
+  const [interaction, setInteraction] = useState<DatePickerInteraction>(idle());
+  const interactionRef = useRef<DatePickerInteraction>(interaction);
+  const replaceInteraction = useCallback((next: DatePickerInteraction) => {
+    interactionRef.current = next;
+    setInteraction(next);
+  }, []);
+  return { interaction, interactionRef, replaceInteraction };
+}
 
 export const useDatePickerController = (options: DatePickerControllerOptions): DatePickerController => {
   const {
@@ -35,7 +45,7 @@ export const useDatePickerController = (options: DatePickerControllerOptions): D
   );
   const [monthMotion, setMonthMotion] = useState<MonthDirection | null>(null);
   const [monthChangeSource, setMonthChangeSource] = useState<MonthChangeSource | null>(null);
-  const [interaction, setInteraction] = useState<DatePickerInteraction>(idle());
+  const { interaction, interactionRef, replaceInteraction } = useLiveInteraction();
   const [clickCycle, setClickCycle] = useState<DateClickCycle | null>(null);
   const { changeMonth, navigateFrom, startEdgeNavigation, stopEdgeNavigation } = useDatePickerNavigation({
     autoNavigateDelay,
@@ -51,7 +61,7 @@ export const useDatePickerController = (options: DatePickerControllerOptions): D
 
   const resetInteraction = (): void => {
     stopEdgeNavigation();
-    setInteraction(idle());
+    replaceInteraction(idle());
     setClickCycle(null);
   };
 
@@ -72,43 +82,46 @@ export const useDatePickerController = (options: DatePickerControllerOptions): D
   const renderedSelection = dragSelection ?? selection;
   const cycleDate = clickCycle?.date ?? null;
   const cyclePreview = clickCycle ? advanceDateClickCycle(clickCycle).value : null;
+  const gridDates = useMemo(() => calendarGrid({ month: visibleMonth, weekStartsOn }), [visibleMonth, weekStartsOn]);
+  const weekdays = useMemo(() => Array.from({ length: 7 }, (_, index) => (weekStartsOn + index) % 7), [weekStartsOn]);
 
   const beginDrag = ({ date }: { date: IsoDate }): void => {
     if (dayIsDisabled({ matcher: isDayDisabled, date })) return;
     stopEdgeNavigation();
-    setInteraction(
+    const next: DatePickerInteraction =
       selectionMode === "single"
         ? { type: "create", origin: date, current: singleDay({ date }), moved: false }
-        : beginInteraction({ selection, date })
-    );
+        : beginInteraction({ selection, date });
+    replaceInteraction(next);
   };
 
   const enterDay = ({ date }: { date: IsoDate }): void => {
-    setInteraction((current) => {
-      const next =
-        selectionMode === "single"
-          ? updateSingleDayInteraction({ interaction: current, date })
-          : updateInteraction({ interaction: current, date });
-      return interactionEndpointsAreEnabled({ matcher: isDayDisabled, interaction: next }) ? next : current;
-    });
+    const current = interactionRef.current;
+    const next =
+      selectionMode === "single"
+        ? updateSingleDayInteraction({ interaction: current, date })
+        : updateInteraction({ interaction: current, date });
+    if (!interactionEndpointsAreEnabled({ matcher: isDayDisabled, interaction: next })) return;
+    replaceInteraction(next);
   };
 
-  const finishDrag = createFinishDatePickerDrag({
-    changeMonth,
-    clickCycle,
-    commit,
-    interaction,
-    selectionMode,
-    isDayDisabled,
-    setClickCycle,
-    setInteraction,
-    stopEdgeNavigation,
-    visibleMonth
-  });
+  const finishDrag = ({ date }: { date: IsoDate }): void =>
+    createFinishDatePickerDrag({
+      changeMonth,
+      clickCycle,
+      commit,
+      interaction: interactionRef.current,
+      selectionMode,
+      isDayDisabled,
+      setClickCycle,
+      setInteraction: replaceInteraction,
+      stopEdgeNavigation,
+      visibleMonth
+    })({ date });
 
   const cancelDrag = (): void => {
     stopEdgeNavigation();
-    setInteraction(idle());
+    replaceInteraction(idle());
   };
 
   const clear = (): void => {
@@ -127,8 +140,8 @@ export const useDatePickerController = (options: DatePickerControllerOptions): D
     monthMotion,
     monthChangeSource,
     interaction,
-    gridDates: calendarGrid({ month: visibleMonth, weekStartsOn }),
-    weekdays: Array.from({ length: 7 }, (_, index) => (weekStartsOn + index) % 7),
+    gridDates,
+    weekdays,
     beginDrag,
     enterDay,
     finishDrag,

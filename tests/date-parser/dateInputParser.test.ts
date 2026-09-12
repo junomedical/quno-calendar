@@ -1,4 +1,5 @@
 import { parseDateInput, tokenizeDateInput } from "@quno/calendar/date-parser";
+import { createDateInputAnalyzer } from "#quno-internal/date-parser/dateInputParser";
 
 const options = {
   expectedRange: { start: "2025-08-19", end: "2026-08-19" } as const,
@@ -6,6 +7,21 @@ const options = {
 };
 
 describe("natural date parser", () => {
+  it("reuses one compiled analyzer and returns tokens with each parse result", () => {
+    const analyzer = createDateInputAnalyzer({
+      expectedRange: { start: "2020-01-01", end: "2030-12-31" },
+      referenceDate: "2026-08-18",
+      parserLanguages: ["en", "de"]
+    });
+
+    const first = analyzer.analyze({ text: "next monday" });
+    const second = analyzer.analyze({ text: "12 Dezember 2026" });
+
+    expect(first.tokens.map((token) => token.value).filter((value) => value.trim())).toEqual(["next", "monday"]);
+    expect(first.result).toEqual({ status: "success", value: { start: "2026-08-24", end: "2026-08-24" } });
+    expect(second.result).toEqual({ status: "success", value: { start: "2026-12-12", end: "2026-12-12" } });
+  });
+
   it("tokenizes date parts separately from explicit range separators", () => {
     expect(tokenizeDateInput({ text: "12/14 -" })).toEqual(
       expect.arrayContaining([

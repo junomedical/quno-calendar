@@ -13,6 +13,10 @@ use the shared records for package-wide contracts and release work.
 The [named-contract migration](./shared/migration.md#unreleased-named-contracts-and-product-ownership) maps the
 current breaking API cleanup. Product decision records preserve the historical signatures they supersede.
 
+The current responsiveness work is recorded in
+[QUNO-013](./shared/decisions.md#quno-013---bound-high-frequency-work-to-display-frames), with Infinite Calendar's
+multilane availability geometry in [Decision 091](./infinite-calendar/decisions.md#091---availability-has-independent-collision-lanes).
+
 ## Shared package records
 
 - [Architecture](./shared/architecture.md) defines public surfaces, dependency direction, framework compatibility,

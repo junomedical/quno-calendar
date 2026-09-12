@@ -489,7 +489,23 @@ test("keeps intra-day scroll offset when the virtual window recenters", async ({
   const beforeTop = await visibleDay.evaluate((element) => element.getBoundingClientRect().top);
   expect(visibleDayNode).not.toBeNull();
   expect(eventNodes.length).toBeGreaterThan(0);
-  await page.waitForTimeout(1500);
+  const maximumTransientMovement = await visibleDay.evaluate(
+    (element, initialTop) =>
+      new Promise<number>((resolve) => {
+        const startedAt = performance.now();
+        let maximumMovement = 0;
+        const sample = () => {
+          maximumMovement = Math.max(maximumMovement, Math.abs(element.getBoundingClientRect().top - initialTop));
+          if (performance.now() - startedAt >= 1_500) {
+            resolve(maximumMovement);
+            return;
+          }
+          requestAnimationFrame(sample);
+        };
+        requestAnimationFrame(sample);
+      }),
+    beforeTop
+  );
   const afterRecenter = await topVisibleDayState(page);
 
   expect(afterRecenter.date).toBe(beforeRecenter.date);
@@ -499,5 +515,6 @@ test("keeps intra-day scroll offset when the virtual window recenters", async ({
     expect(await eventNode.evaluate((element) => element.isConnected)).toBe(true);
   }
   const afterTop = await visibleDay.evaluate((element) => element.getBoundingClientRect().top);
+  expect(maximumTransientMovement).toBeLessThanOrEqual(1);
   expect(Math.abs(afterTop - beforeTop)).toBeLessThanOrEqual(1);
 });

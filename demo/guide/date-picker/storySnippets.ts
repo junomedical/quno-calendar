@@ -20,9 +20,13 @@ type DayStatus = 'loading' | 'available' | 'disabled' | 'error';
 const [visibleMonth, setVisibleMonth] = useState<IsoDate>('2026-08-01');
 const [status, setStatus] = useState<Partial<Record<IsoDate, DayStatus>>>({});
 const [failedMonth, setFailedMonth] = useState<IsoDate | null>(null);
+const limitDateFrom: IsoDate = '2026-08-06';
+const limitDateTo: IsoDate = '2026-09-10';
 
 useEffect(() => {
-  void loadAvailability(calendarGrid({ month: visibleMonth })).then(
+  const datesToResolve = calendarGrid({ month: visibleMonth })
+    .filter((date) => date >= limitDateFrom && date <= limitDateTo);
+  void loadAvailability(datesToResolve).then(
     (next) => setStatus((current) => ({ ...current, ...next })),
     () => setFailedMonth(visibleMonth),
   );
@@ -45,6 +49,8 @@ const styleDay: QunoDatePickerDayCellCustomizer = ({ date, isToday }) => {
 };
 
 <QunoDatePicker
+  limitDateFrom={limitDateFrom}
+  limitDateTo={limitDateTo}
   isDayDisabled={({ date }) => isDayDisabled(date)}
   getDayCellProps={styleDay}
   onVisibleMonthChange={({ month }) => setVisibleMonth(month)}

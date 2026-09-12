@@ -134,6 +134,8 @@ export type QunoDatePickerProps = {
   weekStartsOn?: WeekStart;
   className?: string;
   classNames?: QunoDatePickerClassNames;
+  limitDateFrom?: IsoDate;
+  limitDateTo?: IsoDate;
   isDayDisabled?: QunoDatePickerDisabledDayPredicate;
   getDayCellProps?: QunoDatePickerDayCellCustomizer;
   calendarFooter?: ReactNode;

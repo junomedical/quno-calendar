@@ -32,6 +32,7 @@ type BuildRenderItemsArgs = {
   count: number;
   baseDayHeight: number;
   forcedBaseGeometryAnchorIndex?: number;
+  forcedGeometryAnchorDateKey?: string;
   layoutAnchorDateKey?: string;
   dateKeyToIndex: (args: { dateKey: string }) => number;
   itemKeyForIndex?: (args: { index: number }) => Key;
@@ -47,6 +48,7 @@ export function buildVirtualDateRenderItems({
   count,
   baseDayHeight,
   forcedBaseGeometryAnchorIndex,
+  forcedGeometryAnchorDateKey,
   layoutAnchorDateKey,
   dateKeyToIndex,
   itemKeyForIndex,
@@ -61,18 +63,32 @@ export function buildVirtualDateRenderItems({
     0,
     Math.min(count - baseGeometryItemCount, baseGeometryAnchorIndex - FALLBACK_ITEMS_BEFORE_ANCHOR)
   );
+  const translatedItems =
+    forcedBaseGeometryAnchorIndex === undefined || !forcedGeometryAnchorDateKey
+      ? null
+      : translateMeasuredItems({
+          virtualItems,
+          anchorDateKey: forcedGeometryAnchorDateKey,
+          anchorIndex: forcedBaseGeometryAnchorIndex,
+          count,
+          baseDayHeight,
+          dateKeyToIndex,
+          offsetForIndex
+        });
   const baseItems =
     virtualItems.length > 0 && forcedBaseGeometryAnchorIndex === undefined
       ? virtualItems
-      : Array.from({ length: baseGeometryItemCount }, (_, index) => {
-          const dayIndex = baseGeometryStartIndex + index;
-          return {
-            key: itemKeyForIndex?.({ index: dayIndex }) ?? `fallback-${dayIndex}`,
-            index: dayIndex,
-            start: dayIndex * baseDayHeight,
-            size: baseDayHeight
-          };
-        });
+      : translatedItems?.length
+        ? translatedItems
+        : Array.from({ length: baseGeometryItemCount }, (_, index) => {
+            const dayIndex = baseGeometryStartIndex + index;
+            return {
+              key: itemKeyForIndex?.({ index: dayIndex }) ?? `fallback-${dayIndex}`,
+              index: dayIndex,
+              start: dayIndex * baseDayHeight,
+              size: baseDayHeight
+            };
+          });
 
   if (!layoutAnchorDateKey) return baseItems;
   const pinnedIndex = dateKeyToIndex({ dateKey: layoutAnchorDateKey });
@@ -88,4 +104,34 @@ export function buildVirtualDateRenderItems({
       size: baseDayHeight
     }
   ].sort((left, right) => left.start - right.start);
+}
+
+function translateMeasuredItems({
+  virtualItems,
+  anchorDateKey,
+  anchorIndex,
+  count,
+  baseDayHeight,
+  dateKeyToIndex,
+  offsetForIndex
+}: {
+  virtualItems: VirtualDateRenderItem[];
+  anchorDateKey: string;
+  anchorIndex: number;
+  count: number;
+  baseDayHeight: number;
+  dateKeyToIndex: (args: { dateKey: string }) => number;
+  offsetForIndex: (args: { index: number }) => number | undefined;
+}): VirtualDateRenderItem[] | null {
+  const anchor = virtualItems.find((item) => item.key === anchorDateKey);
+  if (!anchor) return null;
+  const targetStart = offsetForIndex({ index: anchorIndex }) ?? anchorIndex * baseDayHeight;
+  const translation = targetStart - anchor.start;
+  return virtualItems
+    .flatMap((item) => {
+      if (typeof item.key !== "string" || !ISO_DATE_KEY.test(item.key)) return [];
+      const index = dateKeyToIndex({ dateKey: item.key });
+      return index < 0 || index >= count ? [] : [{ ...item, index, start: item.start + translation }];
+    })
+    .sort((left, right) => left.start - right.start);
 }

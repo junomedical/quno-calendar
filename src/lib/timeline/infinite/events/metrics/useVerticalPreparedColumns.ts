@@ -2,7 +2,7 @@
  * Prepared vertical-column model.
  * cached date events -> calendar membership -> prepared lanes -> width/read lookups
  */
-import { useMemo } from "react";
+import { useMemo, useRef } from "react";
 import type {
   ActiveEventDraft,
   CalendarEvent,
@@ -10,15 +10,18 @@ import type {
   CalendarRow,
   QunoInfiniteCalendarSettings
 } from "#quno-internal/timeline/core/types";
-import { withoutActiveDraftSourceEvents } from "./activeDrafts";
 import {
-  columnWidthForPreparedCell,
-  prepareEventCell,
-  type PreparedEventCell
+  columnWidthForPreparedLayers,
+  type PreparedEventLayers
 } from "#quno-internal/timeline/infinite/events/layout/layout";
-import { indexEventsByCalendar } from "#quno-internal/timeline/infinite/events/indexing/eventMembershipIndex";
+import { PreparedDateLayerCache } from "./preparedDateLayers";
 
-const EMPTY_PREPARED_CELL: PreparedEventCell = { items: [], laneCount: 1, metricLaneCount: 1 };
+const EMPTY_PREPARED_CELL = { items: [], laneCount: 1, metricLaneCount: 1 };
+const EMPTY_PREPARED_LAYERS: PreparedEventLayers = {
+  events: EMPTY_PREPARED_CELL,
+  availability: EMPTY_PREPARED_CELL,
+  metricLaneCount: 1
+};
 
 type PreparedColumnsArgs = {
   activeDraft?: ActiveEventDraft | null;
@@ -30,7 +33,7 @@ type PreparedColumnsArgs = {
 
 export type VerticalPreparedColumns = {
   eventsForColumn: (args: { dateKey: string; calendarId: CalendarId }) => CalendarEvent[];
-  preparedCellForColumn: (args: { dateKey: string; calendarId: CalendarId }) => PreparedEventCell;
+  preparedCellForColumn: (args: { dateKey: string; calendarId: CalendarId }) => PreparedEventLayers;
   columnWidthForDateCalendar: (args: { dateKey: string; calendarId: CalendarId }) => number;
   dayMinWidth: (args: { dateKey: string }) => number;
   maxVisibleDayMinWidth: number;
@@ -45,8 +48,7 @@ export function useVerticalPreparedColumns({
 }: PreparedColumnsArgs): VerticalPreparedColumns {
   const { endHour, startHour, verticalColumnMinWidth, verticalColumnOverlapCapacity, verticalColumnOverlapGrowth } =
     settings;
-  // Keep the preparation model stable while zoom only changes projected Y geometry.
-  const preparationSettings = useMemo(() => ({ startHour, endHour }), [endHour, startHour]);
+  const preparationCache = useRef(new PreparedDateLayerCache()).current;
   const columnMetricSettings = useMemo(
     () => ({ verticalColumnMinWidth, verticalColumnOverlapCapacity, verticalColumnOverlapGrowth }),
     [verticalColumnMinWidth, verticalColumnOverlapCapacity, verticalColumnOverlapGrowth]
@@ -59,23 +61,26 @@ export function useVerticalPreparedColumns({
 
   return useMemo(() => {
     const columnEvents = new Map<string, CalendarEvent[]>();
-    const preparedCells = new Map<string, PreparedEventCell>();
+    const preparedCells = new Map<string, PreparedEventLayers>();
     const columnWidths = new Map<string, number>();
-    const calendarIds = renderedCalendars.map((calendar) => calendar.id);
     let widestDay = renderedCalendars.length * verticalColumnMinWidth;
+    preparationCache.retain(Object.keys(eventsByDate));
 
     for (const dateKey of stableVisibleDateKeys) {
       let dayColumnsWidth = 0;
-      const visibleEvents = withoutActiveDraftSourceEvents({ events: eventsByDate[dateKey] ?? [], activeDraft });
-      const eventsByCalendar = indexEventsByCalendar({ events: visibleEvents, calendarIds });
+      const preparedDate = preparationCache.prepare({
+        dateKey,
+        events: eventsByDate[dateKey] ?? [],
+        calendars: renderedCalendars,
+        startHour,
+        endHour,
+        activeDraft
+      });
       for (const calendar of renderedCalendars) {
         const key = columnKey({ dateKey, calendarId: calendar.id });
-        const events = eventsByCalendar.get(calendar.id) ?? [];
-        const preparedCell = prepareEventCell({
-          events: events.filter((event) => event.kind !== "availability"),
-          settings: preparationSettings
-        });
-        const width = columnWidthForPreparedCell({ preparedCell, settings: columnMetricSettings });
+        const events = preparedDate.eventsByCalendar.get(calendar.id) ?? [];
+        const preparedCell = preparedDate.layersByCalendar.get(calendar.id) ?? EMPTY_PREPARED_LAYERS;
+        const width = columnWidthForPreparedLayers({ preparedLayers: preparedCell, settings: columnMetricSettings });
         columnEvents.set(key, events);
         preparedCells.set(key, preparedCell);
         columnWidths.set(key, width);
@@ -89,7 +94,7 @@ export function useVerticalPreparedColumns({
     return {
       eventsForColumn: ({ dateKey, calendarId }) => columnEvents.get(columnKey({ dateKey, calendarId })) ?? [],
       preparedCellForColumn: ({ dateKey, calendarId }) =>
-        preparedCells.get(columnKey({ dateKey, calendarId })) ?? EMPTY_PREPARED_CELL,
+        preparedCells.get(columnKey({ dateKey, calendarId })) ?? EMPTY_PREPARED_LAYERS,
       columnWidthForDateCalendar: widthForColumn,
       dayMinWidth: ({ dateKey }) =>
         renderedCalendars.reduce((total, calendar) => total + widthForColumn({ dateKey, calendarId: calendar.id }), 0),
@@ -98,9 +103,11 @@ export function useVerticalPreparedColumns({
   }, [
     activeDraft,
     columnMetricSettings,
+    endHour,
     eventsByDate,
-    preparationSettings,
+    preparationCache,
     renderedCalendars,
+    startHour,
     stableVisibleDateKeys,
     verticalColumnMinWidth
   ]);

@@ -87,6 +87,27 @@ describe("virtual timeline render items", () => {
     expect(items.map((item) => item.start)).toEqual(items.map((item) => item.index * 200));
   });
 
+  it("translates measured semantic dates during an idle window recenter", () => {
+    const items = buildVirtualDateRenderItems({
+      virtualItems: [
+        { key: "2026-07-06", index: 28, start: 2_760, size: 140 },
+        { key: "2026-07-07", index: 29, start: 2_900, size: 220 }
+      ],
+      anchorIndex: 15,
+      count: 31,
+      baseDayHeight: 100,
+      forcedBaseGeometryAnchorIndex: 15,
+      forcedGeometryAnchorDateKey: "2026-07-06",
+      dateKeyToIndex: ({ dateKey }) => (dateKey === "2026-07-06" ? 15 : 16),
+      offsetForIndex: ({ index }) => (index === 15 ? 1_620 : undefined)
+    });
+
+    expect(items).toEqual([
+      { key: "2026-07-06", index: 15, start: 1_620, size: 140 },
+      { key: "2026-07-07", index: 16, start: 1_760, size: 220 }
+    ]);
+  });
+
   it("does not duplicate a measured or out-of-window pinned date", () => {
     const virtualItems = [{ key: "visible", index: 14, start: 1400, size: 100 }];
     const build = (pinnedIndex: number) =>

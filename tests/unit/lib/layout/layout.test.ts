@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   columnWidthForPreparedCell,
+  columnWidthForPreparedLayers,
   columnWidthForEvents,
   laneCountForPreparedCell,
   layoutPreparedEventsForColumn,
@@ -8,7 +9,9 @@ import {
   layoutEventsForColumn,
   layoutEventsForRow,
   prepareEventCell,
+  prepareEventLayers,
   rowHeightForPreparedCell,
+  rowHeightForPreparedLayers,
   rowHeightForEvents,
   rowHeightForOverlapDepth,
   verticalLaneCountForPreparedCell
@@ -141,14 +144,14 @@ describe("event overlap layout", () => {
     expect(rowHeightForEvents({ events: denseRow, settings })).toBe(96);
   });
 
-  it("does not let availability records increase row height", () => {
-    const availability = {
-      ...event("availability", "08:00", "18:00"),
+  it("grows rows and columns for overlapping availability", () => {
+    const availability = Array.from({ length: 4 }, (_, index) => ({
+      ...event(`availability-${index}`, "09:00", "10:00"),
       kind: "availability" as const
-    };
+    }));
 
-    expect(rowHeightForEvents({ events: [availability], settings })).toBe(settings.rowHeight);
-    expect(layoutEventsForRow({ events: [availability], settings })).toHaveLength(1);
+    expect(rowHeightForEvents({ events: availability, settings })).toBe(96);
+    expect(columnWidthForEvents({ events: availability, settings })).toBe(320);
   });
 
   it("prepares a cell once for metrics and both geometry projections", () => {
@@ -173,23 +176,42 @@ describe("event overlap layout", () => {
     );
   });
 
-  it("keeps availability in prepared geometry but excludes it from prepared metrics", () => {
-    const availability = {
-      ...event("availability", "08:00", "18:00"),
-      kind: "availability" as const
-    };
+  it("prepares appointment and availability collisions independently and sizes by their maximum depth", () => {
+    const availability = [
+      { ...event("availability-first", "09:00", "10:30"), kind: "availability" as const },
+      { ...event("availability-second", "09:00", "10:00"), kind: "availability" as const },
+      { ...event("availability-later", "10:30", "11:00"), kind: "availability" as const },
+      { ...event("availability-third", "09:30", "10:15"), kind: "availability" as const }
+    ];
     const timedEvents = [
       event("timed-a", "09:00", "10:00"),
       event("timed-b", "09:00", "10:00"),
       event("timed-c", "09:00", "10:00")
     ];
-    const preparedCell = prepareEventCell({ events: [availability, ...timedEvents], settings });
+    const preparedLayers = prepareEventLayers({ events: [...availability, ...timedEvents], settings });
 
-    expect(preparedCell.items).toHaveLength(4);
-    expect(preparedCell.laneCount).toBe(4);
-    expect(preparedCell.metricLaneCount).toBe(3);
-    expect(rowHeightForPreparedCell({ preparedCell, settings })).toBe(75);
-    expect(columnWidthForPreparedCell({ preparedCell, settings })).toBe(240);
+    expect(preparedLayers.events.items.map((item) => item.lane)).toEqual([0, 1, 2]);
+    expect(preparedLayers.availability.items.map((item) => [item.event.id, item.lane])).toEqual([
+      ["availability-first", 0],
+      ["availability-second", 1],
+      ["availability-third", 2],
+      ["availability-later", 0]
+    ]);
+    expect(preparedLayers.metricLaneCount).toBe(3);
+    expect(rowHeightForPreparedLayers({ preparedLayers, settings })).toBe(75);
+    expect(columnWidthForPreparedLayers({ preparedLayers, settings })).toBe(240);
+    expect(layoutPreparedEventsForRow({ preparedCell: preparedLayers.availability, settings })).toMatchObject([
+      { lane: 0, laneCount: 3, isOverlapping: true },
+      { lane: 1, laneCount: 3, isOverlapping: true },
+      { lane: 2, laneCount: 3, isOverlapping: true },
+      { lane: 0, laneCount: 1, isOverlapping: false }
+    ]);
+    const columnLayout = layoutPreparedEventsForColumn({ preparedCell: preparedLayers.availability, settings });
+    expect(columnLayout.map((item) => item.widthPercent)).toEqual([100 / 3, 100 / 3, 100 / 3, 100]);
+    expect(columnLayout[0].leftPercent).toBe(0);
+    expect(columnLayout[1].leftPercent).toBeCloseTo(100 / 3);
+    expect(columnLayout[2].leftPercent).toBeCloseTo(200 / 3);
+    expect(columnLayout[3].leftPercent).toBe(0);
   });
 
   it("keeps same-day clock semantics and clips geometry to the visible timeline", () => {

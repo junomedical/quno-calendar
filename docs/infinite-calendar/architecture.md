@@ -255,17 +255,22 @@ Important invariants:
 
 ## Prepared Cell Pipeline
 
-Each revised date is indexed by calendar membership in one pass. Each date/calendar cell separates availability from timed events and prepares overlap lanes with a deterministic heap-based `O(n log n)` algorithm.
+Each revised date is indexed by calendar membership in one pass. Each date/calendar cell separates availability from
+appointments and prepares both layers independently with the same deterministic heap-based `O(n log n)` algorithm.
+Unchanged bucket arrays reuse the complete prepared date model.
 
 ```mermaid
 flowchart LR
   Events["date events"] --> Membership["calendar membership index"]
   Membership --> Cell["date/resource cell"]
-  Cell --> Availability["availability records"]
-  Cell --> Prepared["prepared timed intervals and lanes"]
-  Prepared --> Metrics["row height or column width"]
-  Prepared --> Horizontal["horizontal rectangles"]
-  Prepared --> Vertical["vertical rectangles"]
+  Cell --> Availability["prepared availability lanes"]
+  Cell --> Prepared["prepared appointment lanes"]
+  Availability --> Metrics["max layer depth"]
+  Prepared --> Metrics
+  Availability --> Horizontal["horizontal mini-lanes"]
+  Availability --> Vertical["vertical side-by-side lanes"]
+  Prepared --> Horizontal
+  Prepared --> Vertical
   Prepared --> Hit["hover and hit geometry"]
 ```
 
@@ -283,7 +288,11 @@ flowchart LR
   Translate --> Paint["paint event shells in stable viewport"]
 ```
 
-Sizing and rendering reuse the same prepared cell. Availability remains a full-cell background layer and never increases overlap metrics. One shared state layer assigns availability, draft, and drop-preview statuses; horizontal and vertical views provide their own geometry adapters. These overlays never perturb committed layout.
+Sizing and rendering reuse the same layered prepared cell. Resource size uses the larger appointment or availability
+depth rather than adding them. Non-overlapping availability still fills one resource lane; overlapping availability
+uses real lane rectangles and remains behind appointments. One shared state layer assigns availability, draft, and
+drop-preview statuses; horizontal and vertical views provide their own geometry adapters. Drafts and previews remain
+transient and never perturb committed layout.
 
 ## Date And Resource Virtualization
 
@@ -347,6 +356,10 @@ stateDiagram-v2
 ```
 
 Hit-testing rejects sticky labels and headers. Multi-calendar hover remains local to one rendered resource instance; drag and preview status stays keyed by event id across instances.
+
+Pointer moves retain only the latest coordinates and perform hit-testing plus React preview publication once per
+animation frame. Pointer-up synchronously flushes its coordinates before validation or commit. Pointer cancellation,
+lost capture, Escape, and unmount discard queued work.
 
 Zoom stays controlled by `settings.zoom`. `Shift` + wheel requests `onZoomChange` in a microtask, keeps the first focused time node for a gesture burst, and begins scroll restoration at the following animation frame so the controlled parent update does not overlap React's active render work. Slider or other external horizontal zoom changes first preserve a visible current-time marker at its viewport position in a layout effect before paint. When the marker is outside the configured hours or viewport, a horizontally scrolled view preserves its grid-center time and the timeline origin preserves its left edge. The wheel path suppresses that generic correction and retains its pointer-specific anchor. Horizontal rendering may apply a viewport-fill zoom floor without mutating the parent-owned value.
 

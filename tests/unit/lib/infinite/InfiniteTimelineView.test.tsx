@@ -282,6 +282,79 @@ describe("InfiniteTimelineView", () => {
     });
   });
 
+  it("passes independent multilane availability metadata in both orientations", async () => {
+    const events: CalendarEvent[] = [
+      ...Array.from({ length: 4 }, (_, index) => ({
+        id: `availability-${index}`,
+        calendarId: "calendar-a",
+        title: `Availability ${index}`,
+        start: "2026-07-04T09:00:00",
+        end: "2026-07-04T10:00:00",
+        kind: "availability" as const
+      })),
+      ...Array.from({ length: 2 }, (_, index) => ({
+        id: `appointment-${index}`,
+        calendarId: "calendar-a",
+        title: `Appointment ${index}`,
+        start: "2026-07-04T09:00:00",
+        end: "2026-07-04T10:00:00",
+        kind: "appointment" as const
+      }))
+    ];
+    const loadEvents = vi.fn<LoadEvents>(async () => events);
+    const renderer = vi.fn(({ event, style }: EventRendererProps) => (
+      <div data-testid={`layer-${event.id}`} style={style} />
+    ));
+    const horizontal = renderCalendar({
+      initialDateKey: "2026-07-04",
+      loadEvents,
+      renderEvent: renderer,
+      settings: { ...settings, rowHeight: 50 }
+    });
+
+    await screen.findByTestId("layer-availability-3", undefined, { timeout: 5_000 });
+    const availabilityCalls = renderer.mock.calls
+      .map(([props]) => props)
+      .filter((props) => props.event.id.startsWith("availability-"));
+    const appointmentCalls = renderer.mock.calls
+      .map(([props]) => props)
+      .filter((props) => props.event.id.startsWith("appointment-"));
+    expect(availabilityCalls.map(({ lane }) => lane)).toEqual([0, 1, 2, 3]);
+    expect(availabilityCalls.every(({ laneCount, isOverlapping }) => laneCount === 4 && isOverlapping)).toBe(true);
+    expect(appointmentCalls.every(({ laneCount }) => laneCount === 2)).toBe(true);
+    expect(
+      Array.from(
+        { length: 4 },
+        (_, index) => screen.getByTestId(`layer-availability-${index}`).parentElement?.style.top
+      )
+    ).toEqual(["2px", "26px", "50px", "74px"]);
+    expect(screen.getByTestId("layer-appointment-0").parentElement?.style.zIndex).toBe("2");
+    expect(screen.getByTestId("layer-availability-0").parentElement?.style.zIndex).toBe("1");
+    horizontal.unmount();
+
+    renderer.mockClear();
+    renderCalendar({
+      initialDateKey: "2026-07-04",
+      loadEvents,
+      renderEvent: renderer,
+      settings: { ...settings, verticalColumnOverlapCapacity: 3, verticalColumnOverlapGrowth: 80 },
+      view: "infinite-vertical"
+    });
+    await screen.findByTestId("layer-availability-3", undefined, { timeout: 5_000 });
+    expect(
+      Array.from(
+        { length: 4 },
+        (_, index) => screen.getByTestId(`layer-availability-${index}`).parentElement?.style.left
+      )
+    ).toEqual(["0%", "25%", "50%", "75%"]);
+    expect(
+      Array.from(
+        { length: 4 },
+        (_, index) => screen.getByTestId(`layer-availability-${index}`).parentElement?.style.width
+      )
+    ).toEqual(["25%", "25%", "25%", "25%"]);
+  });
+
   it("reloads the visible range when eventVersion changes", async () => {
     const renderer = vi.fn(({ event, status, style }: EventRendererProps) => (
       <div data-testid="custom-event" data-status={status} style={style}>

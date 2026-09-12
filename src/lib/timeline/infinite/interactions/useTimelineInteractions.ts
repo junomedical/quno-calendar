@@ -15,6 +15,7 @@ import { useReleasedDraft } from "#quno-internal/timeline/infinite/interactions/
 import { useGlobalPointerContinuation } from "#quno-internal/timeline/infinite/interactions/pointer/useGlobalPointerContinuation";
 import { useTimelineDragInteraction } from "#quno-internal/timeline/infinite/interactions/drag/useTimelineDragInteraction";
 import { useTimelineDraftInteraction } from "#quno-internal/timeline/infinite/interactions/draft/useTimelineDraftInteraction";
+import { useTimelinePointerFrames } from "#quno-internal/timeline/infinite/interactions/pointer/useTimelinePointerFrames";
 
 export type HoveredTimelineEvent = { eventId: string; calendarId: CalendarId } | null;
 type PointerLike = Pick<PointerEvent | ReactPointerEvent, "clientX" | "clientY">;
@@ -39,6 +40,36 @@ type EventPointerDownArgs = {
   calendarEvent: CalendarEvent;
   renderedCalendarId: CalendarId;
 };
+
+function resolveDraftRenderState({
+  activeDraft,
+  draggingActiveDraft,
+  localDraftEvent,
+  releasedEvent,
+  releasedStatus
+}: {
+  activeDraft?: ActiveEventDraft | null;
+  draggingActiveDraft: boolean;
+  localDraftEvent?: CalendarEvent | null;
+  releasedEvent?: CalendarEvent;
+  releasedStatus?: EventRenderStatus;
+}) {
+  return {
+    renderedDraftEvent:
+      activeDraft?.event.calendarIds?.length === 0
+        ? null
+        : (activeDraft?.event ?? localDraftEvent ?? releasedEvent ?? null),
+    renderedDraftStatus: draggingActiveDraft
+      ? ("dragging" as const)
+      : activeDraft
+        ? activeDraft.mode === "edit"
+          ? ("existing" as const)
+          : ("new" as const)
+        : localDraftEvent
+          ? ("new" as const)
+          : (releasedStatus ?? "new")
+  };
+}
 
 /** Coordinates the single Pointer Events lifecycle shared by both projections. */
 export function useTimelineInteractions(args: UseTimelineInteractionsArgs) {
@@ -121,23 +152,30 @@ export function useTimelineInteractions(args: UseTimelineInteractionsArgs) {
     cancelDraft();
     setHoveredEvent(null);
   }, [cancelDraft, cancelDrag]);
+  const {
+    schedule: schedulePointerMove,
+    finishFromPoint,
+    cancelFromPointer
+  } = useTimelinePointerFrames({
+    update: updateInteraction,
+    finish: finishInteraction,
+    cancel: cancelInteraction
+  });
 
   useGlobalPointerContinuation({
     active: isInteractionActive,
-    onMove: updateInteraction,
-    onFinish: finishInteraction,
-    onCancel: cancelInteraction
+    onMove: schedulePointerMove,
+    onFinish: finishFromPoint,
+    onCancel: cancelFromPointer
   });
 
-  const renderedDraftStatus: EventRenderStatus = drag.draggingActiveDraft
-    ? "dragging"
-    : args.activeDraft
-      ? args.activeDraft.mode === "edit"
-        ? "existing"
-        : "new"
-      : draft.draftState
-        ? "new"
-        : (releasedDraft?.status ?? "new");
+  const draftRenderState = resolveDraftRenderState({
+    activeDraft: args.activeDraft,
+    draggingActiveDraft: drag.draggingActiveDraft,
+    localDraftEvent: draft.draftState?.event,
+    releasedEvent: releasedDraft?.draft.event,
+    releasedStatus: releasedDraft?.status
+  });
 
   return {
     hoveredEvent,
@@ -146,11 +184,7 @@ export function useTimelineInteractions(args: UseTimelineInteractionsArgs) {
     draftState: draft.draftState,
     dragPreviewEvent: drag.dragPreviewEvent,
     releaseActiveDraft,
-    renderedDraftEvent:
-      args.activeDraft?.event.calendarIds?.length === 0
-        ? null
-        : (args.activeDraft?.event ?? draft.draftState?.event ?? releasedDraft?.draft.event ?? null),
-    renderedDraftStatus,
+    ...draftRenderState,
     renderedDraftIsDraggable: Boolean(args.activeDraft && args.onActiveDraftMoveRequest),
     renderedDraftIsExiting: Boolean(!args.activeDraft && !draft.draftState && releasedDraft),
     renderedDraftReleaseDurationMs: !args.activeDraft && !draft.draftState ? releasedDraft?.durationMs : undefined,
@@ -159,8 +193,8 @@ export function useTimelineInteractions(args: UseTimelineInteractionsArgs) {
     canInteractWithPersistedEvents,
     handleGridPointerDown,
     handleEventPointerDown,
-    handlePointerMove: (event: ReactPointerEvent<HTMLDivElement>) => updateInteraction(event),
-    handlePointerUp: () => void finishInteraction(),
-    handlePointerCancel: cancelInteraction
+    handlePointerMove: schedulePointerMove,
+    handlePointerUp: (event: ReactPointerEvent<HTMLDivElement>) => void finishFromPoint(event),
+    handlePointerCancel: cancelFromPointer
   };
 }

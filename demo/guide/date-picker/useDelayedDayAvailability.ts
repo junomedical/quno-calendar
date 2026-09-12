@@ -18,10 +18,21 @@ const resolvedAvailability = (date: IsoDate): DemoDayAvailability => {
 const statusFor = (statuses: Partial<Record<IsoDate, DemoDayAvailability>>, date: IsoDate): DemoDayAvailability =>
   statuses[date] ?? "loading";
 
-export function useDelayedDayAvailability(initialMonth: IsoDate) {
+export function useDelayedDayAvailability({
+  initialMonth,
+  limitDateFrom,
+  limitDateTo
+}: {
+  initialMonth: IsoDate;
+  limitDateFrom: IsoDate;
+  limitDateTo: IsoDate;
+}) {
   const [visibleMonth, setVisibleMonth] = useState(initialMonth);
   const [statuses, setStatuses] = useState<Partial<Record<IsoDate, DemoDayAvailability>>>({});
-  const visibleDates = useMemo(() => calendarGrid({ month: visibleMonth }), [visibleMonth]);
+  const visibleDates = useMemo(
+    () => calendarGrid({ month: visibleMonth }).filter((date) => date >= limitDateFrom && date <= limitDateTo),
+    [limitDateFrom, limitDateTo, visibleMonth]
+  );
 
   useEffect(() => {
     setStatuses((current) => {
@@ -42,6 +53,7 @@ export function useDelayedDayAvailability(initialMonth: IsoDate) {
   const isDayDisabled = useCallback((date: IsoDate) => statusFor(statuses, date) !== "available", [statuses]);
   const getDayCellProps = useCallback<QunoDatePickerDayCellCustomizer>(
     ({ date, isToday, isWeekend }) => {
+      if (date < limitDateFrom || date > limitDateTo) return { title: "Outside booking window" };
       const status = statusFor(statuses, date);
       return {
         className: [
@@ -68,7 +80,7 @@ export function useDelayedDayAvailability(initialMonth: IsoDate) {
                     : undefined
       };
     },
-    [statuses]
+    [limitDateFrom, limitDateTo, statuses]
   );
   const loadingCount = visibleDates.filter((date) => statusFor(statuses, date) === "loading").length;
 

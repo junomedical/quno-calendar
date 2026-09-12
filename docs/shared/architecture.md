@@ -47,6 +47,19 @@ while retaining their own geometry and scheduling.
 
 `check:architecture` verifies object signatures and dependency direction as well as module and function size limits.
 
+## Main-thread responsiveness
+
+The package applies frame-bounded work at input-rate boundaries: timeline pointer previews, Datepicker captured-pointer
+painting, quick-jump scrolling, and zoom consume only the latest useful value before a paint. Release and commit paths
+stay synchronous. React transitions defer non-urgent cache publication and Date Input recognition decoration, while
+stable immutable buckets, prepared layers, grids, formatter configuration, and parser vocabulary eliminate repeated
+work before scheduling is needed.
+
+Two-axis virtualization, a 120-date event cache, memoized external event content, compositor-friendly transform/opacity
+motion, and native sticky/overflow behavior were already present. The remaining work is bounded and coupled to DOM
+geometry, so workers, offscreen observers, broad layer promotion, FLIP layout animation, and a custom priority queue are
+not architectural dependencies.
+
 ## Packaging
 
 Every JavaScript entry emits ESM, CommonJS, and declarations without accessing `document` during import. UI stylesheets

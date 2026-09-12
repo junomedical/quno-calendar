@@ -60,8 +60,8 @@ export function CommittedLayer<Item extends CommittedItem>({
   });
 }
 
-export function AvailabilityLayer({
-  events,
+export function AvailabilityLayer<Item extends CommittedItem>({
+  items,
   calendarId,
   interactionMode,
   dragEventId,
@@ -71,8 +71,9 @@ export function AvailabilityLayer({
   project,
   shellClassName,
   ...shellProps
-}: AvailabilityLayerProps) {
-  return events.map((event) => {
+}: AvailabilityLayerProps<Item>) {
+  return items.map((item) => {
+    const event = item.event;
     const isDraft = event.id === "draft-new-event";
     const isDragging = dragEventId === event.id;
     const isFocused = focusedEventTarget?.eventId === event.id && focusedEventTarget.calendarId === calendarId;
@@ -89,13 +90,13 @@ export function AvailabilityLayer({
     return (
       <EventShell
         {...shellProps}
-        {...project(event)}
+        {...project({ item })}
         event={event}
         status={status}
         zIndex={interactionMode === "availability" || isDraft ? 40 : 1}
-        lane={0}
-        laneCount={1}
-        isOverlapping={false}
+        lane={item.lane}
+        laneCount={item.laneCount}
+        isOverlapping={item.isOverlapping}
         testId={isDraft ? "draft-event" : "availability-event"}
         renderedCalendarId={calendarId}
         className={[
