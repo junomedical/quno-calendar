@@ -24,16 +24,18 @@ function useEventProjections({
   width: number;
 }) {
   const availability = useMemo(
-    () => (event: CalendarEvent) => {
-      const geometry = horizontalEventGeometry({ event, settings });
-      return {
-        ...geometry,
-        top: 0,
-        hoverMaxWidth: geometry.width,
-        height: rowHeight
-      };
-    },
-    [rowHeight, settings]
+    () =>
+      ({ item }: { item: EventLayoutItem }) => {
+        const left = TIMELINE_LEFT_GUTTER_PX + item.left;
+        return {
+          left,
+          top: item.top,
+          width: item.width,
+          hoverMaxWidth: item.width,
+          height: item.height
+        };
+      },
+    []
   );
   const transient = useMemo(
     () =>
@@ -109,9 +111,12 @@ export const InfiniteTimelineRow = memo(function InfiniteTimelineRow({
   onEventPointerDown
 }: HorizontalTimelineRowProps) {
   const rowSettings = useMemo(() => ({ ...settings, rowHeight }), [rowHeight, settings]);
-  const availabilityEvents = useMemo(() => rowEvents.filter((event) => event.kind === "availability"), [rowEvents]);
   const layoutItems = useMemo(
-    () => layoutPreparedEventsForRow({ preparedCell, settings: rowSettings }),
+    () => layoutPreparedEventsForRow({ preparedCell: preparedCell.events, settings: rowSettings }),
+    [preparedCell, rowSettings]
+  );
+  const availabilityItems = useMemo(
+    () => layoutPreparedEventsForRow({ preparedCell: preparedCell.availability, settings: rowSettings }),
     [preparedCell, rowSettings]
   );
   const project = useEventProjections({ settings, rowHeight, width });
@@ -146,7 +151,7 @@ export const InfiniteTimelineRow = memo(function InfiniteTimelineRow({
     >
       <AvailabilityLayer
         {...sharedLayerProps}
-        events={availabilityEvents}
+        items={availabilityItems}
         interactionMode={interactionMode}
         dragEventId={dragEventId}
         appearingEventIds={appearingEventIds}

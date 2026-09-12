@@ -9,6 +9,55 @@ const disabled =
     dates.includes(date);
 
 describe("QunoDatePicker disabled days", () => {
+  it("applies inclusive hard limits before consulting the day resolver", () => {
+    const onChange = vi.fn();
+    const isDayDisabled = vi.fn(() => false);
+    render(
+      <QunoDatePicker
+        initialMonth="2026-08-01"
+        selectionMode="single"
+        limitDateFrom="2026-08-10"
+        limitDateTo="2026-08-20"
+        isDayDisabled={isDayDisabled}
+        onChange={({ value }) => onChange(value)}
+      />
+    );
+
+    expect(day("2026-08-09")).toBeDisabled();
+    expect(day("2026-08-10")).toBeEnabled();
+    expect(day("2026-08-20")).toBeEnabled();
+    expect(day("2026-08-21")).toBeDisabled();
+    expect(isDayDisabled).not.toHaveBeenCalledWith({ date: "2026-08-09" });
+    expect(isDayDisabled).not.toHaveBeenCalledWith({ date: "2026-08-21" });
+    expect(isDayDisabled).toHaveBeenCalledWith({ date: "2026-08-10" });
+    expect(isDayDisabled).toHaveBeenCalledWith({ date: "2026-08-20" });
+
+    clickDay("2026-08-09");
+    clickDay("2026-08-21");
+    expect(onChange).not.toHaveBeenCalled();
+    clickDay("2026-08-10");
+    expect(onChange).toHaveBeenLastCalledWith({ start: "2026-08-10", end: "2026-08-10" });
+  });
+
+  it("retains the latest in-bounds range endpoint when a gesture crosses a limit", () => {
+    const onChange = vi.fn();
+    render(
+      <QunoDatePicker
+        initialMonth="2026-08-01"
+        limitDateFrom="2026-08-10"
+        limitDateTo="2026-08-20"
+        onChange={({ value }) => onChange(value)}
+      />
+    );
+
+    fireEvent.pointerDown(day("2026-08-10"));
+    fireEvent.pointerEnter(day("2026-08-20"));
+    fireEvent.pointerEnter(day("2026-08-21"));
+    fireEvent.pointerUp(day("2026-08-21"));
+
+    expect(onChange).toHaveBeenLastCalledWith({ start: "2026-08-10", end: "2026-08-20" });
+  });
+
   it("exposes native and stable disabled state without committing a click", () => {
     const onChange = vi.fn();
     render(

@@ -20,16 +20,49 @@ import {
 } from "./articleSupport";
 
 const availabilityCalendars = articleCalendars.filter((calendar) => calendar.id === "provider-a");
-const availabilityEvents = articleEvents
-  .filter((event) => event.calendarId === "provider-a" && event.id !== "consultation-a")
-  .map((event) =>
-    event.id === "availability-a"
-      ? { ...event, end: `${articleDateKey}T11:30:00`, subtitle: "Morning availability" }
-      : event
-  );
+const availabilityEvents = [
+  ...articleEvents
+    .filter((event) => event.calendarId === "provider-a")
+    .map((event) =>
+      event.id === "availability-a"
+        ? { ...event, end: `${articleDateKey}T11:30:00`, subtitle: "Morning availability" }
+        : event
+    ),
+  {
+    id: "availability-a-overlap-1",
+    calendarId: "provider-a",
+    title: "Telehealth available",
+    subtitle: "Parallel service lane",
+    start: `${articleDateKey}T09:00:00`,
+    end: `${articleDateKey}T10:45:00`,
+    color: "#6372a7",
+    kind: "availability" as const
+  },
+  {
+    id: "availability-a-overlap-2",
+    calendarId: "provider-a",
+    title: "Procedure available",
+    subtitle: "Parallel service lane",
+    start: `${articleDateKey}T09:30:00`,
+    end: `${articleDateKey}T11:00:00`,
+    color: "#9b6a9e",
+    kind: "availability" as const
+  },
+  {
+    id: "availability-a-overlap-3",
+    calendarId: "provider-a",
+    title: "Overflow available",
+    subtitle: "Fourth parallel lane",
+    start: `${articleDateKey}T09:45:00`,
+    end: `${articleDateKey}T10:30:00`,
+    color: "#b66a3c",
+    kind: "availability" as const
+  }
+];
 
 export function AvailabilityLayerDemo() {
   const [mode, setMode] = useState<"events" | "availability">("events");
+  const [view, setView] = useState<"infinite-horizontal" | "infinite-vertical">("infinite-horizontal");
   const [activity, setActivity] = useState("Appointment cards receive pointer input");
   const [events, setEvents] = useState(availabilityEvents);
   const eventsRef = useRef(events);
@@ -60,6 +93,22 @@ export function AvailabilityLayerDemo() {
             </button>
             <button aria-pressed={mode === "availability"} onClick={() => setMode("availability")} type="button">
               Edit availability
+            </button>
+          </div>
+          <div className="article-segmented-control" aria-label="Availability orientation">
+            <button
+              aria-pressed={view === "infinite-horizontal"}
+              onClick={() => setView("infinite-horizontal")}
+              type="button"
+            >
+              Horizontal
+            </button>
+            <button
+              aria-pressed={view === "infinite-vertical"}
+              onClick={() => setView("infinite-vertical")}
+              type="button"
+            >
+              Vertical
             </button>
           </div>
         </div>
@@ -96,6 +145,7 @@ export function AvailabilityLayerDemo() {
           onEventMoveRequest={moveEvent}
           selectedCalendarIds={["provider-a"]}
           settings={{ ...articleSettings, startHour: 8, endHour: 16, rowHeight: 74 }}
+          view={view}
         />
       </div>
     </CalendarDemoShell>

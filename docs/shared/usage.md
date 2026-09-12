@@ -359,8 +359,12 @@ present their state:
 type DayStatus = "loading" | "available" | "disabled" | "error";
 const [statuses, setStatuses] = useState<Partial<Record<IsoDate, DayStatus>>>({});
 const statusFor = (date: IsoDate): DayStatus => statuses[date] ?? "loading";
+const limitDateFrom: IsoDate = "2026-08-06";
+const limitDateTo: IsoDate = "2026-09-10";
 
 <QunoDatePicker
+  limitDateFrom={limitDateFrom}
+  limitDateTo={limitDateTo}
   isDayDisabled={({ date }) => statusFor(date) !== "available"}
   getDayCellProps={({ date, isDisabled }) => ({
     className: `booking-day--${statusFor(date)}`,
@@ -368,6 +372,10 @@ const statusFor = (date: IsoDate): DayStatus => statuses[date] ?? "loading";
   })}
 />;
 ```
+
+A date before `limitDateFrom` or after `limitDateTo` is disabled without calling `isDayDisabled`; both limits themselves
+are inclusive. Filter availability loads to the same bounds. Month navigation may still show surrounding context, but
+those context dates cannot start, end, move, or become a single-day selection.
 
 A disabled date cannot be selected alone or become a range start or end. It may occur inside a range whose endpoints
 are enabled. A controlled value is never rewritten when availability changes; the consumer remains responsible for
@@ -425,7 +433,7 @@ week. All seven English weekday names and their common abbreviations are recogni
 Compose `QunoDateInput` with `QunoDatePicker` by passing the same controlled `DateRange` and `onChange` to both public
 entry points. When an input update changes only one endpoint, move the picker’s visible month to that changed date;
 when both endpoints change, fall back to the nearest off-screen endpoint. The independently imported date-input payload
-is currently 6.77 KiB gzip for JavaScript and 0.58 KiB gzip for its optional stylesheet. It uses the React 18+ peer,
+is currently 7.82 KiB gzip for JavaScript and 0.58 KiB gzip for its optional stylesheet. It uses the React 18+ peer,
 supports Preact 10.18+ through `preact/compat`, imports safely in SSR, and has no date-library runtime dependency. The
 combined package’s TanStack virtualizer dependency belongs to Infinite Calendar and is not imported by the
 date-input entry.
@@ -619,6 +627,11 @@ Repository example: the focused creation, visual-focus, and motion chapters in
 Availability uses normal events with `kind: "availability"`. In appointment mode, availability renders as
 pointer-transparent background context. In availability mode, normal appointment cards remain visible but become
 pointer-transparent, and only availability blocks participate in move/draw hit-testing.
+
+Overlapping availability for one person or resource receives independent deterministic lanes. It uses vertical
+mini-lanes in the horizontal calendar and side-by-side lanes in the vertical calendar. `renderEvent` receives the
+availability lane through `lane`, its collision-group depth through `laneCount`, and collision state through
+`isOverlapping`. Appointments use a separate lane grid, and the resource grows to the greater of the two depths.
 
 ```tsx
 <QunoInfiniteCalendar

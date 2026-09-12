@@ -4,9 +4,9 @@
  * Flow: clipped intervals -> overlap groups -> lowest reusable lanes -> one
  * stable prepared model consumed by metrics, projections, hover, and hit tests.
  *
- * Preserves: deterministic lane order and availability exclusion from metric
- * depth while retaining availability items for rendering. Does not own pixel
- * projection, row/column growth policy, or React state.
+ * Preserves: deterministic lane order within each independently prepared
+ * visual layer. Does not own pixel projection, row/column growth policy, or
+ * React state.
  *
  * @see docs/infinite-calendar/architecture.md#prepared-cell-pipeline
  */
@@ -27,12 +27,18 @@ export type PreparedEventCellItem = {
 /**
  * Orientation-neutral layout for one date/calendar cell.
  *
- * `metricLaneCount` excludes availability records so background availability
- * never grows a row or column. `items` remains complete for API compatibility.
+ * `metricLaneCount` is the maximum overlap depth in this cell.
  */
 export type PreparedEventCell = {
   items: PreparedEventCellItem[];
   laneCount: number;
+  metricLaneCount: number;
+};
+
+/** Independently prepared foreground and availability lanes for one resource. */
+export type PreparedEventLayers = {
+  events: PreparedEventCell;
+  availability: PreparedEventCell;
   metricLaneCount: number;
 };
 
@@ -115,10 +121,6 @@ function maximumMetricLaneCount({ intervals }: { intervals: EventInterval[] }): 
   let laneCount = 1;
 
   for (const interval of intervals) {
-    if (interval.event.kind === "availability") {
-      continue;
-    }
-
     while (activeEnds.peek() !== undefined && activeEnds.peek()! <= interval.startMinute) {
       activeEnds.pop();
     }
@@ -144,5 +146,27 @@ export function prepareEventCell({
     items,
     laneCount: items.reduce((maximum, item) => Math.max(maximum, item.laneCount), 1),
     metricLaneCount: maximumMetricLaneCount({ intervals })
+  };
+}
+
+/** Partitions a resource once and prepares each visual layer independently. */
+export function prepareEventLayers({
+  events,
+  settings
+}: {
+  events: readonly CalendarEvent[];
+  settings: Pick<QunoInfiniteCalendarSettings, "startHour" | "endHour">;
+}): PreparedEventLayers {
+  const foreground: CalendarEvent[] = [];
+  const availability: CalendarEvent[] = [];
+  for (const event of events) {
+    (event.kind === "availability" ? availability : foreground).push(event);
+  }
+  const preparedEvents = prepareEventCell({ events: foreground, settings });
+  const preparedAvailability = prepareEventCell({ events: availability, settings });
+  return {
+    events: preparedEvents,
+    availability: preparedAvailability,
+    metricLaneCount: Math.max(preparedEvents.metricLaneCount, preparedAvailability.metricLaneCount)
   };
 }

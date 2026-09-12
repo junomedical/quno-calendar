@@ -38,6 +38,11 @@ uses `getDayProps`, `getDayCellProps`, and `getHourProps` where supported. See t
 
 Calendar day keys use timezone-free `YYYY-MM-DD` values. Infinite Calendar event `start` and `end` remain timestamp strings with their local or offset semantics.
 
+High-frequency pointer, zoom, and quick-navigation work is frame-bounded while release and commit paths stay
+synchronous. Infinite Calendar prepares appointment and availability collision lanes independently, reuses unchanged
+date buckets, and grows each resource to the deeper layer. Date Input reuses compiled parser configuration across
+keystrokes without changing the synchronous headless parser API.
+
 ## Guides and records
 
 Run `npm run dev` and open `/` for the four-product overview, its shared guiding principles, and creator attribution.

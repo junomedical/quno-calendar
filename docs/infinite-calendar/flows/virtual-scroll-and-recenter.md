@@ -161,10 +161,12 @@ flowchart TD
 ```
 
 The pinned layout date is mounted once without widening ordinary overscan. Pinning makes geometry resolvable; it does
-not replace the current scroll anchor. A date-sequence or base-geometry transition temporarily uses the same semantic
-fallback principle for the visible window and keeps its resource nodes mounted until the virtualizer settles.
-Changing the bounded window's anchor during idle recenter uses this transition as well, so the old absolute indexes
-cannot produce a painted wrong-date frame before the equivalent centered scroll offset lands.
+not replace the current scroll anchor. A date-sequence or base-geometry transition keeps its resource nodes mounted
+until the virtualizer settles. When an idle recenter changes only the bounded-window anchor, measured semantic date
+items are translated to their replacement indexes and centered absolute offset while preserving their measured sizes.
+This avoids both a wrong-date frame and a uniform-height placeholder frame for availability-expanded rows.
+Deterministic base geometry remains the fallback when the semantic anchor has not been measured or when a genuine
+base-geometry transition invalidates the old sizes.
 
 ## Cross-Axis Resource Window
 

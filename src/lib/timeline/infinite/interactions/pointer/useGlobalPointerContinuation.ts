@@ -8,7 +8,7 @@ import { useEffect } from "react";
 type GlobalPointerContinuationArgs = {
   active: boolean;
   onMove: (event: PointerEvent) => void;
-  onFinish: () => void | Promise<void>;
+  onFinish: (event: PointerEvent) => void | Promise<void>;
   onCancel: () => void;
 };
 
@@ -21,7 +21,7 @@ export function useGlobalPointerContinuation({ active, onMove, onFinish, onCance
       if (!isHandledByCalendar(event)) onMove(event);
     };
     const handleFinish = (event: PointerEvent) => {
-      if (!isHandledByCalendar(event)) void onFinish();
+      if (!isHandledByCalendar(event)) void onFinish(event);
     };
     const handleCancel = (event: PointerEvent) => {
       if (!isHandledByCalendar(event)) onCancel();

@@ -730,3 +730,29 @@ the stylesheet remains inside its existing 2 KiB gzip ceiling.
 supersedes historical positional signatures and customization names for this product. The accepted interaction,
 presentation, and geometry behavior in this ledger remains in force. See the
 [migration guide](../shared/migration.md#unreleased-named-contracts-and-product-ownership) for exact replacements.
+
+## 091 - Availability Has Independent Collision Lanes
+
+Date: 2026-09-08
+Status: Accepted; supersedes the full-row and no-metric-growth portion of Decision 017 and refines Decision 059
+
+Availability remains background context expressed by `kind: "availability"`, but overlapping windows for one resource
+now receive deterministic lanes of their own. Appointment and availability records are partitioned once and prepared
+independently with the same stable `O(n log n)` allocator. Horizontal availability uses vertical mini-lanes, vertical
+availability uses side-by-side lanes, and equal starts retain caller order. Resource geometry uses the larger of the
+appointment and availability depths rather than their sum, so appointments continue to overlay availability without
+competing for its lane numbers.
+
+`renderEvent` receives the real `lane`, collision-group `laneCount`, and `isOverlapping` values for availability. The
+existing interaction-layer rules, focus and appearance states, multi-calendar projections, and background z-order
+remain unchanged. Draft and drag-preview geometry remains transient and joins normal preparation only after commit.
+
+React-facing date buckets retain their array identity until that bucket changes. Date/resource preparation is cached
+by bucket identity, selected resources, visible time bounds, and any draft source belonging to that date. Accepted
+range responses and targeted mutations therefore invalidate only affected dates instead of rebuilding every prepared
+cell in the bounded cache.
+
+The layered cache, frame scheduler, and measured recenter bridge raise the ESM artifact to 159.29 KiB raw and 37.56
+KiB gzip. The
+Infinite Calendar JavaScript ceiling moves from 37 KiB to 38 KiB; the optional stylesheet remains 1.95 KiB gzip inside
+its existing 2 KiB ceiling.

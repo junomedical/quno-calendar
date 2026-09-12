@@ -30,6 +30,8 @@ export const MonthNavigation = ({ visibleMonth, config, onSelect }: Props): JSX.
   const prependSnapshot = useRef<{ height: number; top: number } | null>(null);
   const loadingEdge = useRef(false);
   const edgeTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const scrollFrame = useRef<number | null>(null);
+  const pendingViewport = useRef<{ top: number; height: number } | null>(null);
   const { labels, formatters, locale, classNames } = config;
   const yearCount = lastYear - firstYear + 1;
   const firstVisibleIndex = Math.max(0, Math.floor(viewportTop / yearHeight) - OVERSCAN_YEARS);
@@ -71,6 +73,7 @@ export const MonthNavigation = ({ visibleMonth, config, onSelect }: Props): JSX.
   useEffect(
     () => () => {
       if (edgeTimer.current) clearTimeout(edgeTimer.current);
+      if (scrollFrame.current !== null) cancelAnimationFrame(scrollFrame.current);
     },
     []
   );
@@ -97,8 +100,20 @@ export const MonthNavigation = ({ visibleMonth, config, onSelect }: Props): JSX.
   const handleScroll = (): void => {
     const container = scroller.current;
     if (!container) return;
-    setViewportTop(container.scrollTop);
-    setViewportHeight(container.clientHeight || DEFAULT_VIEWPORT_HEIGHT);
+    pendingViewport.current = {
+      top: container.scrollTop,
+      height: container.clientHeight || DEFAULT_VIEWPORT_HEIGHT
+    };
+    if (scrollFrame.current === null) {
+      scrollFrame.current = requestAnimationFrame(() => {
+        scrollFrame.current = null;
+        const viewport = pendingViewport.current;
+        pendingViewport.current = null;
+        if (!viewport) return;
+        setViewportTop(viewport.top);
+        setViewportHeight(viewport.height);
+      });
+    }
     if (edgeTimer.current) clearTimeout(edgeTimer.current);
     edgeTimer.current = setTimeout(extendYearsAtRest, SCROLL_SETTLE_DELAY);
   };

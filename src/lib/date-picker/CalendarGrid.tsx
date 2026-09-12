@@ -1,17 +1,10 @@
 import { classNames as cx } from "#quno-internal/shared/classNames";
-import {
-  fromIsoDate,
-  isInMonth,
-  isWithinRange,
-  todayIso,
-  type DateRange,
-  type IsoDate
-} from "#quno-internal/shared/dateRangeModel";
+import { isWithinRange, todayIso, type DateRange, type IsoDate } from "#quno-internal/shared/dateRangeModel";
 import { type MonthDirection } from "#quno-internal/date-picker/datePickerModel";
-import type { QunoDatePickerDayCellContext, ResolvedDatePickerConfig } from "./datePickerTypes";
-import { dayIsDisabled } from "./datePickerDisabledDays";
+import type { ResolvedDatePickerConfig } from "./datePickerTypes";
+import { createDatePickerDayDescriptors } from "./datePickerDayDescriptors";
 import { useDayPointer } from "./useDayPointer";
-import type { JSX } from "react";
+import { useMemo, type JSX } from "react";
 
 type Props = {
   dates: IsoDate[];
@@ -50,6 +43,10 @@ export const CalendarGrid = ({
 }: Props): JSX.Element => {
   const { labels, formatters, locale, classNames, getDayCellProps } = config;
   const today = todayIso();
+  const dayDescriptors = useMemo(
+    () => createDatePickerDayDescriptors({ dates, visibleMonth, today, config }),
+    [config, dates, today, visibleMonth]
+  );
   const pointer = useDayPointer({
     interactionActive,
     begin: onBegin,
@@ -76,8 +73,8 @@ export const CalendarGrid = ({
       role="grid"
       aria-label={`${labels.calendar}: ${formatters.month({ month: visibleMonth, locale })}`}
     >
-      {dates.map((date, index) => {
-        const inVisibleMonth = isInMonth({ date, month: visibleMonth });
+      {dayDescriptors.map((descriptor, index) => {
+        const { date, dayNumber, disabled, inVisibleMonth, isToday, isWeekend, label, weekday } = descriptor;
         const committed = selection ? isWithinRange({ date, range: selection }) : false;
         const displayed = renderedSelection ? isWithinRange({ date, range: renderedSelection }) : false;
         const isStart = renderedSelection?.start === date;
@@ -91,13 +88,11 @@ export const CalendarGrid = ({
           cyclePreview !== null &&
           inCyclePreview &&
           (index % 7 === 6 || !isWithinRange({ date: dates[index + 1], range: cyclePreview }));
-        const weekday = fromIsoDate({ value: date }).getUTCDay() as QunoDatePickerDayCellContext["weekday"];
-        const disabled = dayIsDisabled({ matcher: config.isDayDisabled, date });
         const customProps = getDayCellProps?.({
           date,
           weekday,
-          isToday: date === today,
-          isWeekend: weekday === 0 || weekday === 6,
+          isToday,
+          isWeekend,
           isOutside: !inVisibleMonth,
           isDisabled: disabled,
           isSelected: displayed,
@@ -139,7 +134,7 @@ export const CalendarGrid = ({
             data-disabled={disabled ? "true" : undefined}
             data-selected={displayed ? "true" : undefined}
             data-committed={committed ? "true" : undefined}
-            aria-label={formatters.dayLabel({ date, locale })}
+            aria-label={label}
             aria-selected={committed}
             disabled={disabled}
             onPointerDown={(event) => {
@@ -155,7 +150,7 @@ export const CalendarGrid = ({
             onPointerUp={(event) => pointer.finishPointer({ event, fallback: date })}
             onPointerCancel={pointer.cancelPointer}
           >
-            <span>{Number(date.slice(-2))}</span>
+            <span>{dayNumber}</span>
             {(isStart || isEnd) && (
               <i
                 className={cx({ values: ["quno-date-picker-handle", classNames?.handle] })}

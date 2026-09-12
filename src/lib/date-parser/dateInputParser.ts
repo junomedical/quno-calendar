@@ -61,19 +61,31 @@ const singleOnly = ({
     ? { status: "invalid" }
     : result;
 
-export const parseDateInput = ({
-  text,
-  ...parseOptions
-}: { text: string } & DateInputParseOptions): DateInputParseResult => {
-  const tokens = tokenizeDateInput({ text: text.normalize("NFKC") });
+export type DateInputAnalysis = {
+  tokens: DateInputToken[];
+  result: DateInputParseResult;
+};
+
+export type DateInputAnalyzer = {
+  analyze: (args: { text: string }) => DateInputAnalysis;
+};
+
+const parseTokens = ({
+  tokens,
+  options,
+  vocabulary,
+  selectionMode
+}: {
+  tokens: DateInputToken[];
+  options: DateInputResolveOptions;
+  vocabulary: DateInputVocabulary;
+  selectionMode: DateInputParseOptions["selectionMode"];
+}): DateInputParseResult => {
   if (!hasMeaningful({ tokens })) return { status: "empty" };
-  const options = resolveOptions(parseOptions);
-  const vocabulary = createDateInputVocabulary({ languages: options.parserLanguages, extension: options.lexicon });
   const divider = tokens.findIndex((token) => token.type === "range-separator");
   if (divider === -1) {
     const relative = resolveRelativeDateRange({ tokens, options, vocabulary });
-    if (relative)
-      return singleOnly({ result: { status: "success", value: relative }, selectionMode: parseOptions.selectionMode });
+    if (relative) return singleOnly({ result: { status: "success", value: relative }, selectionMode });
     const date = pickBestDate({ candidates: resolveAbsoluteDateCandidates({ tokens, options, vocabulary }), options });
     return date ? { status: "success", value: { start: date.date, end: date.date } } : { status: "invalid" };
   }
@@ -82,15 +94,39 @@ export const parseDateInput = ({
   const first = pickBestDate({ candidates: firstCandidates, options });
   if (!first) return { status: "invalid" };
   const rest = tokens.slice(divider + 1);
-  if (!hasMeaningful({ tokens: rest }))
+  if (!hasMeaningful({ tokens: rest })) {
     return singleOnly({
       result: { status: "partial-range", value: { start: first.date, end: first.date } },
-      selectionMode: parseOptions.selectionMode
+      selectionMode
     });
+  }
   const secondCandidates = endpointCandidates({ tokens: rest, options, vocabulary });
   if (!secondCandidates.length) return { status: "invalid" };
   const value = pickBestDateRange({ starts: firstCandidates, ends: secondCandidates, options });
-  return value
-    ? singleOnly({ result: { status: "success", value }, selectionMode: parseOptions.selectionMode })
-    : { status: "invalid" };
+  return value ? singleOnly({ result: { status: "success", value }, selectionMode }) : { status: "invalid" };
 };
+
+/** Compiles stable vocabulary while retaining a live default reference date. */
+export const createDateInputAnalyzer = (parseOptions: DateInputParseOptions): DateInputAnalyzer => {
+  const initialOptions = resolveOptions(parseOptions);
+  const vocabulary = createDateInputVocabulary({
+    languages: initialOptions.parserLanguages,
+    extension: initialOptions.lexicon
+  });
+  return {
+    analyze: ({ text }) => {
+      const tokens = tokenizeDateInput({ text: text.normalize("NFKC") });
+      const options = parseOptions.referenceDate ? initialOptions : { ...initialOptions, referenceDate: todayIso() };
+      return {
+        tokens,
+        result: parseTokens({ tokens, options, vocabulary, selectionMode: parseOptions.selectionMode })
+      };
+    }
+  };
+};
+
+export const parseDateInput = ({
+  text,
+  ...parseOptions
+}: { text: string } & DateInputParseOptions): DateInputParseResult =>
+  createDateInputAnalyzer(parseOptions).analyze({ text }).result;

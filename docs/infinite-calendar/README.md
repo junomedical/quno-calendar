@@ -30,6 +30,14 @@ TanStack Virtual notifications use its queued React update path. Layout restorat
 projection before paint, keeping React 19 development free of the virtualizer `flushSync` lifecycle warning while
 semantic anchor and frame-stability browser coverage continues to guard against empty intermediate views.
 
+Availability and appointments have independent deterministic collision lanes. A resource grows to the greater layer
+depth, not the sum, so appointments remain overlaid on availability while overlapping availability stays readable in
+both orientations. Pointer-move hit-testing and preview publication are limited to the latest position per display
+frame; release still flushes the final position synchronously.
+
+Untouched date buckets keep stable immutable snapshots, and prepared date/resource layers are reused until their
+bucket, resource selection, visible time bounds, or relevant draft source changes.
+
 ## Named contracts
 
 Use `renderEvent`, component-level `locale` and `formatters.dayLabel({ date, locale })`, plus `getDayProps`,

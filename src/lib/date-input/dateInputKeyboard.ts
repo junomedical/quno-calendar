@@ -7,7 +7,11 @@ import {
   type DateRange,
   type IsoDate
 } from "#quno-internal/shared/dateRangeModel";
-import { parseDateInput, tokenizeDateInput } from "#quno-internal/date-parser/dateInputParser";
+import {
+  createDateInputAnalyzer,
+  tokenizeDateInput,
+  type DateInputAnalyzer
+} from "#quno-internal/date-parser/dateInputParser";
 import type { DateInputParseOptions, DateInputToken } from "#quno-internal/date-parser/dateInputTypes";
 
 type DatePart = "day" | "month" | "year";
@@ -139,7 +143,8 @@ export const spinDateInput = ({
   direction,
   options,
   format,
-  memory
+  memory,
+  analyzer
 }: {
   text: string;
   cursor: number;
@@ -147,10 +152,12 @@ export const spinDateInput = ({
   options: DateInputParseOptions;
   format: (args: { value: DateRange; preserveRange?: boolean }) => string;
   memory?: DateInputSpinMemory;
+  analyzer?: DateInputAnalyzer;
 }): SpinResult | null => {
-  const parsed = parseDateInput({ text, ...options });
+  const analysis = (analyzer ?? createDateInputAnalyzer(options)).analyze({ text });
+  const parsed = analysis.result;
   if (parsed.status !== "success") return null;
-  const tokens = tokenizeDateInput({ text });
+  const tokens = analysis.tokens;
   const current = tokenAt({ tokens, cursor });
   const duration = current && spinDuration({ text, token: current, cursor, direction, tokens, memory });
   if (duration) return duration;

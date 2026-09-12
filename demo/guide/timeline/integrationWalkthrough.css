@@ -1054,6 +1054,29 @@
   }
 }
 
+@container calendar-event (height < 32px) or (width < 120px) {
+  .article-event-card.kind-availability {
+    justify-content: center;
+    gap: 0;
+    padding: 2px 6px;
+  }
+
+  .article-event-card.kind-availability .article-event-card__kicker {
+    display: block;
+    overflow: hidden;
+    font-size: 9px;
+    line-height: 1.15;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .article-event-card.kind-availability strong,
+  .article-event-card.kind-availability .article-event-card__subtitle,
+  .article-event-card.kind-availability .article-event-card__time {
+    display: none;
+  }
+}
+
 .article-zoom-controls,
 .article-stability-controls,
 .article-segmented-control,

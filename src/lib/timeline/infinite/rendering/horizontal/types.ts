@@ -14,7 +14,7 @@ import type {
   QunoInfiniteCalendarSettings
 } from "#quno-internal/timeline/core/types";
 import type {
-  PreparedEventCell,
+  PreparedEventLayers,
   layoutPreparedEventsForRow
 } from "#quno-internal/timeline/infinite/events/layout/layout";
 import type { ViewportGeometryRegistration } from "#quno-internal/timeline/infinite/anchors/parent/viewportAnchorTypes";
@@ -72,7 +72,7 @@ export type HorizontalTimelineDayProps = CalendarDateLabelOptions & {
   measureElement: RefCallback<HTMLDivElement>;
   getRowHeight: (args: { dateKey: string; calendarId: CalendarId }) => number;
   eventsForRow: (args: { dateKey: string; calendarId: CalendarId }) => CalendarEvent[];
-  preparedCellForRow: (args: { dateKey: string; calendarId: CalendarId }) => PreparedEventCell;
+  preparedCellForRow: (args: { dateKey: string; calendarId: CalendarId }) => PreparedEventLayers;
   onHoverMove: (args: {
     event: PointerEvent<HTMLDivElement>;
     layoutItems: HorizontalRowLayoutItems;
@@ -89,7 +89,7 @@ export type HorizontalTimelineRowProps = {
   top: number;
   rowHeight: number;
   rowEvents: CalendarEvent[];
-  preparedCell: PreparedEventCell;
+  preparedCell: PreparedEventLayers;
   isHidden?: boolean;
   calendarCellProps?: QunoInfiniteCalendarCellProps;
   calendarHourPresentations: CalendarHourPresentation[];

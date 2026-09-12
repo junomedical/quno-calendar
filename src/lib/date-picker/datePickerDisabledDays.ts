@@ -9,6 +9,23 @@ export const dayIsDisabled = ({
   date: IsoDate;
 }): boolean => matcher?.({ date }) ?? false;
 
+export const resolveDatePickerDisabledDayPredicate = ({
+  matcher,
+  limitDateFrom,
+  limitDateTo
+}: {
+  matcher?: QunoDatePickerDisabledDayPredicate;
+  limitDateFrom?: IsoDate;
+  limitDateTo?: IsoDate;
+}): QunoDatePickerDisabledDayPredicate | undefined => {
+  if (!limitDateFrom && !limitDateTo) return matcher;
+  return ({ date }) => {
+    if (limitDateFrom && date < limitDateFrom) return true;
+    if (limitDateTo && date > limitDateTo) return true;
+    return matcher?.({ date }) ?? false;
+  };
+};
+
 export const endpointsAreEnabled = ({
   matcher,
   range

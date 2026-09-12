@@ -197,6 +197,7 @@ export function useScrollRuntime({
     virtualWindow,
     baseDayHeight,
     forcedBaseGeometryAnchorIndex: structuralRenderWindow.anchorIndex,
+    forcedGeometryAnchorDateKey: structuralRenderWindow.anchorDateKey,
     layoutAnchorDateKey,
     dateKeyToIndex,
     dateKeyForIndex,
