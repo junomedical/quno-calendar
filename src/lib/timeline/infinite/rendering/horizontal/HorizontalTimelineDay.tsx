@@ -12,6 +12,20 @@ import { InfiniteTimelineRow } from "./HorizontalTimelineRow";
 
 const EMPTY_ROW_EVENTS: ReturnType<HorizontalTimelineDayProps["eventsForRow"]> = [];
 
+function useDayRegistration({
+  dateKey,
+  measureElement,
+  geometryRegistration
+}: Pick<HorizontalTimelineDayProps, "dateKey" | "measureElement" | "geometryRegistration">) {
+  return useCallback<import("react").RefCallback<HTMLDivElement>>(
+    (element: HTMLDivElement | null) => {
+      measureElement(element);
+      geometryRegistration.registerDayElement({ dateKey, element });
+    },
+    [dateKey, geometryRegistration, measureElement]
+  );
+}
+
 /**
  * Horizontal date coordinator.
  *
@@ -52,15 +66,9 @@ export function InfiniteTimelineDay(props: HorizontalTimelineDayProps) {
     dateKey,
     todayKey,
     view: "infinite-horizontal",
-    getCalendarDayProps: props.getCalendarDayProps
+    getDayProps: props.getDayProps
   });
-  const setDayElement = useCallback(
-    (element: HTMLDivElement | null) => {
-      measureElement(element);
-      geometryRegistration.registerDayElement(dateKey, element);
-    },
-    [dateKey, geometryRegistration, measureElement]
-  );
+  const setDayElement = useDayRegistration({ dateKey, measureElement, geometryRegistration });
 
   return (
     <div
@@ -83,16 +91,16 @@ export function InfiniteTimelineDay(props: HorizontalTimelineDayProps) {
         const calendar = selectedCalendars[resourceIndex];
         const extent = rowExtents[resourceIndex];
         const isHidden = hiddenCalendarIds.has(calendar.id);
-        const calendarCellProps = mergeCalendarPresentation(
-          calendarDayProps,
-          calendarCellPresentation({
+        const calendarCellProps = mergeCalendarPresentation({
+          dayProps: calendarDayProps,
+          cellProps: calendarCellPresentation({
             calendar,
             dateKey,
             todayKey,
             view: "infinite-horizontal",
-            getCalendarCellProps: props.getCalendarCellProps
+            getDayCellProps: props.getDayCellProps
           })
-        );
+        });
 
         return (
           <InfiniteTimelineRow
@@ -101,8 +109,8 @@ export function InfiniteTimelineDay(props: HorizontalTimelineDayProps) {
             dateKey={dateKey}
             top={extent.start}
             rowHeight={extent.size}
-            rowEvents={isHidden ? EMPTY_ROW_EVENTS : props.eventsForRow(dateKey, calendar.id)}
-            preparedCell={props.preparedCellForRow(dateKey, calendar.id)}
+            rowEvents={isHidden ? EMPTY_ROW_EVENTS : props.eventsForRow({ dateKey, calendarId: calendar.id })}
+            preparedCell={props.preparedCellForRow({ dateKey, calendarId: calendar.id })}
             isHidden={isHidden}
             calendarCellProps={calendarCellProps}
             calendarHourPresentations={props.calendarHourPresentations}
@@ -123,7 +131,7 @@ export function InfiniteTimelineDay(props: HorizontalTimelineDayProps) {
             draftEventIsDraggable={props.draftEventIsDraggable}
             draftEventIsExiting={props.draftEventIsExiting}
             draftEventReleaseDurationMs={props.draftEventReleaseDurationMs}
-            eventRenderer={props.eventRenderer}
+            renderEvent={props.renderEvent}
             geometryRegistration={geometryRegistration}
             onHoverMove={props.onHoverMove}
             onHoverLeave={props.onHoverLeave}
@@ -132,6 +140,8 @@ export function InfiniteTimelineDay(props: HorizontalTimelineDayProps) {
         );
       })}
       <HorizontalDayHeader
+        locale={props.locale}
+        formatters={props.formatters}
         dateKey={dateKey}
         settings={settings}
         timelineWidth={width}

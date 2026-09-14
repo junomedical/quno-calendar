@@ -17,7 +17,7 @@ const event = {
 };
 describe("explicit calendar timezone", () => {
   it("positions and focuses an absolute event in the display timezone", () => {
-    expect(eventIntervals([event], { startHour: 0, endHour: 24 })[0]).toMatchObject({
+    expect(eventIntervals({ events: [event], settings: { startHour: 0, endHour: 24 } })[0]).toMatchObject({
       startMinute: 900,
       endMinute: 1020
     });
@@ -26,22 +26,38 @@ describe("explicit calendar timezone", () => {
   });
   it("converts drawn and dragged local hours to UTC with the date-specific offset", () => {
     const hit = { dateKey: "2026-11-07", calendarId: "doctor", minute: 900, dayIndex: 0, rowIndex: 0 };
-    const draft = buildDraftEvent(hit, { ...hit, minute: 1020 }, "availability", "Europe/Bucharest");
+    const draft = buildDraftEvent({
+      startHit: hit,
+      endHit: { ...hit, minute: 1020 },
+      kind: "availability",
+      timeZone: "Europe/Bucharest"
+    });
     expect(draft.start).toBe("2026-11-07T13:00:00.000Z");
     expect(draft.end).toBe("2026-11-07T15:00:00.000Z");
-    const move = buildMoveProposal(event, hit, 0, {
-      startHour: 0,
-      endHour: 24,
-      snapMinutes: 5,
-      timeZone: "Europe/Bucharest"
+    const move = buildMoveProposal({
+      event: event,
+      hit: hit,
+      pointerOffsetMinutes: 0,
+      settings: {
+        startHour: 0,
+        endHour: 24,
+        snapMinutes: 5,
+        timeZone: "Europe/Bucharest"
+      }
     });
     expect(move.proposedStart).toBe(draft.start);
     expect(move.proposedEnd).toBe(draft.end);
   });
   it("keeps Saturday 14:00 local across DST and rejects nonexistent spring hours", () => {
-    expect(zonedDateMinuteToIso("2026-09-19", 840, "Europe/Berlin")).toBe("2026-09-19T12:00:00.000Z");
-    expect(zonedDateMinuteToIso("2026-11-07", 840, "Europe/Berlin")).toBe("2026-11-07T13:00:00.000Z");
-    expect(() => zonedDateMinuteToIso("2026-03-29", 150, "Europe/Berlin")).toThrow("does not exist");
-    expect(zonedParts("2026-09-19T00:00:00Z", "America/New_York").date).toBe("2026-09-18");
+    expect(zonedDateMinuteToIso({ date: "2026-09-19", minute: 840, timeZone: "Europe/Berlin" })).toBe(
+      "2026-09-19T12:00:00.000Z"
+    );
+    expect(zonedDateMinuteToIso({ date: "2026-11-07", minute: 840, timeZone: "Europe/Berlin" })).toBe(
+      "2026-11-07T13:00:00.000Z"
+    );
+    expect(() => zonedDateMinuteToIso({ date: "2026-03-29", minute: 150, timeZone: "Europe/Berlin" })).toThrow(
+      "does not exist"
+    );
+    expect(zonedParts({ value: "2026-09-19T00:00:00Z", timeZone: "America/New_York" }).date).toBe("2026-09-18");
   });
 });

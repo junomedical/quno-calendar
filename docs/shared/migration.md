@@ -2,6 +2,54 @@
 
 Version `0.6.0` presents Infinite Calendar, Datepicker, Date Input, and Date Parser as independent package surfaces. There are no legacy JavaScript exports or wrapper packages.
 
+## Unreleased: named contracts and product ownership
+
+This cleanup is a breaking change with no compatibility aliases or positional overloads. Package entry points,
+return values, date semantics, CSS tokens, slots, and native React event signatures remain unchanged.
+
+| Previous API                                                                     | Replacement                                                                                                       |
+| -------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `parseDateInput(text, options)`                                                  | `parseDateInput({ text, ...options })`                                                                            |
+| `tokenizeDateInput(text)`                                                        | `tokenizeDateInput({ text })`                                                                                     |
+| `addDays(date, amount)` and positional date helpers                              | `addDeays({ date, amount })`; pass each helper's named fields                                                     |
+| Datepicker shared runtime helper exports                                         | Import the same helpers from `@quno/calendar`                                                                     |
+| Picker/input `onChange(value)`                                                   | `onChange({ value })`                                                                                             |
+| `onVisibleMonthChange(month)` / `onZoomChange(zoom)`                             | `onVisibleMonthChange({ month })` / `onZoomChange({ zoom })`                                                      |
+| Date Input `formatter` / `QunoDateInputFormatter`                                | `formatters` / `QunoDateInputFormatters`; individual overrides are optional                                       |
+| Positional formatting callbacks                                                  | `({ date, locale })`, `({ month, locale })`, `({ weekday, locale })`, or `({ value, locale })`                    |
+| `disabledDays(date)` / `QunoDatePickerDisabledDayMatcher`                        | `isDayDisabled({ date })` / `QunoDatePickerDisabledDayPredicate`                                                  |
+| `eventRenderer`                                                                  | `renderEvent` (still rendered as a React component)                                                               |
+| Timeline `getCalendarDayProps` / `getCalendarCellProps` / `getCalendarHourProps` | `getDayProps` / `getDayCellProps` / `getHourProps`                                                                |
+| `settings.dateLocale`                                                            | Component-level `locale`                                                                                          |
+| `settings.dayNameGenerator` / `DayNameGenerator`                                 | `formatters.dayLabel` / `QunoInfiniteCalendarFormatters["dayLabel"]`; the callback receives `IsoDate`, not `Date` |
+| `parserLanguage: "de"`                                                           | `parserLanguages: ["de"]`; omitted or empty arrays retain locale inference                                        |
+| `scrollToDate(date)` / `scrollToDateTime(date, time)`                            | `scrollToDate({ date })` / `scrollToDateTime({ date, time })`                                                     |
+| `focusEvent(event, options)` / `commitVisibleEvent(event, options)`              | `focusEvent({ event, ...options })` / `commitVisibleEvent({ event, ...options })`                                 |
+| `restoreViewportAnchor(anchor, options)` / `removeVisibleEvent(eventId)`         | `restoreViewportAnchor({ anchor, ...options })` / `removeVisibleEvent({ eventId })`                               |
+| `isIsoDate(value)`                                                               | `isIsoDate(input)` for `input = { value }`; narrows `input.value`                                                 |
+
+The parser no longer exports `DateInputResolveOptions`, `ResolvedDateCandidate`, `DateInputVocabulary`,
+`DateInputFormatter`, or `DateInputRangeFormatter`. Use its documented options, results, tokens and lexicon contracts;
+input formatting belongs to `QunoDateInputFormatters`. Shared type re-exports remain available from product entry points.
+Picker-specific selection helpers remain on the picker entry point.
+
+```tsx
+import { addDays, type DateRange } from "@quno/calendar";
+import { QunoDatePicker } from "@quno/calendar/datepicker";
+import { QunoDateInput } from "@quno/calendar/date-input";
+import { parseDateInput } from "@quno/calendar/date-parser";
+
+const expectedRange: DateRange = { start: "2026-08-12", end: addDays({ date: "2026-08-12", amount: 7 }) };
+const result = parseDateInput({ text: "today", expectedRange, referenceDate: expectedRange.start });
+const onChange = ({ value }: { value: DateRange | null }) => setValue(value);
+<QunoDatePicker value={value} onChange={onChange} />;
+<QunoDateInput expectedRange={expectedRange} value={value} onChange={onChange} />;
+```
+
+Zero-argument commands and existing object requests such as `loadEvents`, `onEventMoveRequest`,
+`captureViewportAnchor`, and `releaseActiveDraft` keep their object shapes. Native `onInput`, pointer events, refs,
+React state setters, collection callbacks, and virtualizer callbacks retain their host-required signatures.
+
 ## Import mapping
 
 | Before                                                                     | Now                                           |

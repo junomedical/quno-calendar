@@ -13,8 +13,8 @@ implementation and update them in the same change.
 - `src/lib/shared`: headless timezone-free `IsoDate` contracts and safe calendar-day helpers.
 - `src/lib/timeline`: `QunoInfiniteCalendar`; day keys are `IsoDate`, while event start/end values remain timestamp strings.
 - `src/lib/date-picker`: `QunoDatePicker` and its direct-manipulation range behavior.
-- `src/lib/date-input`: `QunoDateInput` plus the parser implementation it consumes internally.
-- `src/lib/date-parser`: the public headless parser and tokenizer surface.
+- `src/lib/date-input`: `QunoDateInput`, native editing, and formatting; consumes the Date Parser domain internally.
+- `src/lib/date-parser`: the headless parser/tokenizer implementation and public surface.
 - `demo/guide`: four guides built from one editorial system. Every primary contract needs a live public-entry-point example, concise “Try it” guidance, and a copyable recipe. Mount heavy Infinite Calendar exhibits lazily.
 
 Do not use parent-directory module imports. Same-folder imports may use `./`; every cross-folder import uses a stable alias: public package tests use `@quno/calendar/*`, private source tests use `#quno-internal/*`, demo code uses `#quno-demo/*`, API handlers use `#quno-api/*`, browser tests use `#quno-e2e/*`, unit-test helpers use `#quno-tests/*`, and root configuration uses `#quno-project/*`. The root `@quno/calendar` entry is headless; UI is exported only from its feature subpaths. Styles remain optional, independent, component-scoped assets.

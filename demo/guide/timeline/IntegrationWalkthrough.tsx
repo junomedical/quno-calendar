@@ -86,7 +86,7 @@ function TreatmentCard({ event, grouping, style }) {
 
 <QunoInfiniteCalendar
   {...calendarProps}
-  eventRenderer={(props) => (
+  renderEvent={(props) => (
     <TreatmentCard {...props} grouping={grouping} />
   )}
 />`;
@@ -95,7 +95,7 @@ const readOnlySnippet = `<QunoInfiniteCalendar
   calendars={calendars}
   selectedCalendarIds={visibleCalendarIds}
   loadEvents={loadEvents}
-  eventRenderer={EventCard}
+  renderEvent={EventCard}
 />`;
 
 const cssNativeSnippet = `.calendar-date-header {
@@ -131,7 +131,7 @@ const zoomSnippet = `const [zoom, setZoom] = useState(1.25);
 <QunoInfiniteCalendar
   {...calendarProps}
   settings={{ ...settings, zoom }}
-  onZoomChange={setZoom}
+  onZoomChange={({ zoom }) => setZoom(zoom)}
 />`;
 
 const navigationSnippet = `const calendarRef = useRef<QunoInfiniteCalendarHandle>(null);
@@ -147,10 +147,10 @@ const previewArrowDate = (event) => {
   selectionMode="single"
   expectedRange={expectedRange}
   onKeyDown={previewArrowDate}
-  onChange={(selection) => {
+  onChange={({ value: selection }) => {
     if (!selection) return;
     setDate(selection.start);
-    calendarRef.current?.scrollToDate(selection.start);
+    calendarRef.current?.scrollToDate({ date: selection.start });
   }}
 />
 <button onClick={() => moveByDays(-1)}>Previous day</button>
@@ -175,7 +175,7 @@ const themeSnippet = `const settings = {
   --quno-calendar-cell-border: #33443f;
 }`;
 
-const calendarCellStylingSnippet = `const getCalendarDayProps = ({ isWeekend }) =>
+const calendarCellStylingSnippet = `const getDayProps = ({ isWeekend }) =>
   isWeekend
     ? {
         className: "weekend-day",
@@ -184,7 +184,7 @@ const calendarCellStylingSnippet = `const getCalendarDayProps = ({ isWeekend }) 
       }
     : undefined;
 
-const getCalendarCellProps = ({ calendar }) => {
+const getDayCellProps = ({ calendar }) => {
   if (!calendar.id.startsWith("equipment")) return undefined;
 
   return {
@@ -194,7 +194,7 @@ const getCalendarCellProps = ({ calendar }) => {
   };
 };
 
-const getCalendarHourProps = ({ hour }) =>
+const getHourProps = ({ hour }) =>
   hour === 12
     ? {
         className: "lunch-hour",
@@ -205,29 +205,26 @@ const getCalendarHourProps = ({ hour }) =>
 
 <QunoInfiniteCalendar
   {...calendarProps}
-  getCalendarCellProps={getCalendarCellProps}
-  getCalendarDayProps={getCalendarDayProps}
-  getCalendarHourProps={getCalendarHourProps}
+  getDayCellProps={getDayCellProps}
+  getDayProps={getDayProps}
+  getHourProps={getHourProps}
 />
 `;
 
-const dateLocalizationSnippet = `import type { DayNameGenerator } from "@quno/calendar/infinite-calendar";
+const dateLocalizationSnippet = `import { formatIsoDate } from "@quno/calendar";
+import type { QunoInfiniteCalendarFormatters } from "@quno/calendar/infinite-calendar";
 
-const dayNames: Record<string, DayNameGenerator | undefined> = {
-  english: undefined,
-  japanese: undefined,
-  human: (date) => humanRelativeDay(date, today),
-  robot: (date) =>
-    (calendarDayNumber(date) % 64).toString(2).padStart(6, "0")
+const formatters: QunoInfiniteCalendarFormatters = {
+  dayLabel: ({ date, locale }) => formatIsoDate({
+    value: date, locale,
+    options: { day: "numeric", month: "short", year: "numeric" }
+  })
 };
 
 <QunoInfiniteCalendar
   {...calendarProps}
-  settings={{
-    ...settings,
-    dateLocale: mode === "japanese" ? "ja-JP" : "en-US",
-    dayNameGenerator: dayNames[mode]
-  }}
+  locale="de-DE"
+  formatters={formatters}
 />`;
 
 const loadingSnippet = `const loadEvents = async ({ startDate, endDate, calendarIds, signal }) => {
@@ -312,9 +309,9 @@ export function Schedule() {
         calendars={calendars}
         selectedCalendarIds={visibleCalendarIds}
         loadEvents={loadEvents}
-        eventRenderer={EventCard}
+        renderEvent={EventCard}
         settings={{ startHour: 8, endHour: 18, zoom }}
-        onZoomChange={setZoom}
+        onZoomChange={({ zoom }) => setZoom(zoom)}
         onCalendarVisibilityRequest={({ calendarIds }) =>
           setVisibleCalendarIds(calendarIds)
         }
@@ -443,9 +440,10 @@ export function IntegrationWalkthrough({ embedded = false }: { embedded?: boolea
           hover, drag, and zoom.
         </p>
         <p>
-          Quno/Infinite Calendar limits work to the dates, resources, and cards near the viewport. It calculates overlap
-          once, reuses rendered card content, and groups pointer and zoom updates by animation frame. These choices
-          target smooth 60–120fps scrolling on suitable hardware.
+          Quno/Infinite Calendar limits work to the dates, resources, and cards near the viewport. It calculates each
+          changed date’s appointment and availability lanes once, reuses untouched buckets and rendered card content,
+          and groups pointer and zoom updates by animation frame. These choices target smooth 60–120fps scrolling on
+          suitable hardware.
         </p>
         <p>
           Actual frame rate still depends on the browser, device, viewport, event density, and custom event renderer.
@@ -503,7 +501,7 @@ export function IntegrationWalkthrough({ embedded = false }: { embedded?: boolea
           treatment details, while an operations board may emphasize status, equipment, or location.
         </p>
         <p>
-          The <code>eventRenderer</code> receives the event, render status, overlap information, and available card
+          The <code>renderEvent</code> receives the event, render status, overlap information, and available card
           geometry. It can style event types, adjust compact and expanded content, and animate state changes without
           changing calendar layout code.
         </p>
@@ -576,14 +574,16 @@ export function IntegrationWalkthrough({ embedded = false }: { embedded?: boolea
           harder to read and easier to edit by mistake.
         </p>
         <p>
-          Availability renders as a full-row background and does not consume overlap lanes. In appointment mode it
-          remains visible but does not intercept the pointer. In <code>interactionMode="availability"</code>,
-          appointments become inactive context so only availability can be drawn or moved.
+          Availability has its own collision lanes, separate from appointments. Parallel windows for one person use
+          mini-lanes horizontally and side-by-side lanes vertically; the resource grows to the deeper layer rather than
+          adding both depths. In appointment mode availability remains behind events and does not intercept the pointer.
+          In <code>interactionMode="availability"</code>, appointments become inactive context so only availability can
+          be drawn or moved.
         </p>
         <CodeBlock code={availabilitySnippet} title="Choose the editable layer" />
         <Callout>
-          Switch to “Edit availability,” then draw or move a green interval. The appointment cards deliberately fade
-          into context and cannot intercept the availability gesture.
+          Inspect the visible lane numbers, switch orientation, then choose “Edit availability” and draw or move an
+          interval. Appointment cards stay over the same period, fade into context, and cannot intercept the gesture.
         </Callout>
         <DemoBreakout>
           <LazyArticleDemo label="availability interaction layer example">
@@ -725,10 +725,10 @@ export function IntegrationWalkthrough({ embedded = false }: { embedded?: boolea
           capacity may need a warm background, equipment lanes need a distinct color, and lunch needs a visible band.
         </p>
         <p>
-          <code>getCalendarDayProps</code> styles a complete date and its visible header from date, weekday,
-          Today/weekend, and view context. <code>getCalendarCellProps</code> then adds resource-specific presentation to
-          a matching horizontal row or vertical column. <code>getCalendarHourProps</code> styles a visible clock-hour
-          band and its time label in either orientation without taking ownership of layout, events, or interaction.
+          <code>getDayProps</code> styles a complete date and its visible header from date, weekday, Today/weekend, and
+          view context. <code>getDayCellProps</code> then adds resource-specific presentation to a matching horizontal
+          row or vertical column. <code>getHourProps</code> styles a visible clock-hour band and its time label in
+          either orientation without taking ownership of layout, events, or interaction.
         </p>
         <CodeBlock code={calendarCellStylingSnippet} title="Style dates, clock hours, and resources from context" />
         <Callout>
@@ -748,10 +748,10 @@ export function IntegrationWalkthrough({ embedded = false }: { embedded?: boolea
           or a more conversational vocabulary such as Today, Tomorrow, and Yesterday.
         </p>
         <p>
-          <code>settings.dateLocale</code> formats month, day, and weekday labels with the platform’s
-          internationalization support. A <code>dayNameGenerator</code> can replace the complete label with human
-          relative names or a machine-oriented binary sequence. Only the displayed text changes; date identity, loading,
-          excluded weekdays, and virtual position remain stable.
+          <code>locale</code> formats month, day, and weekday labels with the platform’s internationalization support. A{" "}
+          <code>formatters.dayLabel</code> can replace the complete label with human relative names or a
+          machine-oriented binary sequence. Only the displayed text changes; date identity, loading, excluded weekdays,
+          and virtual position remain stable.
         </p>
         <CodeBlock code={dateLocalizationSnippet} title="Localize dates or supply a product day name" />
         <Callout>
@@ -961,7 +961,7 @@ export function IntegrationWalkthrough({ embedded = false }: { embedded?: boolea
 
       <ArticleSection id="package-footprint" number="26" title="Ship Infinite Calendar independently">
         <p>
-          Infinite Calendar JavaScript is 34.29 KiB gzip. Its optional stylesheet is a separate 1.95 KiB gzip import;
+          Infinite Calendar JavaScript is 38.59 KiB gzip. Its optional stylesheet is a separate 1.95 KiB gzip import;
           neither number includes React, React DOM, or the external virtualizer supplied by the application.
         </p>
         <p>

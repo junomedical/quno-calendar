@@ -15,7 +15,7 @@ describe("event membership index", () => {
   it("indexes multi-calendar membership once without cloning events", () => {
     const shared = event("shared", "a", ["a", "b", "b"]);
     const hidden = event("hidden", "c");
-    const buckets = indexEventsByCalendar([shared, hidden], ["a", "b"]);
+    const buckets = indexEventsByCalendar({ events: [shared, hidden], calendarIds: ["a", "b"] });
 
     expect(buckets.get("a")).toEqual([shared]);
     expect(buckets.get("b")).toEqual([shared]);

@@ -47,7 +47,8 @@ describe("datepicker field guide", () => {
       })
     ).toBeInTheDocument();
     expect(screen.getByText(/statusFor\(date\) !== 'available'/)).toBeInTheDocument();
-    expect(screen.getByText(/loadAvailability\(calendarGrid\(visibleMonth\)\)/)).toBeInTheDocument();
+    expect(screen.getByText(/loadAvailability\(datesToResolve\)/)).toBeInTheDocument();
+    expect(screen.getByText(/limitDateFrom=\{limitDateFrom\}/)).toBeInTheDocument();
     expect(screen.getByText("Holiday: 27 Aug")).toBeInTheDocument();
     expect(screen.getByText("Période sélectionnée")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Effacer" })).toBeInTheDocument();
@@ -64,8 +65,8 @@ describe("datepicker field guide", () => {
     );
     expect(within(contents).queryByText("Understand and ship the model")).not.toBeInTheDocument();
     expect(document.querySelector('[data-story-topic="natural-input"]')).not.toBeInTheDocument();
-    expect(screen.getByText("9.00 KiB gzip")).toBeInTheDocument();
-    expect(screen.getByText("3.20 KiB gzip")).toBeInTheDocument();
+    expect(screen.getByText("10.47 KiB gzip")).toBeInTheDocument();
+    expect(screen.getByText("3.22 KiB gzip")).toBeInTheDocument();
     expect(screen.queryByText("Public API at a glance")).not.toBeInTheDocument();
     expect(screen.queryByText(/docs\/shared\/usage\.md/)).not.toBeInTheDocument();
   });

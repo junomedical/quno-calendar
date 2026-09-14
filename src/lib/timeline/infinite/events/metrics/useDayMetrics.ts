@@ -5,18 +5,17 @@
  * Flow: date events -> resource membership -> prepared timed lanes -> row
  * heights -> total date height plus row/cell lookup functions.
  *
- * Preserves: availability and transient drafts never increase committed row
- * metrics; zoom-only changes retain membership, lanes, and metric identities.
+ * Preserves: foreground and availability use independent lanes; transient
+ * drafts never increase metrics; zoom-only changes retain model identities.
  * Does not own virtual measurement or viewport correction.
  *
  * @see docs/infinite-calendar/flows/async-loading-and-layout.md#late-events-that-increase-horizontal-height
  */
-import { useCallback, useMemo } from "react";
-import { withoutActiveDraftSourceEvents } from "./activeDrafts";
+import { useCallback, useMemo, useRef } from "react";
+import { PreparedDateLayerCache } from "./preparedDateLayers";
 import {
-  prepareEventCell,
-  rowHeightForPreparedCell,
-  type PreparedEventCell
+  rowHeightForPreparedLayers,
+  type PreparedEventLayers
 } from "#quno-internal/timeline/infinite/events/layout/layout";
 import type {
   ActiveEventDraft,
@@ -25,9 +24,13 @@ import type {
   CalendarRow,
   QunoInfiniteCalendarSettings
 } from "#quno-internal/timeline/core/types";
-import { indexEventsByCalendar } from "#quno-internal/timeline/infinite/events/indexing/eventMembershipIndex";
 
-const EMPTY_PREPARED_CELL: PreparedEventCell = { items: [], laneCount: 1, metricLaneCount: 1 };
+const EMPTY_PREPARED_CELL = { items: [], laneCount: 1, metricLaneCount: 1 };
+const EMPTY_PREPARED_LAYERS: PreparedEventLayers = {
+  events: EMPTY_PREPARED_CELL,
+  availability: EMPTY_PREPARED_CELL,
+  metricLaneCount: 1
+};
 
 export function useDayMetrics({
   eventsByDate,
@@ -43,31 +46,33 @@ export function useDayMetrics({
   activeDraft?: ActiveEventDraft | null;
 }) {
   const { dayHeaderHeight, endHour, rowHeight, startHour } = settings;
-  // Zoom changes projected pixels, not membership, lane assignment, or row metrics.
-  const preparationSettings = useMemo(() => ({ startHour, endHour }), [endHour, startHour]);
+  const preparationCache = useRef(new PreparedDateLayerCache()).current;
   const { dayMetricsByDate, rowEventsByKey, preparedCellsByKey } = useMemo(() => {
     const metrics = new Map<string, { height: number; rowHeights: Map<CalendarId, number> }>();
     const rowEvents = new Map<string, CalendarEvent[]>();
-    const preparedCells = new Map<string, PreparedEventCell>();
+    const preparedCells = new Map<string, PreparedEventLayers>();
     const dateKeys = new Set(Object.keys(eventsByDate));
-    const calendarIds = selectedCalendars.map((calendar) => calendar.id);
+    preparationCache.retain(dateKeys);
 
     for (const dateKey of dateKeys) {
       let height = dayHeaderHeight;
       const rowHeights = new Map<CalendarId, number>();
-      const visibleEvents = withoutActiveDraftSourceEvents(eventsByDate[dateKey] ?? [], activeDraft);
-      const eventsByCalendar = indexEventsByCalendar(visibleEvents, calendarIds);
+      const preparedDate = preparationCache.prepare({
+        dateKey,
+        events: eventsByDate[dateKey] ?? [],
+        calendars: selectedCalendars,
+        startHour,
+        endHour,
+        activeDraft
+      });
 
       for (const calendar of selectedCalendars) {
         const rowKey = `${dateKey}:${calendar.id}`;
-        const committedRowEvents = eventsByCalendar.get(calendar.id) ?? [];
-        const preparedCell = prepareEventCell(
-          committedRowEvents.filter((event) => event.kind !== "availability"),
-          preparationSettings
-        );
+        const committedRowEvents = preparedDate.eventsByCalendar.get(calendar.id) ?? [];
+        const preparedCell = preparedDate.layersByCalendar.get(calendar.id) ?? EMPTY_PREPARED_LAYERS;
         rowEvents.set(rowKey, committedRowEvents);
         preparedCells.set(rowKey, preparedCell);
-        const preparedRowHeight = rowHeightForPreparedCell(preparedCell, { rowHeight });
+        const preparedRowHeight = rowHeightForPreparedLayers({ preparedLayers: preparedCell, settings: { rowHeight } });
         rowHeights.set(calendar.id, preparedRowHeight);
         height += preparedRowHeight;
       }
@@ -76,26 +81,28 @@ export function useDayMetrics({
     }
 
     return { dayMetricsByDate: metrics, rowEventsByKey: rowEvents, preparedCellsByKey: preparedCells };
-  }, [activeDraft, dayHeaderHeight, eventsByDate, preparationSettings, rowHeight, selectedCalendars]);
+  }, [activeDraft, dayHeaderHeight, endHour, eventsByDate, preparationCache, rowHeight, selectedCalendars, startHour]);
 
   const eventsForRow = useCallback(
-    (dateKey: string, calendarId: CalendarId) => rowEventsByKey.get(`${dateKey}:${calendarId}`) ?? [],
+    ({ dateKey, calendarId }: { dateKey: string; calendarId: CalendarId }) =>
+      rowEventsByKey.get(`${dateKey}:${calendarId}`) ?? [],
     [rowEventsByKey]
   );
 
   const getDayHeight = useCallback(
-    (dateKey: string) => dayMetricsByDate.get(dateKey)?.height ?? baseDayHeight,
+    ({ dateKey }: { dateKey: string }) => dayMetricsByDate.get(dateKey)?.height ?? baseDayHeight,
     [baseDayHeight, dayMetricsByDate]
   );
 
   const preparedCellForRow = useCallback(
-    (dateKey: string, calendarId: CalendarId) =>
-      preparedCellsByKey.get(`${dateKey}:${calendarId}`) ?? EMPTY_PREPARED_CELL,
+    ({ dateKey, calendarId }: { dateKey: string; calendarId: CalendarId }) =>
+      preparedCellsByKey.get(`${dateKey}:${calendarId}`) ?? EMPTY_PREPARED_LAYERS,
     [preparedCellsByKey]
   );
 
   const getRowHeight = useCallback(
-    (dateKey: string, calendarId: CalendarId) => dayMetricsByDate.get(dateKey)?.rowHeights.get(calendarId) ?? rowHeight,
+    ({ dateKey, calendarId }: { dateKey: string; calendarId: CalendarId }) =>
+      dayMetricsByDate.get(dateKey)?.rowHeights.get(calendarId) ?? rowHeight,
     [dayMetricsByDate, rowHeight]
   );
 

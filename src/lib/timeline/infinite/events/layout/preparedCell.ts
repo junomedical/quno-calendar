@@ -4,9 +4,9 @@
  * Flow: clipped intervals -> overlap groups -> lowest reusable lanes -> one
  * stable prepared model consumed by metrics, projections, hover, and hit tests.
  *
- * Preserves: deterministic lane order and availability exclusion from metric
- * depth while retaining availability items for rendering. Does not own pixel
- * projection, row/column growth policy, or React state.
+ * Preserves: deterministic lane order within each independently prepared
+ * visual layer. Does not own pixel projection, row/column growth policy, or
+ * React state.
  *
  * @see docs/infinite-calendar/architecture.md#prepared-cell-pipeline
  */
@@ -27,12 +27,18 @@ export type PreparedEventCellItem = {
 /**
  * Orientation-neutral layout for one date/calendar cell.
  *
- * `metricLaneCount` excludes availability records so background availability
- * never grows a row or column. `items` remains complete for API compatibility.
+ * `metricLaneCount` is the maximum overlap depth in this cell.
  */
 export type PreparedEventCell = {
   items: PreparedEventCellItem[];
   laneCount: number;
+  metricLaneCount: number;
+};
+
+/** Independently prepared foreground and availability lanes for one resource. */
+export type PreparedEventLayers = {
+  events: PreparedEventCell;
+  availability: PreparedEventCell;
   metricLaneCount: number;
 };
 
@@ -41,7 +47,7 @@ type ActiveLane = {
   lane: number;
 };
 
-function splitOverlapGroups(intervals: EventInterval[]): EventInterval[][] {
+function splitOverlapGroups({ intervals }: { intervals: EventInterval[] }): EventInterval[][] {
   const groups: EventInterval[][] = [];
   let group: EventInterval[] = [];
   let groupEnd = -Infinity;
@@ -65,27 +71,31 @@ function splitOverlapGroups(intervals: EventInterval[]): EventInterval[][] {
   return groups;
 }
 
-function releaseFinishedLanes(
-  activeLanes: MinHeap<ActiveLane>,
-  availableLanes: MinHeap<number>,
-  startMinute: number
-): void {
+function releaseFinishedLanes({
+  activeLanes,
+  availableLanes,
+  startMinute
+}: {
+  activeLanes: MinHeap<ActiveLane>;
+  availableLanes: MinHeap<number>;
+  startMinute: number;
+}): void {
   while (activeLanes.peek() && activeLanes.peek()!.endMinute <= startMinute) {
-    availableLanes.push(activeLanes.pop()!.lane);
+    availableLanes.push({ value: activeLanes.pop()!.lane });
   }
 }
 
 /** Assigns the lowest reusable lane in O(n log n), matching the legacy order. */
-function prepareOverlapGroup(group: EventInterval[]): PreparedEventCellItem[] {
-  const activeLanes = new MinHeap<ActiveLane>(
-    (left, right) => left.endMinute - right.endMinute || left.lane - right.lane
-  );
-  const availableLanes = new MinHeap<number>((left, right) => left - right);
+function prepareOverlapGroup({ group }: { group: EventInterval[] }): PreparedEventCellItem[] {
+  const activeLanes = new MinHeap<ActiveLane>({
+    compare: ({ left, right }) => left.endMinute - right.endMinute || left.lane - right.lane
+  });
+  const availableLanes = new MinHeap<number>({ compare: ({ left, right }) => left - right });
   const assignedLanes: number[] = [];
   let laneCount = 0;
 
   for (const interval of group) {
-    releaseFinishedLanes(activeLanes, availableLanes, interval.startMinute);
+    releaseFinishedLanes({ activeLanes, availableLanes, startMinute: interval.startMinute });
     const availableLane = availableLanes.pop();
     const lane = availableLane ?? laneCount;
     if (availableLane === undefined) {
@@ -93,7 +103,7 @@ function prepareOverlapGroup(group: EventInterval[]): PreparedEventCellItem[] {
     }
 
     assignedLanes.push(lane);
-    activeLanes.push({ endMinute: interval.endMinute, lane });
+    activeLanes.push({ value: { endMinute: interval.endMinute, lane } });
   }
 
   return group.map((interval, index) => ({
@@ -106,19 +116,15 @@ function prepareOverlapGroup(group: EventInterval[]): PreparedEventCellItem[] {
   }));
 }
 
-function maximumMetricLaneCount(intervals: EventInterval[]): number {
-  const activeEnds = new MinHeap<number>((left, right) => left - right);
+function maximumMetricLaneCount({ intervals }: { intervals: EventInterval[] }): number {
+  const activeEnds = new MinHeap<number>({ compare: ({ left, right }) => left - right });
   let laneCount = 1;
 
   for (const interval of intervals) {
-    if (interval.event.kind === "availability") {
-      continue;
-    }
-
     while (activeEnds.peek() !== undefined && activeEnds.peek()! <= interval.startMinute) {
       activeEnds.pop();
     }
-    activeEnds.push(interval.endMinute);
+    activeEnds.push({ value: interval.endMinute });
     laneCount = Math.max(laneCount, activeEnds.size);
   }
 
@@ -126,16 +132,41 @@ function maximumMetricLaneCount(intervals: EventInterval[]): number {
 }
 
 /** Prepares one cell once for sizing, horizontal layout, and vertical layout. */
-export function prepareEventCell(
-  events: readonly CalendarEvent[],
-  settings: Pick<QunoInfiniteCalendarSettings, "startHour" | "endHour">
-): PreparedEventCell {
-  const intervals = eventIntervals(events, settings);
-  const items = splitOverlapGroups(intervals).flatMap(prepareOverlapGroup);
+export function prepareEventCell({
+  events,
+  settings
+}: {
+  events: readonly CalendarEvent[];
+  settings: Pick<QunoInfiniteCalendarSettings, "startHour" | "endHour">;
+}): PreparedEventCell {
+  const intervals = eventIntervals({ events, settings });
+  const items = splitOverlapGroups({ intervals }).flatMap((argument0) => prepareOverlapGroup({ group: argument0 }));
 
   return {
     items,
     laneCount: items.reduce((maximum, item) => Math.max(maximum, item.laneCount), 1),
-    metricLaneCount: maximumMetricLaneCount(intervals)
+    metricLaneCount: maximumMetricLaneCount({ intervals })
+  };
+}
+
+/** Partitions a resource once and prepares each visual layer independently. */
+export function prepareEventLayers({
+  events,
+  settings
+}: {
+  events: readonly CalendarEvent[];
+  settings: Pick<QunoInfiniteCalendarSettings, "startHour" | "endHour">;
+}): PreparedEventLayers {
+  const foreground: CalendarEvent[] = [];
+  const availability: CalendarEvent[] = [];
+  for (const event of events) {
+    (event.kind === "availability" ? availability : foreground).push(event);
+  }
+  const preparedEvents = prepareEventCell({ events: foreground, settings });
+  const preparedAvailability = prepareEventCell({ events: availability, settings });
+  return {
+    events: preparedEvents,
+    availability: preparedAvailability,
+    metricLaneCount: Math.max(preparedEvents.metricLaneCount, preparedAvailability.metricLaneCount)
   };
 }

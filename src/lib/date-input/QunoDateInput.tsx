@@ -1,11 +1,12 @@
-import { DEFAULT_DATE_INPUT_FORMATTER } from "./dateInputFormat";
+import { classNames as inputClass } from "#quno-internal/shared/classNames";
+import { useDateInputFormat } from "./useDateInputFormat";
 import { spinDateInput, type DateInputSpinMemory } from "./dateInputKeyboard";
-import { parseDateInput } from "./dateInputParser";
-import { equalDateRanges, inputClass, recognitionOf } from "./dateInputViewHelpers";
+import { createDateInputAnalyzer } from "#quno-internal/date-parser/dateInputParser";
+import { equalDateRanges, recognitionOf } from "./dateInputViewHelpers";
 import { singleDay, type DateRange } from "#quno-internal/shared/dateRangeModel";
 import type { QunoDateInputProps } from "./dateInputTypes";
 import type { FormEventHandler, JSX } from "react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { startTransition, useEffect, useMemo, useRef, useState } from "react";
 
 export const QunoDateInput = ({
   value,
@@ -16,10 +17,10 @@ export const QunoDateInput = ({
   weekStartsOn = 1,
   locale = "en-GB",
   preferredDateOrder,
-  parserLanguage,
+
   parserLanguages,
   labels,
-  formatter,
+  formatters,
   lexicon,
   className,
   classNames,
@@ -39,17 +40,15 @@ export const QunoDateInput = ({
     rangeEnd = range?.end;
   const selection = useMemo(
     () =>
-      rangeStart ? (selectionMode === "single" ? singleDay(rangeStart) : { start: rangeStart, end: rangeEnd! }) : null,
+      rangeStart
+        ? selectionMode === "single"
+          ? singleDay({ date: rangeStart })
+          : { start: rangeStart, end: rangeEnd! }
+        : null,
     [rangeEnd, rangeStart, selectionMode]
   );
-  const format = useCallback(
-    (range: DateRange, preserveRange = false): string => {
-      const value = (formatter?.range ?? DEFAULT_DATE_INPUT_FORMATTER)(range, locale);
-      return preserveRange && range.start === range.end ? `${value} – ${value}` : value;
-    },
-    [formatter, locale]
-  );
-  const [draft, setDraft] = useState(selection ? format(selection) : "");
+  const format = useDateInputFormat({ formatters, locale });
+  const [draft, setDraft] = useState(selection ? format({ value: selection }) : "");
   const [invalid, setInvalid] = useState(false);
   const [recognition, setRecognition] = useState<"recognized" | "unrecognized" | undefined>(
     selection ? "recognized" : undefined
@@ -62,35 +61,38 @@ export const QunoDateInput = ({
     if (controlled) {
       committed.current = selection;
       spinMemory.current = undefined;
-      setDraft(selection ? format(selection) : "");
+      setDraft(selection ? format({ value: selection }) : "");
       setInvalid(false);
       setRecognition(selection ? "recognized" : undefined);
     }
   }, [controlled, format, selection]);
 
-  const parse = (text: string) =>
-    parseDateInput(text, {
+  const parserOptions = useMemo(
+    () => ({
       expectedRange,
       selectionMode,
       referenceDate,
       weekStartsOn,
       locale,
       preferredDateOrder,
-      parserLanguage,
       parserLanguages,
       lexicon
-    });
+    }),
+    [expectedRange, lexicon, locale, parserLanguages, preferredDateOrder, referenceDate, selectionMode, weekStartsOn]
+  );
+  const analyzer = useMemo(() => createDateInputAnalyzer(parserOptions), [parserOptions]);
+  const parse = ({ text }: { text: string }) => analyzer.analyze({ text }).result;
 
   const commit = (): void => {
     if (composing.current) return;
-    const result = parse(draft);
+    const result = parse({ text: draft });
     setRecognition(recognitionOf(result));
     if (result.status === "empty") {
       setInvalid(false);
-      if (!equalDateRanges(committed.current, null)) {
+      if (!equalDateRanges({ left: committed.current, right: null })) {
         committed.current = null;
         if (!controlled) setDraft("");
-        onChange?.(null);
+        onChange?.({ value: null });
       }
       return;
     }
@@ -99,10 +101,10 @@ export const QunoDateInput = ({
       return;
     }
     setInvalid(false);
-    setDraft(format(result.value));
-    if (!equalDateRanges(committed.current, result.value)) {
+    setDraft(format({ value: result.value }));
+    if (!equalDateRanges({ left: committed.current, right: result.value })) {
       committed.current = result.value;
-      onChange?.(result.value);
+      onChange?.({ value: result.value });
     }
   };
 
@@ -112,10 +114,10 @@ export const QunoDateInput = ({
     setDraft(next);
     setInvalid(false);
     if (!composing.current) {
-      const result = parse(next);
-      setRecognition(recognitionOf(result));
+      const result = parse({ text: next });
+      startTransition(() => setRecognition(recognitionOf(result)));
       if (result.status === "partial-range" && next.length >= draft.length) {
-        const formatted = `${format(result.value)} – `;
+        const formatted = `${format({ value: result.value })} – `;
         event.currentTarget.value = formatted;
         event.currentTarget.setSelectionRange(formatted.length, formatted.length);
         setDraft(formatted);
@@ -125,11 +127,11 @@ export const QunoDateInput = ({
   };
 
   return (
-    <span className={inputClass("quno-date-picker-input-root", classNames?.root)} data-slot="root">
+    <span className={inputClass({ values: ["quno-date-picker-input-root", classNames?.root] })} data-slot="root">
       <input
         {...inputProps}
         value={draft}
-        className={inputClass("quno-date-picker-input", className, classNames?.input)}
+        className={inputClass({ values: ["quno-date-picker-input", className, classNames?.input] })}
         data-slot="input"
         data-recognition={recognition}
         aria-invalid={invalid || undefined}
@@ -146,24 +148,25 @@ export const QunoDateInput = ({
         onKeyDown={(event) => {
           onKeyDown?.(event);
           if ((event.key === "ArrowUp" || event.key === "ArrowDown") && !event.defaultPrevented && !composing.current) {
-            const spun = spinDateInput(
-              draft,
-              event.currentTarget.selectionStart ?? draft.length,
-              event.key === "ArrowUp" ? 1 : -1,
-              {
+            const spun = spinDateInput({
+              text: draft,
+              cursor: event.currentTarget.selectionStart ?? draft.length,
+              direction: event.key === "ArrowUp" ? 1 : -1,
+              options: {
                 expectedRange,
                 selectionMode,
                 referenceDate,
                 weekStartsOn,
                 locale,
                 preferredDateOrder,
-                parserLanguage,
+
                 parserLanguages,
                 lexicon
               },
+              analyzer,
               format,
-              spinMemory.current
-            );
+              memory: spinMemory.current
+            });
             if (spun) {
               event.preventDefault();
               event.currentTarget.value = spun.text;
@@ -186,7 +189,7 @@ export const QunoDateInput = ({
           composing.current = false;
           const next = event.currentTarget.value;
           setDraft(next);
-          setRecognition(recognitionOf(parse(next)));
+          setRecognition(recognitionOf(parse({ text: next })));
           onCompositionEnd?.(event);
         }}
       />

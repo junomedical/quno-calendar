@@ -27,8 +27,11 @@ describe("active event drafts", () => {
       event: { ...sourceEvent, id: "draft-1" }
     };
 
-    expect(activeDraftSourceEventId(draft)).toBeNull();
-    expect(withoutActiveDraftSourceEvents([sourceEvent, otherEvent], draft)).toEqual([sourceEvent, otherEvent]);
+    expect(activeDraftSourceEventId({ activeDraft: draft })).toBeNull();
+    expect(withoutActiveDraftSourceEvents({ events: [sourceEvent, otherEvent], activeDraft: draft })).toEqual([
+      sourceEvent,
+      otherEvent
+    ]);
   });
 
   it("removes the source event for edit drafts by explicit source id", () => {
@@ -38,8 +41,10 @@ describe("active event drafts", () => {
       event: { ...sourceEvent, id: "draft-copy", title: "Edited consult" }
     };
 
-    expect(activeDraftSourceEventId(draft)).toBe(sourceEvent.id);
-    expect(withoutActiveDraftSourceEvents([sourceEvent, otherEvent], draft)).toEqual([otherEvent]);
+    expect(activeDraftSourceEventId({ activeDraft: draft })).toBe(sourceEvent.id);
+    expect(withoutActiveDraftSourceEvents({ events: [sourceEvent, otherEvent], activeDraft: draft })).toEqual([
+      otherEvent
+    ]);
   });
 
   it("falls back to the draft event id for edit replacement", () => {
@@ -48,7 +53,9 @@ describe("active event drafts", () => {
       event: { ...sourceEvent, title: "Edited consult" }
     };
 
-    expect(activeDraftSourceEventId(draft)).toBe(sourceEvent.id);
-    expect(withoutActiveDraftSourceEvents([sourceEvent, otherEvent], draft)).toEqual([otherEvent]);
+    expect(activeDraftSourceEventId({ activeDraft: draft })).toBe(sourceEvent.id);
+    expect(withoutActiveDraftSourceEvents({ events: [sourceEvent, otherEvent], activeDraft: draft })).toEqual([
+      otherEvent
+    ]);
   });
 });

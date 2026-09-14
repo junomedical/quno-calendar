@@ -1,9 +1,16 @@
-import { fireEvent, render } from "@testing-library/react";
+import { act, fireEvent, render } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { QunoDatePicker } from "@quno/calendar/datepicker";
 import { day, overflowDay, slot, weekday } from "./datePickerTestUtils";
 
-afterEach(() => vi.restoreAllMocks());
+afterEach(() => {
+  vi.restoreAllMocks();
+  vi.useRealTimers();
+});
+
+const flushPointerFrame = (): void => {
+  act(() => vi.advanceTimersByTime(17));
+};
 
 const hitDate = (date: string): void => {
   hitElement(day(date));
@@ -19,7 +26,7 @@ const hitElement = (element: Element): void => {
 describe("QunoDatePicker touch painting", () => {
   it("resolves the destination under an implicitly captured touch pointer", () => {
     const onChange = vi.fn();
-    render(<QunoDatePicker initialMonth="2026-08-01" onChange={onChange} />);
+    render(<QunoDatePicker initialMonth="2026-08-01" onChange={({ value }) => onChange(value)} />);
     const origin = day("2026-08-04");
 
     fireEvent.pointerDown(origin, {
@@ -37,18 +44,21 @@ describe("QunoDatePicker touch painting", () => {
   });
 
   it("keeps the last valid date while the finger crosses a grid gap", () => {
+    vi.useFakeTimers();
     const onChange = vi.fn();
-    render(<QunoDatePicker initialMonth="2026-08-01" onChange={onChange} />);
+    render(<QunoDatePicker initialMonth="2026-08-01" onChange={({ value }) => onChange(value)} />);
     const origin = day("2026-08-04");
 
     fireEvent.pointerDown(origin, { pointerId: 8, pointerType: "touch" });
     expect(slot("grid")).toHaveAttribute("data-interaction-active", "true");
     hitDate("2026-08-09");
     fireEvent.pointerMove(origin, { pointerId: 8, pointerType: "touch" });
+    flushPointerFrame();
     expect(day("2026-08-06")).toHaveAttribute("data-selected", "true");
 
     hitElement(slot("grid"));
     fireEvent.pointerMove(origin, { pointerId: 8, pointerType: "touch" });
+    flushPointerFrame();
     expect(day("2026-08-06")).toHaveAttribute("data-selected", "true");
     fireEvent.pointerUp(origin, { pointerId: 8, pointerType: "touch" });
 
@@ -60,6 +70,7 @@ describe("QunoDatePicker touch painting", () => {
   });
 
   it("does not repaint for repeated touch moves within one date", () => {
+    vi.useFakeTimers();
     const styleDay = vi.fn(() => undefined);
     render(<QunoDatePicker initialMonth="2026-08-01" getDayCellProps={styleDay} />);
     const origin = day("2026-08-04");
@@ -67,15 +78,18 @@ describe("QunoDatePicker touch painting", () => {
     fireEvent.pointerDown(origin, { pointerId: 10, pointerType: "touch" });
     hitDate("2026-08-09");
     fireEvent.pointerMove(origin, { pointerId: 10, pointerType: "touch" });
+    flushPointerFrame();
     const callsAfterDateChange = styleDay.mock.calls.length;
     fireEvent.pointerMove(origin, { pointerId: 10, pointerType: "touch" });
+    flushPointerFrame();
 
     expect(styleDay).toHaveBeenCalledTimes(callsAfterDateChange);
   });
 
   it("discards the transient range when the touch pointer is cancelled", () => {
+    vi.useFakeTimers();
     const onChange = vi.fn();
-    render(<QunoDatePicker initialMonth="2026-08-01" onChange={onChange} />);
+    render(<QunoDatePicker initialMonth="2026-08-01" onChange={({ value }) => onChange(value)} />);
     const origin = day("2026-08-04");
 
     fireEvent.pointerDown(origin, {
@@ -84,6 +98,7 @@ describe("QunoDatePicker touch painting", () => {
     });
     hitDate("2026-08-09");
     fireEvent.pointerMove(origin, { pointerId: 9, pointerType: "touch" });
+    flushPointerFrame();
     expect(day("2026-08-06")).toHaveAttribute("data-selected", "true");
 
     fireEvent.pointerCancel(origin, { pointerId: 9, pointerType: "touch" });
@@ -92,12 +107,13 @@ describe("QunoDatePicker touch painting", () => {
   });
 
   it("reveals, clears, and commits hidden weekday-strip dates", () => {
+    vi.useFakeTimers();
     const onChange = vi.fn();
     render(
       <QunoDatePicker
         defaultValue={{ start: "2026-08-10", end: "2026-08-18" }}
         initialMonth="2026-08-01"
-        onChange={onChange}
+        onChange={({ value }) => onChange(value)}
       />
     );
     const origin = day("2026-08-10");
@@ -106,14 +122,17 @@ describe("QunoDatePicker touch painting", () => {
     fireEvent.pointerDown(origin, { pointerId: 11, pointerType: "touch" });
     hitElement(hiddenMonday);
     fireEvent.pointerMove(origin, { pointerId: 11, pointerType: "touch" });
+    flushPointerFrame();
     expect(overflowDay("2026-07-20")).toHaveAttribute("data-selected", "true");
 
     hitDate("2026-08-05");
     fireEvent.pointerMove(origin, { pointerId: 11, pointerType: "touch" });
+    flushPointerFrame();
     expect(document.querySelector('[data-slot="overflow-day"]')).toBeNull();
 
     hitElement(hiddenMonday);
     fireEvent.pointerMove(origin, { pointerId: 11, pointerType: "touch" });
+    flushPointerFrame();
     hitElement(overflowDay("2026-07-20"));
     fireEvent.pointerUp(origin, { pointerId: 11, pointerType: "touch" });
     expect(onChange).toHaveBeenLastCalledWith({

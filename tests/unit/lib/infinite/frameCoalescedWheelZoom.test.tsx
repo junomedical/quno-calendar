@@ -17,14 +17,14 @@ describe("frame-coalesced wheel zoom", () => {
     );
     vi.stubGlobal("cancelAnimationFrame", vi.fn());
     const commit = vi.fn();
-    const { result } = renderHook(() => useFrameCoalescedWheelZoom(1));
+    const { result } = renderHook(() => useFrameCoalescedWheelZoom({ controlledZoom: 1 }));
     const settings = { ...defaultQunoInfiniteCalendarSettings, zoom: 1 };
     const zoomIn = () => new WheelEvent("wheel", { deltaY: -100 });
 
     act(() => {
-      result.current(settings, zoomIn(), commit);
-      result.current(settings, zoomIn(), commit);
-      result.current(settings, zoomIn(), commit);
+      result.current({ settings, event: zoomIn(), commit: ({ zoom }) => commit(zoom) });
+      result.current({ settings, event: zoomIn(), commit: ({ zoom }) => commit(zoom) });
+      result.current({ settings, event: zoomIn(), commit: ({ zoom }) => commit(zoom) });
     });
 
     expect(requestAnimationFrame).toHaveBeenCalledTimes(1);
@@ -43,7 +43,7 @@ describe("frame-coalesced wheel zoom", () => {
     const commit = vi.fn();
     const restore = vi.fn();
 
-    scheduleZoomCommit(commit, restore, 1);
+    scheduleZoomCommit({ commit, restore, restoreFrameCount: 1 });
 
     expect(commit).not.toHaveBeenCalled();
     expect(restore).not.toHaveBeenCalled();
@@ -62,16 +62,16 @@ describe("frame-coalesced wheel zoom", () => {
     );
     vi.stubGlobal("cancelAnimationFrame", vi.fn());
     const commit = vi.fn();
-    const { result, rerender } = renderHook(({ zoom }) => useFrameCoalescedWheelZoom(zoom), {
+    const { result, rerender } = renderHook(({ zoom }) => useFrameCoalescedWheelZoom({ controlledZoom: zoom }), {
       initialProps: { zoom: 1 }
     });
 
     act(() =>
-      result.current(
-        { ...defaultQunoInfiniteCalendarSettings, zoom: 1 },
-        new WheelEvent("wheel", { deltaY: -100 }),
-        commit
-      )
+      result.current({
+        settings: { ...defaultQunoInfiniteCalendarSettings, zoom: 1 },
+        event: new WheelEvent("wheel", { deltaY: -100 }),
+        commit: ({ zoom }) => commit(zoom)
+      })
     );
     rerender({ zoom: 3 });
     act(() => frameCallbacks.shift()?.(16.7));

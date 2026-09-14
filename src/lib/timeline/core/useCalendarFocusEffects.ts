@@ -4,9 +4,8 @@ import type { CalendarEvent, CalendarId, QunoInfiniteCalendarProps, CalendarView
 import type { CalendarFocusRequest, CalendarFocusResult, CalendarFocusRequestResult } from "./calendarFocusTypes";
 import type { CalendarFocusedEventTarget, CalendarViewHandle } from "./internalTypes";
 import type { IsoDate } from "#quno-internal/shared/dateRangeModel";
-
-const FOCUS_VISIBILITY_TIMEOUT_MS = 3_000;
-const FOCUS_HIGHLIGHT_DURATION_MS = 3_000;
+const FOCUS_VISIBILITY_TIMEOUT_MS = 3000;
+const FOCUS_HIGHLIGHT_DURATION_MS = 3000;
 const MANUAL_SCROLL_KEYS = new Set([
   "ArrowDown",
   "ArrowLeft",
@@ -18,7 +17,6 @@ const MANUAL_SCROLL_KEYS = new Set([
   "PageUp",
   " "
 ]);
-
 export type PendingFocus = {
   event: CalendarEvent;
   targetCalendarId: CalendarId;
@@ -26,10 +24,9 @@ export type PendingFocus = {
   anchor: CalendarViewportAnchor | null;
   resolve: (result: CalendarFocusResult) => void;
 };
-
 export function eventDateAndTime(event: CalendarEvent) {
   if (event.calendarTimeZone) {
-    const p = zonedParts(event.start, event.calendarTimeZone);
+    const p = zonedParts({ value: event.start, timeZone: event.calendarTimeZone });
     return {
       dateKey: p.date as IsoDate,
       time: `${String(p.hour).padStart(2, "0")}:${String(p.minute).padStart(2, "0")}`
@@ -40,7 +37,6 @@ export function eventDateAndTime(event: CalendarEvent) {
     time: event.start.slice(11, 16)
   };
 }
-
 type FocusEffectsArgs = Pick<
   QunoInfiniteCalendarProps,
   "selectedCalendarIds" | "focusRequest" | "onFocusRequestComplete"
@@ -52,11 +48,16 @@ type FocusEffectsArgs = Pick<
   lastDeclarativeRequestIdRef: MutableRefObject<CalendarFocusRequest["requestId"] | null>;
   viewRef: MutableRefObject<CalendarViewHandle | null>;
   setFocusedEventTarget: Dispatch<SetStateAction<CalendarFocusedEventTarget | null>>;
-  focusEvent: (event: CalendarEvent, options?: { preferredCalendarId?: CalendarId }) => Promise<CalendarFocusResult>;
+  focusEvent: (
+    args: {
+      event: CalendarEvent;
+    } & {
+      preferredCalendarId?: CalendarId;
+    }
+  ) => Promise<CalendarFocusResult>;
   finishPending: (result: CalendarFocusResult) => void;
   cancelActiveFocus: () => void;
 };
-
 /** Settles pending focus work and owns transient cancellation/highlight effects. */
 export function useCalendarFocusEffects({
   selectedCalendarIds,
@@ -79,7 +80,6 @@ export function useCalendarFocusEffects({
       selectedCalendarIds.includes(calendarId)
     );
     if (!selectionReady) return;
-
     const { dateKey, time } = eventDateAndTime(pendingFocus.event);
     const target = {
       eventId: pendingFocus.event.id,
@@ -90,13 +90,16 @@ export function useCalendarFocusEffects({
     setFocusedEventTarget({ eventId: pendingFocus.event.id, calendarId: pendingFocus.targetCalendarId });
     if (!viewRef.current?.isEventFullyVisible(target)) {
       if (pendingFocus.anchor) {
-        viewRef.current?.restoreViewportAnchor(pendingFocus.anchor, {
-          target,
-          afterRecenter: true,
-          cancelOnManualScroll: true
+        viewRef.current?.restoreViewportAnchor({
+          anchor: pendingFocus.anchor,
+          ...{
+            target,
+            afterRecenter: true,
+            cancelOnManualScroll: true
+          }
         });
       } else {
-        viewRef.current?.scrollToDateTime(dateKey, time);
+        viewRef.current?.scrollToDateTime({ date: dateKey, time });
       }
     }
     finishPending({
@@ -109,7 +112,6 @@ export function useCalendarFocusEffects({
       setFocusedEventTarget(null);
     }, FOCUS_HIGHLIGHT_DURATION_MS);
   }, [finishPending, highlightTimerRef, pendingFocus, selectedCalendarIds, setFocusedEventTarget, viewRef]);
-
   useEffect(() => {
     if (!pendingFocus) return;
     const timeout = window.setTimeout(() => {
@@ -121,16 +123,16 @@ export function useCalendarFocusEffects({
     }, FOCUS_VISIBILITY_TIMEOUT_MS);
     return () => window.clearTimeout(timeout);
   }, [finishPending, pendingFocus]);
-
   useEffect(() => {
     if (!focusRequest || lastDeclarativeRequestIdRef.current === focusRequest.requestId) return;
     lastDeclarativeRequestIdRef.current = focusRequest.requestId;
-    void focusEvent(focusRequest.event, { preferredCalendarId: focusRequest.preferredCalendarId }).then((result) => {
-      const requestResult: CalendarFocusRequestResult = { ...result, requestId: focusRequest.requestId };
-      onFocusRequestComplete?.(requestResult);
-    });
+    void focusEvent({ event: focusRequest.event, ...{ preferredCalendarId: focusRequest.preferredCalendarId } }).then(
+      (result) => {
+        const requestResult: CalendarFocusRequestResult = { ...result, requestId: focusRequest.requestId };
+        onFocusRequestComplete?.(requestResult);
+      }
+    );
   }, [focusEvent, focusRequest, lastDeclarativeRequestIdRef, onFocusRequestComplete]);
-
   useEffect(() => {
     if (!pendingFocus && !focusedEventTarget) return;
     const handleKey = (event: KeyboardEvent) => {
@@ -147,7 +149,6 @@ export function useCalendarFocusEffects({
       window.removeEventListener("keydown", handleKey);
     };
   }, [cancelActiveFocus, focusedEventTarget, pendingFocus]);
-
   useEffect(
     () => () => {
       if (highlightTimerRef.current !== null) window.clearTimeout(highlightTimerRef.current);

@@ -724,7 +724,40 @@ The hour projection raises the measured artifact to 136.83 KiB raw and 33.44 KiB
 10.21 KiB raw and 1.95 KiB gzip. The Infinite Calendar JavaScript ceiling moves from Decision 089's 33 KiB to 34 KiB;
 the stylesheet remains inside its existing 2 KiB gzip ceiling.
 
-## 091 - Explicit Timeline Timezone Preserves Absolute Event Instants
+## Shared contract update — 2026-09-05
+
+[QUNO-012](../shared/decisions.md#quno-012---give-library-functions-named-contracts-and-align-product-ownership)
+supersedes historical positional signatures and customization names for this product. The accepted interaction,
+presentation, and geometry behavior in this ledger remains in force. See the
+[migration guide](../shared/migration.md#unreleased-named-contracts-and-product-ownership) for exact replacements.
+
+## 091 - Availability Has Independent Collision Lanes
+
+Date: 2026-09-08
+Status: Accepted; supersedes the full-row and no-metric-growth portion of Decision 017 and refines Decision 059
+
+Availability remains background context expressed by `kind: "availability"`, but overlapping windows for one resource
+now receive deterministic lanes of their own. Appointment and availability records are partitioned once and prepared
+independently with the same stable `O(n log n)` allocator. Horizontal availability uses vertical mini-lanes, vertical
+availability uses side-by-side lanes, and equal starts retain caller order. Resource geometry uses the larger of the
+appointment and availability depths rather than their sum, so appointments continue to overlay availability without
+competing for its lane numbers.
+
+`renderEvent` receives the real `lane`, collision-group `laneCount`, and `isOverlapping` values for availability. The
+existing interaction-layer rules, focus and appearance states, multi-calendar projections, and background z-order
+remain unchanged. Draft and drag-preview geometry remains transient and joins normal preparation only after commit.
+
+React-facing date buckets retain their array identity until that bucket changes. Date/resource preparation is cached
+by bucket identity, selected resources, visible time bounds, and any draft source belonging to that date. Accepted
+range responses and targeted mutations therefore invalidate only affected dates instead of rebuilding every prepared
+cell in the bounded cache.
+
+The layered cache, frame scheduler, and measured recenter bridge raise the ESM artifact to 159.29 KiB raw and 37.56
+KiB gzip. The
+Infinite Calendar JavaScript ceiling moves from 37 KiB to 38 KiB; the optional stylesheet remains 1.95 KiB gzip inside
+its existing 2 KiB ceiling.
+
+## QU-3879-091 - Explicit Timeline Timezone Preserves Absolute Event Instants
 
 Date: 2026-09-14
 Status: Accepted
@@ -733,9 +766,15 @@ Status: Accepted
 
 The timezone conversion and callback handling bring the calendar ESM artifact to approximately 34.15 KiB gzip, 150 bytes above the former 34 KiB ceiling. The feature budget is now 35 KiB gzip; other feature and stylesheet budgets are unchanged.
 
-## 092 - Reject Ambiguous Pointer Times and Preserve Elapsed Duration
+## QU-3879-092 - Reject Ambiguous Pointer Times and Preserve Elapsed Duration
 
 Date: 2026-09-15
 Status: Accepted
 
-Refines Decision 091: a wall time cannot disambiguate repeated autumn hours, so reject folds as well as gaps, matching the onboarding editor. Preserve event duration using absolute timestamps, including when a move crosses a DST boundary. Cancel invalid drawn ranges rather than submitting a stale selection.
+Refines Decision QU-3879-091: a wall time cannot disambiguate repeated autumn hours, so reject folds as well as gaps, matching the onboarding editor. Preserve event duration using absolute timestamps, including when a move crosses a DST boundary. Cancel invalid drawn ranges rather than submitting a stale selection.
+
+Merge identity note: QU-3879-091 and QU-3879-092 were numbered 091/092 on the calendar-foundation branch before integration. Their branch namespace preserves that provenance and distinguishes them from upstream Decision 091 on independent availability lanes. Their accepted behavior remains unchanged.
+
+## 093 - Combine Named Contracts and Timezone-Safe Interactions
+
+Integrate upstream Decision 091 and the branch-local timezone decisions without reverting either behavior. Named object requests and component-level locale apply to timezone-aware navigation and mutations as well. The combined build measures 163.08 KiB raw / 38.59 KiB gzip, so the Infinite Calendar ceiling becomes 39 KiB; other product ceilings remain unchanged. This supersedes the earlier size ceilings for the combined build only.

@@ -65,11 +65,11 @@ export function ReactStateDemo() {
         <QunoInfiniteCalendar
           ariaLabel="Calendar controlled by React state"
           calendars={controlledCalendars}
-          eventRenderer={ArticleEventCard}
+          renderEvent={ArticleEventCard}
           initialDateKey={articleDateKey}
           loadEvents={loadArticleEvents}
           onCalendarVisibilityRequest={({ calendarIds }) => setSelectedCalendarIds(calendarIds)}
-          onZoomChange={setZoom}
+          onZoomChange={({ zoom }) => setZoom(zoom)}
           selectedCalendarIds={selectedCalendarIds}
           settings={settings}
         />

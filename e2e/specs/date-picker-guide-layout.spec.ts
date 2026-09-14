@@ -21,6 +21,12 @@ test("single-day mode and focused range-input composition stay distinct", async 
   await expect(composition.locator('[data-date="2026-06-12"]')).toHaveAttribute("data-range-start", "true");
   await expect(composition.locator('[data-date="2026-06-15"]')).toHaveAttribute("data-selected", "true");
   await expect(composition.locator('[data-date="2026-06-18"]')).toHaveAttribute("data-range-end", "true");
+  await editor.fill("21 May 2026 – 18 August 2026");
+  await editor.press("Enter");
+  await composition.locator('[data-slot="pill"][data-endpoint="start"]').click();
+  await expect(composition.getByRole("grid")).toHaveAccessibleName("Date range picker: May 2026");
+  await composition.locator('[data-slot="pill"][data-endpoint="end"]').click();
+  await expect(composition.getByRole("grid")).toHaveAccessibleName("Date range picker: August 2026");
   await editor.fill("");
   await editor.press("Enter");
   await expect(editor).toHaveValue("");

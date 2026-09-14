@@ -15,16 +15,23 @@ export type EventColumnLayoutItem = {
 };
 
 /** Projects prepared, orientation-neutral items into vertical column geometry. */
-export function layoutPreparedEventsForColumn(
-  preparedCell: PreparedEventCell,
-  settings: Pick<QunoInfiniteCalendarSettings, "startHour" | "endHour" | "zoom">
-): EventColumnLayoutItem[] {
+export function layoutPreparedEventsForColumn({
+  preparedCell,
+  settings
+}: {
+  preparedCell: PreparedEventCell;
+  settings: Pick<QunoInfiniteCalendarSettings, "startHour" | "endHour" | "zoom">;
+}): EventColumnLayoutItem[] {
   return preparedCell.items.map((item) => ({
     event: item.event,
     leftPercent: (item.lane / item.laneCount) * 100,
     widthPercent: 100 / item.laneCount,
-    top: minuteToY(item.startMinute, settings),
-    height: Math.max(12, minuteToY(item.endMinute, settings) - minuteToY(item.startMinute, settings)),
+    top: minuteToY({ minute: item.startMinute, geometry: settings }),
+    height: Math.max(
+      12,
+      minuteToY({ minute: item.endMinute, geometry: settings }) -
+        minuteToY({ minute: item.startMinute, geometry: settings })
+    ),
     lane: item.lane,
     laneCount: item.laneCount,
     isOverlapping: item.isOverlapping

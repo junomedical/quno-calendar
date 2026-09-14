@@ -60,7 +60,7 @@
     "build": "npm run build:lib && npm run build:demo",
     "build:lib": "vite build -c vite.lib.config.ts --mode shared && vite build -c vite.lib.config.ts --mode infinite-calendar && vite build -c vite.lib.config.ts --mode datepicker && vite build -c vite.lib.config.ts --mode date-input && vite build -c vite.lib.config.ts --mode date-parser",
     "build:demo": "vite build -c vite.config.ts --outDir dist-demo",
-    "check:architecture": "node scripts/check-architecture.mjs && node scripts/check-demo-boundaries.mjs",
+    "check:architecture": "node scripts/check-architecture.mjs && node scripts/check-library-contracts.mjs && node scripts/check-demo-boundaries.mjs",
     "check:bundle-size": "node scripts/check-bundle-size.mjs",
     "report:size": "node scripts/check-bundle-size.mjs",
     "typecheck": "tsc --noEmit",

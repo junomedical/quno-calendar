@@ -82,13 +82,13 @@ const loadEvents: LoadEvents = async ({ startDate }) => [{
   start: startDate + "T09:00:00+02:00", end: startDate + "T10:00:00+02:00"
 }];
 function EventCard({ event, style }: EventRendererProps) { return <div style={style}>{event.title}</div>; }
-const value: DateRange = { start: "2026-08-24", end: addDays("2026-08-24", 1) };
-parseDateInput("tomorrow", { referenceDate: "2026-08-24", expectedRange: value });
-tokenizeDateInput("tomorrow");
+const value: DateRange = { start: "2026-08-24", end: addDays({ date: "2026-08-24", amount: 1 }) };
+parseDateInput({ text: "tomorrow", ...({ referenceDate: "2026-08-24", expectedRange: value }) });
+tokenizeDateInput({ text: "tomorrow" });
 createRoot(document.getElementById("root")!).render(<>
   <QunoDatePicker value={value} /><QunoDateInput expectedRange={value} value={value} />
   <QunoInfiniteCalendar calendars={[{ id: "team", name: "Team" }]} selectedCalendarIds={["team"]}
-    loadEvents={loadEvents} eventRenderer={EventCard} initialDateKey="2026-08-24" />
+    loadEvents={loadEvents} renderEvent={EventCard} initialDateKey="2026-08-24" />
 </>);
 `
 );

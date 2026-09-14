@@ -19,9 +19,15 @@
       Why: public timezone behavior needs discoverable examples, explicit limits and the same tested implementation in the consuming app.
       Files: README.md, CHANGELOG.md, docs/, demo/demos/TimeZoneDemo.tsx, demo/guide/, scripts/check-bundle-size.mjs, e2e/specs/examples.spec.ts and .gitignore; consumer archive lives in quno-next-mono/apps/onboarding/vendor/.
 
-4. Verify compatibility and retain the exact known formatting limit.
-   1. All 328 unit tests pass with one worker, including 13 DST regression cases; four focused Chromium checks pass. A timing-sensitive parallel performance assertion passed in the single-worker run.
-   2. Architecture, TypeScript, lint, library/demo builds, size budgets, packed React/SSR and Preact fixtures, and npm pack dry-run pass.
-   3. Full formatting still reports a pre-existing issue in src/lib/date-picker/OffscreenPills.tsx; changed DST files pass. Chromium coverage reported here is the focused set, not a claim that the entire browser suite ran.
-      Why: establish timezone correctness and package compatibility while preserving verification limits accurately.
-      Evidence: local qu3879-dst-unit-serial.log, qu3879-dst-package.log, qu3879-dst-compat.log and qu3879-dst-format.log; repository tests and CHANGELOG.
+4. Verify the merged library and package.
+   1. The full unit run passes 347 tests; final interaction tests pass 18 cases including an additional browser-DST-fold regression. All 118 Chromium checks pass across the full run and the rerun after fixing a missing pointer-helper import; timezone geometry also passes in New York and Tokyo browser contexts.
+   2. Architecture, TypeScript, lint, formatting, library/demo builds, measured size guards, packed React/SSR and Preact fixtures, and npm pack dry-run pass. Current main resolves the earlier OffscreenPills formatting issue.
+      Why: verify the combined public contract and timezone behavior, including actual package consumption.
+      Evidence: local qu3879-cal-* merge verification logs; repository unit/browser tests and packaging scripts.
+
+5. Align release 1 with current Calendar main.
+   1. Merge origin/main at 2bcc8ce. Keep named object contracts, renderEvent, component-level locale, pointer-frame coalescing, ref-based interaction state and independent availability lanes, alongside timezone geometry and DST mutation safety.
+   2. Compare drag changes by absolute instants so a repeated hour in the browser timezone cannot suppress a valid change in the configured calendar timezone.
+   3. The combined Infinite Calendar artifact is 163.08 KiB raw / 38.59 KiB gzip with a 39 KiB ceiling; other product budgets are unchanged. Retain branch-local decision provenance where upstream reused Decision 091.
+      Why: retain the latest main behavior without reintroducing browser-timezone dependence or breaking Onboarding's integration.
+      Files: timeline runtime/interaction/date helpers, timezone demo/tests, public docs, size guards and shared production profiles. Onboarding updates its consumer API and vendored archive in the corresponding monorepo branch.

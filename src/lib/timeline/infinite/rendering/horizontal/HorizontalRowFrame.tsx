@@ -31,12 +31,12 @@ type HorizontalRowFrameProps = PropsWithChildren<{
   nowMinute: number;
   layoutItems: HorizontalRowLayoutItems;
   geometryRegistration: ViewportGeometryRegistration;
-  onHoverMove: (
-    event: PointerEvent<HTMLDivElement>,
-    layoutItems: HorizontalRowLayoutItems,
-    renderedCalendarId: CalendarId,
-    rowHeight: number
-  ) => void;
+  onHoverMove: (args: {
+    event: PointerEvent<HTMLDivElement>;
+    layoutItems: HorizontalRowLayoutItems;
+    renderedCalendarId: CalendarId;
+    rowHeight: number;
+  }) => void;
   onHoverLeave: () => void;
 }>;
 
@@ -61,8 +61,9 @@ export function HorizontalRowFrame({
   onHoverLeave,
   children
 }: HorizontalRowFrameProps) {
-  const setResourceElement = useCallback(
-    (element: HTMLDivElement | null) => geometryRegistration.registerResourceElement(dateKey, calendar.id, element),
+  const setResourceElement = useCallback<import("react").RefCallback<HTMLDivElement>>(
+    (element: HTMLDivElement | null) =>
+      geometryRegistration.registerResourceElement({ dateKey, calendarId: calendar.id, element }),
     [calendar.id, dateKey, geometryRegistration]
   );
 
@@ -99,7 +100,7 @@ export function HorizontalRowFrame({
         data-event-count={eventCount}
         title={calendarCellProps?.title}
         onMouseLeave={onHoverLeave}
-        onPointerMove={(event) => onHoverMove(event, layoutItems, calendar.id, rowHeight)}
+        onPointerMove={(event) => onHoverMove({ event, layoutItems, renderedCalendarId: calendar.id, rowHeight })}
         style={{
           ...calendarCellProps?.style,
           left: settings.labelWidth,
@@ -118,7 +119,7 @@ export function HorizontalRowFrame({
             className={`quno-calendar-now-line ${nowLineClassName}`}
             data-testid="current-time-line"
             style={{
-              left: TIMELINE_LEFT_GUTTER_PX + minuteToX(nowMinute, settings)
+              left: TIMELINE_LEFT_GUTTER_PX + minuteToX({ minute: nowMinute, geometry: settings })
             }}
           />
         ) : null}

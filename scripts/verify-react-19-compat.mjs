@@ -70,17 +70,17 @@ import { QunoDateInput } from "@quno/calendar/date-input";
 import { parseDateInput } from "@quno/calendar/date-parser";
 
 const initial: DateRange = { start: "2026-08-24", end: "2026-08-24" };
-parseDateInput("today", { expectedRange: initial, referenceDate: initial.start });
+parseDateInput({ text: "today", ...({ expectedRange: initial, referenceDate: initial.start }) });
 
 function Fixture() {
   const [value, setValue] = useState<DateRange | null>(initial);
   useEffect(() => document.body.setAttribute("data-react19-ready", "true"), []);
   return <main>
-    <QunoDatePicker value={value} onChange={setValue} disabledDays={(date) => date === "2026-08-25"} />
-    <QunoDateInput expectedRange={initial} value={value} onChange={setValue} />
+    <QunoDatePicker value={value} onChange={({ value }) => setValue(value)} isDayDisabled={({ date }) => date === "2026-08-25"} />
+    <QunoDateInput expectedRange={initial} value={value} onChange={({ value }) => setValue(value)} />
     <div style={{ height: 420 }}>
       <QunoInfiniteCalendar calendars={[{ id: "team", name: "Team" }]} selectedCalendarIds={["team"]}
-        loadEvents={async () => []} eventRenderer={() => null} initialDateKey="2026-08-24" />
+        loadEvents={async () => []} renderEvent={() => null} initialDateKey="2026-08-24" />
     </div>
   </main>;
 }

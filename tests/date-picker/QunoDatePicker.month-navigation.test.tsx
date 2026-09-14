@@ -56,14 +56,15 @@ describe("QunoDatePicker month and year navigation", () => {
   });
 
   it("jumps to a month without changing the selected range", () => {
+    vi.useFakeTimers();
     const onChange = vi.fn();
     const onVisibleMonthChange = vi.fn();
     render(
       <QunoDatePicker
         initialMonth="2026-08-01"
         defaultValue={{ start: "2026-08-10", end: "2026-08-18" }}
-        onChange={onChange}
-        onVisibleMonthChange={onVisibleMonthChange}
+        onChange={({ value }) => onChange(value)}
+        onVisibleMonthChange={({ month }) => onVisibleMonthChange(month)}
       />
     );
 
@@ -75,6 +76,7 @@ describe("QunoDatePicker month and year navigation", () => {
     });
     navigation.scrollTop = 23088;
     fireEvent.scroll(navigation);
+    act(() => vi.advanceTimersByTime(17));
     fireEvent.click(screen.getByRole("button", { name: "February 2030" }));
 
     expect(slot("month-heading")).toHaveTextContent("February 2030");
@@ -135,7 +137,7 @@ describe("QunoDatePicker month and year navigation", () => {
     navigation.scrollTop = 850;
     fireEvent.scroll(navigation);
     act(() => {
-      vi.advanceTimersByTime(120);
+      vi.advanceTimersByTime(140);
     });
     expect(navigation).toHaveAttribute("data-last-year", "2151");
     expect(document.querySelectorAll('[data-slot="year-group"]').length).toBeLessThanOrEqual(6);
@@ -144,7 +146,7 @@ describe("QunoDatePicker month and year navigation", () => {
     navigation.scrollTop = 0;
     fireEvent.scroll(navigation);
     act(() => {
-      vi.advanceTimersByTime(120);
+      vi.advanceTimersByTime(140);
     });
     expect(navigation).toHaveAttribute("data-first-year", "1901");
     expect(document.querySelectorAll('[data-slot="year-group"]').length).toBeLessThanOrEqual(6);
@@ -185,8 +187,8 @@ describe("QunoDatePicker month and year navigation", () => {
           monthNavigation: "Month jump choices"
         }}
         formatters={{
-          monthOption: (month) => `M${month.slice(5, 7)}`,
-          year: (month) => `Y${month.slice(0, 4)}`
+          monthOption: ({ month }) => `M${month.slice(5, 7)}`,
+          year: ({ month }) => `Y${month.slice(0, 4)}`
         }}
         classNames={{
           monthNavigation: "consumer-month-navigation",

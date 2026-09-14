@@ -28,12 +28,12 @@ export class ViewportMetricsStore {
   readonly getSnapshot = () => this.snapshot;
   readonly getServerSnapshot = () => EMPTY_METRICS;
 
-  subscribe = (listener: () => void) => {
+  subscribe = ({ listener }: { listener: () => void }) => {
     this.listeners.add(listener);
     return () => this.listeners.delete(listener);
   };
 
-  attach(element: HTMLElement | null) {
+  attach({ element }: { element: HTMLElement | null }) {
     if (element === this.element) return () => this.detach();
     this.detach();
     this.element = element;
@@ -86,10 +86,14 @@ export class ViewportMetricsStore {
 
 export function useViewportMetricsStore(containerRef: RefObject<HTMLElement | null>) {
   const store = useMemo(() => new ViewportMetricsStore(), []);
-  useLayoutEffect(() => store.attach(containerRef.current), [containerRef, store]);
+  useLayoutEffect(() => store.attach({ element: containerRef.current }), [containerRef, store]);
   return store;
 }
 
 export function useViewportMetrics(store: ViewportMetricsStore) {
-  return useSyncExternalStore(store.subscribe, store.getSnapshot, store.getServerSnapshot);
+  return useSyncExternalStore(
+    (argument0) => store.subscribe({ listener: argument0 }),
+    store.getSnapshot,
+    store.getServerSnapshot
+  );
 }

@@ -25,7 +25,7 @@ import {
 function useEventProjections(settings: VerticalCalendarColumnProps["settings"]) {
   const event = useCallback(
     (calendarEvent: CalendarEvent) => {
-      const box = verticalEventBox(calendarEvent, settings);
+      const box = verticalEventBox({ event: calendarEvent, settings });
       return {
         left: 0,
         top: box.top,
@@ -37,7 +37,7 @@ function useEventProjections(settings: VerticalCalendarColumnProps["settings"]) 
     [settings]
   );
   const committed = useCallback(
-    (item: EventColumnLayoutItem, hovered: boolean) => {
+    ({ item, hovered }: { item: EventColumnLayoutItem; hovered: boolean }) => {
       const width = hovered ? "100%" : `calc(${item.widthPercent}% - ${VERTICAL_COLUMN_GAP_PX * 2}px)`;
       return {
         left: hovered ? "0%" : `calc(${item.leftPercent}% + ${VERTICAL_COLUMN_GAP_PX}px)`,
@@ -49,7 +49,17 @@ function useEventProjections(settings: VerticalCalendarColumnProps["settings"]) 
     },
     [settings.verticalEventHoverMinHeight]
   );
-  return { event, committed };
+  const availability = useCallback(
+    ({ item }: { item: EventColumnLayoutItem }) => ({
+      left: `${item.leftPercent}%`,
+      top: item.top,
+      width: `${item.widthPercent}%`,
+      hoverMaxWidth: `${item.widthPercent}%`,
+      height: item.height
+    }),
+    []
+  );
+  return { event, committed, availability };
 }
 
 export const VerticalCalendarColumn = memo(function VerticalCalendarColumn({
@@ -75,7 +85,7 @@ export const VerticalCalendarColumn = memo(function VerticalCalendarColumn({
   draftEventIsDraggable,
   draftEventIsExiting,
   draftEventReleaseDurationMs,
-  eventRenderer,
+  renderEvent,
   geometryRegistration,
   gridColumn,
   isAlternate,
@@ -83,14 +93,24 @@ export const VerticalCalendarColumn = memo(function VerticalCalendarColumn({
   onHoverLeave,
   onEventPointerDown
 }: VerticalCalendarColumnProps) {
-  const availabilityEvents = useMemo(() => rowEvents.filter((event) => event.kind === "availability"), [rowEvents]);
   const layoutItems = useMemo(
-    () => positionColumnLayoutItems(layoutPreparedEventsForColumn(preparedCell, settings)),
+    () =>
+      positionColumnLayoutItems({
+        items: layoutPreparedEventsForColumn({ preparedCell: preparedCell.events, settings })
+      }),
+    [preparedCell, settings]
+  );
+  const availabilityItems = useMemo(
+    () =>
+      positionColumnLayoutItems({
+        items: layoutPreparedEventsForColumn({ preparedCell: preparedCell.availability, settings })
+      }),
     [preparedCell, settings]
   );
   const project = useEventProjections(settings);
-  const setResourceElement = useCallback(
-    (element: HTMLDivElement | null) => geometryRegistration.registerResourceElement(dateKey, calendar.id, element),
+  const setResourceElement = useCallback<import("react").RefCallback<HTMLDivElement>>(
+    (element: HTMLDivElement | null) =>
+      geometryRegistration.registerResourceElement({ dateKey, calendarId: calendar.id, element }),
     [calendar.id, dateKey, geometryRegistration]
   );
 
@@ -109,7 +129,9 @@ export const VerticalCalendarColumn = memo(function VerticalCalendarColumn({
       ref={setResourceElement}
       aria-hidden={isHidden || undefined}
       onMouseLeave={onHoverLeave}
-      onPointerMove={(pointerEvent) => onHoverMove(pointerEvent, layoutItems, calendar.id)}
+      onPointerMove={(pointerEvent) =>
+        onHoverMove({ event: pointerEvent, layoutItems, renderedCalendarId: calendar.id })
+      }
       style={{
         ...calendarCellProps?.style,
         gridColumn,
@@ -125,17 +147,17 @@ export const VerticalCalendarColumn = memo(function VerticalCalendarColumn({
     >
       <CalendarHourBands hours={calendarHourPresentations} orientation="vertical" settings={settings} />
       <AvailabilityLayer
-        events={availabilityEvents}
+        items={availabilityItems}
         calendarId={calendar.id}
         interactionMode={interactionMode}
         dragEventId={dragEventId}
         appearingEventIds={appearingEventIds}
         focusedEventTarget={focusedEventTarget}
         eventInteractionEnabled={eventInteractionEnabled}
-        eventRenderer={eventRenderer}
+        renderEvent={renderEvent}
         geometryRegistration={geometryRegistration}
         onEventPointerDown={onEventPointerDown}
-        project={project.event}
+        project={project.availability}
         shellClassName="icv-event-shell"
       />
       <CommittedLayer
@@ -147,7 +169,7 @@ export const VerticalCalendarColumn = memo(function VerticalCalendarColumn({
         appearingEventIds={appearingEventIds}
         focusedEventTarget={focusedEventTarget}
         eventInteractionEnabled={eventInteractionEnabled}
-        eventRenderer={eventRenderer}
+        renderEvent={renderEvent}
         geometryRegistration={geometryRegistration}
         onEventPointerDown={onEventPointerDown}
         project={project.committed}
@@ -163,10 +185,10 @@ export const VerticalCalendarColumn = memo(function VerticalCalendarColumn({
         draftEventReleaseDurationMs={draftEventReleaseDurationMs}
         dragPreviewEvent={dragPreviewEvent}
         eventInteractionEnabled={eventInteractionEnabled}
-        eventRenderer={eventRenderer}
+        renderEvent={renderEvent}
         geometryRegistration={geometryRegistration}
         onEventPointerDown={onEventPointerDown}
-        project={project.event}
+        project={({ event }) => project.event(event)}
         shellClassName="icv-event-shell"
       />
     </div>

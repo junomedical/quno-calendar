@@ -365,6 +365,8 @@ test("keeps the same calendar row anchored when drawing again after cancelling e
 });
 
 test("restores participant-filtered calendars without a delayed redraw or event refetch", async ({ page }) => {
+  // This scenario needs working-hour events, independently of the machine clock.
+  await page.clock.setFixedTime(new Date("2026-07-06T09:00:00+02:00"));
   await page.goto("/demo/infinite-calendar");
   await waitForDemoEvents(page);
   await page.getByTestId("api-latency-select").selectOption("1000");

@@ -6,7 +6,7 @@ type StructuralRenderWindowArgs = {
   resourceTransitionKey: string;
   topVisibleDateKey: string;
   itemCount: number;
-  dateKeyToIndex: (dateKey: string) => number;
+  dateKeyToIndex: (args: { dateKey: string }) => number;
 };
 
 /** Pins semantic base geometry until a changed date/layout model has settled. */
@@ -22,6 +22,7 @@ export function useStructuralRenderWindow({
   const overrideRef = useRef<{
     transitionKey: string;
     anchorIndex: number;
+    anchorDateKey: string;
     retainAllResources: boolean;
   } | null>(null);
   const [, setTransitionVersion] = useState(0);
@@ -29,12 +30,15 @@ export function useStructuralRenderWindow({
   if (previousTransitionKeyRef.current !== transitionKey) {
     overrideRef.current = {
       transitionKey,
-      anchorIndex: clampVirtualDateIndex(dateKeyToIndex(topVisibleDateKey), itemCount),
+      anchorIndex: clampVirtualDateIndex({ index: dateKeyToIndex({ dateKey: topVisibleDateKey }), count: itemCount }),
+      anchorDateKey: topVisibleDateKey,
       retainAllResources: previousResourceTransitionKeyRef.current !== resourceTransitionKey
     };
   }
   const anchorIndex =
     overrideRef.current?.transitionKey === transitionKey ? overrideRef.current.anchorIndex : undefined;
+  const anchorDateKey =
+    overrideRef.current?.transitionKey === transitionKey ? overrideRef.current.anchorDateKey : undefined;
   const retainAllResources = Boolean(anchorIndex !== undefined && overrideRef.current?.retainAllResources);
 
   useLayoutEffect(() => {
@@ -56,5 +60,5 @@ export function useStructuralRenderWindow({
     };
   }, [anchorIndex, resourceTransitionKey, transitionKey]);
 
-  return { anchorIndex, retainAllResources };
+  return { anchorDateKey, anchorIndex, retainAllResources };
 }

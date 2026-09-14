@@ -18,13 +18,23 @@ export type DragState = {
   preview: EventMoveRequest | null;
 };
 
-export function proposalForDrag(
-  drag: DragState,
-  hit: CalendarHit,
-  settings: QunoInfiniteCalendarSettings,
-  draggingActiveDraft: boolean
-): EventMoveRequest {
-  const baseProposal = buildMoveProposal(drag.event, hit, drag.offsetMinutes, settings);
+export function proposalForDrag({
+  drag,
+  hit,
+  settings,
+  draggingActiveDraft
+}: {
+  drag: DragState;
+  hit: CalendarHit;
+  settings: QunoInfiniteCalendarSettings;
+  draggingActiveDraft: boolean;
+}): EventMoveRequest {
+  const baseProposal = buildMoveProposal({
+    event: drag.event,
+    hit,
+    pointerOffsetMinutes: drag.offsetMinutes,
+    settings
+  });
   const currentCalendarIds = eventCalendarIds(drag.event);
   const keepsDraftMembership = draggingActiveDraft && currentCalendarIds.length > 1;
   return {
@@ -33,11 +43,21 @@ export function proposalForDrag(
     sourceCalendarId: drag.sourceCalendarId,
     proposedCalendarIds: keepsDraftMembership
       ? currentCalendarIds
-      : replaceEventCalendarMembership(drag.event, drag.sourceCalendarId, baseProposal.proposedCalendarId)
+      : replaceEventCalendarMembership({
+          event: drag.event,
+          sourceCalendarId: drag.sourceCalendarId,
+          proposedCalendarId: baseProposal.proposedCalendarId
+        })
   };
 }
 
-export function previewEventForDrag(drag: DragState | null, draggingActiveDraft: boolean): CalendarEvent | null {
+export function previewEventForDrag({
+  drag,
+  draggingActiveDraft
+}: {
+  drag: DragState | null;
+  draggingActiveDraft: boolean;
+}): CalendarEvent | null {
   if (!drag?.preview || draggingActiveDraft) return null;
   return {
     ...drag.event,
@@ -46,4 +66,14 @@ export function previewEventForDrag(drag: DragState | null, draggingActiveDraft:
     start: drag.preview.proposedStart,
     end: drag.preview.proposedEnd
   };
+}
+
+/** Distinguishes a click/release from a move after final-position flushing. */
+export function proposalChangesEvent({ drag, proposal }: { drag: DragState; proposal: EventMoveRequest }): boolean {
+  return !(
+    Date.parse(proposal.proposedStart) === Date.parse(drag.event.start) &&
+    Date.parse(proposal.proposedEnd) === Date.parse(drag.event.end) &&
+    proposal.proposedCalendarId === drag.sourceCalendarId &&
+    proposal.proposedCalendarIds.join("|") === eventCalendarIds(drag.event).join("|")
+  );
 }

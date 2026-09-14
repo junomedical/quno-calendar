@@ -162,6 +162,14 @@ test("date input field guide follows the task-oriented component contract", asyn
   await expect(guide.locator("#picker-composition").getByRole("grid")).toHaveAccessibleName(
     "Date range picker: December 2026"
   );
+  await guide.locator('#picker-composition [data-slot="pill"][data-endpoint="start"]').click();
+  await expect(guide.locator("#picker-composition").getByRole("grid")).toHaveAccessibleName(
+    "Date range picker: May 2026"
+  );
+  await guide.locator('#picker-composition [data-slot="pill"][data-endpoint="end"]').click();
+  await expect(guide.locator("#picker-composition").getByRole("grid")).toHaveAccessibleName(
+    "Date range picker: December 2026"
+  );
   await expect(guide.getByRole("link", { name: "Date Parser field guide" })).toHaveAttribute(
     "href",
     "/guide/date-parser"
@@ -301,10 +309,10 @@ test("editorial CSS-native exhibit keeps stable chrome browser-positioned", asyn
 
 test("all four guides separate exact payloads from runtime contracts", async ({ page }) => {
   const guides = [
-    ["infinite-calendar", "34.29 KiB gzip", "1.95 KiB gzip", "@quno/calendar/infinite-calendar"],
-    ["datepicker", "9.00 KiB gzip", "3.20 KiB gzip", "@quno/calendar/datepicker"],
-    ["date-input", "6.77 KiB gzip", "0.58 KiB gzip", "@quno/calendar/date-input"],
-    ["date-parser", "4.45 KiB gzip", "No stylesheet", "@quno/calendar/date-parser"]
+    ["infinite-calendar", "38.59 KiB gzip", "1.95 KiB gzip", "@quno/calendar/infinite-calendar"],
+    ["datepicker", "10.47 KiB gzip", "3.22 KiB gzip", "@quno/calendar/datepicker"],
+    ["date-input", "7.82 KiB gzip", "0.58 KiB gzip", "@quno/calendar/date-input"],
+    ["date-parser", "5.20 KiB gzip", "No stylesheet", "@quno/calendar/date-parser"]
   ] as const;
 
   for (const [route, javascript, styles, entrypoint] of guides) {
@@ -818,12 +826,51 @@ test("editorial availability exhibit switches the only interactive event layer",
   const demo = await revealLazyArticleDemo(page, "availability interaction layer example", "article-availability-demo");
   const appointment = demo.locator('[data-event-id="follow-up-a"]');
   const availability = demo.locator('[data-testid="availability-event"][data-event-id="availability-a"]');
+  const overlappingAvailability = demo.locator(
+    '[data-testid="availability-event"][data-event-id="availability-a-overlap-1"]'
+  );
+  const consultation = demo.locator('[data-testid="calendar-event"][data-event-id="consultation-a"]');
   const activeLayerLabel = demo.getByTestId("article-active-layer");
   const layerButtons = demo.locator('.article-segmented-control[aria-label="Editable calendar layer"]');
 
   await expect(activeLayerLabel).toHaveText("Appointments active");
   await expect(appointment).toHaveCSS("pointer-events", "auto");
   await expect(availability).toHaveCSS("pointer-events", "none");
+  await expect(availability.locator(".article-event-card")).toHaveAttribute("data-lane-count", "4");
+  await expect(availability.locator(".article-event-card__kicker")).toHaveText("Avail. 1/4");
+  await expect(consultation).toHaveCSS("z-index", "2");
+  await expect(availability).toHaveCSS("z-index", "1");
+  const horizontalLaneBoxes = await Promise.all([availability.boundingBox(), overlappingAvailability.boundingBox()]);
+  expect(horizontalLaneBoxes[0]).not.toBeNull();
+  expect(horizontalLaneBoxes[1]).not.toBeNull();
+  expect(horizontalLaneBoxes[1]?.y).toBeGreaterThan(horizontalLaneBoxes[0]?.y ?? 0);
+  expect(
+    await demo
+      .locator(".quno-calendar-availability-shell .article-event-card__kicker")
+      .evaluateAll((labels) => labels.every((label) => label.scrollWidth <= label.clientWidth))
+  ).toBe(true);
+  const horizontalRow = demo.locator(
+    '[data-testid="calendar-day"][data-date="2026-07-06"] [data-testid="calendar-row"][data-calendar-id="provider-a"]'
+  );
+  await expect.poll(async () => (await horizontalRow.boundingBox())?.height).toBe(96);
+
+  await demo.getByRole("button", { name: "Vertical" }).click();
+  const verticalColumn = demo.locator(
+    '[data-testid="calendar-column"][data-date="2026-07-06"][data-calendar-id="provider-a"]'
+  );
+  await expect(verticalColumn).toBeVisible();
+  const verticalLaneBoxes = await Promise.all([availability.boundingBox(), overlappingAvailability.boundingBox()]);
+  expect(verticalLaneBoxes[1]?.x).toBeGreaterThan(verticalLaneBoxes[0]?.x ?? 0);
+  expect(
+    await demo
+      .locator(".quno-calendar-availability-shell .article-event-card__kicker")
+      .evaluateAll((labels) => labels.every((label) => label.scrollWidth <= label.clientWidth))
+  ).toBe(true);
+  const verticalBoard = verticalColumn.locator("xpath=..");
+  await expect(verticalBoard).toHaveAttribute("style", /grid-template-columns: minmax\(282px, 1fr\)/);
+  await expect(verticalBoard).toHaveCSS("min-width", "282px");
+  await demo.getByRole("button", { name: "Horizontal" }).click();
+  await expect(horizontalRow).toBeVisible();
   const [labelBox, buttonsBox] = await Promise.all([activeLayerLabel.boundingBox(), layerButtons.boundingBox()]);
   expect(labelBox).not.toBeNull();
   expect(buttonsBox).not.toBeNull();

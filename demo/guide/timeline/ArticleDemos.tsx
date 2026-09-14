@@ -111,7 +111,7 @@ const loadScrollingEvents: LoadEvents = async ({ calendarIds, endDate, startDate
         kind: index % 2 === 0 ? "appointment" : "consultation"
       });
     });
-    date = addDays(date as IsoDate, 1);
+    date = addDays({ date: date as IsoDate, amount: 1 });
   }
   return events;
 };
@@ -135,7 +135,7 @@ export function InfiniteCalendarDemo() {
         <QunoInfiniteCalendar
           ariaLabel="Infinite calendar concept"
           calendars={articleCalendars}
-          eventRenderer={ArticleEventCard}
+          renderEvent={ArticleEventCard}
           initialDateKey={articleDateKey}
           loadEvents={loadScrollingEvents}
           selectedCalendarIds={visibleCalendarIds}
@@ -268,7 +268,7 @@ export function EventCardsDemo() {
           <QunoInfiniteCalendar
             ariaLabel="Calendar populated by external event cards"
             calendars={articleCalendars}
-            eventRenderer={ArticleEventCard}
+            renderEvent={ArticleEventCard}
             initialDateKey={articleDateKey}
             loadEvents={loadArticleEvents}
             selectedCalendarIds={visibleCalendarIds}
@@ -365,11 +365,11 @@ export function ZoomCalendarDemo() {
         <QunoInfiniteCalendar
           ariaLabel="Controlled zoom calendar"
           calendars={articleCalendars}
-          eventRenderer={ArticleEventCard}
+          renderEvent={ArticleEventCard}
           initialDateKey={articleDateKey}
           loadEvents={loadArticleEvents}
           now={articleZoomNow}
-          onZoomChange={changeZoom}
+          onZoomChange={({ zoom }) => changeZoom(zoom)}
           selectedCalendarIds={visibleCalendarIds}
           settings={settings}
         />
@@ -384,7 +384,7 @@ export function LaneComparisonDemo() {
 
   useEffect(() => {
     const frameId = window.requestAnimationFrame(() => {
-      calendarRef.current?.scrollToDateTime(articleDateKey, "12:45");
+      calendarRef.current?.scrollToDateTime({ date: articleDateKey, time: "12:45" });
     });
     return () => window.cancelAnimationFrame(frameId);
   }, [view]);
@@ -421,7 +421,7 @@ export function LaneComparisonDemo() {
           ref={calendarRef}
           ariaLabel="Overlap lane comparison"
           calendars={articleCalendars}
-          eventRenderer={ArticleEventCard}
+          renderEvent={ArticleEventCard}
           initialDateKey={articleDateKey}
           loadEvents={loadOverlapEvents}
           selectedCalendarIds={visibleCalendarIds}
@@ -518,7 +518,7 @@ export function StabilityDemo() {
         <QunoInfiniteCalendar
           ariaLabel="Delayed loading and viewport stability calendar"
           calendars={articleCalendars}
-          eventRenderer={ArticleEventCard}
+          renderEvent={ArticleEventCard}
           eventVersion={eventVersion}
           focusRequest={focusRequest}
           initialDateKey={articleDateKey}
@@ -556,21 +556,21 @@ export function MotionDemo() {
       event
     ];
     setActiveDraft(null);
-    calendarRef.current?.commitVisibleEvent(event, { appearing: true, previousEventId });
-    calendarRef.current?.scrollToDateTime(
-      event.start.slice(0, 10) as `${number}-${number}-${number}`,
-      event.start.slice(11, 16)
-    );
+    calendarRef.current?.commitVisibleEvent({ event, ...{ appearing: true, previousEventId } });
+    calendarRef.current?.scrollToDateTime({
+      date: event.start.slice(0, 10) as `${number}-${number}-${number}`,
+      time: event.start.slice(11, 16)
+    });
   };
 
   const showNewDraft = () => {
     const draft = createMotionDraft(sequenceRef.current + 1);
     setActiveDraft(draft);
     window.requestAnimationFrame(() => {
-      calendarRef.current?.scrollToDateTime(
-        draft.event.start.slice(0, 10) as `${number}-${number}-${number}`,
-        draft.event.start.slice(11, 16)
-      );
+      calendarRef.current?.scrollToDateTime({
+        date: draft.event.start.slice(0, 10) as `${number}-${number}-${number}`,
+        time: draft.event.start.slice(11, 16)
+      });
     });
   };
 
@@ -613,7 +613,7 @@ export function MotionDemo() {
           activeDraft={activeDraft}
           ariaLabel="Appearing event animation calendar"
           calendars={articleCalendars}
-          eventRenderer={ArticleEventCard}
+          renderEvent={ArticleEventCard}
           initialDateKey={articleDateKey}
           loadEvents={loadEvents}
           selectedCalendarIds={["provider-a"]}
@@ -635,7 +635,7 @@ export function HoverRevealDemo() {
         <QunoInfiniteCalendar
           ariaLabel="Hover reveals underlying overlap lanes"
           calendars={articleCalendars}
-          eventRenderer={ArticleEventCard}
+          renderEvent={ArticleEventCard}
           initialDateKey={articleDateKey}
           loadEvents={loadOverlapEvents}
           selectedCalendarIds={["provider-a"]}
@@ -677,10 +677,10 @@ export function CreationLaneDemo() {
     };
     setActiveDraft(draft);
     window.requestAnimationFrame(() => {
-      calendarRef.current?.scrollToDateTime(
-        draft.event.start.slice(0, 10) as `${number}-${number}-${number}`,
-        draft.event.start.slice(11, 16)
-      );
+      calendarRef.current?.scrollToDateTime({
+        date: draft.event.start.slice(0, 10) as `${number}-${number}-${number}`,
+        time: draft.event.start.slice(11, 16)
+      });
     });
   };
 
@@ -729,7 +729,7 @@ export function CreationLaneDemo() {
           activeDraft={activeDraft}
           ariaLabel="Single-lane event creation calendar"
           calendars={articleCalendars}
-          eventRenderer={ArticleEventCard}
+          renderEvent={ArticleEventCard}
           initialDateKey={articleDateKey}
           loadEvents={loadCreationLaneEvents}
           selectedCalendarIds={selectedCalendarIds}

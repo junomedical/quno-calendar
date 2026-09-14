@@ -5,15 +5,12 @@ import {
 } from "#quno-internal/timeline/infinite/interactions/timelineInteractionModel";
 import { minutesSinceStartOfDay } from "#quno-internal/timeline/time/time";
 import { type CalendarEvent, type CalendarViewComponentProps } from "#quno-internal/timeline/core/types";
-
 type PointerLike = Pick<PointerEvent, "clientX" | "clientY">;
-
 export type DraftState = {
   start: CalendarHit;
   current: CalendarHit;
   event: CalendarEvent;
 };
-
 type UseTimelineDraftInteractionArgs = {
   timeZone?: string;
   interactionMode: NonNullable<CalendarViewComponentProps["interactionMode"]>;
@@ -22,7 +19,6 @@ type UseTimelineDraftInteractionArgs = {
   onEventDraftRequest?: CalendarViewComponentProps["onEventDraftRequest"];
   applyCreatedEventToLoadedEvents: (event: CalendarEvent) => void;
 };
-
 export function useTimelineDraftInteraction({
   timeZone,
   interactionMode,
@@ -32,61 +28,65 @@ export function useTimelineDraftInteraction({
   applyCreatedEventToLoadedEvents
 }: UseTimelineDraftInteractionArgs) {
   const [draftState, setDraftState] = useState<DraftState | null>(null);
+  const draftStateRef = useRef<DraftState | null>(null);
   const createdEventSequenceRef = useRef(0);
   const pendingDraftClearFrameRef = useRef<number | null>(null);
-
   const draftKind = interactionMode === "availability" ? "availability" : "draft";
-
   const startDraft = useCallback(
     (hit: CalendarHit) => {
       try {
-        setDraftState({ start: hit, current: hit, event: buildDraftEvent(hit, hit, draftKind, timeZone) });
+        const next = {
+          start: hit,
+          current: hit,
+          event: buildDraftEvent({ startHit: hit, endHit: hit, kind: draftKind, timeZone })
+        };
+        draftStateRef.current = next;
+        setDraftState(next);
       } catch {
+        draftStateRef.current = null;
         setDraftState(null);
       }
     },
     [draftKind, timeZone]
   );
-
   const updateDraftFromPoint = useCallback(
     (event: PointerLike) => {
-      if (!draftState) {
+      const currentDraft = draftStateRef.current;
+      if (!currentDraft) {
         return false;
       }
-
       const hit = getHit(event);
-      if (!hit || hit.dateKey !== draftState.start.dateKey || hit.calendarId !== draftState.start.calendarId) {
+      if (!hit || hit.dateKey !== currentDraft.start.dateKey || hit.calendarId !== currentDraft.start.calendarId) {
         return true;
       }
       try {
-        setDraftState({
-          start: draftState.start,
+        const next = {
+          start: currentDraft.start,
           current: hit,
-          event: buildDraftEvent(draftState.start, hit, draftKind, timeZone)
-        });
+          event: buildDraftEvent({ startHit: currentDraft.start, endHit: hit, kind: draftKind, timeZone })
+        };
+        draftStateRef.current = next;
+        setDraftState(next);
       } catch {
-        // Cancel an invalid final selection; never submit the last valid interval.
+        draftStateRef.current = null;
         setDraftState(null);
-        return true;
       }
       return true;
     },
-    [draftKind, draftState, getHit, timeZone]
+    [draftKind, getHit, timeZone]
   );
-
   const finishDraft = useCallback(async () => {
-    if (!draftState) {
+    const currentDraft = draftStateRef.current;
+    if (!currentDraft) {
       return false;
     }
-
     if (pendingDraftClearFrameRef.current !== null) {
       return true;
     }
-
-    const draft = draftState.event;
+    const draft = currentDraft.event;
     if (
-      minutesSinceStartOfDay(draft.end, draft.calendarTimeZone) >
-      minutesSinceStartOfDay(draft.start, draft.calendarTimeZone)
+      minutesSinceStartOfDay({ value: draft.end, timeZone: draft.calendarTimeZone }) >
+      minutesSinceStartOfDay({ value: draft.start, timeZone: draft.calendarTimeZone })
     ) {
       const request = {
         start: draft.start,
@@ -99,9 +99,11 @@ export function useTimelineDraftInteraction({
           onEventDraftRequest(request);
           pendingDraftClearFrameRef.current = window.requestAnimationFrame(() => {
             pendingDraftClearFrameRef.current = null;
+            draftStateRef.current = null;
             setDraftState(null);
           });
         } else if (onEventCreateRequest) {
+          draftStateRef.current = null;
           setDraftState(null);
           const createdEvent = await onEventCreateRequest(request);
           createdEventSequenceRef.current += 1;
@@ -114,23 +116,23 @@ export function useTimelineDraftInteraction({
           );
         }
       } catch {
+        draftStateRef.current = null;
         setDraftState(null);
       }
     } else {
+      draftStateRef.current = null;
       setDraftState(null);
     }
-
     return true;
-  }, [applyCreatedEventToLoadedEvents, draftState, onEventCreateRequest, onEventDraftRequest]);
-
+  }, [applyCreatedEventToLoadedEvents, onEventCreateRequest, onEventDraftRequest]);
   const cancelDraft = useCallback(() => {
     if (pendingDraftClearFrameRef.current !== null) {
       window.cancelAnimationFrame(pendingDraftClearFrameRef.current);
       pendingDraftClearFrameRef.current = null;
     }
+    draftStateRef.current = null;
     setDraftState(null);
   }, []);
-
   useEffect(() => {
     return () => {
       if (pendingDraftClearFrameRef.current !== null) {
@@ -138,7 +140,6 @@ export function useTimelineDraftInteraction({
       }
     };
   }, []);
-
   return {
     draftState,
     startDraft,

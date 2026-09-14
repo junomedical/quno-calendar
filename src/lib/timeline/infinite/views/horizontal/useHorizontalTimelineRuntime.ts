@@ -10,17 +10,19 @@ import { buildTimeTicks } from "#quno-internal/timeline/time/timelineTicks";
 import { useHorizontalEventHover } from "#quno-internal/timeline/infinite/rendering/horizontal/useHorizontalEventHover";
 import { useHorizontalControlledZoomAnchor } from "#quno-internal/timeline/infinite/anchors/zoom/useHorizontalControlledZoomAnchor";
 import { useHorizontalTimelineFoundation } from "./useHorizontalTimelineFoundation";
-
 /**
  * Horizontal runtime coordinator.
  *
  * data foundation + hit testing -> pointer interactions -> render-ready state
  *                            zoom requests and public committers --^
  */
-export function useHorizontalTimelineRuntime(
-  props: CalendarInternalViewProps,
-  forwardedRef: ForwardedRef<CalendarViewHandle>
-) {
+export function useHorizontalTimelineRuntime({
+  props,
+  forwardedRef
+}: {
+  props: CalendarInternalViewProps;
+  forwardedRef: ForwardedRef<CalendarViewHandle>;
+}) {
   const now = props.now ?? new Date();
   const interactionMode = props.interactionMode ?? "events";
   const [isInteractionActive, setIsInteractionActive] = useState(false);
@@ -49,7 +51,7 @@ export function useHorizontalTimelineRuntime(
   foundation.navigation.commitVisibleEventRef.current = foundation.eventRange.applyCommittedEventToLoadedEvents;
   foundation.navigation.removeVisibleEventRef.current = foundation.eventRange.removeEventFromLoadedEvents;
   useEffect(() => setIsInteractionActive(interactions.isInteractionActive), [interactions.isInteractionActive]);
-  const nowMinute = minutesSinceStartOfDay(now, foundation.settings.timeZone);
+  const nowMinute = minutesSinceStartOfDay({ value: now, timeZone: foundation.settings.timeZone });
   const showNowLine =
     nowMinute >= timelineStartMinute(foundation.settings) && nowMinute <= timelineEndMinute(foundation.settings);
   const shiftWheelZoom = useHorizontalShiftWheelZoom({
@@ -70,7 +72,6 @@ export function useHorizontalTimelineRuntime(
     startHour: foundation.sizing.effectiveSettings.startHour,
     isGestureZoomActive: shiftWheelZoom.isGestureZoomActive
   });
-
   const timeTicks = useMemo(
     () => buildTimeTicks(foundation.sizing.effectiveSettings),
     [foundation.sizing.effectiveSettings]
@@ -79,7 +80,6 @@ export function useHorizontalTimelineRuntime(
     disabled: Boolean(interactions.dragState || interactions.draftState || interactionMode === "availability"),
     setHoveredEvent: interactions.setHoveredEvent
   });
-
   return {
     ...foundation,
     hover,
@@ -88,6 +88,6 @@ export function useHorizontalTimelineRuntime(
     nowMinute,
     showNowLine,
     timeTicks,
-    todayKey: toDateKey(now, foundation.settings.timeZone)
+    todayKey: toDateKey({ date: now, timeZone: foundation.settings.timeZone })
   };
 }

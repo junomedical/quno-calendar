@@ -81,7 +81,7 @@ export function usePresetDemo(preset: DemoPreset) {
   const goToDate = useCallback(
     (date: IsoDate) => {
       setJumpDate(date);
-      calendarRef.current?.scrollToDate(date);
+      calendarRef.current?.scrollToDate({ date });
       setMessage(`Scrolled to ${date}`);
     },
     [setJumpDate]

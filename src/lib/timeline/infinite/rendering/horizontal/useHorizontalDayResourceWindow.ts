@@ -28,7 +28,7 @@ type HorizontalDayResourceWindowArgs = {
   activeRestoreTarget: CalendarViewportAnchorTarget | null;
   viewportMetricsStore: ViewportMetricsStore;
   forceAllResources: boolean;
-  getRowHeight: (dateKey: string, calendarId: CalendarId) => number;
+  getRowHeight: (args: { dateKey: string; calendarId: CalendarId }) => number;
 };
 
 export function useHorizontalDayResourceWindow({
@@ -46,39 +46,50 @@ export function useHorizontalDayResourceWindow({
   const viewport = useViewportMetrics(viewportMetricsStore);
   const rowExtents = useMemo(
     () =>
-      buildResourceExtents(
-        selectedCalendars.map((calendar) => getRowHeight(dateKey, calendar.id)),
-        dayHeaderHeight
-      ),
+      buildResourceExtents({
+        sizes: selectedCalendars.map((calendar) => getRowHeight({ dateKey, calendarId: calendar.id })),
+        start: dayHeaderHeight
+      }),
     [dateKey, dayHeaderHeight, getRowHeight, selectedCalendars]
   );
   const pinnedIndexes = useMemo(
-    () => pinnedResourceIndexes(dateKey, selectedCalendars, [draftEvent, dragPreviewEvent], activeRestoreTarget),
+    () =>
+      pinnedResourceIndexes({
+        dateKey,
+        calendars: selectedCalendars,
+        interactionEvents: [draftEvent, dragPreviewEvent],
+        activeRestoreTarget
+      }),
     [activeRestoreTarget, dateKey, draftEvent, dragPreviewEvent, selectedCalendars]
   );
   const renderedRowIndexes = useMemo(
     () =>
       forceAllResources || viewport.height === 0
         ? rowExtents.map((extent) => extent.index)
-        : resourceIndexesInWindow(
-            rowExtents,
-            viewport.scrollTop - dayStart,
-            viewport.scrollTop + viewport.height - dayStart,
-            2,
+        : resourceIndexesInWindow({
+            extents: rowExtents,
+            viewportStart: viewport.scrollTop - dayStart,
+            viewportEnd: viewport.scrollTop + viewport.height - dayStart,
+            overscan: 2,
             pinnedIndexes
-          ),
+          }),
     [dayStart, forceAllResources, pinnedIndexes, rowExtents, viewport.height, viewport.scrollTop]
   );
 
   return { renderedRowIndexes, rowExtents };
 }
 
-export function pinnedResourceIndexes(
-  dateKey: string,
-  calendars: CalendarRow[],
-  interactionEvents: Array<CalendarEvent | null>,
-  activeRestoreTarget?: CalendarViewportAnchorTarget | null
-): Set<number> {
+export function pinnedResourceIndexes({
+  dateKey,
+  calendars,
+  interactionEvents,
+  activeRestoreTarget
+}: {
+  dateKey: string;
+  calendars: CalendarRow[];
+  interactionEvents: Array<CalendarEvent | null>;
+  activeRestoreTarget?: CalendarViewportAnchorTarget | null;
+}): Set<number> {
   const pinnedCalendarIds = new Set<CalendarId>();
   if (activeRestoreTarget?.dateKey === dateKey && activeRestoreTarget.calendarId) {
     pinnedCalendarIds.add(activeRestoreTarget.calendarId);

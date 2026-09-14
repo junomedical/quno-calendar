@@ -114,7 +114,7 @@ flowchart LR
   Repair --> Loaded["Mark requested dates loaded"]
   Loaded --> Protect["Touch warm-window dates"]
   Protect --> Trim["Trim LRU to 120 date buckets"]
-  Trim --> Snapshot["Create immutable React-facing record"]
+  Trim --> Snapshot["Reuse unchanged immutable bucket arrays"]
 ```
 
 Empty requested buckets are meaningful: a successful empty response records that those dates are loaded. A failed or aborted response never replaces the rendered buckets with emptiness.
@@ -133,7 +133,9 @@ flowchart LR
 
 ## Late Events That Increase Horizontal Height
 
-Before the API resolves, an unloaded horizontal date uses compact base row heights. After loaded overlaps are prepared, only dense date/resource rows grow; availability and draft/preview overlays do not contribute lanes.
+Before the API resolves, an unloaded horizontal date uses compact base row heights. After loaded overlaps are prepared,
+dense appointment or availability collisions may grow only their date/resource row. The two layers are prepared
+independently and sizing uses their maximum depth; draft and drag-preview overlays do not contribute lanes.
 
 ### What Stays In Focus?
 
@@ -171,29 +173,29 @@ For horizontal `scrollToDateTime`, vertical focus follows the date/resource poli
 
 ## Orientation Differences
 
-| Concern                               | Infinite horizontal                                        | Infinite vertical                                                                                                           |
-| ------------------------------------- | ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| Time axis                             | X                                                          | Y                                                                                                                           |
-| Resource axis inside a date           | Variable-height rows                                       | Variable-width columns                                                                                                      |
-| Late overlap metric                   | Can increase row height and total date height              | Can increase column width; date/time height remains determined by settings and zoom                                         |
-| Primary scroll focus after event load | Date header or date/resource/local-row offset              | Date/time remains stable because event data does not change day height                                                      |
-| Cross-axis identity                   | Calendar row id is restored when horizontal heights change | Calendar column id is the semantic cross-axis identity; this change does not add a separate automatic width-correction pass |
-| Availability/draft/preview effect     | Overlay only; no row-height growth                         | Overlay only; no column-width growth                                                                                        |
+| Concern                               | Infinite horizontal                                         | Infinite vertical                                                                                                           |
+| ------------------------------------- | ----------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| Time axis                             | X                                                           | Y                                                                                                                           |
+| Resource axis inside a date           | Variable-height rows                                        | Variable-width columns                                                                                                      |
+| Late overlap metric                   | Can increase row height and total date height               | Can increase column width; date/time height remains determined by settings and zoom                                         |
+| Primary scroll focus after event load | Date header or date/resource/local-row offset               | Date/time remains stable because event data does not change day height                                                      |
+| Cross-axis identity                   | Calendar row id is restored when horizontal heights change  | Calendar column id is the semantic cross-axis identity; this change does not add a separate automatic width-correction pass |
+| Availability/draft/preview effect     | Availability can grow its own mini-lanes; transients do not | Availability can grow its own side-by-side lanes; transients do not                                                         |
 
 ## Runtime Invalidation Matrix
 
-| Trigger                                     | Recomputed or updated                                                                        | Must remain stable                                                    |
-| ------------------------------------------- | -------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
-| Visible date keys or prefetch policy change | Warm-window derivation, missing-range diff, request sets, load-window LRU protection         | Existing fresh cache buckets and grid DOM                             |
-| Current API response                        | Requested buckets, membership for revised dates, prepared cells, affected row/column metrics | Settings, unrelated dates, pointer state                              |
-| `eventVersion` or loader changes            | Request generation and loaded-date/calendar coverage knowledge                               | Rendered stale cache until replacement arrives                        |
-| Selected ids change                         | Coverage diff; request only when a selected id is not already covered                        | Covered cache snapshot and rendered event DOM                         |
-| Active-draft filtering changes visible keys | Retained settled warm window plus draft/navigation-anchor policy windows                     | Loader calls caused only by transient day-height contraction          |
-| Accepted move/create/visible commit         | Indexed source/destination buckets and affected cells                                        | Loader call count and unrelated buckets                               |
-| Horizontal zoom only                        | Time projection pixels and event-shell geometry                                              | Cache, memberships, overlap lanes, row metrics, external card content |
-| Vertical zoom only                          | Time projection pixels and virtual day height                                                | Cache, memberships, overlap lanes, column metrics                     |
-| Scroll                                      | Visible snapshot, virtual items, local resource subscribers                                  | Event cache and prepared cells                                        |
-| Hover                                       | One resource-local rendered instance                                                         | Multi-calendar sibling instances and cache                            |
+| Trigger                                     | Recomputed or updated                                                                   | Must remain stable                                                    |
+| ------------------------------------------- | --------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| Visible date keys or prefetch policy change | Warm-window derivation, missing-range diff, request sets, load-window LRU protection    | Existing fresh cache buckets and grid DOM                             |
+| Current API response                        | Requested bucket identities, membership/preparation for revised dates, affected metrics | Unchanged bucket arrays, prepared dates, settings, pointer state      |
+| `eventVersion` or loader changes            | Request generation and loaded-date/calendar coverage knowledge                          | Rendered stale cache until replacement arrives                        |
+| Selected ids change                         | Coverage diff; request only when a selected id is not already covered                   | Covered cache snapshot and rendered event DOM                         |
+| Active-draft filtering changes visible keys | Retained settled warm window plus draft/navigation-anchor policy windows                | Loader calls caused only by transient day-height contraction          |
+| Accepted move/create/visible commit         | Indexed source/destination buckets and affected cells                                   | Loader call count and unrelated buckets                               |
+| Horizontal zoom only                        | Time projection pixels and event-shell geometry                                         | Cache, memberships, overlap lanes, row metrics, external card content |
+| Vertical zoom only                          | Time projection pixels and virtual day height                                           | Cache, memberships, overlap lanes, column metrics                     |
+| Scroll                                      | Visible snapshot, virtual items, local resource subscribers                             | Event cache and prepared cells                                        |
+| Hover                                       | One resource-local rendered instance                                                    | Multi-calendar sibling instances and cache                            |
 
 ## Failure And Cancellation Subflows
 

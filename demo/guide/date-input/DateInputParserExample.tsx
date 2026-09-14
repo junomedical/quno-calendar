@@ -36,15 +36,18 @@ export function DateInputParserExample({
 }: DateInputParserExampleProps) {
   const inputId = useId();
   const [text, setText] = useState(initialText);
-  const result = parseDateInput(text, {
-    expectedRange,
-    locale,
-    lexicon,
-    parserLanguages,
-    selectionMode,
-    weekStartsOn,
-    referenceDate: "2026-08-25",
-    preferredDateOrder
+  const result = parseDateInput({
+    text,
+    ...{
+      expectedRange,
+      locale,
+      lexicon,
+      parserLanguages,
+      selectionMode,
+      weekStartsOn,
+      referenceDate: "2026-08-25",
+      preferredDateOrder
+    }
   });
 
   return (

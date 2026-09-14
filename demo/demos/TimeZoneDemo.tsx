@@ -54,7 +54,7 @@ export function TimeZoneDemo() {
           calendars={calendars}
           selectedCalendarIds={["doctor"]}
           loadEvents={loadEvents}
-          eventRenderer={Card}
+          renderEvent={Card}
           initialDateKey="2026-09-19"
           now={new Date("2026-09-19T12:00:00Z")}
           settings={{ timeZone, startHour: 7, endHour: 20, zoom: 1, excludedWeekdays: [] }}

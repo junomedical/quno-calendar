@@ -5,6 +5,10 @@ import {
   hitTestCalendar
 } from "#quno-internal/timeline/infinite/interactions/timelineInteractionModel";
 import type { CalendarEvent, QunoInfiniteCalendarSettings } from "#quno-internal/timeline/core/types";
+import {
+  proposalChangesEvent,
+  proposalForDrag
+} from "#quno-internal/timeline/infinite/interactions/drag/dragInteractionModel";
 
 const settings: QunoInfiniteCalendarSettings = {
   startHour: 8,
@@ -51,23 +55,42 @@ describe("calendar interaction math", () => {
       start: "2026-07-06T09:00:00.000Z",
       end: "2026-07-06T10:00:00.000Z"
     };
-    const proposal = buildMoveProposal(
+    const proposal = buildMoveProposal({
       event,
-      { dateKey: "2026-07-07", calendarId: "calendar-b", minute: 11 * 60, dayIndex: 0, rowIndex: 0 },
-      15,
+      hit: { dateKey: "2026-07-07", calendarId: "calendar-b", minute: 11 * 60, dayIndex: 0, rowIndex: 0 },
+      pointerOffsetMinutes: 15,
       settings
-    );
+    });
 
     expect(proposal.proposedCalendarId).toBe("calendar-b");
     expect(proposal.proposedStart).toContain("2026-07-07T");
     expect(proposal.proposedEnd).toContain("2026-07-07T");
   });
 
+  it("keeps a final release in the original snapped slot as activation", () => {
+    const event: CalendarEvent = {
+      id: "event-1",
+      calendarId: "calendar-a",
+      title: "Activate me",
+      start: "2026-07-06T09:00:00",
+      end: "2026-07-06T10:00:00"
+    };
+    const drag = { event, sourceCalendarId: "calendar-a", offsetMinutes: 30, preview: null };
+    const proposal = proposalForDrag({
+      drag,
+      hit: { dateKey: "2026-07-06", calendarId: "calendar-a", minute: 9 * 60 + 30, dayIndex: 0, rowIndex: 0 },
+      settings,
+      draggingActiveDraft: false
+    });
+
+    expect(proposalChangesEvent({ drag, proposal })).toBe(false);
+  });
+
   it("builds a new-event draft from a drawn area", () => {
-    const draft = buildDraftEvent(
-      { dateKey: "2026-07-06", calendarId: "calendar-a", minute: 9 * 60, dayIndex: 0, rowIndex: 0 },
-      { dateKey: "2026-07-06", calendarId: "calendar-a", minute: 10 * 60, dayIndex: 0, rowIndex: 0 }
-    );
+    const draft = buildDraftEvent({
+      startHit: { dateKey: "2026-07-06", calendarId: "calendar-a", minute: 9 * 60, dayIndex: 0, rowIndex: 0 },
+      endHit: { dateKey: "2026-07-06", calendarId: "calendar-a", minute: 10 * 60, dayIndex: 0, rowIndex: 0 }
+    });
 
     expect(draft.id).toBe("draft-new-event");
     expect(draft.calendarId).toBe("calendar-a");

@@ -99,7 +99,7 @@ describe("bundle-size guard", () => {
     expect(result.stderr).toContain("Build the library first with `npm run build:lib`.");
   });
 
-  it("enforces the 34 KiB Infinite Calendar JavaScript gzip ceiling", () => {
+  it("enforces the 39 KiB Infinite Calendar JavaScript gzip ceiling", () => {
     const distRoot = temporaryDirectory();
     writePassingBundles(distRoot);
     const incompressibleSource = randomBytes(40 * 1024).toString("base64");
@@ -108,5 +108,44 @@ describe("bundle-size guard", () => {
     const result = runScript(bundleScript, distRoot);
     expect(result.status).toBe(1);
     expect(result.stderr).toContain("Infinite Calendar JavaScript exceeds its gzip limit");
+  });
+});
+
+describe("library contract guard", () => {
+  const contractScript = join(projectRoot, "scripts", "check-library-contracts.mjs");
+
+  it("accepts named objects and native collection callbacks", () => {
+    const directory = temporaryDirectory();
+    writeFileSync(
+      join(directory, "valid.ts"),
+      "export const add = ({ left, right }: { left: number; right: number }) => left + right;\nexport const values = [1, 2].map((value) => value * 2);\n"
+    );
+    const result = runScript(contractScript, directory);
+    expect(result.status).toBe(0);
+  });
+
+  it("rejects primitive and positional library signatures", () => {
+    const directory = temporaryDirectory();
+    writeFileSync(
+      join(directory, "invalid.ts"),
+      "export const add = (left: number, right: number) => left + right;\nexport const label = (value: string) => value;\n"
+    );
+    const result = runScript(contractScript, directory);
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain("Library functions accept one named object");
+  });
+
+  it("rejects headless parser dependencies on input UI types", () => {
+    const directory = temporaryDirectory();
+    mkdirSync(join(directory, "date-parser"));
+    mkdirSync(join(directory, "date-input"));
+    writeFileSync(join(directory, "date-input", "view.ts"), "export type View = { value: string };\n");
+    writeFileSync(
+      join(directory, "date-parser", "index.ts"),
+      'export type { View } from "#quno-internal/date-input/view";\n'
+    );
+    const result = runScript(contractScript, directory);
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain("date-parser must not depend on date-input");
   });
 });

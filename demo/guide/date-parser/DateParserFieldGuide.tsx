@@ -142,7 +142,7 @@ export function DateParserFieldGuide() {
         number="08"
         kicker="Production"
         title="Ship Date Parser independently."
-        copy="Date Parser JavaScript is 4.45 KiB gzip. It has no stylesheet, UI framework runtime, or runtime dependency."
+        copy="Date Parser JavaScript is 5.20 KiB gzip. It has no stylesheet, UI framework runtime, or runtime dependency."
         instruction="Review its JavaScript artifact, runtime contract, and public surface without a UI payload."
       >
         <FieldGuideProduction profile={dateParserProduction} />

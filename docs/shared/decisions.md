@@ -140,3 +140,51 @@ because that repository was the consolidation source. Its identifier and text re
   Keep the Preact compatibility fixture separate.
 - Consequences: React 18, React 19, and Preact compatibility regressions remain independently attributable. The React 19
   fixture requires a built package and an installed Chromium browser, and CI runs it after package verification.
+
+## QUNO-012 - Give library functions named contracts and align product ownership
+
+- Date: 2026-09-05
+- Status: Accepted; supersedes positional signatures and customization names in QUNO-001 and the affected product records
+- Context: The independent entry points retained parser implementation in the input domain, duplicate helper exports,
+  mixed singular/plural formatter configuration, and positional callbacks that made similar integrations inconsistent.
+- Decision: Use one named object for every library-owned function with arguments. Keep zero-argument commands and
+  externally imposed React, DOM, collection, and virtualizer signatures, with explicitly typed adapters at those
+  boundaries. Standardize text overrides as `formatters`, presentation as `getDayProps`, `getDayCellProps`, and
+  `getHourProps`, disabled-date matching as `isDayDisabled`, and React event rendering as `renderEvent`. Selection and
+  zoom notifications use named payloads. Timeline locale and day-label formatters are component props; day labels
+  receive `IsoDate`. Retain only plural `parserLanguages`. Make Date Parser own its implementation and headless types,
+  place picker interaction algorithms in Datepicker, and export shared runtime helpers only from the root.
+- Consequences: This is a clean public break documented in the migration guide, with no compatibility aliases.
+  Formatting output, selection semantics, native events, geometry, loading, and timezone distinctions are preserved.
+  Architecture checks enforce signatures and dependency direction; public type guards reject removed interfaces.
+
+- Size tradeoff: The mandated object argument convention adds property names and request construction throughout
+  production code. Measured ESM output exceeds the prior Infinite Calendar 34 KiB and Date Input 7 KiB gzip ceilings;
+  accept 37 KiB and 8 KiB respectively for this break. Retain all other budgets and report measured artifacts in the
+  field guides. Native virtualizer adapters must remain referentially stable to avoid invalidating measurements.
+
+## QUNO-013 - Bound High-Frequency Work To Display Frames
+
+- Date: 2026-09-08
+- Status: Accepted
+- Context: Pointer streams and native scroll bursts can arrive more often than the browser can paint. Repeating
+  hit-testing, virtual-window publication, or recognition setup for every raw event spends main-thread time without
+  producing an observable intermediate frame.
+- Decision: Calendar drag/draw and Datepicker touch/pen painting retain only the latest coordinates per animation
+  frame, while pointer release synchronously processes its final coordinates before committing. Datepicker quick-jump
+  scrolling publishes the latest viewport sample once per frame and keeps its existing 120ms settled-edge extension.
+  Cancellation, capture loss, Escape, close, and unmount discard queued work. Date Input compiles normalized parser
+  options and vocabulary once per configuration and returns tokens with parse results internally; native draft/caret
+  writes and Enter, blur, Arrow, partial-range, and IME completion remain synchronous, while ordinary recognition
+  decoration may publish through a React transition.
+- Consequences: The implementation applies splitting, batching, prioritizing, deferring, and repeated-work elimination
+  only to measured high-frequency paths. Existing two-axis virtualization, bounded caches, memoized cards, async cache
+  transitions, frame-coalesced zoom, and transform/opacity draft motion remain the primary foundations. Workers would
+  add startup, serialization, and an asynchronous parser contract for tiny strings; `IntersectionObserver`, broad
+  `will-change`, a FLIP rewrite, and custom priority queues add complexity or memory without reducing these bounded hot
+  paths, so they are intentionally not introduced.
+
+- Size tradeoff: Datepicker's frame scheduler, prepared day descriptors, and hard selection limits raise its ESM
+  artifact to 42.17 KiB raw and 10.47 KiB gzip, so its
+  JavaScript ceiling moves from 10 KiB to 10.5 KiB. Date Input measures 29.83 KiB raw and 7.82 KiB gzip and remains
+  inside its existing 8 KiB ceiling.

@@ -2,7 +2,10 @@
 
 ## Unit Tests
 
-Vitest unit tests live in `tests/unit` and mirror the source module grouping.
+Vitest unit tests live in `tests/unit`, `tests/date-picker`, `tests/date-input`, and `tests/date-parser`.
+Public contract tests verify named arguments, formatter contexts, notification payloads, and ISO guard narrowing.
+Compile-time consumers reject removed names, positional signatures, duplicate exports, and parser-private types.
+Architecture checks enforce object arguments and product dependency direction, including headless type imports.
 
 - Date virtualization with excluded weekdays.
 - Natural-date parsing covers complete previous day/week/month/year periods, the current configured calendar week,
@@ -14,11 +17,13 @@ Vitest unit tests live in `tests/unit` and mirror the source module grouping.
   simultaneous multilingual recognition, picker composition, library size, and dependencies. Each keeps a
   public-entry-point exhibit, Try it guidance, and a copyable recipe.
 - Date labels localize month/day and weekday text for explicit and runtime locales, preserve English ordinal ordering,
-  and let a custom day-name generator replace the complete label using the local date and configured locale.
+  and let a custom `formatters.dayLabel` replace the complete label using an ISO date and configured locale.
 - Variable-size resource prefix extents, binary-searched windows across 50 logical resources, two-resource overscan,
   offscreen pruning, and pinned resource indexes.
 - Date/calendar membership indexing preserves multi-calendar object identity and ignores unselected memberships.
-- Prepared-cell lane assignment is deterministic, reuses the lowest available lane, excludes availability from metrics, and drives both row and column projections without a second preparation pass.
+- Prepared-cell lane assignment is deterministic, reuses the lowest available lane independently for appointments and
+  availability, sizes resources by the greater depth, and drives both row and column projections without a second
+  preparation pass.
 - Horizontal and vertical prepared-cell models retain referential identity across zoom-only settings changes.
 - Horizontal data-layout anchor translation preserves date-header focus, resource identity, and local row offset when earlier or anchored rows grow; missing resources use the clamped date fallback.
 - Date virtual-item resize compensation applies only to items fully above the viewport, leaving the visible date to projection-specific semantic anchoring.
@@ -29,7 +34,13 @@ Vitest unit tests live in `tests/unit` and mirror the source module grouping.
 - Equal-start overlap lanes retain caller order when the last appointment duration changes, while same-date committed edits and accepted moves preserve cache order.
 - Vertical overlap column layout, default 240px base column width, three-lane fit, +80px growth for each additional overlap lane, and custom caller-provided column sizing rules.
 - Row-height growth remains local to the dense date/calendar row instead of inflating every loaded day.
-- Availability events are excluded from row-height growth and overlap calculations.
+- Availability equal-start ordering, lane reuse, renderer metadata, horizontal mini-lanes, vertical side-by-side lanes,
+  appointment overlay order, and overlap-driven row/column growth are covered independently from appointment lanes.
+- Pointer bursts in Calendar and Datepicker publish once per frame, release flushes final coordinates, cancellation
+  clears pending work, and quick-navigation scroll bursts preserve bounded years and settled edge extension.
+- Event-cache mutations retain untouched bucket identities; a 120-date incremental preparation test requires 119
+  unchanged prepared models to retain identity. Date Input analyzer coverage verifies combined token/result analysis
+  alongside synchronous commit, Arrow, rapid-input, and IME behavior.
 - Availability editing mode switches pointer activity from appointments to availability blocks.
 - Generated appointments stay inside the primary calendar's generated availability window.
 - Async range loading de-duplicates committed events by id when a range response includes already-loaded dates, so reloads do not add overlap lanes or grow rows.
@@ -89,8 +100,10 @@ Vitest unit tests live in `tests/unit` and mirror the source module grouping.
   composition opens a range-enabled picker, hides duplicate selection chrome, commits a complete multilingual typed
   range, renders its start/interior/end states, clears through the shared input, and closes when focus leaves.
 - The Datepicker day-state chapter begins with all unresolved dates disabled, then enables only successful availability
-  checks. Unit and Chromium computed-style coverage verify loading, enabled, unavailable, holiday, and failed states,
-  plus the rule that disabled dates cannot become single selections or range endpoints.
+  checks inside its inclusive hard date limits. Dates outside those limits never enter the loading set or call the
+  disabled-day resolver. Unit and Chromium computed-style coverage verify loading, enabled, unavailable, holiday,
+  failed, and out-of-window states, plus the rule that disabled dates cannot become single selections or range
+  endpoints.
 - The Date Parser guide exposes eight headless chapters and verifies absolute/relative formats, DMY/MDY preference,
   configurable week starts, ranges, expected-period ranking, simultaneous English/German recognition, lexicon
   extension, tokenization, SSR safety, and its independent payload. Its focused demo recognizes the visible English and
@@ -203,9 +216,9 @@ orientation, availability, loading, visual-focus, and motion assertions formerly
   across a pending 1.2-second idle-recenter deadline keeps the draft and visible date tree mounted at the same
   viewport-relative geometry until pointer release.
 - Vertical virtual scrolling changes visible dates.
-- `getCalendarDayProps` receives the same typed weekend and date identity in both orientations, and
-  `getCalendarCellProps` adds resource identity. The field guide verifies assigned weekend backgrounds on date labels,
-  rows, and columns plus equipment overrides in both projections. `getCalendarHourProps` receives the same clipped
+- `getDayProps` receives the same typed weekend and date identity in both orientations, and
+  `getDayCellProps` adds resource identity. The field guide verifies assigned weekend backgrounds on date labels,
+  rows, and columns plus equipment overrides in both projections. `getHourProps` receives the same clipped
   clock-hour interval in either view; computed-style and geometry checks cover its horizontal and vertical bands and
   visible labels.
 - Rendered day DOM nodes are pruned to the visible viewport plus five day sections of overscan.
@@ -227,6 +240,8 @@ orientation, availability, loading, visual-focus, and motion assertions formerly
 - Delayed, rejected, aborted, never-resolving, and out-of-order loaders leave scroll, zoom, draw, and drag interactions responsive; delayed commits preserve the captured viewport anchor within 1px and do not flash empty rows.
 - Large dataset scales keep events visible and hoverable instead of clustering into a few calendars.
 - At 20,000 events/year, hovering visible events keeps them visible and rendered row heights vary locally according to overlap density.
+- Idle bounded-window recentering samples the visible day's viewport position on every animation frame and permits at
+  most one pixel of transient movement, including dates whose rows grew from availability collisions.
 - Overlapped cards expand to the full calendar row lane height on hover while resting shells keep a 4px mini-lane gap.
 - Visible day boxes do not overlap adjacent date rows when variable row heights are measured.
 - Availability renders as a background layer while draft/new event drawing can occur on top.
@@ -316,3 +331,8 @@ At 1280×720 with 50 resources and 20,000 total events/year:
 - Vertical horizontal scroll keeps the time pane fixed on the left.
 - Overlapping events expand on hover and come to the front.
 - Rejected moves revert after drop.
+
+Clock-dependent default-demo scenarios set a fixed working-day morning in the browser while leaving timers running.
+The virtualizer item-key adapter must retain identity across ordinary renders; navigation, zoom, and dense-layout
+browser tests guard that boundary. Current budgets are 39 KiB gzip for Infinite Calendar, 10.5 KiB for Datepicker,
+and 8 KiB for Date Input.

@@ -20,16 +20,49 @@ import {
 } from "./articleSupport";
 
 const availabilityCalendars = articleCalendars.filter((calendar) => calendar.id === "provider-a");
-const availabilityEvents = articleEvents
-  .filter((event) => event.calendarId === "provider-a" && event.id !== "consultation-a")
-  .map((event) =>
-    event.id === "availability-a"
-      ? { ...event, end: `${articleDateKey}T11:30:00`, subtitle: "Morning availability" }
-      : event
-  );
+const availabilityEvents = [
+  ...articleEvents
+    .filter((event) => event.calendarId === "provider-a")
+    .map((event) =>
+      event.id === "availability-a"
+        ? { ...event, end: `${articleDateKey}T11:30:00`, subtitle: "Morning availability" }
+        : event
+    ),
+  {
+    id: "availability-a-overlap-1",
+    calendarId: "provider-a",
+    title: "Telehealth available",
+    subtitle: "Parallel service lane",
+    start: `${articleDateKey}T09:00:00`,
+    end: `${articleDateKey}T10:45:00`,
+    color: "#6372a7",
+    kind: "availability" as const
+  },
+  {
+    id: "availability-a-overlap-2",
+    calendarId: "provider-a",
+    title: "Procedure available",
+    subtitle: "Parallel service lane",
+    start: `${articleDateKey}T09:30:00`,
+    end: `${articleDateKey}T11:00:00`,
+    color: "#9b6a9e",
+    kind: "availability" as const
+  },
+  {
+    id: "availability-a-overlap-3",
+    calendarId: "provider-a",
+    title: "Overflow available",
+    subtitle: "Fourth parallel lane",
+    start: `${articleDateKey}T09:45:00`,
+    end: `${articleDateKey}T10:30:00`,
+    color: "#b66a3c",
+    kind: "availability" as const
+  }
+];
 
 export function AvailabilityLayerDemo() {
   const [mode, setMode] = useState<"events" | "availability">("events");
+  const [view, setView] = useState<"infinite-horizontal" | "infinite-vertical">("infinite-horizontal");
   const [activity, setActivity] = useState("Appointment cards receive pointer input");
   const [events, setEvents] = useState(availabilityEvents);
   const eventsRef = useRef(events);
@@ -39,7 +72,7 @@ export function AvailabilityLayerDemo() {
   const loadEvents = useCallback<LoadEvents>(async (request) => filterEvents(eventsRef.current, request), []);
   const moveEvent = useCallback((request: EventMoveRequest) => {
     setEvents((current) =>
-      current.map((event) => (event.id === request.event.id ? applyEventMove(event, request) : event))
+      current.map((event) => (event.id === request.event.id ? applyEventMove({ event, request }) : event))
     );
     setActivity(request.event.kind === "availability" ? "Availability moved" : "Appointment moved");
     return true;
@@ -62,6 +95,22 @@ export function AvailabilityLayerDemo() {
               Edit availability
             </button>
           </div>
+          <div className="article-segmented-control" aria-label="Availability orientation">
+            <button
+              aria-pressed={view === "infinite-horizontal"}
+              onClick={() => setView("infinite-horizontal")}
+              type="button"
+            >
+              Horizontal
+            </button>
+            <button
+              aria-pressed={view === "infinite-vertical"}
+              onClick={() => setView("infinite-vertical")}
+              type="button"
+            >
+              Vertical
+            </button>
+          </div>
         </div>
       }
     >
@@ -70,7 +119,7 @@ export function AvailabilityLayerDemo() {
           ariaLabel="Availability editing layer calendar"
           calendars={availabilityCalendars}
           className={`article-availability-calendar${mode === "availability" ? " is-editing-availability" : ""}`}
-          eventRenderer={ArticleEventCard}
+          renderEvent={ArticleEventCard}
           initialDateKey={articleDateKey}
           interactionMode={mode}
           loadEvents={loadEvents}
@@ -96,6 +145,7 @@ export function AvailabilityLayerDemo() {
           onEventMoveRequest={moveEvent}
           selectedCalendarIds={["provider-a"]}
           settings={{ ...articleSettings, startHour: 8, endHour: 16, rowHeight: 74 }}
+          view={view}
         />
       </div>
     </CalendarDemoShell>
@@ -166,9 +216,12 @@ export function EventFocusDemo() {
   const loadEvents = useCallback<LoadEvents>(async (request) => filterEvents(eventsRef.current, request), []);
 
   const focusCommittedEvent = (eventId: string, nextEvent: CalendarEvent) => {
-    calendarRef.current?.commitVisibleEvent(nextEvent, {
-      appearing: true,
-      previousEventId: eventId
+    calendarRef.current?.commitVisibleEvent({
+      event: nextEvent,
+      ...{
+        appearing: true,
+        previousEventId: eventId
+      }
     });
     window.requestAnimationFrame(() => {
       setFocusRequest({
@@ -190,7 +243,7 @@ export function EventFocusDemo() {
 
   const addCollisions = () => {
     eventsRef.current = [...eventsRef.current, ...focusCollisions];
-    focusCollisions.forEach((event) => calendarRef.current?.commitVisibleEvent(event));
+    focusCollisions.forEach((event) => calendarRef.current?.commitVisibleEvent({ event }));
     window.requestAnimationFrame(() => {
       setFocusRequest({
         requestId: `collisions-${Date.now()}`,
@@ -226,7 +279,7 @@ export function EventFocusDemo() {
           activeDraft={activeDraft}
           ariaLabel="Event visual focus and lane changes calendar"
           calendars={availabilityCalendars}
-          eventRenderer={ArticleEventCard}
+          renderEvent={ArticleEventCard}
           focusRequest={focusRequest}
           initialDateKey={articleDateKey}
           loadEvents={loadEvents}

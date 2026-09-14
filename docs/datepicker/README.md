@@ -18,7 +18,24 @@ The guide presents range selection as direct manipulation instead of a forced fr
 navigator follows seasonal groups—March–May, June–August, September–November, and December continuing into
 January–February—while sticky year labels preserve context during fast scrolling.
 
-`disabledDays` prevents a date from becoming a standalone selection or a range start or end. Disabled dates may remain
+Captured touch and pen painting performs at most one hit-test per display frame and always processes the release cell
+before commit. Quick-jump scroll bursts likewise publish one virtual year window per frame while retaining the 120ms
+settled-edge extension and semantic prepend correction. Stable formatter, weekday, month-grid, and day descriptors are
+memoized across pointer previews.
+
+`isDayDisabled` prevents a date from becoming a standalone selection or a range start or end. Disabled dates may remain
 inside an otherwise valid inclusive range. Async availability stays in consumer state: unresolved and failed checks
-should return `true` from `disabledDays`, while `getDayCellProps` independently presents loading, error, holiday, or
+should return `true` from `isDayDisabled`, while `getDayCellProps` independently presents loading, error, holiday, or
 other product states. The field guide demonstrates this fail-closed delayed-loading pattern.
+
+`limitDateFrom` and `limitDateTo` add inclusive hard bounds around that resolver. Earlier or later dates are disabled
+before `isDayDisabled` runs, so consumers can omit them from availability requests. Boundary dates remain selectable
+when the resolver permits them. Existing controlled values are displayed rather than rewritten if limits later change.
+
+## Named contracts
+
+Datepicker owns its interaction algorithms. Shared runtime date helpers are imported from the headless root.
+Use `limitDateFrom`, `limitDateTo`, `isDayDisabled({ date })`, `getDayCellProps(context)`, object-context `formatters`,
+and `onChange({ value })`.
+
+See the [breaking migration](../shared/migration.md#unreleased-named-contracts-and-product-ownership).

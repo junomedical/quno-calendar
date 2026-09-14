@@ -31,8 +31,8 @@ type HorizontalTimelineCanvasProps = {
   showNowLine: boolean;
   nowMinute: number;
   renderItems: HorizontalTimelineDayProps["item"][];
-  dateKeyForIndex: (index: number) => string;
-  getDayHeight: (dateKey: string) => number;
+  dateKeyForIndex: (args: { index: number }) => string;
+  getDayHeight: (args: { dateKey: string }) => number;
   dayProps: Omit<HorizontalTimelineDayProps, "item" | "dateKey" | "dayHeight">;
 };
 
@@ -96,14 +96,14 @@ export function HorizontalTimelineCanvas({
             nowMinute={nowMinute}
           />
           {renderItems.map((item) => {
-            const dateKey = semanticDateKeyForRenderItem(item, dateKeyForIndex);
+            const dateKey = semanticDateKeyForRenderItem({ item, dateKeyForIndex });
             return (
               <InfiniteTimelineDay
                 {...dayProps}
                 key={dateKey}
                 item={item}
                 dateKey={dateKey}
-                dayHeight={getDayHeight(dateKey)}
+                dayHeight={getDayHeight({ dateKey })}
               />
             );
           })}

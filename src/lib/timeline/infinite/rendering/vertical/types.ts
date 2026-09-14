@@ -1,3 +1,4 @@
+import type { CalendarDateLabelOptions } from "#quno-internal/timeline/core/calendarFormatterTypes";
 /**
  * Vertical render contracts.
  * view coordinator -> day contract -> column and interaction contracts
@@ -16,7 +17,7 @@ import type {
   QunoInfiniteCalendarDayCustomizer,
   QunoInfiniteCalendarSettings
 } from "#quno-internal/timeline/core/types";
-import type { EventColumnLayoutItem, PreparedEventCell } from "#quno-internal/timeline/infinite/events/layout/layout";
+import type { EventColumnLayoutItem, PreparedEventLayers } from "#quno-internal/timeline/infinite/events/layout/layout";
 import type { buildTimeTicks } from "#quno-internal/timeline/time/timelineTicks";
 import type { ViewportGeometryRegistration } from "#quno-internal/timeline/infinite/anchors/parent/viewportAnchorTypes";
 import type { ViewportMetricsStore } from "#quno-internal/timeline/infinite/scroll/resources/viewportMetricsStore";
@@ -27,20 +28,20 @@ export type VerticalHoveredEvent = {
   calendarId: CalendarId;
 } | null;
 
-export type VerticalHoverMove = (
-  event: ReactPointerEvent<HTMLDivElement>,
-  layoutItems: EventColumnLayoutItem[],
-  renderedCalendarId: CalendarId
-) => void;
+export type VerticalHoverMove = (args: {
+  event: ReactPointerEvent<HTMLDivElement>;
+  layoutItems: EventColumnLayoutItem[];
+  renderedCalendarId: CalendarId;
+}) => void;
 
-export type VerticalEventPointerDown = (
-  event: ReactPointerEvent<HTMLDivElement>,
-  calendarEvent: CalendarEvent,
-  renderedCalendarId: CalendarId
-) => void;
+export type VerticalEventPointerDown = (args: {
+  event: ReactPointerEvent<HTMLDivElement>;
+  calendarEvent: CalendarEvent;
+  renderedCalendarId: CalendarId;
+}) => void;
 
 /** Input contract for a single virtualized vertical date section. */
-export type VerticalTimelineDayProps = {
+export type VerticalTimelineDayProps = CalendarDateLabelOptions & {
   dayIndex: number;
   dateKey: string;
   top: number;
@@ -54,8 +55,8 @@ export type VerticalTimelineDayProps = {
   hiddenCalendarIds: Set<CalendarId>;
   timeTicks: ReturnType<typeof buildTimeTicks>;
   todayKey: string;
-  getCalendarCellProps?: QunoInfiniteCalendarCellCustomizer;
-  getCalendarDayProps?: QunoInfiniteCalendarDayCustomizer;
+  getDayCellProps?: QunoInfiniteCalendarCellCustomizer;
+  getDayProps?: QunoInfiniteCalendarDayCustomizer;
   calendarHourPresentations: CalendarHourPresentation[];
   showNowLine: boolean;
   nowMinute: number;
@@ -72,13 +73,13 @@ export type VerticalTimelineDayProps = {
   draftEventIsDraggable: boolean;
   draftEventIsExiting: boolean;
   draftEventReleaseDurationMs?: number;
-  eventRenderer: EventRenderer;
+  renderEvent: EventRenderer;
   geometryRegistration: ViewportGeometryRegistration;
   viewportMetricsStore: ViewportMetricsStore;
   forceAllResources: boolean;
-  eventsForColumn: (dateKey: string, calendarId: CalendarId) => CalendarEvent[];
-  preparedCellForColumn: (dateKey: string, calendarId: CalendarId) => PreparedEventCell;
-  columnWidthForDateCalendar: (dateKey: string, calendarId: CalendarId) => number;
+  eventsForColumn: (args: { dateKey: string; calendarId: CalendarId }) => CalendarEvent[];
+  preparedCellForColumn: (args: { dateKey: string; calendarId: CalendarId }) => PreparedEventLayers;
+  columnWidthForDateCalendar: (args: { dateKey: string; calendarId: CalendarId }) => number;
   onHoverMove: VerticalHoverMove;
   onHoverLeave: () => void;
   onEventPointerDown: VerticalEventPointerDown;
@@ -89,7 +90,7 @@ export type VerticalCalendarColumnProps = {
   calendar: CalendarRow;
   dateKey: string;
   rowEvents: CalendarEvent[];
-  preparedCell: PreparedEventCell;
+  preparedCell: PreparedEventLayers;
   isHidden?: boolean;
   calendarCellProps?: QunoInfiniteCalendarCellProps;
   calendarHourPresentations: CalendarHourPresentation[];
@@ -108,7 +109,7 @@ export type VerticalCalendarColumnProps = {
   draftEventIsDraggable: boolean;
   draftEventIsExiting: boolean;
   draftEventReleaseDurationMs?: number;
-  eventRenderer: EventRenderer;
+  renderEvent: EventRenderer;
   geometryRegistration: ViewportGeometryRegistration;
   gridColumn: number;
   isAlternate: boolean;
