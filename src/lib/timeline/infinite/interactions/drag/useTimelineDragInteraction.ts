@@ -62,17 +62,21 @@ export function useTimelineDragInteraction({
   const updateDragFromPoint = useCallback(
     (event: PointerLike) => {
       const currentDrag = dragStateRef.current;
-      if (!currentDrag) {
-        return false;
-      }
+      if (!currentDrag) return false;
 
       const hit = getHit(event);
-      if (!hit) {
-        return true;
-      }
+      if (!hit) return true;
 
       const draggingActiveDraft = isActiveDraftEvent(currentDrag.event);
-      const proposal = proposalForDrag({ drag: currentDrag, hit, settings, draggingActiveDraft });
+      let proposal: ReturnType<typeof proposalForDrag>;
+      try {
+        proposal = proposalForDrag({ drag: currentDrag, hit, settings, draggingActiveDraft });
+      } catch {
+        const next = { ...currentDrag, preview: null };
+        dragStateRef.current = next;
+        setDragState(next);
+        return true;
+      }
       if (!proposalChangesEvent({ drag: currentDrag, proposal })) {
         if (currentDrag.preview) {
           const next = { ...currentDrag, preview: null };

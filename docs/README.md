@@ -30,3 +30,7 @@ multilane availability geometry in [Decision 091](./infinite-calendar/decisions.
 Each product owns its own `decisions.md`. Historical identifiers remain stable even when an older decision predates
 the four-product documentation structure. `CHANGELOG.md` remains at the repository root because releases apply to the
 combined package.
+
+The Infinite Calendar [timezone recipe](./shared/usage.md#explicit-display-timezone) includes a live `/demo/calendar-timezone` example.
+
+The Infinite Calendar timezone recipe also documents DST rejection and elapsed-duration-preserving moves.

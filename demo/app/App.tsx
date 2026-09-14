@@ -1,3 +1,4 @@
+import { TimeZoneDemo } from "#quno-demo/demos/TimeZoneDemo";
 import { useEffect, useState, type ComponentType } from "react";
 import { DateInputDemo } from "#quno-demo/demos/DateInputDemo";
 import { DateParserDemo } from "#quno-demo/demos/DateParserDemo";
@@ -56,6 +57,7 @@ export function App() {
     return <IntegrationWalkthrough />;
   }
 
+  if (routePath === "/demo/calendar-timezone") return <TimeZoneDemo />;
   if (routePath === "/") return <ProjectHome />;
   if (routePath === "/guide/datepicker") return <DatePickerStory />;
   if (routePath === "/guide/date-input") return <DateInputFieldGuide />;

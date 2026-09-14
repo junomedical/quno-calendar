@@ -4,8 +4,16 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+- Merge current main named-object APIs and pointer responsiveness with release 1 timezone/DST behavior.
+  The combined Infinite Calendar build is 163.08 KiB raw / 38.59 KiB gzip; its ceiling is 39 KiB.
+
+### Fixed
+
+- Preserve elapsed event duration when moving across DST; reject ambiguous pointer times and cancel invalid drawn selections. Infinite Calendar remains below its 35 KiB gzip budget (34.29 KiB measured).
+
 ### Added
 
+- Added optional Infinite Calendar `settings.timeZone`, absolute-time-preserving pointer/navigation behavior, a live timezone recipe, and cross-browser-timezone geometry coverage.
 - Added inclusive Datepicker `limitDateFrom` and `limitDateTo` selection bounds. Out-of-window dates are disabled before
   `isDayDisabled` runs, allowing consumer availability loaders to skip dates whose result is already known.
 - Added Infinite Calendar `getDayProps`, `getHourProps`, and `getDayCellProps` with typed date,

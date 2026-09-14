@@ -779,3 +779,15 @@ When extending Infinite Calendar, start with its [responsibility-domain index](.
 Each domain document lists every owning source file and links to the detailed runtime flows. The other products use
 their product `README.md` and `decisions.md` as their ownership index, so behavior should be added to its existing owner
 rather than a generic hooks or utilities folder.
+
+## Explicit display timezone
+
+Set `settings.timeZone` to an IANA timezone to make day bucketing, geometry, Today/navigation, focus, and drawing/movement independent of the browser timezone. Inputs and mutation callbacks retain absolute timestamps. Custom renderers can format labels using `event.calendarTimeZone`. When omitted, existing browser-local behavior is retained.
+
+Try the public-entry-point example at `/demo/calendar-timezone`: change its display timezone and drag the UTC-backed event. The example shows the unchanged source interval alongside the grid.
+
+```tsx
+<QunoInfiniteCalendar {...calendarProps} settings={{ timeZone: "Europe/Bucharest" }} />
+```
+
+DST pointer policy: event moves preserve elapsed duration. Drawn endpoints and move starts reject both nonexistent spring-forward times and ambiguous repeated autumn times. An invalid drawn endpoint cancels the gesture, so the last valid interval cannot be submitted; start a new selection at a valid time. No browser-zone or tenant-specific policy is introduced.

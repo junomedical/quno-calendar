@@ -334,5 +334,5 @@ At 1280×720 with 50 resources and 20,000 total events/year:
 
 Clock-dependent default-demo scenarios set a fixed working-day morning in the browser while leaving timers running.
 The virtualizer item-key adapter must retain identity across ordinary renders; navigation, zoom, and dense-layout
-browser tests guard that boundary. Current budgets are 38 KiB gzip for Infinite Calendar, 10.5 KiB for Datepicker,
+browser tests guard that boundary. Current budgets are 39 KiB gzip for Infinite Calendar, 10.5 KiB for Datepicker,
 and 8 KiB for Date Input.
