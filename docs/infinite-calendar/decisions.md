@@ -723,3 +723,19 @@ geometry and exposes stable `calendar-hour` and `calendar-hour-label` slots.
 The hour projection raises the measured artifact to 136.83 KiB raw and 33.44 KiB gzip and the optional stylesheet to
 10.21 KiB raw and 1.95 KiB gzip. The Infinite Calendar JavaScript ceiling moves from Decision 089's 33 KiB to 34 KiB;
 the stylesheet remains inside its existing 2 KiB gzip ceiling.
+
+## 091 - Explicit Timeline Timezone Preserves Absolute Event Instants
+
+Date: 2026-09-14
+Status: Accepted
+
+`settings.timeZone` makes the timeline display a single IANA timezone independently of the browser. Event day buckets, overlap geometry, navigation, focus, and pointer proposals use that reference. The component adds `calendarTimeZone` to renderer events without changing their absolute start/end values. Source scheduling zones remain consumer-owned. Date-only keys remain timezone-free. Omitting the setting preserves the established browser-local contract. Nonexistent spring-forward times cannot become persisted pointer proposals. Changing the setting invalidates cached display geometry.
+
+The timezone conversion and callback handling bring the calendar ESM artifact to approximately 34.15 KiB gzip, 150 bytes above the former 34 KiB ceiling. The feature budget is now 35 KiB gzip; other feature and stylesheet budgets are unchanged.
+
+## 092 - Reject Ambiguous Pointer Times and Preserve Elapsed Duration
+
+Date: 2026-09-15
+Status: Accepted
+
+Refines Decision 091: a wall time cannot disambiguate repeated autumn hours, so reject folds as well as gaps, matching the onboarding editor. Preserve event duration using absolute timestamps, including when a move crosses a DST boundary. Cancel invalid drawn ranges rather than submitting a stale selection.

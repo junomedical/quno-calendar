@@ -4,7 +4,13 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+### Fixed
+
+- Preserve elapsed event duration when moving across DST; reject ambiguous pointer times and cancel invalid drawn selections. Infinite Calendar remains below its 35 KiB gzip budget (34.29 KiB measured).
+
 ### Added
+
+- Added optional Infinite Calendar `settings.timeZone`, absolute-time-preserving pointer/navigation behavior, a live timezone recipe, and cross-browser-timezone geometry coverage.
 
 - Added Infinite Calendar `getCalendarDayProps`, `getCalendarHourProps`, and `getCalendarCellProps` with typed date,
   clock-hour, weekday, Today/weekend, calendar, and orientation context. Date-wide presentation covers the complete day
@@ -34,6 +40,8 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
   parsing accept the datepicker's `weekStartsOn` values from `0` (Sunday) through `6` (Saturday), defaulting to Monday.
 
 ### Changed
+
+- Raised the Infinite Calendar gzip budget from 34 to 35 KiB for explicit timezone conversion (approximately 34.14 KiB measured); all other budgets remain unchanged.
 
 - Raised the Infinite Calendar JavaScript gzip ceiling from 32 KiB to 34 KiB for the new presentation callbacks; the
   measured ESM artifact is now 136.83 KiB raw and 33.44 KiB gzip after composing day, hour, and cell presentation.

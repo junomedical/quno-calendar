@@ -1,8 +1,10 @@
+import { zonedParts } from "#quno-internal/timeline/time/zonedTime";
 import { addCalendarDays, addCalendarMonths, isSameLocalDate, parseIsoDate } from "./localDate";
 import type { IsoDate } from "#quno-internal/shared/dateRangeModel";
 
 /** Formats a Date as the calendar's stable `yyyy-MM-dd` date key. */
-export function toDateKey(date: Date): IsoDate {
+export function toDateKey(date: Date, timeZone?: string): IsoDate {
+  if (timeZone) return zonedParts(date, timeZone).date as IsoDate;
   if (Number.isNaN(date.getTime())) {
     throw new RangeError("Invalid time value");
   }

@@ -1,3 +1,4 @@
+import { minutesSinceStartOfDay } from "#quno-internal/timeline/time/time";
 import { useEffect, useMemo, useState, type ForwardedRef } from "react";
 import { toDateKey } from "#quno-internal/timeline/date/dateVirtualization";
 import type { CalendarInternalViewProps, CalendarViewHandle } from "#quno-internal/timeline/core/internalTypes";
@@ -48,7 +49,7 @@ export function useHorizontalTimelineRuntime(
   foundation.navigation.commitVisibleEventRef.current = foundation.eventRange.applyCommittedEventToLoadedEvents;
   foundation.navigation.removeVisibleEventRef.current = foundation.eventRange.removeEventFromLoadedEvents;
   useEffect(() => setIsInteractionActive(interactions.isInteractionActive), [interactions.isInteractionActive]);
-  const nowMinute = now.getHours() * 60 + now.getMinutes();
+  const nowMinute = minutesSinceStartOfDay(now, foundation.settings.timeZone);
   const showNowLine =
     nowMinute >= timelineStartMinute(foundation.settings) && nowMinute <= timelineEndMinute(foundation.settings);
   const shiftWheelZoom = useHorizontalShiftWheelZoom({
@@ -87,6 +88,6 @@ export function useHorizontalTimelineRuntime(
     nowMinute,
     showNowLine,
     timeTicks,
-    todayKey: toDateKey(now)
+    todayKey: toDateKey(now, foundation.settings.timeZone)
   };
 }

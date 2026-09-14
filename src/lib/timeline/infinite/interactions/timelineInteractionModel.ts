@@ -1,12 +1,6 @@
 import type { CalendarEvent, CalendarId, QunoInfiniteCalendarSettings } from "#quno-internal/timeline/core/types";
 import { dateAtVirtualOffset } from "#quno-internal/timeline/date/dateVirtualization";
-import {
-  clampEventToTimeline,
-  dateKeyAndMinuteToIso,
-  minutesSinceStartOfDay,
-  snapMinute,
-  xToMinute
-} from "#quno-internal/timeline/time/time";
+import { clampEventToTimeline, dateKeyAndMinuteToIso, snapMinute, xToMinute } from "#quno-internal/timeline/time/time";
 
 /** Raw coordinates and calendar geometry used for non-virtualized hit tests. */
 export type HitTestInput = {
@@ -75,15 +69,18 @@ export function buildMoveProposal(
   event: CalendarEvent,
   hit: CalendarHit,
   pointerOffsetMinutes: number,
-  settings: Pick<QunoInfiniteCalendarSettings, "startHour" | "endHour" | "snapMinutes">
+  settings: Pick<QunoInfiniteCalendarSettings, "startHour" | "endHour" | "snapMinutes" | "timeZone">
 ) {
-  const durationMinutes = Math.max(1, minutesSinceStartOfDay(event.end) - minutesSinceStartOfDay(event.start));
+  const durationMs = Date.parse(event.end) - Date.parse(event.start);
+  if (!Number.isFinite(durationMs) || durationMs <= 0) throw new RangeError("Invalid event duration");
+  const durationMinutes = durationMs / 60000;
   const startMinute = snapMinute(hit.minute - pointerOffsetMinutes, settings.snapMinutes);
   const clamped = clampEventToTimeline(startMinute, durationMinutes, settings);
+  const proposedStart = dateKeyAndMinuteToIso(hit.dateKey, clamped.startMinute, settings.timeZone);
   return {
     event,
-    proposedStart: dateKeyAndMinuteToIso(hit.dateKey, clamped.startMinute),
-    proposedEnd: dateKeyAndMinuteToIso(hit.dateKey, clamped.endMinute),
+    proposedStart,
+    proposedEnd: new Date(Date.parse(proposedStart) + durationMs).toISOString(),
     proposedCalendarId: hit.calendarId
   };
 }
@@ -92,19 +89,21 @@ export function buildMoveProposal(
 export function buildDraftEvent(
   startHit: CalendarHit,
   endHit: CalendarHit,
-  kind: CalendarEvent["kind"] = "draft"
+  kind: CalendarEvent["kind"] = "draft",
+  timeZone?: string
 ): CalendarEvent {
   const startMinute = Math.min(startHit.minute, endHit.minute);
   const endMinute = Math.max(startHit.minute, endHit.minute);
   const isAvailability = kind === "availability";
   return {
     id: "draft-new-event",
+    calendarTimeZone: timeZone,
     calendarId: startHit.calendarId,
     calendarIds: [startHit.calendarId],
     title: isAvailability ? "Available" : "New appointment",
     subtitle: isAvailability ? "Availability draft" : "Draft",
-    start: dateKeyAndMinuteToIso(startHit.dateKey, startMinute),
-    end: dateKeyAndMinuteToIso(startHit.dateKey, Math.max(endMinute, startMinute + 15)),
+    start: dateKeyAndMinuteToIso(startHit.dateKey, startMinute, timeZone),
+    end: dateKeyAndMinuteToIso(startHit.dateKey, Math.max(endMinute, startMinute + 15), timeZone),
     kind
   };
 }

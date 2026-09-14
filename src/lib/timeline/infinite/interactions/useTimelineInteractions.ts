@@ -52,6 +52,7 @@ export function useTimelineInteractions(args: UseTimelineInteractionsArgs) {
     applyMoveToLoadedEvents: args.applyMoveToLoadedEvents
   });
   const draft = useTimelineDraftInteraction({
+    timeZone: args.settings.timeZone,
     interactionMode: args.interactionMode,
     getHit: args.getHit,
     onEventCreateRequest: args.onEventCreateRequest,
@@ -96,8 +97,9 @@ export function useTimelineInteractions(args: UseTimelineInteractionsArgs) {
     if (!canInteract) return;
     event.preventDefault();
     event.currentTarget.setPointerCapture(event.pointerId);
-    const pointerMinute = args.getHit(event)?.minute ?? minutesSinceStartOfDay(calendarEvent.start);
-    drag.startDrag(calendarEvent, renderedCalendarId, pointerMinute - minutesSinceStartOfDay(calendarEvent.start));
+    const startMinute = minutesSinceStartOfDay(calendarEvent.start, calendarEvent.calendarTimeZone);
+    const pointerMinute = args.getHit(event)?.minute ?? startMinute;
+    drag.startDrag(calendarEvent, renderedCalendarId, pointerMinute - startMinute);
     setHoveredEvent(null);
   };
 

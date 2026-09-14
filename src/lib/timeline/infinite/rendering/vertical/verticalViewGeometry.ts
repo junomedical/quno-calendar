@@ -1,3 +1,4 @@
+import { minutesSinceStartOfDay } from "#quno-internal/timeline/time/time";
 /**
  * Pure vertical-view geometry.
  * settings + current clock -> day dimensions, layout identity, and now-line state
@@ -45,9 +46,9 @@ export function resolveVerticalDateOffset(
 }
 
 export function buildVerticalNowState(now: Date, settings: QunoInfiniteCalendarSettings) {
-  const minute = now.getHours() * 60 + now.getMinutes();
+  const minute = minutesSinceStartOfDay(now, settings.timeZone);
   return {
-    dateKey: toDateKey(now),
+    dateKey: toDateKey(now, settings.timeZone),
     minute,
     showLine: minute >= timelineStartMinute(settings) && minute <= timelineEndMinute(settings)
   };

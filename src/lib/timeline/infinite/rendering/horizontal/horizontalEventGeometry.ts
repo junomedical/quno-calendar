@@ -10,11 +10,11 @@ type HorizontalEventGeometry = {
 };
 
 export function horizontalEventGeometry(
-  event: Pick<CalendarEvent, "start" | "end">,
+  event: Pick<CalendarEvent, "start" | "end" | "calendarTimeZone">,
   settings: Pick<QunoInfiniteCalendarSettings, "startHour" | "endHour" | "zoom">
 ): HorizontalEventGeometry {
-  const startX = minuteToX(minutesSinceStartOfDay(event.start), settings);
-  const endX = minuteToX(minutesSinceStartOfDay(event.end), settings);
+  const startX = minuteToX(minutesSinceStartOfDay(event.start, event.calendarTimeZone), settings);
+  const endX = minuteToX(minutesSinceStartOfDay(event.end, event.calendarTimeZone), settings);
   return {
     left: TIMELINE_LEFT_GUTTER_PX + startX,
     width: Math.max(12, endX - startX)

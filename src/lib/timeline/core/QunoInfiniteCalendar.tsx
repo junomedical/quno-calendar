@@ -1,8 +1,9 @@
-import { forwardRef, useImperativeHandle, useRef } from "react";
+import { forwardRef, useCallback, useImperativeHandle, useRef } from "react";
 import { InfiniteTimelineView } from "#quno-internal/timeline/infinite/views/horizontal/HorizontalTimelineView";
 import { InfiniteVerticalTimelineView } from "#quno-internal/timeline/infinite/views/vertical/VerticalTimelineView";
 import {
   defaultQunoInfiniteCalendarSettings,
+  type CalendarEvent,
   type QunoInfiniteCalendarHandle,
   type QunoInfiniteCalendarProps
 } from "./types";
@@ -16,12 +17,33 @@ import { useCalendarFocusCoordinator } from "./useCalendarFocusCoordinator";
  */
 export const QunoInfiniteCalendar = forwardRef<QunoInfiniteCalendarHandle, QunoInfiniteCalendarProps>(
   function QunoInfiniteCalendar({ view = "infinite-horizontal", ...props }, ref) {
+    const zone = props.settings?.timeZone;
+    const sourceLoader = props.loadEvents;
+    const sourceCreator = props.onEventCreateRequest;
+    const prepare = useCallback(
+      (event: CalendarEvent): CalendarEvent =>
+        zone === event.calendarTimeZone ? event : { ...event, calendarTimeZone: zone },
+      [zone]
+    );
+    const loadEvents = useCallback(
+      async (args: Parameters<typeof sourceLoader>[0]) => (await sourceLoader(args)).map(prepare),
+      [sourceLoader, prepare]
+    );
+    const createEvent = useCallback(
+      async (request: Parameters<NonNullable<typeof sourceCreator>>[0]) => {
+        const event = await sourceCreator?.(request);
+        return event ? prepare(event) : event;
+      },
+      [sourceCreator, prepare]
+    );
     const viewRef = useRef<CalendarViewHandle | null>(null);
-    const focus = useCalendarFocusCoordinator({
+    const { focusEvent, focusedEventTarget } = useCalendarFocusCoordinator({
       calendars: props.calendars,
       selectedCalendarIds: props.selectedCalendarIds,
       excludedWeekdays: props.settings?.excludedWeekdays ?? defaultQunoInfiniteCalendarSettings.excludedWeekdays,
-      focusRequest: props.focusRequest,
+      focusRequest: props.focusRequest
+        ? { ...props.focusRequest, event: prepare(props.focusRequest.event) }
+        : undefined,
       onCalendarVisibilityRequest: props.onCalendarVisibilityRequest,
       onFocusRequestComplete: props.onFocusRequestComplete,
       viewRef
@@ -35,15 +57,24 @@ export const QunoInfiniteCalendar = forwardRef<QunoInfiniteCalendarHandle, QunoI
         captureViewportAnchor: (target) => viewRef.current?.captureViewportAnchor(target) ?? null,
         restoreViewportAnchor: (anchor, options) => viewRef.current?.restoreViewportAnchor(anchor, options),
         cancelViewportAnchorRestore: () => viewRef.current?.cancelViewportAnchorRestore(),
-        commitVisibleEvent: (event, options) => viewRef.current?.commitVisibleEvent(event, options),
+        commitVisibleEvent: (event, options) => viewRef.current?.commitVisibleEvent(prepare(event), options),
         removeVisibleEvent: (eventId) => viewRef.current?.removeVisibleEvent(eventId),
         releaseActiveDraft: (options) => viewRef.current?.releaseActiveDraft(options),
-        focusEvent: focus.focusEvent
+        focusEvent: (event, options) => focusEvent(prepare(event), options)
       }),
-      [focus.focusEvent]
+      [focusEvent, prepare]
     );
 
-    const internalProps = { ...props, focusedEventTarget: focus.focusedEventTarget };
+    const internalProps = {
+      ...props,
+      eventVersion: `${props.eventVersion ?? ""}:${zone ?? ""}`,
+      loadEvents,
+      onEventCreateRequest: props.onEventCreateRequest ? createEvent : undefined,
+      activeDraft: props.activeDraft
+        ? { ...props.activeDraft, event: prepare(props.activeDraft.event) }
+        : props.activeDraft,
+      focusedEventTarget: focusedEventTarget
+    };
     if (view === "infinite-vertical") {
       return <InfiniteVerticalTimelineView ref={viewRef} {...internalProps} />;
     }

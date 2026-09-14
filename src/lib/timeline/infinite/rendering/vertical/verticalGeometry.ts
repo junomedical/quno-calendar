@@ -17,8 +17,8 @@ export function verticalMinuteToY(minute: number, settings: VerticalGeometrySett
 
 /** Converts event time into the positioned block shared by transient and availability layers. */
 export function verticalEventBox(event: CalendarEvent, settings: VerticalGeometrySettings) {
-  const startMinute = minutesSinceStartOfDay(event.start);
-  const endMinute = minutesSinceStartOfDay(event.end);
+  const startMinute = minutesSinceStartOfDay(event.start, event.calendarTimeZone);
+  const endMinute = minutesSinceStartOfDay(event.end, event.calendarTimeZone);
   return {
     top: verticalMinuteToY(startMinute, settings),
     height: Math.max(12, minuteToY(endMinute, settings) - minuteToY(startMinute, settings))

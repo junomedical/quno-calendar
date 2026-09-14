@@ -1,3 +1,4 @@
+import { minutesSinceStartOfDay } from "#quno-internal/timeline/time/time";
 import { useCallback, useImperativeHandle, useRef, type ForwardedRef, type RefObject } from "react";
 import { toDateKey } from "#quno-internal/timeline/date/dateVirtualization";
 import type { QunoInfiniteCalendarHandle, QunoInfiniteCalendarSettings } from "#quno-internal/timeline/core/types";
@@ -67,8 +68,8 @@ export function useHorizontalNavigation({
       scrollToDateTime,
       scrollToToday: () =>
         scrollToDateTime(
-          toDateKey(now),
-          `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`
+          toDateKey(now, effectiveSettings.timeZone),
+          `${String(Math.floor(minutesSinceStartOfDay(now, effectiveSettings.timeZone) / 60)).padStart(2, "0")}:${String(minutesSinceStartOfDay(now, effectiveSettings.timeZone) % 60).padStart(2, "0")}`
         ),
       captureViewportAnchor,
       isEventFullyVisible,
@@ -83,6 +84,7 @@ export function useHorizontalNavigation({
       captureViewportAnchor,
       isEventFullyVisible,
       now,
+      effectiveSettings.timeZone,
       restoreViewportAnchor,
       scrollToDate,
       scrollToDateTime

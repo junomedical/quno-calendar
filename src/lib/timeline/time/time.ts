@@ -1,3 +1,4 @@
+import { zonedParts, zonedDateMinuteToIso } from "./zonedTime";
 import { fromDateKey } from "#quno-internal/timeline/date/dateVirtualization";
 import { parseIsoDate } from "#quno-internal/timeline/date/localDate";
 
@@ -16,7 +17,11 @@ export function parseClockToMinutes(clock: string): number {
 }
 
 /** Returns the local minutes from midnight for an ISO string or Date. */
-export function minutesSinceStartOfDay(value: string | Date): number {
+export function minutesSinceStartOfDay(value: string | Date, timeZone?: string): number {
+  if (timeZone) {
+    const p = zonedParts(value, timeZone);
+    return p.hour * 60 + p.minute;
+  }
   const date = typeof value === "string" ? parseIsoDate(value) : value;
   return date.getHours() * 60 + date.getMinutes();
 }
@@ -94,7 +99,8 @@ export function clampEventToTimeline(
 }
 
 /** Builds an ISO timestamp for a date key plus a minute offset from midnight. */
-export function dateKeyAndMinuteToIso(dateKey: string, minute: number): string {
+export function dateKeyAndMinuteToIso(dateKey: string, minute: number, timeZone?: string): string {
+  if (timeZone) return zonedDateMinuteToIso(dateKey, minute, timeZone);
   const date = fromDateKey(dateKey);
   date.setTime(date.getTime() + minute * 60_000);
   return date.toISOString();

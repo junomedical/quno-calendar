@@ -15,6 +15,7 @@ export type DraftState = {
 };
 
 type UseTimelineDraftInteractionArgs = {
+  timeZone?: string;
   interactionMode: NonNullable<CalendarViewComponentProps["interactionMode"]>;
   getHit: (event: PointerLike) => CalendarHit | null;
   onEventCreateRequest?: CalendarViewComponentProps["onEventCreateRequest"];
@@ -23,6 +24,7 @@ type UseTimelineDraftInteractionArgs = {
 };
 
 export function useTimelineDraftInteraction({
+  timeZone,
   interactionMode,
   getHit,
   onEventCreateRequest,
@@ -37,9 +39,13 @@ export function useTimelineDraftInteraction({
 
   const startDraft = useCallback(
     (hit: CalendarHit) => {
-      setDraftState({ start: hit, current: hit, event: buildDraftEvent(hit, hit, draftKind) });
+      try {
+        setDraftState({ start: hit, current: hit, event: buildDraftEvent(hit, hit, draftKind, timeZone) });
+      } catch {
+        setDraftState(null);
+      }
     },
-    [draftKind]
+    [draftKind, timeZone]
   );
 
   const updateDraftFromPoint = useCallback(
@@ -52,14 +58,20 @@ export function useTimelineDraftInteraction({
       if (!hit || hit.dateKey !== draftState.start.dateKey || hit.calendarId !== draftState.start.calendarId) {
         return true;
       }
-      setDraftState({
-        start: draftState.start,
-        current: hit,
-        event: buildDraftEvent(draftState.start, hit, draftKind)
-      });
+      try {
+        setDraftState({
+          start: draftState.start,
+          current: hit,
+          event: buildDraftEvent(draftState.start, hit, draftKind, timeZone)
+        });
+      } catch {
+        // Cancel an invalid final selection; never submit the last valid interval.
+        setDraftState(null);
+        return true;
+      }
       return true;
     },
-    [draftKind, draftState, getHit]
+    [draftKind, draftState, getHit, timeZone]
   );
 
   const finishDraft = useCallback(async () => {
@@ -72,7 +84,10 @@ export function useTimelineDraftInteraction({
     }
 
     const draft = draftState.event;
-    if (minutesSinceStartOfDay(draft.end) > minutesSinceStartOfDay(draft.start)) {
+    if (
+      minutesSinceStartOfDay(draft.end, draft.calendarTimeZone) >
+      minutesSinceStartOfDay(draft.start, draft.calendarTimeZone)
+    ) {
       const request = {
         start: draft.start,
         end: draft.end,

@@ -26,8 +26,8 @@ export function eventIntervals(
   return events
     .map((event, sourceIndex) => ({
       event,
-      startMinute: Math.max(timelineStart, minutesSinceStartOfDay(event.start)),
-      endMinute: Math.min(timelineEnd, minutesSinceStartOfDay(event.end)),
+      startMinute: Math.max(timelineStart, minutesSinceStartOfDay(event.start, event.calendarTimeZone)),
+      endMinute: Math.min(timelineEnd, minutesSinceStartOfDay(event.end, event.calendarTimeZone)),
       sourceIndex
     }))
     .filter((interval) => interval.endMinute > timelineStart && interval.startMinute < timelineEnd)

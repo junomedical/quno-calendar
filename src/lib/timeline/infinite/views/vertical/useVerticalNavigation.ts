@@ -1,3 +1,4 @@
+import { minutesSinceStartOfDay } from "#quno-internal/timeline/time/time";
 /**
  * Vertical navigation and public imperative API.
  * date/time requests + geometry registry -> scroll operations and anchor-safe ref methods
@@ -84,8 +85,8 @@ export function useVerticalNavigation({
       scrollToDateTime,
       scrollToToday: () =>
         scrollToDateTime(
-          toDateKey(now),
-          `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`
+          toDateKey(now, settings.timeZone),
+          `${String(Math.floor(minutesSinceStartOfDay(now, settings.timeZone) / 60)).padStart(2, "0")}:${String(minutesSinceStartOfDay(now, settings.timeZone) % 60).padStart(2, "0")}`
         ),
       captureViewportAnchor: anchoring.captureViewportAnchor,
       isEventFullyVisible: anchoring.isEventFullyVisible,
@@ -95,7 +96,16 @@ export function useVerticalNavigation({
       removeVisibleEvent,
       releaseActiveDraft
     }),
-    [anchoring, commitVisibleEvent, now, releaseActiveDraft, removeVisibleEvent, scrollToDate, scrollToDateTime]
+    [
+      anchoring,
+      commitVisibleEvent,
+      now,
+      releaseActiveDraft,
+      removeVisibleEvent,
+      scrollToDate,
+      scrollToDateTime,
+      settings.timeZone
+    ]
   );
 
   return {

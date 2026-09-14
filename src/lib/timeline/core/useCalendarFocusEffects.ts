@@ -1,3 +1,4 @@
+import { zonedParts } from "#quno-internal/timeline/time/zonedTime";
 import { useEffect, type Dispatch, type MutableRefObject, type SetStateAction } from "react";
 import type { CalendarEvent, CalendarId, QunoInfiniteCalendarProps, CalendarViewportAnchor } from "./types";
 import type { CalendarFocusRequest, CalendarFocusResult, CalendarFocusRequestResult } from "./calendarFocusTypes";
@@ -27,6 +28,13 @@ export type PendingFocus = {
 };
 
 export function eventDateAndTime(event: CalendarEvent) {
+  if (event.calendarTimeZone) {
+    const p = zonedParts(event.start, event.calendarTimeZone);
+    return {
+      dateKey: p.date as IsoDate,
+      time: `${String(p.hour).padStart(2, "0")}:${String(p.minute).padStart(2, "0")}`
+    };
+  }
   return {
     dateKey: event.start.slice(0, 10) as IsoDate,
     time: event.start.slice(11, 16)

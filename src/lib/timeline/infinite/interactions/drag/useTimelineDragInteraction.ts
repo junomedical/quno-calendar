@@ -57,7 +57,13 @@ export function useTimelineDragInteraction({
       }
 
       const draggingActiveDraft = isActiveDraftEvent(dragState.event);
-      const proposal = proposalForDrag(dragState, hit, settings, draggingActiveDraft);
+      let proposal: ReturnType<typeof proposalForDrag>;
+      try {
+        proposal = proposalForDrag(dragState, hit, settings, draggingActiveDraft);
+      } catch {
+        setDragState((current) => (current ? { ...current, preview: null } : current));
+        return true;
+      }
       if (draggingActiveDraft && !sameMoveRequest(proposal, dragState.preview)) {
         onActiveDraftMoveRequest?.(proposal);
       }
