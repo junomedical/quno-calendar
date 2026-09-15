@@ -1058,3 +1058,10 @@ Booking embeds can hide selection headers, offscreen pills and month popovers wh
   composition opts in explicitly. Preserve accessible full-date labels and existing date values.
 - Why: booking designs use two-digit dates; plain datepickers should retain their current output. Font weight remains
   a consumer styling decision, not part of this formatting setting.
+
+## QDP-BOOKING-SIZE-BUDGET — Allow the approved booking additions
+
+- Date: 2026-09-15
+- Status: Accepted
+- Decision: Raise the Datepicker JavaScript gzip ceiling from 10.5 KiB to 10.75 KiB (11,008 bytes), superseding the Datepicker size ceiling recorded in QUNO-013.
+- Why: the user approved the current 10,919-byte build, including booking chrome and optional leading-zero numerals. Keep the size check active for further growth.

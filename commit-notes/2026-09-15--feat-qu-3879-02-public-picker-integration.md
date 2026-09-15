@@ -77,3 +77,9 @@
 1. Verify the integrated release checkout and preserve the existing feature changes.
    1. Why: provide a reproducible commit with explicit validation results before pushing.
    2. 363 unit tests and 120 Chromium browser tests pass. Typecheck, lint, demo/library builds, Preact and React 19 compatibility, packed React/SSR/types/CSS/ESM/CommonJS verification, and dry-run pack pass. Formatting corrected. Remaining release checks: restored booking functions/callbacks violate the named-object contract; Datepicker JavaScript is 10,919 B gzip versus its 10,752 B limit (167 B over). Firefox/WebKit could not launch because their browser executables are not installed. These are not waived by preparing the branch.
+
+## Approved Datepicker size increase
+
+1. Raise only the Datepicker JavaScript gzip ceiling to 10.75 KiB (11,008 bytes).
+   1. Why: the user approved the current booking additions exceeding the former limit by 167 bytes.
+   2. Files: `scripts/check-bundle-size.mjs`, Datepicker README/decision ledger, and `CHANGELOG.md`. Runtime artifacts are unchanged; consumer packages need no refresh for this budget-only adjustment.

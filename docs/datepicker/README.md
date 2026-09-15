@@ -58,3 +58,7 @@ example has a checkbox to try both modes.
 ```
 
 Scheduling pickers explicitly opt in. Their consuming pages retain control of typography through CSS.
+
+## Bundle budget
+
+Datepicker JavaScript has a 10.75 KiB (11,008-byte) gzip ceiling. The approved booking additions currently measure 10,919 bytes; `npm run check:bundle-size` continues to guard future growth.
