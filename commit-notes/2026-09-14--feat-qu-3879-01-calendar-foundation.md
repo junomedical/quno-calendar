@@ -31,3 +31,11 @@
    3. The combined Infinite Calendar artifact is 163.08 KiB raw / 38.59 KiB gzip with a 39 KiB ceiling; other product budgets are unchanged. Retain branch-local decision provenance where upstream reused Decision 091.
       Why: retain the latest main behavior without reintroducing browser-timezone dependence or breaking Onboarding's integration.
       Files: timeline runtime/interaction/date helpers, timezone demo/tests, public docs, size guards and shared production profiles. Onboarding updates its consumer API and vendored archive in the corresponding monorepo branch.
+
+6. Preserve imported timestamps when opening an event.
+   1. Compare absolute start minutes, elapsed duration and calendar membership when deciding whether a pointer release is a move. A stationary click or a return to the original minute activates the untouched event, including seconds and milliseconds.
+   2. Retain actual time/resource moves and repeated-hour identity. Exercise differing endpoint seconds, browser-local mode and the public timezone demo.
+      Why: minute-only interaction proposals must not silently reschedule imported appointments when the user clicks them.
+      Files: dragInteractionModel.ts, tests/unit/lib/interaction/seconds.test.tsx, demo/demos/TimeZoneDemo.tsx, e2e/specs/timezone.spec.ts and the README/usage/decision/changelog records.
+   3. Validation: all 25 focused interaction tests and 120 Chromium checks pass, including actual click and drag behavior in New York and Tokyo browser contexts. The full unit run passed 354 cases and hit one layout-scaling timing threshold; both layout-scaling tests passed when rerun without the concurrent browser/build jobs. Formatting, architecture, TypeScript, lint, library/demo builds, React/SSR and Preact package verification, size guards and pack dry-run pass. Infinite Calendar is 39,501 bytes gzip against 39,936 allowed.
+   4. Refresh the corresponding step 1 Onboarding archive and its isolated local installation; all 50 selected package, calendar-surface and editor tests pass. The running release checkout and database are unchanged.

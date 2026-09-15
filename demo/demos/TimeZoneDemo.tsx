@@ -7,8 +7,8 @@ const initialEvents: CalendarEvent[] = [
     id: "berlin-hours",
     calendarId: "doctor",
     title: "Berlin Saturday hours",
-    start: "2026-09-19T12:00:00Z",
-    end: "2026-09-19T14:00:00Z"
+    start: "2026-09-19T12:00:30.123Z",
+    end: "2026-09-19T14:00:15.000Z"
   }
 ];
 function Card({ event }: EventRendererProps) {
@@ -29,13 +29,15 @@ function Card({ event }: EventRendererProps) {
 export function TimeZoneDemo() {
   const [timeZone, setTimeZone] = useState("Europe/Bucharest");
   const [events, setEvents] = useState(initialEvents);
+  const [action, setAction] = useState("No interaction yet");
   const loadEvents = useCallback(async () => events, [events]);
   return (
     <main style={{ padding: 24 }}>
       <h1>One calendar timezone</h1>
       <p>
         Try changing the display timezone or dragging the event. The source hours are 14:00–16:00 in Berlin; the browser
-        timezone does not control this grid.
+        timezone does not control this grid. Click the card to open it: imported seconds stay in the source interval
+        while the card shows only hours and minutes.
       </p>
       <label>
         Display timezone{" "}
@@ -49,6 +51,7 @@ export function TimeZoneDemo() {
       <output aria-label="Saved UTC interval">
         {events[0].start} / {events[0].end}
       </output>
+      <output aria-label="Last interaction">{action}</output>
       <div style={{ height: 500, marginTop: 16 }}>
         <QunoInfiniteCalendar
           calendars={calendars}
@@ -58,7 +61,9 @@ export function TimeZoneDemo() {
           initialDateKey="2026-09-19"
           now={new Date("2026-09-19T12:00:00Z")}
           settings={{ timeZone, startHour: 7, endHour: 20, zoom: 1, excludedWeekdays: [] }}
+          onEventActivate={() => setAction("Appointment opened")}
           onEventMoveRequest={(request) => {
+            setAction("Appointment moved");
             setEvents((current) =>
               current.map((event) =>
                 event.id === request.event.id

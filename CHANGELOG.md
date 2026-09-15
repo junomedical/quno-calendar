@@ -9,6 +9,7 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ### Fixed
 
+- Clicking an imported event with seconds or milliseconds opens it without submitting a rounded move. Compare absolute start minutes and elapsed duration, retaining real time/resource moves and DST-fold identity.
 - Preserve elapsed event duration when moving across DST; reject ambiguous pointer times and cancel invalid drawn selections. Infinite Calendar remains below its 35 KiB gzip budget (34.29 KiB measured).
 
 ### Added

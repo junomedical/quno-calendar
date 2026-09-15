@@ -70,9 +70,12 @@ export function previewEventForDrag({
 
 /** Distinguishes a click/release from a move after final-position flushing. */
 export function proposalChangesEvent({ drag, proposal }: { drag: DragState; proposal: EventMoveRequest }): boolean {
+  const originalStart = Date.parse(drag.event.start);
+  const proposedStart = Date.parse(proposal.proposedStart);
+  // Pointer positions have minute precision; compare absolute minutes to retain DST-fold identity.
   return !(
-    Date.parse(proposal.proposedStart) === Date.parse(drag.event.start) &&
-    Date.parse(proposal.proposedEnd) === Date.parse(drag.event.end) &&
+    Math.floor(proposedStart / 60000) === Math.floor(originalStart / 60000) &&
+    Date.parse(proposal.proposedEnd) - proposedStart === Date.parse(drag.event.end) - originalStart &&
     proposal.proposedCalendarId === drag.sourceCalendarId &&
     proposal.proposedCalendarIds.join("|") === eventCalendarIds(drag.event).join("|")
   );

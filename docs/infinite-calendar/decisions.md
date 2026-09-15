@@ -778,3 +778,10 @@ Merge identity note: QU-3879-091 and QU-3879-092 were numbered 091/092 on the ca
 ## 093 - Combine Named Contracts and Timezone-Safe Interactions
 
 Integrate upstream Decision 091 and the branch-local timezone decisions without reverting either behavior. Named object requests and component-level locale apply to timezone-aware navigation and mutations as well. The combined build measures 163.08 KiB raw / 38.59 KiB gzip, so the Infinite Calendar ceiling becomes 39 KiB; other product ceilings remain unchanged. This supersedes the earlier size ceilings for the combined build only.
+
+## 094 - Keep Hidden Seconds From Turning Clicks Into Moves
+
+Date: 2026-09-15
+Status: Accepted; refines Decision 093
+
+Pointer proposals have minute precision, while imported timestamps may contain seconds and milliseconds. Treat a proposal with the same absolute start minute, elapsed duration and calendar membership as unchanged. Activate the original event without changing its timestamps. Compare elapsed duration rather than rounded end minutes because snapping a start can cross an end-minute boundary. Absolute start minutes still distinguish the two instants in a repeated DST hour. Actual moves retain their existing snapped-start and elapsed-duration policy. The timezone demo shows minute-only labels alongside a precise source interval and reports whether clicking opens or moves the event.

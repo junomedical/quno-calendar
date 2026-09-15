@@ -47,6 +47,8 @@ See the [breaking migration](../shared/migration.md#unreleased-named-contracts-a
 
 ## Explicit display timezone
 
+Event labels can show hours and minutes while source timestamps retain seconds. A click opens the original event without a rounded move; genuine moves still snap the start and preserve elapsed duration. The timezone demo exercises both paths with a precise imported interval.
+
 Set `settings.timeZone` to an IANA timezone to make day bucketing, geometry, Today/navigation, focus, and drawing/movement independent of the browser timezone. Inputs and mutation callbacks retain absolute timestamps. Custom renderers can format labels using `event.calendarTimeZone`. When omitted, existing browser-local behavior is retained.
 
 Try the public-entry-point example at `/demo/calendar-timezone`: change its display timezone and drag the UTC-backed event. The example shows the unchanged source interval alongside the grid.
