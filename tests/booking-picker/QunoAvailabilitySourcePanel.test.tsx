@@ -7,11 +7,11 @@ const labels = {
   cronofy: "Cronofy",
   quno: "API",
   compare: "Compare",
-  matching: (count: number) => `${count} matching`,
-  qunoOnly: (count: number) => `${count} API only`,
-  cronofyOnly: (count: number) => `${count} Cronofy only`,
-  bootstrapIn: (milliseconds: number) => `bootstrap in ${milliseconds} ms`,
-  availabilityIn: (milliseconds: number) => `availability in ${milliseconds} ms`
+  matching: ({ count }: { count: number }) => `${count} matching`,
+  qunoOnly: ({ count }: { count: number }) => `${count} API only`,
+  cronofyOnly: ({ count }: { count: number }) => `${count} Cronofy only`,
+  bootstrapIn: ({ milliseconds }: { milliseconds: number }) => `bootstrap in ${milliseconds} ms`,
+  availabilityIn: ({ milliseconds }: { milliseconds: number }) => `availability in ${milliseconds} ms`
 };
 
 describe("booking diagnostics", () => {
@@ -39,7 +39,7 @@ describe("booking diagnostics", () => {
     );
     expect(screen.getByText("4 matching")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "API" }));
-    expect(onSelect).toHaveBeenCalledWith("quno");
+    expect(onSelect).toHaveBeenCalledWith({ mode: "quno" });
   });
 
   it("shows ongoing availability without inventing a bootstrap measurement", () => {

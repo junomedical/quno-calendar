@@ -5,18 +5,15 @@ import { BookingSlotOptions } from "./BookingSlotOptions";
 import type { QunoBookingDateTimeSlot } from "./bookingDateTimePickerModel";
 import type { QunoBookingDateTimePickerLabels, QunoBookingDateTimePickerProps } from "./bookingPickerTypes";
 import { useBookingPickerViewModel } from "./bookingPickerViewModel";
-
 const DEFAULT_LABELS: QunoBookingDateTimePickerLabels = {
-  selectedDate: (date, locale) => formatIsoDate({ value: date, locale }),
+  selectedDate: ({ date, locale }) => formatIsoDate({ value: date, locale }),
   loading: "Loading available times…",
   noTimes: "No available times on this date.",
-  timeZone: (timeZone) => `Times shown in ${timeZone}`,
-  slot: (start, end) => `${start}–${end}`
+  timeZone: ({ timeZone }) => `Times shown in ${timeZone}`,
+  slot: ({ start, end }) => `${start}–${end}`
 };
-
-const classes = (...values: Array<string | undefined>): string | undefined =>
+const classes = ({ values }: { values: Array<string | undefined> }): string | undefined =>
   values.filter(Boolean).join(" ") || undefined;
-
 /** Provider-neutral booking date and exact-time composition shared by Page and Funnel. */
 export const QunoBookingDateTimePicker = <TSlot extends QunoBookingDateTimeSlot>({
   slots,
@@ -48,10 +45,9 @@ export const QunoBookingDateTimePicker = <TSlot extends QunoBookingDateTimeSlot>
     dateOnly,
     onDateSelected
   });
-
   return (
     <section
-      className={classes("quno-booking-date-time-picker", classNames?.root, className)}
+      className={classes({ values: ["quno-booking-date-time-picker", classNames?.root, className] })}
       data-slot="booking-picker"
     >
       <QunoDatePicker
@@ -72,21 +68,21 @@ export const QunoBookingDateTimePicker = <TSlot extends QunoBookingDateTimeSlot>
         getDayCellProps={({ date }) => ({
           className:
             !loading && picker.slotsByDay.has(date)
-              ? classes("quno-booking-date-time-picker__available-day", classNames?.availableDay)
+              ? classes({ values: ["quno-booking-date-time-picker__available-day", classNames?.availableDay] })
               : undefined
         })}
-        onChange={({ value }) => picker.selectDate(value?.start ?? null)}
+        onChange={({ value }) => picker.selectDate({ date: value?.start ?? null })}
         onVisibleMonthChange={({ month }) => {
-          picker.selectMonth(month);
-          onVisibleMonthChange?.(month);
+          picker.selectMonth({ month });
+          onVisibleMonthChange?.({ month });
         }}
       />
       <div
-        className={classes("quno-booking-date-time-picker__slots", classNames?.slots)}
+        className={classes({ values: ["quno-booking-date-time-picker__slots", classNames?.slots] })}
         data-slot="available-slots"
         aria-live="polite"
       >
-        {picker.selectedDate && <h3>{resolvedLabels.selectedDate(picker.selectedDate, locale)}</h3>}
+        {picker.selectedDate && <h3>{resolvedLabels.selectedDate({ date: picker.selectedDate, locale })}</h3>}
         <BookingSlotOptions
           slots={picker.displayedSlots}
           loading={loading}
@@ -96,14 +92,14 @@ export const QunoBookingDateTimePicker = <TSlot extends QunoBookingDateTimeSlot>
           classNames={classNames}
           labels={resolvedLabels}
           isSelected={picker.slotIsSelected}
-          onSelect={(slot) => {
-            picker.selectSlot(slot);
-            void onSlotSelected(slot);
+          onSelect={({ slot }) => {
+            picker.selectSlot({ slot });
+            void onSlotSelected({ slot });
           }}
         />
         {showTimeZone && (
-          <p className={classes("quno-booking-date-time-picker__time-zone", classNames?.timeZone)}>
-            {resolvedLabels.timeZone(timeZone)}
+          <p className={classes({ values: ["quno-booking-date-time-picker__time-zone", classNames?.timeZone] })}>
+            {resolvedLabels.timeZone({ timeZone })}
           </p>
         )}
       </div>

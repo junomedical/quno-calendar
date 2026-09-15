@@ -97,3 +97,7 @@ The source is authored for React 18+. Existing Preact applications should add th
 Remove `theme="public-booking"` from booking pickers. It was an unreleased opt-in appearance experiment; consumers
 now apply their own scoped date/time CSS through existing class hooks and state attributes. No change to slot or
 navigation behavior is required. Always pair selected background and text colors in the consumer theme.
+
+## Booking composition named arguments
+
+The restored booking subpath now follows the named-object contract. Change `bookingSlotDate(timestamp, timeZone)` to `bookingSlotDate({ timestamp, timeZone })`; merge helpers receive `{ current, incoming }`, period merging receives `{ left, right }`, and comparison receives `{ cronofy, quno }`. Date bounds receive `{ periods }`; slot grouping receives `{ slots, timeZone }`. Timing retention receives `{ timings }`. Callbacks destructure their payload: `onSlotSelected={({ slot }) => submit(slot)}`, `onVisibleMonthChange={({ month }) => load(month)}`, and source-panel `onSelect={({ mode }) => select(mode)}`. Update label callbacks to destructure their named fields too.

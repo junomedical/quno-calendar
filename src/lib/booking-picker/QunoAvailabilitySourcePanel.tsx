@@ -12,11 +12,11 @@ export type QunoAvailabilitySourcePanelLabels = {
   cronofy: string;
   quno: string;
   compare: string;
-  matching: (count: number) => string;
-  qunoOnly: (count: number) => string;
-  cronofyOnly: (count: number) => string;
-  bootstrapIn: (milliseconds: number) => string;
-  availabilityIn: (milliseconds: number) => string;
+  matching: ({ count }: { count: number }) => string;
+  qunoOnly: ({ count }: { count: number }) => string;
+  cronofyOnly: ({ count }: { count: number }) => string;
+  bootstrapIn: ({ milliseconds }: { milliseconds: number }) => string;
+  availabilityIn: ({ milliseconds }: { milliseconds: number }) => string;
 };
 
 export type QunoAvailabilitySourcePanelProps = {
@@ -26,7 +26,7 @@ export type QunoAvailabilitySourcePanelProps = {
   counts: QunoAvailabilityComparisonCounts | null;
   timings: QunoAvailabilityFetchTimings | null;
   labels: QunoAvailabilitySourcePanelLabels;
-  onSelect: (mode: QunoAvailabilityDisplayMode) => void;
+  onSelect: ({ mode }: { mode: QunoAvailabilityDisplayMode }) => void;
 };
 
 const MODES: readonly QunoAvailabilityDisplayMode[] = ["cronofy", "quno", "compare"];
@@ -53,7 +53,7 @@ export const QunoAvailabilitySourcePanel = ({
             data-source={value}
             disabled={loading}
             key={value}
-            onClick={() => onSelect(value)}
+            onClick={() => onSelect({ mode: value })}
             type="button"
           >
             {labels[value]}
@@ -64,9 +64,9 @@ export const QunoAvailabilitySourcePanel = ({
         <div className="quno-source-compare-panel__details" aria-live="polite">
           {mode === "compare" && counts && (
             <div className="quno-source-compare-panel__legend">
-              <span data-comparison="match">{labels.matching(counts.matching)}</span>
-              <span data-comparison="quno-only">{labels.qunoOnly(counts.qunoOnly)}</span>
-              <span data-comparison="cronofy-only">{labels.cronofyOnly(counts.cronofyOnly)}</span>
+              <span data-comparison="match">{labels.matching({ count: counts.matching })}</span>
+              <span data-comparison="quno-only">{labels.qunoOnly({ count: counts.qunoOnly })}</span>
+              <span data-comparison="cronofy-only">{labels.cronofyOnly({ count: counts.cronofyOnly })}</span>
             </div>
           )}
           {timings && (
@@ -78,8 +78,12 @@ export const QunoAvailabilitySourcePanel = ({
                 return (
                   <span data-timing={source} key={source}>
                     <strong>{labels[source]}</strong>
-                    {timing.bootstrap === undefined ? null : <> · {labels.bootstrapIn(timing.bootstrap)}</>}
-                    {timing.availability === undefined ? null : <> · {labels.availabilityIn(timing.availability)}</>}
+                    {timing.bootstrap === undefined ? null : (
+                      <> · {labels.bootstrapIn({ milliseconds: timing.bootstrap })}</>
+                    )}
+                    {timing.availability === undefined ? null : (
+                      <> · {labels.availabilityIn({ milliseconds: timing.availability })}</>
+                    )}
                   </span>
                 );
               })}

@@ -4,6 +4,8 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+- Resolve the restored booking function-contract blocker: helpers and callbacks use named object payloads, with matching consumer adapters. See the booking migration guide.
+
 - Approve a 10.75 KiB Datepicker JavaScript gzip ceiling (11,008 bytes) for the current 10,919-byte build. This resolves the previously recorded 167-byte size overage; the booking function-contract blocker remains.
 
 - Push preparation: 363 unit and 120 Chromium tests pass; Preact/React 19 and packed exports pass. Remaining blockers: booking positional function contracts and Datepicker gzip 167 B over its 10,752 B budget. Firefox/WebKit executables are not installed. Formatting has been corrected.

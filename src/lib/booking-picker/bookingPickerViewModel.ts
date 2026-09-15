@@ -9,7 +9,6 @@ import {
   todayIso,
   type QunoBookingDateTimeSlot
 } from "./bookingDateTimePickerModel";
-
 type Input<TSlot extends QunoBookingDateTimeSlot> = {
   slots: readonly TSlot[];
   queryPeriods: readonly QunoBookingQueryPeriod[];
@@ -18,11 +17,9 @@ type Input<TSlot extends QunoBookingDateTimeSlot> = {
   timeZone: string;
   loading: boolean;
   dateOnly: boolean;
-  onDateSelected?: (date: IsoDate) => void;
+  onDateSelected?: ({ date }: { date: IsoDate }) => void;
 };
-
 const slotKey = ({ start, end }: QunoBookingDateTimeSlot): string => `${start}:${end}`;
-
 export const useBookingPickerViewModel = <TSlot extends QunoBookingDateTimeSlot>({
   slots,
   queryPeriods,
@@ -33,16 +30,17 @@ export const useBookingPickerViewModel = <TSlot extends QunoBookingDateTimeSlot>
   dateOnly,
   onDateSelected
 }: Input<TSlot>) => {
-  const slotsByDay = useMemo(() => groupBookingSlots(slots, timeZone), [slots, timeZone]);
+  const slotsByDay = useMemo(() => groupBookingSlots({ slots: slots, timeZone: timeZone }), [slots, timeZone]);
   const availableDates = useMemo(() => [...slotsByDay.keys()].sort(), [slotsByDay]);
-  const valueDate = value ? bookingSlotDate(value.start, timeZone) : null;
-  const firstMonth = bookingMonth(
-    initialMonth ??
+  const valueDate = value ? bookingSlotDate({ timestamp: value.start, timeZone: timeZone }) : null;
+  const firstMonth = bookingMonth({
+    date:
+      initialMonth ??
       valueDate ??
       availableDates[0] ??
       (queryPeriods[0]?.start.slice(0, 10) as IsoDate | undefined) ??
       todayIso()
-  );
+  });
   const [visibleMonth, setVisibleMonth] = useState(firstMonth);
   const [selectedDate, setSelectedDate] = useState<IsoDate | null>(() =>
     valueDate?.slice(0, 7) === firstMonth.slice(0, 7)
@@ -55,7 +53,6 @@ export const useBookingPickerViewModel = <TSlot extends QunoBookingDateTimeSlot>
     () => availableDates.filter((date) => date.slice(0, 7) === visibleMonth.slice(0, 7)),
     [availableDates, visibleMonth]
   );
-
   useEffect(() => {
     if (valueDate && slotsByDay.has(valueDate) && valueDate.slice(0, 7) === visibleMonth.slice(0, 7)) {
       setSelectedDate(valueDate);
@@ -70,33 +67,31 @@ export const useBookingPickerViewModel = <TSlot extends QunoBookingDateTimeSlot>
       setSelectedDate(firstDate);
       const firstSlot = firstDate ? slotsByDay.get(firstDate)?.[0] : undefined;
       setSelectedSlotKey(dateOnly && firstSlot ? slotKey(firstSlot) : undefined);
-      if (firstDate) onDateSelected?.(firstDate);
+      if (firstDate) onDateSelected?.({ date: firstDate });
     }
   }, [dateOnly, datesInMonth, loading, onDateSelected, selectedDate, slots, slotsByDay, valueDate, visibleMonth]);
-
-  const selectDate = (date: IsoDate | null): void => {
+  const selectDate = ({ date }: { date: IsoDate | null }): void => {
     setSelectedDate(date);
     const firstSlot = date ? slotsByDay.get(date)?.[0] : undefined;
     setSelectedSlotKey(dateOnly && firstSlot ? slotKey(firstSlot) : undefined);
-    if (date) onDateSelected?.(date);
+    if (date) onDateSelected?.({ date });
   };
-  const selectMonth = (month: IsoDate): void => {
+  const selectMonth = ({ month }: { month: IsoDate }): void => {
     const firstDate = availableDates.find((date) => date.slice(0, 7) === month.slice(0, 7));
     pendingSlots.current = firstDate ? undefined : slots;
     setVisibleMonth(month);
-    if (firstDate) selectDate(firstDate);
+    if (firstDate) selectDate({ date: firstDate });
   };
   const displayedSlots = selectedDate ? (slotsByDay.get(selectedDate) ?? []) : [];
-
   return {
-    bounds: bookingPickerDateBounds(queryPeriods),
+    bounds: bookingPickerDateBounds({ periods: queryPeriods }),
     displayedSlots: dateOnly ? displayedSlots.slice(0, 1) : displayedSlots,
     firstMonth,
     selectedDate,
     selectDate,
     selectMonth,
-    selectSlot: (slot: TSlot) => setSelectedSlotKey(slotKey(slot)),
-    slotIsSelected: (slot: TSlot) =>
+    selectSlot: ({ slot }: { slot: TSlot }) => setSelectedSlotKey(slotKey(slot)),
+    slotIsSelected: ({ slot }: { slot: TSlot }) =>
       value === undefined ? selectedSlotKey === slotKey(slot) : value !== null && slotKey(value) === slotKey(slot),
     slotsByDay
   };

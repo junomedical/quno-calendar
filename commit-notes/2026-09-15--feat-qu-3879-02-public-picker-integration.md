@@ -83,3 +83,10 @@
 1. Raise only the Datepicker JavaScript gzip ceiling to 10.75 KiB (11,008 bytes).
    1. Why: the user approved the current booking additions exceeding the former limit by 167 bytes.
    2. Files: `scripts/check-bundle-size.mjs`, Datepicker README/decision ledger, and `CHANGELOG.md`. Runtime artifacts are unchanged; consumer packages need no refresh for this budget-only adjustment.
+
+## Named booking contracts
+
+1. Convert shared booking helper arguments, labels, and selection callbacks to named object payloads.
+   1. Why: restore compliance with Calendar’s named-object library contract while preserving slot selection and comparison behavior.
+   2. Calendar booking models/components and tests use named fields; Funnel and Patient Journey adapters pass the new payloads. Refresh both consumer package archives and the embedded Funnel runtime together.
+   3. Verification: Calendar architecture/typecheck/lint, 363 unit tests, 120 Chromium tests, and package verification pass. Both booking consumers pass their picker tests; Funnel typecheck/build passes. Patient Journey retains the four earlier fixture type errors. Funnel retains the main-branch debounce Babel failure (212 other tests pass).

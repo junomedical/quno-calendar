@@ -42,3 +42,9 @@
   Keep generic unavailable spillover styling and disabled bounded navigation in the shared picker.
 - Why: the consumer theme is the design authority; shared appearance was overriding selected text and duplicating
   ownership. This also restores the landing page's pre-existing FunnelTheme color contract.
+
+## BPK-005 — Named booking arguments and callback payloads
+
+- Date: 2026-09-15
+- Decision: All booking helpers and callbacks accept one named object, superseding the positional-signature compatibility exception in QUNO-BOOKING-RESTORE. Examples: `bookingSlotDate({ timestamp, timeZone })`, `onSlotSelected({ slot })`, and `onSelect({ mode })`.
+- Why: make the restored booking composition comply with the same checked contracts as the other library domains. Consumer adapters translate application callbacks at their boundary.

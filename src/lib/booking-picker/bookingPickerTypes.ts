@@ -4,11 +4,11 @@ import type { QunoBookingQueryPeriod } from "./bookingAvailabilityModel";
 import type { QunoBookingDateTimeSlot } from "./bookingDateTimePickerModel";
 
 export type QunoBookingDateTimePickerLabels = {
-  selectedDate: (date: IsoDate, locale: string) => string;
+  selectedDate: ({ date, locale }: { date: IsoDate; locale: string }) => string;
   loading: string;
   noTimes: string;
-  timeZone: (timeZone: string) => string;
-  slot: (start: string, end: string) => string;
+  timeZone: ({ timeZone }: { timeZone: string }) => string;
+  slot: ({ start, end }: { start: string; end: string }) => string;
 };
 
 export type QunoBookingDateTimePickerClassNames = {
@@ -36,7 +36,7 @@ export type QunoBookingDateTimePickerProps<TSlot extends QunoBookingDateTimeSlot
   classNames?: QunoBookingDateTimePickerClassNames;
   labels?: Partial<QunoBookingDateTimePickerLabels>;
   datePickerLabels?: Partial<QunoDatePickerLabels>;
-  onDateSelected?: (date: IsoDate) => void;
-  onSlotSelected: (slot: TSlot) => void | Promise<void>;
-  onVisibleMonthChange?: (month: IsoDate) => void;
+  onDateSelected?: ({ date }: { date: IsoDate }) => void;
+  onSlotSelected: ({ slot }: { slot: TSlot }) => void | Promise<void>;
+  onVisibleMonthChange?: ({ month }: { month: IsoDate }) => void;
 };

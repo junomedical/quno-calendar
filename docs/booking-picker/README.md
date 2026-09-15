@@ -41,3 +41,7 @@ Unavailable dates outside the displayed month are muted by default, including wi
 Available spillover days explicitly inherit normal calendar text instead of core Datepicker’s outside-month gray. Override `--quno-booking-picker-available-date-text` when a separate available-day text color is needed.
 
 Scheduling composition opts into Datepicker `padDayNumbers`, rendering `01`–`09` without changing full-date accessible labels. Font weight remains consumer-owned.
+
+## Named arguments
+
+Booking helpers accept one object: `bookingSlotDate({ timestamp, timeZone })`, `mergeBookingSlots({ current, incoming })`, and `bookingPickerDateBounds({ periods })`. Selection callbacks receive `{ slot }`, `{ date }`, `{ month }`, or `{ mode }`. Label formatters likewise receive named fields such as `{ date, locale }`, `{ count }`, or `{ milliseconds }`.
