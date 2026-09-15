@@ -163,4 +163,5 @@ export const singleDaySnippet = `const [date, setDate] = useState<DateRange | nu
   value={date}
   onChange={({ value }) => setDate(value)}
   selectionMode="single"
+  padDayNumbers // Optional: show 01–09; defaults to false.
 />;`;

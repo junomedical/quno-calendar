@@ -132,6 +132,8 @@ export type QunoDatePickerProps = {
   labels?: Partial<QunoDatePickerLabels>;
   formatters?: Partial<QunoDatePickerFormatters>;
   weekStartsOn?: WeekStart;
+  /** Display day numbers as 01–09. Defaults to false. */
+  padDayNumbers?: boolean;
   className?: string;
   classNames?: QunoDatePickerClassNames;
   limitDateFrom?: IsoDate;
@@ -139,6 +141,10 @@ export type QunoDatePickerProps = {
   isDayDisabled?: QunoDatePickerDisabledDayPredicate;
   getDayCellProps?: QunoDatePickerDayCellCustomizer;
   calendarFooter?: ReactNode;
+  showSelectionHeader?: boolean;
+  showOffscreenPills?: boolean;
+  showMonthNavigation?: boolean;
+  limitNavigation?: boolean;
   autoNavigateDelay?: number;
   autoNavigateRepeatDelay?: number;
   onChange?: (args: { value: DateRange | null }) => void;
@@ -146,6 +152,7 @@ export type QunoDatePickerProps = {
 };
 
 export type ResolvedDatePickerConfig = {
+  padDayNumbers?: boolean;
   locale: string;
   labels: QunoDatePickerLabels;
   formatters: QunoDatePickerFormatters;

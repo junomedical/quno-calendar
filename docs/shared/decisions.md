@@ -188,3 +188,7 @@ because that repository was the consolidation source. Its identifier and text re
   artifact to 42.17 KiB raw and 10.47 KiB gzip, so its
   JavaScript ceiling moves from 10 KiB to 10.5 KiB. Date Input measures 29.83 KiB raw and 7.82 KiB gzip and remains
   inside its existing 8 KiB ceiling.
+
+## QUNO-BOOKING-RESTORE — Restore shared booking UI
+
+The booking-picker subpath composes Datepicker with slot selection and one shared source-comparison panel. Funnel and Patient Journey keep transport and branding outside the package. The restored callback signatures remain compatible with the earlier consumers; the newer named-object contract guard currently reports these legacy signatures.

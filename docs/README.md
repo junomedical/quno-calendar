@@ -34,3 +34,7 @@ combined package.
 The Infinite Calendar [timezone recipe](./shared/usage.md#explicit-display-timezone) includes a live `/demo/calendar-timezone` example.
 
 The Infinite Calendar timezone recipe also documents DST rejection and elapsed-duration-preserving moves.
+
+## Booking picker
+
+See [Booking picker](booking-picker/README.md) for the shared booking UI and source comparison panel.

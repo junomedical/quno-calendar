@@ -791,3 +791,9 @@ Try the public-entry-point example at `/demo/calendar-timezone`: change its disp
 ```
 
 DST pointer policy: event moves preserve elapsed duration. Drawn endpoints and move starts reject both nonexistent spring-forward times and ambiguous repeated autumn times. An invalid drawn endpoint cancels the gesture, so the last valid interval cannot be submitted; start a new selection at a valid time. No browser-zone or tenant-specific policy is introduced.
+
+## Shared booking picker
+
+Import `QunoBookingDateTimePicker` and `QunoAvailabilitySourcePanel` from `@quno/calendar/booking-picker`, and import `@quno/calendar/booking-picker/styles.css`. Consumers own transport and theme tokens. See [the booking picker guide](../booking-picker/README.md).
+
+For two-digit Datepicker numerals, use `<QunoDatePicker padDayNumbers />`. It defaults to false and does not change accessible labels. Booking composition opts in explicitly.

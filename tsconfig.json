@@ -16,6 +16,7 @@
       "@quno/calendar": ["./src/lib/index.ts"],
       "@quno/calendar/infinite-calendar": ["./src/lib/timeline/index.ts"],
       "@quno/calendar/datepicker": ["./src/lib/date-picker/index.ts"],
+      "@quno/calendar/booking-picker": ["./src/lib/booking-picker/index.ts"],
       "@quno/calendar/date-input": ["./src/lib/date-input/index.ts"],
       "@quno/calendar/date-parser": ["./src/lib/date-parser/index.ts"],
       "#quno-internal/*": ["./src/lib/*"],

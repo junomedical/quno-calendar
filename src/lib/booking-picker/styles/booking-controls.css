@@ -1,0 +1,114 @@
+.quno-source-compare-panel {
+  box-sizing: border-box;
+  min-width: 0;
+  overflow-x: auto;
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: var(--quno-source-panel-gap, 8px);
+  width: 100%;
+  padding: var(--quno-source-panel-padding, 8px);
+  border: 1px dashed var(--quno-source-panel-border, #9ca3af);
+  border-radius: var(--quno-source-panel-radius, 8px);
+  background: var(--quno-source-panel-background, #f3f4f6);
+  color: var(--quno-source-panel-text, #17202a);
+  font-size: var(--quno-source-panel-font-size, 13px);
+  line-height: 1.25;
+}
+
+.quno-source-compare-panel__label {
+  flex: 0 0 auto;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.quno-source-compare-panel__modes,
+.quno-source-compare-panel__legend,
+.quno-source-compare-panel__timings {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 4px;
+}
+
+.quno-source-compare-panel__modes {
+  flex: 0 0 auto;
+}
+
+.quno-source-compare-panel__modes > button {
+  padding: 4px 8px;
+  border: 1px solid currentcolor;
+  border-radius: 999px;
+  background: var(--quno-source-panel-button-background, #fff);
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+}
+
+.quno-source-compare-panel__modes > button[aria-pressed="true"] {
+  border-color: var(--quno-source-panel-active-background, #00bcb3);
+  background: var(--quno-source-panel-active-background, #00bcb3);
+  color: var(--quno-source-panel-active-text, #fff);
+}
+
+.quno-source-compare-panel__modes > button:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+.quno-source-compare-panel__details {
+  align-items: center;
+  display: flex;
+  flex: 0 0 auto;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.quno-source-compare-panel__legend > span,
+.quno-source-compare-panel__timings > span {
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+.quno-booking-choice-group {
+  display: flex;
+  gap: var(--quno-booking-choice-gap, 8px);
+  min-width: 0;
+}
+
+.quno-booking-choice-group[data-layout="stack"] {
+  flex-direction: column;
+}
+
+.quno-booking-choice-group[data-layout="responsive"] {
+  contain: inline-size;
+  flex-wrap: wrap;
+}
+
+.quno-booking-choice-group[data-layout="responsive"] > * {
+  flex: 1 0 max-content;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.quno-booking-choice-group[data-layout="responsive"]:not(:has(> :nth-child(7))) > * {
+  flex-basis: 100%;
+}
+
+.quno-source-compare-panel [data-comparison="match"] {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.quno-source-compare-panel [data-comparison="quno-only"] {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.quno-source-compare-panel [data-comparison="cronofy-only"] {
+  background: #ffedd5;
+  color: #9a3412;
+}
+
+.quno-source-compare-panel__timings > span {
+  background: var(--quno-source-panel-timing-background, #fff);
+}

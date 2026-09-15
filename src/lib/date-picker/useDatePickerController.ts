@@ -48,6 +48,7 @@ export const useDatePickerController = (options: DatePickerControllerOptions): D
   const { interaction, interactionRef, replaceInteraction } = useLiveInteraction();
   const [clickCycle, setClickCycle] = useState<DateClickCycle | null>(null);
   const { changeMonth, navigateFrom, startEdgeNavigation, stopEdgeNavigation } = useDatePickerNavigation({
+    visibleMonth,
     autoNavigateDelay,
     autoNavigateRepeatDelay,
     interaction,

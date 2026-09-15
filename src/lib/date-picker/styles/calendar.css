@@ -17,7 +17,10 @@
 
 .quno-date-picker-month-header {
   display: grid;
-  grid-template-columns: 36px minmax(0, 1fr) 36px;
+  grid-template-columns: var(--quno-date-picker-navigation-button-size, 36px) minmax(0, 1fr) var(
+      --quno-date-picker-navigation-button-size,
+      36px
+    );
   column-gap: var(--quno-date-picker-month-header-gap, 8px);
   align-items: center;
   height: 36px;
@@ -40,8 +43,8 @@
 .quno-date-picker-month-header > [data-slot="previous-button"],
 .quno-date-picker-month-header > [data-slot="next-button"] {
   display: grid;
-  width: 36px;
-  height: 36px;
+  width: var(--quno-date-picker-navigation-button-size, 36px);
+  height: var(--quno-date-picker-navigation-button-size, 36px);
   padding: 0;
   place-items: center;
   border: 1px solid var(--quno-date-picker-border, var(--quno-date-picker-border-default));
@@ -57,7 +60,7 @@
   height: 16px;
 }
 
-.quno-date-picker-month-header > button:hover,
+.quno-date-picker-month-header > button:hover:not(:disabled),
 .quno-date-picker-month-header > button:focus-visible {
   border-color: var(--quno-date-picker-primary, var(--quno-date-picker-primary-default));
   color: var(--quno-date-picker-primary, var(--quno-date-picker-primary-default));
@@ -123,4 +126,11 @@
 
 .quno-date-picker-edge--next {
   right: 0;
+}
+
+/* Bounds already set native disabled; make that state visible and inert to pointers. */
+.quno-date-picker-month-header > :is([data-slot="previous-button"], [data-slot="next-button"]):disabled {
+  opacity: var(--quno-date-picker-navigation-disabled-opacity, 0.35);
+  pointer-events: none;
+  cursor: default;
 }

@@ -4,6 +4,25 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+- Push preparation: 363 unit and 120 Chromium tests pass; Preact/React 19 and packed exports pass. Remaining blockers: booking positional function contracts and Datepicker gzip 167 B over its 10,752 B budget. Firefox/WebKit executables are not installed. Formatting has been corrected.
+
+- Add optional `padDayNumbers` (default false); scheduling pickers opt into two-digit date numerals. Page CSS retains control of date weight.
+
+- Fix available spillover dates inheriting core outside-month gray in landing pages; booking availability now restores normal text color.
+
+- Give bounded Datepicker arrows a dimmed, pointer-inert disabled state and configurable size; public booking consumers use 32px arrows.
+
+- Mute unavailable off-month booking dates by default, preserving consumer color overrides and available spillover dates.
+
+- Public-booking theme verification: scoped tests/style assertions, typecheck/lint, library/demo builds, packed React/SSR/CSS/types, Preact compatibility and dry-run pack pass. Initial unit/Chromium timing failures pass on isolated rerun. Existing blockers remain: positional booking callback contract violations, unrelated repository formatting, and Datepicker gzip 142 B above its 10.50 KiB ceiling.
+
+- Remove the unreleased public-booking appearance theme; consumers own date/time colors and selected text. Generic off-month styling and bounded navigation remain shared.
+
+- Restore the shared booking picker and source comparison panel, with consumer-owned theming.
+- Add optional Datepicker chrome and bounded month navigation for booking embeds.
+- Verification blockers: formatting reports five files; standalone Chromium cannot bind 127.0.0.1:5173 in the sandbox; isolated package/Preact dependency installation did not complete.
+- Verification blocker: `check:architecture` flags restored booking-picker positional function/callback signatures under the newer named-object-only library contract. Module-size checks, typecheck and lint pass.
+
 - Merge current main named-object APIs and pointer responsiveness with release 1 timezone/DST behavior.
   The combined Infinite Calendar build is 163.08 KiB raw / 38.59 KiB gzip; its ceiling is 39 KiB.
 

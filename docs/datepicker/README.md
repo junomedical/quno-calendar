@@ -39,3 +39,22 @@ Use `limitDateFrom`, `limitDateTo`, `isDayDisabled({ date })`, `getDayCellProps(
 and `onChange({ value })`.
 
 See the [breaking migration](../shared/migration.md#unreleased-named-contracts-and-product-ownership).
+
+### Booking composition
+
+`showSelectionHeader`, `showOffscreenPills`, and `showMonthNavigation` default to true. Booking composition can hide that chrome. `limitNavigation` defaults to false and bounds month arrows when enabled.
+
+Bounded month-navigation arrows use native disabled state, reduced opacity, and no pointer events. Override `--quno-date-picker-navigation-disabled-opacity` (default `0.35`) and `--quno-date-picker-navigation-button-size` (default `36px`). Public booking consumers set the latter to `32px` to match their deployed arrow circles.
+
+### Leading-zero day numbers
+
+Set `padDayNumbers` to display `01`–`09` in the month grid, including spillover dates and dates revealed in the
+weekday drag strip. It defaults to `false`; ordinary Datepicker consumers retain `1`–`9`. This changes only visible
+numerals, not ISO values, accessible `formatters.dayLabel` labels, selection or font weight. The single-day guide
+example has a checkbox to try both modes.
+
+```tsx
+<QunoDatePicker padDayNumbers />
+```
+
+Scheduling pickers explicitly opt in. Their consuming pages retain control of typography through CSS.

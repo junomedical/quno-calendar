@@ -53,12 +53,18 @@
       "types": "./dist/date-parser/index.d.ts",
       "import": "./dist/date-parser.js",
       "require": "./dist/date-parser.cjs"
-    }
+    },
+    "./booking-picker": {
+      "types": "./dist/booking-picker/index.d.ts",
+      "import": "./dist/booking-picker.js",
+      "require": "./dist/booking-picker.cjs"
+    },
+    "./booking-picker/styles.css": "./dist/booking-picker.css"
   },
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "build": "npm run build:lib && npm run build:demo",
-    "build:lib": "vite build -c vite.lib.config.ts --mode shared && vite build -c vite.lib.config.ts --mode infinite-calendar && vite build -c vite.lib.config.ts --mode datepicker && vite build -c vite.lib.config.ts --mode date-input && vite build -c vite.lib.config.ts --mode date-parser",
+    "build:lib": "vite build -c vite.lib.config.ts --mode shared && vite build -c vite.lib.config.ts --mode infinite-calendar && vite build -c vite.lib.config.ts --mode datepicker && vite build -c vite.lib.config.ts --mode booking-picker && vite build -c vite.lib.config.ts --mode date-input && vite build -c vite.lib.config.ts --mode date-parser",
     "build:demo": "vite build -c vite.config.ts --outDir dist-demo",
     "check:architecture": "node scripts/check-architecture.mjs && node scripts/check-library-contracts.mjs && node scripts/check-demo-boundaries.mjs",
     "check:bundle-size": "node scripts/check-bundle-size.mjs",
@@ -112,5 +118,24 @@
     "vite": "^7.3.6",
     "vite-plugin-dts": "^5.0.3",
     "vitest": "^3.2.6"
+  },
+  "typesVersions": {
+    "*": {
+      "booking-picker": [
+        "dist/booking-picker/index.d.ts"
+      ],
+      "datepicker": [
+        "dist/date-picker/index.d.ts"
+      ],
+      "date-input": [
+        "dist/date-input/index.d.ts"
+      ],
+      "date-parser": [
+        "dist/date-parser/index.d.ts"
+      ],
+      "infinite-calendar": [
+        "dist/timeline/index.d.ts"
+      ]
+    }
   }
 }

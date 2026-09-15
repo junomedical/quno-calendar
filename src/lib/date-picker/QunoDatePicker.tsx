@@ -15,6 +15,7 @@ function useResolvedConfig({
   locale,
   labels,
   formatters,
+  padDayNumbers,
   classNames,
   limitDateFrom,
   limitDateTo,
@@ -26,6 +27,7 @@ function useResolvedConfig({
   | "locale"
   | "labels"
   | "formatters"
+  | "padDayNumbers"
   | "classNames"
   | "limitDateFrom"
   | "limitDateTo"
@@ -45,11 +47,12 @@ function useResolvedConfig({
       locale: locale ?? "en-GB",
       labels: { ...DEFAULT_LABELS, ...modeLabels, ...labels },
       formatters: { ...DEFAULT_FORMATTERS, ...formatters },
+      padDayNumbers: padDayNumbers ?? false,
       classNames,
       isDayDisabled: effectiveIsDayDisabled,
       getDayCellProps
     };
-  }, [classNames, effectiveIsDayDisabled, formatters, getDayCellProps, labels, locale, selectionMode]);
+  }, [classNames, effectiveIsDayDisabled, formatters, getDayCellProps, labels, locale, padDayNumbers, selectionMode]);
   return { config, effectiveIsDayDisabled };
 }
 
@@ -61,6 +64,7 @@ export const QunoDatePicker = ({
   locale = "en-GB",
   labels,
   formatters,
+  padDayNumbers,
   weekStartsOn = 1,
   className,
   classNames,
@@ -69,6 +73,10 @@ export const QunoDatePicker = ({
   isDayDisabled,
   getDayCellProps,
   calendarFooter,
+  showSelectionHeader = true,
+  showOffscreenPills = true,
+  showMonthNavigation = true,
+  limitNavigation = false,
   autoNavigateDelay = 400,
   autoNavigateRepeatDelay = 650,
   onChange,
@@ -80,6 +88,7 @@ export const QunoDatePicker = ({
     locale,
     labels,
     formatters,
+    padDayNumbers,
     classNames,
     limitDateFrom,
     limitDateTo,
@@ -118,38 +127,47 @@ export const QunoDatePicker = ({
       aria-label={config.labels.calendar}
       onPointerUp={controller.stopEdgeNavigation}
     >
-      <SelectionHeader selection={controller.selection} config={config} onClear={controller.clear} />
-      <OffscreenPills
-        selection={controller.selection}
-        selectionMode={selectionMode}
-        visibleMonth={controller.visibleMonth}
-        position="before"
-        monthChangeSource={controller.monthChangeSource}
-        config={config}
-        onJump={({ date }) => {
-          controller.jumpToEndpoint({ date });
-          setMonthNavigationOpen(false);
-        }}
-      />
+      {showSelectionHeader && (
+        <SelectionHeader selection={controller.selection} config={config} onClear={controller.clear} />
+      )}
+      {showOffscreenPills && (
+        <OffscreenPills
+          selection={controller.selection}
+          selectionMode={selectionMode}
+          visibleMonth={controller.visibleMonth}
+          position="before"
+          monthChangeSource={controller.monthChangeSource}
+          config={config}
+          onJump={({ date }) => {
+            controller.jumpToEndpoint({ date });
+            setMonthNavigationOpen(false);
+          }}
+        />
+      )}
       <Calendar
         controller={controller}
         config={config}
+        showMonthNavigation={showMonthNavigation}
+        navigationFrom={limitNavigation ? limitDateFrom : undefined}
+        navigationTo={limitNavigation ? limitDateTo : undefined}
         monthNavigationOpen={monthNavigationOpen}
         onMonthNavigationOpenChange={({ open }) => setMonthNavigationOpen(open)}
         footer={calendarFooter}
       />
-      <OffscreenPills
-        selection={controller.selection}
-        selectionMode={selectionMode}
-        visibleMonth={controller.visibleMonth}
-        position="after"
-        monthChangeSource={controller.monthChangeSource}
-        config={config}
-        onJump={({ date }) => {
-          controller.jumpToEndpoint({ date });
-          setMonthNavigationOpen(false);
-        }}
-      />
+      {showOffscreenPills && (
+        <OffscreenPills
+          selection={controller.selection}
+          selectionMode={selectionMode}
+          visibleMonth={controller.visibleMonth}
+          position="after"
+          monthChangeSource={controller.monthChangeSource}
+          config={config}
+          onJump={({ date }) => {
+            controller.jumpToEndpoint({ date });
+            setMonthNavigationOpen(false);
+          }}
+        />
+      )}
       {config.labels.hint && (
         <p className={cx({ values: ["quno-date-picker-hint", classNames?.hint] })} data-slot="hint">
           {config.labels.hint}

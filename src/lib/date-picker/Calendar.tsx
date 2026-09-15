@@ -5,6 +5,7 @@ import { MonthNavigation } from "./MonthNavigation";
 import { WeekdayStrip } from "./WeekdayStrip";
 import type { DatePickerController } from "./datePickerControllerTypes";
 import type { ResolvedDatePickerConfig } from "./datePickerTypes";
+import type { IsoDate } from "#quno-internal/shared/dateRangeModel";
 import type { JSX, ReactNode } from "react";
 import { useState } from "react";
 
@@ -14,6 +15,9 @@ type Props = {
   monthNavigationOpen: boolean;
   onMonthNavigationOpenChange: (args: { open: boolean }) => void;
   footer?: ReactNode;
+  showMonthNavigation?: boolean;
+  navigationFrom?: IsoDate;
+  navigationTo?: IsoDate;
 };
 
 export const Calendar = ({
@@ -21,7 +25,10 @@ export const Calendar = ({
   config,
   monthNavigationOpen,
   onMonthNavigationOpenChange,
-  footer
+  footer,
+  showMonthNavigation,
+  navigationFrom,
+  navigationTo
 }: Props): JSX.Element => {
   const [touchOverflowIndex, setTouchOverflowIndex] = useState<number | null>(null);
   const movingSelection =
@@ -54,6 +61,9 @@ export const Calendar = ({
         ))}
 
       <CalendarHeader
+        showMonthNavigation={showMonthNavigation}
+        navigationFrom={navigationFrom}
+        navigationTo={navigationTo}
         visibleMonth={controller.visibleMonth}
         monthMotion={controller.monthMotion}
         config={config}

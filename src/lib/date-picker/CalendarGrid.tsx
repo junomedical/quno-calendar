@@ -150,7 +150,7 @@ export const CalendarGrid = ({
             onPointerUp={(event) => pointer.finishPointer({ event, fallback: date })}
             onPointerCancel={pointer.cancelPointer}
           >
-            <span>{dayNumber}</span>
+            <span>{config.padDayNumbers ? date.slice(-2) : dayNumber}</span>
             {(isStart || isEnd) && (
               <i
                 className={cx({ values: ["quno-date-picker-handle", classNames?.handle] })}

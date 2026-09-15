@@ -1,0 +1,10 @@
+/* Unavailable spillover dates stay muted even when a host resets button colors. */
+.quno-booking-date-time-picker .quno-date-picker-day:where([data-outside="true"][data-disabled="true"]) > span {
+  color: var(--quno-booking-picker-unavailable-outside-text, var(--quno-date-picker-outside, #a5acb7));
+}
+
+/* Core Datepicker mutes every outside day; booking availability takes precedence. */
+.quno-booking-date-time-picker
+  .quno-date-picker-day:where([data-outside="true"]:not([data-disabled="true"], :disabled)) {
+  color: var(--quno-booking-picker-available-date-text, inherit);
+}

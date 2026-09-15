@@ -77,3 +77,7 @@ Release preparation is local only. Publishing, deprecating old packages, and del
 Infinite Calendar supports an explicit IANA display timezone through `settings.timeZone`; see the [timezone recipe](./docs/shared/usage.md#explicit-display-timezone).
 
 DST pointer policy: event moves preserve elapsed duration. Drawn endpoints and move starts reject both nonexistent spring-forward times and ambiguous repeated autumn times. An invalid drawn endpoint cancels the gesture, so the last valid interval cannot be submitted; start a new selection at a valid time. No browser-zone or tenant-specific policy is introduced.
+
+## Shared booking picker diagnostics
+
+The optional `@quno/calendar/booking-picker` composition is shared by Funnel and Patient Journey landing pages. It includes date/time selection, comparison counts, and independent bootstrap/availability timings; applications retain their theme adapters and booking submission. See [Booking Picker](docs/booking-picker/README.md).

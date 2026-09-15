@@ -94,7 +94,7 @@ const OverflowDay = ({
         onFinish({ date });
       }}
     >
-      <span>{Number(date.slice(-2))}</span>
+      <span>{config.padDayNumbers ? date.slice(-2) : Number(date.slice(-2))}</span>
     </span>
   );
 };

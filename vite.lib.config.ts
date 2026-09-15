@@ -7,6 +7,7 @@ const entries = {
   shared: { entry: "src/lib/index.ts", file: "index" },
   "infinite-calendar": { entry: "src/lib/timeline/index.ts", file: "infinite-calendar" },
   datepicker: { entry: "src/lib/date-picker/index.ts", file: "datepicker" },
+  "booking-picker": { entry: "src/lib/booking-picker/index.ts", file: "booking-picker" },
   "date-input": { entry: "src/lib/date-input/index.ts", file: "date-input" },
   "date-parser": { entry: "src/lib/date-parser/index.ts", file: "date-parser" }
 } as const;

@@ -40,6 +40,20 @@ describe("QunoDatePicker customization", () => {
     expect(document.querySelector('[data-slot="weekday"]')).toHaveTextContent("Day:0");
   });
 
+  it("pads visible day numbers only when opted in, without changing accessible labels", () => {
+    const { rerender } = render(<QunoDatePicker initialMonth="2026-08-01" />);
+    const label = day("2026-08-01").getAttribute("aria-label");
+    expect(day("2026-08-01").textContent).toBe("1");
+    rerender(<QunoDatePicker initialMonth="2026-08-01" padDayNumbers />);
+    expect(day("2026-08-01").textContent).toBe("01");
+    expect(day("2026-08-09").textContent).toBe("09");
+    expect(day("2026-08-10").textContent).toBe("10");
+    expect(day("2026-09-01").textContent).toBe("01");
+    expect(day("2026-08-01")).toHaveAttribute("aria-label", label);
+    rerender(<QunoDatePicker initialMonth="2026-08-01" padDayNumbers={false} />);
+    expect(day("2026-08-01").textContent).toBe("1");
+  });
+
   it("customizes day cells from external date and selection context", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-08-10T12:00:00Z"));

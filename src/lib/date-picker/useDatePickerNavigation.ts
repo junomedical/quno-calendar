@@ -6,6 +6,7 @@ import type { MonthChangeSource } from "./datePickerControllerTypes";
 import type { DatePickerInteraction } from "./datePickerTypes";
 
 type Args = {
+  visibleMonth: IsoDate;
   autoNavigateDelay: number;
   autoNavigateRepeatDelay: number;
   interaction: DatePickerInteraction;
@@ -18,6 +19,7 @@ type Args = {
 };
 
 export function useDatePickerNavigation({
+  visibleMonth,
   autoNavigateDelay,
   autoNavigateRepeatDelay,
   interaction,
@@ -28,6 +30,7 @@ export function useDatePickerNavigation({
   setMonthMotion,
   setVisibleMonth
 }: Args) {
+  const monthRef = useRef(visibleMonth);
   const edgeTimer = useRef<number | null>(null);
   const stopEdgeNavigation = (): void => {
     if (edgeTimer.current === null) return;
@@ -47,17 +50,17 @@ export function useDatePickerNavigation({
   }): void => {
     setMonthMotion(motion);
     setMonthChangeSource(source);
+    monthRef.current = month;
     setVisibleMonth(month);
     onVisibleMonthChange?.({ month });
   };
   const navigateFrom = ({ direction, source }: { direction: MonthDirection; source: MonthChangeSource }): void => {
     setMonthMotion(direction);
     setMonthChangeSource(source);
-    setVisibleMonth((current) => {
-      const next = addMonths({ date: current, amount: direction });
-      onVisibleMonthChange?.({ month: next });
-      return next;
-    });
+    const next = addMonths({ date: monthRef.current, amount: direction });
+    monthRef.current = next;
+    setVisibleMonth(next);
+    onVisibleMonthChange?.({ month: next });
     setClickCycle(null);
   };
   const startEdgeNavigation = ({ direction }: { direction: MonthDirection }): void => {

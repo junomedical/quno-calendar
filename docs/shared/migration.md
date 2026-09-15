@@ -91,3 +91,9 @@ JavaScript imports never imply a stylesheet. Import each UI primitive's `styles.
 ## Preact
 
 The source is authored for React 18+. Existing Preact applications should add the aliases in [the usage guide](./usage.md#react-preact-ssr-and-production-builds). The packed package is verified through those aliases.
+
+### Unreleased booking appearance correction
+
+Remove `theme="public-booking"` from booking pickers. It was an unreleased opt-in appearance experiment; consumers
+now apply their own scoped date/time CSS through existing class hooks and state attributes. No change to slot or
+navigation behavior is required. Always pair selected background and text colors in the consumer theme.

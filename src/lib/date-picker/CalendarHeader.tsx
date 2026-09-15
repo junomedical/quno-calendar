@@ -5,6 +5,9 @@ import type { MonthDirection } from "#quno-internal/date-picker/datePickerModel"
 import type { JSX } from "react";
 
 type Props = {
+  showMonthNavigation?: boolean;
+  navigationFrom?: IsoDate;
+  navigationTo?: IsoDate;
   visibleMonth: IsoDate;
   monthMotion: MonthDirection | null;
   config: ResolvedDatePickerConfig;
@@ -28,6 +31,9 @@ const Chevron = ({ direction }: { direction: MonthDirection }): JSX.Element => (
 
 export const CalendarHeader = ({
   visibleMonth,
+  showMonthNavigation = true,
+  navigationFrom,
+  navigationTo,
   monthMotion,
   config,
   monthNavigationOpen,
@@ -45,6 +51,7 @@ export const CalendarHeader = ({
         type="button"
         className={classNames?.previousButton}
         data-slot="previous-button"
+        disabled={navigationFrom ? visibleMonth.slice(0, 7) <= navigationFrom.slice(0, 7) : undefined}
         aria-label={labels.previousMonth}
         onClick={() => onNavigate({ direction: -1 })}
       >
@@ -55,23 +62,28 @@ export const CalendarHeader = ({
         data-slot="month-heading"
         data-month-motion={monthMotion === -1 ? "previous" : monthMotion === 1 ? "next" : undefined}
       >
-        <button
-          type="button"
-          className={cx({ values: ["quno-date-picker-month-heading-button", classNames?.monthHeadingButton] })}
-          data-slot="month-heading-button"
-          aria-label={`${monthLabel}. ${
-            monthNavigationOpen ? labels.closeMonthNavigation : labels.openMonthNavigation
-          }`}
-          aria-expanded={monthNavigationOpen}
-          onClick={onToggleMonthNavigation}
-        >
+        {showMonthNavigation ? (
+          <button
+            type="button"
+            className={cx({ values: ["quno-date-picker-month-heading-button", classNames?.monthHeadingButton] })}
+            data-slot="month-heading-button"
+            aria-label={`${monthLabel}. ${
+              monthNavigationOpen ? labels.closeMonthNavigation : labels.openMonthNavigation
+            }`}
+            aria-expanded={monthNavigationOpen}
+            onClick={onToggleMonthNavigation}
+          >
+            <span key={visibleMonth}>{monthLabel}</span>
+          </button>
+        ) : (
           <span key={visibleMonth}>{monthLabel}</span>
-        </button>
+        )}
       </h2>
       <button
         type="button"
         className={classNames?.nextButton}
         data-slot="next-button"
+        disabled={navigationTo ? visibleMonth.slice(0, 7) >= navigationTo.slice(0, 7) : undefined}
         aria-label={labels.nextMonth}
         onClick={() => onNavigate({ direction: 1 })}
       >

@@ -1039,3 +1039,22 @@ future identifiers are documented in [Date Input decisions](../date-input/decisi
 supersedes historical positional signatures and customization names for this product. The accepted interaction,
 presentation, and geometry behavior in this ledger remains in force. See the
 [migration guide](../shared/migration.md#unreleased-named-contracts-and-product-ownership) for exact replacements.
+
+## QDP-BOOKING-CHROME — Optional booking composition chrome
+
+Booking embeds can hide selection headers, offscreen pills and month popovers while retaining arrows bounded by available query dates. Existing Datepicker defaults stay unchanged. Month notifications run outside state updater callbacks.
+
+## QDP-NAVIGATION-DISABLED — Visible, inert bounded arrows
+
+- Date: 2026-09-15
+- Decision: Native disabled previous/next arrows are dimmed and ignore pointer events in core Datepicker CSS. Expose size and disabled-opacity tokens; keep bounds opt-in through existing limitNavigation.
+- Why: bounded booking arrows looked active despite being disabled; consumers also need compact visual sizing.
+
+## QDP-PAD-DAY-NUMBERS — Optional leading-zero numerals
+
+- Date: 2026-09-15
+- Status: Accepted
+- Decision: Expose `padDayNumbers`, default false, for visible grid and revealed overflow numerals. Scheduling
+  composition opts in explicitly. Preserve accessible full-date labels and existing date values.
+- Why: booking designs use two-digit dates; plain datepickers should retain their current output. Font weight remains
+  a consumer styling decision, not part of this formatting setting.
