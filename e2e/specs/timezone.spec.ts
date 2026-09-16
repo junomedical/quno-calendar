@@ -26,7 +26,28 @@ for (const timezoneId of ["America/New_York", "Asia/Tokyo"]) {
           )
         )
         .toBeCloseTo(2.5, 3);
-      await expect(page.getByLabel("Saved UTC interval")).toContainText("2026-09-19T12:00:00Z");
+      await expect(page.getByLabel("Saved UTC interval")).toContainText("2026-09-19T12:00:30.123Z");
+    });
+
+    test("opens an imported event without rounding its saved timestamps on click", async ({ page }) => {
+      await page.goto("/demo/calendar-timezone");
+      const event = page.locator('[data-event-id="berlin-hours"]');
+      await expect(event).toContainText("15:00–17:00");
+      const original = await page.getByLabel("Saved UTC interval").textContent();
+      await event.click();
+      await expect(page.getByLabel("Last interaction")).toHaveText("Appointment opened");
+      await expect(page.getByLabel("Saved UTC interval")).toHaveText(original!);
+      await expect(page.getByTestId("drag-preview-event")).toHaveCount(0);
+
+      const box = await event.boundingBox();
+      expect(box).not.toBeNull();
+      if (!box) return;
+      await page.mouse.move(box.x + 12, box.y + 12);
+      await page.mouse.down();
+      await page.mouse.move(box.x + 72, box.y + 12);
+      await page.mouse.up();
+      await expect(page.getByLabel("Last interaction")).toHaveText("Appointment moved");
+      await expect(page.getByLabel("Saved UTC interval")).not.toHaveText(original!);
     });
   });
 }

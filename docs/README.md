@@ -35,6 +35,8 @@ The Infinite Calendar [timezone recipe](./shared/usage.md#explicit-display-timez
 
 The Infinite Calendar timezone recipe also documents DST rejection and elapsed-duration-preserving moves.
 
+The same recipe covers minute-only labels and preserving imported seconds on click; see [Decision 094](./infinite-calendar/decisions.md#094---keep-hidden-seconds-from-turning-clicks-into-moves).
+
 ## Booking picker
 
 See [Booking picker](booking-picker/README.md) for the shared booking UI and source comparison panel.

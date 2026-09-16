@@ -762,7 +762,7 @@ its existing 2 KiB ceiling.
 Date: 2026-09-14
 Status: Accepted
 
-`settings.timeZone` makes the timeline display a single IANA timezone independently of the browser. Event day buckets, overlap geometry, navigation, focus, and pointer proposals use that reference. The component adds `calendarTimeZone` to renderer events without changing their absolute start/end values. Source scheduling zones remain consumer-owned. Date-only keys remain timezone-free. Omitting the setting preserves the established browser-local contract. Nonexistent spring-forward times cannot become persisted pointer proposals. Changing the setting invalidates cached display geometry.
+`settings.timeZone` makes the timeline display a single IANA timezone independently of the browser. Event day buckets, overlap geometry, navigation, focus, and pointer proposals use that reference. The component adds `calendarTimeZone` to renderer events without changing their absolute start/end values. Source scheduling zones remain consumer-owned. Date-only keys remain timezone-free. Omitting the setting preserves the established browser-local contract. Nonexistent spring-forward times cannot become persisted pointer proposals. Changing the setting reprojects retained cached events into the new display timezone immediately and also invalidates source freshness for refetch.
 
 The timezone conversion and callback handling bring the calendar ESM artifact to approximately 34.15 KiB gzip, 150 bytes above the former 34 KiB ceiling. The feature budget is now 35 KiB gzip; other feature and stylesheet budgets are unchanged.
 
@@ -778,3 +778,10 @@ Merge identity note: QU-3879-091 and QU-3879-092 were numbered 091/092 on the ca
 ## 093 - Combine Named Contracts and Timezone-Safe Interactions
 
 Integrate upstream Decision 091 and the branch-local timezone decisions without reverting either behavior. Named object requests and component-level locale apply to timezone-aware navigation and mutations as well. The combined build measures 163.08 KiB raw / 38.59 KiB gzip, so the Infinite Calendar ceiling becomes 39 KiB; other product ceilings remain unchanged. This supersedes the earlier size ceilings for the combined build only.
+
+## 094 - Keep Hidden Seconds From Turning Clicks Into Moves
+
+Date: 2026-09-15
+Status: Accepted; refines Decision 093
+
+Pointer proposals have minute precision, while imported timestamps may contain seconds and milliseconds. Treat a proposal with the same absolute start and end minutes and calendar membership as unchanged. Activate the original event without changing its timestamps. Compare rounded endpoints so a stationary click retains the source seconds even when its two endpoints have different sub-minute remainders. Absolute start minutes still distinguish the two instants in a repeated DST hour. Actual moves floor both imported endpoints to whole minutes and preserve that minute duration. The timezone demo shows minute-only labels alongside a precise source interval and reports whether clicking opens or moves the event.
