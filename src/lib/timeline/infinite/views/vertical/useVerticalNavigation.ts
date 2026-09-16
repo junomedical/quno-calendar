@@ -1,3 +1,4 @@
+import { minutesSinceStartOfDay } from "#quno-internal/timeline/time/time";
 /**
  * Vertical navigation and public imperative API.
  * date/time requests + geometry registry -> scroll operations and anchor-safe forwardedRef methods
@@ -14,7 +15,6 @@ import {
 import { buildVerticalViewGeometry } from "#quno-internal/timeline/infinite/rendering/vertical/verticalViewGeometry";
 import { useViewportAnchoring } from "#quno-internal/timeline/infinite/anchors/parent/useViewportAnchoring";
 import type { IsoDate } from "#quno-internal/shared/dateRangeModel";
-
 type VerticalNavigationArgs = {
   forwardedRef: ForwardedRef<CalendarViewHandle>;
   containerRef: RefObject<HTMLDivElement | null>;
@@ -26,7 +26,6 @@ type VerticalNavigationArgs = {
   removeVisibleEvent: QunoInfiniteCalendarHandle["removeVisibleEvent"];
   releaseActiveDraft: QunoInfiniteCalendarHandle["releaseActiveDraft"];
 };
-
 export function useVerticalNavigation({
   forwardedRef,
   containerRef,
@@ -76,7 +75,6 @@ export function useVerticalNavigation({
       top: settings.dayHeaderHeight
     }
   });
-
   useImperativeHandle(
     forwardedRef,
     () => ({
@@ -84,8 +82,8 @@ export function useVerticalNavigation({
       scrollToDateTime,
       scrollToToday: () =>
         scrollToDateTime({
-          date: toDateKey({ date: now }),
-          time: `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`
+          date: toDateKey({ date: now, timeZone: settings.timeZone }),
+          time: `${String(Math.floor(minutesSinceStartOfDay({ value: now, timeZone: settings.timeZone }) / 60)).padStart(2, "0")}:${String(minutesSinceStartOfDay({ value: now, timeZone: settings.timeZone }) % 60).padStart(2, "0")}`
         }),
       captureViewportAnchor: anchoring.captureViewportAnchor,
       isEventFullyVisible: anchoring.isEventFullyVisible,
@@ -95,9 +93,17 @@ export function useVerticalNavigation({
       removeVisibleEvent,
       releaseActiveDraft
     }),
-    [anchoring, commitVisibleEvent, now, releaseActiveDraft, removeVisibleEvent, scrollToDate, scrollToDateTime]
+    [
+      anchoring,
+      commitVisibleEvent,
+      now,
+      releaseActiveDraft,
+      removeVisibleEvent,
+      scrollToDate,
+      scrollToDateTime,
+      settings.timeZone
+    ]
   );
-
   return {
     activeRestoreTarget: anchoring.activeRestoreTarget,
     geometryRegistration: anchoring.registration

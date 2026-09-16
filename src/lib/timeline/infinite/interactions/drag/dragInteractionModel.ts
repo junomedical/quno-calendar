@@ -10,14 +10,13 @@ import type {
   EventMoveRequest,
   QunoInfiniteCalendarSettings
 } from "#quno-internal/timeline/core/types";
-import { eventDateKey } from "#quno-internal/timeline/infinite/events/eventDateKey";
-import { minutesSinceStartOfDay } from "#quno-internal/timeline/time/time";
 
 export type DragState = {
   event: CalendarEvent;
   sourceCalendarId: CalendarId;
   offsetMinutes: number;
   preview: EventMoveRequest | null;
+  rejectedDestination?: boolean;
 };
 
 export function proposalForDrag({
@@ -72,11 +71,12 @@ export function previewEventForDrag({
 
 /** Distinguishes a click/release from a move after final-position flushing. */
 export function proposalChangesEvent({ drag, proposal }: { drag: DragState; proposal: EventMoveRequest }): boolean {
-  const proposedEvent = { ...drag.event, start: proposal.proposedStart, end: proposal.proposedEnd };
+  const originalStart = Date.parse(drag.event.start);
+  const proposedStart = Date.parse(proposal.proposedStart);
+  // Pointer positions have minute precision; compare absolute minutes to retain DST-fold identity.
   return !(
-    eventDateKey(proposedEvent) === eventDateKey(drag.event) &&
-    minutesSinceStartOfDay({ value: proposedEvent.start }) === minutesSinceStartOfDay({ value: drag.event.start }) &&
-    minutesSinceStartOfDay({ value: proposedEvent.end }) === minutesSinceStartOfDay({ value: drag.event.end }) &&
+    Math.floor(proposedStart / 60000) === Math.floor(originalStart / 60000) &&
+    Math.floor(Date.parse(proposal.proposedEnd) / 60000) === Math.floor(Date.parse(drag.event.end) / 60000) &&
     proposal.proposedCalendarId === drag.sourceCalendarId &&
     proposal.proposedCalendarIds.join("|") === eventCalendarIds(drag.event).join("|")
   );

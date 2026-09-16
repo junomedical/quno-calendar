@@ -1,29 +1,31 @@
 import type { CalendarEvent, QunoInfiniteCalendarSettings } from "#quno-internal/timeline/core/types";
 import { minuteToX, minutesSinceStartOfDay } from "#quno-internal/timeline/time/time";
 import { TIMELINE_LEFT_GUTTER_PX } from "#quno-internal/timeline/time/timelineTicks";
-
 /** Pure event geometry: event timestamps -> horizontal shell bounds. */
-
 type HorizontalEventGeometry = {
   left: number;
   width: number;
 };
-
 export function horizontalEventGeometry({
   event,
   settings
 }: {
-  event: Pick<CalendarEvent, "start" | "end">;
+  event: Pick<CalendarEvent, "start" | "end" | "calendarTimeZone">;
   settings: Pick<QunoInfiniteCalendarSettings, "startHour" | "endHour" | "zoom">;
 }): HorizontalEventGeometry {
-  const startX = minuteToX({ minute: minutesSinceStartOfDay({ value: event.start }), geometry: settings });
-  const endX = minuteToX({ minute: minutesSinceStartOfDay({ value: event.end }), geometry: settings });
+  const startX = minuteToX({
+    minute: minutesSinceStartOfDay({ value: event.start, timeZone: event.calendarTimeZone }),
+    geometry: settings
+  });
+  const endX = minuteToX({
+    minute: minutesSinceStartOfDay({ value: event.end, timeZone: event.calendarTimeZone }),
+    geometry: settings
+  });
   return {
     left: TIMELINE_LEFT_GUTTER_PX + startX,
     width: Math.max(12, endX - startX)
   };
 }
-
 export function committedEventHoverWidth({
   eventLeft,
   eventWidth,

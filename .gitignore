@@ -35,3 +35,6 @@ Thumbs.db
 
 # TypeScript incremental state
 *.tsbuildinfo
+
+# Keep local dependency symlinks out of release commits.
+/node_modules
