@@ -78,4 +78,4 @@ Infinite Calendar supports an explicit IANA display timezone through `settings.t
 
 Clicking events with hidden seconds opens them without rounding their saved timestamps. The timezone demo shows minute-only labels alongside the precise source interval.
 
-DST pointer policy: event moves preserve elapsed duration. Drawn endpoints and move starts reject both nonexistent spring-forward times and ambiguous repeated autumn times. An invalid drawn endpoint cancels the gesture, so the last valid interval cannot be submitted; start a new selection at a valid time. No browser-zone or tenant-specific policy is introduced.
+DST pointer policy: event moves preserve elapsed duration at minute precision. Drawn endpoints and move starts reject both nonexistent spring-forward times and ambiguous repeated autumn times. An invalid drawn endpoint cancels the gesture, so the last valid interval cannot be submitted; start a new selection at a valid time. No browser-zone or tenant-specific policy is introduced.

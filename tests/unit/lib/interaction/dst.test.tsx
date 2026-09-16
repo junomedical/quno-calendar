@@ -4,6 +4,8 @@ import { describe, expect, it, vi } from "vitest";
 import { zonedDateMinuteToIso } from "#quno-internal/timeline/time/zonedTime";
 import { buildMoveProposal } from "#quno-internal/timeline/infinite/interactions/timelineInteractionModel";
 import { useTimelineDraftInteraction } from "#quno-internal/timeline/infinite/interactions/draft/useTimelineDraftInteraction";
+import { useTimelineDragInteraction } from "#quno-internal/timeline/infinite/interactions/drag/useTimelineDragInteraction";
+import { defaultQunoInfiniteCalendarSettings } from "#quno-internal/timeline/core/types";
 describe("DST mutation safety", () => {
   it.each([
     ["2026-10-25", 150, "Europe/Berlin"],
@@ -36,6 +38,58 @@ describe("DST mutation safety", () => {
       Date.parse(end) - Date.parse(start)
     );
   });
+  it.each(["UTC", "Europe/Berlin", undefined])("floors both imported endpoints before a clamped move in %s", (timeZone) => {
+    const proposal = buildMoveProposal({
+      event: {
+        id: "imported",
+        title: "Imported appointment",
+        calendarId: "doctor",
+        start: "2026-09-19T10:00:30.123Z",
+        end: "2026-09-19T11:00:15.000Z"
+      },
+      hit: { dateKey: "2026-09-19", calendarId: "doctor", minute: 1080, dayIndex: 0, rowIndex: 0 },
+      pointerOffsetMinutes: 0,
+      settings: { startHour: 0, endHour: 18, snapMinutes: 5, timeZone }
+    });
+    expect(Date.parse(proposal.proposedEnd) - Date.parse(proposal.proposedStart)).toBe(60 * 60000);
+    expect(proposal.proposedStart.endsWith(":00.000Z")).toBe(true);
+    expect(proposal.proposedEnd.endsWith(":00.000Z")).toBe(true);
+  });
+
+  it("does not activate the original event after dropping on a nonexistent DST time", async () => {
+    const appointment = {
+      id: "appointment",
+      title: "Appointment",
+      calendarId: "doctor",
+      start: "2026-03-29T00:30:00Z",
+      end: "2026-03-29T01:00:00Z",
+      calendarTimeZone: "Europe/Berlin"
+    };
+    const hit = { dateKey: "2026-03-29", calendarId: "doctor", minute: 210, dayIndex: 0, rowIndex: 0 };
+    const getHit = vi.fn().mockReturnValue(hit);
+    const onEventActivate = vi.fn();
+    const onEventMoveRequest = vi.fn();
+    const { result } = renderHook(() =>
+      useTimelineDragInteraction({
+        settings: { ...defaultQunoInfiniteCalendarSettings, startHour: 0, endHour: 24, timeZone: "Europe/Berlin" },
+        getHit,
+        isActiveDraftEvent: () => false,
+        onEventActivate,
+        onEventMoveRequest,
+        applyMoveToLoadedEvents: vi.fn()
+      })
+    );
+    act(() => result.current.startDrag({ event: appointment, sourceCalendarId: "doctor", offsetMinutes: 0 }));
+    act(() => result.current.updateDragFromPoint({ clientX: 1, clientY: 1 }));
+    expect(result.current.dragPreviewEvent).not.toBeNull();
+    getHit.mockReturnValue({ ...hit, minute: 150 });
+    act(() => result.current.updateDragFromPoint({ clientX: 1, clientY: 1 }));
+    expect(result.current.dragPreviewEvent).toBeNull();
+    await act(async () => { await result.current.finishDrag(); });
+    expect(onEventActivate).not.toHaveBeenCalled();
+    expect(onEventMoveRequest).not.toHaveBeenCalled();
+  });
+
   it.each(["2026-03-29", "2026-10-25"])(
     "does not submit a stale draft after an invalid endpoint on %s",
     async (dateKey) => {

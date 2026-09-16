@@ -16,6 +16,7 @@ export type DragState = {
   sourceCalendarId: CalendarId;
   offsetMinutes: number;
   preview: EventMoveRequest | null;
+  rejectedDestination?: boolean;
 };
 
 export function proposalForDrag({
@@ -75,7 +76,7 @@ export function proposalChangesEvent({ drag, proposal }: { drag: DragState; prop
   // Pointer positions have minute precision; compare absolute minutes to retain DST-fold identity.
   return !(
     Math.floor(proposedStart / 60000) === Math.floor(originalStart / 60000) &&
-    Date.parse(proposal.proposedEnd) - proposedStart === Date.parse(drag.event.end) - originalStart &&
+    Math.floor(Date.parse(proposal.proposedEnd) / 60000) === Math.floor(Date.parse(drag.event.end) / 60000) &&
     proposal.proposedCalendarId === drag.sourceCalendarId &&
     proposal.proposedCalendarIds.join("|") === eventCalendarIds(drag.event).join("|")
   );

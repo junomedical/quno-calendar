@@ -47,7 +47,7 @@ See the [breaking migration](../shared/migration.md#unreleased-named-contracts-a
 
 ## Explicit display timezone
 
-Event labels can show hours and minutes while source timestamps retain seconds. A click opens the original event without a rounded move; genuine moves still snap the start and preserve elapsed duration. The timezone demo exercises both paths with a precise imported interval.
+Event labels can show hours and minutes while source timestamps retain seconds. A click opens the original event without a rounded move; genuine moves floor both imported endpoints to whole minutes, then preserve that minute duration. The timezone demo exercises both paths with a precise imported interval.
 
 Set `settings.timeZone` to an IANA timezone to make day bucketing, geometry, Today/navigation, focus, and drawing/movement independent of the browser timezone. Inputs and mutation callbacks retain absolute timestamps. Custom renderers can format labels using `event.calendarTimeZone`. When omitted, existing browser-local behavior is retained.
 
@@ -57,4 +57,4 @@ Try the public-entry-point example at `/demo/calendar-timezone`: change its disp
 <QunoInfiniteCalendar {...calendarProps} settings={{ timeZone: "Europe/Bucharest" }} />
 ```
 
-DST pointer policy: event moves preserve elapsed duration. Drawn endpoints and move starts reject both nonexistent spring-forward times and ambiguous repeated autumn times. An invalid drawn endpoint cancels the gesture, so the last valid interval cannot be submitted; start a new selection at a valid time. No browser-zone or tenant-specific policy is introduced.
+DST pointer policy: event moves preserve elapsed duration at minute precision. Drawn endpoints and move starts reject both nonexistent spring-forward times and ambiguous repeated autumn times. An invalid drawn endpoint cancels the gesture, so the last valid interval cannot be submitted; start a new selection at a valid time. No browser-zone or tenant-specific policy is introduced.

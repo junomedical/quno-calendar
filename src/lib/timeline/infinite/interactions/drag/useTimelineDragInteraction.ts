@@ -51,7 +51,8 @@ export function useTimelineDragInteraction({
         event,
         sourceCalendarId,
         offsetMinutes,
-        preview: null
+        preview: null,
+        rejectedDestination: false
       };
       dragStateRef.current = next;
       setDragState(next);
@@ -72,14 +73,14 @@ export function useTimelineDragInteraction({
       try {
         proposal = proposalForDrag({ drag: currentDrag, hit, settings, draggingActiveDraft });
       } catch {
-        const next = { ...currentDrag, preview: null };
+        const next = { ...currentDrag, preview: null, rejectedDestination: true };
         dragStateRef.current = next;
         setDragState(next);
         return true;
       }
       if (!proposalChangesEvent({ drag: currentDrag, proposal })) {
-        if (currentDrag.preview) {
-          const next = { ...currentDrag, preview: null };
+        if (currentDrag.preview || currentDrag.rejectedDestination) {
+          const next = { ...currentDrag, preview: null, rejectedDestination: false };
           dragStateRef.current = next;
           setDragState(next);
         }
@@ -89,7 +90,7 @@ export function useTimelineDragInteraction({
         onActiveDraftMoveRequest?.(proposal);
       }
       if (sameMoveRequest({ a: proposal, b: currentDrag.preview })) return true;
-      const next = { ...currentDrag, preview: proposal };
+      const next = { ...currentDrag, preview: proposal, rejectedDestination: false };
       dragStateRef.current = next;
       setDragState(next);
       return true;
@@ -121,7 +122,7 @@ export function useTimelineDragInteraction({
         } catch {
           // A rejected parent mutation is a rejected drop; local cache stays unchanged.
         }
-      } else if (!proposal && onEventActivate) {
+      } else if (!proposal && !currentDrag.rejectedDestination && onEventActivate) {
         onEventActivate({ event: currentDrag.event, renderedCalendarId: currentDrag.sourceCalendarId });
       }
       return true;

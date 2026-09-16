@@ -73,8 +73,15 @@ export function buildMoveProposal({
   pointerOffsetMinutes: number;
   settings: Pick<QunoInfiniteCalendarSettings, "startHour" | "endHour" | "snapMinutes" | "timeZone">;
 }) {
-  const durationMs = Date.parse(event.end) - Date.parse(event.start);
-  if (!Number.isFinite(durationMs) || durationMs <= 0) throw new RangeError("Invalid event duration");
+  const originalStart = Date.parse(event.start);
+  const originalEnd = Date.parse(event.end);
+  if (!Number.isFinite(originalStart) || !Number.isFinite(originalEnd) || originalEnd <= originalStart) {
+    throw new RangeError("Invalid event duration");
+  }
+  // A moved appointment uses minute precision at both endpoints. A stationary click
+  // is handled by the drag lifecycle and keeps the imported source timestamps.
+  const durationMs = Math.floor(originalEnd / 60000) * 60000 - Math.floor(originalStart / 60000) * 60000;
+  if (durationMs <= 0) throw new RangeError("Event duration is shorter than one minute");
   const durationMinutes = durationMs / 60000;
   const startMinute = snapMinute({ minute: hit.minute - pointerOffsetMinutes, snapMinutes: settings.snapMinutes });
   const clamped = clampEventToTimeline({

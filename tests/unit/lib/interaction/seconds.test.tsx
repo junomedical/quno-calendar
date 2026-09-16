@@ -81,9 +81,8 @@ describe("imported appointment precision", () => {
     const [move] = test.onEventMoveRequest.mock.calls[0];
     expect(move.proposedStart).toBe(expectedStart);
     expect(move.proposedCalendarId).toBe(calendarId);
-    expect(Date.parse(move.proposedEnd) - Date.parse(move.proposedStart)).toBe(
-      Date.parse(test.event.end) - Date.parse(test.event.start)
-    );
+    expect(Date.parse(move.proposedEnd) - Date.parse(move.proposedStart)).toBe(60 * 60000);
+    expect(move.proposedEnd.endsWith(":00.000Z")).toBe(true);
     expect(test.applyMoveToLoadedEvents).toHaveBeenCalledExactlyOnceWith(move);
   });
 });
