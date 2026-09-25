@@ -26,10 +26,20 @@ describe("timelineGridAtPoint", () => {
     resolvePointTo(secondEvent);
 
     expect(
-      timelineGridAtPoint(firstCalendar, { clientX: 10, clientY: 10 }, ".quno-calendar-row-grid", ".sticky")
+      timelineGridAtPoint({
+        container: firstCalendar,
+        point: { clientX: 10, clientY: 10 },
+        gridSelector: ".quno-calendar-row-grid",
+        excludedSelector: ".sticky"
+      })
     ).toBeNull();
     expect(
-      timelineGridAtPoint(secondCalendar, { clientX: 10, clientY: 10 }, ".quno-calendar-row-grid", ".sticky")
+      timelineGridAtPoint({
+        container: secondCalendar,
+        point: { clientX: 10, clientY: 10 },
+        gridSelector: ".quno-calendar-row-grid",
+        excludedSelector: ".sticky"
+      })
     ).toBe(secondGrid);
   });
 
@@ -47,17 +57,22 @@ describe("timelineGridAtPoint", () => {
 
     resolvePointTo(horizontalLabel);
     expect(
-      timelineGridAtPoint(
-        calendar,
-        { clientX: 20, clientY: 20 },
-        ".quno-calendar-row-grid",
-        ".quno-calendar-day-header"
-      )
+      timelineGridAtPoint({
+        container: calendar,
+        point: { clientX: 20, clientY: 20 },
+        gridSelector: ".quno-calendar-row-grid",
+        excludedSelector: ".quno-calendar-day-header"
+      })
     ).toBeNull();
 
     resolvePointTo(verticalLabel);
     expect(
-      timelineGridAtPoint(calendar, { clientX: 20, clientY: 20 }, ".icv-calendar-column-grid", ".icv-time-pane")
+      timelineGridAtPoint({
+        container: calendar,
+        point: { clientX: 20, clientY: 20 },
+        gridSelector: ".icv-calendar-column-grid",
+        excludedSelector: ".icv-time-pane"
+      })
     ).toBeNull();
   });
 
@@ -70,7 +85,7 @@ describe("timelineGridAtPoint", () => {
     row.dataset.calendarId = "room-b";
     const grid = row.appendChild(document.createElement("div"));
 
-    expect(timelineGridIdentity(grid, ["room-a", "room-b"])).toEqual({
+    expect(timelineGridIdentity({ grid, selectedIds: ["room-a", "room-b"] })).toEqual({
       dateKey: "2026-07-18",
       calendarId: "room-b",
       dayIndex: 31,

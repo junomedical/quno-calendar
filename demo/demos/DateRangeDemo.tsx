@@ -16,7 +16,7 @@ export function DateRangeDemo() {
       title="Quno/Datepicker"
     >
       <div className="component-demo__panel">
-        <QunoDatePicker initialMonth="2026-08-01" onChange={setValue} value={value} />
+        <QunoDatePicker initialMonth="2026-08-01" onChange={({ value }) => setValue(value)} value={value} />
         <p className="component-demo__value" aria-live="polite">
           {value ? `${value.start} → ${value.end}` : "No dates selected"}
         </p>

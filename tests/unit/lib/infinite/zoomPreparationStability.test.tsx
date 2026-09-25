@@ -39,14 +39,14 @@ describe("zoom preparation stability", () => {
       { initialProps: { settings: settingsAtZoom(1) } }
     );
     const initialMetrics = result.current;
-    const initialCell = initialMetrics.preparedCellForRow(dateKey, calendar.id);
-    const initialEvents = initialMetrics.eventsForRow(dateKey, calendar.id);
+    const initialCell = initialMetrics.preparedCellForRow({ dateKey, calendarId: calendar.id });
+    const initialEvents = initialMetrics.eventsForRow({ dateKey, calendarId: calendar.id });
 
     rerender({ settings: settingsAtZoom(2) });
 
     expect(result.current.dayMetricsByDate).toBe(initialMetrics.dayMetricsByDate);
-    expect(result.current.preparedCellForRow(dateKey, calendar.id)).toBe(initialCell);
-    expect(result.current.eventsForRow(dateKey, calendar.id)).toBe(initialEvents);
+    expect(result.current.preparedCellForRow({ dateKey, calendarId: calendar.id })).toBe(initialCell);
+    expect(result.current.eventsForRow({ dateKey, calendarId: calendar.id })).toBe(initialEvents);
     expect(result.current.preparedCellForRow).toBe(initialMetrics.preparedCellForRow);
     expect(result.current.eventsForRow).toBe(initialMetrics.eventsForRow);
   });
@@ -64,13 +64,13 @@ describe("zoom preparation stability", () => {
       { initialProps: { settings: settingsAtZoom(1), visibleDateKeys: [dateKey] } }
     );
     const initialColumns = result.current;
-    const initialCell = initialColumns.preparedCellForColumn(dateKey, calendar.id);
-    const initialEvents = initialColumns.eventsForColumn(dateKey, calendar.id);
+    const initialCell = initialColumns.preparedCellForColumn({ dateKey, calendarId: calendar.id });
+    const initialEvents = initialColumns.eventsForColumn({ dateKey, calendarId: calendar.id });
 
     rerender({ settings: settingsAtZoom(2), visibleDateKeys: [dateKey] });
 
     expect(result.current).toBe(initialColumns);
-    expect(result.current.preparedCellForColumn(dateKey, calendar.id)).toBe(initialCell);
-    expect(result.current.eventsForColumn(dateKey, calendar.id)).toBe(initialEvents);
+    expect(result.current.preparedCellForColumn({ dateKey, calendarId: calendar.id })).toBe(initialCell);
+    expect(result.current.eventsForColumn({ dateKey, calendarId: calendar.id })).toBe(initialEvents);
   });
 });

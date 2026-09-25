@@ -14,8 +14,13 @@ type CalendarHourBandsProps = {
 export function CalendarHourBands({ hours, orientation, settings }: CalendarHourBandsProps) {
   return hours.map(({ hour, startMinute, endMinute, props }) => {
     const isHorizontal = orientation === "horizontal";
-    const start = isHorizontal ? minuteToX(startMinute, settings) : minuteToY(startMinute, settings);
-    const size = (isHorizontal ? minuteToX(endMinute, settings) : minuteToY(endMinute, settings)) - start;
+    const start = isHorizontal
+      ? minuteToX({ minute: startMinute, geometry: settings })
+      : minuteToY({ minute: startMinute, geometry: settings });
+    const size =
+      (isHorizontal
+        ? minuteToX({ minute: endMinute, geometry: settings })
+        : minuteToY({ minute: endMinute, geometry: settings })) - start;
     return (
       <div
         className={["quno-calendar-hour-band", props.className].filter(Boolean).join(" ")}
@@ -36,6 +41,6 @@ export function CalendarHourBands({ hours, orientation, settings }: CalendarHour
 }
 
 /** Finds presentation for an existing full-hour time label. */
-export function calendarHourLabelProps(hours: CalendarHourPresentation[], minute: number) {
+export function calendarHourLabelProps({ hours, minute }: { hours: CalendarHourPresentation[]; minute: number }) {
   return hours.find(({ hour }) => hour * 60 === minute)?.props;
 }

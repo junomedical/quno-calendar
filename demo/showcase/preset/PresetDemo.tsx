@@ -36,7 +36,7 @@ export function PresetDemo({ preset, routes }: PresetDemoProps) {
             calendars={demoCalendars}
             selectedCalendarIds={demo.selectedCalendarIds}
             loadEvents={demo.loadEvents}
-            eventRenderer={preset.eventRenderer}
+            renderEvent={preset.renderEvent}
             onEventMoveRequest={demo.handleMove}
             onEventCreateRequest={demo.handleCreate}
             now={demo.systemNow}

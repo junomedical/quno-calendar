@@ -27,7 +27,7 @@ import {
 } from "#quno-internal/timeline/infinite/rendering/vertical/verticalViewGeometry";
 import "#quno-internal/timeline/infinite/rendering/styles/calendar.css";
 
-function useVerticalViewSetup(props: CalendarInternalViewProps, now: Date) {
+function useVerticalViewSetup({ props, now }: { props: CalendarInternalViewProps; now: Date }) {
   return useTimelineViewSetup({
     calendars: props.calendars,
     selectedCalendarIds: props.selectedCalendarIds,
@@ -37,21 +37,48 @@ function useVerticalViewSetup(props: CalendarInternalViewProps, now: Date) {
   });
 }
 
+function verticalLoaderProps(props: CalendarInternalViewProps) {
+  return {
+    loadEvents: props.loadEvents,
+    eventPrefetchPolicy: props.eventPrefetchPolicy,
+    eventVersion: props.eventVersion,
+    requestedAppearingEventIds: props.appearingEventIds
+  };
+}
+
 function verticalPresentationProps(props: CalendarInternalViewProps) {
   return {
-    getCalendarCellProps: props.getCalendarCellProps,
-    getCalendarDayProps: props.getCalendarDayProps,
-    getCalendarHourProps: props.getCalendarHourProps
+    locale: props.locale,
+    formatters: props.formatters,
+    getDayCellProps: props.getDayCellProps,
+    getDayProps: props.getDayProps,
+    getHourProps: props.getHourProps
   };
 }
 
 /** Infinite date timeline with resources as columns and time on the vertical axis. */
+function useVerticalHover({
+  interactions,
+  interactionMode
+}: {
+  interactions: ReturnType<typeof useTimelineInteractions>;
+  interactionMode: CalendarInternalViewProps["interactionMode"];
+}) {
+  return useVerticalColumnHover({
+    disabled: Boolean(interactions.dragState || interactions.draftState || interactionMode === "availability"),
+    setHoveredEvent: interactions.setHoveredEvent
+  });
+}
+
 export const InfiniteVerticalTimelineView = forwardRef<CalendarViewHandle, CalendarInternalViewProps>(
   function InfiniteVerticalTimelineView(props, ref) {
     const now = props.now ?? new Date();
     const interactionMode = props.interactionMode ?? "events";
-    const { settings, selectedCalendars, selectedIds, initialAnchorDateKey } = useVerticalViewSetup(props, now);
-    const { renderedCalendars, hiddenCalendarIds } = useRetainedCalendarRows(selectedCalendars, props.activeDraft);
+    const { settings, selectedCalendars, selectedIds, initialAnchorDateKey } = useVerticalViewSetup({ props, now });
+    const { renderedCalendars, hiddenCalendarIds } = useRetainedCalendarRows({
+      selectedCalendars,
+      activeDraft: props.activeDraft
+    });
     const geometry = buildVerticalViewGeometry(settings);
     const viewport = useVerticalViewportWindow({
       initialAnchorDateKey,
@@ -64,10 +91,7 @@ export const InfiniteVerticalTimelineView = forwardRef<CalendarViewHandle, Calen
     const eventStore = useEventRangeLoader({
       activeDraftDateKey: props.activeDraft ? eventDateKey(props.activeDraft.event) : undefined,
       activeDraftLoadAnchorDateKey: viewport.virtualWindow.anchorDateKey,
-      loadEvents: props.loadEvents,
-      eventPrefetchPolicy: props.eventPrefetchPolicy,
-      eventVersion: props.eventVersion,
-      requestedAppearingEventIds: props.appearingEventIds,
+      ...verticalLoaderProps(props),
       selectedIds,
       visibleDateKeys: viewport.visibleDateKeys
     });
@@ -99,9 +123,12 @@ export const InfiniteVerticalTimelineView = forwardRef<CalendarViewHandle, Calen
       applyMoveToLoadedEvents: eventStore.applyMoveToLoadedEvents,
       applyCreatedEventToLoadedEvents: eventStore.applyCreatedEventToLoadedEvents
     });
-    useVerticalInteractionWindowSync(viewport.setInteractionActive, interactions.isInteractionActive);
+    useVerticalInteractionWindowSync({
+      setInteractionActive: viewport.setInteractionActive,
+      interactionActive: interactions.isInteractionActive
+    });
     const navigation = useVerticalNavigation({
-      ref,
+      forwardedRef: ref,
       containerRef: viewport.containerRef,
       settings,
       now,
@@ -120,10 +147,7 @@ export const InfiniteVerticalTimelineView = forwardRef<CalendarViewHandle, Calen
       updateTopVisibleDate: viewport.updateTopVisibleDate,
       timelineGutterPx: VERTICAL_TIMELINE_GUTTER_PX
     });
-    const hover = useVerticalColumnHover({
-      blocked: Boolean(interactions.dragState || interactions.draftState || interactionMode === "availability"),
-      setHoveredEvent: interactions.setHoveredEvent
-    });
+    const hover = useVerticalHover({ interactions, interactionMode });
     const day: VerticalDayRenderProps = useVerticalDayRenderProps({
       geometry,
       columns,
@@ -135,7 +159,7 @@ export const InfiniteVerticalTimelineView = forwardRef<CalendarViewHandle, Calen
       interactions,
       appearingEventIds: eventStore.appearingEventIds,
       focusedEventTarget: props.focusedEventTarget,
-      eventRenderer: props.eventRenderer,
+      renderEvent: props.renderEvent,
       ...verticalPresentationProps(props),
       geometryRegistration: navigation.geometryRegistration,
       activeRestoreTarget: navigation.activeRestoreTarget,

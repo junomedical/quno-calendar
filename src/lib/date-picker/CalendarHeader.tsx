@@ -1,6 +1,7 @@
-import { classNames as cx } from "./classNames";
+import { classNames as cx } from "#quno-internal/shared/classNames";
 import type { ResolvedDatePickerConfig } from "./datePickerTypes";
-import type { IsoDate, MonthDirection } from "#quno-internal/shared/dateRangeModel";
+import type { IsoDate } from "#quno-internal/shared/dateRangeModel";
+import type { MonthDirection } from "#quno-internal/date-picker/datePickerModel";
 import type { JSX } from "react";
 
 type Props = {
@@ -8,7 +9,7 @@ type Props = {
   monthMotion: MonthDirection | null;
   config: ResolvedDatePickerConfig;
   monthNavigationOpen: boolean;
-  onNavigate: (direction: MonthDirection) => void;
+  onNavigate: (args: { direction: MonthDirection }) => void;
   onToggleMonthNavigation: () => void;
 };
 
@@ -34,15 +35,18 @@ export const CalendarHeader = ({
   onToggleMonthNavigation
 }: Props): JSX.Element => {
   const { labels, formatters, locale, classNames } = config;
-  const monthLabel = formatters.month(visibleMonth, locale);
+  const monthLabel = formatters.month({ month: visibleMonth, locale });
   return (
-    <div className={cx("quno-date-picker-month-header", classNames?.monthHeader)} data-slot="month-header">
+    <div
+      className={cx({ values: ["quno-date-picker-month-header", classNames?.monthHeader] })}
+      data-slot="month-header"
+    >
       <button
         type="button"
         className={classNames?.previousButton}
         data-slot="previous-button"
         aria-label={labels.previousMonth}
-        onClick={() => onNavigate(-1)}
+        onClick={() => onNavigate({ direction: -1 })}
       >
         <Chevron direction={-1} />
       </button>
@@ -53,7 +57,7 @@ export const CalendarHeader = ({
       >
         <button
           type="button"
-          className={cx("quno-date-picker-month-heading-button", classNames?.monthHeadingButton)}
+          className={cx({ values: ["quno-date-picker-month-heading-button", classNames?.monthHeadingButton] })}
           data-slot="month-heading-button"
           aria-label={`${monthLabel}. ${
             monthNavigationOpen ? labels.closeMonthNavigation : labels.openMonthNavigation
@@ -69,7 +73,7 @@ export const CalendarHeader = ({
         className={classNames?.nextButton}
         data-slot="next-button"
         aria-label={labels.nextMonth}
-        onClick={() => onNavigate(1)}
+        onClick={() => onNavigate({ direction: 1 })}
       >
         <Chevron direction={1} />
       </button>

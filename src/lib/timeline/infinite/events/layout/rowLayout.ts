@@ -16,18 +16,25 @@ export type EventLayoutItem = {
 };
 
 /** Projects prepared, orientation-neutral items into horizontal row geometry. */
-export function layoutPreparedEventsForRow(
-  preparedCell: PreparedEventCell,
-  settings: Pick<QunoInfiniteCalendarSettings, "startHour" | "endHour" | "zoom" | "rowHeight">
-): EventLayoutItem[] {
+export function layoutPreparedEventsForRow({
+  preparedCell,
+  settings
+}: {
+  preparedCell: PreparedEventCell;
+  settings: Pick<QunoInfiniteCalendarSettings, "startHour" | "endHour" | "zoom" | "rowHeight">;
+}): EventLayoutItem[] {
   return preparedCell.items.map((item) => {
     const laneHeight = Math.max(1, settings.rowHeight / item.laneCount);
     const laneInset = Math.min(2, Math.max(0, (laneHeight - 1) / 2));
 
     return {
       event: item.event,
-      left: minuteToX(item.startMinute, settings),
-      width: Math.max(12, minuteToX(item.endMinute, settings) - minuteToX(item.startMinute, settings)),
+      left: minuteToX({ minute: item.startMinute, geometry: settings }),
+      width: Math.max(
+        12,
+        minuteToX({ minute: item.endMinute, geometry: settings }) -
+          minuteToX({ minute: item.startMinute, geometry: settings })
+      ),
       top: item.lane * laneHeight + laneInset,
       height: Math.max(1, laneHeight - laneInset * 2),
       laneHeight,

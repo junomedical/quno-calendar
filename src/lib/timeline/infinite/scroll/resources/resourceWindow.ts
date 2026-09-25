@@ -15,7 +15,13 @@ export type ResourceExtent = {
   size: number;
 };
 
-export function buildResourceExtents(sizes: readonly number[], start = 0): ResourceExtent[] {
+export function buildResourceExtents({
+  sizes,
+  start = 0
+}: {
+  sizes: readonly number[];
+  start?: number;
+}): ResourceExtent[] {
   let offset = start;
   return sizes.map((rawSize, index) => {
     const size = Math.max(0, rawSize);
@@ -25,13 +31,19 @@ export function buildResourceExtents(sizes: readonly number[], start = 0): Resou
   });
 }
 
-export function resourceIndexesInWindow(
-  extents: readonly ResourceExtent[],
-  viewportStart: number,
-  viewportEnd: number,
+export function resourceIndexesInWindow({
+  extents,
+  viewportStart,
+  viewportEnd,
   overscan = 2,
-  pinnedIndexes: ReadonlySet<number> = new Set()
-): number[] {
+  pinnedIndexes = new Set()
+}: {
+  extents: readonly ResourceExtent[];
+  viewportStart: number;
+  viewportEnd: number;
+  overscan?: number;
+  pinnedIndexes?: ReadonlySet<number>;
+}): number[] {
   const indexes = new Set<number>();
   for (const index of pinnedIndexes) {
     if (index >= 0 && index < extents.length) indexes.add(index);
@@ -40,15 +52,15 @@ export function resourceIndexesInWindow(
     return [...indexes].sort((left, right) => left - right);
   }
 
-  const firstVisible = firstExtentEndingAfter(extents, viewportStart);
-  const lastVisible = lastExtentStartingBefore(extents, viewportEnd);
+  const firstVisible = firstExtentEndingAfter({ extents, offset: viewportStart });
+  const lastVisible = lastExtentStartingBefore({ extents, offset: viewportEnd });
   const first = Math.max(0, firstVisible - Math.max(0, overscan));
   const last = Math.min(extents.length - 1, lastVisible + Math.max(0, overscan));
   for (let index = first; index <= last; index += 1) indexes.add(index);
   return [...indexes].sort((left, right) => left - right);
 }
 
-function firstExtentEndingAfter(extents: readonly ResourceExtent[], offset: number): number {
+function firstExtentEndingAfter({ extents, offset }: { extents: readonly ResourceExtent[]; offset: number }): number {
   let low = 0;
   let high = extents.length - 1;
   while (low < high) {
@@ -59,7 +71,7 @@ function firstExtentEndingAfter(extents: readonly ResourceExtent[], offset: numb
   return low;
 }
 
-function lastExtentStartingBefore(extents: readonly ResourceExtent[], offset: number): number {
+function lastExtentStartingBefore({ extents, offset }: { extents: readonly ResourceExtent[]; offset: number }): number {
   let low = 0;
   let high = extents.length - 1;
   while (low < high) {

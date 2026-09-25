@@ -10,6 +10,14 @@ use the shared records for package-wide contracts and release work.
 | Quno/Date Input        | `@quno/calendar/date-input`        | [Date Input](./date-input/README.md)               | `/guide/date-input`        |
 | Quno/Date Parser       | `@quno/calendar/date-parser`       | [Date Parser](./date-parser/README.md)             | `/guide/date-parser`       |
 
+The [named-contract migration](./shared/migration.md#unreleased-named-contracts-and-product-ownership) maps the
+current breaking API cleanup. Product decision records preserve the historical signatures they supersede.
+
+The current responsiveness work is recorded in
+[QUNO-013](./shared/decisions.md#quno-013---bound-high-frequency-work-to-display-frames), with Infinite Calendar's
+multilane background availability geometry in [Decision 091](./infinite-calendar/decisions.md#091---availability-has-independent-collision-lanes),
+refined by the explicit background opt-in in [Decision 093](./infinite-calendar/decisions.md#093---event-entity-kind-is-separate-from-its-render-layer).
+
 ## Shared package records
 
 - [Architecture](./shared/architecture.md) defines public surfaces, dependency direction, framework compatibility,

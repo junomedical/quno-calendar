@@ -1,10 +1,6 @@
-import { classNames as cx } from "./classNames";
-import {
-  monthRelation,
-  type DateRange,
-  type DateSelectionMode,
-  type IsoDate
-} from "#quno-internal/shared/dateRangeModel";
+import { classNames as cx } from "#quno-internal/shared/classNames";
+import { type DateRange, type DateSelectionMode, type IsoDate } from "#quno-internal/shared/dateRangeModel";
+import { monthRelation } from "#quno-internal/date-picker/datePickerModel";
 import type { ResolvedDatePickerConfig } from "./datePickerTypes";
 import type { MonthChangeSource } from "./datePickerControllerTypes";
 import type { JSX } from "react";
@@ -29,7 +25,7 @@ type Props = {
   position: Position;
   monthChangeSource: MonthChangeSource | null;
   config: ResolvedDatePickerConfig;
-  onJump: (date: IsoDate) => void;
+  onJump: (args: { date: IsoDate }) => void;
 };
 
 export const OffscreenPills = ({
@@ -50,7 +46,7 @@ export const OffscreenPills = ({
                 { endpoint: "start" as const, date: selection.start },
                 { endpoint: "end" as const, date: selection.end }
               ]
-          ).filter(({ date }) => monthRelation(date, visibleMonth) === position)
+          ).filter(({ date }) => monthRelation({ date, month: visibleMonth }) === position)
         : [],
     [position, selection, selectionMode, visibleMonth]
   );
@@ -90,7 +86,7 @@ export const OffscreenPills = ({
   }, [liveItems, monthChangeSource, visibleMonth]);
 
   const motionKey = items.map(({ endpoint, phase }) => `${endpoint}:${phase}`).join("|");
-  const finishMotion = (endpoint?: PillItem["endpoint"], phase?: ItemPhase): void => {
+  const finishMotion = ({ endpoint, phase }: { endpoint?: PillItem["endpoint"]; phase?: ItemPhase } = {}): void => {
     setItems((current) =>
       current.flatMap((item) => {
         if (endpoint !== undefined && (item.endpoint !== endpoint || item.phase !== phase)) {
@@ -123,7 +119,7 @@ export const OffscreenPills = ({
   return (
     <div
       ref={containerRef}
-      className={cx("quno-date-picker-pills", `quno-date-picker-pills--${position}`, classNames?.pills)}
+      className={cx({ values: ["quno-date-picker-pills", `quno-date-picker-pills--${position}`, classNames?.pills] })}
       data-slot="pills"
       data-position={position}
       data-presence={containerPhase}
@@ -139,18 +135,18 @@ export const OffscreenPills = ({
           <button
             key={endpoint}
             type="button"
-            className={cx("quno-date-picker-pill", classNames?.pill)}
+            className={cx({ values: ["quno-date-picker-pill", classNames?.pill] })}
             data-slot="pill"
             data-endpoint={endpoint}
             data-position={position}
             data-item-presence={phase}
             aria-hidden={phase === "exiting" || undefined}
             disabled={phase === "exiting"}
-            onClick={() => onJump(date)}
-            onAnimationEnd={() => finishMotion(endpoint, phase)}
+            onClick={() => onJump({ date })}
+            onAnimationEnd={() => finishMotion({ endpoint, phase })}
           >
             <span>{endpoint === "start" ? labels.start : labels.end}</span>
-            {formatters.date(date, locale)}
+            {formatters.date({ date, locale })}
             <span aria-hidden="true">{position === "before" ? "↑" : "↓"}</span>
           </button>
         ))}

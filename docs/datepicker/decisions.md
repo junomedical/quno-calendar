@@ -1017,3 +1017,25 @@ future identifiers are documented in [Date Input decisions](../date-input/decisi
 - Consequences: Every gesture has deterministic fail-closed behavior while products can independently render loading,
   error, holiday, or availability classes. Consumers must revalidate persisted controlled values when their business
   rules change, and async work never runs from the synchronous matcher.
+
+## QDP-123 — Apply inclusive hard date limits before availability resolution
+
+- Date: 2026-09-08
+- Status: Accepted; extends QDP-122
+- Context: A booking window often has a known first and last date even when availability inside that window still needs
+  consumer-owned resolution. Sending known out-of-window dates through the resolver creates unnecessary loading states
+  and requests, while expressing the same bounds inside every resolver duplicates a component-level invariant.
+- Decision: Add optional `limitDateFrom` and `limitDateTo` props as inclusive selection bounds. Dates earlier than the
+  From limit or later than the To limit are disabled before `isDayDisabled` is called. Apply the combined disabled state
+  to single selection, range endpoints, painting, endpoint and whole-range dragging, overflow days, and outside-month
+  interaction. Keep month navigation available for surrounding context, and do not rewrite existing controlled values.
+- Consequences: Consumers can filter availability requests to the known window and receive no resolver calls for dates
+  outside it. Boundary dates still use normal availability rules. A range may contain an out-of-window interior date
+  only when both endpoints are allowed, matching the accepted disabled-day rule.
+
+## Shared contract update — 2026-09-05
+
+[QUNO-012](../shared/decisions.md#quno-012---give-library-functions-named-contracts-and-align-product-ownership)
+supersedes historical positional signatures and customization names for this product. The accepted interaction,
+presentation, and geometry behavior in this ledger remains in force. See the
+[migration guide](../shared/migration.md#unreleased-named-contracts-and-product-ownership) for exact replacements.

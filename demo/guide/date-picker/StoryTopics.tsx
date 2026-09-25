@@ -132,13 +132,13 @@ export const StoryTopics = (): JSX.Element => (
       number="10"
       kicker="Day handler"
       title="Mark and disable the dates that matter."
-      copy="Style each date with getDayCellProps and control whether it can become a selection endpoint with disabledDays. Availability stays parent-owned: while a delayed check is loading—or if it fails—the date remains disabled, so unresolved state can never become a start, end, or single-day selection. Disabled dates may still appear inside a valid range."
-      instruction="Wait for availability to load, then choose an enabled weekday. Weekends, Wednesdays, the 27 August holiday, and the failed check on 24 August cannot become endpoints. Navigate once to see the next month fail closed while it loads."
+      copy="Bound the booking window with inclusive limitDateFrom and limitDateTo values, then style each in-window date with getDayCellProps and control whether it can become a selection endpoint with isDayDisabled. Dates outside the hard bounds skip availability resolution entirely. Inside the window, unresolved or failed dates remain disabled, while disabled interior dates may still appear inside a valid range."
+      instruction="Wait for availability to load, then choose an enabled weekday from 6 August through 10 September. Dates outside that window never enter the loading count; weekends, Wednesdays, the 27 August holiday, and the failed check on 24 August cannot become endpoints."
       howTo={
         <StoryHowTo
           title="Load and disable day states"
           language="TSX"
-          copy="Keep asynchronous availability in parent state. Return presentation props separately, and disable every date until its check explicitly succeeds."
+          copy="Filter async work to the same hard limits, return presentation props separately, and disable every in-window date until its check explicitly succeeds."
           code={customDaysSnippet}
         />
       }

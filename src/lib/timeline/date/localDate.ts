@@ -4,7 +4,7 @@ function invalidDate(): Date {
   return new Date(Number.NaN);
 }
 
-function copyDate(date: Date): Date {
+function copyDate({ date }: { date: Date }): Date {
   return new Date(date.getTime());
 }
 
@@ -16,7 +16,7 @@ function copyDate(date: Date): Date {
  * browser is west of Greenwich. Full ISO timestamps retain native offset and
  * local-time semantics.
  */
-export function parseIsoDate(value: string): Date {
+export function parseIsoDate({ value }: { value: string }): Date {
   const dateKeyMatch = DATE_KEY_PATTERN.exec(value);
   if (!dateKeyMatch) {
     return new Date(value);
@@ -34,8 +34,8 @@ export function parseIsoDate(value: string): Date {
 }
 
 /** Returns a copy moved by whole local calendar days. */
-export function addCalendarDays(date: Date, amount: number): Date {
-  const result = copyDate(date);
+export function addCalendarDays({ date, amount }: { date: Date; amount: number }): Date {
+  const result = copyDate({ date });
   if (!Number.isFinite(amount) || Number.isNaN(result.getTime())) {
     return invalidDate();
   }
@@ -50,8 +50,8 @@ export function addCalendarDays(date: Date, amount: number): Date {
  * The original day is clamped to the target month's final day, so January 31
  * plus one month becomes February 28 (or 29) rather than rolling into March.
  */
-export function addCalendarMonths(date: Date, amount: number): Date {
-  const result = copyDate(date);
+export function addCalendarMonths({ date, amount }: { date: Date; amount: number }): Date {
+  const result = copyDate({ date });
   if (!Number.isFinite(amount) || Number.isNaN(result.getTime())) {
     return invalidDate();
   }
@@ -67,7 +67,7 @@ export function addCalendarMonths(date: Date, amount: number): Date {
 }
 
 /** Returns whether two values represent the same local calendar date. */
-export function isSameLocalDate(left: Date, right: Date): boolean {
+export function isSameLocalDate({ left, right }: { left: Date; right: Date }): boolean {
   return (
     left.getFullYear() === right.getFullYear() &&
     left.getMonth() === right.getMonth() &&

@@ -9,17 +9,23 @@ import { addCalendarMonths, parseIsoDate } from "#quno-internal/timeline/date/lo
 
 describe("local date helpers", () => {
   it("parses a date key at local midnight without a UTC date shift", () => {
-    const date = parseIsoDate("2026-07-04");
+    const date = parseIsoDate({ value: "2026-07-04" });
 
     expect(date.getHours()).toBe(0);
     expect(date.getMinutes()).toBe(0);
-    expect(toDateKey(date)).toBe("2026-07-04");
+    expect(toDateKey({ date })).toBe("2026-07-04");
   });
 
   it("clamps month arithmetic at the target month's final day", () => {
-    expect(toDateKey(addCalendarMonths(fromDateKey("2026-01-31"), 1))).toBe("2026-02-28");
-    expect(toDateKey(addCalendarMonths(fromDateKey("2024-01-31"), 1))).toBe("2024-02-29");
-    expect(toDateKey(addCalendarMonths(fromDateKey("2026-03-31"), -1))).toBe("2026-02-28");
+    expect(toDateKey({ date: addCalendarMonths({ date: fromDateKey({ dateKey: "2026-01-31" }), amount: 1 }) })).toBe(
+      "2026-02-28"
+    );
+    expect(toDateKey({ date: addCalendarMonths({ date: fromDateKey({ dateKey: "2024-01-31" }), amount: 1 }) })).toBe(
+      "2024-02-29"
+    );
+    expect(toDateKey({ date: addCalendarMonths({ date: fromDateKey({ dateKey: "2026-03-31" }), amount: -1 }) })).toBe(
+      "2026-02-28"
+    );
   });
 
   it.each([
@@ -32,28 +38,30 @@ describe("local date helpers", () => {
     ["2026-07-13", "July 13th"],
     ["2026-07-21", "July 21st"]
   ])("formats %s with its English ordinal", (dateKey, expected) => {
-    expect(formatMonthDayOrdinal(fromDateKey(dateKey))).toBe(expected);
+    expect(formatMonthDayOrdinal({ date: fromDateKey({ dateKey }) })).toBe(expected);
   });
 
   it("preserves the existing complete horizontal label", () => {
-    expect(formatHorizontalDateLabel(fromDateKey("2026-07-04"), { dateLocale: "en-US" })).toBe("July 4th, Saturday");
+    expect(
+      formatHorizontalDateLabel({ date: fromDateKey({ dateKey: "2026-07-04" }), options: { locale: "en-US" } })
+    ).toBe("July 4th, Saturday");
   });
 
   it("localizes month, day, and weekday labels", () => {
-    const date = fromDateKey("2026-07-04");
+    const date = fromDateKey({ dateKey: "2026-07-04" });
 
-    expect(formatHorizontalDateLabel(date, { dateLocale: "de-DE" })).toBe("4. Juli, Samstag");
-    expect(formatMonthDayOrdinal(date, { dateLocale: "en-GB" })).toBe("4th July");
+    expect(formatHorizontalDateLabel({ date, options: { locale: "de-DE" } })).toBe("4. Juli, Samstag");
+    expect(formatMonthDayOrdinal({ date, options: { locale: "en-GB" } })).toBe("4th July");
   });
 
   it("uses a custom day-name generator with the configured locale", () => {
-    const date = fromDateKey("2026-07-04");
-    const dayNameGenerator = vi.fn((value: Date, locale?: string | readonly string[]) => {
-      return `${value.getDay()}-${String(locale)}`;
+    const date = fromDateKey({ dateKey: "2026-07-04" });
+    const dayLabel = vi.fn(({ date: value, locale }: { date: string; locale?: string | readonly string[] }) => {
+      return `${new Date(`${value}T00:00:00`).getDay()}-${String(locale)}`;
     });
 
-    expect(formatWeekday(date, { dateLocale: "de-DE", dayNameGenerator })).toBe("6-de-DE");
-    expect(formatHorizontalDateLabel(date, { dateLocale: "de-DE", dayNameGenerator })).toBe("6-de-DE");
-    expect(dayNameGenerator).toHaveBeenCalledWith(date, "de-DE");
+    expect(formatWeekday({ date, options: { locale: "de-DE", formatters: { dayLabel } } })).toBe("6-de-DE");
+    expect(formatHorizontalDateLabel({ date, options: { locale: "de-DE", formatters: { dayLabel } } })).toBe("6-de-DE");
+    expect(dayLabel).toHaveBeenCalledWith({ date: "2026-07-04", locale: "de-DE" });
   });
 });

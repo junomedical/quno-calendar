@@ -62,7 +62,7 @@ export class ViewportAnchorRestoreSession {
     });
     this.resizeObserver = new ResizeObserver(this.schedule);
     this.resizeObserver.observe(viewport);
-    this.unsubscribe = registry.subscribe(this.schedule);
+    this.unsubscribe = registry.subscribe({ listener: this.schedule });
     viewport.addEventListener("scroll", this.handleScroll, { passive: true });
     viewport.addEventListener("pointerdown", this.markIntent, { passive: true });
     window.addEventListener("wheel", this.markIntent, { passive: true, capture: true });
@@ -121,7 +121,7 @@ export class ViewportAnchorRestoreSession {
     const { options, scrollToDateTime, target } = this.args;
     if (this.fallbackUsed || options.allowNavigationFallback === false || !target.dateKey || !target.time) return;
     this.fallbackUsed = true;
-    scrollToDateTime(target.dateKey, target.time);
+    scrollToDateTime({ date: target.dateKey, time: target.time });
   }
 
   private readonly markIntent = () => {

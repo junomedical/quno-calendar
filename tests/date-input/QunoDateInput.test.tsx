@@ -10,7 +10,7 @@ const props = {
 describe("QunoDateInput", () => {
   it("commits once on Enter and formats the selected date", () => {
     const onChange = vi.fn();
-    render(<QunoDateInput {...props} onChange={onChange} aria-label="Dates" />);
+    render(<QunoDateInput {...props} onChange={({ value }) => onChange(value)} aria-label="Dates" />);
     const input = screen.getByRole("textbox", { name: "Dates" });
     fireEvent.input(input, { target: { value: "12/14" } });
     fireEvent.keyDown(input, { key: "Enter" });
@@ -22,7 +22,7 @@ describe("QunoDateInput", () => {
 
   it("commits a this or next calendar period", () => {
     const onChange = vi.fn();
-    render(<QunoDateInput {...props} onChange={onChange} aria-label="Dates" />);
+    render(<QunoDateInput {...props} onChange={({ value }) => onChange(value)} aria-label="Dates" />);
     const input = screen.getByRole("textbox");
     fireEvent.input(input, { target: { value: "next month" } });
     fireEvent.keyDown(input, { key: "Enter" });
@@ -37,7 +37,7 @@ describe("QunoDateInput", () => {
         {...props}
         selectionMode="single"
         parserLanguages={["en", "de"]}
-        onChange={onChange}
+        onChange={({ value }) => onChange(value)}
         aria-label="Date"
       />
     );
@@ -58,7 +58,7 @@ describe("QunoDateInput", () => {
 
   it("formats a recognized partial range without emitting a value", () => {
     const onChange = vi.fn();
-    render(<QunoDateInput {...props} onChange={onChange} aria-label="Dates" />);
+    render(<QunoDateInput {...props} onChange={({ value }) => onChange(value)} aria-label="Dates" />);
     const input = screen.getByRole("textbox") as HTMLInputElement;
     fireEvent.input(input, { target: { value: "12/14 -" } });
     expect(input).toHaveValue("14 December 2025 – ");
@@ -79,7 +79,7 @@ describe("QunoDateInput", () => {
 
   it("uses recognition state and aria-invalid without an error label", () => {
     const onChange = vi.fn();
-    render(<QunoDateInput {...props} onChange={onChange} aria-label="Dates" />);
+    render(<QunoDateInput {...props} onChange={({ value }) => onChange(value)} aria-label="Dates" />);
     const input = screen.getByRole("textbox");
     fireEvent.input(input, { target: { value: "12/14" } });
     expect(input).toHaveAttribute("data-recognition", "recognized");
@@ -98,7 +98,7 @@ describe("QunoDateInput", () => {
       const [value, setValue] = useState<DateRange | null>({ start: "2026-08-01", end: "2026-08-02" });
       return (
         <>
-          <QunoDateInput {...props} value={value} onChange={setValue} aria-label="Dates" />
+          <QunoDateInput {...props} value={value} onChange={({ value }) => setValue(value)} aria-label="Dates" />
           <button onClick={() => setValue({ start: "2026-08-03", end: "2026-08-03" })}>Calendar</button>
         </>
       );
@@ -177,7 +177,7 @@ describe("QunoDateInput", () => {
       <QunoDateInput
         {...props}
         defaultValue={{ start: "2025-01-09", end: "2025-01-10" }}
-        onChange={onChange}
+        onChange={({ value }) => onChange(value)}
         aria-label="Dates"
       />
     );

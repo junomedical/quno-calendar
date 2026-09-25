@@ -163,7 +163,7 @@ export function DefaultDemo() {
     (date: DemoControls["jumpDate"]) => {
       setJumpDate(date);
       markProgrammaticReposition();
-      calendarRef.current?.scrollToDateTime(date, "09:00");
+      calendarRef.current?.scrollToDateTime({ date, time: "09:00" });
       setMessage(`Scrolled to ${date}`);
     },
     [markProgrammaticReposition, setJumpDate, setMessage]
@@ -211,7 +211,7 @@ export function DefaultDemo() {
             selectedCalendarIds={drafts.visibleCalendarIds}
             loadEvents={simulatedApi.loadEvents}
             eventVersion={eventVersion}
-            eventRenderer={DemoEventCard}
+            renderEvent={DemoEventCard}
             activeDraft={drafts.activeDraft}
             onEventMoveRequest={handleMove}
             onEventCreateRequest={handleCreate}

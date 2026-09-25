@@ -15,12 +15,14 @@ describe("ViewportGeometryRegistry", () => {
     const visible = elementAt(20, 20);
     const viewport = { left: 0, top: 0, right: 100, bottom: 100, width: 100, height: 100 } as DOMRect;
 
-    registry.registerEvent("shared", "a", offscreen);
-    registry.registerEvent("shared", "b", visible);
+    registry.registerEvent({ eventId: "shared", calendarId: "a", element: offscreen });
+    registry.registerEvent({ eventId: "shared", calendarId: "b", element: visible });
 
-    expect(registry.event({ eventId: "shared", calendarId: "b" }, viewport)).toBe(visible);
-    expect(registry.event({ eventId: "shared", calendarId: "a", requireVisible: true }, viewport)).toBeNull();
-    expect(registry.event({ eventId: "shared" }, viewport)).toBe(visible);
+    expect(registry.event({ target: { eventId: "shared", calendarId: "b" }, viewportBox: viewport })).toBe(visible);
+    expect(
+      registry.event({ target: { eventId: "shared", calendarId: "a", requireVisible: true }, viewportBox: viewport })
+    ).toBeNull();
+    expect(registry.event({ target: { eventId: "shared" }, viewportBox: viewport })).toBe(visible);
   });
 
   it("distinguishes a fully visible event from one clipped by the content viewport", () => {
@@ -29,27 +31,31 @@ describe("ViewportGeometryRegistry", () => {
     const clipped = elementAt(80, 20, 30, 30);
     const viewport = { left: 10, top: 10, right: 100, bottom: 100, width: 90, height: 90 } as DOMRect;
 
-    registry.registerEvent("fully-visible", "a", fullyVisible);
-    registry.registerEvent("clipped", "a", clipped);
+    registry.registerEvent({ eventId: "fully-visible", calendarId: "a", element: fullyVisible });
+    registry.registerEvent({ eventId: "clipped", calendarId: "a", element: clipped });
 
-    expect(registry.eventFullyVisible({ eventId: "fully-visible", calendarId: "a" }, viewport)).toBe(true);
-    expect(registry.eventFullyVisible({ eventId: "clipped", calendarId: "a" }, viewport)).toBe(false);
+    expect(
+      registry.eventFullyVisible({ target: { eventId: "fully-visible", calendarId: "a" }, viewportBox: viewport })
+    ).toBe(true);
+    expect(registry.eventFullyVisible({ target: { eventId: "clipped", calendarId: "a" }, viewportBox: viewport })).toBe(
+      false
+    );
   });
 
   it("notifies subscribers for mounts and unregisters empty nested maps", () => {
     const registry = new ViewportGeometryRegistry();
     const listener = vi.fn();
-    const unsubscribe = registry.subscribe(listener);
+    const unsubscribe = registry.subscribe({ listener });
     const resource = elementAt(0, 0);
 
-    registry.registerResource("2026-07-18", "a", resource);
-    expect(registry.resource("2026-07-18", "a")).toBe(resource);
-    registry.registerResource("2026-07-18", "a", null);
-    expect(registry.resource("2026-07-18", "a")).toBeNull();
+    registry.registerResource({ dateKey: "2026-07-18", calendarId: "a", element: resource });
+    expect(registry.resource({ dateKey: "2026-07-18", calendarId: "a" })).toBe(resource);
+    registry.registerResource({ dateKey: "2026-07-18", calendarId: "a", element: null });
+    expect(registry.resource({ dateKey: "2026-07-18", calendarId: "a" })).toBeNull();
     expect(listener).toHaveBeenCalledTimes(2);
 
     unsubscribe();
-    registry.registerDay("2026-07-18", elementAt(0, 0));
+    registry.registerDay({ dateKey: "2026-07-18", element: elementAt(0, 0) });
     expect(listener).toHaveBeenCalledTimes(2);
   });
 
@@ -59,10 +65,10 @@ describe("ViewportGeometryRegistry", () => {
     const replacement = elementAt(20, 20);
     const viewport = { left: 0, top: 0, right: 100, bottom: 100, width: 100, height: 100 } as DOMRect;
 
-    registry.registerEvent("draft", "a", previous);
-    registry.registerEvent("draft", "a", replacement);
-    registry.registerEvent("draft", "a", null, previous);
+    registry.registerEvent({ eventId: "draft", calendarId: "a", element: previous });
+    registry.registerEvent({ eventId: "draft", calendarId: "a", element: replacement });
+    registry.registerEvent({ eventId: "draft", calendarId: "a", element: null, previousElement: previous });
 
-    expect(registry.event({ eventId: "draft", calendarId: "a" }, viewport)).toBe(replacement);
+    expect(registry.event({ target: { eventId: "draft", calendarId: "a" }, viewportBox: viewport })).toBe(replacement);
   });
 });

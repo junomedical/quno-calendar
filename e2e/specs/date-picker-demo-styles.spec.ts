@@ -40,10 +40,15 @@ test("value-model chips keep compact typography", async ({ page }) => {
 test("delayed day states remain disabled until availability succeeds", async ({ page }) => {
   await page.goto("/guide/datepicker#day-handler");
   const topic = page.locator("#day-handler");
+  const outsideWindow = topic.locator('[data-date="2026-08-05"]');
   const available = topic.locator('[data-date="2026-08-10"]');
   const unavailable = topic.locator('[data-date="2026-08-12"]');
   const failed = topic.locator('[data-date="2026-08-24"]');
 
+  await expect(topic.getByText("Checking 32 dates…")).toBeVisible();
+  await expect(outsideWindow).toBeDisabled();
+  await expect(outsideWindow).toHaveAttribute("title", "Outside booking window");
+  await expect(outsideWindow).not.toHaveClass(/story__day--loading/);
   await expect(available).toBeDisabled();
   await expect(available).toHaveClass(/story__day--loading/);
   await expect(available.locator("span")).toHaveCSS("animation-name", "story-day-loading");

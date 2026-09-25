@@ -17,7 +17,9 @@ describe("delayed datepicker day availability", () => {
 
     expect(date("2026-08-10")).toBeDisabled();
     expect(date("2026-08-10")).toHaveClass("story__day--loading");
-    expect(screen.getByText(/Checking 42 dates/)).toBeInTheDocument();
+    expect(screen.getByText(/Checking 32 dates/)).toBeInTheDocument();
+    expect(date("2026-08-05")).toHaveAttribute("title", "Outside booking window");
+    expect(date("2026-08-05")).not.toHaveClass("story__day--loading");
 
     await act(async () => vi.advanceTimersByTime(900));
 

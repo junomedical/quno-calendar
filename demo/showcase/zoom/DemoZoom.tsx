@@ -121,6 +121,8 @@ export const DemoQunoInfiniteCalendar = forwardRef<QunoInfiniteCalendarHandle, D
     const { zoom, requestZoom } = useDemoCalendarZoom();
     const settings = useMemo(() => ({ ...settingsWithoutZoom, zoom }), [settingsWithoutZoom, zoom]);
 
-    return <QunoInfiniteCalendar {...props} ref={ref} settings={settings} onZoomChange={requestZoom} />;
+    return (
+      <QunoInfiniteCalendar {...props} ref={ref} settings={settings} onZoomChange={({ zoom }) => requestZoom(zoom)} />
+    );
   }
 );

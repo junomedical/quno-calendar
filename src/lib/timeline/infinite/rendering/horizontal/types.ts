@@ -1,3 +1,4 @@
+import type { CalendarDateLabelOptions } from "#quno-internal/timeline/core/calendarFormatterTypes";
 import type { Key, PointerEvent, RefCallback } from "react";
 import type { CalendarHourPresentation } from "#quno-internal/timeline/core/calendarCellPresentation";
 import type {
@@ -13,7 +14,7 @@ import type {
   QunoInfiniteCalendarSettings
 } from "#quno-internal/timeline/core/types";
 import type {
-  PreparedEventCell,
+  PreparedEventLayers,
   layoutPreparedEventsForRow
 } from "#quno-internal/timeline/infinite/events/layout/layout";
 import type { ViewportGeometryRegistration } from "#quno-internal/timeline/infinite/anchors/parent/viewportAnchorTypes";
@@ -31,13 +32,13 @@ export type VirtualDayItem = {
 export type HoveredEvent = { eventId: string; calendarId: CalendarId } | null;
 export type HorizontalRowLayoutItems = ReturnType<typeof layoutPreparedEventsForRow>;
 
-export type HorizontalEventPointerDown = (
-  event: PointerEvent<HTMLDivElement>,
-  calendarEvent: CalendarEvent,
-  renderedCalendarId: CalendarId
-) => void;
+export type HorizontalEventPointerDown = (args: {
+  event: PointerEvent<HTMLDivElement>;
+  calendarEvent: CalendarEvent;
+  renderedCalendarId: CalendarId;
+}) => void;
 
-export type HorizontalTimelineDayProps = {
+export type HorizontalTimelineDayProps = CalendarDateLabelOptions & {
   item: VirtualDayItem;
   dateKey: string;
   dayHeight: number;
@@ -46,8 +47,8 @@ export type HorizontalTimelineDayProps = {
   selectedCalendars: CalendarRow[];
   hiddenCalendarIds: Set<CalendarId>;
   todayKey: string;
-  getCalendarCellProps?: QunoInfiniteCalendarCellCustomizer;
-  getCalendarDayProps?: QunoInfiniteCalendarDayCustomizer;
+  getDayCellProps?: QunoInfiniteCalendarCellCustomizer;
+  getDayProps?: QunoInfiniteCalendarDayCustomizer;
   calendarHourPresentations: CalendarHourPresentation[];
   showNowLine: boolean;
   nowMinute: number;
@@ -64,20 +65,20 @@ export type HorizontalTimelineDayProps = {
   draftEventIsDraggable: boolean;
   draftEventIsExiting: boolean;
   draftEventReleaseDurationMs?: number;
-  eventRenderer: EventRenderer;
+  renderEvent: EventRenderer;
   geometryRegistration: ViewportGeometryRegistration;
   viewportMetricsStore: ViewportMetricsStore;
   forceAllResources: boolean;
   measureElement: RefCallback<HTMLDivElement>;
-  getRowHeight: (dateKey: string, calendarId: CalendarId) => number;
-  eventsForRow: (dateKey: string, calendarId: CalendarId) => CalendarEvent[];
-  preparedCellForRow: (dateKey: string, calendarId: CalendarId) => PreparedEventCell;
-  onHoverMove: (
-    event: PointerEvent<HTMLDivElement>,
-    layoutItems: HorizontalRowLayoutItems,
-    renderedCalendarId: CalendarId,
-    rowHeight: number
-  ) => void;
+  getRowHeight: (args: { dateKey: string; calendarId: CalendarId }) => number;
+  eventsForRow: (args: { dateKey: string; calendarId: CalendarId }) => CalendarEvent[];
+  preparedCellForRow: (args: { dateKey: string; calendarId: CalendarId }) => PreparedEventLayers;
+  onHoverMove: (args: {
+    event: PointerEvent<HTMLDivElement>;
+    layoutItems: HorizontalRowLayoutItems;
+    renderedCalendarId: CalendarId;
+    rowHeight: number;
+  }) => void;
   onHoverLeave: () => void;
   onEventPointerDown: HorizontalEventPointerDown;
 };
@@ -88,7 +89,7 @@ export type HorizontalTimelineRowProps = {
   top: number;
   rowHeight: number;
   rowEvents: CalendarEvent[];
-  preparedCell: PreparedEventCell;
+  preparedCell: PreparedEventLayers;
   isHidden?: boolean;
   calendarCellProps?: QunoInfiniteCalendarCellProps;
   calendarHourPresentations: CalendarHourPresentation[];
@@ -109,14 +110,14 @@ export type HorizontalTimelineRowProps = {
   draftEventIsDraggable: boolean;
   draftEventIsExiting: boolean;
   draftEventReleaseDurationMs?: number;
-  eventRenderer: EventRenderer;
+  renderEvent: EventRenderer;
   geometryRegistration: ViewportGeometryRegistration;
-  onHoverMove: (
-    event: PointerEvent<HTMLDivElement>,
-    layoutItems: HorizontalRowLayoutItems,
-    renderedCalendarId: CalendarId,
-    rowHeight: number
-  ) => void;
+  onHoverMove: (args: {
+    event: PointerEvent<HTMLDivElement>;
+    layoutItems: HorizontalRowLayoutItems;
+    renderedCalendarId: CalendarId;
+    rowHeight: number;
+  }) => void;
   onHoverLeave: () => void;
   onEventPointerDown: HorizontalEventPointerDown;
 };

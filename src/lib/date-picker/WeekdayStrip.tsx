@@ -1,4 +1,4 @@
-import { classNames as cx } from "./classNames";
+import { classNames as cx } from "#quno-internal/shared/classNames";
 import { useEffect, useState } from "react";
 import { addDays, isWithinRange, todayIso, type IsoDate, type WeekStart } from "#quno-internal/shared/dateRangeModel";
 import type { DatePickerController } from "./datePickerControllerTypes";
@@ -14,7 +14,7 @@ type Props = {
 
 type StripMode = { type: "weekdays" } | { type: "previous-dates"; pointerIndex: number };
 
-const targetIndex = (target: EventTarget | null, weekdays: number[]): number => {
+const targetIndex = ({ target, weekdays }: { target: EventTarget | null; weekdays: number[] }): number => {
   const element = (target as HTMLElement | null)?.closest<HTMLElement>("[data-day-index]");
   return weekdays.indexOf(Number(element?.dataset.dayIndex));
 };
@@ -27,8 +27,8 @@ type OverflowDayProps = {
   index: number;
   selected: boolean;
   today: IsoDate;
-  onReveal: (index: number) => void;
-  onFinish: (date: IsoDate) => void;
+  onReveal: (args: { index: number }) => void;
+  onFinish: (args: { date: IsoDate }) => void;
 };
 
 const OverflowDay = ({
@@ -44,8 +44,8 @@ const OverflowDay = ({
 }: OverflowDayProps): JSX.Element => {
   const isStart = controller.renderedSelection?.start === date;
   const isEnd = controller.renderedSelection?.end === date;
-  const committed = controller.selection ? isWithinRange(date, controller.selection) : false;
-  const disabled = dayIsDisabled(config.disabledDays, date);
+  const committed = controller.selection ? isWithinRange({ date, range: controller.selection }) : false;
+  const disabled = dayIsDisabled({ matcher: config.isDayDisabled, date });
   const customProps = config.getDayCellProps?.({
     date,
     weekday: dayIndex as WeekStart,
@@ -60,18 +60,20 @@ const OverflowDay = ({
   });
   return (
     <span
-      className={cx(
-        "quno-date-picker-day",
-        "quno-date-picker-day--outside",
-        "quno-date-picker-overflow-day",
-        selected && "quno-date-picker-day--selected",
-        isStart && "quno-date-picker-day--start",
-        isEnd && "quno-date-picker-day--end",
-        disabled && "quno-date-picker-day--disabled",
-        config.classNames?.day,
-        config.classNames?.overflowDay,
-        customProps?.className
-      )}
+      className={cx({
+        values: [
+          "quno-date-picker-day",
+          "quno-date-picker-day--outside",
+          "quno-date-picker-overflow-day",
+          selected && "quno-date-picker-day--selected",
+          isStart && "quno-date-picker-day--start",
+          isEnd && "quno-date-picker-day--end",
+          disabled && "quno-date-picker-day--disabled",
+          config.classNames?.day,
+          config.classNames?.overflowDay,
+          customProps?.className
+        ]
+      })}
       style={customProps?.style}
       title={customProps?.title}
       data-slot="overflow-day"
@@ -85,11 +87,11 @@ const OverflowDay = ({
       data-outside="true"
       data-disabled={disabled ? "true" : undefined}
       aria-disabled={disabled || undefined}
-      onPointerEnter={(event) => event.pointerType !== "touch" && onReveal(index)}
+      onPointerEnter={(event) => event.pointerType !== "touch" && onReveal({ index })}
       onPointerUp={(event) => {
         event.preventDefault();
         event.stopPropagation();
-        onFinish(date);
+        onFinish({ date });
       }}
     >
       <span>{Number(date.slice(-2))}</span>
@@ -103,7 +105,9 @@ export const WeekdayStrip = ({ controller, config, touchOverflowIndex }: Props):
   const { interaction, renderedSelection, weekdays } = controller;
   const dragActive = interaction.type !== "idle";
   const today = todayIso();
-  const previousDates = Array.from({ length: 7 }, (_, index) => addDays(controller.gridDates[0], index - 7));
+  const previousDates = Array.from({ length: 7 }, (_, index) =>
+    addDays({ date: controller.gridDates[0], amount: index - 7 })
+  );
 
   useEffect(() => {
     if (!dragActive || touchOverflowIndex === null) {
@@ -113,40 +117,40 @@ export const WeekdayStrip = ({ controller, config, touchOverflowIndex }: Props):
     setMode({ type: "previous-dates", pointerIndex: touchOverflowIndex });
   }, [dragActive, touchOverflowIndex]);
 
-  const revealAt = (index: number): void => {
+  const revealAt = ({ index }: { index: number }): void => {
     if (!dragActive || index < 0) return;
     setMode({ type: "previous-dates", pointerIndex: index });
-    controller.enterDay(previousDates[index]);
+    controller.enterDay({ date: previousDates[index] });
   };
 
-  const finishAt = (date: IsoDate): void => {
+  const finishAt = ({ date }: { date: IsoDate }): void => {
     setMode({ type: "weekdays" });
-    controller.finishDrag(date);
+    controller.finishDrag({ date });
   };
 
   return (
     <div
-      className={cx("quno-date-picker-weekdays", classNames?.weekdays)}
+      className={cx({ values: ["quno-date-picker-weekdays", classNames?.weekdays] })}
       data-slot="weekdays"
       data-drag-overflow={mode.type === "previous-dates" ? "previous" : undefined}
       data-drag-active={dragActive ? "true" : undefined}
       aria-hidden="true"
       onPointerEnter={(event) => {
         if (event.pointerType === "touch") return;
-        revealAt(targetIndex(event.target, weekdays));
+        revealAt({ index: targetIndex({ target: event.target, weekdays }) });
       }}
       onPointerLeave={() => setMode({ type: "weekdays" })}
       onPointerUp={(event) => {
         if (!dragActive) return;
-        const index = targetIndex(event.target, weekdays);
+        const index = targetIndex({ target: event.target, weekdays });
         if (index < 0) return;
         event.preventDefault();
-        finishAt(previousDates[index]);
+        finishAt({ date: previousDates[index] });
       }}
     >
       {weekdays.map((dayIndex, index) => {
         const date = previousDates[index];
-        const selected = renderedSelection ? isWithinRange(date, renderedSelection) : false;
+        const selected = renderedSelection ? isWithinRange({ date, range: renderedSelection }) : false;
         const revealed = mode.type === "previous-dates" && (selected || index === mode.pointerIndex);
         if (!revealed) {
           return (
@@ -158,10 +162,10 @@ export const WeekdayStrip = ({ controller, config, touchOverflowIndex }: Props):
               data-touch-date={date}
               data-touch-index={index}
               onPointerEnter={(event) => {
-                if (event.pointerType !== "touch") revealAt(index);
+                if (event.pointerType !== "touch") revealAt({ index });
               }}
             >
-              {formatters.weekday(dayIndex, locale)}
+              {formatters.weekday({ weekday: dayIndex, locale })}
             </span>
           );
         }

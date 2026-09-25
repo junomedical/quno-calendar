@@ -12,7 +12,7 @@ import type { EventId } from "#quno-internal/timeline/core/types";
 const APPEARING_EVENT_DURATION_MS = 900;
 const EMPTY_EVENT_IDS: EventId[] = [];
 
-export function useAppearingEvents(requestedEventIds: EventId[] = EMPTY_EVENT_IDS) {
+export function useAppearingEvents({ requestedEventIds = EMPTY_EVENT_IDS }: { requestedEventIds?: EventId[] } = {}) {
   const [appearingEventIds, setAppearingEventIds] = useState<Set<EventId>>(() => new Set());
   const consumedRequestedIdsRef = useRef(new Set<EventId>());
   const timersRef = useRef(new Map<EventId, number>());

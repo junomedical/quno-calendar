@@ -724,26 +724,59 @@ The hour projection raises the measured artifact to 136.83 KiB raw and 33.44 KiB
 10.21 KiB raw and 1.95 KiB gzip. The Infinite Calendar JavaScript ceiling moves from Decision 089's 33 KiB to 34 KiB;
 the stylesheet remains inside its existing 2 KiB gzip ceiling.
 
-## 091 - Horizontal Row Navigation Belongs To The Calendar
+## Shared contract update — 2026-09-05
+
+[QUNO-012](../shared/decisions.md#quno-012---give-library-functions-named-contracts-and-align-product-ownership)
+supersedes historical positional signatures and customization names for this product. The accepted interaction,
+presentation, and geometry behavior in this ledger remains in force. See the
+[migration guide](../shared/migration.md#unreleased-named-contracts-and-product-ownership) for exact replacements.
+
+## 091 - Availability Has Independent Collision Lanes
+
+Date: 2026-09-08
+Status: Accepted; supersedes the full-row and no-metric-growth portion of Decision 017 and refines Decision 059
+
+Availability remains background context expressed by `kind: "availability"`, but overlapping windows for one resource
+now receive deterministic lanes of their own. Appointment and availability records are partitioned once and prepared
+independently with the same stable `O(n log n)` allocator. Horizontal availability uses vertical mini-lanes, vertical
+availability uses side-by-side lanes, and equal starts retain caller order. Resource geometry uses the larger of the
+appointment and availability depths rather than their sum, so appointments continue to overlay availability without
+competing for its lane numbers.
+
+`renderEvent` receives the real `lane`, collision-group `laneCount`, and `isOverlapping` values for availability. The
+existing interaction-layer rules, focus and appearance states, multi-calendar projections, and background z-order
+remain unchanged. Draft and drag-preview geometry remains transient and joins normal preparation only after commit.
+
+React-facing date buckets retain their array identity until that bucket changes. Date/resource preparation is cached
+by bucket identity, selected resources, visible time bounds, and any draft source belonging to that date. Accepted
+range responses and targeted mutations therefore invalidate only affected dates instead of rebuilding every prepared
+cell in the bounded cache.
+
+The layered cache, frame scheduler, and measured recenter bridge raise the ESM artifact to 159.29 KiB raw and 37.56
+KiB gzip. The
+Infinite Calendar JavaScript ceiling moves from 37 KiB to 38 KiB; the optional stylesheet remains 1.95 KiB gzip inside
+its existing 2 KiB ceiling.
+
+## 092 - Horizontal Row Navigation Belongs To The Calendar
 
 Date: 2026-09-24
 Status: Accepted
 
 An external editor can know a date, time, and calendar id before its target row is mounted. The public
-`scrollToDateTime` handle accepts an optional `calendarId` for horizontal row navigation. The existing geometry
-registry and cancellable viewport restoration pin and reveal an offscreen resource after date virtualization settles;
-an already-visible row is not moved vertically. The calendar owns sticky-header offsets and row visibility, while the
-editor calls only the public handle. The vertical view keeps its date/time behavior because it has columns, not rows.
+`scrollToDateTime({ date, time, calendarId })` handle accepts an optional `calendarId` for horizontal row navigation.
+The existing geometry registry and cancellable viewport restoration pin and reveal an offscreen resource after date
+virtualization settles; an already-visible row is not moved vertically. The calendar owns sticky-header offsets and
+row visibility, while the editor calls only the public handle. The vertical view keeps its date/time behavior because
+it has columns, not rows.
 
-## 092 - Event Entity Kind Is Separate From Its Render Layer
+## 093 - Event Entity Kind Is Separate From Its Render Layer
 
 Date: 2026-09-25
-Status: Accepted
+Status: Accepted; refines Decision 091 and supersedes Decisions 017 and 019's implicit background-layer rule
 
-This supersedes Decisions 017 and 019's assumption that every availability uses the background interaction layer. `CalendarEvent.kind`
-identifies the scheduling entity (`appointment`, `availability`, or `blocker`); `renderLayer: "availability"` explicitly
-selects the background treatment, which is pointer-transparent in `events` mode. Without that layer override, an
-availability remains a foreground, editable event in `events` mode and contributes to overlap metrics. `availability`
-interaction mode targets the
-explicit background layer. This permits internal scheduling editors while retaining the original background rendering
-for consumers that opt into it.
+`CalendarEvent.kind` identifies the scheduling entity (`appointment`, `availability`, or `blocker`);
+`renderLayer: "availability"` explicitly selects the background treatment. Decision 091's independent lanes and
+maximum-depth sizing apply to this background layer only. Without the layer override, an availability is a foreground
+editable event in `events` mode and shares its overlap lanes and metrics with appointments and blockers. Background
+availability is pointer-transparent in `events` mode; `availability` interaction mode targets that layer. This permits
+internal scheduling editors while retaining the background treatment for consumers that opt into it.

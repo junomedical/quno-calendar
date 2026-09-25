@@ -32,9 +32,9 @@ type VerticalTimelineCanvasProps = {
   labelWidth: number;
   maxVisibleDayMinWidth: number;
   renderItems: VirtualDateRenderItem[];
-  dateKeyForIndex: (index: number) => string;
+  dateKeyForIndex: (args: { index: number }) => string;
   dayHeight: number;
-  dayMinWidth: (dateKey: string) => number;
+  dayMinWidth: (args: { dateKey: string }) => number;
   day: VerticalDayRenderProps;
 };
 
@@ -89,7 +89,7 @@ export function VerticalTimelineCanvas({
           style={{ height: totalHeight, width: "100%", minWidth: labelWidth + maxVisibleDayMinWidth }}
         >
           {renderItems.map((item) => {
-            const dateKey = semanticDateKeyForRenderItem(item, dateKeyForIndex);
+            const dateKey = semanticDateKeyForRenderItem({ item, dateKeyForIndex });
             return (
               <VerticalTimelineDay
                 {...day}
@@ -97,7 +97,7 @@ export function VerticalTimelineCanvas({
                 dateKey={dateKey}
                 top={item.start}
                 dayHeight={dayHeight}
-                boardMinWidth={dayMinWidth(dateKey)}
+                boardMinWidth={dayMinWidth({ dateKey })}
                 key={dateKey}
               />
             );

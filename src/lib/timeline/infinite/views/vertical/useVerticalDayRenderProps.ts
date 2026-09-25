@@ -1,3 +1,4 @@
+import type { CalendarDateLabelOptions } from "#quno-internal/timeline/core/calendarFormatterTypes";
 /**
  * Vertical day projection adapter.
  * view/cache/interaction models -> stable props consumed by every virtual date
@@ -25,7 +26,7 @@ import {
 } from "#quno-internal/timeline/infinite/rendering/vertical/verticalViewGeometry";
 import type { CalendarFocusedEventTarget } from "#quno-internal/timeline/core/internalTypes";
 
-type VerticalDayRenderPropsArgs = {
+type VerticalDayRenderPropsArgs = CalendarDateLabelOptions & {
   geometry: VerticalViewGeometry;
   columns: VerticalPreparedColumns;
   settings: QunoInfiniteCalendarSettings;
@@ -36,10 +37,10 @@ type VerticalDayRenderPropsArgs = {
   interactions: ReturnType<typeof useTimelineInteractions>;
   appearingEventIds: Set<string>;
   focusedEventTarget?: CalendarFocusedEventTarget | null;
-  eventRenderer: EventRenderer;
-  getCalendarCellProps?: CalendarViewComponentProps["getCalendarCellProps"];
-  getCalendarDayProps?: CalendarViewComponentProps["getCalendarDayProps"];
-  getCalendarHourProps?: CalendarViewComponentProps["getCalendarHourProps"];
+  renderEvent: EventRenderer;
+  getDayCellProps?: CalendarViewComponentProps["getDayCellProps"];
+  getDayProps?: CalendarViewComponentProps["getDayProps"];
+  getHourProps?: CalendarViewComponentProps["getHourProps"];
   geometryRegistration: ViewportGeometryRegistration;
   activeRestoreTarget: CalendarViewportAnchorTarget | null;
   viewportMetricsStore: ViewportMetricsStore;
@@ -48,6 +49,8 @@ type VerticalDayRenderPropsArgs = {
 };
 
 export function useVerticalDayRenderProps({
+  locale,
+  formatters,
   geometry,
   columns,
   settings,
@@ -58,10 +61,10 @@ export function useVerticalDayRenderProps({
   interactions,
   appearingEventIds,
   focusedEventTarget,
-  eventRenderer,
-  getCalendarCellProps,
-  getCalendarDayProps,
-  getCalendarHourProps,
+  renderEvent,
+  getDayCellProps,
+  getDayProps,
+  getHourProps,
   geometryRegistration,
   activeRestoreTarget,
   viewportMetricsStore,
@@ -70,11 +73,13 @@ export function useVerticalDayRenderProps({
 }: VerticalDayRenderPropsArgs): VerticalDayRenderProps {
   const timeTicks = useMemo(() => buildTimeTicks(settings), [settings]);
   const hourPresentations = useMemo(
-    () => calendarHourPresentations(settings, "infinite-vertical", getCalendarHourProps),
-    [getCalendarHourProps, settings]
+    () => calendarHourPresentations({ settings, view: "infinite-vertical", getHourProps }),
+    [getHourProps, settings]
   );
-  const nowState = buildVerticalNowState(now, settings);
+  const nowState = buildVerticalNowState({ now, settings });
   return {
+    locale,
+    formatters,
     boardHeight: geometry.timelineHeight,
     virtualBoardMinWidth: columns.maxVisibleDayMinWidth,
     labelWidth: geometry.labelWidth,
@@ -97,9 +102,9 @@ export function useVerticalDayRenderProps({
     draftEventIsDraggable: interactions.renderedDraftIsDraggable,
     draftEventIsExiting: interactions.renderedDraftIsExiting,
     draftEventReleaseDurationMs: interactions.renderedDraftReleaseDurationMs,
-    eventRenderer,
-    getCalendarCellProps,
-    getCalendarDayProps,
+    renderEvent,
+    getDayCellProps,
+    getDayProps,
     calendarHourPresentations: hourPresentations,
     geometryRegistration,
     activeRestoreTarget,
@@ -109,7 +114,7 @@ export function useVerticalDayRenderProps({
     preparedCellForColumn: columns.preparedCellForColumn,
     columnWidthForDateCalendar: columns.columnWidthForDateCalendar,
     onHoverMove: hover.updateHoverFromColumn,
-    onHoverLeave: hover.clearHover,
+    onHoverLeave: hover.clearHoveredEvent,
     onEventPointerDown: interactions.handleEventPointerDown
   };
 }

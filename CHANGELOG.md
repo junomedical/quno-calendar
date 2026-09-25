@@ -6,16 +6,18 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ### Added
 
-- Added optional horizontal resource-row navigation through `scrollToDateTime(date, time, { calendarId })`, using the
+- Added optional horizontal resource-row navigation through `scrollToDateTime({ date, time, calendarId })`, using the
   calendar's virtualized geometry and cancellation lifecycle instead of consumer DOM observers.
 - Added `typesVersions` mappings for public subpaths so projects using legacy Node-style TypeScript resolution no longer need local declaration shims.
 - Exported `CALENDAR_EVENT_KINDS`, `CALENDAR_RULE_KINDS`, and their types for the appointment, availability, and blocker domain.
-- Added Infinite Calendar `getCalendarDayProps`, `getCalendarHourProps`, and `getCalendarCellProps` with typed date,
+- Added inclusive Datepicker `limitDateFrom` and `limitDateTo` selection bounds. Out-of-window dates are disabled before
+  `isDayDisabled` runs, allowing consumer availability loaders to skip dates whose result is already known.
+- Added Infinite Calendar `getDayProps`, `getHourProps`, and `getDayCellProps` with typed date,
   clock-hour, weekday, Today/weekend, calendar, and orientation context. Date-wide presentation covers the complete day
   and its visible header; hour presentation covers time bands and labels; resource presentation can override matching
   horizontal rows or vertical columns—including resource labels and headers. A dedicated field-guide chapter
   demonstrates weekend, lunch-hour, and equipment treatments separately from whole-calendar theming.
-- Added Datepicker `disabledDays`, typed `isDisabled` day-cell context, native disabled state, and endpoint guards for
+- Added Datepicker `isDayDisabled`, typed `isDisabled` day-cell context, native disabled state, and endpoint guards for
   click, paint, resize, range movement, single-day selection, and outside-month navigation. The field guide now shows
   delayed parent-owned availability with loading and failure states kept unselectable.
 - Added a packed React 19 compatibility fixture that typechecks and builds all public products, mounts the virtualized
@@ -40,8 +42,33 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 ### Changed
 
 - Separated event identity from presentation: `kind: "availability"` is foreground and participates in overlap metrics
-  unless `renderLayer: "availability"` explicitly selects the original background treatment. Legacy `consultation`,
+  unless `renderLayer: "availability"` explicitly selects the background treatment. Legacy `consultation`,
   `blocked`, and `draft` event-kind values are replaced by `appointment` or `blocker`; see the migration guide.
+- Gave explicitly background-layered availability deterministic lanes independent from foreground events in both
+  orientations. Resource rows and columns grow to the greater layer depth, and background availability renderers
+  receive meaningful `lane`, `laneCount`, and `isOverlapping` metadata.
+- Coalesced Infinite Calendar pointer previews, Datepicker captured-pointer painting, and quick-jump virtual scrolling
+  to one latest-value publication per animation frame while preserving synchronous release and commit behavior.
+- Reused unchanged event-bucket snapshots and date preparation, memoized static Datepicker structure, compiled Date
+  Input analysis per configuration, and deferred ordinary recognition decoration without changing parser or input
+  commit contracts.
+- Updated measured ESM artifacts and accepted ceilings for the combined changes: Infinite Calendar is
+  37.88 KiB gzip with a 38 KiB ceiling, Datepicker is 10.46 KiB with a 10.5 KiB ceiling, and Date Input remains within
+  its 8 KiB ceiling at 7.80 KiB.
+
+- Accepted the cumulative object-contract and responsiveness tradeoff: Infinite Calendar's gzip budget is now 38 KiB
+  (previously 34 KiB), Datepicker's is 10.5 KiB, and Date Input's is 8 KiB (previously 7 KiB); the other JavaScript and
+  stylesheet budgets are unchanged.
+
+- **Breaking:** Standardized public and private library functions on named object arguments, with native callback
+  signatures preserved. Unified `formatters`, `renderEvent`, presentation getters, and `isDayDisabled`; moved timeline
+  locale/formatting to component props, changed selection/zoom notifications to named payloads, and retained only
+  `parserLanguages`. See `docs/shared/migration.md` for replacements; no deprecated aliases remain.
+- Moved parser implementation and types into Date Parser, separated relative arithmetic from recognition and picker
+  actions from shared date primitives, and gave shared runtime helpers one root entry point. Removed parser-private
+  exports, duplicate input formatter types, repeated formatting/class-name helpers, and unused picker input CSS.
+- Added function-contract and dependency-direction guards plus public consumer type tests; grouped input and parser
+  tests under their owning products and updated all four live guides and compatibility fixtures.
 - Raised the Infinite Calendar JavaScript gzip ceiling from 32 KiB to 34 KiB for the new presentation callbacks; the
   measured ESM artifact is now 136.83 KiB raw and 33.44 KiB gzip after composing day, hour, and cell presentation.
 - Replaced the event-card resize lab's width and height sliders with one browser-native draggable corner. The demo's
@@ -105,6 +132,17 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 ### Fixed
 
 - A drag dropped back onto its original minute and calendar activates the event editor without sending a move request.
+- Prevented settled Infinite Calendar recentering from briefly painting uniform-height placeholder dates over already
+  measured variable-height days, which could make availability-expanded rows jump and then return.
+- Kept compact overlapping availability labels inside their card bounds by using a single-line lane label and removing
+  secondary content at mini-lane sizes.
+
+- Kept the native virtualizer item-key adapter stable across renders during the object-contract migration, preserving
+  navigation and dense-layout anchoring. Made five existing browser scenarios independent of the machine clock by
+  fixing their browser date/time to a working-day morning; the same five failures were reproduced on unchanged HEAD.
+
+- Kept focused Date Input calendar popups open when their off-screen Start or End shortcuts are clicked. Popup
+  compositions now retain internal pointer intent while classifying the blur before the clicked shortcut navigates.
 - Kept external create drafts anchored to their drawn date while the participant list is empty; the demo now shows its
   normal calendar set, hides the unassigned preview, and preserves checkbox focus until a participant is selected.
 - Removed React 19's synchronous virtualizer-update warning by using TanStack Virtual's queued notification path, and

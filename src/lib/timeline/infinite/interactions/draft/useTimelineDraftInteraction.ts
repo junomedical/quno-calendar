@@ -30,6 +30,7 @@ export function useTimelineDraftInteraction({
   applyCreatedEventToLoadedEvents
 }: UseTimelineDraftInteractionArgs) {
   const [draftState, setDraftState] = useState<DraftState | null>(null);
+  const draftStateRef = useRef<DraftState | null>(null);
   const createdEventSequenceRef = useRef(0);
   const pendingDraftClearFrameRef = useRef<number | null>(null);
 
@@ -37,33 +38,43 @@ export function useTimelineDraftInteraction({
 
   const startDraft = useCallback(
     (hit: CalendarHit) => {
-      setDraftState({ start: hit, current: hit, event: buildDraftEvent(hit, hit, draftKind) });
+      const next = {
+        start: hit,
+        current: hit,
+        event: buildDraftEvent({ startHit: hit, endHit: hit, kind: draftKind })
+      };
+      draftStateRef.current = next;
+      setDraftState(next);
     },
     [draftKind]
   );
 
   const updateDraftFromPoint = useCallback(
     (event: PointerLike) => {
-      if (!draftState) {
+      const currentDraft = draftStateRef.current;
+      if (!currentDraft) {
         return false;
       }
 
       const hit = getHit(event);
-      if (!hit || hit.dateKey !== draftState.start.dateKey || hit.calendarId !== draftState.start.calendarId) {
+      if (!hit || hit.dateKey !== currentDraft.start.dateKey || hit.calendarId !== currentDraft.start.calendarId) {
         return true;
       }
-      setDraftState({
-        start: draftState.start,
+      const next = {
+        start: currentDraft.start,
         current: hit,
-        event: buildDraftEvent(draftState.start, hit, draftKind)
-      });
+        event: buildDraftEvent({ startHit: currentDraft.start, endHit: hit, kind: draftKind })
+      };
+      draftStateRef.current = next;
+      setDraftState(next);
       return true;
     },
-    [draftKind, draftState, getHit]
+    [draftKind, getHit]
   );
 
   const finishDraft = useCallback(async () => {
-    if (!draftState) {
+    const currentDraft = draftStateRef.current;
+    if (!currentDraft) {
       return false;
     }
 
@@ -71,8 +82,8 @@ export function useTimelineDraftInteraction({
       return true;
     }
 
-    const draft = draftState.event;
-    if (minutesSinceStartOfDay(draft.end) > minutesSinceStartOfDay(draft.start)) {
+    const draft = currentDraft.event;
+    if (minutesSinceStartOfDay({ value: draft.end }) > minutesSinceStartOfDay({ value: draft.start })) {
       const request = {
         start: draft.start,
         end: draft.end,
@@ -84,9 +95,11 @@ export function useTimelineDraftInteraction({
           onEventDraftRequest(request);
           pendingDraftClearFrameRef.current = window.requestAnimationFrame(() => {
             pendingDraftClearFrameRef.current = null;
+            draftStateRef.current = null;
             setDraftState(null);
           });
         } else if (onEventCreateRequest) {
+          draftStateRef.current = null;
           setDraftState(null);
           const createdEvent = await onEventCreateRequest(request);
           createdEventSequenceRef.current += 1;
@@ -99,20 +112,23 @@ export function useTimelineDraftInteraction({
           );
         }
       } catch {
+        draftStateRef.current = null;
         setDraftState(null);
       }
     } else {
+      draftStateRef.current = null;
       setDraftState(null);
     }
 
     return true;
-  }, [applyCreatedEventToLoadedEvents, draftState, onEventCreateRequest, onEventDraftRequest]);
+  }, [applyCreatedEventToLoadedEvents, onEventCreateRequest, onEventDraftRequest]);
 
   const cancelDraft = useCallback(() => {
     if (pendingDraftClearFrameRef.current !== null) {
       window.cancelAnimationFrame(pendingDraftClearFrameRef.current);
       pendingDraftClearFrameRef.current = null;
     }
+    draftStateRef.current = null;
     setDraftState(null);
   }, []);
 

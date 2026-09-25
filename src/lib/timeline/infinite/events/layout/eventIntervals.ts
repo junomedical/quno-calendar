@@ -9,27 +9,30 @@ export type EventInterval = {
   sourceIndex: number;
 };
 
-function compareIntervals(left: EventInterval, right: EventInterval): number {
+function compareIntervals({ left, right }: { left: EventInterval; right: EventInterval }): number {
   return (
     left.startMinute - right.startMinute || left.sourceIndex - right.sourceIndex || left.endMinute - right.endMinute
   );
 }
 
 /** Clips events and keeps caller order when appointments share a start time. */
-export function eventIntervals(
-  events: readonly CalendarEvent[],
-  settings: Pick<QunoInfiniteCalendarSettings, "startHour" | "endHour">
-): EventInterval[] {
+export function eventIntervals({
+  events,
+  settings
+}: {
+  events: readonly CalendarEvent[];
+  settings: Pick<QunoInfiniteCalendarSettings, "startHour" | "endHour">;
+}): EventInterval[] {
   const timelineStart = timelineStartMinute(settings);
   const timelineEnd = timelineEndMinute(settings);
 
   return events
     .map((event, sourceIndex) => ({
       event,
-      startMinute: Math.max(timelineStart, minutesSinceStartOfDay(event.start)),
-      endMinute: Math.min(timelineEnd, minutesSinceStartOfDay(event.end)),
+      startMinute: Math.max(timelineStart, minutesSinceStartOfDay({ value: event.start })),
+      endMinute: Math.min(timelineEnd, minutesSinceStartOfDay({ value: event.end })),
       sourceIndex
     }))
     .filter((interval) => interval.endMinute > timelineStart && interval.startMinute < timelineEnd)
-    .sort(compareIntervals);
+    .sort((argument0, argument1) => compareIntervals({ left: argument0, right: argument1 }));
 }

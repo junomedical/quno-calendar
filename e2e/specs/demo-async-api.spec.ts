@@ -4,6 +4,8 @@ test("demo simulates delayed API loading without blocking calendar chrome", asyn
   const apiResponse = page.waitForResponse(
     (response) => response.url().includes("/api/demo-events") && response.request().method() === "POST"
   );
+  // This scenario needs working-hour events, independently of the machine clock.
+  await page.clock.setFixedTime(new Date("2026-07-06T09:00:00+02:00"));
   await page.goto("/demo/infinite-calendar");
 
   await page.getByTestId("api-latency-select").selectOption("1000");

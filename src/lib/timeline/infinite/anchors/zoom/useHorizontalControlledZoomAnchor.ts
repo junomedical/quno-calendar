@@ -14,13 +14,19 @@ type HorizontalControlledZoomAnchorArgs = {
 };
 
 /** Keeps the time at the center of the visible grid fixed for prop/slider zoom. */
-export function centeredScrollLeftAfterZoom(
-  scrollLeft: number,
-  viewportWidth: number,
-  labelWidth: number,
-  previousZoom: number,
-  nextZoom: number
-) {
+export function centeredScrollLeftAfterZoom({
+  scrollLeft,
+  viewportWidth,
+  labelWidth,
+  previousZoom,
+  nextZoom
+}: {
+  scrollLeft: number;
+  viewportWidth: number;
+  labelWidth: number;
+  previousZoom: number;
+  nextZoom: number;
+}) {
   if (previousZoom <= 0 || previousZoom === nextZoom) return scrollLeft;
   // At the timeline origin the left edge is the user's anchor; do not introduce scrolling.
   if (scrollLeft <= 1) return 0;
@@ -31,14 +37,21 @@ export function centeredScrollLeftAfterZoom(
 }
 
 /** Prefers a visible current-time marker, then falls back to center/origin anchoring. */
-export function controlledScrollLeftAfterZoom(
-  scrollLeft: number,
-  viewportWidth: number,
-  labelWidth: number,
-  previousZoom: number,
-  nextZoom: number,
-  currentTimeTimelineX?: number
-) {
+export function controlledScrollLeftAfterZoom({
+  scrollLeft,
+  viewportWidth,
+  labelWidth,
+  previousZoom,
+  nextZoom,
+  currentTimeTimelineX
+}: {
+  scrollLeft: number;
+  viewportWidth: number;
+  labelWidth: number;
+  previousZoom: number;
+  nextZoom: number;
+  currentTimeTimelineX?: number;
+}) {
   const visibleTimelineWidth = Math.max(0, viewportWidth - labelWidth - TIMELINE_LEFT_GUTTER_PX);
   const markerViewportOffset = currentTimeTimelineX === undefined ? undefined : currentTimeTimelineX - scrollLeft;
   const markerIsVisible =
@@ -47,7 +60,7 @@ export function controlledScrollLeftAfterZoom(
     markerViewportOffset <= visibleTimelineWidth &&
     previousZoom > 0;
   if (!markerIsVisible || currentTimeTimelineX === undefined || markerViewportOffset === undefined) {
-    return centeredScrollLeftAfterZoom(scrollLeft, viewportWidth, labelWidth, previousZoom, nextZoom);
+    return centeredScrollLeftAfterZoom({ scrollLeft, viewportWidth, labelWidth, previousZoom, nextZoom });
   }
   const nextMarkerTimelineX = (currentTimeTimelineX * nextZoom) / previousZoom;
   return Math.max(0, nextMarkerTimelineX - markerViewportOffset);
@@ -86,17 +99,17 @@ export function useHorizontalControlledZoomAnchor({
     const scrollLeftBeforeZoom =
       effectiveZoom < previousZoom ? Math.max(lastScrollLeftRef.current, viewport.scrollLeft) : viewport.scrollLeft;
     const currentTimeTimelineX = showNowLine
-      ? minuteToX(nowMinute, { startHour, endHour, zoom: previousZoom })
+      ? minuteToX({ minute: nowMinute, geometry: { startHour, endHour, zoom: previousZoom } })
       : undefined;
 
-    viewport.scrollLeft = controlledScrollLeftAfterZoom(
-      scrollLeftBeforeZoom,
-      viewport.clientWidth,
+    viewport.scrollLeft = controlledScrollLeftAfterZoom({
+      scrollLeft: scrollLeftBeforeZoom,
+      viewportWidth: viewport.clientWidth,
       labelWidth,
       previousZoom,
-      effectiveZoom,
+      nextZoom: effectiveZoom,
       currentTimeTimelineX
-    );
+    });
     lastScrollLeftRef.current = viewport.scrollLeft;
   }, [containerRef, effectiveZoom, endHour, isGestureZoomActive, labelWidth, nowMinute, showNowLine, startHour]);
 }

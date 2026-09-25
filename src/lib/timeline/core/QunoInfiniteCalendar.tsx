@@ -29,14 +29,16 @@ export const QunoInfiniteCalendar = forwardRef<QunoInfiniteCalendarHandle, QunoI
     useImperativeHandle(
       ref,
       () => ({
-        scrollToDate: (dateKey) => viewRef.current?.scrollToDate(dateKey),
-        scrollToDateTime: (dateKey, time, options) => viewRef.current?.scrollToDateTime(dateKey, time, options),
+        scrollToDate: ({ date: dateKey }) => viewRef.current?.scrollToDate({ date: dateKey }),
+        scrollToDateTime: ({ date: dateKey, time, calendarId }) =>
+          viewRef.current?.scrollToDateTime({ date: dateKey, time, calendarId }),
         scrollToToday: () => viewRef.current?.scrollToToday(),
         captureViewportAnchor: (target) => viewRef.current?.captureViewportAnchor(target) ?? null,
-        restoreViewportAnchor: (anchor, options) => viewRef.current?.restoreViewportAnchor(anchor, options),
+        restoreViewportAnchor: ({ anchor, ...options }) =>
+          viewRef.current?.restoreViewportAnchor({ anchor, ...options }),
         cancelViewportAnchorRestore: () => viewRef.current?.cancelViewportAnchorRestore(),
-        commitVisibleEvent: (event, options) => viewRef.current?.commitVisibleEvent(event, options),
-        removeVisibleEvent: (eventId) => viewRef.current?.removeVisibleEvent(eventId),
+        commitVisibleEvent: ({ event, ...options }) => viewRef.current?.commitVisibleEvent({ event, ...options }),
+        removeVisibleEvent: ({ eventId }) => viewRef.current?.removeVisibleEvent({ eventId }),
         releaseActiveDraft: (options) => viewRef.current?.releaseActiveDraft(options),
         focusEvent: focus.focusEvent
       }),

@@ -33,12 +33,17 @@ type HorizontalAnchorGeometry = {
 };
 
 /** Captures the grid slot at the viewport's top edge before row metrics change. */
-export function captureHorizontalDataLayoutAnchor(
-  dateKey: string,
-  offsetWithinDate: number,
-  metric: HorizontalDayMetric | undefined,
-  geometry: HorizontalAnchorGeometry
-): HorizontalDataLayoutAnchor {
+export function captureHorizontalDataLayoutAnchor({
+  dateKey,
+  offsetWithinDate,
+  metric,
+  geometry
+}: {
+  dateKey: string;
+  offsetWithinDate: number;
+  metric: HorizontalDayMetric | undefined;
+  geometry: HorizontalAnchorGeometry;
+}): HorizontalDataLayoutAnchor {
   const safeOffset = Math.max(0, offsetWithinDate);
   if (safeOffset < geometry.dayHeaderHeight) {
     return { kind: "date", dateKey, offsetWithinDate: safeOffset };
@@ -63,13 +68,17 @@ export function captureHorizontalDataLayoutAnchor(
 }
 
 /** Translates a captured semantic slot into the next date's row geometry. */
-export function resolveHorizontalDataLayoutOffset(
-  anchor: HorizontalDataLayoutAnchor,
-  metric: HorizontalDayMetric | undefined,
-  geometry: HorizontalAnchorGeometry
-): number {
+export function resolveHorizontalDataLayoutOffset({
+  anchor,
+  metric,
+  geometry
+}: {
+  anchor: HorizontalDataLayoutAnchor;
+  metric: HorizontalDayMetric | undefined;
+  geometry: HorizontalAnchorGeometry;
+}): number {
   if (anchor.kind === "date") {
-    return clampDateOffset(anchor.offsetWithinDate, metric?.height);
+    return clampDateOffset({ offset: anchor.offsetWithinDate, height: metric?.height });
   }
 
   let rowTop = geometry.dayHeaderHeight;
@@ -81,9 +90,9 @@ export function resolveHorizontalDataLayoutOffset(
     rowTop += rowHeight;
   }
 
-  return clampDateOffset(anchor.fallbackOffsetWithinDate, metric?.height);
+  return clampDateOffset({ offset: anchor.fallbackOffsetWithinDate, height: metric?.height });
 }
 
-function clampDateOffset(offset: number, height?: number): number {
+function clampDateOffset({ offset, height }: { offset: number; height?: number }): number {
   return height === undefined ? Math.max(0, offset) : Math.min(Math.max(0, offset), Math.max(0, height - 1));
 }

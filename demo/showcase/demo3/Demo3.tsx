@@ -29,7 +29,7 @@ const availabilityPreset: DemoPreset = {
     verticalColumnOverlapGrowth: 120,
     verticalEventHoverMinHeight: 72
   },
-  eventRenderer: Demo3EventCard,
+  renderEvent: Demo3EventCard,
   messages: {
     initial: "Availability editing enabled",
     datasetLoaded: (scale) => `Loaded ${scale.toLocaleString()} availability events/year`,

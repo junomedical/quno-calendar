@@ -27,7 +27,7 @@ describe("vertical render utilities", () => {
       isOverlapping: true
     };
 
-    const [positioned] = positionColumnLayoutItems([item]);
+    const [positioned] = positionColumnLayoutItems({ items: [item] });
 
     expect(positioned.top).toBe(68);
     expect(item.top).toBe(60);
@@ -35,7 +35,7 @@ describe("vertical render utilities", () => {
   });
 
   it("uses one shared time-to-block conversion for vertical transient layers", () => {
-    expect(verticalEventBox(event, { startHour: 8, endHour: 18, zoom: 1 })).toEqual({
+    expect(verticalEventBox({ event, settings: { startHour: 8, endHour: 18, zoom: 1 } })).toEqual({
       top: 68,
       height: 60
     });
@@ -52,12 +52,21 @@ describe("vertical render utilities", () => {
       { id: "calendar-c", name: "C" }
     ];
 
-    expect([...pinnedVerticalColumnIndexes("2026-07-18", calendars, [multiCalendarEvent])]).toEqual([0, 2]);
-    expect([...pinnedVerticalColumnIndexes("2026-07-19", calendars, [multiCalendarEvent])]).toEqual([]);
     expect([
-      ...pinnedVerticalColumnIndexes("2026-07-18", calendars, [], {
+      ...pinnedVerticalColumnIndexes({ dateKey: "2026-07-18", calendars, transientEvents: [multiCalendarEvent] })
+    ]).toEqual([0, 2]);
+    expect([
+      ...pinnedVerticalColumnIndexes({ dateKey: "2026-07-19", calendars, transientEvents: [multiCalendarEvent] })
+    ]).toEqual([]);
+    expect([
+      ...pinnedVerticalColumnIndexes({
         dateKey: "2026-07-18",
-        calendarId: "calendar-b"
+        calendars,
+        transientEvents: [],
+        activeRestoreTarget: {
+          dateKey: "2026-07-18",
+          calendarId: "calendar-b"
+        }
       })
     ]).toEqual([1]);
   });

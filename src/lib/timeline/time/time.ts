@@ -10,14 +10,14 @@ export type TimelineGeometry = {
 };
 
 /** Converts an `HH:mm` clock string into minutes from midnight. */
-export function parseClockToMinutes(clock: string): number {
+export function parseClockToMinutes({ clock }: { clock: string }): number {
   const [hours, minutes] = clock.split(":").map(Number);
   return hours * 60 + minutes;
 }
 
 /** Returns the local minutes from midnight for an ISO string or Date. */
-export function minutesSinceStartOfDay(value: string | Date): number {
-  const date = typeof value === "string" ? parseIsoDate(value) : value;
+export function minutesSinceStartOfDay({ value }: { value: string | Date }): number {
+  const date = typeof value === "string" ? parseIsoDate({ value }) : value;
   return date.getHours() * 60 + date.getMinutes();
 }
 
@@ -37,13 +37,13 @@ export function timelineTotalMinutes(geometry: Pick<TimelineGeometry, "startHour
 }
 
 /** Converts zoom into pixels per minute, with a lower rendering bound. */
-export function pixelsPerMinute(zoom: number): number {
+export function pixelsPerMinute({ zoom }: { zoom: number }): number {
   return Math.max(0.5, zoom);
 }
 
 /** Returns the full horizontal pixel width of the visible timeline. */
 export function timelineWidth(geometry: Pick<TimelineGeometry, "startHour" | "endHour" | "zoom">): number {
-  return timelineTotalMinutes(geometry) * pixelsPerMinute(geometry.zoom);
+  return timelineTotalMinutes(geometry) * pixelsPerMinute({ zoom: geometry.zoom });
 }
 
 /** Returns the full vertical pixel height of the visible timeline. */
@@ -52,38 +52,66 @@ export function timelineHeight(geometry: Pick<TimelineGeometry, "startHour" | "e
 }
 
 /** Converts an absolute minute from midnight into a clamped x-position. */
-export function minuteToX(minute: number, geometry: Pick<TimelineGeometry, "startHour" | "endHour" | "zoom">): number {
+export function minuteToX({
+  minute,
+  geometry
+}: {
+  minute: number;
+  geometry: Pick<TimelineGeometry, "startHour" | "endHour" | "zoom">;
+}): number {
   const clampedMinute = Math.min(timelineEndMinute(geometry), Math.max(timelineStartMinute(geometry), minute));
-  return (clampedMinute - timelineStartMinute(geometry)) * pixelsPerMinute(geometry.zoom);
+  return (clampedMinute - timelineStartMinute(geometry)) * pixelsPerMinute({ zoom: geometry.zoom });
 }
 
 /** Converts a timeline x-position into a clamped minute from midnight. */
-export function xToMinute(x: number, geometry: Pick<TimelineGeometry, "startHour" | "endHour" | "zoom">): number {
-  const minute = timelineStartMinute(geometry) + x / pixelsPerMinute(geometry.zoom);
+export function xToMinute({
+  x,
+  geometry
+}: {
+  x: number;
+  geometry: Pick<TimelineGeometry, "startHour" | "endHour" | "zoom">;
+}): number {
+  const minute = timelineStartMinute(geometry) + x / pixelsPerMinute({ zoom: geometry.zoom });
   return Math.min(timelineEndMinute(geometry), Math.max(timelineStartMinute(geometry), minute));
 }
 
 /** Converts an absolute minute from midnight into a clamped y-position. */
-export function minuteToY(minute: number, geometry: Pick<TimelineGeometry, "startHour" | "endHour" | "zoom">): number {
-  return minuteToX(minute, geometry);
+export function minuteToY({
+  minute,
+  geometry
+}: {
+  minute: number;
+  geometry: Pick<TimelineGeometry, "startHour" | "endHour" | "zoom">;
+}): number {
+  return minuteToX({ minute, geometry });
 }
 
 /** Converts a timeline y-position into a clamped minute from midnight. */
-export function yToMinute(y: number, geometry: Pick<TimelineGeometry, "startHour" | "endHour" | "zoom">): number {
-  return xToMinute(y, geometry);
+export function yToMinute({
+  y,
+  geometry
+}: {
+  y: number;
+  geometry: Pick<TimelineGeometry, "startHour" | "endHour" | "zoom">;
+}): number {
+  return xToMinute({ x: y, geometry });
 }
 
 /** Snaps a minute value to the configured interaction cadence. */
-export function snapMinute(minute: number, snapMinutes: number): number {
+export function snapMinute({ minute, snapMinutes }: { minute: number; snapMinutes: number }): number {
   return Math.round(minute / snapMinutes) * snapMinutes;
 }
 
 /** Keeps a moved event inside the visible timeline while preserving duration when possible. */
-export function clampEventToTimeline(
-  startMinute: number,
-  durationMinutes: number,
-  geometry: Pick<TimelineGeometry, "startHour" | "endHour">
-): { startMinute: number; endMinute: number } {
+export function clampEventToTimeline({
+  startMinute,
+  durationMinutes,
+  geometry
+}: {
+  startMinute: number;
+  durationMinutes: number;
+  geometry: Pick<TimelineGeometry, "startHour" | "endHour">;
+}): { startMinute: number; endMinute: number } {
   const startBoundary = timelineStartMinute(geometry);
   const endBoundary = timelineEndMinute(geometry);
   const clampedStart = Math.max(startBoundary, Math.min(endBoundary - durationMinutes, startMinute));
@@ -94,14 +122,14 @@ export function clampEventToTimeline(
 }
 
 /** Builds an ISO timestamp for a date key plus a minute offset from midnight. */
-export function dateKeyAndMinuteToIso(dateKey: string, minute: number): string {
-  const date = fromDateKey(dateKey);
+export function dateKeyAndMinuteToIso({ dateKey, minute }: { dateKey: string; minute: number }): string {
+  const date = fromDateKey({ dateKey });
   date.setTime(date.getTime() + minute * 60_000);
   return date.toISOString();
 }
 
 /** Formats a timeline tick label as an hour or two-digit minute marker. */
-export function formatHourLabel(minute: number): string {
+export function formatHourLabel({ minute }: { minute: number }): string {
   const hours = Math.floor(minute / 60);
   const minutes = minute % 60;
   if (minutes === 0) {

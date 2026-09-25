@@ -7,7 +7,12 @@ describe("QunoDateInput calendar phrases", () => {
   it("commits previous calendar periods and named weekdays", () => {
     const onChange = vi.fn();
     render(
-      <QunoDateInput aria-label="Dates" expectedRange={expectedRange} onChange={onChange} referenceDate="2026-08-19" />
+      <QunoDateInput
+        aria-label="Dates"
+        expectedRange={expectedRange}
+        onChange={({ value }) => onChange(value)}
+        referenceDate="2026-08-19"
+      />
     );
     const input = screen.getByRole("textbox", { name: "Dates" });
 
@@ -30,7 +35,7 @@ describe("QunoDateInput calendar phrases", () => {
       <QunoDateInput
         aria-label="Sunday-first dates"
         expectedRange={expectedRange}
-        onChange={onChange}
+        onChange={({ value }) => onChange(value)}
         referenceDate="2026-08-19"
         weekStartsOn={0}
       />

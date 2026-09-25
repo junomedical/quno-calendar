@@ -12,23 +12,23 @@
  *
  * @see docs/infinite-calendar/flows/virtual-scroll-and-recenter.md
  */
-import { useVirtualizer, type Virtualizer } from "@tanstack/react-virtual";
+import { useVirtualizer, type Virtualizer, type VirtualizerOptions } from "@tanstack/react-virtual";
 import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { QunoInfiniteCalendarSettings } from "#quno-internal/timeline/core/types";
 import { VIRTUAL_DAY_NODE_OVERSCAN } from "./scrollConstants";
-import { createVirtualDateModel } from "./window/dateModel";
-import { useLayoutOffsetRestoration } from "./recenter/useLayoutOffsetRestoration";
-import type { ResolveOffsetOnLayoutChange } from "./recenter/useLayoutOffsetRestoration";
-import { useVirtualDateRenderItems } from "./window/useVirtualDateRenderItems";
-import { useStructuralRenderWindow } from "./window/useStructuralRenderWindow";
-import { useVirtualScrollPosition } from "./position/useVirtualScrollPosition";
-import { useVirtualWindowNavigation } from "./navigation/useVirtualWindowNavigation";
-import { useVisibleDateState } from "./position/useVisibleDateState";
-import { shouldAdjustForDateItemResize } from "./position/visibleSnapshot";
+import { createVirtualDateModel } from "#quno-internal/timeline/infinite/scroll/window/dateModel";
+import { useLayoutOffsetRestoration } from "#quno-internal/timeline/infinite/scroll/recenter/useLayoutOffsetRestoration";
+import type { ResolveOffsetOnLayoutChange } from "#quno-internal/timeline/infinite/scroll/recenter/useLayoutOffsetRestoration";
+import { useVirtualDateRenderItems } from "#quno-internal/timeline/infinite/scroll/window/useVirtualDateRenderItems";
+import { useStructuralRenderWindow } from "#quno-internal/timeline/infinite/scroll/window/useStructuralRenderWindow";
+import { useVirtualScrollPosition } from "#quno-internal/timeline/infinite/scroll/position/useVirtualScrollPosition";
+import { useVirtualWindowNavigation } from "#quno-internal/timeline/infinite/scroll/navigation/useVirtualWindowNavigation";
+import { useVisibleDateState } from "#quno-internal/timeline/infinite/scroll/position/useVisibleDateState";
+import { shouldAdjustForDateItemResize } from "#quno-internal/timeline/infinite/scroll/position/visibleSnapshot";
 
 type UseVirtualTimelineWindowArgs = {
   anchorDateKey: string;
-  setAnchorDateKey: (updater: (current: string) => string) => void;
+  setAnchorDateKey: import("react").Dispatch<import("react").SetStateAction<string>>;
   initialAnchorDateKey: string;
   settings: QunoInfiniteCalendarSettings;
   baseDayHeight: number;
@@ -40,29 +40,37 @@ type UseVirtualTimelineWindowArgs = {
   resolveOffsetOnLayoutChange?: ResolveOffsetOnLayoutChange;
 };
 
-const shouldAdjustScrollPositionOnItemSizeChange = (
-  item: { end: number },
-  _delta: number,
-  instance: { scrollOffset: number | null }
-) => shouldAdjustForDateItemResize(item.end, instance.scrollOffset);
+const shouldAdjustScrollPositionOnItemSizeChange: NonNullable<
+  Virtualizer<HTMLDivElement, Element>["shouldAdjustScrollPositionOnItemSizeChange"]
+> = (item, _delta, instance) =>
+  shouldAdjustForDateItemResize({ itemEnd: item.end, scrollOffset: instance.scrollOffset });
 
-function resetVirtualizerMeasurements(
-  virtualizer: Virtualizer<HTMLDivElement, Element>,
-  itemCount: number,
-  baseDayHeight: number,
-  forceUniformGeometry: boolean
-) {
+function resetVirtualizerMeasurements({
+  virtualizer,
+  itemCount,
+  baseDayHeight,
+  forceUniformGeometry
+}: {
+  virtualizer: Virtualizer<HTMLDivElement, Element>;
+  itemCount: number;
+  baseDayHeight: number;
+  forceUniformGeometry: boolean;
+}) {
   virtualizer.measure();
   if (!forceUniformGeometry) return;
   for (let index = 0; index < itemCount; index += 1) virtualizer.resizeItem(index, baseDayHeight);
 }
 
-function virtualViewportIncludesDate(
-  virtualizer: Virtualizer<HTMLDivElement, Element>,
-  dateKeyToIndex: (dateKey: string) => number,
-  dateKey: string
-) {
-  const targetIndex = dateKeyToIndex(dateKey);
+function virtualViewportIncludesDate({
+  virtualizer,
+  dateKeyToIndex,
+  dateKey
+}: {
+  virtualizer: Virtualizer<HTMLDivElement, Element>;
+  dateKeyToIndex: (args: { dateKey: string }) => number;
+  dateKey: string;
+}) {
+  const targetIndex = dateKeyToIndex({ dateKey });
   return virtualizer.getVirtualItems().some((item) => item.index === targetIndex);
 }
 
@@ -81,18 +89,22 @@ export function useScrollRuntime({
 }: UseVirtualTimelineWindowArgs) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const { topVisibleDateRef, topVisibleOffsetRef, pendingScrollTargetRef, rememberVisibleDateOffset } =
-    useVisibleDateState(initialAnchorDateKey, settings.excludedWeekdays, setAnchorDateKey);
+    useVisibleDateState({ initialAnchorDateKey, excludedWeekdays: settings.excludedWeekdays, setAnchorDateKey });
 
   const dateModel = useMemo(
-    () => createVirtualDateModel(anchorDateKey, settings.excludedWeekdays),
+    () => createVirtualDateModel({ anchorDateKey, excludedWeekdays: settings.excludedWeekdays }),
     [anchorDateKey, settings.excludedWeekdays]
   );
   const { virtualWindow, dateKeyToIndex, dateKeyForIndex } = dateModel;
+  const getItemKey = useCallback<NonNullable<VirtualizerOptions<HTMLDivElement, Element>["getItemKey"]>>(
+    (index) => dateKeyForIndex({ index }),
+    [dateKeyForIndex]
+  );
   const virtualizer = useVirtualizer({
     count: virtualWindow.count,
     getScrollElement: () => containerRef.current,
     estimateSize: () => baseDayHeight,
-    getItemKey: dateKeyForIndex,
+    getItemKey,
     overscan: VIRTUAL_DAY_NODE_OVERSCAN,
     useFlushSync: false,
     initialRect: { width: 1400, height: 1100 },
@@ -132,10 +144,15 @@ export function useScrollRuntime({
   });
 
   const measureVirtualizer = useCallback(() => {
-    resetVirtualizerMeasurements(virtualizer, virtualWindow.count, baseDayHeight, Boolean(resolveOffsetOnLayoutChange));
+    resetVirtualizerMeasurements({
+      virtualizer,
+      itemCount: virtualWindow.count,
+      baseDayHeight,
+      forceUniformGeometry: Boolean(resolveOffsetOnLayoutChange)
+    });
   }, [baseDayHeight, resolveOffsetOnLayoutChange, virtualWindow.count, virtualizer]);
   const isDateInVirtualViewport = useCallback(
-    (dateKey: string) => virtualViewportIncludesDate(virtualizer, dateKeyToIndex, dateKey),
+    ({ dateKey }: { dateKey: string }) => virtualViewportIncludesDate({ virtualizer, dateKeyToIndex, dateKey }),
     [dateKeyToIndex, virtualizer]
   );
   useLayoutOffsetRestoration({
@@ -172,7 +189,7 @@ export function useScrollRuntime({
     dateKeyToIndex
   });
   const offsetForIndex = useCallback(
-    (index: number) => virtualizer.getOffsetForIndex(index, "start")?.[0],
+    ({ index }: { index: number }) => virtualizer.getOffsetForIndex(index, "start")?.[0],
     [virtualizer]
   );
   const { renderItems, visibleDateKeys } = useVirtualDateRenderItems({
@@ -180,6 +197,7 @@ export function useScrollRuntime({
     virtualWindow,
     baseDayHeight,
     forcedBaseGeometryAnchorIndex: structuralRenderWindow.anchorIndex,
+    forcedGeometryAnchorDateKey: structuralRenderWindow.anchorDateKey,
     layoutAnchorDateKey,
     dateKeyToIndex,
     dateKeyForIndex,

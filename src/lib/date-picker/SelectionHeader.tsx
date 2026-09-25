@@ -1,4 +1,4 @@
-import { classNames as cx } from "./classNames";
+import { classNames as cx } from "#quno-internal/shared/classNames";
 import type { ResolvedDatePickerConfig } from "./datePickerTypes";
 import type { DateRange } from "#quno-internal/shared/dateRangeModel";
 import type { JSX } from "react";
@@ -13,17 +13,20 @@ export const SelectionHeader = ({ selection, config, onClear }: Props): JSX.Elem
   const { labels, formatters, locale, classNames } = config;
   const summary = selection
     ? selection.start === selection.end
-      ? formatters.date(selection.start, locale)
-      : `${formatters.date(selection.start, locale)} – ${formatters.date(selection.end, locale)}`
+      ? formatters.date({ date: selection.start, locale })
+      : `${formatters.date({ date: selection.start, locale })} – ${formatters.date({ date: selection.end, locale })}`
     : labels.chooseDate;
 
   return (
     <header
-      className={cx("quno-date-picker-selection-header", classNames?.selectionHeader)}
+      className={cx({ values: ["quno-date-picker-selection-header", classNames?.selectionHeader] })}
       data-slot="selection-header"
     >
       <div>
-        <span className={cx("quno-date-picker-eyebrow", classNames?.selectionEyebrow)} data-slot="selection-eyebrow">
+        <span
+          className={cx({ values: ["quno-date-picker-eyebrow", classNames?.selectionEyebrow] })}
+          data-slot="selection-eyebrow"
+        >
           {labels.selectedPeriod}
         </span>
         <strong className={classNames?.selectionSummary} data-slot="selection-summary">
@@ -32,7 +35,7 @@ export const SelectionHeader = ({ selection, config, onClear }: Props): JSX.Elem
       </div>
       <button
         type="button"
-        className={cx("quno-date-picker-clear", classNames?.clearButton)}
+        className={cx({ values: ["quno-date-picker-clear", classNames?.clearButton] })}
         data-slot="clear-button"
         disabled={!selection}
         onClick={onClear}

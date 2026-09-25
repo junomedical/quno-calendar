@@ -9,7 +9,7 @@ import {
   type QunoInfiniteCalendarCellCustomizer,
   type QunoInfiniteCalendarDayCustomizer,
   type QunoInfiniteCalendarHourCustomizer,
-  type DayNameGenerator,
+  type QunoInfiniteCalendarFormatters,
   type EventCreateRequest,
   type EventMoveRequest,
   type EventRendererProps,
@@ -129,7 +129,7 @@ const cardGroupingLabels: Record<CardGrouping, string> = {
 
 export function CustomCardStructureDemo() {
   const [grouping, setGrouping] = useState<CardGrouping>("product");
-  const eventRenderer = useCallback(
+  const renderEvent = useCallback(
     (props: EventRendererProps) => <StructuredEventCard {...props} grouping={grouping} />,
     [grouping]
   );
@@ -158,7 +158,7 @@ export function CustomCardStructureDemo() {
           ariaLabel="Calendar with switchable product card structure"
           calendars={articleCalendars}
           className="article-card-structure-calendar"
-          eventRenderer={eventRenderer}
+          renderEvent={renderEvent}
           initialDateKey={articleDateKey}
           loadEvents={loadStructuredCardEvents}
           selectedCalendarIds={["provider-a"]}
@@ -219,7 +219,7 @@ export function CssNativeDemo() {
         <QunoInfiniteCalendar
           ariaLabel="Calendar with CSS-native sticky chrome"
           calendars={articleCalendars}
-          eventRenderer={ArticleEventCard}
+          renderEvent={ArticleEventCard}
           initialDateKey={articleDateKey}
           loadEvents={loadNavigationEvents}
           now={articleNow}
@@ -236,7 +236,7 @@ export function TimeMarkerDemo() {
 
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => {
-      calendarRef.current?.scrollToDateTime(articleDateKey, articleNowTime);
+      calendarRef.current?.scrollToDateTime({ date: articleDateKey, time: articleNowTime });
     });
     return () => window.cancelAnimationFrame(frame);
   }, []);
@@ -250,7 +250,7 @@ export function TimeMarkerDemo() {
           <span className="article-now-badge">Today · 13:30</span>
           <button
             className="article-button article-button--primary"
-            onClick={() => calendarRef.current?.scrollToDateTime(articleDateKey, articleNowTime)}
+            onClick={() => calendarRef.current?.scrollToDateTime({ date: articleDateKey, time: articleNowTime })}
             type="button"
           >
             Keep current time visible
@@ -263,7 +263,7 @@ export function TimeMarkerDemo() {
           ref={calendarRef}
           ariaLabel="Calendar with visible current-time marker"
           calendars={articleCalendars}
-          eventRenderer={ArticleEventCard}
+          renderEvent={ArticleEventCard}
           initialDateKey={articleDateKey}
           loadEvents={loadNavigationEvents}
           now={articleNow}
@@ -283,7 +283,7 @@ export function NavigationControlsDemo() {
 
   const navigate = (nextDate: IsoDate) => {
     setDate(nextDate);
-    calendarRef.current?.scrollToDateTime(nextDate, articleNowTime);
+    calendarRef.current?.scrollToDateTime({ date: nextDate, time: articleNowTime });
     setStatus(`Showing ${nextDate}`);
   };
 
@@ -304,17 +304,20 @@ export function NavigationControlsDemo() {
           <QunoDateInput
             aria-label="Destination date"
             expectedRange={navigationExpectedRange}
-            onChange={(next) => {
+            onChange={({ value: next }) => {
               if (next) navigate(next.start);
             }}
             onKeyDown={(event) => {
               if (event.key !== "ArrowUp" && event.key !== "ArrowDown") return;
               const input = event.currentTarget;
               window.requestAnimationFrame(() => {
-                const result = parseDateInput(input.value, {
-                  expectedRange: navigationExpectedRange,
-                  selectionMode: "single",
-                  referenceDate: date
+                const result = parseDateInput({
+                  text: input.value,
+                  ...{
+                    expectedRange: navigationExpectedRange,
+                    selectionMode: "single",
+                    referenceDate: date
+                  }
                 });
                 if (result.status === "success") navigate(result.value.start);
               });
@@ -339,7 +342,11 @@ export function NavigationControlsDemo() {
             className="article-button"
             onClick={() => {
               setDate(articleDateKey);
-              calendarRef.current?.scrollToDateTime(articleDateKey, articleNowTime, { calendarId: "room-1" });
+              calendarRef.current?.scrollToDateTime({
+                date: articleDateKey,
+                time: articleNowTime,
+                calendarId: "room-1"
+              });
               setStatus("Showing Room 1 at 13:30");
             }}
             type="button"
@@ -354,7 +361,7 @@ export function NavigationControlsDemo() {
           ref={calendarRef}
           ariaLabel="Calendar with product-owned date controls"
           calendars={articleCalendars}
-          eventRenderer={ArticleEventCard}
+          renderEvent={ArticleEventCard}
           initialDateKey={articleDateKey}
           loadEvents={loadNavigationEvents}
           now={articleNow}
@@ -407,11 +414,11 @@ export function ProgressiveTimeRevealDemo() {
         <QunoInfiniteCalendar
           ariaLabel="Calendar with progressively revealed time precision"
           calendars={articleCalendars}
-          eventRenderer={ArticleEventCard}
+          renderEvent={ArticleEventCard}
           initialDateKey={articleDateKey}
           loadEvents={loadNavigationEvents}
           now={articleNow}
-          onZoomChange={(nextZoom) => {
+          onZoomChange={({ zoom: nextZoom }) => {
             const nextLevel = nextZoom > 6 ? "five-minute" : nextZoom >= 2 ? "quarter" : ("overview" as PrecisionLevel);
             setLevel(nextLevel);
           }}
@@ -457,7 +464,7 @@ export function ThemeDemo() {
           ariaLabel="Calendar theme presets"
           calendars={articleCalendars}
           className={`article-themed-calendar theme-${theme}`}
-          eventRenderer={ArticleEventCard}
+          renderEvent={ArticleEventCard}
           initialDateKey={articleDateKey}
           key={theme}
           loadEvents={loadNavigationEvents}
@@ -472,7 +479,7 @@ export function ThemeDemo() {
 
 export function CalendarCellStylingDemo() {
   const [view, setView] = useState<"infinite-horizontal" | "infinite-vertical">("infinite-horizontal");
-  const getCalendarDayProps = useCallback<QunoInfiniteCalendarDayCustomizer>(({ isWeekend }) => {
+  const getDayProps = useCallback<QunoInfiniteCalendarDayCustomizer>(({ isWeekend }) => {
     if (!isWeekend) return undefined;
     return {
       className: "article-weekend-day",
@@ -480,7 +487,7 @@ export function CalendarCellStylingDemo() {
       title: "Weekend"
     };
   }, []);
-  const getCalendarCellProps = useCallback<QunoInfiniteCalendarCellCustomizer>(({ calendar }) => {
+  const getDayCellProps = useCallback<QunoInfiniteCalendarCellCustomizer>(({ calendar }) => {
     const isEquipment = calendar.id.startsWith("equipment");
     if (!isEquipment) return undefined;
     return {
@@ -489,7 +496,7 @@ export function CalendarCellStylingDemo() {
       title: `${calendar.name} equipment`
     };
   }, []);
-  const getCalendarHourProps = useCallback<QunoInfiniteCalendarHourCustomizer>(({ hour }) => {
+  const getHourProps = useCallback<QunoInfiniteCalendarHourCustomizer>(({ hour }) => {
     if (hour !== 12) return undefined;
     return {
       className: "article-lunch-hour",
@@ -518,10 +525,10 @@ export function CalendarCellStylingDemo() {
         <QunoInfiniteCalendar
           ariaLabel="Calendar cell styling"
           calendars={articleCalendars}
-          eventRenderer={ArticleEventCard}
-          getCalendarCellProps={getCalendarCellProps}
-          getCalendarDayProps={getCalendarDayProps}
-          getCalendarHourProps={getCalendarHourProps}
+          renderEvent={ArticleEventCard}
+          getDayCellProps={getDayCellProps}
+          getDayProps={getDayProps}
+          getHourProps={getHourProps}
           initialDateKey="2026-07-04"
           key={view}
           loadEvents={loadNavigationEvents}
@@ -546,7 +553,8 @@ const dayMonthFormatter = new Intl.DateTimeFormat("en-GB", {
   month: "short"
 });
 
-const humanDayName: DayNameGenerator = (date) => {
+const humanDayName: QunoInfiniteCalendarFormatters["dayLabel"] = ({ date: isoDate }) => {
+  const date = new Date(`${isoDate}T00:00:00`);
   const distance = localCalendarDayNumber(date) - localCalendarDayNumber(articleReferenceDate);
   if (distance === -1) return "Yesterday";
   if (distance === 0) return "Today";
@@ -557,7 +565,8 @@ const humanDayName: DayNameGenerator = (date) => {
   return dayMonthFormatter.format(date);
 };
 
-const robotDayName: DayNameGenerator = (date) => {
+const robotDayName: QunoInfiniteCalendarFormatters["dayLabel"] = ({ date: isoDate }) => {
+  const date = new Date(`${isoDate}T00:00:00`);
   const sequence = ((localCalendarDayNumber(date) % 64) + 64) % 64;
   return sequence.toString(2).padStart(6, "0");
 };
@@ -568,7 +577,7 @@ const dateLabelOptions: Array<{
   locale: string;
   sample: string;
   sampleLanguage: string;
-  dayNameGenerator?: DayNameGenerator;
+  dayLabel?: QunoInfiniteCalendarFormatters["dayLabel"];
 }> = [
   {
     id: "english",
@@ -590,7 +599,7 @@ const dateLabelOptions: Array<{
     locale: "en-US",
     sample: "Yesterday · Today · Tomorrow",
     sampleLanguage: "en",
-    dayNameGenerator: humanDayName
+    dayLabel: humanDayName
   },
   {
     id: "robot",
@@ -598,7 +607,7 @@ const dateLabelOptions: Array<{
     locale: "en-US",
     sample: "011111 · 100000 · 100001",
     sampleLanguage: "en",
-    dayNameGenerator: robotDayName
+    dayLabel: robotDayName
   }
 ];
 
@@ -609,12 +618,10 @@ export function DateLocalizationDemo() {
   const settings = useMemo(
     () => ({
       ...articleSettings,
-      dateLocale: activeOption.locale,
-      dayNameGenerator: activeOption.dayNameGenerator,
       labelWidth: 205,
       zoom: 1.1
     }),
-    [activeOption]
+    []
   );
 
   return (
@@ -658,8 +665,10 @@ export function DateLocalizationDemo() {
       <div className="article-calendar-frame">
         <QunoInfiniteCalendar
           ariaLabel="Calendar with localized date labels"
+          locale={activeOption.locale}
+          formatters={{ dayLabel: activeOption.dayLabel }}
           calendars={articleCalendars}
-          eventRenderer={ArticleEventCard}
+          renderEvent={ArticleEventCard}
           initialDateKey={articleDateKey}
           loadEvents={loadNavigationEvents}
           now={articleNow}
@@ -723,7 +732,7 @@ export function EverythingTogetherDemo() {
 
   const moveEvent = useCallback((request: EventMoveRequest) => {
     eventsRef.current = eventsRef.current.map((event) =>
-      event.id === request.event.id ? applyEventMove(event, request) : event
+      event.id === request.event.id ? applyEventMove({ event, request }) : event
     );
     setStatus(`Moved “${request.event.title}”`);
     return true;
@@ -745,8 +754,8 @@ export function EverythingTogetherDemo() {
       ...eventsRef.current.filter((candidate) => !candidate.id.startsWith("article-summary-inserted-")),
       event
     ];
-    calendarRef.current?.commitVisibleEvent(event, { appearing: true });
-    calendarRef.current?.scrollToDateTime(articleDateKey, "15:30");
+    calendarRef.current?.commitVisibleEvent({ event, ...{ appearing: true } });
+    calendarRef.current?.scrollToDateTime({ date: articleDateKey, time: "15:30" });
     setStatus("Inserted an event without rebuilding the calendar");
   };
 
@@ -794,13 +803,13 @@ export function EverythingTogetherDemo() {
           ariaLabel="Complete calendar system example"
           calendars={articleCalendars}
           className="article-themed-calendar theme-clinical"
-          eventRenderer={ArticleEventCard}
+          renderEvent={ArticleEventCard}
           initialDateKey={articleDateKey}
           loadEvents={loadEvents}
           now={articleNow}
           onEventCreateRequest={createEvent}
           onEventMoveRequest={moveEvent}
-          onZoomChange={setZoom}
+          onZoomChange={({ zoom }) => setZoom(zoom)}
           selectedCalendarIds={["provider-a", "room-1", "equipment-1"]}
           settings={settings}
         />

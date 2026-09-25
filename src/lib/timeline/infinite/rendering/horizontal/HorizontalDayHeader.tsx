@@ -1,3 +1,4 @@
+import type { CalendarDateLabelOptions } from "#quno-internal/timeline/core/calendarFormatterTypes";
 import { formatHorizontalDateLabel } from "#quno-internal/timeline/date/dateLabels";
 import { fromDateKey } from "#quno-internal/timeline/date/dateVirtualization";
 import { minuteToX } from "#quno-internal/timeline/time/time";
@@ -6,7 +7,7 @@ import type { QunoInfiniteCalendarDayProps, QunoInfiniteCalendarSettings } from 
 
 /** Sticky date chrome: header band, current-time marker, and readable date label. */
 
-type HorizontalDayHeaderProps = {
+type HorizontalDayHeaderProps = CalendarDateLabelOptions & {
   dateKey: string;
   settings: QunoInfiniteCalendarSettings;
   timelineWidth: number;
@@ -18,6 +19,8 @@ type HorizontalDayHeaderProps = {
 
 export function HorizontalDayHeader({
   dateKey,
+  locale,
+  formatters,
   settings,
   timelineWidth,
   todayKey,
@@ -49,7 +52,7 @@ export function HorizontalDayHeader({
           data-testid="current-time-day-header-line"
           data-date={dateKey}
           style={{
-            left: settings.labelWidth + TIMELINE_LEFT_GUTTER_PX + minuteToX(nowMinute, settings),
+            left: settings.labelWidth + TIMELINE_LEFT_GUTTER_PX + minuteToX({ minute: nowMinute, geometry: settings }),
             height: settings.dayHeaderHeight
           }}
         />
@@ -68,7 +71,7 @@ export function HorizontalDayHeader({
           style={{ ...calendarDayProps?.style, width: settings.labelWidth }}
           title={calendarDayProps?.title}
         >
-          {formatHorizontalDateLabel(fromDateKey(dateKey), settings)}
+          {formatHorizontalDateLabel({ date: fromDateKey({ dateKey }), options: { locale, formatters } })}
         </div>
       </div>
     </>

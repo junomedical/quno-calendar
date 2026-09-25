@@ -18,8 +18,8 @@ describe("demo event generator", () => {
   it("assigns demo appointments to two calendars", () => {
     const [event] = createDemoEvents(1).filter((generatedEvent) => generatedEvent.kind !== "availability");
     expect(event.calendarIds).toHaveLength(2);
-    expect(eventBelongsToCalendar(event, event.calendarIds?.[0] ?? "")).toBe(true);
-    expect(eventBelongsToCalendar(event, event.calendarIds?.[1] ?? "")).toBe(true);
+    expect(eventBelongsToCalendar({ event, calendarId: event.calendarIds?.[0] ?? "" })).toBe(true);
+    expect(eventBelongsToCalendar({ event, calendarId: event.calendarIds?.[1] ?? "" })).toBe(true);
   });
 
   it("creates weekday availability records for every demo calendar", () => {

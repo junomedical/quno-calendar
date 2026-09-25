@@ -18,7 +18,7 @@ export function DateInputDemo() {
         <QunoDateInput
           aria-label="Enter a date or period"
           expectedRange={expectedRange}
-          onChange={setValue}
+          onChange={({ value }) => setValue(value)}
           placeholder="Try next 2 weeks"
           referenceDate="2026-08-25"
           value={value}

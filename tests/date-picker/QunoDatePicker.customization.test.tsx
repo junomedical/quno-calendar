@@ -20,8 +20,8 @@ describe("QunoDatePicker customization", () => {
           previousMonth: "Back one month"
         }}
         formatters={{
-          month: (month) => `Month:${month.slice(0, 7)}`,
-          weekday: (dayIndex) => `Day:${dayIndex}`
+          month: ({ month }) => `Month:${month.slice(0, 7)}`,
+          weekday: ({ weekday: dayIndex }) => `Day:${dayIndex}`
         }}
       />
     );

@@ -8,8 +8,7 @@ import {
   type QunoInfiniteCalendarSettings
 } from "#quno-internal/timeline/core/types";
 import { sameMoveRequest } from "./sameMoveRequest";
-import { eventCalendarIds } from "#quno-internal/timeline/data/calendarEvents";
-import { previewEventForDrag, proposalForDrag, type DragState } from "./dragInteractionModel";
+import { previewEventForDrag, proposalChangesEvent, proposalForDrag, type DragState } from "./dragInteractionModel";
 
 type PointerLike = Pick<PointerEvent | MouseEvent, "clientX" | "clientY">;
 
@@ -35,20 +34,35 @@ export function useTimelineDragInteraction({
   applyMoveToLoadedEvents
 }: UseTimelineDragInteractionArgs) {
   const [dragState, setDragState] = useState<DragState | null>(null);
+  const dragStateRef = useRef<DragState | null>(null);
   const isFinishingRef = useRef(false);
 
-  const startDrag = useCallback((event: CalendarEvent, sourceCalendarId: CalendarId, offsetMinutes: number) => {
-    setDragState({
+  const startDrag = useCallback(
+    ({
       event,
       sourceCalendarId,
-      offsetMinutes,
-      preview: null
-    });
-  }, []);
+      offsetMinutes
+    }: {
+      event: CalendarEvent;
+      sourceCalendarId: CalendarId;
+      offsetMinutes: number;
+    }) => {
+      const next = {
+        event,
+        sourceCalendarId,
+        offsetMinutes,
+        preview: null
+      };
+      dragStateRef.current = next;
+      setDragState(next);
+    },
+    []
+  );
 
   const updateDragFromPoint = useCallback(
     (event: PointerLike) => {
-      if (!dragState) {
+      const currentDrag = dragStateRef.current;
+      if (!currentDrag) {
         return false;
       }
 
@@ -57,24 +71,31 @@ export function useTimelineDragInteraction({
         return true;
       }
 
-      const draggingActiveDraft = isActiveDraftEvent(dragState.event);
-      const proposal = proposalForDrag(dragState, hit, settings, draggingActiveDraft);
-      if (draggingActiveDraft && !sameMoveRequest(proposal, dragState.preview)) {
+      const draggingActiveDraft = isActiveDraftEvent(currentDrag.event);
+      const proposal = proposalForDrag({ drag: currentDrag, hit, settings, draggingActiveDraft });
+      if (!proposalChangesEvent({ drag: currentDrag, proposal })) {
+        if (currentDrag.preview) {
+          const next = { ...currentDrag, preview: null };
+          dragStateRef.current = next;
+          setDragState(next);
+        }
+        return true;
+      }
+      if (draggingActiveDraft && !sameMoveRequest({ a: proposal, b: currentDrag.preview })) {
         onActiveDraftMoveRequest?.(proposal);
       }
-      setDragState((current) => {
-        if (!current || sameMoveRequest(proposal, current.preview)) {
-          return current;
-        }
-        return { ...current, preview: proposal };
-      });
+      if (sameMoveRequest({ a: proposal, b: currentDrag.preview })) return true;
+      const next = { ...currentDrag, preview: proposal };
+      dragStateRef.current = next;
+      setDragState(next);
       return true;
     },
-    [dragState, getHit, isActiveDraftEvent, onActiveDraftMoveRequest, settings]
+    [getHit, isActiveDraftEvent, onActiveDraftMoveRequest, settings]
   );
 
   const finishDrag = useCallback(async () => {
-    if (!dragState) {
+    const currentDrag = dragStateRef.current;
+    if (!currentDrag) {
       return false;
     }
     if (isFinishingRef.current) {
@@ -83,24 +104,12 @@ export function useTimelineDragInteraction({
 
     isFinishingRef.current = true;
     try {
-      const proposal = dragState.preview;
-      if (isActiveDraftEvent(dragState.event)) {
+      const proposal = currentDrag.preview;
+      if (isActiveDraftEvent(currentDrag.event)) {
         return true;
       }
-      // Dropping back on the exact original slot is a click, not a move: skip
-      // the parent's save request and fall through to activation. Compare at
-      // whole-minute precision so API timestamps with :00 seconds and the
-      // proposal's canonical ISO align.
-      const sameMinuteIso = (left: string, right: string): boolean =>
-        Date.parse(left) - (Date.parse(left) % 60_000) === Date.parse(right) - (Date.parse(right) % 60_000);
-      const isNoOpMove = Boolean(
-        proposal &&
-        proposal.proposedCalendarId === dragState.event.calendarId &&
-        proposal.proposedCalendarIds.join("|") === eventCalendarIds(dragState.event).join("|") &&
-        sameMinuteIso(proposal.proposedStart, dragState.event.start) &&
-        sameMinuteIso(proposal.proposedEnd, dragState.event.end)
-      );
-      if (proposal && !isNoOpMove && onEventMoveRequest) {
+      // The release frame clears a preview that returns to the original minute and calendar.
+      if (proposal && onEventMoveRequest) {
         try {
           const accepted = await onEventMoveRequest(proposal);
           if (accepted !== false) {
@@ -110,23 +119,25 @@ export function useTimelineDragInteraction({
           // A rejected parent mutation is a rejected drop; local cache stays unchanged.
         }
       } else if (onEventActivate) {
-        // Also fires when the pointer ended on the original slot (isNoOpMove).
-        onEventActivate({ event: dragState.event, renderedCalendarId: dragState.sourceCalendarId });
+        // Also fires when the pointer ended on the original slot.
+        onEventActivate({ event: currentDrag.event, renderedCalendarId: currentDrag.sourceCalendarId });
       }
       return true;
     } finally {
+      dragStateRef.current = null;
       setDragState(null);
       isFinishingRef.current = false;
     }
-  }, [applyMoveToLoadedEvents, dragState, isActiveDraftEvent, onEventActivate, onEventMoveRequest]);
+  }, [applyMoveToLoadedEvents, isActiveDraftEvent, onEventActivate, onEventMoveRequest]);
 
   const cancelDrag = useCallback(() => {
     isFinishingRef.current = false;
+    dragStateRef.current = null;
     setDragState(null);
   }, []);
 
   const draggingActiveDraft = Boolean(dragState && isActiveDraftEvent(dragState.event));
-  const dragPreviewEvent = previewEventForDrag(dragState, draggingActiveDraft);
+  const dragPreviewEvent = previewEventForDrag({ drag: dragState, draggingActiveDraft });
 
   return {
     dragState,

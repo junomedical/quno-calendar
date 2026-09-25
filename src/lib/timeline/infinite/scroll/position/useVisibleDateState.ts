@@ -6,11 +6,15 @@ import type { PendingScrollTarget } from "./scrollPositionTypes";
  * Data flow: initial/current anchor -> normalized top-date snapshot -> pending restore target.
  * Invariant: remembered offsets are non-negative and excluded dates are never retained.
  */
-export function useVisibleDateState(
-  initialAnchorDateKey: string,
-  excludedWeekdays: number[],
-  setAnchorDateKey: (updater: (current: string) => string) => void
-) {
+export function useVisibleDateState({
+  initialAnchorDateKey,
+  excludedWeekdays,
+  setAnchorDateKey
+}: {
+  initialAnchorDateKey: string;
+  excludedWeekdays: number[];
+  setAnchorDateKey: import("react").Dispatch<import("react").SetStateAction<string>>;
+}) {
   const topVisibleDateRef = useRef(initialAnchorDateKey);
   const topVisibleOffsetRef = useRef(0);
   const pendingScrollTargetRef = useRef<PendingScrollTarget | null>({
@@ -20,7 +24,7 @@ export function useVisibleDateState(
 
   useEffect(() => {
     setAnchorDateKey((current) => {
-      const normalized = normalizeAnchorDate(current, excludedWeekdays);
+      const normalized = normalizeAnchorDate({ dateKey: current, excludedWeekdays });
       topVisibleDateRef.current = normalized;
       topVisibleOffsetRef.current = 0;
       pendingScrollTargetRef.current = { dateKey: normalized, offsetWithinDate: 0 };
@@ -29,8 +33,8 @@ export function useVisibleDateState(
   }, [excludedWeekdays, setAnchorDateKey]);
 
   const rememberVisibleDateOffset = useCallback(
-    (dateKey: string, offsetWithinDate: number) => {
-      topVisibleDateRef.current = normalizeAnchorDate(dateKey, excludedWeekdays);
+    ({ dateKey, offsetWithinDate }: { dateKey: string; offsetWithinDate: number }) => {
+      topVisibleDateRef.current = normalizeAnchorDate({ dateKey, excludedWeekdays });
       topVisibleOffsetRef.current = Math.max(0, offsetWithinDate);
     },
     [excludedWeekdays]

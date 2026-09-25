@@ -41,7 +41,7 @@ export function CommittedLayer<Item extends CommittedItem>({
     return (
       <EventShell
         {...shellProps}
-        {...project(item, isHovered)}
+        {...project({ item, hovered: isHovered })}
         event={item.event}
         status={status}
         zIndex={isHovered ? 30 : item.lane + 2}
@@ -60,8 +60,8 @@ export function CommittedLayer<Item extends CommittedItem>({
   });
 }
 
-export function AvailabilityLayer({
-  events,
+export function AvailabilityLayer<Item extends CommittedItem>({
+  items,
   calendarId,
   interactionMode,
   dragEventId,
@@ -71,8 +71,9 @@ export function AvailabilityLayer({
   project,
   shellClassName,
   ...shellProps
-}: AvailabilityLayerProps) {
-  return events.map((event) => {
+}: AvailabilityLayerProps<Item>) {
+  return items.map((item) => {
+    const event = item.event;
     const isDraft = event.id === "draft-new-event";
     const isDragging = dragEventId === event.id;
     const isFocused = focusedEventTarget?.eventId === event.id && focusedEventTarget.calendarId === calendarId;
@@ -89,13 +90,13 @@ export function AvailabilityLayer({
     return (
       <EventShell
         {...shellProps}
-        {...project(event)}
+        {...project({ item })}
         event={event}
         status={status}
         zIndex={interactionMode === "availability" || isDraft ? 40 : 1}
-        lane={0}
-        laneCount={1}
-        isOverlapping={false}
+        lane={item.lane}
+        laneCount={item.laneCount}
+        isOverlapping={item.isOverlapping}
         testId={isDraft ? "draft-event" : "availability-event"}
         renderedCalendarId={calendarId}
         className={[
@@ -120,7 +121,7 @@ type TransientLayerProps = SharedLayerProps & {
   draftEventIsExiting: boolean;
   draftEventReleaseDurationMs?: number;
   dragPreviewEvent: CalendarEvent | null;
-  project: (event: CalendarEvent, preview: boolean) => EventProjection;
+  project: (args: { event: CalendarEvent; preview: boolean }) => EventProjection;
 };
 
 export function TransientLayer({
@@ -137,15 +138,15 @@ export function TransientLayer({
   shellClassName,
   ...shellProps
 }: TransientLayerProps) {
-  const belongs = (event: CalendarEvent | null) =>
-    Boolean(event && eventDateKey(event) === dateKey && eventBelongsToCalendar(event, calendarId));
+  const belongs = ({ event }: { event: CalendarEvent | null }) =>
+    Boolean(event && eventDateKey(event) === dateKey && eventBelongsToCalendar({ event, calendarId }));
 
   return (
     <>
-      {draftEvent && belongs(draftEvent) ? (
+      {draftEvent && belongs({ event: draftEvent }) ? (
         <EventShell
           {...shellProps}
-          {...project(draftEvent, false)}
+          {...project({ event: draftEvent, preview: false })}
           event={draftEvent}
           status={draftEventStatus}
           zIndex={55}
@@ -168,10 +169,10 @@ export function TransientLayer({
           releaseDurationMs={draftEventReleaseDurationMs}
         />
       ) : null}
-      {dragPreviewEvent && belongs(dragPreviewEvent) ? (
+      {dragPreviewEvent && belongs({ event: dragPreviewEvent }) ? (
         <EventShell
           {...shellProps}
-          {...project(dragPreviewEvent, true)}
+          {...project({ event: dragPreviewEvent, preview: true })}
           event={dragPreviewEvent}
           status="drop-preview"
           zIndex={60}

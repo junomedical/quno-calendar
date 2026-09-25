@@ -1,6 +1,6 @@
 import { CalendarGrid } from "./CalendarGrid";
 import { CalendarHeader } from "./CalendarHeader";
-import { classNames as cx } from "./classNames";
+import { classNames as cx } from "#quno-internal/shared/classNames";
 import { MonthNavigation } from "./MonthNavigation";
 import { WeekdayStrip } from "./WeekdayStrip";
 import type { DatePickerController } from "./datePickerControllerTypes";
@@ -12,7 +12,7 @@ type Props = {
   controller: DatePickerController;
   config: ResolvedDatePickerConfig;
   monthNavigationOpen: boolean;
-  onMonthNavigationOpenChange: (open: boolean) => void;
+  onMonthNavigationOpenChange: (args: { open: boolean }) => void;
   footer?: ReactNode;
 };
 
@@ -28,25 +28,27 @@ export const Calendar = ({
     controller.interaction.type === "drag-range" || controller.interaction.type === "drag-endpoint";
   return (
     <div
-      className={cx("quno-date-picker-calendar-shell", config.classNames?.calendar)}
+      className={cx({ values: ["quno-date-picker-calendar-shell", config.classNames?.calendar] })}
       data-slot="calendar"
       data-view={monthNavigationOpen ? "month-navigation" : "dates"}
       data-dragging={movingSelection ? "move" : undefined}
       onKeyDown={(event) => {
         if (!monthNavigationOpen || event.key !== "Escape") return;
         event.preventDefault();
-        onMonthNavigationOpenChange(false);
+        onMonthNavigationOpenChange({ open: false });
       }}
     >
       {!monthNavigationOpen &&
         (["previous", "next"] as const).map((direction) => (
           <div
             key={direction}
-            className={cx("quno-date-picker-edge", `quno-date-picker-edge--${direction}`, config.classNames?.edge)}
+            className={cx({
+              values: ["quno-date-picker-edge", `quno-date-picker-edge--${direction}`, config.classNames?.edge]
+            })}
             data-slot="edge"
             data-direction={direction}
             aria-hidden="true"
-            onPointerEnter={() => controller.startEdgeNavigation(direction === "previous" ? -1 : 1)}
+            onPointerEnter={() => controller.startEdgeNavigation({ direction: direction === "previous" ? -1 : 1 })}
             onPointerLeave={controller.stopEdgeNavigation}
           />
         ))}
@@ -56,20 +58,20 @@ export const Calendar = ({
         monthMotion={controller.monthMotion}
         config={config}
         monthNavigationOpen={monthNavigationOpen}
-        onNavigate={(direction) => {
-          controller.navigate(direction);
-          onMonthNavigationOpenChange(false);
+        onNavigate={({ direction }) => {
+          controller.navigate({ direction });
+          onMonthNavigationOpenChange({ open: false });
         }}
-        onToggleMonthNavigation={() => onMonthNavigationOpenChange(!monthNavigationOpen)}
+        onToggleMonthNavigation={() => onMonthNavigationOpenChange({ open: !monthNavigationOpen })}
       />
 
       {monthNavigationOpen ? (
         <MonthNavigation
           visibleMonth={controller.visibleMonth}
           config={config}
-          onSelect={(month) => {
-            controller.goToMonth(month);
-            onMonthNavigationOpenChange(false);
+          onSelect={({ month }) => {
+            controller.goToMonth({ month });
+            onMonthNavigationOpenChange({ open: false });
           }}
         />
       ) : (
@@ -91,11 +93,11 @@ export const Calendar = ({
             onEnter={controller.enterDay}
             onFinish={controller.finishDrag}
             onCancel={controller.cancelDrag}
-            onOverflowChange={setTouchOverflowIndex}
+            onOverflowChange={({ index }) => setTouchOverflowIndex(index)}
           />
           {footer && (
             <div
-              className={cx("quno-date-picker-calendar-footer", config.classNames?.calendarFooter)}
+              className={cx({ values: ["quno-date-picker-calendar-footer", config.classNames?.calendarFooter] })}
               data-slot="calendar-footer"
             >
               {footer}

@@ -44,7 +44,10 @@ export function useHorizontalTimelineFoundation({
     initialDateKey: props.initialDateKey,
     now
   });
-  const { renderedCalendars, hiddenCalendarIds } = useRetainedCalendarRows(selectedCalendars, props.activeDraft);
+  const { renderedCalendars, hiddenCalendarIds } = useRetainedCalendarRows({
+    selectedCalendars,
+    activeDraft: props.activeDraft
+  });
   const [createTransitionActive, setCreateTransitionActive] = useState(false);
   useEffect(() => {
     const mode = props.activeDraft?.mode;
@@ -75,11 +78,11 @@ export function useHorizontalTimelineFoundation({
     layoutAnchorDateKey: props.activeDraft ? eventDateKey(props.activeDraft.event) : undefined
   });
   const viewportMetricsStore = useViewportMetricsStore(virtualTimeline.containerRef);
-  const sizing = useHorizontalViewportSizing(virtualTimeline.containerRef, settings);
+  const sizing = useHorizontalViewportSizing({ containerRef: virtualTimeline.containerRef, settings });
   const navigation = useHorizontalNavigation({
     forwardedRef,
     containerRef: virtualTimeline.containerRef,
-    effectiveSettings: sizing.effectiveSettings,
+    settings: sizing.effectiveSettings,
     now,
     scrollToDate: virtualTimeline.scrollToDate
   });

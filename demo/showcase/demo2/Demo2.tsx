@@ -29,7 +29,7 @@ const plannerPreset: DemoPreset = {
     verticalColumnOverlapGrowth: 90,
     verticalEventHoverMinHeight: 76
   },
-  eventRenderer: Demo2EventCard,
+  renderEvent: Demo2EventCard,
   messages: {
     initial: "Wide vertical resource planner",
     datasetLoaded: (scale) => `Loaded ${scale.toLocaleString()} planner events/year`,

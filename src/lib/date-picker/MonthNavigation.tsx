@@ -1,4 +1,4 @@
-import { classNames as cx } from "./classNames";
+import { classNames as cx } from "#quno-internal/shared/classNames";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { ResolvedDatePickerConfig } from "./datePickerTypes";
 import type { IsoDate } from "#quno-internal/shared/dateRangeModel";
@@ -7,7 +7,7 @@ import type { JSX } from "react";
 type Props = {
   visibleMonth: IsoDate;
   config: ResolvedDatePickerConfig;
-  onSelect: (month: IsoDate) => void;
+  onSelect: (args: { month: IsoDate }) => void;
 };
 
 const CHUNK_SIZE = 25;
@@ -16,7 +16,7 @@ const OVERSCAN_YEARS = 2;
 const DEFAULT_YEAR_HEIGHT = 222;
 const DEFAULT_VIEWPORT_HEIGHT = 326;
 const SCROLL_SETTLE_DELAY = 120;
-const monthIso = (year: number, month: number): IsoDate =>
+const monthIso = ({ year, month }: { year: number; month: number }): IsoDate =>
   `${String(year).padStart(4, "0")}-${String(month).padStart(2, "0")}-01` as IsoDate;
 
 export const MonthNavigation = ({ visibleMonth, config, onSelect }: Props): JSX.Element => {
@@ -30,6 +30,8 @@ export const MonthNavigation = ({ visibleMonth, config, onSelect }: Props): JSX.
   const prependSnapshot = useRef<{ height: number; top: number } | null>(null);
   const loadingEdge = useRef(false);
   const edgeTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const scrollFrame = useRef<number | null>(null);
+  const pendingViewport = useRef<{ top: number; height: number } | null>(null);
   const { labels, formatters, locale, classNames } = config;
   const yearCount = lastYear - firstYear + 1;
   const firstVisibleIndex = Math.max(0, Math.floor(viewportTop / yearHeight) - OVERSCAN_YEARS);
@@ -71,6 +73,7 @@ export const MonthNavigation = ({ visibleMonth, config, onSelect }: Props): JSX.
   useEffect(
     () => () => {
       if (edgeTimer.current) clearTimeout(edgeTimer.current);
+      if (scrollFrame.current !== null) cancelAnimationFrame(scrollFrame.current);
     },
     []
   );
@@ -97,8 +100,20 @@ export const MonthNavigation = ({ visibleMonth, config, onSelect }: Props): JSX.
   const handleScroll = (): void => {
     const container = scroller.current;
     if (!container) return;
-    setViewportTop(container.scrollTop);
-    setViewportHeight(container.clientHeight || DEFAULT_VIEWPORT_HEIGHT);
+    pendingViewport.current = {
+      top: container.scrollTop,
+      height: container.clientHeight || DEFAULT_VIEWPORT_HEIGHT
+    };
+    if (scrollFrame.current === null) {
+      scrollFrame.current = requestAnimationFrame(() => {
+        scrollFrame.current = null;
+        const viewport = pendingViewport.current;
+        pendingViewport.current = null;
+        if (!viewport) return;
+        setViewportTop(viewport.top);
+        setViewportHeight(viewport.height);
+      });
+    }
     if (edgeTimer.current) clearTimeout(edgeTimer.current);
     edgeTimer.current = setTimeout(extendYearsAtRest, SCROLL_SETTLE_DELAY);
   };
@@ -106,7 +121,7 @@ export const MonthNavigation = ({ visibleMonth, config, onSelect }: Props): JSX.
   return (
     <div
       ref={scroller}
-      className={cx("quno-date-picker-month-navigation", classNames?.monthNavigation)}
+      className={cx({ values: ["quno-date-picker-month-navigation", classNames?.monthNavigation] })}
       data-slot="month-navigation"
       data-first-year={firstYear}
       data-last-year={lastYear}
@@ -123,30 +138,30 @@ export const MonthNavigation = ({ visibleMonth, config, onSelect }: Props): JSX.
       {renderedYears.map((year) => (
         <section
           key={year}
-          className={cx("quno-date-picker-year-group", classNames?.yearGroup)}
+          className={cx({ values: ["quno-date-picker-year-group", classNames?.yearGroup] })}
           data-slot="year-group"
           data-year={year}
         >
           <h3 className={classNames?.yearHeading} data-slot="year-heading" data-year-tone={year % 2 ? "odd" : "even"}>
-            {formatters.year(monthIso(year, 1), locale)}
+            {formatters.year({ month: monthIso({ year, month: 1 }), locale })}
           </h3>
           <div className="quno-date-picker-month-options">
             {Array.from({ length: 12 }, (_, index) => {
-              const month = monthIso(year, index + 1);
+              const month = monthIso({ year, month: index + 1 });
               const current = month === visibleMonth;
               return (
                 <button
                   key={month}
                   type="button"
-                  className={cx("quno-date-picker-month-option", classNames?.monthOption)}
+                  className={cx({ values: ["quno-date-picker-month-option", classNames?.monthOption] })}
                   data-slot="month-option"
                   data-month={month.slice(0, 7)}
                   data-year-tone={year % 2 ? "odd" : "even"}
-                  aria-label={formatters.month(month, locale)}
+                  aria-label={formatters.month({ month, locale })}
                   aria-current={current ? "date" : undefined}
-                  onClick={() => onSelect(month)}
+                  onClick={() => onSelect({ month })}
                 >
-                  {formatters.monthOption(month, locale)}
+                  {formatters.monthOption({ month, locale })}
                 </button>
               );
             })}

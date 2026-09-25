@@ -178,6 +178,19 @@
     0 4px 8px rgba(15, 23, 42, 0.1);
 }
 
+@container calendar-event (height < 32px) {
+  .demo-event-card.kind-availability {
+    justify-content: center;
+    gap: 0;
+    padding: 2px 7px;
+  }
+
+  .demo-event-card.kind-availability .demo-event-patient,
+  .demo-event-card.kind-availability .demo-event-time {
+    display: none;
+  }
+}
+
 .demo-event-card.kind-blocked {
   /* Blocked/locked events stay visible but visually communicate unavailable time. */
   color: #6b7280;

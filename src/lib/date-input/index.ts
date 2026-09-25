@@ -3,7 +3,7 @@ import "./styles.css";
 export { QunoDateInput } from "./QunoDateInput";
 export type {
   QunoDateInputClassNames,
-  QunoDateInputFormatter,
+  QunoDateInputFormatters,
   QunoDateInputLabels,
   QunoDateInputProps,
   QunoDateInputSlot

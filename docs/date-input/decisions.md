@@ -22,3 +22,10 @@ The canonical text of the following pre-consolidation decisions remains in the
 [QDP historical ledger](../datepicker/decisions.md): `QDP-086`, `QDP-090`–`QDP-098`, `QDP-100`–`QDP-104`,
 `QDP-106`–`QDP-108`, `QDP-110`–`QDP-115`, `QDP-119`, and `QDP-120`. They remain accepted where their behavior still
 applies; new refinements belong here rather than in the Datepicker ledger.
+
+## Shared contract update — 2026-09-05
+
+[QUNO-012](../shared/decisions.md#quno-012---give-library-functions-named-contracts-and-align-product-ownership)
+supersedes historical positional signatures and customization names for this product. The accepted interaction,
+presentation, and geometry behavior in this ledger remains in force. See the
+[migration guide](../shared/migration.md#unreleased-named-contracts-and-product-ownership) for exact replacements.

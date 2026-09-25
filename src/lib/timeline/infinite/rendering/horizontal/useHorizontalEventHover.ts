@@ -17,12 +17,17 @@ type HorizontalEventHoverArgs = {
 export function useHorizontalEventHover({ disabled, setHoveredEvent }: HorizontalEventHoverArgs) {
   const clearHoveredEvent = useCallback(() => setHoveredEvent(null), [setHoveredEvent]);
   const updateHoverFromRow = useCallback(
-    (
-      event: PointerEvent<HTMLDivElement>,
-      layoutItems: EventLayoutItem[],
-      renderedCalendarId: CalendarId,
-      rowHeight: number
-    ) => {
+    ({
+      event,
+      layoutItems,
+      renderedCalendarId,
+      rowHeight
+    }: {
+      event: PointerEvent<HTMLDivElement>;
+      layoutItems: EventLayoutItem[];
+      renderedCalendarId: CalendarId;
+      rowHeight: number;
+    }) => {
       if (disabled) {
         clearHoveredEvent();
         return;

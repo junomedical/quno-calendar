@@ -16,3 +16,10 @@ or natural-language parsing.
 
 The field guide's production chapter presents the headless entry point, measured artifact, and runtime contract
 directly without repeating them in a separate import implementation accordion.
+
+## Named contracts
+
+The parser owns its implementation and headless types. Call `parseDateInput({ text, ...options })` and
+`tokenizeDateInput({ text })`. `parserLanguages` is the single language setting; resolution internals are private.
+
+See the [breaking migration](../shared/migration.md#unreleased-named-contracts-and-product-ownership).

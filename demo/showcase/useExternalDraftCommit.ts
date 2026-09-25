@@ -80,7 +80,7 @@ export function useExternalDraftCommit({
         setEvents((current) => [...current, savedEvent]);
         setMessage("Saved external create");
       }
-      calendarRef.current?.commitVisibleEvent(savedEvent, { previousEventId, appearing: true });
+      calendarRef.current?.commitVisibleEvent({ event: savedEvent, ...{ previousEventId, appearing: true } });
       clearActiveDraft();
     });
     if (anchor) {

@@ -49,3 +49,13 @@ applies; new refinements belong here rather than in the Datepicker ledger.
 - Consequences: The public surface and guide no longer promise partial Japanese parsing. Supporting Japanese or
   another grammar with different word boundaries and order requires a coherent parser-language design rather than
   isolated ignored markers.
+
+## QDPR-004 - Keep parser implementation and private resolution state in the parser domain
+
+- Date: 2026-09-05
+- Status: Accepted; refines QDPR-001 and applies QUNO-012
+- Decision: Own tokenization, recognition, vocabulary, ranking, and relative arithmetic under Date Parser. Export
+  only parsing/tokenization and their consumer configuration and result contracts; keep resolved options, candidates,
+  and constructed vocabulary private. Date Input imports this headless implementation internally.
+- Consequences: The public parser declarations have no React dependency. Relative-date arithmetic is maintained
+  separately from phrase recognition, and grammar, ranking, and locale inference retain their accepted behavior.

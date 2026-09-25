@@ -60,7 +60,7 @@ export function ReadOnlyArticleDemo() {
         <QunoInfiniteCalendar
           ariaLabel="Read-only article calendar"
           calendars={articleCalendars}
-          eventRenderer={ArticleEventCard}
+          renderEvent={ArticleEventCard}
           initialDateKey={articleDateKey}
           loadEvents={loadArticleEvents}
           selectedCalendarIds={introductoryCalendarIds}
@@ -86,7 +86,7 @@ export function DragCreateArticleDemo() {
 
   const loadEvents = useCallback<LoadEvents>(async (request) => filterEvents(eventsRef.current, request), []);
   const moveEvent = useCallback((request: EventMoveRequest) => {
-    const movedEvent = applyEventMove(request.event, request);
+    const movedEvent = applyEventMove({ event: request.event, request });
     const anchor =
       calendarRef.current?.captureViewportAnchor(eventAnchorTarget(request.event, request.sourceCalendarId, true)) ??
       null;
@@ -96,11 +96,14 @@ export function DragCreateArticleDemo() {
       setPendingDraft({ mode: "edit", event: movedEvent, sourceEventId: request.event.id });
       setActivity(`Review the move for “${request.event.title}”. Saved data is unchanged.`);
     });
-    calendarRef.current?.restoreViewportAnchor(anchor, {
-      target: eventAnchorTarget(movedEvent, request.proposedCalendarId),
-      afterRecenter: true,
-      allowNavigationFallback: false,
-      cancelOnManualScroll: true
+    calendarRef.current?.restoreViewportAnchor({
+      anchor,
+      ...{
+        target: eventAnchorTarget(movedEvent, request.proposedCalendarId),
+        afterRecenter: true,
+        allowNavigationFallback: false,
+        cancelOnManualScroll: true
+      }
     });
     return false;
   }, []);
@@ -124,10 +127,13 @@ export function DragCreateArticleDemo() {
       setPendingDraft({ mode: "create", event });
       setActivity("Review the new appointment. Saved data is unchanged.");
     });
-    calendarRef.current?.restoreViewportAnchor(anchor, {
-      target: eventAnchorTarget(event),
-      afterRecenter: true,
-      cancelOnManualScroll: true
+    calendarRef.current?.restoreViewportAnchor({
+      anchor,
+      ...{
+        target: eventAnchorTarget(event),
+        afterRecenter: true,
+        cancelOnManualScroll: true
+      }
     });
   }, []);
   const acceptPendingDraft = () => {
@@ -145,9 +151,12 @@ export function DragCreateArticleDemo() {
           ? [...current, committedEvent]
           : current.map((event) => (event.id === pendingDraft.sourceEventId ? committedEvent : event))
       );
-      calendarRef.current?.commitVisibleEvent(committedEvent, {
-        appearing: true,
-        previousEventId: pendingDraft.sourceEventId
+      calendarRef.current?.commitVisibleEvent({
+        event: committedEvent,
+        ...{
+          appearing: true,
+          previousEventId: pendingDraft.sourceEventId
+        }
       });
       setPendingDraft(null);
       setActivity(
@@ -156,10 +165,13 @@ export function DragCreateArticleDemo() {
           : `Accepted the move for “${pendingDraft.event.title}”. Parent state and the visible calendar now match.`
       );
     });
-    calendarRef.current?.restoreViewportAnchor(anchor, {
-      target: eventAnchorTarget(committedEvent),
-      afterRecenter: false,
-      cancelOnManualScroll: true
+    calendarRef.current?.restoreViewportAnchor({
+      anchor,
+      ...{
+        target: eventAnchorTarget(committedEvent),
+        afterRecenter: false,
+        cancelOnManualScroll: true
+      }
     });
     proposalAnchorRef.current = null;
     sourceEventRef.current = null;
@@ -178,11 +190,14 @@ export function DragCreateArticleDemo() {
       );
       setPendingDraft(null);
     });
-    calendarRef.current?.restoreViewportAnchor(anchor, {
-      target,
-      afterRecenter: true,
-      allowNavigationFallback: false,
-      cancelOnManualScroll: true
+    calendarRef.current?.restoreViewportAnchor({
+      anchor,
+      ...{
+        target,
+        afterRecenter: true,
+        allowNavigationFallback: false,
+        cancelOnManualScroll: true
+      }
     });
     proposalAnchorRef.current = null;
     sourceEventRef.current = null;
@@ -216,7 +231,7 @@ export function DragCreateArticleDemo() {
           activeDraft={pendingDraft}
           ariaLabel="Drag and create article calendar"
           calendars={articleCalendars}
-          eventRenderer={ArticleEventCard}
+          renderEvent={ArticleEventCard}
           initialDateKey={articleDateKey}
           loadEvents={loadEvents}
           onEventDraftRequest={stageCreateDraft}
@@ -286,7 +301,7 @@ export function PrefetchLoadingDemo() {
             className="article-button article-button--primary"
             onClick={() => {
               setStatus("Navigating into the already requested warm window");
-              calendarRef.current?.scrollToDateTime(prefetchedDate, "09:30");
+              calendarRef.current?.scrollToDateTime({ date: prefetchedDate, time: "09:30" });
             }}
             type="button"
           >
@@ -329,7 +344,7 @@ export function PrefetchLoadingDemo() {
           ariaLabel="Delayed loading and event prefetch calendar"
           calendars={articleCalendars}
           eventPrefetchPolicy={articlePrefetchPolicy}
-          eventRenderer={ArticleEventCard}
+          renderEvent={ArticleEventCard}
           initialDateKey={articleDateKey}
           loadEvents={loadEvents}
           selectedCalendarIds={["provider-a"]}

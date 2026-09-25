@@ -14,7 +14,7 @@ import type { CalendarEvent, LoadEvents, LoadEventsArgs } from "#quno-internal/t
 
 const RETRY_DELAYS_MS = [250, 1_000] as const;
 
-function waitForRetry(delayMs: number, signal: AbortSignal): Promise<boolean> {
+function waitForRetry({ delayMs, signal }: { delayMs: number; signal: AbortSignal }): Promise<boolean> {
   if (signal.aborted) {
     return Promise.resolve(false);
   }
@@ -32,13 +32,17 @@ function waitForRetry(delayMs: number, signal: AbortSignal): Promise<boolean> {
   });
 }
 
-export async function loadEventRange(
-  loadEvents: LoadEvents,
-  args: LoadEventsArgs,
-  signal: AbortSignal
-): Promise<CalendarEvent[] | undefined> {
+export async function loadEventRange({
+  loadEvents,
+  args,
+  signal
+}: {
+  loadEvents: LoadEvents;
+  args: LoadEventsArgs;
+  signal: AbortSignal;
+}): Promise<CalendarEvent[] | undefined> {
   for (let attempt = 0; attempt <= RETRY_DELAYS_MS.length; attempt += 1) {
-    if (attempt > 0 && !(await waitForRetry(RETRY_DELAYS_MS[attempt - 1], signal))) {
+    if (attempt > 0 && !(await waitForRetry({ delayMs: RETRY_DELAYS_MS[attempt - 1], signal }))) {
       return undefined;
     }
     try {

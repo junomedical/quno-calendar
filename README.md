@@ -33,7 +33,17 @@ The headless `@quno/calendar` root exports shared contracts such as `IsoDate`, `
 
 Type declarations for the public subpaths resolve through package `exports` in modern TypeScript projects and through `typesVersions` in projects still using Node-style module resolution. Consumers do not need ambient module declarations or TypeScript path aliases.
 
+Library functions and customization callbacks receive named objects: `addDays({ date, amount })`,
+`parseDateInput({ text, expectedRange })`, and `onChange({ value })`. Text overrides use `formatters`; presentation
+uses `getDayProps`, `getDayCellProps`, and `getHourProps` where supported. See the
+[breaking migration](./docs/shared/migration.md#unreleased-named-contracts-and-product-ownership).
+
 Calendar day keys use timezone-free `YYYY-MM-DD` values. Infinite Calendar event `start` and `end` remain timestamp strings with their local or offset semantics.
+
+High-frequency pointer, zoom, and quick-navigation work is frame-bounded while release and commit paths stay
+synchronous. Infinite Calendar prepares foreground events and explicitly background-layered availability in independent
+collision lanes, reuses unchanged date buckets, and grows each resource to the deeper layer. Date Input reuses compiled parser configuration across
+keystrokes without changing the synchronous headless parser API.
 
 ## Guides and records
 

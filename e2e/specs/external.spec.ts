@@ -545,6 +545,8 @@ test("does not pull the viewport back after cancel when the user scrolls immedia
 });
 
 test("keeps expanded calendar rows populated immediately after create cancel", async ({ page }) => {
+  // This scenario needs working-hour events, independently of the machine clock.
+  await page.clock.setFixedTime(new Date("2026-07-06T09:00:00+02:00"));
   await page.goto("/demo/infinite-calendar");
   await openDrawnExternalDraft(page);
   await expect

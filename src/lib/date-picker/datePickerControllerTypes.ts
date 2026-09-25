@@ -1,11 +1,6 @@
-import type { DatePickerInteraction, QunoDatePickerDisabledDayMatcher } from "./datePickerTypes";
-import type {
-  DateRange,
-  DateSelectionMode,
-  IsoDate,
-  MonthDirection,
-  WeekStart
-} from "#quno-internal/shared/dateRangeModel";
+import type { DatePickerInteraction, QunoDatePickerDisabledDayPredicate } from "./datePickerTypes";
+import type { DateRange, DateSelectionMode, IsoDate, WeekStart } from "#quno-internal/shared/dateRangeModel";
+import type { MonthDirection } from "#quno-internal/date-picker/datePickerModel";
 
 export type MonthChangeSource = "navigation" | "interaction" | "endpoint";
 
@@ -15,11 +10,11 @@ export type DatePickerControllerOptions = {
   selectionMode: DateSelectionMode;
   initialMonth?: IsoDate;
   weekStartsOn: WeekStart;
-  disabledDays?: QunoDatePickerDisabledDayMatcher;
+  isDayDisabled?: QunoDatePickerDisabledDayPredicate;
   autoNavigateDelay: number;
   autoNavigateRepeatDelay: number;
-  onChange?: (value: DateRange | null) => void;
-  onVisibleMonthChange?: (month: IsoDate) => void;
+  onChange?: (args: { value: DateRange | null }) => void;
+  onVisibleMonthChange?: (args: { month: IsoDate }) => void;
 };
 
 export type DatePickerController = {
@@ -33,14 +28,14 @@ export type DatePickerController = {
   interaction: DatePickerInteraction;
   gridDates: IsoDate[];
   weekdays: number[];
-  beginDrag: (date: IsoDate) => void;
-  enterDay: (date: IsoDate) => void;
-  finishDrag: (date: IsoDate) => void;
+  beginDrag: (args: { date: IsoDate }) => void;
+  enterDay: (args: { date: IsoDate }) => void;
+  finishDrag: (args: { date: IsoDate }) => void;
   cancelDrag: () => void;
   clear: () => void;
-  navigate: (direction: MonthDirection) => void;
-  goToMonth: (month: IsoDate) => void;
-  startEdgeNavigation: (direction: MonthDirection) => void;
+  navigate: (args: { direction: MonthDirection }) => void;
+  goToMonth: (args: { month: IsoDate }) => void;
+  startEdgeNavigation: (args: { direction: MonthDirection }) => void;
   stopEdgeNavigation: () => void;
-  jumpToEndpoint: (date: IsoDate) => void;
+  jumpToEndpoint: (args: { date: IsoDate }) => void;
 };

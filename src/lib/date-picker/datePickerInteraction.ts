@@ -1,14 +1,16 @@
 import {
-  applyDateAction,
   compareDates,
-  dateActionContext,
   isWithinRange,
-  moveRange,
   normalizeRange,
   type DateRange,
-  type Endpoint,
   type IsoDate
 } from "#quno-internal/shared/dateRangeModel";
+import {
+  applyDateAction,
+  dateActionContext,
+  moveRange,
+  type Endpoint
+} from "#quno-internal/date-picker/datePickerModel";
 import type { DatePickerInteraction, IdleInteraction } from "./datePickerTypes";
 
 export type DateClickCycle = {
@@ -21,7 +23,15 @@ export type DateClickCycle = {
 
 export const idle = (): IdleInteraction => ({ type: "idle" });
 
-const endpointDrag = (selection: DateRange, endpoint: Endpoint, date: IsoDate): DatePickerInteraction => ({
+const endpointDrag = ({
+  selection,
+  endpoint,
+  date
+}: {
+  selection: DateRange;
+  endpoint: Endpoint;
+  date: IsoDate;
+}): DatePickerInteraction => ({
   type: "drag-endpoint",
   endpoint,
   origin: date,
@@ -30,7 +40,13 @@ const endpointDrag = (selection: DateRange, endpoint: Endpoint, date: IsoDate): 
   moved: false
 });
 
-export const beginInteraction = (selection: DateRange | null, date: IsoDate): DatePickerInteraction => {
+export const beginInteraction = ({
+  selection,
+  date
+}: {
+  selection: DateRange | null;
+  date: IsoDate;
+}): DatePickerInteraction => {
   if (!selection) {
     return {
       type: "create",
@@ -42,10 +58,10 @@ export const beginInteraction = (selection: DateRange | null, date: IsoDate): Da
 
   const endpointHit = date === selection.start ? "start" : date === selection.end ? "end" : null;
   if (endpointHit) {
-    return endpointDrag(selection, endpointHit, date);
+    return endpointDrag({ selection, endpoint: endpointHit, date });
   }
 
-  if (isWithinRange(date, selection)) {
+  if (isWithinRange({ date, range: selection })) {
     return {
       type: "drag-range",
       origin: date,
@@ -64,7 +80,13 @@ export const beginInteraction = (selection: DateRange | null, date: IsoDate): Da
   };
 };
 
-export const updateInteraction = (interaction: DatePickerInteraction, date: IsoDate): DatePickerInteraction => {
+export const updateInteraction = ({
+  interaction,
+  date
+}: {
+  interaction: DatePickerInteraction;
+  date: IsoDate;
+}): DatePickerInteraction => {
   if (interaction.type === "idle") {
     return interaction;
   }
@@ -72,7 +94,7 @@ export const updateInteraction = (interaction: DatePickerInteraction, date: IsoD
   if (interaction.type === "create") {
     return {
       ...interaction,
-      current: normalizeRange(interaction.origin, date),
+      current: normalizeRange({ first: interaction.origin, second: date }),
       moved: interaction.moved || date !== interaction.origin
     };
   }
@@ -82,7 +104,7 @@ export const updateInteraction = (interaction: DatePickerInteraction, date: IsoD
     return {
       type: "create",
       origin: interaction.origin,
-      current: normalizeRange(interaction.origin, date),
+      current: normalizeRange({ first: interaction.origin, second: date }),
       moved: true
     };
   }
@@ -90,15 +112,15 @@ export const updateInteraction = (interaction: DatePickerInteraction, date: IsoD
   if (interaction.type === "drag-range") {
     return {
       ...interaction,
-      current: moveRange(interaction.original, interaction.origin, date),
+      current: moveRange({ range: interaction.original, origin: interaction.origin, date }),
       moved: interaction.moved || date !== interaction.origin
     };
   }
 
   return {
     ...interaction,
-    endpoint: compareDates(date, interaction.anchor) <= 0 ? "start" : "end",
-    current: normalizeRange(interaction.anchor, date),
+    endpoint: compareDates({ left: date, right: interaction.anchor }) <= 0 ? "start" : "end",
+    current: normalizeRange({ first: interaction.anchor, second: date }),
     moved: interaction.moved || date !== interaction.origin
   };
 };
@@ -113,7 +135,7 @@ export const advanceDateClickCycle = (
   cycle: DateClickCycle
 ): { cycle: DateClickCycle | null; value: DateRange; changed: boolean } => {
   for (let index = cycle.index + 1; index < cycle.actions.length; index += 1) {
-    const value = applyDateAction(cycle.original, cycle.date, cycle.actions[index]);
+    const value = applyDateAction({ range: cycle.original, date: cycle.date, action: cycle.actions[index] });
     if (value.start !== cycle.value.start || value.end !== cycle.value.end) {
       const nextCycle = index === cycle.actions.length - 1 ? null : { ...cycle, index, value };
       return { cycle: nextCycle, value, changed: true };
@@ -122,7 +144,13 @@ export const advanceDateClickCycle = (
   return { cycle: null, value: cycle.value, changed: false };
 };
 
-export const finishInteraction = (interaction: DatePickerInteraction, date: IsoDate): InteractionResult => {
+export const finishInteraction = ({
+  interaction,
+  date
+}: {
+  interaction: DatePickerInteraction;
+  date: IsoDate;
+}): InteractionResult => {
   if (interaction.type === "idle") {
     return { interaction };
   }
@@ -130,12 +158,12 @@ export const finishInteraction = (interaction: DatePickerInteraction, date: IsoD
   if (interaction.type === "paint-pending" && date !== interaction.origin) {
     return {
       interaction: idle(),
-      value: normalizeRange(interaction.origin, date)
+      value: normalizeRange({ first: interaction.origin, second: date })
     };
   }
 
   if (interaction.moved) {
-    const finalInteraction = updateInteraction(interaction, date);
+    const finalInteraction = updateInteraction({ interaction, date });
     if (finalInteraction.type === "idle") {
       return { interaction: finalInteraction };
     }
@@ -147,7 +175,7 @@ export const finishInteraction = (interaction: DatePickerInteraction, date: IsoD
   }
 
   const original = interaction.type === "paint-pending" ? interaction.original : interaction.current;
-  const context = dateActionContext(original, date);
+  const context = dateActionContext({ range: original, date });
   const opposite = context.defaultAction === "start" ? "end" : "start";
   const actions: DateClickCycle["actions"] = [context.defaultAction, opposite, "single"];
   const next = advanceDateClickCycle({

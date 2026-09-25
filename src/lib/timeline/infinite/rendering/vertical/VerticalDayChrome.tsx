@@ -30,8 +30,8 @@ export function VerticalDayChrome({
   calendarCellProps,
   calendarDayProps
 }: VerticalDayChromeProps) {
-  const date = fromDateKey(day.dateKey);
-  const customDayName = day.settings.dayNameGenerator ? formatWeekday(date, day.settings) : null;
+  const date = fromDateKey({ dateKey: day.dateKey });
+  const customDayName = day.formatters?.dayLabel ? formatWeekday({ date, options: day }) : null;
 
   return (
     <>
@@ -58,8 +58,8 @@ export function VerticalDayChrome({
         >
           {customDayName === null ? (
             <>
-              <span className="icv-date-main">{formatMonthDayOrdinal(date, day.settings)}</span>
-              <span className="icv-date-weekday">{formatWeekday(date, day.settings)}</span>
+              <span className="icv-date-main">{formatMonthDayOrdinal({ date, options: day })}</span>
+              <span className="icv-date-weekday">{formatWeekday({ date, options: day })}</span>
             </>
           ) : (
             <span className="icv-date-main">{customDayName}</span>
@@ -116,7 +116,7 @@ export function VerticalDayChrome({
           >
             {day.timeTicks.map((tick) => {
               const hourProps = tick.isHour
-                ? calendarHourLabelProps(day.calendarHourPresentations, tick.minute)
+                ? calendarHourLabelProps({ hours: day.calendarHourPresentations, minute: tick.minute })
                 : undefined;
               return (
                 <span
@@ -135,7 +135,7 @@ export function VerticalDayChrome({
                   style={{ ...hourProps?.style, top: `${tick.positionPercent}%` }}
                   title={hourProps?.title}
                 >
-                  {formatVerticalTimeTick(tick.minute, tick.isHour)}
+                  {formatVerticalTimeTick({ minute: tick.minute, isHour: tick.isHour })}
                 </span>
               );
             })}
@@ -146,6 +146,6 @@ export function VerticalDayChrome({
   );
 }
 
-function formatVerticalTimeTick(minute: number, isHour: boolean): string {
+function formatVerticalTimeTick({ minute, isHour }: { minute: number; isHour: boolean }): string {
   return isHour ? `${Math.floor(minute / 60)}:00` : String(minute % 60);
 }

@@ -21,7 +21,7 @@ describe("QunoDatePicker overflow drag zone", () => {
       <QunoDatePicker
         defaultValue={{ start: "2026-08-10", end: "2026-08-20" }}
         initialMonth="2026-08-01"
-        onChange={onChange}
+        onChange={({ value }) => onChange(value)}
       />
     );
 
@@ -50,7 +50,7 @@ describe("QunoDatePicker overflow drag zone", () => {
       <QunoDatePicker
         defaultValue={{ start: "2026-08-10", end: "2026-08-20" }}
         initialMonth="2026-08-01"
-        onChange={onChange}
+        onChange={({ value }) => onChange(value)}
       />
     );
 

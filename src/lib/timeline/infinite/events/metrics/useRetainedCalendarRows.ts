@@ -10,10 +10,13 @@ type RetainedCalendarRows = {
  * Keeps the last non-empty draft calendar layout mounted while active-draft
  * filtering temporarily removes every visible calendar.
  */
-export function useRetainedCalendarRows(
-  selectedCalendars: CalendarRow[],
-  activeDraft: ActiveEventDraft | null | undefined
-): RetainedCalendarRows {
+export function useRetainedCalendarRows({
+  selectedCalendars,
+  activeDraft
+}: {
+  selectedCalendars: CalendarRow[];
+  activeDraft: ActiveEventDraft | null | undefined;
+}): RetainedCalendarRows {
   const retainedCalendarsRef = useRef<CalendarRow[]>([]);
 
   if (!activeDraft) {

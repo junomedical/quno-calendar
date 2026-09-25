@@ -59,11 +59,14 @@ export function useExternalDraftNavigation(calendarRef: RefObject<QunoInfiniteCa
 
   const restoreEventAnchor = useCallback(
     (anchor: CalendarViewportAnchor | null, event: CalendarEvent, options: DraftRestoreEventOptions = {}) => {
-      calendarRef.current?.restoreViewportAnchor(anchor, {
-        target: eventTarget(event, options.targetCalendarId, options.eventId ?? event.id),
-        afterRecenter: options.afterRecenter ?? true,
-        allowNavigationFallback: options.allowNavigationFallback,
-        cancelOnManualScroll: options.cancelOnManualScroll
+      calendarRef.current?.restoreViewportAnchor({
+        anchor,
+        ...{
+          target: eventTarget(event, options.targetCalendarId, options.eventId ?? event.id),
+          afterRecenter: options.afterRecenter ?? true,
+          allowNavigationFallback: options.allowNavigationFallback,
+          cancelOnManualScroll: options.cancelOnManualScroll
+        }
       });
     },
     [calendarRef]
@@ -71,11 +74,14 @@ export function useExternalDraftNavigation(calendarRef: RefObject<QunoInfiniteCa
 
   const restoreSlotAnchor = useCallback(
     (anchor: CalendarViewportAnchor | null, event: CalendarEvent, options: DraftRestoreOptions = {}) => {
-      calendarRef.current?.restoreViewportAnchor(anchor, {
-        target: slotTarget(event, options.targetCalendarId),
-        afterRecenter: options.afterRecenter ?? true,
-        allowNavigationFallback: options.allowNavigationFallback,
-        cancelOnManualScroll: options.cancelOnManualScroll
+      calendarRef.current?.restoreViewportAnchor({
+        anchor,
+        ...{
+          target: slotTarget(event, options.targetCalendarId),
+          afterRecenter: options.afterRecenter ?? true,
+          allowNavigationFallback: options.allowNavigationFallback,
+          cancelOnManualScroll: options.cancelOnManualScroll
+        }
       });
     },
     [calendarRef]
@@ -88,7 +94,10 @@ export function useExternalDraftNavigation(calendarRef: RefObject<QunoInfiniteCa
         restoreEventAnchor(targetAnchor, event, { afterRecenter: true });
         return;
       }
-      calendarRef.current?.scrollToDateTime(isoDateInputValue(event.start), isoTimeInputValue(event.start));
+      calendarRef.current?.scrollToDateTime({
+        date: isoDateInputValue(event.start),
+        time: isoTimeInputValue(event.start)
+      });
     },
     [calendarRef, restoreEventAnchor]
   );

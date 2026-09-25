@@ -1,7 +1,7 @@
 import type { EventMoveRequest } from "#quno-internal/timeline/core/types";
 
 /** Compares move proposals so drag previews update only for semantic changes. */
-export function sameMoveRequest(a: EventMoveRequest, b: EventMoveRequest | null): boolean {
+export function sameMoveRequest({ a, b }: { a: EventMoveRequest; b: EventMoveRequest | null }): boolean {
   return Boolean(
     b &&
     a.event.id === b.event.id &&

@@ -56,7 +56,7 @@ export function useEventRangeLoader({
   const [eventsByDate, setEventsByDate] = useState<Record<string, CalendarEvent[]>>({});
   const selectedIdsKey = JSON.stringify(selectedIds);
   const visibleLoadDateKeys = useMemo(
-    () => eventLoadDateKeys(visibleDateKeys, selectedIds, eventPrefetchPolicy),
+    () => eventLoadDateKeys({ visibleDateKeys, selectedCalendarIds: selectedIds, policy: eventPrefetchPolicy }),
     [eventPrefetchPolicy, selectedIds, visibleDateKeys]
   );
   const inactiveLoadDateKeysRef = useRef(visibleLoadDateKeys);
@@ -66,11 +66,15 @@ export function useEventRangeLoader({
     const activeAnchorDateKeys = [activeDraftLoadAnchorDateKey, activeDraftDateKey].filter(
       (dateKey): dateKey is string => Boolean(dateKey)
     );
-    const activeLoadDateKeys = eventLoadDateKeys(activeAnchorDateKeys, selectedIds, eventPrefetchPolicy);
+    const activeLoadDateKeys = eventLoadDateKeys({
+      visibleDateKeys: activeAnchorDateKeys,
+      selectedCalendarIds: selectedIds,
+      policy: eventPrefetchPolicy
+    });
     return [...new Set([...inactiveLoadDateKeysRef.current, ...activeLoadDateKeys])].sort();
   }, [activeDraftDateKey, activeDraftLoadAnchorDateKey, eventPrefetchPolicy, selectedIds, visibleLoadDateKeys]);
   const { appearingEventIds, hasRequestedEventIds, markEventsAppearing, markRequestedEventsAppearing } =
-    useAppearingEvents(requestedAppearingEventIds);
+    useAppearingEvents({ requestedEventIds: requestedAppearingEventIds });
 
   useEffect(() => {
     // Invalidation clears freshness knowledge, not the cache snapshot currently on screen.
@@ -93,13 +97,13 @@ export function useEventRangeLoader({
     for (const { dateKeys, startDate, endDate } of missingRanges) {
       const request = coordinator.begin(dateKeys);
       const args = { startDate, endDate, calendarIds: [...request.calendarIds], signal: request.controller.signal };
-      void loadEventRange(loadEvents, args, request.controller.signal).then((loadedEvents) => {
+      void loadEventRange({ loadEvents, args, signal: request.controller.signal }).then((loadedEvents) => {
         if (!loadedEvents) {
           // Abort or exhausted retries make these dates requestable again later.
           coordinator.reject(request);
           return;
         }
-        if (!coordinator.accept(request, loadedEvents)) {
+        if (!coordinator.accept({ request, events: loadedEvents })) {
           return;
         }
         // Cache indexing completes before React receives one atomic, deferrable snapshot.
@@ -115,15 +119,15 @@ export function useEventRangeLoader({
     if (!hasRequestedEventIds) {
       return;
     }
-    const cachedRequestedEventIds = requestedAppearingEventIds.filter((eventId) => coordinator.hasEvent(eventId));
+    const cachedRequestedEventIds = requestedAppearingEventIds.filter((eventId) => coordinator.hasEvent({ eventId }));
     markRequestedEventsAppearing(cachedRequestedEventIds);
   }, [coordinator, eventsByDate, hasRequestedEventIds, markRequestedEventsAppearing, requestedAppearingEventIds]);
 
   const applyMoveToLoadedEvents = useCallback(
     (proposal: EventMoveRequest) => {
-      const movedEvent = applyEventMove(proposal.event, proposal);
+      const movedEvent = applyEventMove({ event: proposal.event, request: proposal });
       // A destination outside loaded buckets remains parent-owned until that date loads.
-      if (coordinator.patchMovedEvent(proposal.event.id, movedEvent)) {
+      if (coordinator.patchMovedEvent({ eventId: proposal.event.id, event: movedEvent })) {
         setEventsByDate(coordinator.toRecord());
       }
     },
@@ -131,12 +135,12 @@ export function useEventRangeLoader({
   );
 
   const applyCommittedEventToLoadedEvents = useCallback(
-    (event: CalendarEvent, options: CalendarVisibleEventCommitOptions = {}) => {
+    ({ event, ...options }: { event: CalendarEvent } & CalendarVisibleEventCommitOptions) => {
       if (options.appearing) {
         markEventsAppearing([event.id]);
       }
       // A visible commit may replace a temporary id without invalidating the range.
-      if (coordinator.patchCommittedEvent(event, options.previousEventId)) {
+      if (coordinator.patchCommittedEvent({ event, previousEventId: options.previousEventId })) {
         setEventsByDate(coordinator.toRecord());
       }
     },
@@ -145,14 +149,14 @@ export function useEventRangeLoader({
 
   const applyCreatedEventToLoadedEvents = useCallback(
     (event: CalendarEvent) => {
-      applyCommittedEventToLoadedEvents(event, { appearing: true });
+      applyCommittedEventToLoadedEvents({ event, appearing: true });
     },
     [applyCommittedEventToLoadedEvents]
   );
 
   const removeEventFromLoadedEvents = useCallback(
-    (eventId: EventId) => {
-      if (coordinator.removeEvent(eventId)) {
+    ({ eventId }: { eventId: EventId }) => {
+      if (coordinator.removeEvent({ eventId })) {
         setEventsByDate(coordinator.toRecord());
       }
     },

@@ -114,7 +114,7 @@ export const ArchitectureStory = (): JSX.Element => (
       title="Keep state responsibilities separate"
       language="TSX"
       copy="Control the public range without coupling it to the visible month."
-      code={'<QunoDatePicker value={range} onChange={setRange} initialMonth="2026-08" />'}
+      code={'<QunoDatePicker value={range} onChange={({ value }) => setRange(value)} initialMonth="2026-08-01" />'}
     />
   </section>
 );
@@ -125,7 +125,7 @@ export const FootprintStory = (): JSX.Element => (
       <span>Production</span>
       <h3>Ship Datepicker independently.</h3>
       <p>
-        Datepicker JavaScript is 9.00 KiB gzip. Its optional stylesheet is a separate 3.20 KiB gzip import; neither
+        Datepicker JavaScript is 10.47 KiB gzip. Its optional stylesheet is a separate 3.22 KiB gzip import; neither
         number includes external application runtimes.
       </p>
     </div>

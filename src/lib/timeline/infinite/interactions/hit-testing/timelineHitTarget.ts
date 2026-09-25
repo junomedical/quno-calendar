@@ -10,12 +10,17 @@ export type TimelineGridIdentity = {
   rowIndex: number;
 };
 
-export function timelineGridAtPoint(
-  container: HTMLElement | null,
-  point: ClientPoint,
-  gridSelector: string,
-  excludedSelector: string
-): HTMLElement | null {
+export function timelineGridAtPoint({
+  container,
+  point,
+  gridSelector,
+  excludedSelector
+}: {
+  container: HTMLElement | null;
+  point: ClientPoint;
+  gridSelector: string;
+  excludedSelector: string;
+}): HTMLElement | null {
   if (!container) return null;
   const element = document.elementFromPoint(point.clientX, point.clientY) as HTMLElement | null;
   if (!element || element.closest(excludedSelector)) return null;
@@ -24,10 +29,13 @@ export function timelineGridAtPoint(
 }
 
 /** Reads stable date/resource ownership from the mounted grid instead of lagging virtual measurements. */
-export function timelineGridIdentity(
-  grid: HTMLElement,
-  selectedIds: readonly CalendarId[]
-): TimelineGridIdentity | null {
+export function timelineGridIdentity({
+  grid,
+  selectedIds
+}: {
+  grid: HTMLElement;
+  selectedIds: readonly CalendarId[];
+}): TimelineGridIdentity | null {
   const day = grid.closest<HTMLElement>('[data-testid="calendar-day"]');
   const resource = grid.closest<HTMLElement>("[data-calendar-id]");
   const dateKey = day?.dataset.date;

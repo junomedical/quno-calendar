@@ -16,7 +16,7 @@ export function DateNavigationInput({ date, onChange }: DateNavigationInputProps
       aria-label="Go to date"
       data-testid="jump-date-input"
       expectedRange={expectedRange}
-      onChange={(next) => {
+      onChange={({ value: next }) => {
         if (next) onChange(next.start);
       }}
       placeholder="Today or 6 July"

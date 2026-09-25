@@ -11,8 +11,8 @@ describe("QunoDatePicker navigation", () => {
       <QunoDatePicker
         defaultValue={{ start: "2026-08-10", end: "2026-08-20" }}
         initialMonth="2026-08-01"
-        onChange={onChange}
-        onVisibleMonthChange={onVisibleMonthChange}
+        onChange={({ value }) => onChange(value)}
+        onVisibleMonthChange={({ month }) => onVisibleMonthChange(month)}
       />
     );
 
@@ -31,7 +31,7 @@ describe("QunoDatePicker navigation", () => {
         defaultValue={{ start: "2026-08-20", end: "2026-08-28" }}
         initialMonth="2026-08-01"
         autoNavigateDelay={400}
-        onChange={onChange}
+        onChange={({ value }) => onChange(value)}
       />
     );
 
@@ -100,7 +100,11 @@ describe("QunoDatePicker navigation", () => {
     const onChange = vi.fn();
     const onVisibleMonthChange = vi.fn();
     render(
-      <QunoDatePicker initialMonth="2026-08-01" onChange={onChange} onVisibleMonthChange={onVisibleMonthChange} />
+      <QunoDatePicker
+        initialMonth="2026-08-01"
+        onChange={({ value }) => onChange(value)}
+        onVisibleMonthChange={({ month }) => onVisibleMonthChange(month)}
+      />
     );
 
     clickDay("2026-07-31");
@@ -118,7 +122,7 @@ describe("QunoDatePicker navigation", () => {
       <QunoDatePicker
         defaultValue={{ start: "2026-08-10", end: "2026-08-20" }}
         initialMonth="2026-08-01"
-        onChange={onChange}
+        onChange={({ value }) => onChange(value)}
       />
     );
 
@@ -143,7 +147,7 @@ describe("QunoDatePicker navigation", () => {
       <QunoDatePicker
         defaultValue={{ start: "2026-08-20", end: "2026-08-28" }}
         initialMonth="2026-08-01"
-        onChange={onChange}
+        onChange={({ value }) => onChange(value)}
       />
     );
 
@@ -164,7 +168,7 @@ describe("QunoDatePicker navigation", () => {
       <QunoDatePicker
         defaultValue={{ start: "2026-08-10", end: "2026-08-20" }}
         initialMonth="2026-08-01"
-        onChange={onChange}
+        onChange={({ value }) => onChange(value)}
       />
     );
 

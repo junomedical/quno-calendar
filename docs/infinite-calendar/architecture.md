@@ -15,7 +15,7 @@ flowchart LR
   Viewport --> Projection
   Gestures --> Projection
   Projection --> Layers["memoized render layers"]
-  Layers --> Renderer["external eventRenderer"]
+  Layers --> Renderer["external renderEvent"]
 ```
 
 The central performance rule is simple: network work can add or refresh event shells, but it never owns the grid.
@@ -63,13 +63,13 @@ Date Input may consume the parser implementation internally but does not re-expo
 
 `QunoInfiniteCalendar` accepts calendars, selected calendar ids, a range loader, an optional `eventPrefetchPolicy`, an external renderer, controlled settings, interaction callbacks, and an optional imperative ref.
 
-The optional `getCalendarDayProps` presentation boundary receives typed date context and projects its result across the
-date section, visible date header, and resource cells. `getCalendarCellProps` receives a more specific date/resource
+The optional `getDayProps` presentation boundary receives typed date context and projects its result across the
+date section, visible date header, and resource cells. `getDayCellProps` receives a more specific date/resource
 context and overrides conflicting day presentation on the horizontal row or vertical column plus its resource
 label/header. Both return only `className`, `style`, or `title`; fixed virtual geometry, event layers, hit-testing, and
 accessibility state stay inside the calendar.
 
-`getCalendarHourProps` receives one visible clock-hour interval and the active view. Its presentation projects onto
+`getHourProps` receives one visible clock-hour interval and the active view. Its presentation projects onto
 horizontal or vertical hour bands and their visible time labels. Hour bands paint above date/resource backgrounds but
 below availability, event, draft, current-time, and pointer-interaction layers; fixed position and size remain
 calendar-owned.
@@ -77,8 +77,8 @@ calendar-owned.
 - `view="infinite-horizontal"`: dates flow down, calendars are rows, time runs left-to-right.
 - `view="infinite-vertical"`: dates flow down, calendars are columns, time runs top-to-bottom.
 
-Date-header text is also settings-owned. `settings.dateLocale` flows directly to the date-label formatter in both
-orientations, while `settings.dayNameGenerator` can replace the complete displayed label without changing date
+Date-header text is configured through component-level `locale` and `formatters.dayLabel`. Both orientations
+receive the same ISO-date formatter context, which can replace the complete displayed label without changing date
 virtualization or date-key identity. Generated vertical labels use one primary line; default vertical labels retain
 their month/day and weekday lines. When no locale is supplied, `Intl.DateTimeFormat` uses the current runtime locale;
 server-rendered applications should pass an explicit locale when server and browser defaults may differ.
@@ -121,11 +121,11 @@ flowchart TD
   Anchors --> Views
   Rendering --> Views
   Views --> Shell["EventShell geometry boundary"]
-  Shell --> External["consumer eventRenderer"]
+  Shell --> External["consumer renderEvent"]
   Demo["demo and examples"] --> Entry
 ```
 
-Feature domains do not import views or demo code. Scroll publishes visible positions; events decides what to prefetch. Anchors translate semantic focus using scroll and event geometry without becoming part of either engine. Product card markup stays outside the library internals: rendering positions `EventShell`, then calls `eventRenderer` with event, status, lane, overlap, and full-size style data.
+Feature domains do not import views or demo code. Scroll publishes visible positions; events decides what to prefetch. Anchors translate semantic focus using scroll and event geometry without becoming part of either engine. Product card markup stays outside the library internals: rendering positions `EventShell`, then calls `renderEvent` with event, status, lane, overlap, and full-size style data.
 Each `EventShell` is also a named `calendar-event` size container. Product renderers can therefore adapt their content
 hierarchy to the shell's own width and height with CSS container queries, without viewport media queries or
 layout-measurement state in React.
@@ -214,7 +214,7 @@ sequenceDiagram
   participant Anchor as Data-layout anchor
   participant Virtual as Date virtualizer
 
-  User->>Nav: scrollToDateTime(D, T)
+  User->>Nav: scrollToDateTime({ date: D, time: T })
   Nav->>View: paint D immediately at base row heights
   Nav->>View: keep time T on the horizontal axis
   View->>API: request visible/overscan range
@@ -232,8 +232,8 @@ The resulting focus contract is explicit:
 
 | View state before response                   | Position preserved after response                                                  |
 | -------------------------------------------- | ---------------------------------------------------------------------------------- |
-| Exact `scrollToDate(D)`                      | D's date header; dense rows grow downward.                                         |
-| `scrollToDateTime(D, T)`                     | The same date policy vertically and time T horizontally.                           |
+| Exact `scrollToDate({ date: D })`            | D's date header; dense rows grow downward.                                         |
+| `scrollToDateTime({ date: D, time: T })`     | The same date policy vertically and time T horizontally.                           |
 | Viewport partway inside resource R on date D | `{ D, R, offsetWithinRow }`; growth above R is compensated.                        |
 | Anchored resource removed by another change  | Captured date-local fallback offset, clamped inside D.                             |
 | Vertical orientation receives dense overlaps | Date/time Y stays fixed; overlap changes column width rather than vertical height. |
@@ -257,18 +257,22 @@ Important invariants:
 ## Prepared Cell Pipeline
 
 Each revised date is indexed by calendar membership in one pass. Each date/calendar cell separates explicit background
-availability from foreground events of every kind and prepares foreground overlap lanes with a deterministic
+availability from foreground events of every kind and prepares both layers independently with the same deterministic
 heap-based `O(n log n)` algorithm.
+Unchanged bucket arrays reuse the complete prepared date model.
 
 ```mermaid
 flowchart LR
   Events["date events"] --> Membership["calendar membership index"]
   Membership --> Cell["date/resource cell"]
-  Cell --> Availability["background availability layer"]
-  Cell --> Prepared["foreground intervals and lanes"]
-  Prepared --> Metrics["row height or column width"]
-  Prepared --> Horizontal["horizontal rectangles"]
-  Prepared --> Vertical["vertical rectangles"]
+  Cell --> Availability["explicit background availability lanes"]
+  Cell --> Prepared["foreground event lanes"]
+  Availability --> Metrics["max layer depth"]
+  Prepared --> Metrics
+  Availability --> Horizontal["horizontal mini-lanes"]
+  Availability --> Vertical["vertical side-by-side lanes"]
+  Prepared --> Horizontal
+  Prepared --> Vertical
   Prepared --> Hit["hover and hit geometry"]
 ```
 
@@ -286,11 +290,12 @@ flowchart LR
   Translate --> Paint["paint event shells in stable viewport"]
 ```
 
-Sizing and rendering reuse the same prepared cell. Only events explicitly marked
-`renderLayer: "availability"` become full-cell background availability and avoid overlap metrics. Foreground availability
-uses ordinary event lanes and can grow its row or column. One shared state layer assigns background availability,
-draft, and drop-preview statuses; horizontal and vertical views provide their own geometry adapters. Those overlays do
-not perturb committed layout.
+Sizing and rendering reuse the same layered prepared cell. Resource size uses the larger foreground or background
+depth rather than adding them. Only events explicitly marked `renderLayer: "availability"` use the background lane;
+unmarked availability joins ordinary foreground events and can grow its row or column. Non-overlapping background
+availability fills one resource lane; overlapping background availability uses real lane rectangles behind foreground
+events. Horizontal and vertical views provide their own geometry adapters. Drafts and previews remain transient and
+never perturb committed layout.
 
 ## Date And Resource Virtualization
 
@@ -355,6 +360,10 @@ stateDiagram-v2
 
 Hit-testing rejects sticky labels and headers. Multi-calendar hover remains local to one rendered resource instance; drag and preview status stays keyed by event id across instances.
 
+Pointer moves retain only the latest coordinates and perform hit-testing plus React preview publication once per
+animation frame. Pointer-up synchronously flushes its coordinates before validation or commit. Pointer cancellation,
+lost capture, Escape, and unmount discard queued work.
+
 Zoom stays controlled by `settings.zoom`. `Shift` + wheel requests `onZoomChange` in a microtask, keeps the first focused time node for a gesture burst, and begins scroll restoration at the following animation frame so the controlled parent update does not overlap React's active render work. Slider or other external horizontal zoom changes first preserve a visible current-time marker at its viewport position in a layout effect before paint. When the marker is outside the configured hours or viewport, a horizontally scrolled view preserves its grid-center time and the timeline origin preserves its left edge. The wheel path suppresses that generic correction and retains its pointer-specific anchor. Horizontal rendering may apply a viewport-fill zoom floor without mutating the parent-owned value.
 
 The showcase keeps the controlled projection value and displayed control value in separate narrow contexts. A gesture zoom request updates only the calendar wrapper immediately; the range thumb and numeric readout catch up once after the 300ms gesture tail. Direct slider input updates its thumb/readout immediately and coalesces calendar projection to the latest value once per animation frame. The route shell, settings sections, popup, and other demo controls do not render again. The calendar shell owns a stacking boundary but deliberately avoids broad paint containment around its changing scroll surface; its existing overflow clip still bounds visible content without encouraging mixed old/new raster tiles during rapid zoom. The zoom control and live stats panel own small local layout, paint, and compositor boundaries. The full control pane must not use paint containment: a changing child would otherwise invalidate the full-sidebar paint layer despite stable React and DOM identity. The static sidebar is isolated on a parent compositor layer, and its changing child layers rerasterize independently, so neither a calendar frame nor a settled zoom-output update clears and repaints the menu surface.
@@ -376,7 +385,7 @@ Zoom is a geometry update, not a calendar-content lifecycle. Changes in `setting
 - Never key the calendar, a date, a resource row or column, an event shell, or time ticks by zoom. Mounted semantic nodes must retain identity while their position and size styles change.
 - Keep controlled zoom state as close as possible to the calendar and its zoom input. Unrelated application chrome, settings, popups, and data controllers must not subscribe to it.
 - Do not write sidebar control DOM on every gesture frame. Keep wheel/touch projection immediate, then synchronize its thumb and readout once the gesture settles. Direct slider display stays immediate while its calendar projection is limited to the latest value once per animation frame.
-- Keep prepared membership, overlap, and resource metrics independent of zoom. An unchanged external `eventRenderer` must not run again merely because its event shell moved or resized.
+- Keep prepared membership, overlap, and resource metrics independent of zoom. An unchanged external `renderEvent` must not run again merely because its event shell moved or resized.
 - Keep tick cadence in the DOM independent of visual grid cadence. Hide labels with attributes/classes; do not add, remove, or replace label children at a zoom threshold.
 - Apply scroll-anchor correction in a layout effect before paint. Do not blank, fade, skeletonize, or remount the calendar during correction.
 - Accumulate raw mouse-wheel and touchpad zoom steps within a display frame, then perform one controlled projection and anchor restore using the first focused node. A newer external controlled value must cancel the queued wheel commit.
