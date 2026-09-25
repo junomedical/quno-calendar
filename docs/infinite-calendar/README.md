@@ -20,6 +20,14 @@ days, hours, horizontal rows, and vertical columns without taking ownership of g
 Day keys use shared timezone-free `IsoDate` values. Event `start` and `end` remain timestamp strings and retain their
 local or offset semantics.
 
+`CalendarEvent.kind` identifies an appointment, availability, or blocker. Availability is a foreground event by
+default, so it can be selected and contributes to overlap sizing. Set `renderLayer: "availability"` only when a
+consumer needs the original full-cell background treatment; that presentation layer stays out of overlap metrics.
+
+The horizontal navigation handle can reveal a resource row with
+`scrollToDateTime(date, time, { calendarId })`. The calendar owns the virtual-row wait and viewport correction; consumers
+do not query its DOM.
+
 The field guide keeps its interaction contracts live: newly scrolled dates populate without a simulated delay, event
 cards can be resized in place, parent-reviewed mutations preserve their working row and restore the original view on
 Cancel, Date Input arrow changes navigate immediately, and motion begins from an explicit draft action. An external

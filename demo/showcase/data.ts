@@ -138,7 +138,8 @@ export function createDemoEvents(eventsPerYear: number, year = 2026): CalendarEv
         start: startDate.toISOString(),
         end: endDate.toISOString(),
         color: calendar.color,
-        kind: "availability"
+        kind: "availability",
+        renderLayer: "availability"
       });
     }
   }
@@ -158,7 +159,7 @@ export function createDemoEvents(eventsPerYear: number, year = 2026): CalendarEv
     const baseMinute = window.startMinute + Math.floor(seededNumber(index + 23) * slotCount) * 15;
     const startDate = addMinutes(addDays(start, dayOffset), baseMinute);
     const endDate = addMinutes(startDate, duration);
-    const kind = index % 11 === 0 ? "blocked" : index % 3 === 0 ? "consultation" : "appointment";
+    const kind = index % 11 === 0 ? "blocker" : "appointment";
 
     events.push({
       id: `event-${eventsPerYear}-${index}`,
@@ -206,7 +207,8 @@ export function appendCreatedEvent(events: CalendarEvent[], request: EventCreate
       subtitle: request.kind === "availability" ? "Created availability" : "Created from drawn area",
       start: request.start,
       end: request.end,
-      kind: request.kind === "availability" ? "availability" : "draft"
+      kind: request.kind === "availability" ? "availability" : "appointment",
+      ...(request.kind === "availability" ? { renderLayer: "availability" as const } : {})
     }
   ];
 }

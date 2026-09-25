@@ -72,5 +72,15 @@ describe("calendar interaction math", () => {
     expect(draft.id).toBe("draft-new-event");
     expect(draft.calendarId).toBe("calendar-a");
     expect(draft.title).toBe("New appointment");
+    expect(draft.kind).toBe("appointment");
+    expect(draft.renderLayer).toBeUndefined();
+
+    const availabilityDraft = buildDraftEvent(
+      { dateKey: "2026-07-06", calendarId: "calendar-a", minute: 9 * 60, dayIndex: 0, rowIndex: 0 },
+      { dateKey: "2026-07-06", calendarId: "calendar-a", minute: 10 * 60, dayIndex: 0, rowIndex: 0 },
+      "availability"
+    );
+    expect(availabilityDraft.kind).toBe("availability");
+    expect(availabilityDraft.renderLayer).toBe("availability");
   });
 });

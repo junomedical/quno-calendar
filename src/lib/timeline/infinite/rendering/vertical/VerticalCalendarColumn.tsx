@@ -83,7 +83,10 @@ export const VerticalCalendarColumn = memo(function VerticalCalendarColumn({
   onHoverLeave,
   onEventPointerDown
 }: VerticalCalendarColumnProps) {
-  const availabilityEvents = useMemo(() => rowEvents.filter((event) => event.kind === "availability"), [rowEvents]);
+  const availabilityEvents = useMemo(
+    () => rowEvents.filter((event) => event.renderLayer === "availability"),
+    [rowEvents]
+  );
   const layoutItems = useMemo(
     () => positionColumnLayoutItems(layoutPreparedEventsForColumn(preparedCell, settings)),
     [preparedCell, settings]

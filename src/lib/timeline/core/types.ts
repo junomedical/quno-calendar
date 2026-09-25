@@ -47,6 +47,12 @@ export type {
 /** Stable identifier for an appointment, availability block, or draft event. */
 export type EventId = string;
 
+/** Scheduling entities represented by calendar events. */
+export const CALENDAR_RULE_KINDS = ["availability", "blocker"] as const;
+export type CalendarRuleKind = (typeof CALENDAR_RULE_KINDS)[number];
+export const CALENDAR_EVENT_KINDS = ["appointment", ...CALENDAR_RULE_KINDS] as const;
+export type CalendarEventKind = (typeof CALENDAR_EVENT_KINDS)[number];
+
 /** Event data accepted by the reusable calendar renderer. */
 export type CalendarEvent = {
   id: EventId;
@@ -57,7 +63,9 @@ export type CalendarEvent = {
   start: string;
   end: string;
   color?: string;
-  kind?: "appointment" | "consultation" | "blocked" | "draft" | "availability";
+  kind?: CalendarEventKind;
+  /** Paint an availability behind ordinary events instead of in the editable event layer. */
+  renderLayer?: "availability";
 };
 
 /** Visual state passed to the external event renderer. */
@@ -137,7 +145,7 @@ export type EventCreateRequest = {
   start: string;
   end: string;
   calendarId: CalendarId;
-  kind?: CalendarEvent["kind"];
+  kind?: CalendarEventKind;
 };
 
 /** Parent-owned create/edit preview rendered by the calendar without committing data. */
@@ -193,7 +201,8 @@ export type CalendarViewComponentProps = {
 /** Imperative navigation methods exposed by `QunoInfiniteCalendar`. */
 export type QunoInfiniteCalendarHandle = {
   scrollToDate: (dateKey: IsoDate) => void;
-  scrollToDateTime: (dateKey: IsoDate, time: string) => void;
+  /** A calendarId also reveals that resource row in the horizontal view. */
+  scrollToDateTime: (dateKey: IsoDate, time: string, options?: { calendarId?: CalendarId }) => void;
   scrollToToday: () => void;
   captureViewportAnchor: (target: CalendarViewportAnchorTarget) => CalendarViewportAnchor | null;
   restoreViewportAnchor: (

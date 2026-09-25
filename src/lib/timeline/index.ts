@@ -13,9 +13,13 @@ export {
 } from "./data/calendarEvents";
 export {
   defaultQunoInfiniteCalendarSettings,
+  CALENDAR_EVENT_KINDS,
+  CALENDAR_RULE_KINDS,
   type ActiveDraftReleaseOptions,
   type ActiveEventDraft,
   type CalendarEvent,
+  type CalendarEventKind,
+  type CalendarRuleKind,
   type CalendarId,
   type QunoInfiniteCalendarHandle,
   type QunoInfiniteCalendarCellContext,

@@ -133,7 +133,9 @@ flowchart LR
 
 ## Late Events That Increase Horizontal Height
 
-Before the API resolves, an unloaded horizontal date uses compact base row heights. After loaded overlaps are prepared, only dense date/resource rows grow; availability and draft/preview overlays do not contribute lanes.
+Before the API resolves, an unloaded horizontal date uses compact base row heights. After loaded overlaps are prepared,
+only dense date/resource rows grow. Foreground availability contributes lanes like other events; explicit background
+availability and draft/preview overlays do not.
 
 ### What Stays In Focus?
 
@@ -178,7 +180,8 @@ For horizontal `scrollToDateTime`, vertical focus follows the date/resource poli
 | Late overlap metric                   | Can increase row height and total date height              | Can increase column width; date/time height remains determined by settings and zoom                                         |
 | Primary scroll focus after event load | Date header or date/resource/local-row offset              | Date/time remains stable because event data does not change day height                                                      |
 | Cross-axis identity                   | Calendar row id is restored when horizontal heights change | Calendar column id is the semantic cross-axis identity; this change does not add a separate automatic width-correction pass |
-| Availability/draft/preview effect     | Overlay only; no row-height growth                         | Overlay only; no column-width growth                                                                                        |
+| Foreground availability               | Ordinary event lanes may increase row height               | Ordinary event lanes may increase column width                                                                              |
+| Background availability/draft/preview | Overlay only; no row-height growth                         | Overlay only; no column-width growth                                                                                        |
 
 ## Runtime Invalidation Matrix
 

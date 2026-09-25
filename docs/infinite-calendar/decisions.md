@@ -723,3 +723,27 @@ geometry and exposes stable `calendar-hour` and `calendar-hour-label` slots.
 The hour projection raises the measured artifact to 136.83 KiB raw and 33.44 KiB gzip and the optional stylesheet to
 10.21 KiB raw and 1.95 KiB gzip. The Infinite Calendar JavaScript ceiling moves from Decision 089's 33 KiB to 34 KiB;
 the stylesheet remains inside its existing 2 KiB gzip ceiling.
+
+## 091 - Horizontal Row Navigation Belongs To The Calendar
+
+Date: 2026-09-24
+Status: Accepted
+
+An external editor can know a date, time, and calendar id before its target row is mounted. The public
+`scrollToDateTime` handle accepts an optional `calendarId` for horizontal row navigation. The existing geometry
+registry and cancellable viewport restoration pin and reveal an offscreen resource after date virtualization settles;
+an already-visible row is not moved vertically. The calendar owns sticky-header offsets and row visibility, while the
+editor calls only the public handle. The vertical view keeps its date/time behavior because it has columns, not rows.
+
+## 092 - Event Entity Kind Is Separate From Its Render Layer
+
+Date: 2026-09-25
+Status: Accepted
+
+This supersedes Decisions 017 and 019's assumption that every availability uses the background interaction layer. `CalendarEvent.kind`
+identifies the scheduling entity (`appointment`, `availability`, or `blocker`); `renderLayer: "availability"` explicitly
+selects the background treatment, which is pointer-transparent in `events` mode. Without that layer override, an
+availability remains a foreground, editable event in `events` mode and contributes to overlap metrics. `availability`
+interaction mode targets the
+explicit background layer. This permits internal scheduling editors while retaining the original background rendering
+for consumers that opt into it.

@@ -163,7 +163,8 @@ recipes. `/guide/infinite-calendar` mounts later calendar exhibits only when the
 each exhibit mounted afterward. Every exhibit uses the same demo-owned full-screen shell, which places its existing
 mounted `QunoInfiniteCalendar` in a fixed viewport overlay; it does not invoke the browser Fullscreen API or move calendar state
 into the reusable library. Its system-design labs also expose two existing library boundaries without adding article
-state to the runtime: `interactionMode` switches pointer ownership between committed event and availability layers, and
+state to the runtime: `interactionMode` switches pointer ownership between foreground events and the explicit
+background availability layer, and
 the public viewport-anchor handle carries visual focus from a controlled draft to its saved replacement or through
 overlap-lane recomputation. A CSS-native lab demonstrates that sticky days and resource names remain browser-positioned
 instead of entering high-frequency React scroll state. Product-control labs use the existing navigation handle,
@@ -255,14 +256,16 @@ Important invariants:
 
 ## Prepared Cell Pipeline
 
-Each revised date is indexed by calendar membership in one pass. Each date/calendar cell separates availability from timed events and prepares overlap lanes with a deterministic heap-based `O(n log n)` algorithm.
+Each revised date is indexed by calendar membership in one pass. Each date/calendar cell separates explicit background
+availability from foreground events of every kind and prepares foreground overlap lanes with a deterministic
+heap-based `O(n log n)` algorithm.
 
 ```mermaid
 flowchart LR
   Events["date events"] --> Membership["calendar membership index"]
   Membership --> Cell["date/resource cell"]
-  Cell --> Availability["availability records"]
-  Cell --> Prepared["prepared timed intervals and lanes"]
+  Cell --> Availability["background availability layer"]
+  Cell --> Prepared["foreground intervals and lanes"]
   Prepared --> Metrics["row height or column width"]
   Prepared --> Horizontal["horizontal rectangles"]
   Prepared --> Vertical["vertical rectangles"]
@@ -283,7 +286,11 @@ flowchart LR
   Translate --> Paint["paint event shells in stable viewport"]
 ```
 
-Sizing and rendering reuse the same prepared cell. Availability remains a full-cell background layer and never increases overlap metrics. One shared state layer assigns availability, draft, and drop-preview statuses; horizontal and vertical views provide their own geometry adapters. These overlays never perturb committed layout.
+Sizing and rendering reuse the same prepared cell. Only events explicitly marked
+`renderLayer: "availability"` become full-cell background availability and avoid overlap metrics. Foreground availability
+uses ordinary event lanes and can grow its row or column. One shared state layer assigns background availability,
+draft, and drop-preview statuses; horizontal and vertical views provide their own geometry adapters. Those overlays do
+not perturb committed layout.
 
 ## Date And Resource Virtualization
 

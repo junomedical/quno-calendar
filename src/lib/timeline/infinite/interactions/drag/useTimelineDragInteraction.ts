@@ -8,6 +8,7 @@ import {
   type QunoInfiniteCalendarSettings
 } from "#quno-internal/timeline/core/types";
 import { sameMoveRequest } from "./sameMoveRequest";
+import { eventCalendarIds } from "#quno-internal/timeline/data/calendarEvents";
 import { previewEventForDrag, proposalForDrag, type DragState } from "./dragInteractionModel";
 
 type PointerLike = Pick<PointerEvent | MouseEvent, "clientX" | "clientY">;
@@ -86,7 +87,20 @@ export function useTimelineDragInteraction({
       if (isActiveDraftEvent(dragState.event)) {
         return true;
       }
-      if (proposal && onEventMoveRequest) {
+      // Dropping back on the exact original slot is a click, not a move: skip
+      // the parent's save request and fall through to activation. Compare at
+      // whole-minute precision so API timestamps with :00 seconds and the
+      // proposal's canonical ISO align.
+      const sameMinuteIso = (left: string, right: string): boolean =>
+        Date.parse(left) - (Date.parse(left) % 60_000) === Date.parse(right) - (Date.parse(right) % 60_000);
+      const isNoOpMove = Boolean(
+        proposal &&
+        proposal.proposedCalendarId === dragState.event.calendarId &&
+        proposal.proposedCalendarIds.join("|") === eventCalendarIds(dragState.event).join("|") &&
+        sameMinuteIso(proposal.proposedStart, dragState.event.start) &&
+        sameMinuteIso(proposal.proposedEnd, dragState.event.end)
+      );
+      if (proposal && !isNoOpMove && onEventMoveRequest) {
         try {
           const accepted = await onEventMoveRequest(proposal);
           if (accepted !== false) {
@@ -95,7 +109,8 @@ export function useTimelineDragInteraction({
         } catch {
           // A rejected parent mutation is a rejected drop; local cache stays unchanged.
         }
-      } else if (!proposal && onEventActivate) {
+      } else if (onEventActivate) {
+        // Also fires when the pointer ended on the original slot (isNoOpMove).
         onEventActivate({ event: dragState.event, renderedCalendarId: dragState.sourceCalendarId });
       }
       return true;

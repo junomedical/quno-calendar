@@ -68,12 +68,7 @@ export function useExternalDraftCommit({
       id: previousEventId ?? `created-${Date.now()}`,
       calendarId: participantIds[0],
       calendarIds: participantIds,
-      kind:
-        activeDraft.event.kind === "availability"
-          ? "availability"
-          : activeDraft.event.kind === "blocked"
-            ? "blocked"
-            : "appointment"
+      kind: activeDraft.event.kind ?? "appointment"
     };
     const anchor = captureEventAnchor(activeDraft.event);
 

@@ -33,7 +33,7 @@ export function useTimelineDraftInteraction({
   const createdEventSequenceRef = useRef(0);
   const pendingDraftClearFrameRef = useRef<number | null>(null);
 
-  const draftKind = interactionMode === "availability" ? "availability" : "draft";
+  const draftKind = interactionMode === "availability" ? "availability" : "appointment";
 
   const startDraft = useCallback(
     (hit: CalendarHit) => {

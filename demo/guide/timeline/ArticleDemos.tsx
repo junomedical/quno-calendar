@@ -108,7 +108,7 @@ const loadScrollingEvents: LoadEvents = async ({ calendarIds, endDate, startDate
         start: `${date}T${index % 2 === 0 ? "09:30" : "13:15"}:00`,
         end: `${date}T${index % 2 === 0 ? "10:30" : "14:15"}:00`,
         color: scrollingEventColors[index % scrollingEventColors.length],
-        kind: index % 2 === 0 ? "appointment" : "consultation"
+        kind: "appointment"
       });
     });
     date = addDays(date as IsoDate, 1);
@@ -194,7 +194,7 @@ export function EventCardsDemo() {
             id: "specimen-cancelled",
             title: "Cancelled draft",
             subtitle: "Shell release + card motion",
-            kind: "draft"
+            kind: "appointment"
           }}
           label="Cancelled draft"
           motion="cancelled"
@@ -672,7 +672,7 @@ export function CreationLaneDemo() {
         start: `${articleDateKey}T13:15:00`,
         end: `${articleDateKey}T14:15:00`,
         color: articleCalendars.find((calendar) => calendar.id === selectedDoctorId)?.color,
-        kind: "draft"
+        kind: "appointment"
       }
     };
     setActiveDraft(draft);
@@ -889,7 +889,7 @@ function createMotionDraft(sequence: number): ActiveEventDraft {
       start: `${articleDateKey}T${minute}:00`,
       end: `${articleDateKey}T${sequence % 2 === 0 ? "12:15" : "13:15"}:00`,
       color: "#246b5d",
-      kind: "draft"
+      kind: "appointment"
     }
   };
 }

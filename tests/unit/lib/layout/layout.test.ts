@@ -138,11 +138,22 @@ describe("event overlap layout", () => {
   it("does not let availability records increase row height", () => {
     const availability = {
       ...event("availability", "08:00", "18:00"),
-      kind: "availability" as const
+      kind: "availability" as const,
+      renderLayer: "availability" as const
     };
 
     expect(rowHeightForEvents([availability], settings)).toBe(settings.rowHeight);
     expect(layoutEventsForRow([availability], settings)).toHaveLength(1);
+  });
+
+  it("counts foreground availability as an ordinary editable event", () => {
+    const availability: CalendarEvent = {
+      ...event("availability", "09:00", "10:00"),
+      kind: "availability"
+    };
+    const preparedCell = prepareEventCell([availability, event("appointment", "09:00", "10:00")], settings);
+
+    expect(preparedCell.metricLaneCount).toBe(2);
   });
 
   it("prepares a cell once for metrics and both geometry projections", () => {
@@ -168,7 +179,8 @@ describe("event overlap layout", () => {
   it("keeps availability in prepared geometry but excludes it from prepared metrics", () => {
     const availability = {
       ...event("availability", "08:00", "18:00"),
-      kind: "availability" as const
+      kind: "availability" as const,
+      renderLayer: "availability" as const
     };
     const timedEvents = [
       event("timed-a", "09:00", "10:00"),

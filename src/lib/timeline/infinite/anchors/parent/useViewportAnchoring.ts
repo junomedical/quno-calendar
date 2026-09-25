@@ -151,12 +151,18 @@ export function useViewportAnchoring(args: AnchoringArgs) {
     [registry]
   );
 
+  const getResourceElement = useCallback(
+    (dateKey: string, calendarId: string) => registry.resource(dateKey, calendarId),
+    [registry]
+  );
+
   return {
     activeRestoreTarget,
     captureViewportAnchor,
     isEventFullyVisible,
     restoreViewportAnchor,
     cancelViewportAnchorRestore,
+    getResourceElement,
     registration
   };
 }

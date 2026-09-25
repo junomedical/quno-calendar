@@ -6,6 +6,10 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ### Added
 
+- Added optional horizontal resource-row navigation through `scrollToDateTime(date, time, { calendarId })`, using the
+  calendar's virtualized geometry and cancellation lifecycle instead of consumer DOM observers.
+- Added `typesVersions` mappings for public subpaths so projects using legacy Node-style TypeScript resolution no longer need local declaration shims.
+- Exported `CALENDAR_EVENT_KINDS`, `CALENDAR_RULE_KINDS`, and their types for the appointment, availability, and blocker domain.
 - Added Infinite Calendar `getCalendarDayProps`, `getCalendarHourProps`, and `getCalendarCellProps` with typed date,
   clock-hour, weekday, Today/weekend, calendar, and orientation context. Date-wide presentation covers the complete day
   and its visible header; hour presentation covers time bands and labels; resource presentation can override matching
@@ -35,6 +39,9 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ### Changed
 
+- Separated event identity from presentation: `kind: "availability"` is foreground and participates in overlap metrics
+  unless `renderLayer: "availability"` explicitly selects the original background treatment. Legacy `consultation`,
+  `blocked`, and `draft` event-kind values are replaced by `appointment` or `blocker`; see the migration guide.
 - Raised the Infinite Calendar JavaScript gzip ceiling from 32 KiB to 34 KiB for the new presentation callbacks; the
   measured ESM artifact is now 136.83 KiB raw and 33.44 KiB gzip after composing day, hour, and cell presentation.
 - Replaced the event-card resize lab's width and height sliders with one browser-native draggable corner. The demo's
@@ -97,6 +104,7 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ### Fixed
 
+- A drag dropped back onto its original minute and calendar activates the event editor without sending a move request.
 - Kept external create drafts anchored to their drawn date while the participant list is empty; the demo now shows its
   normal calendar set, hides the unassigned preview, and preserves checkbox focus until a participant is selected.
 - Removed React 19's synchronous virtualizer-update warning by using TanStack Virtual's queued notification path, and

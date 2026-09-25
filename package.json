@@ -25,6 +25,22 @@
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "infinite-calendar": [
+        "dist/timeline/index.d.ts"
+      ],
+      "datepicker": [
+        "dist/date-picker/index.d.ts"
+      ],
+      "date-input": [
+        "dist/date-input/index.d.ts"
+      ],
+      "date-parser": [
+        "dist/date-parser/index.d.ts"
+      ]
+    }
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",

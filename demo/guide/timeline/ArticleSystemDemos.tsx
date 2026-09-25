@@ -157,7 +157,7 @@ export function EventFocusDemo() {
   const eventsRef = useRef<CalendarEvent[]>([articleEvents[0]]);
   const [activeDraft, setActiveDraft] = useState<ActiveEventDraft | null>(() => ({
     mode: "create",
-    event: { ...focusEvent, id: "article-focus-draft", kind: "draft", title: "Draft appointment" }
+    event: { ...focusEvent, id: "article-focus-draft", kind: "appointment", title: "Draft appointment" }
   }));
   const [saved, setSaved] = useState(false);
   const [hasCollisions, setHasCollisions] = useState(false);

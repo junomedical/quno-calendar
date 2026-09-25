@@ -111,7 +111,7 @@ function maximumMetricLaneCount(intervals: EventInterval[]): number {
   let laneCount = 1;
 
   for (const interval of intervals) {
-    if (interval.event.kind === "availability") {
+    if (interval.event.renderLayer === "availability") {
       continue;
     }
 

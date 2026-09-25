@@ -20,6 +20,8 @@ use the shared records for package-wide contracts and release work.
 - [Testing](./shared/testing.md) owns the combined verification strategy and feature budgets.
 - [Shared decisions](./shared/decisions.md) records choices affecting more than one product.
 
+The package manifest provides both modern `exports` types and legacy Node-style `typesVersions` mappings for these public entry points.
+
 Each product owns its own `decisions.md`. Historical identifiers remain stable even when an older decision predates
 the four-product documentation structure. `CHANGELOG.md` remains at the repository root because releases apply to the
 combined package.

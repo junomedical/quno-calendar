@@ -89,7 +89,7 @@ export function useTimelineInteractions(args: UseTimelineInteractionsArgs) {
   ) => {
     event.stopPropagation();
     if (args.activeDraft && !isActiveDraftEvent(calendarEvent)) return;
-    if ((args.interactionMode === "availability") !== (calendarEvent.kind === "availability")) return;
+    if ((args.interactionMode === "availability") !== (calendarEvent.renderLayer === "availability")) return;
     const canInteract = isActiveDraftEvent(calendarEvent)
       ? Boolean(args.onActiveDraftMoveRequest)
       : Boolean(args.onEventMoveRequest || args.onEventActivate);

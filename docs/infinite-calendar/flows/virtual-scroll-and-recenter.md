@@ -106,6 +106,8 @@ flowchart TD
 ```
 
 The repeated frame is a mount/measurement bridge, not polling. The bounded model may need one React commit before the target day exists.
+An optional `calendarId` on horizontal `scrollToDateTime` uses the instance geometry registry and restore target pin
+to reveal a row after that commit. An already-visible row keeps its vertical position.
 
 ## Position Snapshots And Layout Changes
 

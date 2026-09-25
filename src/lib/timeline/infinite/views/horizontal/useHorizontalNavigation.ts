@@ -37,7 +37,7 @@ export function useHorizontalNavigation({
     },
     [containerRef, effectiveSettings]
   );
-  const scrollToDateTime = useCallback(
+  const scrollToDateTimeBase = useCallback(
     (dateKey: IsoDate, time: string) => {
       scrollToDate(dateKey);
       scrollToTime(time);
@@ -49,13 +49,68 @@ export function useHorizontalNavigation({
     containerRef,
     settings: effectiveSettings,
     orientation: "horizontal",
-    scrollToDateTime,
+    scrollToDateTime: scrollToDateTimeBase,
     visibilityInsets: {
       left: effectiveSettings.labelWidth,
       top: effectiveSettings.dayHeaderHeight
     }
   });
-  const { captureViewportAnchor, isEventFullyVisible, restoreViewportAnchor, cancelViewportAnchorRestore } = anchoring;
+  const {
+    captureViewportAnchor,
+    isEventFullyVisible,
+    restoreViewportAnchor,
+    cancelViewportAnchorRestore,
+    getResourceElement
+  } = anchoring;
+  const scrollToDateTime = useCallback<QunoInfiniteCalendarHandle["scrollToDateTime"]>(
+    (dateKey, time, options) => {
+      const calendarId = options?.calendarId;
+      const viewport = containerRef.current;
+      if (!calendarId || !viewport || !/^\d{2}:\d{2}$/.test(time)) {
+        cancelViewportAnchorRestore();
+        scrollToDateTimeBase(dateKey, time);
+        return;
+      }
+
+      const row = getResourceElement(dateKey, calendarId);
+      if (row?.dataset.retainedHidden === "true") {
+        cancelViewportAnchorRestore();
+        scrollToDateTimeBase(dateKey, time);
+        return;
+      }
+
+      const viewportBox = viewport.getBoundingClientRect();
+      const rowBox = row?.getBoundingClientRect();
+      cancelViewportAnchorRestore();
+      scrollToTime(time);
+      if (
+        rowBox &&
+        rowBox.top >= viewportBox.top + effectiveSettings.dayHeaderHeight &&
+        rowBox.bottom <= viewportBox.bottom - 8
+      ) {
+        return;
+      }
+
+      const target = { dateKey, time, calendarId };
+      const rowHeight = rowBox?.height ?? effectiveSettings.rowHeight;
+      const top = Math.max(effectiveSettings.dayHeaderHeight, (viewport.clientHeight - rowHeight) / 2);
+      const left =
+        effectiveSettings.labelWidth +
+        TIMELINE_LEFT_GUTTER_PX +
+        minuteToX(parseClockToMinutes(time), effectiveSettings) -
+        viewport.scrollLeft;
+      restoreViewportAnchor({ target, snapshot: { top, left } }, { afterRecenter: true, cancelOnManualScroll: true });
+    },
+    [
+      getResourceElement,
+      cancelViewportAnchorRestore,
+      containerRef,
+      effectiveSettings,
+      restoreViewportAnchor,
+      scrollToDateTimeBase,
+      scrollToTime
+    ]
+  );
   const releaseActiveDraftRef = useRef<QunoInfiniteCalendarHandle["releaseActiveDraft"]>(() => undefined);
   const commitVisibleEventRef = useRef<QunoInfiniteCalendarHandle["commitVisibleEvent"]>(() => undefined);
   const removeVisibleEventRef = useRef<QunoInfiniteCalendarHandle["removeVisibleEvent"]>(() => undefined);

@@ -646,6 +646,10 @@ export function IntegrationWalkthrough({ embedded = false }: { embedded?: boolea
           navigation handle. Products can connect the same handle to a command palette, search result, or deep link
           without learning how the infinite date window works.
         </p>
+        <p>
+          When an editor knows its resource, pass its calendar id as the optional third argument to reveal that row
+          without querying the timeline DOM. The calendar keeps an already-visible row in place.
+        </p>
         <Callout>
           Place the caret over part of the date and press Arrow Up or Arrow Down. Each recognized change moves the
           calendar immediately; Enter is still available when typing a complete replacement.

@@ -72,7 +72,7 @@ export function useVerticalPreparedColumns({
         const key = columnKey(dateKey, calendar.id);
         const events = eventsByCalendar.get(calendar.id) ?? [];
         const preparedCell = prepareEventCell(
-          events.filter((event) => event.kind !== "availability"),
+          events.filter((event) => event.renderLayer !== "availability"),
           preparationSettings
         );
         const width = columnWidthForPreparedCell(preparedCell, columnMetricSettings);

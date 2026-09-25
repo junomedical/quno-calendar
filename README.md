@@ -31,6 +31,8 @@ import { parseDateInput, tokenizeDateInput } from "@quno/calendar/date-parser";
 
 The headless `@quno/calendar` root exports shared contracts such as `IsoDate`, `DateRange`, `DateSelectionMode`, `WeekStart`, and safe calendar-day helpers. It exports no UI. JavaScript entry points are ESM/CommonJS compatible, SSR-safe, and never inject CSS. The separately exported stylesheets remain readable, unminified CSS in `dist`.
 
+Type declarations for the public subpaths resolve through package `exports` in modern TypeScript projects and through `typesVersions` in projects still using Node-style module resolution. Consumers do not need ambient module declarations or TypeScript path aliases.
+
 Calendar day keys use timezone-free `YYYY-MM-DD` values. Infinite Calendar event `start` and `end` remain timestamp strings with their local or offset semantics.
 
 ## Guides and records

@@ -140,3 +140,11 @@ because that repository was the consolidation source. Its identifier and text re
   Keep the Preact compatibility fixture separate.
 - Consequences: React 18, React 19, and Preact compatibility regressions remain independently attributable. The React 19
   fixture requires a built package and an installed Chromium browser, and CI runs it after package verification.
+
+## QUNO-012 - Resolve public subpath types for legacy TypeScript consumers
+
+- Date: 2026-09-24
+- Status: Accepted
+- Context: Modern TypeScript resolves declaration subpaths from package `exports`, but the onboarding monorepo still uses Node-style module resolution and required ambient declarations for Infinite Calendar and Datepicker.
+- Decision: Keep the existing `exports` type conditions and add `typesVersions` mappings for every public JavaScript subpath. Do not add consumer-side TypeScript paths, which can affect runtime bundler resolution.
+- Consequences: Legacy consumers can import the package's real declarations directly, remove local declaration shims, and keep runtime imports at public subpaths. No JavaScript or CSS payload changes.

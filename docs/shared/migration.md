@@ -27,6 +27,16 @@ Date Parser has no stylesheet. Date Input may use it internally but does not re-
 
 Event-domain names such as `CalendarEvent`, `EventRendererProps`, and `LoadEvents` are unchanged. Infinite Calendar day keys use shared `IsoDate`; event `start` and `end` values remain timestamp strings.
 
+## Event kinds and availability presentation
+
+`CalendarEvent.kind` and `EventCreateRequest.kind` now accept `appointment`, `availability`, or `blocker`. Map older
+`consultation` and `draft` values to `appointment`, and `blocked` to `blocker`; a create/edit preview is represented
+by `ActiveEventDraft`, not a persisted event kind.
+
+An event with `kind: "availability"` is now a foreground, editable event and participates in overlap sizing. To retain
+the former full-cell background appearance, also set `renderLayer: "availability"` on that event. The optional
+`renderLayer` changes presentation and interaction only; it is not a scheduling entity or persistence field.
+
 ## Headless root and styling
 
 The `@quno/calendar` root remains headless. Use it for `IsoDate`, `DateRange`, `DateSelectionMode`, `WeekStart`, comparison, formatting, parsing, and calendar-day arithmetic shared between features.

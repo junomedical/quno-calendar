@@ -99,7 +99,10 @@ export const InfiniteTimelineRow = memo(function InfiniteTimelineRow({
   onEventPointerDown
 }: HorizontalTimelineRowProps) {
   const rowSettings = useMemo(() => ({ ...settings, rowHeight }), [rowHeight, settings]);
-  const availabilityEvents = useMemo(() => rowEvents.filter((event) => event.kind === "availability"), [rowEvents]);
+  const availabilityEvents = useMemo(
+    () => rowEvents.filter((event) => event.renderLayer === "availability"),
+    [rowEvents]
+  );
   const layoutItems = useMemo(() => layoutPreparedEventsForRow(preparedCell, rowSettings), [preparedCell, rowSettings]);
   const project = useEventProjections(settings, rowHeight, width);
   const sharedLayerProps = {

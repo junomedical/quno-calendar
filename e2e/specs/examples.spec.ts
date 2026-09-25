@@ -369,6 +369,36 @@ test("editorial Quno date input navigates directly to a selected date", async ({
   await demo.getByLabel("Destination date").press("ArrowDown");
   await expect(demo.getByText("Showing 2026-07-08")).toBeVisible();
 
+  const roomRow = demo.locator(
+    '[data-testid="calendar-day"][data-date="2026-07-06"] [data-testid="calendar-row"][data-calendar-id="room-1"]'
+  );
+  await expect(roomRow).toHaveCount(0);
+  await demo.getByRole("button", { name: "Show Room 1" }).click();
+  await expect(demo.getByText("Showing Room 1 at 13:30")).toBeVisible();
+  await expect
+    .poll(() =>
+      demo.evaluate((element) => {
+        const viewport = element.querySelector<HTMLElement>(".quno-calendar-viewport");
+        const row = element.querySelector<HTMLElement>(
+          '[data-testid="calendar-day"][data-date="2026-07-06"] [data-testid="calendar-row"][data-calendar-id="room-1"]'
+        );
+        if (!viewport || !row) return false;
+        const viewportBox = viewport.getBoundingClientRect();
+        const rowBox = row.getBoundingClientRect();
+        return rowBox.top >= viewportBox.top + 48 && rowBox.bottom <= viewportBox.bottom - 8;
+      })
+    )
+    .toBe(true);
+  const rowScrollTop = await demo.locator(".quno-calendar-viewport").evaluate((viewport) => viewport.scrollTop);
+  await demo.getByRole("button", { name: "Show Room 1" }).click();
+  await expect
+    .poll(() =>
+      demo
+        .locator(".quno-calendar-viewport")
+        .evaluate((viewport, before) => Math.abs(viewport.scrollTop - before), rowScrollTop)
+    )
+    .toBeLessThanOrEqual(1);
+
   await demo.getByRole("button", { name: "Today", exact: true }).click();
   await expect(demo.locator(".quno-calendar-now-pin.is-current")).toBeInViewport();
 });

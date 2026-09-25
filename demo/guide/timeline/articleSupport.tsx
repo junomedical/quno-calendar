@@ -40,7 +40,8 @@ export const articleEvents: CalendarEvent[] = [
     start: `${articleDateKey}T08:00:00`,
     end: `${articleDateKey}T17:00:00`,
     color: "#4b9b7d",
-    kind: "availability"
+    kind: "availability",
+    renderLayer: "availability"
   },
   {
     id: "consultation-a",
@@ -51,7 +52,7 @@ export const articleEvents: CalendarEvent[] = [
     start: `${articleDateKey}T09:00:00`,
     end: `${articleDateKey}T10:00:00`,
     color: "#c77b45",
-    kind: "consultation"
+    kind: "appointment"
   },
   {
     id: "follow-up-a",
@@ -71,7 +72,7 @@ export const articleEvents: CalendarEvent[] = [
     start: `${articleDateKey}T12:00:00`,
     end: `${articleDateKey}T13:30:00`,
     color: "#a84e43",
-    kind: "blocked"
+    kind: "blocker"
   },
   {
     id: "imaging-a",
@@ -91,7 +92,8 @@ export const articleEvents: CalendarEvent[] = [
     start: `${articleDateKey}T08:30:00`,
     end: `${articleDateKey}T16:30:00`,
     color: "#7d8244",
-    kind: "availability"
+    kind: "availability",
+    renderLayer: "availability"
   },
   {
     id: "follow-up-b",
@@ -124,7 +126,7 @@ export const overlapEvents: CalendarEvent[] = [
     start: `${articleDateKey}T13:15:00`,
     end: `${articleDateKey}T14:45:00`,
     color: "#c77b45",
-    kind: "consultation"
+    kind: "appointment"
   },
   {
     id: "overlap-3",
@@ -164,7 +166,7 @@ export const stabilityEvent: CalendarEvent = {
   start: `${articleDateKey}T10:00:00`,
   end: `${articleDateKey}T11:00:00`,
   color: "#c77b45",
-  kind: "consultation"
+  kind: "appointment"
 };
 
 export const stabilityEvents: CalendarEvent[] = [
@@ -217,9 +219,9 @@ export function abortableDelay(durationMs: number, signal?: AbortSignal) {
 
 export function ArticleEventCard({ event, status, style, laneCount }: EventRendererProps) {
   const isAvailability = event.kind === "availability";
-  const isConsultation = event.kind === "consultation";
-  const isBlocked = event.kind === "blocked";
-  const isDraft = event.kind === "draft";
+  const isConsultation = event.title.toLowerCase().includes("consultation");
+  const isBlocked = event.kind === "blocker";
+  const isDraft = event.id.includes("draft");
   const start = event.start.slice(11, 16);
   const end = event.end.slice(11, 16);
   const className = [

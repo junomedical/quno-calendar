@@ -1,4 +1,9 @@
-import type { CalendarEvent, CalendarId, QunoInfiniteCalendarSettings } from "#quno-internal/timeline/core/types";
+import type {
+  CalendarEvent,
+  CalendarEventKind,
+  CalendarId,
+  QunoInfiniteCalendarSettings
+} from "#quno-internal/timeline/core/types";
 import { dateAtVirtualOffset } from "#quno-internal/timeline/date/dateVirtualization";
 import {
   clampEventToTimeline,
@@ -92,7 +97,7 @@ export function buildMoveProposal(
 export function buildDraftEvent(
   startHit: CalendarHit,
   endHit: CalendarHit,
-  kind: CalendarEvent["kind"] = "draft"
+  kind: CalendarEventKind = "appointment"
 ): CalendarEvent {
   const startMinute = Math.min(startHit.minute, endHit.minute);
   const endMinute = Math.max(startHit.minute, endHit.minute);
@@ -105,6 +110,7 @@ export function buildDraftEvent(
     subtitle: isAvailability ? "Availability draft" : "Draft",
     start: dateKeyAndMinuteToIso(startHit.dateKey, startMinute),
     end: dateKeyAndMinuteToIso(startHit.dateKey, Math.max(endMinute, startMinute + 15)),
-    kind
+    kind,
+    ...(isAvailability ? { renderLayer: "availability" as const } : {})
   };
 }

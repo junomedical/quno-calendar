@@ -21,6 +21,7 @@ import { parseDateInput, tokenizeDateInput } from "@quno/calendar/date-parser";
 ```
 
 Add only the optional stylesheets needed by the browser application. JavaScript imports do not inject CSS.
+The package's public subpath types resolve under both modern and legacy Node-style TypeScript module resolution; no consumer-side declaration shim is needed.
 
 Import the component and stylesheet from the package entrypoint:
 
@@ -668,6 +669,16 @@ const [date, setDate] = useState<DateRange>({
 Date pickers, search results, command palettes, and “Today” controls can call the same handle without knowing the
 calendar’s virtual-window geometry. Use `settings` for density and dimensions, then scope product CSS through
 `className`; changing either preserves the same calendar integration and renderer contract.
+
+For an editor that knows the resource row, supply its id while navigating the horizontal timeline:
+
+```tsx
+calendarRef.current?.scrollToDateTime(date, time, { calendarId: "provider-a" });
+```
+
+The optional target brings an offscreen or virtualized row into the unobscured viewport after the date mounts. An
+already-visible row stays in place; the time still moves into view. Omitting `calendarId` preserves the original
+date/time navigation, and the vertical view continues to navigate by date/time without a row axis.
 
 Product controls do not need a separate submit step. The infinite-calendar demo uses `QunoDateInput` in single-date mode
 and navigates to the committed day at its product-owned default focus time. It has no separate time field or Add event

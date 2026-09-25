@@ -62,7 +62,7 @@ export function useDayMetrics({
         const rowKey = `${dateKey}:${calendar.id}`;
         const committedRowEvents = eventsByCalendar.get(calendar.id) ?? [];
         const preparedCell = prepareEventCell(
-          committedRowEvents.filter((event) => event.kind !== "availability"),
+          committedRowEvents.filter((event) => event.renderLayer !== "availability"),
           preparationSettings
         );
         rowEvents.set(rowKey, committedRowEvents);
