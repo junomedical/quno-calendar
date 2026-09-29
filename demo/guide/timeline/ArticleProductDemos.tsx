@@ -345,13 +345,28 @@ export function NavigationControlsDemo() {
               calendarRef.current?.scrollToDateTime({
                 date: articleDateKey,
                 time: articleNowTime,
-                calendarId: "room-1"
+                calendarId: "room-1",
+                align: "center"
               });
               setStatus("Showing Room 1 at 13:30");
             }}
             type="button"
           >
             Show Room 1
+          </button>
+          <button
+            className="article-button"
+            type="button"
+            onClick={() => {
+              const dates = calendarRef.current?.getVisibleDateKeys() ?? [];
+              const middle = dates[Math.floor(dates.length / 2)];
+              if (middle) {
+                setDate(middle);
+                setStatus(`Visible middle date: ${middle}`);
+              }
+            }}
+          >
+            Use middle visible date
           </button>
         </div>
       }

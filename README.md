@@ -24,7 +24,8 @@ import "@quno/calendar/date-input/styles.css";
 import { parseDateInput, tokenizeDateInput } from "@quno/calendar/date-parser";
 ```
 
-- **Quno/Infinite Calendar** virtualizes horizontal and vertical schedules with event loading, rendering, editing, zoom, navigation, and focus.
+- **Quno/Infinite Calendar** virtualizes horizontal and vertical schedules with event loading, rendering, editing, zoom, navigation, focus, and an optional consumer-owned loading fallback.
+  Its handle exposes visible date keys for contextual creation and optional centered horizontal resource navigation.
 - **Quno/Datepicker** paints, resizes, and moves one timezone-free date or inclusive range.
 - **Quno/Date Input** provides a native controlled or uncontrolled field for typed dates and ranges.
 - **Quno/Date Parser** recognizes formats, relative phrases, configurable weeks, ranges, and multilingual vocabulary without a UI runtime.

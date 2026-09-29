@@ -235,6 +235,8 @@ const loadingSnippet = `const loadEvents = async ({ startDate, endDate, calendar
   {...calendarProps}
   selectedCalendarIds={visibleCalendarIds}
   loadEvents={loadEvents}
+  isLoading={!initialDataReady}
+  loadingFallback={<MyCalendarSkeleton />}
 />`;
 
 const availabilitySnippet = `const [interactionMode, setInteractionMode] =

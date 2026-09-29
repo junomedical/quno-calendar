@@ -12,6 +12,8 @@ use the shared records for package-wide contracts and release work.
 
 The [named-contract migration](./shared/migration.md#unreleased-named-contracts-and-product-ownership) maps the
 current breaking API cleanup. Product decision records preserve the historical signatures they supersede.
+For creation defaults and centered row navigation, see Infinite Calendar Decision 094 and the shared usage recipes.
+Consumer-owned initial skeletons are covered by Infinite Calendar Decision 095 and the async-loading flow.
 
 The current responsiveness work is recorded in
 [QUNO-013](./shared/decisions.md#quno-013---bound-high-frequency-work-to-display-frames), with Infinite Calendar's

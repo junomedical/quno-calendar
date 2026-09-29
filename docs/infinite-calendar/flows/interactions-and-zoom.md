@@ -28,9 +28,10 @@ stateDiagram-v2
   [*] --> Idle
   Idle --> Drawing: empty grid pointer down
   Idle --> DragCandidate: event pointer down
-  DragCandidate --> Dragging: pointer resolves a changed proposal
-  DragCandidate --> Activating: pointer up without a changed move
-  Dragging --> Validating: pointer up
+  DragCandidate --> Dragging: pointer moves beyond click tolerance
+  DragCandidate --> Activating: pointer up without dragging
+  Dragging --> Validating: pointer up with a changed proposal
+  Dragging --> Idle: pointer up at original slot
   Drawing --> Creating: pointer up with positive duration
   Drawing --> Idle: zero duration or cancellation
   Activating --> Idle: onEventActivate notified
@@ -46,8 +47,9 @@ stateDiagram-v2
   Drawing --> Idle: pointercancel or Escape
 ```
 
-`DragCandidate` is represented by drag state with no preview rather than by a separate exported enum. A click or a
-drop back onto the same minute and resource activates the event without calling the parent's move callback.
+`DragCandidate` is represented by drag state rather than a separate exported enum. Movement is remembered before
+frame coalescing, even within a snapped slot or outside the grid. A click activates the event. A drag returning to
+the same minute and resource clears its preview without calling either activation or the parent's move callback.
 
 ## Drag And Drop Validation
 

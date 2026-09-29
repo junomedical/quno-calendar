@@ -2,6 +2,12 @@
 
 The event API is additive to the calendar surface. Dates, resources, scrolling, hit-testing, zoom, and drafts render from settings, virtualization state, and the last accepted cache snapshot. None of them waits for `loadEvents`.
 
+Consumers can supply `loadingFallback` and control `isLoading` during startup. With an initially empty selection,
+the view waits for resource context before mounting. Once selected rows exist, the timeline measures and loads events
+beneath a hidden surface; the fallback occupies the same viewport. Clearing loading reveals the mounted view, and
+the consumer can center its initial date through the navigation handle. The loader itself does not infer readiness
+or replace consumer error handling, and ordinary refreshes can retain the visible grid.
+
 ## End-To-End Delayed Load
 
 ```mermaid

@@ -780,3 +780,36 @@ maximum-depth sizing apply to this background layer only. Without the layer over
 editable event in `events` mode and shares its overlap lanes and metrics with appointments and blockers. Background
 availability is pointer-transparent in `events` mode; `availability` interaction mode targets that layer. This permits
 internal scheduling editors while retaining the background treatment for consumers that opt into it.
+
+## 094 - Contextual Creation And Explicit Row Centering
+
+Date: 2026-09-29
+Status: Accepted; refines Decision 092
+
+`getVisibleDateKeys()` reports sorted dates intersecting the usable viewport through the existing geometry registry,
+excluding overscan and sticky chrome. Products can choose the middle visible date when opening a creation form without
+scrolling or querying package DOM. `scrollToDateTime({ date, time, calendarId, align: "center" })` centers a horizontal
+resource row even if it was already visible; omitted alignment retains Decision 092's existing visibility behavior.
+The vertical view retains its existing date/time navigation. Recurrence calculation remains owned by the consuming app.
+
+## 095 - Consumer-Owned Initial Loading Fallback
+
+Date: 2026-09-29
+Status: Accepted
+
+`isLoading` and `loadingFallback` optionally cover initial context and event loading with consumer-owned markup.
+An initially empty selection defers the timeline mount, avoiding header-only geometry before resource rows arrive.
+With selected rows, the hidden timeline keeps its dimensions and runs its normal event loader; revealing it does not
+remount it. The consumer clears loading on readiness or failure and may center its initial date through the existing
+navigation handle. Omitted fallback preserves the existing rendering behavior; background refreshes can keep the grid visible.
+
+## 096 - Returning A Drag To Its Starting Slot Does Not Activate
+
+Date: 2026-09-29
+Status: Accepted; refines Decision 028
+
+The calendar distinguishes pointer clicks from drags before coalescing move frames. Movement more than four pixels
+from the initial press is remembered until the gesture ends, including movement within one snapped slot or outside
+the timeline. Returning a drag to its original minute and calendar clears the preview without invoking activation
+or requesting a move. Ordinary clicks still invoke `onEventActivate`; consumers need no pointer-movement guard.
+Changed drops retain the existing parent-owned persistence boundary.

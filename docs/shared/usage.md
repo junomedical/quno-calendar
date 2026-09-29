@@ -32,6 +32,19 @@ import "@quno/calendar/infinite-calendar/styles.css";
 
 Repository examples use the same public subpath aliases as package consumers.
 
+For initial calendar loading, supply your own skeleton and keep it mounted as a prop:
+
+```tsx
+<QunoInfiniteCalendar
+  {...calendarProps}
+  isLoading={!initialDataReady && !initialError}
+  loadingFallback={<MyCalendarSkeleton />}
+/>
+```
+
+The consumer owns readiness and error UI. Once selected rows exist, event loading and layout continue beneath the
+fallback. Clear loading after the initial data arrives; ordinary refreshes need not hide the calendar.
+
 The stylesheet is an explicit package asset; JavaScript does not inject it. This keeps both ESM imports and CommonJS `require("@quno/calendar/infinite-calendar")` safe in Node/SSR code. Import the stylesheet from the browser application entrypoint once.
 
 For a concept-first introduction with live examples, read
@@ -531,6 +544,8 @@ these callbacks is read-only.
 />
 ```
 
+A normal click invokes `onEventActivate`. Dragging away and back to the original slot invokes neither activation nor a move request; the calendar tracks the gesture, so consumers need no pointer-movement suppression.
+
 Returning `false` from `onEventMoveRequest` rejects a drop. Returning a created event from `onEventCreateRequest` lets the visible cache show the committed event immediately. Newly committed visible events briefly receive `status: "appearing"` in `renderEvent` props so product renderers can play a save/create highlight. For parent-owned save flows, update your own event store and call `commitVisibleEvent` so the loaded visible cache changes one record instead of reloading the range.
 
 Repository example: the parent-owned mutation chapter in
@@ -701,8 +716,20 @@ For an editor that knows the resource row, supply its id while navigating the ho
 calendarRef.current?.scrollToDateTime({ date, time, calendarId: "provider-a" });
 ```
 
+Use `align: "center"` on that call when the row should move to the middle even if already visible. To start a new
+draft where the operator is looking without scrolling:
+
+```tsx
+const visibleDates = calendarRef.current?.getVisibleDateKeys() ?? [];
+const initialDate = visibleDates[Math.floor(visibleDates.length / 2)] ?? toolbarDate;
+openCreateForm(initialDate);
+```
+
+Try **Use middle visible date** and **Show Room 1** in the date-navigation field-guide example. The former reads
+the current viewport without moving it; the latter centers the selected resource row.
+
 The optional target brings an offscreen or virtualized row into the unobscured viewport after the date mounts. An
-already-visible row stays in place; the time still moves into view. Omitting `calendarId` preserves the original
+already-visible row stays in place unless `align: "center"` is requested; the time still moves into view. Omitting `calendarId` preserves the original
 date/time navigation, and the vertical view continues to navigate by date/time without a row axis.
 
 Product controls do not need a separate submit step. The infinite-calendar demo uses `QunoDateInput` in single-date mode

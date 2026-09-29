@@ -17,6 +17,9 @@ days, hours, horizontal rows, and vertical columns without taking ownership of g
 - [Decisions](./decisions.md)
 - [Shared usage recipes](../shared/usage.md)
 
+Dragging an event back to its starting slot neither opens its editor nor requests a move. The calendar owns
+this distinction from an ordinary click, which still invokes `onEventActivate`; consumers need no movement guard.
+
 Day keys use shared timezone-free `IsoDate` values. Event `start` and `end` remain timestamp strings and retain their
 local or offset semantics.
 
@@ -27,6 +30,12 @@ consumer needs the background treatment; that layer has independent overlap lane
 The horizontal navigation handle can reveal a resource row with
 `scrollToDateTime({ date, time, calendarId })`. The calendar owns the virtual-row wait and viewport correction; consumers
 do not query its DOM.
+Pass `align: "center"` to center the requested row even when it is already visible. `getVisibleDateKeys()` returns
+only dates intersecting the usable viewport, so an external creation form can start on the middle visible date.
+
+Optional `isLoading` and `loadingFallback` props let a consumer supply its initial skeleton. With no selected rows,
+the initial timeline waits to mount; once rows exist it measures and loads events beneath the hidden surface. Clearing
+`isLoading` reveals that same timeline. Consumers own readiness, failures and any initial centered navigation.
 
 The field guide keeps its interaction contracts live: newly scrolled dates populate without a simulated delay, event
 cards can be resized in place, parent-reviewed mutations preserve their working row and restore the original view on

@@ -52,6 +52,19 @@ function captureAnchor({
   return snapshot ? { snapshot, target } : null;
 }
 
+function visibleDateKeys({ registry, args }: { registry: ViewportGeometryRegistry; args: AnchoringArgs }) {
+  const viewport = args.containerRef.current;
+  return viewport
+    ? registry.visibleDateKeys({
+        viewportBox: insetViewportBox({
+          viewport,
+          leftInset: args.visibilityInsets?.left,
+          topInset: args.visibilityInsets?.top
+        })
+      })
+    : [];
+}
+
 /** Captures and restores event/slot geometry through an instance-owned registry. */
 export function useViewportAnchoring(args: AnchoringArgs) {
   const registry = useMemo(() => new ViewportGeometryRegistry(), []);
@@ -167,12 +180,10 @@ export function useViewportAnchoring(args: AnchoringArgs) {
     [registry]
   );
 
-  const getResourceElement = useCallback(
-    ({ dateKey, calendarId }: { dateKey: string; calendarId: string }) => registry.resource({ dateKey, calendarId }),
-    [registry]
-  );
+  const getResourceElement = useMemo(() => registry.resource.bind(registry), [registry]);
 
   return {
+    getVisibleDateKeys: () => visibleDateKeys({ registry, args }),
     activeRestoreTarget,
     captureViewportAnchor,
     isEventFullyVisible,

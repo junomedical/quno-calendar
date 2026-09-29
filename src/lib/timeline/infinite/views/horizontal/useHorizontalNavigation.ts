@@ -61,10 +61,11 @@ export function useHorizontalNavigation({
     isEventFullyVisible,
     restoreViewportAnchor,
     cancelViewportAnchorRestore,
+    getVisibleDateKeys,
     getResourceElement
   } = anchoring;
   const scrollToDateTime = useCallback<QunoInfiniteCalendarHandle["scrollToDateTime"]>(
-    ({ date: dateKey, time, calendarId }) => {
+    ({ date: dateKey, time, calendarId, align }) => {
       const viewport = containerRef.current;
       if (!calendarId || !viewport || !/^\d{2}:\d{2}$/.test(time)) {
         cancelViewportAnchorRestore();
@@ -84,6 +85,7 @@ export function useHorizontalNavigation({
       cancelViewportAnchorRestore();
       scrollToTime({ time });
       if (
+        align !== "center" &&
         rowBox &&
         rowBox.top >= viewportBox.top + settings.dayHeaderHeight &&
         rowBox.bottom <= viewportBox.bottom - 8
@@ -93,7 +95,10 @@ export function useHorizontalNavigation({
 
       const target = { dateKey, time, calendarId };
       const rowHeight = rowBox?.height ?? settings.rowHeight;
-      const top = Math.max(settings.dayHeaderHeight, (viewport.clientHeight - rowHeight) / 2);
+      const top = Math.max(
+        settings.dayHeaderHeight,
+        (viewport.clientHeight + settings.dayHeaderHeight - rowHeight) / 2
+      );
       const left =
         settings.labelWidth +
         TIMELINE_LEFT_GUTTER_PX +
@@ -124,6 +129,7 @@ export function useHorizontalNavigation({
     () => ({
       scrollToDate,
       scrollToDateTime,
+      getVisibleDateKeys,
       scrollToToday: () =>
         scrollToDateTime({
           date: toDateKey({ date: now }),
@@ -139,6 +145,7 @@ export function useHorizontalNavigation({
     }),
     [
       cancelViewportAnchorRestore,
+      getVisibleDateKeys,
       captureViewportAnchor,
       isEventFullyVisible,
       now,

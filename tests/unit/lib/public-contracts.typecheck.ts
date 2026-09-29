@@ -31,6 +31,9 @@ export function checkPublicContracts(handle: QunoInfiniteCalendarHandle, event: 
   tokenizeDateInput({ text: "today" });
   handle.scrollToDate({ date });
   handle.scrollToDateTime({ date, time: "09:00" });
+  handle.scrollToDateTime({ date, time: "09:00", calendarId: "provider-a", align: "center" });
+  const visibleDates: IsoDate[] = handle.getVisibleDateKeys();
+  void visibleDates;
   handle.focusEvent({ event, preferredCalendarId: event.calendarId });
   handle.commitVisibleEvent({ event, previousEventId: "temporary", appearing: true });
   handle.restoreViewportAnchor({ anchor: null, cancelOnManualScroll: true });
@@ -72,6 +75,8 @@ export function checkPublicContracts(handle: QunoInfiniteCalendarHandle, event: 
   // @ts-expect-error Input formatting uses the plural collection.
   input.formatter = { range: () => "" };
   const calendar: Partial<QunoInfiniteCalendarProps> = {
+    isLoading: true,
+    loadingFallback: "Loading schedule…",
     locale: "en-GB",
     formatters: { dayLabel: ({ date }) => date },
     onZoomChange: ({ zoom }) => {

@@ -393,11 +393,26 @@ test("editorial Quno date input navigates directly to a selected date", async ({
         if (!viewport || !row) return false;
         const viewportBox = viewport.getBoundingClientRect();
         const rowBox = row.getBoundingClientRect();
-        return rowBox.top >= viewportBox.top + 48 && rowBox.bottom <= viewportBox.bottom - 8;
+        const expectedCenter = (viewportBox.top + 48 + viewportBox.bottom) / 2;
+        return Math.abs((rowBox.top + rowBox.bottom) / 2 - expectedCenter) < 30;
       })
     )
     .toBe(true);
   const rowScrollTop = await demo.locator(".quno-calendar-viewport").evaluate((viewport) => viewport.scrollTop);
+  const middleDate = await demo.evaluate((element) => {
+    const viewport = element.querySelector<HTMLElement>(".quno-calendar-viewport")!;
+    const box = viewport.getBoundingClientRect();
+    const dates = [...viewport.querySelectorAll<HTMLElement>('[data-testid="calendar-day"]')]
+      .filter(
+        (day) => day.getBoundingClientRect().bottom > box.top + 48 && day.getBoundingClientRect().top < box.bottom
+      )
+      .map((day) => day.dataset.date!)
+      .sort();
+    return dates[Math.floor(dates.length / 2)];
+  });
+  await demo.getByRole("button", { name: "Use middle visible date" }).click();
+  await expect(demo.getByText(`Visible middle date: ${middleDate}`)).toBeVisible();
+  expect(await demo.locator(".quno-calendar-viewport").evaluate((viewport) => viewport.scrollTop)).toBe(rowScrollTop);
   await demo.getByRole("button", { name: "Show Room 1" }).click();
   await expect
     .poll(() =>
@@ -1166,12 +1181,38 @@ test("editorial hover demo reveals underlying overlap lanes in turn", async ({ p
   await expect(demo.locator(`[data-event-id="${lanePair[0].id}"][data-status="hovered"]`)).toHaveCount(0);
 });
 
+test("consumer loading fallback covers startup and reveals the initial date centered", async ({ page }) => {
+  await page.goto("/guide");
+  const demo = await revealLazyArticleDemo(page, "event preloading example", "article-prefetch-demo");
+  const fallback = demo.getByRole("status", { name: "Loading calendar" });
+  await expect(fallback).toBeVisible();
+  await expect(demo.locator(".quno-calendar-loading-content")).toHaveCSS("visibility", "hidden");
+  const viewport = demo.locator(".quno-calendar-viewport");
+  await expect(demo.getByTestId("article-prefetch-count")).toContainText(/[1-9]\d* requests?/);
+  await expect(viewport).toHaveCount(1);
+  const [skeletonBox, viewportBox] = await Promise.all([fallback.boundingBox(), viewport.boundingBox()]);
+  expect(Math.abs(skeletonBox!.height - viewportBox!.height)).toBeLessThan(3);
+  await expect(fallback).toHaveCount(0);
+  await expect(demo.locator(".quno-calendar-loading-content")).toHaveCSS("visibility", "visible");
+  const centerDistance = () =>
+    demo.evaluate((element) => {
+      const viewport = element.querySelector(".quno-calendar-viewport")!.getBoundingClientRect();
+      const row = element
+        .querySelector('[data-date="2026-07-06"] [data-calendar-id="provider-a"][data-testid="calendar-row"]')
+        ?.getBoundingClientRect();
+      return row ? Math.abs((row.top + row.bottom) / 2 - (viewport.top + 48 + viewport.bottom) / 2) : Infinity;
+    });
+  await expect.poll(centerDistance).toBeLessThan(30);
+  await page.waitForTimeout(3_000);
+  expect(await centerDistance()).toBeLessThan(30);
+});
+
 test("editorial prefetch exhibit reveals a warm event before the next delayed range settles", async ({ page }) => {
   await page.goto("/guide");
   const demo = await revealLazyArticleDemo(page, "event preloading example", "article-prefetch-demo");
   await expect(demo.getByText("Warm window accepted and cached")).toBeVisible({ timeout: 10_000 });
   const initialRange = await page.getByTestId("article-prefetch-range").textContent();
-  expect(initialRange).toContain("2026-07");
+  expect(initialRange).toMatch(/2026-\d{2}-\d{2} → 2026-\d{2}-\d{2}/);
   const loadedEvents = demo.getByTestId("article-prefetch-loaded-events");
   const prefetchedLoadedEvent = loadedEvents.locator('[data-loaded-event-id="article-prefetched-event"]');
   await expect(prefetchedLoadedEvent).toBeVisible();

@@ -11,7 +11,7 @@ import {
   type EventPrefetchPolicy,
   type LoadEvents
 } from "@quno/calendar/infinite-calendar";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import { CalendarDemoShell } from "./ArticleDemos";
 import {
@@ -262,6 +262,22 @@ const articlePrefetchPolicy: EventPrefetchPolicy = () => ({ beforeDays: 3, after
 
 export function PrefetchLoadingDemo() {
   const calendarRef = useRef<QunoInfiniteCalendarHandle>(null);
+  const [contextReady, setContextReady] = useState(false);
+  const [initialLoaded, setInitialLoaded] = useState(false);
+  useEffect(() => {
+    const timer = window.setTimeout(() => setContextReady(true), 300);
+    return () => window.clearTimeout(timer);
+  }, []);
+  useLayoutEffect(() => {
+    if (initialLoaded) {
+      calendarRef.current?.scrollToDateTime({
+        date: articleDateKey,
+        time: "09:30",
+        calendarId: "provider-a",
+        align: "center"
+      });
+    }
+  }, [initialLoaded]);
   const latestRequestRef = useRef(0);
   const [requestCount, setRequestCount] = useState(0);
   const [range, setRange] = useState("Waiting for the first range");
@@ -280,6 +296,7 @@ export function PrefetchLoadingDemo() {
       setStatus("Warm window accepted and cached");
     }
     const events = filterEvents(preloadEvents, request);
+    setInitialLoaded(true);
     setLoadedEvents((current) => {
       const eventsById = new Map(current.map((event) => [event.id, event]));
       events.forEach((event) => eventsById.set(event.id, event));
@@ -342,12 +359,33 @@ export function PrefetchLoadingDemo() {
         <QunoInfiniteCalendar
           ref={calendarRef}
           ariaLabel="Delayed loading and event prefetch calendar"
-          calendars={articleCalendars}
+          calendars={contextReady ? articleCalendars : []}
+          isLoading={!initialLoaded}
+          loadingFallback={
+            <div
+              role="status"
+              aria-label="Loading calendar"
+              style={{ height: "100%", background: "#f0f2f5", padding: 20, boxSizing: "border-box" }}
+            >
+              {Array.from({ length: 5 }, (_, index) => (
+                <div
+                  key={index}
+                  style={{
+                    height: 32,
+                    marginBottom: 16,
+                    borderRadius: 4,
+                    background: "#dce2e8",
+                    width: index % 2 ? "70%" : "90%"
+                  }}
+                />
+              ))}
+            </div>
+          }
           eventPrefetchPolicy={articlePrefetchPolicy}
           renderEvent={ArticleEventCard}
           initialDateKey={articleDateKey}
           loadEvents={loadEvents}
-          selectedCalendarIds={["provider-a"]}
+          selectedCalendarIds={contextReady ? ["provider-a"] : []}
           settings={articleSettings}
         />
       </div>

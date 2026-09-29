@@ -157,3 +157,34 @@ test("keeps visible event cache populated after dropping on another day", async 
   );
   expect(Math.min(...(samples ?? [0]))).toBeGreaterThanOrEqual(Math.max(1, dragTarget.baselineVisibleEvents - 2));
 });
+
+test("does not open an editor or move an event dragged back to its starting slot", async ({ page }) => {
+  await page.goto("/demo/infinite-calendar");
+  await goToWorkday(page);
+  await waitForDemoEvents(page);
+  const duplicate = await firstDuplicatedViewportEvent(page);
+  const [box] = duplicate.boxes;
+  const x = box.x + 12;
+  const y = box.y + 12;
+  const source = page.locator(`[data-testid="calendar-event"][data-event-id="${duplicate.id}"]`).first();
+  const initialBox = await source.boundingBox();
+  const initialCount = await page.getByTestId("calendar-event").count();
+
+  await page.mouse.move(x, y);
+  await page.mouse.down();
+  await page.mouse.move(x + 80, y, { steps: 5 });
+  await expect(page.getByTestId("drag-preview-event").first()).toBeVisible();
+  await page.mouse.move(x, y, { steps: 5 });
+  await page.mouse.up();
+  await expect(page.getByTestId("drag-preview-event")).toHaveCount(0);
+  await expect(page.getByTestId("external-event-popup")).toHaveCount(0);
+  await expect(page.getByTestId("demo-message")).not.toContainText(/Move accepted|Move rejected/);
+  expect(await page.getByTestId("calendar-event").count()).toBe(initialCount);
+  const finalBox = await source.boundingBox();
+  expect(finalBox).not.toBeNull();
+  expect(Math.abs(finalBox!.x - initialBox!.x)).toBeLessThan(2);
+  expect(Math.abs(finalBox!.y - initialBox!.y)).toBeLessThan(2);
+
+  await page.mouse.click(x, y);
+  await expect(page.getByTestId("external-event-popup")).toBeVisible();
+});
