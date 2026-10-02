@@ -4,18 +4,30 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
-### Verification notes
-
-- Drag-back activation: all 14 focused interaction tests pass, including 8 new gesture regressions, and all 3 Chromium drag scenarios pass. The full Chromium run passed 117 of 118 scenarios; the one guide timeout passed when retried after building. Package typecheck, lint, architecture/contracts, library/demo builds, Preact compatibility and packed React/import/style verification pass. Full unit tests pass 336 tests with the same five documented stale guide assertions; repository formatting still flags the unchanged `OffscreenPills.tsx`. The final Infinite Calendar artifact is 39,377 bytes gzip, 465 bytes above its unchanged 38 KiB ceiling (259 bytes more than the previous build).
-
-- Viewport navigation and startup loading: all 117 Chromium checks pass, including loading-fallback visibility, delayed-context initialization, centered resource-row geometry and middle-visible-date selection. Typecheck, architecture, lint, builds, Preact compatibility and packed-package verification pass. The full unit run has five existing stale guide-size assertions (`DemoStory.test.tsx`: one; `FieldGuideProduction.test.tsx`: four), with 328 tests passing. Repository-wide formatting flags the unchanged `src/lib/date-picker/OffscreenPills.tsx`; changed files pass. The Infinite Calendar bundle is 39,118 bytes gzip, 206 bytes above the existing 38 KiB ceiling; the ceiling remains unchanged. Calendar CSS remains within its 2 KiB ceiling at 2,035 bytes gzip.
-
 ### Added
 
 - Optional consumer-owned `isLoading`/`loadingFallback` for initial calendar loading. Resource selection can arrive before the hidden timeline mounts and loads events, avoiding the header-only startup layout. The prefetch guide demonstrates delayed context, a supplied skeleton and centered initial navigation.
 
 - Restored `getVisibleDateKeys()` for creation defaults based on the actual viewport. Added optional `align: "center"`
   to horizontal resource-row navigation, including rows that are already visible. The navigation guide demonstrates both.
+
+### Fixed
+
+- A drag dropped back onto its original minute and calendar now neither activates the event editor nor sends a move request. The calendar tracks movement before frame coalescing; ordinary clicks still activate without consumer-side suppression.
+
+### Verification notes
+
+- After merging `0.6.1`, the corrected guide-size assertions pass: 341 unit tests, typecheck, lint, architecture, and formatting pass, and the library builds. The Infinite Calendar gzip result remains 39,377 bytes, 465 bytes over the 38 KiB budget; this pre-existing size gate still fails.
+
+- Drag-back activation: all 14 focused interaction tests pass, including 8 new gesture regressions, and all 3 Chromium drag scenarios pass. The full Chromium run passed 117 of 118 scenarios; the one guide timeout passed when retried after building. Package typecheck, lint, architecture/contracts, library/demo builds, Preact compatibility and packed React/import/style verification pass. Full unit tests pass 336 tests with the same five documented stale guide assertions; repository formatting still flags the unchanged `OffscreenPills.tsx`. The final Infinite Calendar artifact is 39,377 bytes gzip, 465 bytes above its unchanged 38 KiB ceiling (259 bytes more than the previous build).
+
+- Viewport navigation and startup loading: all 117 Chromium checks pass, including loading-fallback visibility, delayed-context initialization, centered resource-row geometry and middle-visible-date selection. Typecheck, architecture, lint, builds, Preact compatibility and packed-package verification pass. The full unit run has five existing stale guide-size assertions (`DemoStory.test.tsx`: one; `FieldGuideProduction.test.tsx`: four), with 328 tests passing. Repository-wide formatting flags the unchanged `src/lib/date-picker/OffscreenPills.tsx`; changed files pass. The Infinite Calendar bundle is 39,118 bytes gzip, 206 bytes above the existing 38 KiB ceiling; the ceiling remains unchanged. Calendar CSS remains within its 2 KiB ceiling at 2,035 bytes gzip.
+
+## 0.6.1 - 2026-10-02
+
+This package contains the current `feat/internal-calendar-core` contracts, including the headless root `singleDay` export used by onboarding. The new versioned archive gives consumers a distinct package identity for deployment.
+
+### Added
 
 - Added optional horizontal resource-row navigation through `scrollToDateTime({ date, time, calendarId })`, using the
   calendar's virtualized geometry and cancellation lifecycle instead of consumer DOM observers.
@@ -142,7 +154,7 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ### Fixed
 
-- A drag dropped back onto its original minute and calendar now neither activates the event editor nor sends a move request. The calendar tracks movement before frame coalescing; ordinary clicks still activate without consumer-side suppression.
+- A drag dropped back onto its original minute and calendar activates the event editor without sending a move request.
 - Prevented settled Infinite Calendar recentering from briefly painting uniform-height placeholder dates over already
   measured variable-height days, which could make availability-expanded rows jump and then return.
 - Kept compact overlapping availability labels inside their card bounds by using a single-line lane label and removing
