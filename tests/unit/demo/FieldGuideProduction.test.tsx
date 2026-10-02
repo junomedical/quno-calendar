@@ -9,10 +9,10 @@ import {
 
 describe("field guide production facts", () => {
   it.each([
-    [infiniteCalendarProduction, "37.56 KiB gzip", "1.95 KiB gzip"],
-    [datepickerProduction, "10.47 KiB gzip", "3.22 KiB gzip"],
-    [dateInputProduction, "7.82 KiB gzip", "0.58 KiB gzip"],
-    [dateParserProduction, "5.20 KiB gzip", "No stylesheet"]
+    [infiniteCalendarProduction, "37.88 KiB gzip", "1.96 KiB gzip"],
+    [datepickerProduction, "10.46 KiB gzip", "3.23 KiB gzip"],
+    [dateInputProduction, "7.80 KiB gzip", "0.58 KiB gzip"],
+    [dateParserProduction, "5.21 KiB gzip", "No stylesheet"]
   ] as const)("separates exact artifacts and runtime contracts for $product", (profile, javascript, styles) => {
     const { unmount } = render(<FieldGuideProduction profile={profile} />);
     const payload = screen.getByLabelText(`${profile.product} production payload`);

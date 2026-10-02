@@ -4,6 +4,10 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+## 0.6.1 - 2026-10-02
+
+This package contains the current `feat/internal-calendar-core` contracts, including the headless root `singleDay` export used by onboarding. The new versioned archive gives consumers a distinct package identity for deployment.
+
 ### Added
 
 - Added optional horizontal resource-row navigation through `scrollToDateTime({ date, time, calendarId })`, using the
