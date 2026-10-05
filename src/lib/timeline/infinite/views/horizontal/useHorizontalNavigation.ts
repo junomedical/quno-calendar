@@ -1,3 +1,4 @@
+import { minutesSinceStartOfDay } from "#quno-internal/timeline/time/time";
 import { useCallback, useImperativeHandle, useRef, type ForwardedRef, type RefObject } from "react";
 import { toDateKey } from "#quno-internal/timeline/date/dateVirtualization";
 import type { QunoInfiniteCalendarHandle, QunoInfiniteCalendarSettings } from "#quno-internal/timeline/core/types";
@@ -6,7 +7,6 @@ import { minuteToX, parseClockToMinutes } from "#quno-internal/timeline/time/tim
 import { useViewportAnchoring } from "#quno-internal/timeline/infinite/anchors/parent/useViewportAnchoring";
 import { TIMELINE_LEFT_GUTTER_PX } from "#quno-internal/timeline/time/timelineTicks";
 import type { IsoDate } from "#quno-internal/shared/dateRangeModel";
-
 /**
  * Horizontal navigation boundary.
  *
@@ -20,7 +20,6 @@ type HorizontalNavigationArgs = {
   now: Date;
   scrollToDate: QunoInfiniteCalendarHandle["scrollToDate"];
 };
-
 export function useHorizontalNavigation({
   forwardedRef,
   containerRef,
@@ -60,7 +59,6 @@ export function useHorizontalNavigation({
   const releaseActiveDraftRef = useRef<QunoInfiniteCalendarHandle["releaseActiveDraft"]>(() => undefined);
   const commitVisibleEventRef = useRef<QunoInfiniteCalendarHandle["commitVisibleEvent"]>(() => undefined);
   const removeVisibleEventRef = useRef<QunoInfiniteCalendarHandle["removeVisibleEvent"]>(() => undefined);
-
   useImperativeHandle(
     forwardedRef,
     () => ({
@@ -68,8 +66,8 @@ export function useHorizontalNavigation({
       scrollToDateTime,
       scrollToToday: () =>
         scrollToDateTime({
-          date: toDateKey({ date: now }),
-          time: `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`
+          date: toDateKey({ date: now, timeZone: settings.timeZone }),
+          time: `${String(Math.floor(minutesSinceStartOfDay({ value: now, timeZone: settings.timeZone }) / 60)).padStart(2, "0")}:${String(minutesSinceStartOfDay({ value: now, timeZone: settings.timeZone }) % 60).padStart(2, "0")}`
         }),
       captureViewportAnchor,
       isEventFullyVisible,
@@ -84,12 +82,12 @@ export function useHorizontalNavigation({
       captureViewportAnchor,
       isEventFullyVisible,
       now,
+      settings.timeZone,
       restoreViewportAnchor,
       scrollToDate,
       scrollToDateTime
     ]
   );
-
   return {
     activeRestoreTarget: anchoring.activeRestoreTarget,
     commitVisibleEventRef,

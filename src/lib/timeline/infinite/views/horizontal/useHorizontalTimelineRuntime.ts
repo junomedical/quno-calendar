@@ -1,3 +1,4 @@
+import { minutesSinceStartOfDay } from "#quno-internal/timeline/time/time";
 import { useEffect, useMemo, useState, type ForwardedRef } from "react";
 import { toDateKey } from "#quno-internal/timeline/date/dateVirtualization";
 import type { CalendarInternalViewProps, CalendarViewHandle } from "#quno-internal/timeline/core/internalTypes";
@@ -9,7 +10,6 @@ import { buildTimeTicks } from "#quno-internal/timeline/time/timelineTicks";
 import { useHorizontalEventHover } from "#quno-internal/timeline/infinite/rendering/horizontal/useHorizontalEventHover";
 import { useHorizontalControlledZoomAnchor } from "#quno-internal/timeline/infinite/anchors/zoom/useHorizontalControlledZoomAnchor";
 import { useHorizontalTimelineFoundation } from "./useHorizontalTimelineFoundation";
-
 /**
  * Horizontal runtime coordinator.
  *
@@ -51,7 +51,7 @@ export function useHorizontalTimelineRuntime({
   foundation.navigation.commitVisibleEventRef.current = foundation.eventRange.applyCommittedEventToLoadedEvents;
   foundation.navigation.removeVisibleEventRef.current = foundation.eventRange.removeEventFromLoadedEvents;
   useEffect(() => setIsInteractionActive(interactions.isInteractionActive), [interactions.isInteractionActive]);
-  const nowMinute = now.getHours() * 60 + now.getMinutes();
+  const nowMinute = minutesSinceStartOfDay({ value: now, timeZone: foundation.settings.timeZone });
   const showNowLine =
     nowMinute >= timelineStartMinute(foundation.settings) && nowMinute <= timelineEndMinute(foundation.settings);
   const shiftWheelZoom = useHorizontalShiftWheelZoom({
@@ -72,7 +72,6 @@ export function useHorizontalTimelineRuntime({
     startHour: foundation.sizing.effectiveSettings.startHour,
     isGestureZoomActive: shiftWheelZoom.isGestureZoomActive
   });
-
   const timeTicks = useMemo(
     () => buildTimeTicks(foundation.sizing.effectiveSettings),
     [foundation.sizing.effectiveSettings]
@@ -81,7 +80,6 @@ export function useHorizontalTimelineRuntime({
     disabled: Boolean(interactions.dragState || interactions.draftState || interactionMode === "availability"),
     setHoveredEvent: interactions.setHoveredEvent
   });
-
   return {
     ...foundation,
     hover,
@@ -90,6 +88,6 @@ export function useHorizontalTimelineRuntime({
     nowMinute,
     showNowLine,
     timeTicks,
-    todayKey: toDateKey({ date: now })
+    todayKey: toDateKey({ date: now, timeZone: foundation.settings.timeZone })
   };
 }

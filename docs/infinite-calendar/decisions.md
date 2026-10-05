@@ -756,3 +756,32 @@ The layered cache, frame scheduler, and measured recenter bridge raise the ESM a
 KiB gzip. The
 Infinite Calendar JavaScript ceiling moves from 37 KiB to 38 KiB; the optional stylesheet remains 1.95 KiB gzip inside
 its existing 2 KiB ceiling.
+
+## QU-3879-091 - Explicit Timeline Timezone Preserves Absolute Event Instants
+
+Date: 2026-09-14
+Status: Accepted
+
+`settings.timeZone` makes the timeline display a single IANA timezone independently of the browser. Event day buckets, overlap geometry, navigation, focus, and pointer proposals use that reference. The component adds `calendarTimeZone` to renderer events without changing their absolute start/end values. Source scheduling zones remain consumer-owned. Date-only keys remain timezone-free. Omitting the setting preserves the established browser-local contract. Nonexistent spring-forward times cannot become persisted pointer proposals. Changing the setting reprojects retained cached events into the new display timezone immediately and also invalidates source freshness for refetch.
+
+The timezone conversion and callback handling bring the calendar ESM artifact to approximately 34.15 KiB gzip, 150 bytes above the former 34 KiB ceiling. The feature budget is now 35 KiB gzip; other feature and stylesheet budgets are unchanged.
+
+## QU-3879-092 - Reject Ambiguous Pointer Times and Preserve Elapsed Duration
+
+Date: 2026-09-15
+Status: Accepted
+
+Refines Decision QU-3879-091: a wall time cannot disambiguate repeated autumn hours, so reject folds as well as gaps, matching the onboarding editor. Preserve event duration using absolute timestamps, including when a move crosses a DST boundary. Cancel invalid drawn ranges rather than submitting a stale selection.
+
+Merge identity note: QU-3879-091 and QU-3879-092 were numbered 091/092 on the calendar-foundation branch before integration. Their branch namespace preserves that provenance and distinguishes them from upstream Decision 091 on independent availability lanes. Their accepted behavior remains unchanged.
+
+## 093 - Combine Named Contracts and Timezone-Safe Interactions
+
+Integrate upstream Decision 091 and the branch-local timezone decisions without reverting either behavior. Named object requests and component-level locale apply to timezone-aware navigation and mutations as well. The combined build measures 163.08 KiB raw / 38.59 KiB gzip, so the Infinite Calendar ceiling becomes 39 KiB; other product ceilings remain unchanged. This supersedes the earlier size ceilings for the combined build only.
+
+## 094 - Keep Hidden Seconds From Turning Clicks Into Moves
+
+Date: 2026-09-15
+Status: Accepted; refines Decision 093
+
+Pointer proposals have minute precision, while imported timestamps may contain seconds and milliseconds. Treat a proposal with the same absolute start and end minutes and calendar membership as unchanged. Activate the original event without changing its timestamps. Compare rounded endpoints so a stationary click retains the source seconds even when its two endpoints have different sub-minute remainders. Absolute start minutes still distinguish the two instants in a repeated DST hour. Actual moves floor both imported endpoints to whole minutes and preserve that minute duration. The timezone demo shows minute-only labels alongside a precise source interval and reports whether clicking opens or moves the event.

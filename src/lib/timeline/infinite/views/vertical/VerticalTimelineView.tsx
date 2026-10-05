@@ -37,12 +37,13 @@ function useVerticalViewSetup({ props, now }: { props: CalendarInternalViewProps
   });
 }
 
-function verticalLoaderProps(props: CalendarInternalViewProps) {
+function verticalLoaderProps({ props, displayTimeZone }: { props: CalendarInternalViewProps; displayTimeZone?: string }) {
   return {
     loadEvents: props.loadEvents,
     eventPrefetchPolicy: props.eventPrefetchPolicy,
     eventVersion: props.eventVersion,
-    requestedAppearingEventIds: props.appearingEventIds
+    requestedAppearingEventIds: props.appearingEventIds,
+    displayTimeZone: displayTimeZone ?? null
   };
 }
 
@@ -91,7 +92,7 @@ export const InfiniteVerticalTimelineView = forwardRef<CalendarViewHandle, Calen
     const eventStore = useEventRangeLoader({
       activeDraftDateKey: props.activeDraft ? eventDateKey(props.activeDraft.event) : undefined,
       activeDraftLoadAnchorDateKey: viewport.virtualWindow.anchorDateKey,
-      ...verticalLoaderProps(props),
+      ...verticalLoaderProps({ props, displayTimeZone: settings.timeZone }),
       selectedIds,
       visibleDateKeys: viewport.visibleDateKeys
     });

@@ -17,6 +17,7 @@ import { startTransition, useCallback, useEffect, useMemo, useRef, useState } fr
 import { applyEventMove } from "#quno-internal/timeline/data/calendarEvents";
 import { defaultEventPrefetchPolicy } from "#quno-internal/timeline/data/eventPrefetch";
 import { EventRangeCoordinator, eventLoadDateKeys } from "./eventRangeCoordinator";
+import { projectEventSnapshot } from "./projectEventSnapshot";
 import { loadEventRange } from "./loadEventRange";
 import type {
   CalendarEvent,
@@ -35,6 +36,7 @@ type UseEventRangeLoaderArgs = {
   loadEvents: LoadEvents;
   eventPrefetchPolicy?: EventPrefetchPolicy;
   eventVersion?: number | string;
+  displayTimeZone?: string | null;
   requestedAppearingEventIds?: EventId[];
   selectedIds: CalendarId[];
   visibleDateKeys: string[];
@@ -48,6 +50,7 @@ export function useEventRangeLoader({
   loadEvents,
   eventPrefetchPolicy = defaultEventPrefetchPolicy,
   eventVersion,
+  displayTimeZone,
   requestedAppearingEventIds = EMPTY_REQUESTED_APPEARING_EVENT_IDS,
   selectedIds,
   visibleDateKeys
@@ -55,6 +58,10 @@ export function useEventRangeLoader({
   const [coordinator] = useState(() => new EventRangeCoordinator());
   const [eventsByDate, setEventsByDate] = useState<Record<string, CalendarEvent[]>>({});
   const selectedIdsKey = JSON.stringify(selectedIds);
+  const projectedEventsByDate = useMemo(
+    () => projectEventSnapshot({ eventsByDate, displayTimeZone }),
+    [displayTimeZone, eventsByDate]
+  );
   const visibleLoadDateKeys = useMemo(
     () => eventLoadDateKeys({ visibleDateKeys, selectedCalendarIds: selectedIds, policy: eventPrefetchPolicy }),
     [eventPrefetchPolicy, selectedIds, visibleDateKeys]
@@ -164,7 +171,7 @@ export function useEventRangeLoader({
   );
 
   return {
-    eventsByDate,
+    eventsByDate: projectedEventsByDate,
     appearingEventIds,
     applyMoveToLoadedEvents,
     applyCommittedEventToLoadedEvents,

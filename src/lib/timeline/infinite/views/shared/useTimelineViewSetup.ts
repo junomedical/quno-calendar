@@ -7,7 +7,6 @@ import {
   type QunoInfiniteCalendarSettings
 } from "#quno-internal/timeline/core/types";
 import { mergeQunoInfiniteCalendarSettings } from "./mergeQunoInfiniteCalendarSettings";
-
 type UseTimelineViewSetupArgs = {
   calendars: CalendarRow[];
   selectedCalendarIds: CalendarId[];
@@ -15,7 +14,6 @@ type UseTimelineViewSetupArgs = {
   initialDateKey?: CalendarViewComponentProps["initialDateKey"];
   now: Date;
 };
-
 export function useTimelineViewSetup({
   calendars,
   selectedCalendarIds,
@@ -32,12 +30,11 @@ export function useTimelineViewSetup({
   const initialAnchorDateKey = useMemo(
     () =>
       normalizeAnchorDate({
-        dateKey: initialDateKey ?? toDateKey({ date: now }),
+        dateKey: initialDateKey ?? toDateKey({ date: now, timeZone: settings.timeZone }),
         excludedWeekdays: settings.excludedWeekdays
       }),
-    [initialDateKey, now, settings.excludedWeekdays]
+    [initialDateKey, now, settings.excludedWeekdays, settings.timeZone]
   );
-
   return {
     settings,
     selectedCalendars,

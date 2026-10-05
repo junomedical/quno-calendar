@@ -113,6 +113,38 @@ describe("useEventRangeLoader", () => {
     expect(result.current.eventsByDate["2026-07-18"]).toHaveLength(1);
   });
 
+  it("reprojects retained events to the new display timezone before refetch finishes", async () => {
+    const nextResponse = deferred<CalendarEvent[]>();
+    const sourceEvent = {
+      ...event("late"),
+      start: "2026-07-18T23:00:00Z",
+      end: "2026-07-18T23:30:00Z",
+      calendarTimeZone: "UTC"
+    };
+    const loadEvents = vi.fn<LoadEvents>()
+      .mockResolvedValueOnce([sourceEvent])
+      .mockImplementationOnce(() => nextResponse.promise);
+    const { result, rerender } = renderHook(
+      ({ eventVersion, displayTimeZone }: { eventVersion: number; displayTimeZone: string }) =>
+        useEventRangeLoader({
+          loadEvents,
+          eventVersion,
+          displayTimeZone,
+          selectedIds: ["calendar-a"],
+          visibleDateKeys: ["2026-07-18"]
+        }),
+      { initialProps: { eventVersion: 1, displayTimeZone: "UTC" } }
+    );
+    await waitFor(() => expect(result.current.eventsByDate["2026-07-18"]?.[0]?.id).toBe("late"));
+    rerender({ eventVersion: 2, displayTimeZone: "Europe/Bucharest" });
+    expect(result.current.eventsByDate["2026-07-19"]?.[0]).toMatchObject({
+      id: "late",
+      calendarTimeZone: "Europe/Bucharest"
+    });
+    expect(result.current.eventsByDate["2026-07-18"]).toEqual([]);
+    await waitFor(() => expect(loadEvents).toHaveBeenCalledTimes(2));
+  });
+
   it("reuses date buckets when a calendar selection narrows and returns within loaded coverage", async () => {
     const events = [event("event-a"), event("event-b", "event-b", "calendar-b")];
     const loadEvents = vi.fn<LoadEvents>(async () => events);

@@ -92,6 +92,7 @@ export function useHorizontalTimelineFoundation({
     loadEvents: props.loadEvents,
     eventPrefetchPolicy: props.eventPrefetchPolicy,
     eventVersion: props.eventVersion,
+    displayTimeZone: settings.timeZone ?? null,
     requestedAppearingEventIds: props.appearingEventIds,
     selectedIds,
     visibleDateKeys: virtualTimeline.visibleDateKeys

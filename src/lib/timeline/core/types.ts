@@ -49,6 +49,8 @@ export type EventId = string;
 
 /** Event data accepted by the reusable calendar renderer. */
 export type CalendarEvent = {
+  /** Display timezone supplied by the owning calendar; source timestamps remain unchanged. */
+  calendarTimeZone?: string;
   id: EventId;
   calendarId: CalendarId;
   calendarIds?: CalendarId[];
@@ -65,6 +67,8 @@ export type EventRenderStatus = "existing" | "hovered" | "dragging" | "drop-prev
 
 /** Shared geometry, interaction, and filtering settings for timeline views. */
 export type QunoInfiniteCalendarSettings = {
+  /** IANA display timezone; omitted preserves browser-local behavior. */
+  timeZone?: string;
   startHour: number;
   endHour: number;
   zoom: number;
