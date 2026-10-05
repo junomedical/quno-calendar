@@ -472,6 +472,25 @@ The parser recognizes explicit formats, relative dates and calendar periods, inc
 Lexicon extensions add deliberate aliases to the bounded grammar; they do not turn it into a general parser for
 languages with different token boundaries or word order.
 
+### Optional dates and clock times
+
+```ts
+const timed = parseDateInput({
+  text: "tomorrow 10:30PM",
+  recognizeTime: true,
+  referenceDate: "2026-10-05",
+  expectedRange: { start: "2026-01-01", end: "2027-12-31" }
+});
+// value: { start: "2026-10-06", end: "2026-10-06" }
+// times: { start: "22:30", end: "22:30" }
+const clockTokens = tokenizeDateInput({ text: "10:30PM", recognizeTime: true });
+```
+
+Clock recognition defaults to false. Times remain separate `HH:mm` values without a timezone; missing endpoint times
+are `null` and date-only results omit `times`. Time-only input uses `referenceDate`; `23:00–01:00` advances an undated
+end to the next calendar day. Use `at` or `um` to disambiguate a bare hour from an accepted date. See the
+[complete clock and range rules](../date-parser/README.md#optional-clock-recognition). Date Input remains date-only.
+
 ## Compose Quno/Datepicker and Quno/Infinite Calendar
 
 Keep both components independent. A single-date picker can navigate the timeline through the public handle:

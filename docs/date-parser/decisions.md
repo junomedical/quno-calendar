@@ -59,3 +59,21 @@ applies; new refinements belong here rather than in the Datepicker ledger.
   and constructed vocabulary private. Date Input imports this headless implementation internally.
 - Consequences: The public parser declarations have no React dependency. Relative-date arithmetic is maintained
   separately from phrase recognition, and grammar, ranking, and locale inference retain their accepted behavior.
+
+## QDPR-005 - Opt into timezone-free clock recognition
+
+- Date: 2026-10-05
+- Status: Accepted; extends QDPR-001 and QDPR-004
+- Context: Headless consumers need familiar clock syntax alongside dates while existing date-input consumers retain
+  their accepted date-only contract.
+- Decision: Add `recognizeTime: true` to parsing and tokenization, defaulting to false. Keep `value: DateRange` and add
+  optional `times: DateInputTimeRange` with normalized `HH:mm` boundaries and `null` for missing clocks. Accept bare
+  24-hour hours, colon minutes, and case-insensitive AM/PM; preserve valid unmarked date readings and require `at`/`um`
+  to disambiguate a bare hour. Time-only input uses the live reference date. Inherit omitted endpoint dates, never
+  times or meridiem, and advance an undated end by one calendar day when its clock precedes the start. Normalize
+  explicitly dated endpoints with their times attached; retain partial-range and single-calendar-day semantics.
+  Exclude clocks on multi-day relative periods, seconds, zones, offsets, dotted meridiem, and natural clock phrases.
+  Opt-in tokenization emits explicit clocks as time tokens with original raw spans; bare hours remain numeric tokens.
+- Consequences: Parser guide and demo expose the opt-in through public imports. Date Input consumes the date-only
+  analyzer without clock recognition code; Datepicker and the shared day model retain their contracts. The parser stays
+  dependency-free and SSR-safe. Existing feature size ceilings remain unchanged.

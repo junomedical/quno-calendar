@@ -35,3 +35,36 @@ export function TokenParserExample() {
     </div>
   );
 }
+
+const timeSamples = ["10:00", "10AM", "10:30PM", "13", "23", "12:59", "tomorrow 13", "tomorrow 23:00–01:00"];
+
+export function TimeParserExample() {
+  const [text, setText] = useState("tomorrow 10:30PM");
+  const [recognizeTime, setRecognizeTime] = useState(true);
+  const result = parseDateInput({ text, expectedRange, referenceDate: "2026-08-25", recognizeTime });
+  return (
+    <div className="date-input-parser-example">
+      <label htmlFor="time-parser-mode">Clock times</label>
+      <select
+        id="time-parser-mode"
+        value={String(recognizeTime)}
+        onChange={(event) => setRecognizeTime(event.target.value === "true")}
+      >
+        <option value="true">Recognize times</option>
+        <option value="false">Date only</option>
+      </select>
+      <div className="date-input-guide__samples" aria-label="Date and time examples">
+        {timeSamples.map((sample) => (
+          <button key={sample} type="button" onClick={() => setText(sample)}>
+            {sample}
+          </button>
+        ))}
+      </div>
+      <label htmlFor="time-parser-input">Date and time to parse</label>
+      <input id="time-parser-input" value={text} onChange={(event) => setText(event.target.value)} />
+      <pre aria-live="polite">
+        <code>{JSON.stringify(result, null, 2)}</code>
+      </pre>
+    </div>
+  );
+}

@@ -10,18 +10,8 @@ import {
   nextCalendarPeriod
 } from "./dateInputRelativeArithmetic";
 import { calendarWeek, calendarWeekday } from "./dateInputWeekResolver";
-import { hasDateInputWord, normalizeDateInputWord, type DateInputVocabulary } from "./dateInputVocabulary";
+import { hasDateInputWord as has, normalizeDateInputWord, type DateInputVocabulary } from "./dateInputVocabulary";
 import type { DateInputResolveOptions, DateInputToken } from "./dateInputTypes";
-
-const has = ({
-  value,
-  name,
-  vocabulary
-}: {
-  value: string;
-  name: Parameters<typeof hasDateInputWord>[0]["name"];
-  vocabulary: DateInputVocabulary;
-}): boolean => hasDateInputWord({ vocabulary, name, value });
 
 const values = ({ tokens }: { tokens: DateInputToken[] }): Array<string | number> =>
   tokens
@@ -29,7 +19,9 @@ const values = ({ tokens }: { tokens: DateInputToken[] }): Array<string | number
     .map((token) => (token.type === "number" ? Number(token.value) : normalizeDateInputWord({ word: token.value })));
 
 const validSeparators = ({ tokens }: { tokens: DateInputToken[] }): boolean =>
-  tokens.every((token) => token.type !== "date-separator" || /^[\s/.,-]+$/u.test(token.value));
+  tokens.every(
+    (token) => token.type !== "time" && (token.type !== "date-separator" || /^[\s/.,-]+$/u.test(token.value))
+  );
 
 const durationUnit = ({
   unit,
@@ -72,7 +64,11 @@ export const resolveRelativeDateRange = ({
     }
     return null;
   }
-  if (typeof input[0] === "string" && has({ value: input[0], name: "next", vocabulary })) {
+  if (
+    typeof input[0] === "string" &&
+    has({ value: input[0], name: "next", vocabulary }) &&
+    (!options.recognizeTime || input.length === (typeof input[1] === "number" ? 3 : 2))
+  ) {
     const count = typeof input[1] === "number" ? input[1] : 1;
     const unitName = typeof input[1] === "number" ? input[2] : input[1];
     const unit = typeof unitName === "string" ? durationUnit({ unit: unitName, vocabulary }) : null;

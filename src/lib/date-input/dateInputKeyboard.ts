@@ -11,7 +11,7 @@ import {
   createDateInputAnalyzer,
   tokenizeDateInput,
   type DateInputAnalyzer
-} from "#quno-internal/date-parser/dateInputParser";
+} from "#quno-internal/date-parser/dateInputDateParser";
 import type { DateInputParseOptions, DateInputToken } from "#quno-internal/date-parser/dateInputTypes";
 
 type DatePart = "day" | "month" | "year";

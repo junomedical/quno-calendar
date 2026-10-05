@@ -6,6 +6,11 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ### Added
 
+- Added opt-in Date Parser clock recognition with `recognizeTime: true`: traditional 24-hour and AM/PM forms,
+  time-only input anchored to the reference date, and time ranges with inherited dates and overnight rollover.
+  Existing date values stay intact; optional `times` holds normalized `HH:mm` clocks. Tokenization can expose explicit
+  clock tokens with original spans. The guide and focused demo demonstrate the opt-in; Date Input remains date-only.
+
 - Added inclusive Datepicker `limitDateFrom` and `limitDateTo` selection bounds. Out-of-window dates are disabled before
   `isDayDisabled` runs, allowing consumer availability loaders to skip dates whose result is already known.
 - Added Infinite Calendar `getDayProps`, `getHourProps`, and `getDayCellProps` with typed date,
@@ -36,6 +41,10 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
   parsing accept the datepicker's `weekStartsOn` values from `0` (Sunday) through `6` (Saturday), defaulting to Monday.
 
 ### Changed
+
+- Kept clock recognition outside Date Input's date-only analyzer and reused date-resolution/ranking logic without
+  raising feature ceilings. Current ESM measurements are 6,143 B gzip for Date Parser (6 KiB ceiling), 7.70 KiB for
+  Date Input (8 KiB ceiling), and 10.49 KiB for Datepicker (10.5 KiB ceiling); production guides report refreshed sizes.
 
 - Gave overlapping availability deterministic lanes independent from appointments in both calendar orientations.
   Resource rows and columns now grow to the greater layer depth, and availability renderers receive meaningful

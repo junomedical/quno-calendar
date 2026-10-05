@@ -23,6 +23,11 @@ that model throughout. Infinite Calendar uses `IsoDate` for day keys, navigation
 `start` and `end` values remain local or offset-aware timestamp strings. Never apply timezone-free day arithmetic to
 event timestamps.
 
+Date Parser optionally returns a separate `DateInputTimeRange` of timezone-free `HH:mm` clocks. An omitted endpoint
+time is `null`; dates remain `IsoDate`. Overnight inference uses calendar-day arithmetic, without producing event
+timestamps or applying a timezone. The parser facade owns the clock tokenizer and result composition; Date Input
+imports only the parser's date-only analyzer so optional time recognition does not enter its runtime bundle.
+
 ## Dependency direction
 
 - Product entry points may import the shared headless layer.

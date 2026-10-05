@@ -146,7 +146,33 @@ execFileSync(
   ],
   { cwd: appDir }
 );
-for (const oldSubpath of ["@quno/calendar/timeline", "@quno/calendar/date-picker"]) {
+for (const mode of ["module", "commonjs"]) {
+  const load =
+    mode === "module" ? 'await import("@quno/calendar/date-parser")' : 'require("@quno/calendar/date-parser")';
+  execFileSync(
+    process.execPath,
+    [
+      "--input-type=" + mode,
+      "--eval",
+      `
+    const { parseDateInput, tokenizeDateInput } = ${load};
+    const result = parseDateInput({ text: "23:00–01:00", recognizeTime: true,
+      referenceDate: "2026-10-05", expectedRange: { start: "2026-01-01", end: "2027-12-31" } });
+    if (result.status !== "success" || result.value.end !== "2026-10-06" || result.times.start !== "23:00" || result.times.end !== "01:00")
+      throw new Error("Packed parser lost clock recognition or overnight composition");
+    if (tokenizeDateInput({ text: "10:30PM", recognizeTime: true })[0].value !== "22:30")
+      throw new Error("Packed clock tokenization failed");
+  `
+    ],
+    { cwd: appDir }
+  );
+}
+for (const oldSubpath of [
+  "@quno/calendar/timeline",
+  "@quno/calendar/date-picker",
+  "@quno/calendar/date-parser/dateInputTimeParser",
+  "@quno/calendar/dist/date-parser/dateInputDateParser"
+]) {
   try {
     execFileSync(process.execPath, ["--input-type=module", "--eval", `await import("${oldSubpath}")`], {
       cwd: appDir,

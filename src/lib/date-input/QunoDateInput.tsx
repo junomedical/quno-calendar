@@ -1,7 +1,7 @@
 import { classNames as inputClass } from "#quno-internal/shared/classNames";
 import { useDateInputFormat } from "./useDateInputFormat";
 import { spinDateInput, type DateInputSpinMemory } from "./dateInputKeyboard";
-import { createDateInputAnalyzer } from "#quno-internal/date-parser/dateInputParser";
+import { createDateInputAnalyzer } from "#quno-internal/date-parser/dateInputDateParser";
 import { equalDateRanges, recognitionOf } from "./dateInputViewHelpers";
 import { singleDay, type DateRange } from "#quno-internal/shared/dateRangeModel";
 import type { QunoDateInputProps } from "./dateInputTypes";

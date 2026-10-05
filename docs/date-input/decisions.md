@@ -36,3 +36,9 @@ presentation, and geometry behavior in this ledger remains in force. See the
 popup contract: Start/End shortcuts navigate without closing or changing the input value, while actual outside
 focus or pointer actions still dismiss it. Datepicker owns the shortcut focus handoff in
 [QDP-124](../datepicker/decisions.md#qdp-124--transfer-shortcut-focus-before-endpoint-navigation).
+
+## Parser implementation update — 2026-10-05
+
+[QDPR-005](../date-parser/decisions.md#qdpr-005---opt-into-timezone-free-clock-recognition) records optional headless
+clock recognition. Date Input continues to consume the date-only analyzer; its values, formatting, and keyboard
+editing retain their existing accepted behavior.

@@ -188,3 +188,11 @@ flowchart LR
 - `renderEvent`: consumer-owned React event-card rendering, preserving component lifecycle.
 - `onChange`, `onVisibleMonthChange`, `onZoomChange`: notifications receiving `{ value }`, `{ month }`, and `{ zoom }`.
 - Function arguments are named objects; component props use the same convention. Native event objects retain their host contract.
+
+## Parser clocks
+
+- **Clock time**: A timezone-free `HH:mm` value recognized only with `recognizeTime: true`.
+- **Time range**: `DateInputTimeRange` pairs clocks with `DateRange` endpoints; `null` means no clock was supplied.
+- **Time token**: An explicit colon or AM/PM clock, normalized in `value` while preserving `raw` and source offsets.
+  Bare hours remain number tokens until resolved in context.
+- **Overnight range**: An interval whose undated end clock precedes its start; its end date advances one calendar day.

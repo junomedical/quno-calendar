@@ -8,13 +8,13 @@ describe("date parser field guide", () => {
     expect(screen.getByRole("link", { name: "All components" })).toHaveAttribute("href", "/");
     expect(screen.getByRole("link", { name: /Demo/ })).toHaveAttribute("href", "/demo/date-parser");
     const contents = screen.getByRole("navigation", { name: "Table of contents" });
-    expect(within(contents).getAllByRole("link")).toHaveLength(8);
+    expect(within(contents).getAllByRole("link")).toHaveLength(9);
     expect(within(contents).getByRole("link", { name: /Resolve numeric order/ })).toHaveAttribute(
       "href",
       "#preferred-date-order"
     );
-    expect(screen.getAllByText(/^Try it$/)).toHaveLength(8);
-    expect(screen.getAllByText(/^Implementation/)).toHaveLength(7);
+    expect(screen.getAllByText(/^Try it$/)).toHaveLength(9);
+    expect(screen.getAllByText(/^Implementation/)).toHaveLength(8);
     const production = document.querySelector<HTMLElement>('[data-story-topic="parser-production"]') as HTMLElement;
     expect(within(production).queryByText(/^Implementation/)).not.toBeInTheDocument();
     expect(within(production).queryByText("Import Date Parser")).not.toBeInTheDocument();
@@ -31,6 +31,15 @@ describe("date parser field guide", () => {
     const tokens = tokenization.querySelector(".date-input-parser-example pre");
     expect(tokens).toHaveTextContent('"value": "next"');
     expect(tokens).toHaveTextContent('"value": "monday"');
+  });
+
+  it("demonstrates optional clocks and overnight dates through the public parser", () => {
+    render(<DateParserFieldGuide />);
+    const times = document.querySelector<HTMLElement>('[data-story-topic="time-parsing"]') as HTMLElement;
+    fireEvent.click(within(times).getByRole("button", { name: "tomorrow 23:00–01:00" }));
+    expect(within(times).getByText(/"end": "2026-08-27"/)).toHaveTextContent('"start": "23:00"');
+    fireEvent.change(within(times).getByRole("combobox", { name: "Clock times" }), { target: { value: "false" } });
+    expect(within(times).getByText(/"status": "invalid"/)).toBeInTheDocument();
   });
 
   it("shows distinct output for every language and product-vocabulary sample", () => {
