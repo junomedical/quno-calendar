@@ -142,7 +142,13 @@ export const OffscreenPills = ({
             data-item-presence={phase}
             aria-hidden={phase === "exiting" || undefined}
             disabled={phase === "exiting"}
-            onClick={() => onJump({ date })}
+            onClick={() => {
+              // Keep focus inside the picker before this shortcut is disabled and removed.
+              containerRef.current?.parentElement
+                ?.querySelector<HTMLButtonElement>('[data-slot="month-heading-button"]')
+                ?.focus();
+              onJump({ date });
+            }}
             onAnimationEnd={() => finishMotion({ endpoint, phase })}
           >
             <span>{endpoint === "start" ? labels.start : labels.end}</span>

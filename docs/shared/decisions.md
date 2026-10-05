@@ -188,3 +188,15 @@ because that repository was the consolidation source. Its identifier and text re
   artifact to 42.17 KiB raw and 10.47 KiB gzip, so its
   JavaScript ceiling moves from 10 KiB to 10.5 KiB. Date Input measures 29.83 KiB raw and 7.82 KiB gzip and remains
   inside its existing 8 KiB ceiling.
+
+## QUNO-014 - Retain focus through composed endpoint navigation
+
+- Date: 2026-10-05
+- Status: Accepted; refines QUNO-005 and QUNO-006
+- Context: Focused Date Input/Datepicker popups can interpret a disappearing Start or End shortcut as focus leaving
+  the control. Retaining pointer intent through the click does not provide a lasting keyboard focus destination.
+- Decision: Keep the composed popup open through endpoint navigation, preserving the controlled range and input text.
+  Use Datepicker's stable month-heading focus destination from QDP-124 before the shortcut exits. Continue closing
+  on focus moving outside or an outside pointer action, and retain internal-pointer guards for other interactions.
+- Consequences: Both public guide compositions support repeated Start/End jumps with pointer, Enter, and Space,
+  with ordinary or reduced motion, while subsequent Tab navigation remains within the picker until focus leaves.

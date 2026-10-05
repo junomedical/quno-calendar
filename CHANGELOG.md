@@ -126,6 +126,8 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ### Fixed
 
+- Transferred Start/End shortcut focus to Datepicker's stable month heading before navigation removes the chip, keeping
+  composed Date Input popups open and their selected range intact for pointer and keyboard activation, including reduced motion.
 - Prevented settled Infinite Calendar recentering from briefly painting uniform-height placeholder dates over already
   measured variable-height days, which could make availability-expanded rows jump and then return.
 - Kept compact overlapping availability labels inside their card bounds by using a single-line lane label and removing
@@ -187,6 +189,12 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
   around its center. The equivalent scroll position and replacement month-window anchor now commit without a painted
   intermediate date tree.
 - Kept an in-progress controlled single-date input draft intact across unrelated parent rerenders.
+
+### Verification
+
+- Additional Firefox check blocked locally: `browserType.launch` timed out after 180000ms. Firefox reported
+  `sandbox_extension_issue_file_to_process ... plugin-container.app: 1 (Operation not permitted)` and
+  `RenderCompositorSWGL failed mapping default framebuffer, no dt`. Chromium and WebKit endpoint-navigation checks pass.
 
 ## 0.6.0 - 2026-08-24
 

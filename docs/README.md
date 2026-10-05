@@ -3,6 +3,10 @@
 The documentation follows the four public `@quno/calendar` products. Start with the product you are changing, then
 use the shared records for package-wide contracts and release work.
 
+Focused input/picker compositions keep Start and End shortcut navigation inside the popup. See the
+[composition recipe](./shared/usage.md#qunodate-input) and
+[focus contract](./shared/decisions.md#quno-014---retain-focus-through-composed-endpoint-navigation).
+
 | Product                | Public entry point                 | Documentation                                      | Live field guide           |
 | ---------------------- | ---------------------------------- | -------------------------------------------------- | -------------------------- |
 | Quno/Infinite Calendar | `@quno/calendar/infinite-calendar` | [Infinite Calendar](./infinite-calendar/README.md) | `/guide/infinite-calendar` |

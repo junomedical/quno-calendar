@@ -300,6 +300,10 @@ orientation, availability, loading, visual-focus, and motion assertions formerly
 
 ## Release Checks
 
+Endpoint-shortcut browser coverage checks both Date Input/Datepicker guide compositions with pointer, Enter, and Space
+activation under ordinary and reduced motion. It waits for shortcut removal, asserts the destination month and endpoint
+state, stable month-heading focus and unchanged input value, then verifies Tab navigation and outside dismissal.
+
 - `npm run typecheck` validates library, demo, examples, tests, and configs.
 - `npm run lint` runs ESLint with TypeScript and React Hooks checks.
 - `npm run format` uses OxFmt to check the project against the checked-in formatting and ignore rules.

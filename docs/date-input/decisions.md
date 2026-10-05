@@ -29,3 +29,10 @@ applies; new refinements belong here rather than in the Datepicker ledger.
 supersedes historical positional signatures and customization names for this product. The accepted interaction,
 presentation, and geometry behavior in this ledger remains in force. See the
 [migration guide](../shared/migration.md#unreleased-named-contracts-and-product-ownership) for exact replacements.
+
+## Shared composition update — 2026-10-05
+
+[QUNO-014](../shared/decisions.md#quno-014---retain-focus-through-composed-endpoint-navigation) records the focused
+popup contract: Start/End shortcuts navigate without closing or changing the input value, while actual outside
+focus or pointer actions still dismiss it. Datepicker owns the shortcut focus handoff in
+[QDP-124](../datepicker/decisions.md#qdp-124--transfer-shortcut-focus-before-endpoint-navigation).

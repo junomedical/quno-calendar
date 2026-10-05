@@ -13,6 +13,9 @@ the shared timezone-free `DateRange` model.
 The component owns draft text, recognition state, keyboard edits, formatting, commit behavior, and accessibility. It
 does not re-export parser utilities, and composition with Datepicker remains consumer-owned.
 
+In the focused picker composition, Start and End shortcuts navigate while keeping the popup open and the typed value
+intact. Picker focus moves to its month heading; leaving the composed control through focus or an outside click closes it.
+
 Parser options and vocabulary are compiled once per input configuration and reused across drafts. Ordinary recognition
 decoration may settle through a React transition, but the native text and caret stay urgent; Enter, blur, Arrow edits,
 partial-range completion, and IME completion remain synchronous. Parsing stays on the main thread because the input is
