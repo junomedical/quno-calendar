@@ -85,42 +85,35 @@ const extract = ({
   return values.length ? { parts: values, month } : null;
 };
 
-const resolveNumeric = ({
-  parts,
+type NumericContext = { options: DateInputResolveOptions; result: ResolvedDateCandidate[] };
+
+const appendOrdered = ({
+  first,
+  second,
+  year,
   options,
   result
-}: {
-  parts: Part[];
-  options: DateInputResolveOptions;
-  result: ResolvedDateCandidate[];
+}: NumericContext & {
+  first: Part;
+  second: Part;
+  year?: Part;
 }): void => {
-  const first = parts[0];
-  const second = parts[1];
+  const primary = dateOrder(options) === "mdy" ? [first, second] : [second, first];
+  append({ result, month: primary[0].value, day: primary[1].value, year, localePenalty: 0, options });
+  append({ result, month: primary[1].value, day: primary[0].value, year, localePenalty: 1, options });
+};
+
+const resolveNumeric = ({ parts, options, result }: NumericContext & { parts: Part[] }): void => {
+  const [first, second, third] = parts;
   if (!first || !second || parts.length > 3) return;
-  if (parts.length === 2) {
-    const primary = dateOrder(options) === "mdy" ? [first, second] : [second, first];
-    const fallback = dateOrder(options) === "mdy" ? [second, first] : [first, second];
-    append({ result, month: primary[0].value, day: primary[1].value, year: undefined, localePenalty: 0, options });
-    append({ result, month: fallback[0].value, day: fallback[1].value, year: undefined, localePenalty: 1, options });
-    return;
-  }
-  const third = parts[2];
+  if (parts.length === 2) return appendOrdered({ first, second, options, result });
   const yearIndex = parts.findIndex((part) => part.digits === 4 || part.value > 31);
   if (yearIndex === 0)
     append({ result, month: second.value, day: third.value, year: first, localePenalty: 0, options });
-  else if (yearIndex === 1) {
-    const primary = dateOrder(options) === "mdy" ? [first, third] : [third, first];
-    const fallback = dateOrder(options) === "mdy" ? [third, first] : [first, third];
-    append({ result, month: primary[0].value, day: primary[1].value, year: second, localePenalty: 0, options });
-    append({ result, month: fallback[0].value, day: fallback[1].value, year: second, localePenalty: 1, options });
-  } else if (dateOrder(options) === "ymd")
+  else if (yearIndex === 1) appendOrdered({ first, second: third, year: second, options, result });
+  else if (dateOrder(options) === "ymd")
     append({ result, month: second.value, day: third.value, year: first, localePenalty: 0, options });
-  else {
-    const primary = dateOrder(options) === "mdy" ? [first, second] : [second, first];
-    const fallback = dateOrder(options) === "mdy" ? [second, first] : [first, second];
-    append({ result, month: primary[0].value, day: primary[1].value, year: third, localePenalty: 0, options });
-    append({ result, month: fallback[0].value, day: fallback[1].value, year: third, localePenalty: 1, options });
-  }
+  else appendOrdered({ first, second, year: third, options, result });
 };
 
 export const resolveAbsoluteDateCandidates = ({

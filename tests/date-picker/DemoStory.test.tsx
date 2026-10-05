@@ -65,7 +65,7 @@ describe("datepicker field guide", () => {
     );
     expect(within(contents).queryByText("Understand and ship the model")).not.toBeInTheDocument();
     expect(document.querySelector('[data-story-topic="natural-input"]')).not.toBeInTheDocument();
-    expect(screen.getByText("10.47 KiB gzip")).toBeInTheDocument();
+    expect(screen.getByText("10.49 KiB gzip")).toBeInTheDocument();
     expect(screen.getByText("3.22 KiB gzip")).toBeInTheDocument();
     expect(screen.queryByText("Public API at a glance")).not.toBeInTheDocument();
     expect(screen.queryByText(/docs\/shared\/usage\.md/)).not.toBeInTheDocument();

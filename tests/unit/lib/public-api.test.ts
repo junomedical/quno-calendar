@@ -31,6 +31,7 @@ describe("public API", () => {
     expect(dateInputApi).not.toHaveProperty("tokenizeDateInput");
     expect(dateParserApi).toHaveProperty("parseDateInput");
     expect(dateParserApi).toHaveProperty("tokenizeDateInput");
+    expect(Object.keys(dateParserApi).sort()).toEqual(["parseDateInput", "tokenizeDateInput"]);
   });
 
   it("does not retain legacy timeline facade names", () => {

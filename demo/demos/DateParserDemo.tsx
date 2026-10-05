@@ -8,7 +8,15 @@ import {
 import { useState } from "react";
 import { ComponentDemoShell } from "./ComponentDemoShell";
 
-const samples = ["3/4/2026", "this week", "last Monday", "12 June 2026 – next Monday", "12 Juni 2026"];
+const samples = [
+  "3/4/2026",
+  "this week",
+  "last Monday",
+  "12 June 2026 – next Monday",
+  "12 Juni 2026",
+  "tomorrow 10:30PM",
+  "23:00–01:00"
+];
 type ParserLanguageMode = DateInputParserLanguage | "en-de";
 
 export function DateParserDemo() {
@@ -16,17 +24,19 @@ export function DateParserDemo() {
   const [dateOrder, setDateOrder] = useState<DateInputDateOrder>("dmy");
   const [weekStartsOn, setWeekStartsOn] = useState<WeekStart>(1);
   const [language, setLanguage] = useState<ParserLanguageMode>("en-de");
+  const [recognizeTime, setRecognizeTime] = useState(false);
   const parserLanguages: ReadonlyArray<DateInputParserLanguage> = language === "en-de" ? ["en", "de"] : [language];
   const options = {
     expectedRange: { start: "2025-08-25", end: "2027-08-25" } as const,
     referenceDate: "2026-08-25" as const,
     preferredDateOrder: dateOrder,
     parserLanguages,
-    weekStartsOn
+    weekStartsOn,
+    recognizeTime
   };
   return (
     <ComponentDemoShell
-      description="Try familiar dates, relative phrases, or a complete range and inspect the headless result."
+      description="Try dates and ranges, or enable clock times to recognize hours and overnight intervals."
       guideHref="/guide/date-parser"
       title="Quno/Date Parser"
     >
@@ -41,6 +51,13 @@ export function DateParserDemo() {
           ))}
         </div>
         <div className="date-parser-demo__options">
+          <label>
+            Clock times
+            <select value={String(recognizeTime)} onChange={(event) => setRecognizeTime(event.target.value === "true")}>
+              <option value="false">Date only</option>
+              <option value="true">Recognize times</option>
+            </select>
+          </label>
           <label>
             Preferred order
             <select value={dateOrder} onChange={(event) => setDateOrder(event.target.value as DateInputDateOrder)}>
@@ -74,7 +91,9 @@ export function DateParserDemo() {
         </section>
         <section>
           <h2>Tokens</h2>
-          <pre className="component-demo__value">{JSON.stringify(tokenizeDateInput({ text }), null, 2)}</pre>
+          <pre className="component-demo__value">
+            {JSON.stringify(tokenizeDateInput({ text, recognizeTime }), null, 2)}
+          </pre>
         </section>
       </div>
     </ComponentDemoShell>

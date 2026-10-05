@@ -104,7 +104,7 @@ Architecture checks enforce object arguments and product dependency direction, i
   disabled-day resolver. Unit and Chromium computed-style coverage verify loading, enabled, unavailable, holiday,
   failed, and out-of-window states, plus the rule that disabled dates cannot become single selections or range
   endpoints.
-- The Date Parser guide exposes eight headless chapters and verifies absolute/relative formats, DMY/MDY preference,
+- The Date Parser guide exposes nine headless chapters and verifies absolute/relative formats, DMY/MDY preference,
   configurable week starts, ranges, expected-period ranking, simultaneous English/German recognition, lexicon
   extension, tokenization, SSR safety, and its independent payload. Its focused demo recognizes the visible English and
   German samples together by default, including an absolute-to-relative weekday range.
@@ -309,7 +309,7 @@ state, stable month-heading focus and unchanged input value, then verifies Tab n
 - `npm run format` uses OxFmt to check the project against the checked-in formatting and ignore rules.
 - `npm run check:architecture` enforces at most 200 non-comment lines per library module and 120 source lines per function through the TypeScript AST.
 - `npm run build:lib` emits ESM, UMD, declarations, and a package stylesheet subpath.
-- `npm run check:bundle-size` enforces the 32KiB ESM and 2KiB stylesheet gzip ceilings against a fresh library build.
+- `npm run check:bundle-size` enforces the independent feature JavaScript and stylesheet gzip ceilings against a fresh library build.
 - `npm run verify:package` checks an explicit stylesheet asset, confirms no runtime `date-fns` or style injection, loads the package through Node CommonJS and ESM without `document`, then installs it into a temporary Vite React app and builds the consumer.
 - `npm run test:compat` builds the packed public products through Preact compatibility aliases.
 - `npm run test:compat:react19` typechecks and builds a packed React 19 consumer, mounts its real virtualized calendar in
@@ -327,7 +327,8 @@ At 1280×720 with 50 resources and 20,000 total events/year:
 - Calendar DOM stays below 5,000 horizontal nodes and 6,500 vertical nodes, with at most 1,000 committed event shells.
 - Pointer work is animation-frame bounded and does not rerender unrelated external event cards.
 - p95 scripting plus layout remains below 10ms, no task exceeds 50ms, and a 10× layout benchmark input stays below 25× runtime.
-- The ESM bundle target is 30KB gzip with a 32KB ceiling; stylesheet output stays below 2KB gzip.
+- JavaScript gzip ceilings are 2 KiB for shared helpers, 38 KiB for Infinite Calendar, 10.5 KiB for Datepicker,
+  8 KiB for Date Input, and 6 KiB for Date Parser. Optional CSS keeps its independent feature ceilings.
 
 ## Manual Checks
 
@@ -340,3 +341,12 @@ Clock-dependent default-demo scenarios set a fixed working-day morning in the br
 The virtualizer item-key adapter must retain identity across ordinary renders; navigation, zoom, and dense-layout
 browser tests guard that boundary. Current budgets are 38 KiB gzip for Infinite Calendar, 10.5 KiB for Datepicker,
 and 8 KiB for Date Input.
+
+## Optional clock verification
+
+Parser tests cover clock formats and validation, AM/PM boundaries, reference dates, numeric-date precedence,
+English/German connectors, inherited dates, overnight and explicitly reversed endpoints, missing clocks, partial
+ranges, single-day selection, unchanged defaults, token spans, and compiled analysis. Public consumer types require
+`DateInputTimeRange` on the parser subpath and keep time recognition out of Date Input props. Packed Node ESM/CommonJS
+checks execute timed parsing without `document`. Chromium tests toggle recognition in the guide and demo, verify
+resolved dates and times, and assert usable control geometry and bounded overflow at desktop and mobile widths.

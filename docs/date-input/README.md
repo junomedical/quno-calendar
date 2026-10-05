@@ -33,3 +33,6 @@ Date Input consumes the headless implementation owned by Date Parser. Use `forma
 `parserLanguages`, and `onChange({ value })`; native input events retain React event signatures.
 
 See the [breaking migration](../shared/migration.md#unreleased-named-contracts-and-product-ownership).
+
+Clock recognition is an opt-in headless [Date Parser capability](../date-parser/README.md#optional-clock-recognition).
+Date Input consumes the date-only analyzer and keeps its existing date values, formatting, and keyboard behavior.

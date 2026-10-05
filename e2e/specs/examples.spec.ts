@@ -182,7 +182,7 @@ test("date input field guide follows the task-oriented component contract", asyn
 test("date parser guide keeps parsing semantics headless and interactive", async ({ page }) => {
   await page.goto("/guide/date-parser");
   const guide = page.locator('[data-field-guide="Quno/Date Parser"]');
-  await expect(guide.getByRole("navigation", { name: "Table of contents" }).getByRole("link")).toHaveCount(8);
+  await expect(guide.getByRole("navigation", { name: "Table of contents" }).getByRole("link")).toHaveCount(9);
   await guide.locator("#preferred-date-order").getByRole("button", { name: "MDY" }).click();
   await expect(guide.locator("#preferred-date-order output")).toHaveText("2026-03-04");
   await guide.locator("#relative-dates").getByRole("button", { name: "this week" }).click();
@@ -310,9 +310,9 @@ test("editorial CSS-native exhibit keeps stable chrome browser-positioned", asyn
 test("all four guides separate exact payloads from runtime contracts", async ({ page }) => {
   const guides = [
     ["infinite-calendar", "37.56 KiB gzip", "1.95 KiB gzip", "@quno/calendar/infinite-calendar"],
-    ["datepicker", "10.47 KiB gzip", "3.22 KiB gzip", "@quno/calendar/datepicker"],
-    ["date-input", "7.82 KiB gzip", "0.58 KiB gzip", "@quno/calendar/date-input"],
-    ["date-parser", "5.20 KiB gzip", "No stylesheet", "@quno/calendar/date-parser"]
+    ["datepicker", "10.49 KiB gzip", "3.22 KiB gzip", "@quno/calendar/datepicker"],
+    ["date-input", "7.70 KiB gzip", "0.58 KiB gzip", "@quno/calendar/date-input"],
+    ["date-parser", "6.00 KiB gzip", "No stylesheet", "@quno/calendar/date-parser"]
   ] as const;
 
   for (const [route, javascript, styles, entrypoint] of guides) {

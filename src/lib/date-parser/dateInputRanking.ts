@@ -10,23 +10,10 @@ import type { DateInputResolveOptions, ResolvedDateCandidate } from "./dateInput
 const contains = ({ date, range }: { date: IsoDate; range: DateRange }): boolean =>
   compareDates({ left: date, right: range.start }) >= 0 && compareDates({ left: date, right: range.end }) <= 0;
 
-const compareCandidates = ({
-  left,
-  right,
-  options
-}: {
-  left: ResolvedDateCandidate;
-  right: ResolvedDateCandidate;
-  options: DateInputResolveOptions;
-}): number => {
-  const leftInside = contains({ date: left.date, range: options.expectedRange });
-  const rightInside = contains({ date: right.date, range: options.expectedRange });
-  if (leftInside !== rightInside) return leftInside ? -1 : 1;
-  if (left.localePenalty !== right.localePenalty) return left.localePenalty - right.localePenalty;
-  const leftDistance = Math.abs(differenceInDays({ left: left.date, right: options.referenceDate }));
-  const rightDistance = Math.abs(differenceInDays({ left: right.date, right: options.referenceDate }));
-  return leftDistance - rightDistance || compareDates({ left: left.date, right: right.date });
-};
+const dateCandidateRange = ({ candidate }: { candidate: ResolvedDateCandidate }) => ({
+  value: { start: candidate.date, end: candidate.date },
+  penalty: candidate.localePenalty
+});
 
 export const pickBestDate = ({
   candidates,
@@ -36,14 +23,22 @@ export const pickBestDate = ({
   options: DateInputResolveOptions;
 }): ResolvedDateCandidate | null =>
   candidates.reduce<ResolvedDateCandidate | null>(
-    (best, candidate) => (!best || compareCandidates({ left: candidate, right: best, options }) < 0 ? candidate : best),
+    (best, candidate) =>
+      !best ||
+      compareRangeCandidates({
+        left: dateCandidateRange({ candidate }),
+        right: dateCandidateRange({ candidate: best }),
+        options
+      }) < 0
+        ? candidate
+        : best,
     null
   );
 
 const rangeInside = ({ value, expected }: { value: DateRange; expected: DateRange }): boolean =>
   contains({ date: value.start, range: expected }) && contains({ date: value.end, range: expected });
 
-export const pickBestDateRange = ({
+export const pickBestDateEndpoints = ({
   starts,
   ends,
   options
@@ -51,17 +46,24 @@ export const pickBestDateRange = ({
   starts: ResolvedDateCandidate[];
   ends: ResolvedDateCandidate[];
   options: DateInputResolveOptions;
-}): DateRange | null => {
-  let best: { value: DateRange; penalty: number } | null = null;
+}): { value: DateRange; penalty: number; start: ResolvedDateCandidate; end: ResolvedDateCandidate } | null => {
+  let best: { value: DateRange; penalty: number; start: ResolvedDateCandidate; end: ResolvedDateCandidate } | null =
+    null;
   for (const start of starts)
     for (const end of ends) {
       const candidate = {
         value: normalizeRange({ first: start.date, second: end.date }),
-        penalty: start.localePenalty + end.localePenalty
+        penalty: start.localePenalty + end.localePenalty,
+        start,
+        end
       };
       if (!best || compareRangeCandidates({ left: candidate, right: best, options }) < 0) best = candidate;
     }
-  return best?.value ?? null;
+  return best;
+};
+
+export const pickBestDateRange = (args: Parameters<typeof pickBestDateEndpoints>[0]): DateRange | null => {
+  return pickBestDateEndpoints(args)?.value ?? null;
 };
 
 const compareRangeCandidates = ({
