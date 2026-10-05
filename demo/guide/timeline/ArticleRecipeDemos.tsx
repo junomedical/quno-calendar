@@ -92,10 +92,8 @@ export function DragCreateArticleDemo() {
       null;
     proposalAnchorRef.current = anchor;
     sourceEventRef.current = request.event;
-    flushSync(() => {
-      setPendingDraft({ mode: "edit", event: movedEvent, sourceEventId: request.event.id });
-      setActivity(`Review the move for “${request.event.title}”. Saved data is unchanged.`);
-    });
+    setPendingDraft({ mode: "edit", event: movedEvent, sourceEventId: request.event.id });
+    setActivity(`Review the move for “${request.event.title}”. Saved data is unchanged.`);
     calendarRef.current?.restoreViewportAnchor({
       anchor,
       ...{
@@ -123,10 +121,8 @@ export function DragCreateArticleDemo() {
     const anchor = calendarRef.current?.captureViewportAnchor(slotAnchorTarget(event)) ?? null;
     proposalAnchorRef.current = anchor;
     sourceEventRef.current = null;
-    flushSync(() => {
-      setPendingDraft({ mode: "create", event });
-      setActivity("Review the new appointment. Saved data is unchanged.");
-    });
+    setPendingDraft({ mode: "create", event });
+    setActivity("Review the new appointment. Saved data is unchanged.");
     calendarRef.current?.restoreViewportAnchor({
       anchor,
       ...{
@@ -182,14 +178,12 @@ export function DragCreateArticleDemo() {
     const sourceEvent = sourceEventRef.current;
     const target = sourceEvent ? eventAnchorTarget(sourceEvent) : slotAnchorTarget(pendingDraft.event);
     calendarRef.current?.releaseActiveDraft({ animation: "fade-out", durationMs: 320 });
-    flushSync(() => {
-      setActivity(
-        pendingDraft.mode === "create"
-          ? "Cancelled the new appointment. Saved data was left untouched, and the view was restored."
-          : `Cancelled the move for “${pendingDraft.event.title}”. Saved data and the original view were restored.`
-      );
-      setPendingDraft(null);
-    });
+    setActivity(
+      pendingDraft.mode === "create"
+        ? "Cancelled the new appointment. Saved data was left untouched, and the view was restored."
+        : `Cancelled the move for “${pendingDraft.event.title}”. Saved data and the original view were restored.`
+    );
+    setPendingDraft(null);
     calendarRef.current?.restoreViewportAnchor({
       anchor,
       ...{

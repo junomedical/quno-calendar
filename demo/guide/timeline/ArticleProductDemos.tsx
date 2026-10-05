@@ -277,6 +277,7 @@ export function TimeMarkerDemo() {
 
 export function NavigationControlsDemo() {
   const calendarRef = useRef<QunoInfiniteCalendarHandle>(null);
+  const [selectedCalendarIds, setSelectedCalendarIds] = useState(["provider-a"]);
   const [date, setDate] = useState<IsoDate>(articleDateKey);
   const [status, setStatus] = useState(`Showing ${articleDateKey}`);
   const inputValue = useMemo<DateRange>(() => ({ start: date, end: date }), [date]);
@@ -342,6 +343,7 @@ export function NavigationControlsDemo() {
             className="article-button"
             onClick={() => {
               setDate(articleDateKey);
+              setSelectedCalendarIds(["provider-a", "room-1"]);
               calendarRef.current?.scrollToDateTime({
                 date: articleDateKey,
                 time: articleNowTime,
@@ -380,7 +382,7 @@ export function NavigationControlsDemo() {
           initialDateKey={articleDateKey}
           loadEvents={loadNavigationEvents}
           now={articleNow}
-          selectedCalendarIds={["provider-a", "room-1"]}
+          selectedCalendarIds={selectedCalendarIds}
           settings={{ ...articleSettings, zoom: 1.3 }}
         />
       </div>

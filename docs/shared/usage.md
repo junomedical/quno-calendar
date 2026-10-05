@@ -87,6 +87,29 @@ Repository example: the read-only chapter in
 [`ArticleRecipeDemos.tsx`](../../demo/guide/timeline/ArticleRecipeDemos.tsx) and the
 [integration field guide](../../demo/guide/timeline/README.md).
 
+## Local Event Previews
+
+Keep `loadEvents` stable while editing a draft. Use `projectEvents` to change the display after the calendar cache:
+
+```tsx
+import type { ProjectEvents } from "@quno/calendar/infinite-calendar";
+
+const projectEvents = useCallback<ProjectEvents>(
+  ({ events, startDate, endDate, calendarIds }) => {
+    const previews = expandDraft({ draft, startDate, endDate, calendarIds });
+    return [...events.filter(keepSavedEvent), ...previews];
+  },
+  [draft]
+);
+
+<QunoInfiniteCalendar {...calendarProps} loadEvents={loadEvents} projectEvents={projectEvents} />;
+```
+
+The dates are inclusive local date keys and include empty rendered dates. Return a new collection without mutating
+cached records. Events outside the rendered dates are ignored. Changing or clearing the projection never refreshes
+persisted data; use `eventVersion` or a changed `loadEvents` for saves and filters. Both orientations use projected
+events for layout. Recurrence expansion remains consumer-owned. Try the lazy local-projection example in the field guide.
+
 ## Custom Event Card Structure
 
 The calendar owns the event shell’s time geometry; `renderEvent` owns the content hierarchy inside it. Products can
@@ -600,8 +623,9 @@ The target is semantic rather than lane-index based. If a save introduces collis
 metrics that move the event into another overlap lane, restoration resolves the new event geometry and keeps that event
 at the captured viewport position.
 
-Capture the source event before staging a move, restore the anchor against the proposed event after rendering the
-controlled draft, and retain that original anchor until the review ends. Accept can keep the proposed event at its
+Capture the source event before staging a move, update the controlled draft, then request restoration against the
+proposed event in the same handler. Capture stays synchronous; restoration waits for the committed layout, so no
+`flushSync` wrapper is needed. Retain that original anchor until the review ends. Accept can keep the proposed event at its
 current viewport-relative position; Cancel should restore the same anchor against the original saved event (or the
 original drawn slot for a create draft). Set `allowNavigationFallback: false` when the workflow must stay inside the
 currently visible date and resource view.
@@ -713,10 +737,12 @@ calendar’s virtual-window geometry. Use `settings` for density and dimensions,
 For an editor that knows the resource row, supply its id while navigating the horizontal timeline:
 
 ```tsx
-calendarRef.current?.scrollToDateTime({ date, time, calendarId: "provider-a" });
+setSelectedCalendarIds(["provider-a", "room-1"]);
+calendarRef.current?.scrollToDateTime({ date, time, calendarId: "room-1", align: "center" });
 ```
 
-Use `align: "center"` on that call when the row should move to the middle even if already visible. To start a new
+The package waits for the updated selection to commit before measuring the row. Multiple resource-row navigation requests in
+one batch use the latest request. Use `align: "center"` when the row should move to the middle even if already visible. To start a new
 draft where the operator is looking without scrolling:
 
 ```tsx

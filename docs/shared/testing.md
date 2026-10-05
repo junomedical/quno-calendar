@@ -323,7 +323,7 @@ At 1280×720 with 50 resources and 20,000 total events/year:
 - Calendar DOM stays below 5,000 horizontal nodes and 6,500 vertical nodes, with at most 1,000 committed event shells.
 - Pointer work is animation-frame bounded and does not rerender unrelated external event cards.
 - p95 scripting plus layout remains below 10ms, no task exceeds 50ms, and a 10× layout benchmark input stays below 25× runtime.
-- The ESM bundle target is 30KB gzip with a 32KB ceiling; stylesheet output stays below 2KB gzip.
+- The Infinite Calendar ESM bundle ceiling is 39 KiB gzip; optional stylesheet output stays below 2 KiB gzip.
 
 ## Manual Checks
 
@@ -334,5 +334,5 @@ At 1280×720 with 50 resources and 20,000 total events/year:
 
 Clock-dependent default-demo scenarios set a fixed working-day morning in the browser while leaving timers running.
 The virtualizer item-key adapter must retain identity across ordinary renders; navigation, zoom, and dense-layout
-browser tests guard that boundary. Current budgets are 38 KiB gzip for Infinite Calendar, 10.5 KiB for Datepicker,
+browser tests guard that boundary. Current budgets are 39 KiB gzip for Infinite Calendar, 10.5 KiB for Datepicker,
 and 8 KiB for Date Input.

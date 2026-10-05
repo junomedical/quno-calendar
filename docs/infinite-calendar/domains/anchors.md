@@ -25,6 +25,8 @@ Priority and interaction with scroll maintenance are defined in the [Flow Guide]
   shells are brought into the uncovered content viewport.
 - Horizontal late-data restoration preserves date/resource/local-row offset; missing resources fall back to date-local offset.
 - Controlled zoom remains parent-owned through `settings.zoom` and only requests changes with `onZoomChange`.
+- Captures read the current geometry synchronously. Restore requests start after the parent layout commits; cancellation
+  clears pending requests as well as active sessions. Consumers can update selection or drafts without forcing a React commit.
 - Manual user intent cancels eligible scheduled restoration.
 - Horizontal date/time navigation can target a resource row; visible rows stay put while virtualized rows are pinned
   and revealed after the date jump.
@@ -41,8 +43,12 @@ Priority and interaction with scroll maintenance are defined in the [Flow Guide]
 | [`useHorizontalDayMeasurement.ts`](../../../src/lib/timeline/infinite/anchors/data-layout/useHorizontalDayMeasurement.ts)      | Measures changed days and restores the current semantic slot before paint.                                   |
 | [`useHorizontalControlledZoomAnchor.ts`](../../../src/lib/timeline/infinite/anchors/zoom/useHorizontalControlledZoomAnchor.ts) | Preserves a visible now marker, with center/origin fallback, across controlled horizontal zoom prop changes. |
 
+- [`useViewportAnchorRestore.ts`](../../../src/lib/timeline/infinite/anchors/parent/useViewportAnchorRestore.ts) starts the existing restoration session after committed parent props and geometry.
+
 ## Verification Map
 
 - Unit: geometry registry full-visibility checks, data-layout anchor, controlled zoom anchor, and resize compensation.
+  `viewportAnchoring.test.tsx` covers committed geometry and cancellation before commit; `horizontalNavigation.test.tsx`
+  covers updated row sizing, newly selected rows, and latest-request navigation.
 - Browser: async height growth, external layout restore/cancel, conditional event-focus scrolling, date/time navigation,
   zoom continuity, and interaction priority.

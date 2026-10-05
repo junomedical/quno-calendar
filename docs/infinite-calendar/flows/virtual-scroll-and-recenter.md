@@ -20,6 +20,14 @@ flowchart LR
 
 The virtual-window anchor chooses the bounded date range. It is not itself the visible DOM element, browser focus, or an event anchor.
 
+## Parent State And Navigation
+
+The parent may update its selected resources or controlled draft, then call `scrollToDateTime` with a resource id or
+`restoreViewportAnchor` in the same handler. The calendar retains that request until its layout commit, measures the
+updated geometry, then uses the existing virtual-window navigation or restoration session. The session continues to
+observe late row registration and layout changes. Capturing an anchor still happens before the parent change;
+cancelling a restore clears both queued and active work. Consumers do not force a React commit.
+
 ## Settled Scroll Lifecycle
 
 ```mermaid

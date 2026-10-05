@@ -20,6 +20,9 @@ days, hours, horizontal rows, and vertical columns without taking ownership of g
 Dragging an event back to its starting slot neither opens its editor nor requests a move. The calendar owns
 this distinction from an ordinary click, which still invokes `onEventActivate`; consumers need no movement guard.
 
+`CalendarEventBase` exposes the shared `id`, `calendarId`, and `start` fields. `CalendarEvent` extends it with the
+remaining renderer data, so consumers can store an event's identity and start position without a local field selection.
+
 Day keys use shared timezone-free `IsoDate` values. Event `start` and `end` remain timestamp strings and retain their
 local or offset semantics.
 
@@ -29,7 +32,8 @@ consumer needs the background treatment; that layer has independent overlap lane
 
 The horizontal navigation handle can reveal a resource row with
 `scrollToDateTime({ date, time, calendarId })`. The calendar owns the virtual-row wait and viewport correction; consumers
-do not query its DOM.
+do not query its DOM. Parent selection or draft state can be updated immediately before resource-row navigation or restoration
+in the same handler. The package measures after the resulting layout commits; consumers need no `flushSync` wrapper.
 Pass `align: "center"` to center the requested row even when it is already visible. `getVisibleDateKeys()` returns
 only dates intersecting the usable viewport, so an external creation form can start on the middle visible date.
 
@@ -55,9 +59,17 @@ frame; release still flushes the final position synchronously.
 Untouched date buckets keep stable immutable snapshots, and prepared date/resource layers are reused until their
 bucket, resource selection, visible time bounds, or relevant draft source changes.
 
+`projectEvents` optionally transforms cached events for the inclusive rendered date window. It is synchronous and
+must leave its input records unchanged. Changing the callback updates event geometry in either orientation without
+invalidating API loading. Clearing it restores the persisted snapshot. Empty rendered dates also accept previews.
+Products own recurrence expansion; saves and filters still refresh through `eventVersion` or `loadEvents`.
+
 ## Named contracts
 
 Use `renderEvent`, component-level `locale` and `formatters.dayLabel({ date, locale })`, plus `getDayProps`,
 `getDayCellProps`, and `getHourProps` for presentation. Navigation commands and zoom notifications use named objects.
 
 See the [breaking migration](../shared/migration.md#unreleased-named-contracts-and-product-ownership).
+
+The 0.6.2 Infinite Calendar ESM artifact is 39,858 bytes gzip (38.92 KiB). Its JavaScript ceiling is 39 KiB gzip;
+the optional stylesheet is 2,035 bytes gzip within its 2 KiB ceiling. See Decision 099 for the accepted budget.

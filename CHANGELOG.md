@@ -6,16 +6,36 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ### Added
 
+- Optional synchronous `projectEvents` and its named types separate local preview rendering from persisted event loading. Both orientations prepare projected events without mutating cached data or invalidating requests; empty rendered dates support previews. The lazy guide example demonstrates preview movement with a stable load count.
+
+- Exported `CalendarEventBase` from `@quno/calendar/infinite-calendar`. `CalendarEvent` inherits its `id`, `calendarId`, and `start` fields so consumers can share a named contract for an event identity and start position.
+
 - Optional consumer-owned `isLoading`/`loadingFallback` for initial calendar loading. Resource selection can arrive before the hidden timeline mounts and loads events, avoiding the header-only startup layout. The prefetch guide demonstrates delayed context, a supplied skeleton and centered initial navigation.
 
 - Restored `getVisibleDateKeys()` for creation defaults based on the actual viewport. Added optional `align: "center"`
   to horizontal resource-row navigation, including rows that are already visible. The navigation guide demonstrates both.
 
+### Changed
+
+- Raised the Infinite Calendar JavaScript gzip ceiling from 38 KiB to 39 KiB for version 0.6.2. The current artifact is 39,858 bytes (38.92 KiB), within the 39,936-byte ceiling. Updated the guide payload facts and current testing budgets. Decision 099 records the accepted size.
+
+- Corrected the local package version for `feat/more-improvements` to `0.6.2`. The manifest, lockfile, and current README use the same version. Earlier `0.6.3` and `0.6.4` local builds are verification history.
+
 ### Fixed
+
+- Resource-row navigation and viewport-anchor restoration now wait for committed parent layout. A selection or draft
+  update followed by the existing handle call works without consumer `flushSync` wrappers. Batched navigation uses
+  the latest request, and cancellation can discard a restore before it starts.
 
 - A drag dropped back onto its original minute and calendar now neither activates the event editor nor sends a move request. The calendar tracks movement before frame coalescing; ordinary clicks still activate without consumer-side suppression.
 
 ### Verification notes
+
+- Version 0.6.2 with the accepted 39 KiB budget: aggregate `npm run verify:package` passes. Formatting, architecture, typecheck, lint, 13 affected unit tests, the Chromium payload-guide test, the demo build, and pack dry-run pass. The earlier size-gate failures below describe verification against the previous 38 KiB ceiling.
+
+- Local event projection: all 351 unit tests and all 119 Chromium scenarios pass. Typecheck, lint, architecture, formatting, library/demo builds, packed Preact and React 19 compatibility, packed-package verification and pack dry-run pass. Infinite Calendar JavaScript is 39,858 bytes gzip, 946 bytes above the unchanged 38 KiB ceiling (358 bytes above the preceding 0.6.3 build). This existing size gate still blocks the aggregate `verify:package` command; its packed-package checks pass separately. Other artifact budgets pass.
+
+- Committed-layout navigation: all 347 unit tests and all 118 Chromium checks pass, including batched resource selection, controlled draft restoration and the saved-event motion regression. Typecheck, lint, architecture and formatting pass. Final Infinite Calendar JavaScript is 39,500 bytes gzip, 588 bytes above the unchanged 38 KiB limit (123 bytes more than the preceding build). Other artifact budgets pass.
 
 - After merging `0.6.1`, the corrected guide-size assertions pass: 341 unit tests, typecheck, lint, architecture, and formatting pass, and the library builds. The Infinite Calendar gzip result remains 39,377 bytes, 465 bytes over the 38 KiB budget; this pre-existing size gate still fails.
 

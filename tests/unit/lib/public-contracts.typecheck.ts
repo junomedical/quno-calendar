@@ -5,7 +5,8 @@ import { parseDateInput, tokenizeDateInput } from "@quno/calendar/date-parser";
 import type {
   QunoInfiniteCalendarHandle,
   QunoInfiniteCalendarProps,
-  CalendarEvent
+  CalendarEvent,
+  CalendarEventBase
 } from "@quno/calendar/infinite-calendar";
 // @ts-expect-error Shared runtime helpers have one public home.
 import { addDays as pickerAddDays } from "@quno/calendar/datepicker";
@@ -20,6 +21,14 @@ import type { DateInputFormatter } from "@quno/calendar/date-parser";
 
 /** Compiled with the consumer surface; never executed by the runtime tests. */
 export function checkPublicContracts(handle: QunoInfiniteCalendarHandle, event: CalendarEvent) {
+  const eventBase: CalendarEventBase = {
+    id: event.id,
+    calendarId: event.calendarId,
+    start: event.start
+  };
+  // @ts-expect-error A base event still needs title and end to be rendered.
+  const incompleteEvent: CalendarEvent = eventBase;
+  void incompleteEvent;
   const date: IsoDate = "2026-08-12";
   const expectedRange: DateRange = { start: date, end: addDays({ date, amount: 1 }) };
   const candidate: { value: string } = { value: date };
@@ -75,6 +84,12 @@ export function checkPublicContracts(handle: QunoInfiniteCalendarHandle, event: 
   // @ts-expect-error Input formatting uses the plural collection.
   input.formatter = { range: () => "" };
   const calendar: Partial<QunoInfiniteCalendarProps> = {
+    projectEvents: ({ events, startDate, endDate, calendarIds }) => {
+      void [startDate, endDate, calendarIds];
+      // @ts-expect-error Display projection does not mutate cached collections.
+      events.push(event);
+      return [...events, event];
+    },
     isLoading: true,
     loadingFallback: "Loading schedule…",
     locale: "en-GB",

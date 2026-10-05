@@ -14,6 +14,10 @@ The [named-contract migration](./shared/migration.md#unreleased-named-contracts-
 current breaking API cleanup. Product decision records preserve the historical signatures they supersede.
 For creation defaults and centered row navigation, see Infinite Calendar Decision 094 and the shared usage recipes.
 Consumer-owned initial skeletons are covered by Infinite Calendar Decision 095 and the async-loading flow.
+Resource-row navigation and anchor restoration after normal parent state updates are covered by
+[Decision 097](./infinite-calendar/decisions.md#097---navigation-and-restoration-wait-for-committed-layout).
+
+Local preview projection after the event cache is covered by Infinite Calendar Decision 098 and the shared usage recipe.
 
 The current responsiveness work is recorded in
 [QUNO-013](./shared/decisions.md#quno-013---bound-high-frequency-work-to-display-frames), with Infinite Calendar's

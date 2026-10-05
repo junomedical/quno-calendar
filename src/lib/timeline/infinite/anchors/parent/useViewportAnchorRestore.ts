@@ -1,0 +1,83 @@
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type RefObject } from "react";
+import type {
+  QunoInfiniteCalendarHandle,
+  CalendarViewportAnchor,
+  CalendarViewportAnchorRestoreOptions,
+  CalendarViewportAnchorTarget
+} from "#quno-internal/timeline/core/types";
+import type { ViewportGeometryRegistry } from "./viewportGeometryRegistry";
+import { ViewportAnchorRestoreSession } from "./viewportAnchorRestoreSession";
+
+type RestoreRequest = {
+  anchor: CalendarViewportAnchor;
+  target: CalendarViewportAnchorTarget;
+  options: CalendarViewportAnchorRestoreOptions;
+};
+type RestoreArgs = {
+  containerRef: RefObject<HTMLElement | null>;
+  registry: ViewportGeometryRegistry;
+  resolveSnapshot: (target: CalendarViewportAnchorTarget) => CalendarViewportAnchor["snapshot"] | null;
+  scrollToDateTime: QunoInfiniteCalendarHandle["scrollToDateTime"];
+};
+
+/** Starts each restore after parent props and registered geometry commit. See docs/infinite-calendar/domains/anchors.md. */
+export function useViewportAnchorRestore(args: RestoreArgs) {
+  const restoreTokenRef = useRef(0);
+  const cleanupRef = useRef<(() => void) | null>(null);
+  const pendingRestoreRef = useRef<RestoreRequest | null>(null);
+  const [activeRestoreTarget, setActiveRestoreTarget] = useState<CalendarViewportAnchorTarget | null>(null);
+
+  const cancelViewportAnchorRestore = useCallback(() => {
+    restoreTokenRef.current += 1;
+    pendingRestoreRef.current = null;
+    cleanupRef.current?.();
+    cleanupRef.current = null;
+    setActiveRestoreTarget(null);
+  }, []);
+  useEffect(() => () => cancelViewportAnchorRestore(), [cancelViewportAnchorRestore]);
+
+  const restoreViewportAnchor = useCallback<QunoInfiniteCalendarHandle["restoreViewportAnchor"]>(
+    ({ anchor, ...options }) => {
+      if (!anchor) {
+        return;
+      }
+      cancelViewportAnchorRestore();
+      const target = options.target ?? anchor.target;
+      pendingRestoreRef.current = { anchor, target, options };
+      setActiveRestoreTarget({ ...target });
+    },
+    [cancelViewportAnchorRestore]
+  );
+
+  useLayoutEffect(() => {
+    const request = pendingRestoreRef.current;
+    if (!request) {
+      return;
+    }
+    pendingRestoreRef.current = null;
+    const viewport = args.containerRef.current;
+    if (!viewport) {
+      return;
+    }
+    const token = restoreTokenRef.current;
+    const session = new ViewportAnchorRestoreSession({
+      ...request,
+      viewport,
+      registry: args.registry,
+      resolveSnapshot: args.resolveSnapshot,
+      scrollToDateTime: args.scrollToDateTime,
+      isCurrent: () => restoreTokenRef.current === token,
+      cancel: cancelViewportAnchorRestore
+    });
+    cleanupRef.current = session.start();
+  }, [
+    activeRestoreTarget,
+    args.containerRef,
+    args.registry,
+    args.resolveSnapshot,
+    args.scrollToDateTime,
+    cancelViewportAnchorRestore
+  ]);
+
+  return { activeRestoreTarget, restoreViewportAnchor, cancelViewportAnchorRestore };
+}

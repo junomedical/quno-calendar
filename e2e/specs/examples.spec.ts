@@ -309,7 +309,7 @@ test("editorial CSS-native exhibit keeps stable chrome browser-positioned", asyn
 
 test("all four guides separate exact payloads from runtime contracts", async ({ page }) => {
   const guides = [
-    ["infinite-calendar", "37.88 KiB gzip", "1.96 KiB gzip", "@quno/calendar/infinite-calendar"],
+    ["infinite-calendar", "38.92 KiB gzip", "1.99 KiB gzip", "@quno/calendar/infinite-calendar"],
     ["datepicker", "10.46 KiB gzip", "3.23 KiB gzip", "@quno/calendar/datepicker"],
     ["date-input", "7.80 KiB gzip", "0.58 KiB gzip", "@quno/calendar/date-input"],
     ["date-parser", "5.21 KiB gzip", "No stylesheet", "@quno/calendar/date-parser"]
@@ -381,6 +381,7 @@ test("editorial Quno date input navigates directly to a selected date", async ({
     '[data-testid="calendar-day"][data-date="2026-07-06"] [data-testid="calendar-row"][data-calendar-id="room-1"]'
   );
   await expect(roomRow).toHaveCount(0);
+  await expect(demo.locator('[data-testid="calendar-row"][data-calendar-id="room-1"]')).toHaveCount(0);
   await demo.getByRole("button", { name: "Show Room 1" }).click();
   await expect(demo.getByText("Showing Room 1 at 13:30")).toBeVisible();
   await expect
@@ -1543,4 +1544,25 @@ test("showcase sidebars align dataset size and API delay on one row", async ({ p
     expect(datasetBox?.width ?? 0).toBeGreaterThan(70);
     expect(apiDelayBox?.width ?? 0).toBeGreaterThan(70);
   }
+});
+
+test("local event projection moves previews without loading persisted data again", async ({ page }) => {
+  await page.goto("/guide/infinite-calendar");
+  const demo = await revealLazyArticleDemo(page, "local event projection example", "article-projection-demo");
+  const loads = demo.getByTestId("projection-load-count");
+  await expect(loads).not.toHaveText("0 loads");
+  const loadedCount = await loads.textContent();
+  await demo.getByRole("button", { name: "Preview at 10:00" }).click();
+  const preview = demo.locator('[data-event-id="draft:preview"]');
+  await expect(preview).toBeVisible();
+  const before = await preview.boundingBox();
+  await demo.getByRole("button", { name: "Move preview to 12:00" }).click();
+  await expect(preview.locator(".article-event-card__time")).toHaveText("12:00–13:00");
+  const after = await preview.boundingBox();
+  expect(after!.x).toBeGreaterThan(before!.x + 50);
+  expect(Math.abs(after!.y - before!.y)).toBeLessThan(2);
+  await expect(loads).toHaveText(loadedCount!);
+  await demo.getByRole("button", { name: "Clear preview" }).click();
+  await expect(preview).toHaveCount(0);
+  await expect(loads).toHaveText(loadedCount!);
 });

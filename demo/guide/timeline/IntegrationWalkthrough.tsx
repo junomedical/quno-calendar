@@ -23,6 +23,7 @@ import {
   TimeMarkerDemo
 } from "./ArticleProductDemos";
 import { DragCreateArticleDemo, PrefetchLoadingDemo, ReadOnlyArticleDemo } from "./ArticleRecipeDemos";
+import { EventProjectionDemo } from "./EventProjectionDemo";
 import { ReactStateDemo } from "./ReactStateDemo";
 import { FieldGuidePage } from "#quno-demo/guide/shared/FieldGuidePage";
 import { FieldGuideProduction } from "#quno-demo/guide/shared/FieldGuideProduction";
@@ -915,11 +916,29 @@ export function IntegrationWalkthrough({ embedded = false }: { embedded?: boolea
           Switch between one and two calendars, then change zoom. The state summary and calendar update together because
           React owns both values; the calendar keeps its visible date and loaded events while those props change.
         </Callout>
+        <p>
+          Keep <code>loadEvents</code> for persisted data. A synchronous <code>projectEvents</code> callback can replace
+          or add local previews in the rendered date window without invalidating loaded events. Return a new collection;
+          leave cached records unchanged. Recurrence expansion stays in your application.
+        </p>
+        <Callout>Try it: show the preview, move it to noon, then clear it. The load count stays unchanged.</Callout>
         <DemoBreakout>
           <LazyArticleDemo label="React-controlled calendar example">
             <ReactStateDemo />
           </LazyArticleDemo>
+          <LazyArticleDemo label="local event projection example">
+            <EventProjectionDemo />
+          </LazyArticleDemo>
         </DemoBreakout>
+        <CodeBlock
+          code={`const projectEvents = useCallback(({ events, startDate, endDate }) => {
+  const previews = expandDraft({ draft, startDate, endDate });
+  return [...events.filter(keepSavedEvent), ...previews];
+}, [draft]);
+
+<QunoInfiniteCalendar {...calendarProps} loadEvents={loadEvents} projectEvents={projectEvents} />`}
+          title="Project local previews after loading"
+        />
         <CodeBlock code={completeSnippet} title="Complete minimal integration" />
       </ArticleSection>
 
@@ -967,7 +986,7 @@ export function IntegrationWalkthrough({ embedded = false }: { embedded?: boolea
 
       <ArticleSection id="package-footprint" number="26" title="Ship Infinite Calendar independently">
         <p>
-          Infinite Calendar JavaScript is 37.88 KiB gzip. Its optional stylesheet is a separate 1.96 KiB gzip import;
+          Infinite Calendar JavaScript is 38.92 KiB gzip. Its optional stylesheet is a separate 1.99 KiB gzip import;
           neither number includes React, React DOM, or the external virtualizer supplied by the application.
         </p>
         <p>

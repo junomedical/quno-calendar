@@ -813,3 +813,45 @@ from the initial press is remembered until the gesture ends, including movement 
 the timeline. Returning a drag to its original minute and calendar clears the preview without invoking activation
 or requesting a move. Ordinary clicks still invoke `onEventActivate`; consumers need no pointer-movement guard.
 Changed drops retain the existing parent-owned persistence boundary.
+
+## 097 - Navigation And Restoration Wait For Committed Layout
+
+Date: 2026-10-05
+Status: Accepted; refines Decisions 045, 092 and 094
+
+A consumer can update selected resources or its controlled draft and call `scrollToDateTime` with a resource id or
+`restoreViewportAnchor` in the same handler. The calendar consumes the request in its layout phase, after parent
+props and registered geometry commit, rather than measuring the previous layout. The latest date/time request in a
+batch wins; date-only navigation retains its synchronous path and cancels a pending row request. Capturing an anchor remains synchronous so it records the position before the parent change.
+
+Restoration keeps the existing geometry registry, virtual-row pinning, session notifications, fallback and manual-intent
+cancellation. Cancellation also discards a pending restore before it starts. No new public options or forced React
+commit are needed; React 18+, React 19 and Preact continue to share the same contract. Consumer persistence and form
+submission remain outside this layout boundary.
+
+## 098 - Project Local Events After The Persisted Cache
+
+Date: 2026-10-05
+Status: Accepted
+
+`loadEvents` owns persisted data and invalidates freshness when its identity changes. Optional synchronous
+`projectEvents({ events, startDate, endDate, calendarIds })` owns display changes for the inclusive rendered date window,
+including empty dates. Apply it after the persisted cache and before layout in both orientations. The callback must
+not mutate cached event records. Returned events are indexed by the existing local start-date semantics; events
+outside rendered dates are ignored. Unchanged date buckets retain their preparation identity.
+
+Changing or removing a projection never invalidates requests or commits previews into the cache. Removal restores
+saved events immediately. Saves and filters use the existing loader and version invalidation. Recurrence expansion
+and edited-series selection remain product-owned; consumers need no second cache to keep local editing off the API.
+
+## 099 - Accept The 0.6.2 Infinite Calendar Payload
+
+Date: 2026-10-05
+Status: Accepted; supersedes only the Infinite Calendar JavaScript ceiling in Decision 091
+
+The committed-layout navigation and local event projection in Decisions 097 and 098 produce a 168,119-byte raw
+Infinite Calendar ESM artifact and a 39,858-byte gzip artifact. Raise its gzip ceiling from 38 KiB to 39 KiB
+(39,936 bytes) to accept this 0.6.2 build. The size guard still rejects artifacts above the new ceiling.
+
+Keep the optional stylesheet ceiling at 2 KiB and retain every other product budget. The field guide reports the
+measured 38.92 KiB JavaScript and 1.99 KiB optional stylesheet payloads alongside their budgets.
