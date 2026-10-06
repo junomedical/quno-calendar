@@ -21,6 +21,7 @@ import { parseDateInput, tokenizeDateInput } from "@quno/calendar/date-parser";
 ```
 
 Infinite Calendar JavaScript has a 50 KiB gzip ceiling; its optional stylesheet has a separate 2 KiB ceiling.
+The headless Date Parser JavaScript entry point has a 7 KiB gzip ceiling.
 
 Add only the optional stylesheets needed by the browser application. JavaScript imports do not inject CSS.
 The package's public subpath types resolve under both modern and legacy Node-style TypeScript module resolution; no consumer-side declaration shim is needed.

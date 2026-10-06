@@ -14,7 +14,7 @@ const bundles = [
   { label: "Datepicker CSS", path: resolve(distRoot, "datepicker.css"), gzipLimit: 3.5 * KIB },
   { label: "Date input JavaScript", path: resolve(distRoot, "date-input.js"), gzipLimit: 8 * KIB },
   { label: "Date input CSS", path: resolve(distRoot, "date-input.css"), gzipLimit: 1 * KIB },
-  { label: "Date Parser JavaScript", path: resolve(distRoot, "date-parser.js"), gzipLimit: 6 * KIB }
+  { label: "Date Parser JavaScript", path: resolve(distRoot, "date-parser.js"), gzipLimit: 7 * KIB }
 ];
 
 function formatSize(bytes) {

@@ -328,7 +328,7 @@ At 1280×720 with 50 resources and 20,000 total events/year:
 - Pointer work is animation-frame bounded and does not rerender unrelated external event cards.
 - p95 scripting plus layout remains below 10ms, no task exceeds 50ms, and a 10× layout benchmark input stays below 25× runtime.
 - JavaScript gzip ceilings are 2 KiB for shared helpers, 50 KiB for Infinite Calendar, 10.5 KiB for Datepicker,
-  8 KiB for Date Input, and 6 KiB for Date Parser. Optional CSS keeps its independent feature ceilings.
+  8 KiB for Date Input, and 7 KiB for Date Parser. Optional CSS keeps its independent feature ceilings.
 
 ## Manual Checks
 

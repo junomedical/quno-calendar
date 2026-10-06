@@ -91,7 +91,7 @@ export const dateParserProduction: FieldGuideProductionProfile = {
       label: "JavaScript",
       gzip: "6.00 KiB",
       raw: "22.63 KiB",
-      budget: "≤ 6 KiB gzip"
+      budget: "≤ 7 KiB gzip"
     }
   ],
   runtime: "No UI framework runtime",

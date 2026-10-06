@@ -27,6 +27,8 @@ See [optional clock recognition](./date-parser/README.md#optional-clock-recognit
 
 The Infinite Calendar JavaScript gzip ceiling is 50 KiB; see
 [Decision 094](./infinite-calendar/decisions.md#094---allow-50-kib-for-infinite-calendar-javascript).
+Date Parser has a 7 KiB gzip ceiling; see
+[QDPR-006](./date-parser/decisions.md#qdpr-006---leave-headroom-in-the-parser-bundle-budget).
 
 ## Shared package records
 
