@@ -327,8 +327,8 @@ At 1280×720 with 50 resources and 20,000 total events/year:
 - Calendar DOM stays below 5,000 horizontal nodes and 6,500 vertical nodes, with at most 1,000 committed event shells.
 - Pointer work is animation-frame bounded and does not rerender unrelated external event cards.
 - p95 scripting plus layout remains below 10ms, no task exceeds 50ms, and a 10× layout benchmark input stays below 25× runtime.
-- JavaScript gzip ceilings are 2 KiB for shared helpers, 50 KiB for Infinite Calendar, 10.5 KiB for Datepicker,
-  8 KiB for Date Input, and 7 KiB for Date Parser. Optional CSS keeps its independent feature ceilings.
+- JavaScript gzip ceilings are 2 KiB for shared helpers, 50 KiB for Infinite Calendar, 12.5 KiB for Datepicker,
+  10 KiB for Date Input, and 7 KiB for Date Parser. Optional CSS keeps its independent feature ceilings.
 
 ## Manual Checks
 
@@ -339,14 +339,46 @@ At 1280×720 with 50 resources and 20,000 total events/year:
 
 Clock-dependent default-demo scenarios set a fixed working-day morning in the browser while leaving timers running.
 The virtualizer item-key adapter must retain identity across ordinary renders; navigation, zoom, and dense-layout
-browser tests guard that boundary. Current budgets are 50 KiB gzip for Infinite Calendar, 10.5 KiB for Datepicker,
-and 8 KiB for Date Input.
+browser tests guard that boundary. Current budgets are 50 KiB gzip for Infinite Calendar, 12.5 KiB for Datepicker,
+and 10 KiB for Date Input.
 
 ## Optional clock verification
 
 Parser tests cover clock formats and validation, AM/PM boundaries, reference dates, numeric-date precedence,
-English/German connectors, inherited dates, overnight and explicitly reversed endpoints, missing clocks, partial
+English/German connectors, omitted-year single/partial endpoints across multi-year windows, inherited dates, overnight and explicitly reversed endpoints, missing clocks, partial
 ranges, single-day selection, unchanged defaults, token spans, and compiled analysis. Public consumer types require
-`DateInputTimeRange` on the parser subpath and keep time recognition out of Date Input props. Packed Node ESM/CommonJS
+`DateInputTimeRange` on the parser subpath, the shared `DateTimeSelectionChange`/`TimeSelectionOptions`, and single-day
+`timeMode` on the input and picker; `recognizeTime` remains exclusive to parser options. Packed Node ESM/CommonJS
 checks execute timed parsing without `document`. Chromium tests toggle recognition in the guide and demo, verify
 resolved dates and times, and assert usable control geometry and bounded overflow at desktop and mobile widths.
+
+Single-day time tests cover all ten cadences, enabled/omitted/empty/duplicate hours, controlled and uncontrolled clocks,
+date-only defaults, unrestricted typing, forced cadence/hour validation, time-only changes, clearing, settings changes,
+disabled/cancelled date choices, same-day reselection, fully controlled day-to-time flow, removed footer API guards, distinct-clock rejection, IME,
+caret-based spins, localized/custom time-view date titles, controlled date changes, enabled-day arrow navigation, hard limits, exhausted directions, long disabled stretches, search cancellation, and day/month/time view exclusion. Chromium checks the public composition at 1280px and 390px:
+automatic day-to-time selection, removed footer control, mouse/touch/keyboard activation, prevention of carry-through touch clicks, cadence-specific minute columns, minute/day computed font-size and weight parity, sticky hour
+geometry and layering, full-date title fit and month-title restoration, pointer/Enter title activation returning to the selected month’s day grid with retained focus/value, arrow focus and panel-height stability across month boundaries, disabled-arrow styles, bounded clipping/overflow,
+keyboard focus after selection/Escape, typed synchronization, and live recipes in both guides. Packed package,
+Preact, and React 19 fixtures include the optional time props alongside all four product surfaces.
+
+## Standalone Timepicker verification
+
+Unit coverage exercises controlled/uncontrolled HH:mm values, null clearing, settings changes with off-slot clocks,
+all ten cadences, sorted/deduplicated valid hours, omitted and empty lists enabling all hours, native disabled actions, custom labels, formatter
+contexts, class names, and root attributes. Public surface/type guards include the fifth subpath and reject its
+private renderer, date-range values, unsupported cadence, and typed-input validation props.
+
+Chromium checks 1280px and 390px selection, Enter focus retention, selected-slot scrolling, empty-list fallback and disabled state,
+cadence-specific computed columns and full-row geometry for every supported cadence, sticky hour geometry and layering, 13px/550 minute typography, clipping and page overflow.
+The home card and editorial guide expose live controlled/uncontrolled examples, recipes, scoped theme colors, and
+separate production measurements. Packed React, Node ESM/CommonJS/SSR, Preact, and React 19 consumers import the
+Timepicker alongside the original four surfaces. Its JavaScript and CSS budgets are 3 KiB and 1.5 KiB gzip.
+
+Empty and omitted enabled-hour regressions verify all 24 groups, boundary-hour selection, forced typed clocks, and midnight clock spins. Nonempty lists retain hour restrictions.
+
+Five-minute cadence geometry must produce six columns and two full rows per hour in both selectors.
+Both selectors assert 16px/700 hour headings, normal text color, and rail fit on desktop and mobile, alongside
+13px/550 minutes and sticky geometry/layering.
+
+The packed React consumer also typechecks every product, including Timepicker, with legacy Node-style module
+resolution to verify `typesVersions` alongside the normal Bundler/`exports` resolution.

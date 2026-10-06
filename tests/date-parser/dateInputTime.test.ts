@@ -101,6 +101,25 @@ describe("optional clock recognition", () => {
     }
   });
 
+  it.each(["6 oct 2pm", "2pm 6 October", "6 oct at 2pm", "6 Oktober um 14"])(
+    "ranks the omitted year once for %s across a multi-year window",
+    (text) => {
+      const config = {
+        ...options,
+        parserLanguages: ["en", "de"],
+        referenceDate: "2026-10-06",
+        expectedRange: { start: "2025-01-01", end: "2027-12-31" }
+      } as const;
+      expect(parseDateInput({ text, ...config })).toEqual(success("2026-10-06", "14:00"));
+      expect(parseDateInput({ text, ...config, selectionMode: "single" })).toEqual(success("2026-10-06", "14:00"));
+      expect(parseDateInput({ text: `${text} -`, ...config })).toEqual({
+        status: "partial-range",
+        value: { start: "2026-10-06", end: "2026-10-06" },
+        times: { start: "14:00", end: null }
+      });
+    }
+  );
+
   it("does not enable clock syntax by default", () => {
     for (const text of ["13", "10:00", "10AM", "tomorrow 10:30PM", "10:00–11:00"]) {
       expect(parseDateInput({ text, ...options, recognizeTime: false })).toEqual({ status: "invalid" });

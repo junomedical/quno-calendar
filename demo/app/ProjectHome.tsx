@@ -20,6 +20,12 @@ const projects = [
     label: "Explore the Date Input guide"
   },
   {
+    title: "Quno/Timepicker",
+    description: "Choose a standalone clock with sticky hours and a minute cadence that fits your workflow.",
+    href: "/guide/timepicker",
+    label: "Explore the Timepicker guide"
+  },
+  {
     title: "Quno/Date Parser",
     description: "Resolve familiar formats, relative phrases, and multilingual ranges without a UI runtime.",
     href: "/guide/date-parser",
@@ -61,7 +67,7 @@ export function ProjectHome() {
         <p className="project-home__eyebrow">@quno/calendar</p>
         <h1>Opinionated approach to dates and schedules UI</h1>
         <p className="project-home__intro">
-          Four different ideas in the date UI elements wrapped into one package. Read story behind every element and
+          Five different ideas in the date UI elements wrapped into one package. Read story behind every element and
           interaction in the field guides and see attached demos.
         </p>
         <div className="project-home__cards">

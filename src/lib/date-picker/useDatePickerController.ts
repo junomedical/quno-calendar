@@ -15,6 +15,7 @@ import { dayIsDisabled, interactionEndpointsAreEnabled } from "./datePickerDisab
 import type { DatePickerController, DatePickerControllerOptions, MonthChangeSource } from "./datePickerControllerTypes";
 import type { DatePickerInteraction } from "./datePickerTypes";
 import { useDatePickerNavigation } from "./useDatePickerNavigation";
+import { createDatePickerDaySelection } from "./createDatePickerDaySelection";
 
 function useLiveInteraction() {
   const [interaction, setInteraction] = useState<DatePickerInteraction>(idle());
@@ -147,6 +148,7 @@ export const useDatePickerController = (options: DatePickerControllerOptions): D
     finishDrag,
     cancelDrag,
     clear,
+    selectDay: createDatePickerDaySelection({ selectionMode, isDayDisabled, goToMonth, commit }),
     navigate,
     goToMonth,
     startEdgeNavigation,

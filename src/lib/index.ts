@@ -17,3 +17,4 @@ export {
   todayIso
 } from "#quno-internal/shared/dateRangeModel";
 export type { DateRange, DateSelectionMode, IsoDate, WeekStart } from "#quno-internal/shared/dateRangeModel";
+export type { DateTimeSelectionChange, MinuteCadence, TimeSelectionOptions } from "#quno-internal/shared/clockTime";

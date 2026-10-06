@@ -1,5 +1,8 @@
 import { useEffect, useState, type ComponentType } from "react";
 import { DateInputDemo } from "#quno-demo/demos/DateInputDemo";
+import { TimePickerDemo } from "#quno-demo/demos/TimePickerDemo";
+import { TimePickerFieldGuide } from "#quno-demo/guide/time-picker/TimePickerFieldGuide";
+import { DateTimeDemo } from "#quno-demo/demos/DateTimeDemo";
 import { DateParserDemo } from "#quno-demo/demos/DateParserDemo";
 import { DateRangeDemo } from "#quno-demo/demos/DateRangeDemo";
 import { DateInputFieldGuide } from "#quno-demo/guide/date-input/DateInputFieldGuide";
@@ -62,6 +65,9 @@ export function App() {
   if (routePath === "/guide/date-parser") return <DateParserFieldGuide />;
   if (routePath === "/demo/datepicker") return <DateRangeDemo />;
   if (routePath === "/demo/date-input") return <DateInputDemo />;
+  if (routePath === "/guide/timepicker") return <TimePickerFieldGuide />;
+  if (routePath === "/demo/timepicker") return <TimePickerDemo />;
+  if (routePath === "/demo/date-time") return <DateTimeDemo />;
   if (routePath === "/demo/date-parser") return <DateParserDemo />;
 
   const activeRoute = demoRoutes.find((route) => route.path === routePath);

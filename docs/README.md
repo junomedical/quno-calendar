@@ -1,6 +1,6 @@
 # Documentation
 
-The documentation follows the four public `@quno/calendar` products. Start with the product you are changing, then
+The documentation follows the five public `@quno/calendar` products. Start with the product you are changing, then
 use the shared records for package-wide contracts and release work.
 
 Focused input/picker compositions keep Start and End shortcut navigation inside the popup. See the
@@ -12,6 +12,7 @@ Focused input/picker compositions keep Start and End shortcut navigation inside 
 | Quno/Infinite Calendar | `@quno/calendar/infinite-calendar` | [Infinite Calendar](./infinite-calendar/README.md) | `/guide/infinite-calendar` |
 | Quno/Datepicker        | `@quno/calendar/datepicker`        | [Datepicker](./datepicker/README.md)               | `/guide/datepicker`        |
 | Quno/Date Input        | `@quno/calendar/date-input`        | [Date Input](./date-input/README.md)               | `/guide/date-input`        |
+| Quno/Timepicker        | `@quno/calendar/timepicker`        | [Timepicker](./timepicker/README.md)               | `/guide/timepicker`        |
 | Quno/Date Parser       | `@quno/calendar/date-parser`       | [Date Parser](./date-parser/README.md)             | `/guide/date-parser`       |
 
 The [named-contract migration](./shared/migration.md#unreleased-named-contracts-and-product-ownership) maps the
@@ -28,7 +29,14 @@ The current responsiveness work is recorded in
 multilane background availability geometry in [Decision 091](./infinite-calendar/decisions.md#091---availability-has-independent-collision-lanes),
 refined by the explicit background opt-in in [Decision 093](./infinite-calendar/decisions.md#093---event-entity-kind-is-separate-from-its-render-layer).
 
+The [single-day date-time recipe](./shared/usage.md#single-day-date-and-time) connects Date Input and Datepicker
+through a separate `HH:mm` clock. Picker cadence/hours constrain typing only when Date Input enables `forceCadence`. Choosing a day opens time selection automatically, with no footer time control. The selector title displays the selected full date; its arrows skip disabled days while keeping time navigation open. Click the date title to return to day selection. Try `/demo/date-time`, or the Datepicker and Date Input guides’ date-time chapters.
+
+Timepicker and Datepicker use [cadence-specific row sizes](./timepicker/README.md#value-and-settings), including six choices per five-minute row and 20-minute slots. Omitted or empty enabled hours enables all 24 hours in both selectors and forced input validation.
+Both time selectors emphasize sticky hour headings with larger, bold text above the minute-number hierarchy.
+
 Date Parser can opt into traditional clock times and overnight ranges with `recognizeTime: true`.
+Single dates without a year, such as `6 oct 2pm`, use the same year ranking as date-only input.
 See [optional clock recognition](./date-parser/README.md#optional-clock-recognition) and its live guide chapter.
 
 The Infinite Calendar JavaScript gzip ceiling is 50 KiB; see

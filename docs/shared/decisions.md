@@ -208,3 +208,100 @@ because that repository was the consolidation source. Its identifier and text re
 - Context: Modern TypeScript resolves declaration subpaths from package `exports`, but the onboarding monorepo still uses Node-style module resolution and required ambient declarations for Infinite Calendar and Datepicker.
 - Decision: Keep the existing `exports` type conditions and add `typesVersions` mappings for every public JavaScript subpath. Do not add consumer-side TypeScript paths, which can affect runtime bundler resolution.
 - Consequences: Legacy consumers can import the package's real declarations directly, remove local declaration shims, and keep runtime imports at public subpaths. No JavaScript or CSS payload changes.
+
+## QUNO-015 - Compose a single day and a separate clock across picker and input
+
+- Date: 2026-10-06
+- Status: Accepted; extends QUNO-005, QUNO-006, and QUNO-012
+- Context: A single-date booking field needs typed clock recognition and direct time selection without changing the
+  existing timezone-free day model or coupling the independent UI products.
+- Decision: Share headless `TimeSelectionOptions`, `MinuteCadence`, and `DateTimeSelectionChange` through the root.
+  Enable `timeMode` only with single selection; keep date ranges unchanged and store `time`/`defaultTime` separately
+  as `HH:mm` or null. Active time mode emits `{ value, time }`; default and range callbacks keep `{ value }`.
+  Share enabled hours and cadence across the picker and input, keep controlled values authoritative when settings
+  change, and demonstrate the composition through public imports in both guides and `/demo/date-time`.
+- Consequences: Consumers own one date and one clock, with no timezone/timestamp conversion or range-time UI.
+  Date Input consumes the existing synchronous clock-capable parser facade; Datepicker remains parser-free.
+  Picker behavior belongs in QDP-125 and typed editing in QDI-002. These opt-in features increase feature bundle
+  sizes, so the Datepicker JavaScript ceiling moves from 10.5 to 12 KiB gzip and Date Input from 8 to 10 KiB.
+  Shared, Infinite Calendar, Date Parser, and optional stylesheet ceilings remain unchanged; guides report measured
+  artifacts separately. This supersedes only those two current size ceilings in QUNO-012/QUNO-013.
+
+## QUNO-016 - Separate picker choices from typed clock restrictions
+
+- Date: 2026-10-06
+- Status: Accepted; refines QUNO-015
+- Context: Sharing picker cadence and enabled hours should not silently limit the precision of typed date-time values.
+- Decision: Keep picker options constrained by their settings, while Date Input accepts any valid single clock by
+  default. Its `forceCadence` prop explicitly enforces both cadence and enabled hours. Demonstrate the distinction
+  through a default-off enforcement control and copyable recipes in both guides and the focused date-time demo.
+- Consequences: Shared state still synchronizes exact typed clocks even when they have no corresponding picker slot.
+  QDI-003 owns typed validation and arrow behavior; QDP-125 continues to own offered picker choices unchanged.
+
+## QUNO-017 - Add an independent Timepicker and reuse its slot renderer
+
+- Date: 2026-10-06
+- Status: Accepted; extends QUNO-015 and the four-product boundary in QUNO-012
+- Context: The existing calendar time selector is useful as a standalone clock control with its own public surface.
+- Decision: Add `@quno/calendar/timepicker` and its optional stylesheet as a fifth product, with `QunoTimePicker`
+  and product-owned props, labels, formatters, class names, and slots. Keep the root headless. Move the private time
+  slot renderer into `src/lib/time-picker`; permit Datepicker to depend on that renderer while Timepicker depends
+  only on shared headless contracts and its own domain. Preserve Datepicker's existing CSS/classes, slots, labels,
+  focus behavior, and callbacks. Use `quno-time-picker-*`/`--quno-time-picker-*` names for the new standalone surface.
+- Consequences: Both controls share option generation and selected-slot scrolling without bundling a calendar into
+  Timepicker. Add an interactive guide, focused demo, home card, public guards, packed consumers, and visual coverage.
+  Set separate Timepicker ceilings of 3 KiB JavaScript and 1.5 KiB CSS gzip; other accepted ceilings stay unchanged.
+  QTP-001 owns the standalone value and interaction contract.
+
+## QUNO-018 - Size time rows by minute cadence
+
+- Date: 2026-10-06
+- Status: Accepted; refines slot layout in QUNO-015/QUNO-017, QDP-125, and QTP-001
+- Context: A fixed maximum-six-column layout leaves uneven last rows for fine cadences and gives different minute
+  intervals the same density.
+- Decision: Share cadence-specific columns across Timepicker and Datepicker: 1/2/3/4/6-minute steps use five columns,
+  5/15 use four, 10 uses six, 20 uses three, and 30 uses two. Retain the existing 6-minute setting at five columns.
+  Add 20 to the shared `MinuteCadence` contract and demo settings; forced Date Input validation and clock spins use it.
+- Consequences: Each hour ends in a full row. Default cadence remains 15; minute values still start at 00 and stay
+  below 60. Sticky hours, existing selected clocks, callbacks, disabled behavior, and unrestricted typing remain intact.
+  Browser coverage asserts column counts and row geometry at desktop and mobile widths; size ceilings remain unchanged.
+
+## QUNO-019 - Default omitted or empty enabled hours to all hours
+
+- Date: 2026-10-06
+- Status: Accepted; supersedes empty-list behavior in QDP-125/QTP-001 and forced validation under QDI-003
+- Context: A missing or empty hour configuration should provide the full clock rather than an unusable selector.
+- Decision: Both omitted and empty `enabledHours` enable all 24 hours in Timepicker and Datepicker. Use the same
+  default in forced Date Input validation and clock spins. Nonempty lists continue to restrict hours; invalid and
+  duplicate entries do not add options. Keep cadence, selected values, callbacks, and disabled behavior unchanged.
+- Consequences: Demo settings expose the empty-list fallback as All (empty list). Regression coverage verifies full
+  option groups, boundary-hour selections, forced commits, and midnight edits. Document the changed empty-list
+  meaning in migration guidance; keep existing public labels and customization surfaces intact.
+
+## QUNO-020 - Use six columns for five-minute cadence
+
+- Date: 2026-10-06
+- Status: Accepted; supersedes only the five-minute column count in QUNO-018
+- Context: Twelve five-minute choices fit evenly into two rows of six instead of three rows of four.
+- Decision: Render five-minute cadence with six columns in both Timepicker and Datepicker time mode. Keep every
+  other cadence's column count and all minute values unchanged.
+- Consequences: Both selectors use the shared renderer; guide examples and browser checks assert six columns and
+  two complete rows per hour. Value ownership, callbacks, availability, and public styling names retain their contracts.
+
+## QUNO-021 - Emphasize hours above minute options
+
+- Date: 2026-10-06
+- Status: Accepted; supersedes the retained hour-label typography in QDP-126 and refines QUNO-017
+- Context: Small muted hour labels are less prominent than the minute choices they organize.
+- Decision: Give sticky hour headings in Timepicker and Datepicker time mode 16px text, weight 700, and each
+  component's normal text color. Keep minute options at 13px/550, matching calendar day numbers.
+- Consequences: Hours anchor the minute grids without changing rail width, option geometry, or interaction.
+  Existing scoped text tokens and hour-heading hooks remain available. Desktop and mobile browser checks cover
+  computed typography/color, rail fit, sticky position, and layering in both controls.
+
+## Concurrent decision records reconciled — 2026-10-06
+
+The merged branches independently assigned QUNO-015 to [legacy TypeScript subpath resolution](#quno-015---resolve-public-subpath-types-for-legacy-typescript-consumers)
+and [single-day clock composition](#quno-015---compose-a-single-day-and-a-separate-clock-across-picker-and-input).
+Both accepted identifiers and texts are preserved; references distinguish these records by their full title/anchor.
+New decisions continue after QUNO-021. The legacy TypeScript mapping also covers the new Timepicker subpath.

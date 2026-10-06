@@ -72,6 +72,8 @@ import { addDays, type DateRange } from "@quno/calendar";
 import { QunoInfiniteCalendar, type EventRendererProps, type LoadEvents } from "@quno/calendar/infinite-calendar";
 import { QunoDatePicker } from "@quno/calendar/datepicker";
 import { QunoDateInput } from "@quno/calendar/date-input";
+import { QunoTimePicker } from "@quno/calendar/timepicker";
+import "@quno/calendar/timepicker/styles.css";
 import { parseDateInput, tokenizeDateInput } from "@quno/calendar/date-parser";
 import "@quno/calendar/infinite-calendar/styles.css";
 import "@quno/calendar/datepicker/styles.css";
@@ -86,7 +88,8 @@ const value: DateRange = { start: "2026-08-24", end: addDays({ date: "2026-08-24
 parseDateInput({ text: "tomorrow", ...({ referenceDate: "2026-08-24", expectedRange: value }) });
 tokenizeDateInput({ text: "tomorrow" });
 createRoot(document.getElementById("root")!).render(<>
-  <QunoDatePicker value={value} /><QunoDateInput expectedRange={value} value={value} />
+  <QunoTimePicker defaultValue="10:30" enabledHours={[10, 11]} minuteCadence={15} />
+  <QunoDatePicker value={value} selectionMode="single" timeMode time="10:30" minuteCadence={15} enabledHours={[10, 11]} /><QunoDateInput expectedRange={value} value={value} selectionMode="single" timeMode forceCadence time="10:30" />
   <QunoInfiniteCalendar calendars={[{ id: "team", name: "Team" }]} selectedCalendarIds={["team"]}
     loadEvents={loadEvents} renderEvent={EventCard} initialDateKey="2026-08-24" />
 </>);
@@ -100,7 +103,7 @@ execFileSync("npm", ["install", "--prefer-offline", "--no-audit", "--no-fund"], 
 });
 const installed = join(appDir, "node_modules", "@quno", "calendar");
 const manifest = JSON.parse(readFileSync(join(installed, "package.json"), "utf8"));
-for (const file of ["infinite-calendar.css", "datepicker.css", "date-input.css"]) {
+for (const file of ["infinite-calendar.css", "datepicker.css", "date-input.css", "timepicker.css"]) {
   const stylesheet = join(installed, "dist", file);
   accessSync(stylesheet);
   const source = readFileSync(stylesheet, "utf8");
@@ -117,11 +120,13 @@ for (const subpath of [
   "./datepicker/styles.css",
   "./date-input",
   "./date-input/styles.css",
-  "./date-parser"
+  "./date-parser",
+  "./timepicker",
+  "./timepicker/styles.css"
 ]) {
   if (!manifest.exports?.[subpath]) throw new Error(`Missing package export ${subpath}`);
 }
-for (const subpath of ["./timeline", "./date-picker"]) {
+for (const subpath of ["./timeline", "./date-picker", "./time-picker"]) {
   if (manifest.exports?.[subpath]) throw new Error(`Legacy package export remains: ${subpath}`);
 }
 for (const subpath of [
@@ -129,7 +134,8 @@ for (const subpath of [
   "@quno/calendar/infinite-calendar",
   "@quno/calendar/datepicker",
   "@quno/calendar/date-input",
-  "@quno/calendar/date-parser"
+  "@quno/calendar/date-parser",
+  "@quno/calendar/timepicker"
 ]) {
   execFileSync(process.execPath, ["--input-type=module", "--eval", `await import("${subpath}")`], { cwd: appDir });
   execFileSync(process.execPath, ["--input-type=commonjs", "--eval", `require("${subpath}")`], { cwd: appDir });
@@ -170,7 +176,10 @@ for (const mode of ["module", "commonjs"]) {
 for (const oldSubpath of [
   "@quno/calendar/timeline",
   "@quno/calendar/date-picker",
+  "@quno/calendar/time-picker",
   "@quno/calendar/date-parser/dateInputTimeParser",
+  "@quno/calendar/timepicker/TimeOptions",
+  "@quno/calendar/dist/time-picker/TimeOptions",
   "@quno/calendar/dist/date-parser/dateInputDateParser"
 ]) {
   try {
@@ -184,4 +193,9 @@ for (const oldSubpath of [
   }
 }
 execFileSync("npm", ["run", "build"], { cwd: appDir, env: npmEnvironment, stdio: "inherit" });
-console.log("Packed React, type, stylesheet, ESM, CommonJS, and SSR verification passed.");
+execFileSync("npm", ["exec", "--", "tsc", "--noEmit", "--moduleResolution", "node", "--module", "ESNext"], {
+  cwd: appDir,
+  env: npmEnvironment,
+  stdio: "inherit"
+});
+console.log("Packed React, modern/legacy TypeScript, stylesheet, ESM, CommonJS, and SSR verification passed.");

@@ -1,5 +1,8 @@
 import { addDays, isIsoDate, type DateRange, type IsoDate } from "@quno/calendar";
 import { QunoDatePicker, type QunoDatePickerProps } from "@quno/calendar/datepicker";
+import { QunoTimePicker, type QunoTimePickerProps } from "@quno/calendar/timepicker";
+// @ts-expect-error Slot renderer remains private.
+import { TimeOptions } from "@quno/calendar/timepicker";
 import type { QunoDateInputProps } from "@quno/calendar/date-input";
 import { parseDateInput, tokenizeDateInput, type DateInputTimeRange } from "@quno/calendar/date-parser";
 import type {
@@ -78,16 +81,57 @@ export function checkPublicContracts(handle: QunoInfiniteCalendarHandle, event: 
     isDayDisabled: ({ date }) => date === expectedRange.start,
     formatters: { date: ({ date, locale }) => `${date}:${locale}`, weekday: ({ weekday }) => String(weekday) }
   };
+  picker.selectionMode = "single";
+  picker.timeMode = true;
+  picker.time = "10:30";
+  picker.enabledHours = [9, 10, 11];
+  picker.minuteCadence = 20;
+  // @ts-expect-error Typed restrictions belong to Date Input only.
+  picker.forceCadence = true;
+  // @ts-expect-error Only supported minute cadences are accepted.
+  picker.minuteCadence = 7;
+  const timePicker: QunoTimePickerProps = {
+    value: "10:30",
+    minuteCadence: 15,
+    enabledHours: [9, 10],
+    onChange: ({ value }) => {
+      const clock: string | null = value;
+      void clock;
+    },
+    formatters: { time: ({ time, locale }) => `${locale}:${time}` }
+  };
+  timePicker.minuteCadence = 20;
+  // @ts-expect-error Timepicker uses a clock, not a date range.
+  timePicker.value = expectedRange;
+  // @ts-expect-error Only supported cadences are accepted.
+  timePicker.minuteCadence = 7;
+  // @ts-expect-error Input validation does not belong to the slot selector.
+  timePicker.forceCadence = true;
+  void [timePicker, QunoTimePicker, TimeOptions];
   const input: QunoDateInputProps = {
+    forceCadence: true,
     expectedRange,
-    onChange: picker.onChange,
+    timeMode: true,
+    selectionMode: "single",
+    time: "10:30",
+    minuteCadence: 15,
+    enabledHours: [9, 10],
+    onChange: ({ value, time }) => {
+      const clock: string | null | undefined = time;
+      void [value, clock];
+    },
     formatters: { range: ({ value, locale }) => `${value.start}:${locale}` },
     onInput: (event) => {
       event.currentTarget.setSelectionRange(0, 0);
     }
   };
+  input.minuteCadence = 20;
   // @ts-expect-error Disabled-date predicate has a canonical name.
   picker.disabledDays = () => false;
+  // @ts-expect-error Time selection now starts from a day; the footer slot is removed.
+  picker.classNames = { timeButton: "clock" };
+  // @ts-expect-error The removed time footer no longer has a Choose time label.
+  picker.labels = { chooseTime: "Clock" };
   // @ts-expect-error Input formatting uses the plural collection.
   input.formatter = { range: () => "" };
   // @ts-expect-error Clock recognition is owned by the headless parser.

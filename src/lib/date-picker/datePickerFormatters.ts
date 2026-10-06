@@ -61,7 +61,7 @@ const formatWeekday = ({ weekday: dayIndex, locale }: { weekday: number; locale:
     }
   });
 
-export const DEFAULT_LABELS: QunoDatePickerLabels = {
+export const DEFAULT_LABELS: Required<QunoDatePickerLabels> = {
   calendar: "Date range picker",
   selectedPeriod: "Selected period",
   chooseDate: "Choose a date",
@@ -77,14 +77,21 @@ export const DEFAULT_LABELS: QunoDatePickerLabels = {
   startDate: "Start date",
   endDate: "End date",
   thisDate: "This date",
+  timeNavigation: "Choose a time",
+  noEnabledHours: "No enabled hours",
+  previousDay: "Previous enabled day",
+  nextDay: "Next enabled day",
   hint: "Click again to cycle a date role, or drag outside the period to paint a new one."
 };
 
-export const DEFAULT_FORMATTERS: QunoDatePickerFormatters = {
+export const DEFAULT_FORMATTERS: Required<QunoDatePickerFormatters> = {
   date: formatDate,
   month: formatMonth,
   monthOption: formatMonthOption,
   year: formatYear,
   dayLabel: formatDayLabel,
-  weekday: formatWeekday
+  weekday: formatWeekday,
+  timeDate: ({ date, locale }) =>
+    formatIsoDate({ value: date, locale, options: { day: "numeric", month: "long", year: "numeric" } }),
+  time: ({ time }) => time
 };

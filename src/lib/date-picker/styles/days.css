@@ -26,6 +26,10 @@
   height: 34px;
   place-items: center;
   border-radius: var(--quno-date-picker-day-radius, 9px);
+}
+
+.quno-date-picker-day > span,
+.quno-date-picker-minute-option {
   font-size: 13px;
   font-weight: 550;
 }

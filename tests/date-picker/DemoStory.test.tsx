@@ -13,11 +13,11 @@ describe("datepicker field guide", () => {
     expect(
       screen.getByText("Paint, drag and correct a range without going to forced from-to sequence.")
     ).toBeInTheDocument();
-    expect(screen.getAllByRole("grid")).toHaveLength(14);
+    expect(screen.getAllByRole("grid")).toHaveLength(15);
     const contents = screen.getByRole("navigation", {
       name: "Table of contents"
     });
-    expect(within(contents).getAllByRole("link")).toHaveLength(11);
+    expect(within(contents).getAllByRole("link")).toHaveLength(12);
     expect(within(contents).queryByRole("link", { name: /Interactive demo/ })).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: "All components" })).toHaveAttribute("href", "/");
     expect(screen.getByRole("link", { name: /Demo/ })).toHaveAttribute("href", "/demo/datepicker");
@@ -67,8 +67,8 @@ describe("datepicker field guide", () => {
     ).toHaveAttribute("href", "#idea");
     expect(within(contents).queryByText("Understand and ship the model")).not.toBeInTheDocument();
     expect(document.querySelector('[data-story-topic="natural-input"]')).not.toBeInTheDocument();
-    expect(screen.getByText("10.49 KiB gzip")).toBeInTheDocument();
-    expect(screen.getByText("3.22 KiB gzip")).toBeInTheDocument();
+    expect(screen.getByText("12.46 KiB gzip")).toBeInTheDocument();
+    expect(screen.getByText("3.36 KiB gzip")).toBeInTheDocument();
     expect(screen.queryByText("Public API at a glance")).not.toBeInTheDocument();
     expect(screen.queryByText(/docs\/shared\/usage\.md/)).not.toBeInTheDocument();
   });

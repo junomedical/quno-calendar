@@ -6,20 +6,20 @@ import { resolveTimeEndpoint, trimTimeWhitespace, type TimeEndpoint } from "./da
 import type { DateInputParseResult, DateInputResolveOptions } from "./dateInputTypes";
 
 const endpointPair = ({
-  first,
-  second,
+  first: { candidates: starts },
+  second: { candidates: ends },
   options
 }: {
   first: TimeEndpoint;
   second: TimeEndpoint;
   options: DateInputResolveOptions;
 }): { start: IsoDate; end: IsoDate } => {
-  if (first.candidates.length && second.candidates.length) {
-    const pair = pickBestDateEndpoints({ starts: first.candidates, ends: second.candidates, options })!;
-    return { start: pair.start.date, end: pair.end.date };
+  // A single or partial endpoint shares candidates; rank its omitted year only once.
+  if (starts !== ends) {
+    const pair = pickBestDateEndpoints({ starts, ends, options });
+    if (pair) return { start: pair.start.date, end: pair.end.date };
   }
-  const candidates = first.candidates.length ? first.candidates : second.candidates;
-  const date = pickBestDate({ candidates, options })?.date ?? options.referenceDate;
+  const date = pickBestDate({ candidates: starts.length ? starts : ends, options })?.date ?? options.referenceDate;
   return { start: date, end: date };
 };
 
@@ -35,7 +35,7 @@ export const parseTimeInput = ({ tokens, options, vocabulary }: DateEndpointCont
     vocabulary
   });
   if (!first) return { status: "invalid" };
-  const rest = divider === -1 ? tokens : tokens.slice(divider + 1);
+  const rest = tokens.slice(divider + 1);
   const partial = divider !== -1 && !trimTimeWhitespace({ tokens: rest }).length;
   const second = partial
     ? { ...first, time: null }

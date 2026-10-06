@@ -33,6 +33,7 @@ export type DatePickerController = {
   finishDrag: (args: { date: IsoDate }) => void;
   cancelDrag: () => void;
   clear: () => void;
+  selectDay: (args: { date: IsoDate }) => void;
   navigate: (args: { direction: MonthDirection }) => void;
   goToMonth: (args: { month: IsoDate }) => void;
   startEdgeNavigation: (args: { direction: MonthDirection }) => void;

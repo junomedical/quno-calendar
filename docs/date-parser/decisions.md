@@ -87,3 +87,29 @@ applies; new refinements belong here rather than in the Datepicker ledger.
 - Decision: Raise the Date Parser JavaScript gzip ceiling to 7 KiB and align the bundle guard, field-guide budget,
   and verification documentation. Retain independent budgets for the other products.
 - Consequences: The size check passes across the verified Node versions while retaining a bounded parser budget.
+
+## UI integration update — 2026-10-06
+
+[QUNO-015](../shared/decisions.md#quno-015---compose-a-single-day-and-a-separate-clock-across-picker-and-input)
+extends the UI integration limitation in QDPR-005: Date Input now consumes the existing clock-capable facade in
+single-day time mode, while Datepicker selects a separate clock without importing parser code. The headless parser's
+accepted grammar, distinct intraday/overnight clocks, result shape, dependency direction, and 6 KiB ceiling are unchanged.
+
+## QDPR-006 - Rank single timed dates without a year once
+
+- Date: 2026-10-06
+- Status: Accepted; corrects endpoint ranking under QDPR-005
+- Context: Applying range ranking to the duplicated endpoint of `6 oct 2pm` could select two different years in a
+  multi-year expected window, making a valid date-time invalid in single selection.
+- Decision: Rank a single timed endpoint with the same single-date ranking as date-only input, then duplicate that
+  resolved date. A trailing delimiter likewise duplicates the resolved start date and leaves the end clock null.
+  Rank genuinely separate range endpoints together as before.
+- Consequences: Abbreviated months and AM/PM clocks retain their grammar; omitted years respect expected-range,
+  locale, and reference-date ranking. Single selection accepts the resulting date and clock without public API changes.
+
+## Concurrent decision records reconciled — 2026-10-06
+
+The merged branches independently assigned QDPR-006 to [parser budget headroom](#qdpr-006---leave-headroom-in-the-parser-bundle-budget)
+and [single timed-date ranking](#qdpr-006---rank-single-timed-dates-without-a-year-once).
+Preserve both accepted identifiers and texts, and distinguish references by full title/anchor. The current parser
+ceiling is 7 KiB; the earlier UI integration note's unchanged 6 KiB refers to its branch baseline.

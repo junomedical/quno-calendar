@@ -5,11 +5,12 @@ import type { JSX } from "react";
 
 type Props = {
   selection: DateRange | null;
+  time?: string | null;
   config: ResolvedDatePickerConfig;
   onClear: () => void;
 };
 
-export const SelectionHeader = ({ selection, config, onClear }: Props): JSX.Element => {
+export const SelectionHeader = ({ selection, time, config, onClear }: Props): JSX.Element => {
   const { labels, formatters, locale, classNames } = config;
   const summary = selection
     ? selection.start === selection.end
@@ -31,6 +32,7 @@ export const SelectionHeader = ({ selection, config, onClear }: Props): JSX.Elem
         </span>
         <strong className={classNames?.selectionSummary} data-slot="selection-summary">
           {summary}
+          {selection && time ? ` ${formatters.time({ time, locale })}` : ""}
         </strong>
       </div>
       <button

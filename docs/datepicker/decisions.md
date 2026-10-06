@@ -1051,3 +1051,83 @@ presentation, and geometry behavior in this ledger remains in force. See the
   shortcut exit motion.
 - Consequences: Focus remains within the picker throughout shortcut removal, including without animations. Host
   compositions can distinguish internal navigation from leaving the control through the normal blur `relatedTarget`.
+
+## QDP-125 — Select one clock in the calendar frame
+
+- Date: 2026-10-06
+- Status: Accepted; extends QDP-072 and QDP-114, supersedes the time exclusion in QDP-001
+- Context: Single-day selection needs optional time editing using the familiar in-place month/year navigation model.
+- Decision: In single-day `timeMode`, show a centered selected-clock/Choose time button below the calendar. Toggle an
+  in-place time navigator with sorted enabled hours, sticky left hour labels, and cadence-aligned 00–59 minutes in at
+  most six columns. Default to all 24 hours and 15-minute cadence; offer 1/2/3/4/5/6/10/15/30 steps. Selecting a minute
+  commits one separate clock and returns to days with focus on the stable button. Toggling or Escape returns without
+  committing. Month/time views are mutually exclusive and normal navigation returns to days.
+- Consequences: Date values remain timezone-free days. New day selection retains the clock; Clear removes it. Empty
+  or disabled selected days cannot choose a time; empty hours show an accessible empty state. Controlled clocks are
+  not rewritten when constraints change. Stable slots, labels, formatter and existing theme tokens keep presentation
+  consumer-owned. QUNO-015 owns the shared callback and cross-product composition.
+
+## QDP-126 — Match minute options to calendar number typography
+
+- Date: 2026-10-06
+- Status: Accepted; refines the presentation in QDP-125
+- Context: Minute buttons inherited the surrounding font while day numbers explicitly used a smaller, medium weight.
+- Decision: Give day-number spans and minute options one shared CSS typography rule: 13px and weight 550.
+- Consequences: The minute selector matches calendar numbers on desktop, mobile, and editorial guide surfaces. Hour
+  headings retain their existing rail-label typography; consumers keep their normal scoped styling hooks.
+
+## QDP-127 — Title time navigation with the selected date
+
+- Date: 2026-10-06
+- Status: Accepted; refines the title presentation in QDP-125
+- Context: A month-only title leaves the selected day unclear while choosing its time.
+- Decision: While time navigation is active, replace the visible month title with the selected day, full month, and year using the picker locale. Add optional `formatters.timeDate({ date, locale })` for consumer-owned text. Returning to day or month navigation restores the visible month title.
+- Consequences: The title follows controlled date changes independently of the visible month. Keep the existing header slots, month-navigation button behavior, and accessible action label. Browser coverage verifies the title fits on desktop and mobile.
+
+## QDP-128 — Navigate enabled days inside time selection
+
+- Date: 2026-10-06
+- Status: Accepted; supersedes the time-view arrow behavior in QDP-125 and extends QDP-127
+- Context: Month navigation arrows closed the time selector even though its title represented one selected day.
+- Decision: In time view, header arrows select the nearest enabled day in their direction while preserving the clock and keeping the view open. Skip dates rejected by the combined disabled-date predicate and respect inclusive date limits. Reveal the selected day’s month so returning to days shows its context. Use optional `previousDay`/`nextDay` labels; retain existing header slots and ordinary month arrows outside time view. Disable exhausted directions.
+- Consequences: Controlled/uncontrolled selection keeps the normal `{ value, time }` callback. Long disabled stretches scan in chunks of 128 days, yielding to the browser and pausing the arrows until resolved; leaving time mode, changing availability/selection, or unmounting cancels the search. Scans stop at hard limits or the representable ISO date boundary. Demo remounts follow typed month changes only, so picker day navigation retains the open panel and focus across months.
+
+- Size tradeoff: Enabled-day navigation, boundary state, and cancellable browser-yielding searches increase Datepicker to 12.22 KiB JavaScript gzip and 3.42 KiB CSS gzip. Supersede only the Datepicker JavaScript ceiling in QUNO-015 with 12.5 KiB; retain all other ceilings.
+
+## QDP-129 — Return from the time-view date title to days
+
+- Date: 2026-10-06
+- Status: Accepted; supersedes the time-view title action retained in QDP-127
+- Context: The full-date title still opened month/year navigation when activated during time selection.
+- Decision: Activating the full-date title in time mode opens day selection in the selected date’s month without committing a selection or changing its clock. Retain the stable title button and focus; describe its action with the existing `chooseDate` label and omit month-navigation `aria-expanded` while it represents this action.
+- Consequences: Pointer and native keyboard activation return to the day grid. The normal month title continues to toggle month/year navigation. Date title activation also cancels any pending enabled-day search by leaving time mode.
+
+## QDP-130 — Advance from day selection to time selection
+
+- Date: 2026-10-06
+- Status: Accepted; supersedes the footer toggle and clock-button focus behavior in QDP-125; retains QDP-128/QDP-129
+- Context: The separate clock below the calendar adds another action between selecting a day and selecting its time.
+- Decision: In single-day time mode, a committed enabled day opens the in-place time selector immediately, including same-day reselection. Keep initial/external values in the current view until direct picker selection. Remove the footer control, its `timeButton` slot/class key, footer CSS classes, and `chooseTime` label. Display the clock beside the date in the existing summary above the calendar. Selecting a minute returns to days; the date title and Escape also return.
+- Consequences: Transfer focus to the stable title before replacing the day grid or time navigator. Native keyboard day activation follows the same flow. Suppress the pointer compatibility click after committing a day so touch/pen gestures cannot also select a minute under the former cell. Disabled/cancelled choices do not advance. Range/date-only behavior and controlled values/callbacks remain unchanged. The migration guide documents the removed customization names.
+
+## Shared cadence update — 2026-10-06
+
+[QUNO-018](../shared/decisions.md#quno-018---size-time-rows-by-minute-cadence) extends shared cadence choices with
+20-minute steps and chooses time-selector columns by cadence. It supersedes the previous fixed maximum-six-column
+layout; existing value, focus, formatting, and typed-clock ownership contracts remain in force.
+
+## Shared enabled-hour default update — 2026-10-06
+
+[QUNO-019](../shared/decisions.md#quno-019---default-omitted-or-empty-enabled-hours-to-all-hours) supersedes the empty-list
+restriction: omitted or empty enabled hours now allows all 24 hours, including forced typed-clock validation and spins.
+Nonempty lists retain their restrictions; disabled state, cadence, and existing values keep their contracts.
+
+## Shared five-minute row update — 2026-10-06
+
+[QUNO-020](../shared/decisions.md#quno-020---use-six-columns-for-five-minute-cadence) supersedes the five-minute column
+count in QUNO-018: both time selectors now use two rows of six minute choices per hour.
+
+## Shared hour emphasis update — 2026-10-06
+
+[QUNO-021](../shared/decisions.md#quno-021---emphasize-hours-above-minute-options) makes sticky hour headings
+larger and bold (16px/700), using normal text color beside 13px/550 minutes. Existing geometry and interaction remain.

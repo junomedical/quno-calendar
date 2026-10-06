@@ -67,6 +67,8 @@ import { QunoInfiniteCalendar } from "@quno/calendar/infinite-calendar";
 import "@quno/calendar/infinite-calendar/styles.css";
 import { QunoDatePicker, type DateRange } from "@quno/calendar/datepicker";
 import { QunoDateInput } from "@quno/calendar/date-input";
+import { QunoTimePicker } from "@quno/calendar/timepicker";
+import "@quno/calendar/timepicker/styles.css";
 import { parseDateInput } from "@quno/calendar/date-parser";
 
 const initial: DateRange = { start: "2026-08-24", end: "2026-08-24" };
@@ -76,8 +78,9 @@ function Fixture() {
   const [value, setValue] = useState<DateRange | null>(initial);
   useEffect(() => document.body.setAttribute("data-react19-ready", "true"), []);
   return <main>
-    <QunoDatePicker value={value} onChange={({ value }) => setValue(value)} isDayDisabled={({ date }) => date === "2026-08-25"} />
-    <QunoDateInput expectedRange={initial} value={value} onChange={({ value }) => setValue(value)} />
+    <QunoTimePicker defaultValue="10:30" enabledHours={[10, 11]} />
+    <QunoDatePicker selectionMode="single" timeMode time="10:30" value={value} onChange={({ value }) => setValue(value)} isDayDisabled={({ date }) => date === "2026-08-25"} />
+    <QunoDateInput selectionMode="single" timeMode forceCadence time="10:30" expectedRange={initial} value={value} onChange={({ value }) => setValue(value)} />
     <div style={{ height: 420 }}>
       <QunoInfiniteCalendar calendars={[{ id: "team", name: "Team" }]} selectedCalendarIds={["team"]}
         loadEvents={async () => []} renderEvent={() => null} initialDateKey="2026-08-24" />
@@ -115,7 +118,12 @@ try {
   await viewport.waitFor();
   const pickerDay = page.locator('[data-slot="day"][data-date="2026-08-26"]');
   await pickerDay.click();
+  await page.locator('.quno-date-picker [data-slot="time-navigation"]').waitFor();
+  await page.locator('[data-slot="month-heading-button"]').press("Enter");
   await page.locator('[data-slot="day"][data-date="2026-08-26"][data-selected="true"]').waitFor();
+  const standalone = page.locator(".quno-time-picker");
+  await standalone.getByRole("button", { name: "11:15", exact: true }).click();
+  await standalone.locator('[data-time="11:15"][aria-pressed="true"]').waitFor();
   const input = page.locator('[data-slot="input"]');
   await input.fill("27 August 2026");
   await input.press("Enter");

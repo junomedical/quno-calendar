@@ -56,6 +56,8 @@ Hours use one or two digits: `0–23` for 24-hour clocks, `1–12` with case-ins
 in `00–59`; spaces before AM/PM are optional. `12AM` is midnight and `12PM` is noon. Time-only input uses
 `referenceDate`, defaulting to today. Time may precede or follow one date, using whitespace or `at`/`um` connectors.
 Bare numeric tokens keep valid date readings: `12 June 13` remains a date, while `12 June at 13` supplies a clock.
+Omitted years use the same ranking as date-only input: with reference date `2026-10-06`, `6 oct 2pm` resolves to
+one day, `2026-10-06`, at `14:00`, even when the expected range spans several years.
 Existing duration phrases keep their meaning.
 
 Ranges accept existing delimiters, plus compact dashes between explicit clocks (`10:00–11:00`). Bare-hour ranges
@@ -67,4 +69,6 @@ own clocks. Missing times and meridiem suffixes are never inherited.
 A trailing range delimiter returns `partial-range`, duplicates the recognized start date, and leaves the end time
 `null`. Malformed clocks are `invalid`. Single selection allows intraday intervals and rejects overnight ranges.
 Times on whole multi-day calendar phrases, seconds, timezones, offsets, dotted meridiem, and natural clock phrases
-are unsupported. `QunoDateInput` and Datepicker remain date-only.
+are unsupported. Date Input and Datepicker can compose one date and one clock with `timeMode` in single-day mode;
+see the [date-time recipe](../shared/usage.md#single-day-date-and-time). The headless parser continues to support
+intraday and overnight ranges independently of the single-clock UI.

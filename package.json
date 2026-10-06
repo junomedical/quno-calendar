@@ -1,7 +1,7 @@
 {
   "name": "@quno/calendar",
   "version": "0.6.2",
-  "description": "Quno Infinite Calendar, Datepicker, Date Input, and headless Date Parser for React and Preact-compatible applications.",
+  "description": "Quno Infinite Calendar, Datepicker, Date Input, Timepicker, and headless Date Parser for React and Preact-compatible applications.",
   "type": "module",
   "license": "MIT",
   "author": "",
@@ -38,6 +38,9 @@
       ],
       "date-parser": [
         "dist/date-parser/index.d.ts"
+      ],
+      "timepicker": [
+        "dist/time-picker/index.d.ts"
       ]
     }
   },
@@ -69,12 +72,18 @@
       "types": "./dist/date-parser/index.d.ts",
       "import": "./dist/date-parser.js",
       "require": "./dist/date-parser.cjs"
-    }
+    },
+    "./timepicker": {
+      "types": "./dist/time-picker/index.d.ts",
+      "import": "./dist/timepicker.js",
+      "require": "./dist/timepicker.cjs"
+    },
+    "./timepicker/styles.css": "./dist/timepicker.css"
   },
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "build": "npm run build:lib && npm run build:demo",
-    "build:lib": "vite build -c vite.lib.config.ts --mode shared && vite build -c vite.lib.config.ts --mode infinite-calendar && vite build -c vite.lib.config.ts --mode datepicker && vite build -c vite.lib.config.ts --mode date-input && vite build -c vite.lib.config.ts --mode date-parser",
+    "build:lib": "vite build -c vite.lib.config.ts --mode shared && vite build -c vite.lib.config.ts --mode infinite-calendar && vite build -c vite.lib.config.ts --mode datepicker && vite build -c vite.lib.config.ts --mode date-input && vite build -c vite.lib.config.ts --mode date-parser && vite build -c vite.lib.config.ts --mode timepicker",
     "build:demo": "vite build -c vite.config.ts --outDir dist-demo",
     "check:architecture": "node scripts/check-architecture.mjs && node scripts/check-library-contracts.mjs && node scripts/check-demo-boundaries.mjs",
     "check:bundle-size": "node scripts/check-bundle-size.mjs",

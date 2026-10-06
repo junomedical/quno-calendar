@@ -8,6 +8,7 @@ export default defineConfig({
   resolve: {
     alias: [
       { find: /^@quno\/calendar\/infinite-calendar$/, replacement: resolve(__dirname, "src/lib/timeline/index.ts") },
+      { find: /^@quno\/calendar\/timepicker$/, replacement: resolve(__dirname, "src/lib/time-picker/index.ts") },
       { find: /^@quno\/calendar\/datepicker$/, replacement: resolve(__dirname, "src/lib/date-picker/index.ts") },
       { find: /^@quno\/calendar\/date-input$/, replacement: resolve(__dirname, "src/lib/date-input/index.ts") },
       { find: /^@quno\/calendar\/date-parser$/, replacement: resolve(__dirname, "src/lib/date-parser/index.ts") },

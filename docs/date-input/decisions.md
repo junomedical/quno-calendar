@@ -42,3 +42,43 @@ focus or pointer actions still dismiss it. Datepicker owns the shortcut focus ha
 [QDPR-005](../date-parser/decisions.md#qdpr-005---opt-into-timezone-free-clock-recognition) records optional headless
 clock recognition. Date Input continues to consume the date-only analyzer; its values, formatting, and keyboard
 editing retain their existing accepted behavior.
+
+## QDI-002 - Recognize and edit one optional single-day clock
+
+- Date: 2026-10-06
+- Status: Accepted; extends QDI-001 and supersedes the date-only integration limitation noted on 2026-10-05
+- Context: A date-time picker needs a native input that can control the same calendar day and clock through familiar
+  typed syntax, while preserving date-only defaults and existing commit/IME behavior.
+- Decision: In single-day `timeMode`, consume Date Parser's compiled clock-capable facade. Keep the date and separate
+  controlled/uncontrolled clock synchronized; format the date then `HH:mm` (with an optional clock formatter).
+  Enter/blur emits time-only changes, date-only text removes time, and clearing removes both. Reject off-cadence or
+  disabled-hour clocks and distinct-clock intervals instead of rounding. Clock arrows edit the caret's hour or
+  cadence-sized minute part, skip disabled hours, and stay drafts; date arrows retain the clock. Preserve IME guards.
+- Consequences: Default/range behavior remains date-only. The synchronous parser code now enters the input bundle;
+  parser utilities and grammar remain owned by Date Parser. QUNO-015 owns the shared settings/callback contract and
+  QDP-125 owns direct time selection. Consumers own validation of persisted values after settings changes.
+
+## QDI-003 - Make typed clock restrictions opt-in
+
+- Date: 2026-10-06
+- Status: Accepted; supersedes the implicit clock restrictions and arrow-step defaults in QDI-002
+- Context: A minute cadence and enabled-hour list describe picker choices but should not reject a valid typed time.
+- Decision: Add the Date Input-only `forceCadence` flag, defaulting to false. Valid typed clocks ignore both picker
+  cadence and enabled hours unless that flag is true, including an empty hour list. Forced commits reject unsupported
+  clocks without rounding. Default clock arrows use one-minute/all-hour editing; forced arrows use cadence-sized steps
+  and skip disabled hours. Toggling enforcement does not rewrite committed values. Distinct-clock intervals, malformed
+  clocks, overnight rejection, native commit points, and IME behavior retain QDI-002 semantics.
+- Consequences: Products can offer convenient slots and accept exact typed times, or explicitly enforce identical
+  picker/input options. The flag is not a parser option or a picker prop. QUNO-016 records the composed guide contract.
+
+## Shared cadence update — 2026-10-06
+
+[QUNO-018](../shared/decisions.md#quno-018---size-time-rows-by-minute-cadence) extends shared cadence choices with
+20-minute steps and chooses time-selector columns by cadence. It supersedes the previous fixed maximum-six-column
+layout; existing value, focus, formatting, and typed-clock ownership contracts remain in force.
+
+## Shared enabled-hour default update — 2026-10-06
+
+[QUNO-019](../shared/decisions.md#quno-019---default-omitted-or-empty-enabled-hours-to-all-hours) supersedes the empty-list
+restriction: omitted or empty enabled hours now allows all 24 hours, including forced typed-clock validation and spins.
+Nonempty lists retain their restrictions; disabled state, cadence, and existing values keep their contracts.

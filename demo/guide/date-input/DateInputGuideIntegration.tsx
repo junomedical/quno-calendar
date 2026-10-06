@@ -2,6 +2,7 @@ import { StoryFeature } from "#quno-demo/guide/date-picker/StoryFeature";
 import { StoryHowTo } from "#quno-demo/guide/date-picker/StoryHowTo";
 import { TypeToEditExample } from "#quno-demo/guide/date-picker/TypeToEditExample";
 import { FieldGuideProduction } from "#quno-demo/guide/shared/FieldGuideProduction";
+import { DateTimeStory } from "#quno-demo/guide/date-picker/DateTimeStory";
 import { dateInputProduction } from "#quno-demo/guide/shared/productionProfiles";
 import {
   AccessibleDateInputExample,
@@ -68,9 +69,10 @@ export function DateInputGuideIntegration() {
         <TypeToEditExample />
       </StoryFeature>
 
+      <DateTimeStory number="07" />
       <StoryFeature
         id="accessibility"
-        number="07"
+        number="08"
         kicker="Native contracts"
         title="Keep the field understandable to every input method."
         copy="The component retains native labels and events, exposes recognition state, and marks invalid committed text with aria-invalid."
@@ -86,10 +88,10 @@ export function DateInputGuideIntegration() {
 
       <StoryFeature
         id="library-size"
-        number="08"
+        number="09"
         kicker="Production"
         title="Ship Date Input independently."
-        copy="Date Input JavaScript is 7.70 KiB gzip. Its optional stylesheet is a separate 0.58 KiB gzip import; neither number includes external application runtimes."
+        copy="Date Input JavaScript is 9.60 KiB gzip. Its optional stylesheet is a separate 0.58 KiB gzip import; neither number includes external application runtimes."
         instruction="Compare JavaScript, optional CSS, runtime contracts, and the public surface without treating them as one payload."
       >
         <FieldGuideProduction profile={dateInputProduction} anchorIds={["dependencies"]} />

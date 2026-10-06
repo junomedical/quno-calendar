@@ -57,11 +57,16 @@
   height: 16px;
 }
 
-.quno-date-picker-month-header > button:hover,
+.quno-date-picker-month-header > button:enabled:hover,
 .quno-date-picker-month-header > button:focus-visible {
   border-color: var(--quno-date-picker-primary, var(--quno-date-picker-primary-default));
   color: var(--quno-date-picker-primary, var(--quno-date-picker-primary-default));
   outline: none;
+}
+
+.quno-date-picker-month-header > button:disabled {
+  opacity: 0.4;
+  cursor: default;
 }
 
 .quno-date-picker-weekdays,

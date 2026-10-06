@@ -1,6 +1,7 @@
 import type { DateSelectionMode, DateRange, IsoDate, WeekStart } from "#quno-internal/shared/dateRangeModel";
 import type { DateAction as ModelDateAction, Endpoint } from "#quno-internal/date-picker/datePickerModel";
 import type { CSSProperties, ReactNode } from "react";
+import type { DateTimeSelectionChange, TimeSelectionOptions } from "#quno-internal/shared/clockTime";
 
 export type IdleInteraction = {
   type: "idle";
@@ -54,6 +55,10 @@ export type QunoDatePickerLabels = {
   endDate: string;
   thisDate: string;
   hint: string;
+  timeNavigation?: string;
+  noEnabledHours?: string;
+  previousDay?: string;
+  nextDay?: string;
 };
 
 export type QunoDatePickerFormatters = {
@@ -63,6 +68,8 @@ export type QunoDatePickerFormatters = {
   year: (args: { month: IsoDate; locale: string }) => string;
   dayLabel: (args: { date: IsoDate; locale: string }) => string;
   weekday: (args: { weekday: number; locale: string }) => string;
+  time?: (args: { time: string; locale: string }) => string;
+  timeDate?: (args: { date: IsoDate; locale: string }) => string;
 };
 
 export type QunoDatePickerDayCellContext = {
@@ -119,11 +126,15 @@ export type QunoDatePickerSlot =
   | "day"
   | "handle"
   | "calendarFooter"
+  | "timeNavigation"
+  | "hourGroup"
+  | "hourHeading"
+  | "minuteOption"
   | "hint";
 
 export type QunoDatePickerClassNames = Partial<Record<QunoDatePickerSlot, string>>;
 
-export type QunoDatePickerProps = {
+export type QunoDatePickerProps = TimeSelectionOptions & {
   value?: DateRange | null;
   defaultValue?: DateRange | null;
   selectionMode?: DateSelectionMode;
@@ -141,17 +152,19 @@ export type QunoDatePickerProps = {
   calendarFooter?: ReactNode;
   autoNavigateDelay?: number;
   autoNavigateRepeatDelay?: number;
-  onChange?: (args: { value: DateRange | null }) => void;
+  onChange?: (args: DateTimeSelectionChange) => void;
   onVisibleMonthChange?: (args: { month: IsoDate }) => void;
 };
 
 export type ResolvedDatePickerConfig = {
   locale: string;
-  labels: QunoDatePickerLabels;
-  formatters: QunoDatePickerFormatters;
+  labels: Required<QunoDatePickerLabels>;
+  formatters: Required<QunoDatePickerFormatters>;
   classNames?: QunoDatePickerClassNames;
   isDayDisabled?: QunoDatePickerDisabledDayPredicate;
   getDayCellProps?: QunoDatePickerDayCellCustomizer;
+  limitDateFrom?: IsoDate;
+  limitDateTo?: IsoDate;
 };
 
 export type DateAction = ModelDateAction;
