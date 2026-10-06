@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import * as sharedApi from "@quno/calendar";
+import * as timePickerApi from "@quno/calendar/timepicker";
 import * as dateInputApi from "@quno/calendar/date-input";
 import * as dateParserApi from "@quno/calendar/date-parser";
 import * as datePickerApi from "@quno/calendar/datepicker";
@@ -24,7 +25,10 @@ describe("public API", () => {
     expect(sharedApi).not.toHaveProperty("QunoDatePicker");
   });
 
-  it("publishes four independent primitive surfaces", () => {
+  it("publishes five independent primitive surfaces", () => {
+    expect(timePickerApi).toHaveProperty("QunoTimePicker");
+    expect(timePickerApi).not.toHaveProperty("TimeOptions");
+    expect(sharedApi).not.toHaveProperty("QunoTimePicker");
     expect(datePickerApi).toHaveProperty("QunoDatePicker");
     expect(dateInputApi).toHaveProperty("QunoDateInput");
     expect(dateInputApi).not.toHaveProperty("parseDateInput");

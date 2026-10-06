@@ -36,7 +36,17 @@ export function TokenParserExample() {
   );
 }
 
-const timeSamples = ["10:00", "10AM", "10:30PM", "13", "23", "12:59", "tomorrow 13", "tomorrow 23:00–01:00"];
+const timeSamples = [
+  "10:00",
+  "10AM",
+  "10:30PM",
+  "13",
+  "23",
+  "12:59",
+  "tomorrow 13",
+  "6 oct 2pm",
+  "tomorrow 23:00–01:00"
+];
 
 export function TimeParserExample() {
   const [text, setText] = useState("tomorrow 10:30PM");

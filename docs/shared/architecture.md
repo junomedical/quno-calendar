@@ -1,6 +1,6 @@
 # Shared package architecture
 
-`@quno/calendar` contains four independently importable products authored in React. Consumers pay only for the entry
+`@quno/calendar` contains five independently importable products authored in React. Consumers pay only for the entry
 points and optional stylesheets they import.
 
 ## Public surfaces
@@ -11,6 +11,7 @@ points and optional stylesheets they import.
 | `@quno/calendar/infinite-calendar` | Virtualized schedules and timestamped events              | React      | `styles.css` |
 | `@quno/calendar/datepicker`        | Direct manipulation of one day or an inclusive range      | React      | `styles.css` |
 | `@quno/calendar/date-input`        | Controlled or uncontrolled typed date and range input     | React      | `styles.css` |
+| `@quno/calendar/timepicker`        | Standalone timezone-free clock selection                  | React      | `styles.css` |
 | `@quno/calendar/date-parser`       | Headless recognition and tokenization                     | No         | No           |
 
 The root exports no UI. Date Input may consume parser implementation internally but does not re-export the parser's
@@ -25,13 +26,19 @@ event timestamps.
 
 Date Parser optionally returns a separate `DateInputTimeRange` of timezone-free `HH:mm` clocks. An omitted endpoint
 time is `null`; dates remain `IsoDate`. Overnight inference uses calendar-day arithmetic, without producing event
-timestamps or applying a timezone. The parser facade owns the clock tokenizer and result composition; Date Input
-imports only the parser's date-only analyzer so optional time recognition does not enter its runtime bundle.
+timestamps or applying a timezone. Datepicker and Date Input opt into a separate `time`/`defaultTime` clock only with
+single-day `timeMode`; both emit the shared `DateTimeSelectionChange` and consume headless `TimeSelectionOptions`.
+The parser facade owns clock tokenization and result composition. Date Input compiles that facade once per
+configuration, synchronously recognizes one clock, and validates enabled hours/cadence in its own UI domain only
+when its `forceCadence` prop is true. Picker options remain constrained independently of typed recognition.
+Datepicker owns the day-to-time view handoff and pointer compatibility-click suppression; its selection summary presents the separate clock.
+Its optional behavior increases the independently imported input bundle; Datepicker never imports parser code.
 
 ## Dependency direction
 
 - Product entry points may import the shared headless layer.
 - Date Input may import the internal parser responsibility domain.
+- Datepicker may import the private time-slot renderer owned by Timepicker. Timepicker imports only its own domain and shared headless contracts.
 - Datepicker, Date Input, and Infinite Calendar do not import one another.
 - Demo compositions may import several public entry points.
 - React and React DOM remain runtime peers. The repository develops against React 18, verifies React 19 in a packed
@@ -73,3 +80,9 @@ application and is not part of the installed runtime.
 
 For Infinite Calendar's runtime ownership, virtualization, async loading, rendering, and interaction architecture, see
 [its dedicated architecture guide](../infinite-calendar/architecture.md).
+
+Timepicker stores a standalone `HH:mm` clock or null, with controlled/uncontrolled ownership and `onChange({ value })`. Its scoped optional stylesheet is independent of Datepicker. Both controls share slot generation and selected-slot reveal; Datepicker owns its date/time view handoff. See [QUNO-017](./decisions.md#quno-017---add-an-independent-timepicker-and-reuse-its-slot-renderer).
+
+The shared time-slot renderer chooses columns by cadence; twenty-minute slots extend the headless `MinuteCadence` contract consumed by Datepicker, Timepicker, and optional forced Date Input validation. See [QUNO-018](./decisions.md#quno-018---size-time-rows-by-minute-cadence).
+
+Omitted or empty enabled-hour lists enable all 24 hours in slot generation and forced clock validation, so Datepicker, Timepicker, and Date Input agree on defaults.

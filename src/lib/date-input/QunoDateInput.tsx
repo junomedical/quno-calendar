@@ -1,195 +1,121 @@
 import { classNames as inputClass } from "#quno-internal/shared/classNames";
-import { useDateInputFormat } from "./useDateInputFormat";
-import { spinDateInput, type DateInputSpinMemory } from "./dateInputKeyboard";
-import { createDateInputAnalyzer } from "#quno-internal/date-parser/dateInputDateParser";
-import { equalDateRanges, recognitionOf } from "./dateInputViewHelpers";
-import { singleDay, type DateRange } from "#quno-internal/shared/dateRangeModel";
+import { spinDateInput } from "./dateInputKeyboard";
+import { spinClockInput } from "./dateInputTimeKeyboard";
+import { recognitionOf } from "./dateInputViewHelpers";
+import { useDateInputState } from "./useDateInputState";
 import type { QunoDateInputProps } from "./dateInputTypes";
-import type { FormEventHandler, JSX } from "react";
-import { startTransition, useEffect, useMemo, useRef, useState } from "react";
+import type { JSX } from "react";
 
-export const QunoDateInput = ({
-  value,
-  defaultValue = null,
-  expectedRange,
-  selectionMode = "range",
-  referenceDate,
-  weekStartsOn = 1,
-  locale = "en-GB",
-  preferredDateOrder,
-
-  parserLanguages,
-  labels,
-  formatters,
-  lexicon,
-  className,
-  classNames,
-  placeholder,
-  onChange,
-  onBlur,
-  onInput,
-  onKeyDown,
-  onPointerDown,
-  onCompositionStart,
-  onCompositionEnd,
-  ...inputProps
-}: QunoDateInputProps): JSX.Element => {
-  const controlled = value !== undefined;
-  const range = controlled ? (value ?? null) : defaultValue;
-  const rangeStart = range?.start,
-    rangeEnd = range?.end;
-  const selection = useMemo(
-    () =>
-      rangeStart
-        ? selectionMode === "single"
-          ? singleDay({ date: rangeStart })
-          : { start: rangeStart, end: rangeEnd! }
-        : null,
-    [rangeEnd, rangeStart, selectionMode]
-  );
-  const format = useDateInputFormat({ formatters, locale });
-  const [draft, setDraft] = useState(selection ? format({ value: selection }) : "");
-  const [invalid, setInvalid] = useState(false);
-  const [recognition, setRecognition] = useState<"recognized" | "unrecognized" | undefined>(
-    selection ? "recognized" : undefined
-  );
-  const composing = useRef(false);
-  const committed = useRef<DateRange | null>(selection);
-  const spinMemory = useRef<DateInputSpinMemory | undefined>(undefined);
-
-  useEffect(() => {
-    if (controlled) {
-      committed.current = selection;
-      spinMemory.current = undefined;
-      setDraft(selection ? format({ value: selection }) : "");
-      setInvalid(false);
-      setRecognition(selection ? "recognized" : undefined);
-    }
-  }, [controlled, format, selection]);
-
-  const parserOptions = useMemo(
-    () => ({
-      expectedRange,
-      selectionMode,
-      referenceDate,
-      weekStartsOn,
-      locale,
-      preferredDateOrder,
-      parserLanguages,
-      lexicon
-    }),
-    [expectedRange, lexicon, locale, parserLanguages, preferredDateOrder, referenceDate, selectionMode, weekStartsOn]
-  );
-  const analyzer = useMemo(() => createDateInputAnalyzer(parserOptions), [parserOptions]);
-  const parse = ({ text }: { text: string }) => analyzer.analyze({ text }).result;
-
-  const commit = (): void => {
-    if (composing.current) return;
-    const result = parse({ text: draft });
-    setRecognition(recognitionOf(result));
-    if (result.status === "empty") {
-      setInvalid(false);
-      if (!equalDateRanges({ left: committed.current, right: null })) {
-        committed.current = null;
-        if (!controlled) setDraft("");
-        onChange?.({ value: null });
-      }
-      return;
-    }
-    if (result.status !== "success") {
-      setInvalid(true);
-      return;
-    }
-    setInvalid(false);
-    setDraft(format({ value: result.value }));
-    if (!equalDateRanges({ left: committed.current, right: result.value })) {
-      committed.current = result.value;
-      onChange?.({ value: result.value });
-    }
-  };
-
-  const handleInput: FormEventHandler<HTMLInputElement> = (event) => {
-    const next = event.currentTarget.value;
-    spinMemory.current = undefined;
-    setDraft(next);
-    setInvalid(false);
-    if (!composing.current) {
-      const result = parse({ text: next });
-      startTransition(() => setRecognition(recognitionOf(result)));
-      if (result.status === "partial-range" && next.length >= draft.length) {
-        const formatted = `${format({ value: result.value })} – `;
-        event.currentTarget.value = formatted;
-        event.currentTarget.setSelectionRange(formatted.length, formatted.length);
-        setDraft(formatted);
-      }
-    }
-    onInput?.(event);
-  };
-
+export const QunoDateInput = (props: QunoDateInputProps): JSX.Element => {
+  const state = useDateInputState(props);
+  const {
+    value: _value,
+    defaultValue: _defaultValue,
+    expectedRange: _expectedRange,
+    selectionMode: _selectionMode,
+    referenceDate: _referenceDate,
+    weekStartsOn: _weekStartsOn,
+    locale: _locale,
+    preferredDateOrder: _preferredDateOrder,
+    parserLanguages: _parserLanguages,
+    labels,
+    formatters: _formatters,
+    lexicon: _lexicon,
+    className,
+    classNames,
+    placeholder,
+    timeMode: _timeMode,
+    time: _time,
+    defaultTime: _defaultTime,
+    enabledHours: _enabledHours,
+    minuteCadence: _minuteCadence,
+    forceCadence: _forceCadence,
+    onChange: _onChange,
+    onBlur,
+    onInput,
+    onKeyDown,
+    onPointerDown,
+    onCompositionStart,
+    onCompositionEnd,
+    ...inputProps
+  } = props;
   return (
     <span className={inputClass({ values: ["quno-date-picker-input-root", classNames?.root] })} data-slot="root">
       <input
         {...inputProps}
-        value={draft}
+        value={state.draft}
         className={inputClass({ values: ["quno-date-picker-input", className, classNames?.input] })}
         data-slot="input"
-        data-recognition={recognition}
-        aria-invalid={invalid || undefined}
+        data-recognition={state.recognition}
+        aria-invalid={state.invalid || undefined}
         placeholder={placeholder ?? labels?.placeholder}
-        onInput={handleInput}
+        onInput={(event) => {
+          state.input({ text: event.currentTarget.value, element: event.currentTarget });
+          onInput?.(event);
+        }}
         onPointerDown={(event) => {
-          spinMemory.current = undefined;
+          state.spinMemory.current = undefined;
           onPointerDown?.(event);
         }}
         onBlur={(event) => {
-          commit();
+          state.commit();
           onBlur?.(event);
         }}
         onKeyDown={(event) => {
           onKeyDown?.(event);
-          if ((event.key === "ArrowUp" || event.key === "ArrowDown") && !event.defaultPrevented && !composing.current) {
-            const spun = spinDateInput({
-              text: draft,
-              cursor: event.currentTarget.selectionStart ?? draft.length,
-              direction: event.key === "ArrowUp" ? 1 : -1,
-              options: {
-                expectedRange,
-                selectionMode,
-                referenceDate,
-                weekStartsOn,
-                locale,
-                preferredDateOrder,
-
-                parserLanguages,
-                lexicon
-              },
-              analyzer,
-              format,
-              memory: spinMemory.current
-            });
+          if (
+            (event.key === "ArrowUp" || event.key === "ArrowDown") &&
+            !event.defaultPrevented &&
+            !state.composing.current
+          ) {
+            const cursor = event.currentTarget.selectionStart ?? state.draft.length;
+            const direction = event.key === "ArrowUp" ? 1 : -1;
+            const result = state.parse({ text: state.draft });
+            const clock = result.status === "success" ? result.times?.start : undefined;
+            const spun =
+              (state.timeMode &&
+                spinClockInput({
+                  text: state.draft,
+                  cursor,
+                  direction,
+                  enabledHours: props.forceCadence ? props.enabledHours : undefined,
+                  minuteCadence: props.forceCadence ? props.minuteCadence : 1,
+                  tokens: state.analyzer.analyze({ text: state.draft }).tokens
+                })) ||
+              (result.status === "success"
+                ? spinDateInput({
+                    text: state.draft,
+                    cursor,
+                    direction,
+                    options: state.parserOptions,
+                    analyzer: state.analyzer,
+                    format: state.timeMode ? ({ value }) => state.format({ value, time: clock }) : state.dateFormat,
+                    memory: state.spinMemory.current
+                  })
+                : null);
             if (spun) {
               event.preventDefault();
               event.currentTarget.value = spun.text;
               event.currentTarget.setSelectionRange(spun.caret, spun.caret);
-              setDraft(spun.text);
-              setInvalid(false);
-              setRecognition("recognized");
-              spinMemory.current = { key: spun.key, offset: spun.offset };
+              state.setDraft(spun.text);
+              state.setInvalid(false);
+              state.setRecognition(recognitionOf(state.parse({ text: spun.text })));
+              state.spinMemory.current = { key: spun.key, offset: spun.offset };
             }
           }
-          if (event.key !== "ArrowUp" && event.key !== "ArrowDown") spinMemory.current = undefined;
-          if (event.key === "Enter" && !event.defaultPrevented) commit();
+          if (event.key !== "ArrowUp" && event.key !== "ArrowDown") state.spinMemory.current = undefined;
+          if (event.key === "Enter" && !event.defaultPrevented) state.commit();
         }}
         onCompositionStart={(event) => {
-          composing.current = true;
-          setRecognition(undefined);
+          state.composing.current = true;
+          state.setRecognition(undefined);
           onCompositionStart?.(event);
         }}
         onCompositionEnd={(event) => {
-          composing.current = false;
-          const next = event.currentTarget.value;
-          setDraft(next);
-          setRecognition(recognitionOf(parse({ text: next })));
+          state.composing.current = false;
+          const text = event.currentTarget.value;
+          state.setDraft(text);
+          state.setRecognition(recognitionOf(state.parse({ text })));
           onCompositionEnd?.(event);
         }}
       />

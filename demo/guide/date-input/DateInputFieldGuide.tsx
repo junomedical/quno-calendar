@@ -12,8 +12,9 @@ const contents = [
   ["#localization", "04", "Localize the field"],
   ["#parser-configuration", "05", "Use Date Parser semantics"],
   ["#picker-composition", "06", "Compose with Datepicker"],
-  ["#accessibility", "07", "Preserve native field contracts"],
-  ["#library-size", "08", "Ship the field independently"]
+  ["#date-time", "07", "Type and select a date and time"],
+  ["#accessibility", "08", "Preserve native field contracts"],
+  ["#library-size", "09", "Ship the field independently"]
 ] as const;
 
 export function DateInputFieldGuide() {

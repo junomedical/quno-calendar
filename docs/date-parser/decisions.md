@@ -77,3 +77,22 @@ applies; new refinements belong here rather than in the Datepicker ledger.
 - Consequences: Parser guide and demo expose the opt-in through public imports. Date Input consumes the date-only
   analyzer without clock recognition code; Datepicker and the shared day model retain their contracts. The parser stays
   dependency-free and SSR-safe. Existing feature size ceilings remain unchanged.
+
+## UI integration update — 2026-10-06
+
+[QUNO-015](../shared/decisions.md#quno-015---compose-a-single-day-and-a-separate-clock-across-picker-and-input)
+extends the UI integration limitation in QDPR-005: Date Input now consumes the existing clock-capable facade in
+single-day time mode, while Datepicker selects a separate clock without importing parser code. The headless parser's
+accepted grammar, distinct intraday/overnight clocks, result shape, dependency direction, and 6 KiB ceiling are unchanged.
+
+## QDPR-006 - Rank single timed dates without a year once
+
+- Date: 2026-10-06
+- Status: Accepted; corrects endpoint ranking under QDPR-005
+- Context: Applying range ranking to the duplicated endpoint of `6 oct 2pm` could select two different years in a
+  multi-year expected window, making a valid date-time invalid in single selection.
+- Decision: Rank a single timed endpoint with the same single-date ranking as date-only input, then duplicate that
+  resolved date. A trailing delimiter likewise duplicates the resolved start date and leaves the end clock null.
+  Rank genuinely separate range endpoints together as before.
+- Consequences: Abbreviated months and AM/PM clocks retain their grammar; omitted years respect expected-range,
+  locale, and reference-date ranking. Single selection accepts the resulting date and clock without public API changes.

@@ -9,6 +9,7 @@ This document defines the names used for visible calendar interface parts and th
 | Quno/Infinite Calendar | `@quno/calendar/infinite-calendar` | Virtualized schedules and timestamped events.                    |
 | Quno/Datepicker        | `@quno/calendar/datepicker`        | Direct manipulation of timezone-free dates and inclusive ranges. |
 | Quno/Date Input        | `@quno/calendar/date-input`        | Native typed-date and range input.                               |
+| Quno/Timepicker        | `@quno/calendar/timepicker`        | Standalone timezone-free clock selection.                        |
 | Quno/Date Parser       | `@quno/calendar/date-parser`       | Headless recognition, tokenization, and parser configuration.    |
 
 Use code identifiers such as `QunoInfiniteCalendar` and `QunoDatePicker` only for APIs and implementation references.
@@ -196,3 +197,19 @@ flowchart LR
 - **Time token**: An explicit colon or AM/PM clock, normalized in `value` while preserving `raw` and source offsets.
   Bare hours remain number tokens until resolved in context.
 - **Overnight range**: An interval whose undated end clock precedes its start; its end date advances one calendar day.
+
+## Single-day Time Selection
+
+| Term           | Meaning                                                                                                     | Public contract                                       |
+| -------------- | ----------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| Clock value    | A separate timezone-free `HH:mm` time attached to one calendar day.                                         | `time`, `defaultTime`                                 |
+| Time mode      | Optional single-day input recognition and picker time navigation opened by selecting a day.                 | `timeMode`, `selectionMode="single"`                  |
+| Enabled hours  | Zero-based clock hours; omitted/empty means all 24. Input enforces nonempty lists only with `forceCadence`. | `enabledHours`                                        |
+| Minute cadence | Interval between minute options starting at 00, with cadence-specific columns (2–6).                        | `minuteCadence`, `MinuteCadence`                      |
+| Hour rail      | Sticky 16px/700 hour headings beside the smaller 13px/550 minute numbers.                                   | `hour-heading`, `--quno-date-picker-time-label-width` |
+
+Date Input’s `forceCadence` is an opt-in typed-clock restriction that applies both minute cadence and enabled hours.
+
+## Standalone time surface
+
+`QunoTimePicker` owns the clock summary (`selection-summary`), Clear (`clear-button`), hour/minute scroller (`time-navigation`), sticky hour rail (`hour-heading`), and selected minute (`minute-option`, `aria-pressed`, `data-time`). Standalone classes and tokens use `quno-time-picker-*` and `--quno-time-picker-*`; Datepicker retains its existing names.

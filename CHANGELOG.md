@@ -4,12 +4,53 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+- Additional browser verification: WebKit passes the time-selector typography/geometry checks but fails the existing enabled-day arrow focus assertion at 1280px and 390px (`Next enabled day` is inactive after a click). The Firefox probe was stopped while browser startup remained pending. Required Chromium verification remains the handoff baseline.
+
+- Hour headings now stand out from minute numbers in standalone Timepicker and Datepicker time mode: 16px bold text in the normal text color, beside 13px/550 minute options. Desktop/mobile browser checks verify computed styles, rail fit, and sticky layering.
+
+- Five-minute cadence now uses six choices per row in Timepicker and Datepicker time mode, producing two full rows per hour. Updated the guide, cadence table, and unit/browser geometry expectations.
+
+- Omitted or empty `enabledHours` now enables all 24 clock hours in Timepicker, Datepicker, and forced Date Input validation/arrow edits. Nonempty lists continue to restrict choices. Updated both demos with an All (empty list) choice and covered midnight/boundary-hour selection and typing. See the migration note for consumers that previously used an empty list to disable time choices.
+
+- Timepicker and Datepicker time selection now size minute rows by cadence: 1/2/3/4/6 minutes use five columns, 15 uses four, 5/10 use six, 20 uses three, and 30 uses two. Added 20-minute cadence to both selectors, demo controls, shared types, and forced Date Input validation/arrow edits. Full-row geometry and all supported cadence choices are covered on desktop and mobile.
+
+- Added standalone `QunoTimePicker` through `@quno/calendar/timepicker` with optional scoped styles, controlled/uncontrolled HH:mm values, null clearing, disabled state, enabled hours, all ten minute cadences, sticky hour headings, and at most six minute choices per row. Datepicker reuses its private slot renderer while retaining existing behavior and customization names. Added `/guide/timepicker`, `/demo/timepicker`, a fifth home card, public API guards, packed compatibility coverage, and desktop/mobile geometry tests. Timepicker measures 1.59 KiB JavaScript and 0.78 KiB CSS gzip against separate 3 KiB and 1.5 KiB ceilings.
+
+- Fixed omitted-year clock parsing such as `6 oct 2pm`: single and partial timed endpoints now rank one date rather
+  than accidentally spanning two years. The Optional time mode demo accepts this as `6 October 2026 14:00`;
+  explicit range endpoint ranking remains unchanged. Added parser, native-input, and both-guide browser regressions.
+
+- Selecting an enabled day in single-day time mode now immediately opens time selection, including same-day reselection and keyboard activation. Removed the time button below the calendar and its `timeButton`/`time-button` customization surface and `chooseTime` label. The existing selection summary above the calendar shows the clock. Focus stays on the stable title when entering or leaving time selection; pointer compatibility clicks cannot carry through to minute options. See the migration guide.
+
+- Clicking the full-date title in time mode now returns to day selection in the selected date’s month, preserving the day, clock, and title-button focus. Its accessible action uses the existing Choose a date label; the month title still opens month/year navigation from day mode.
+
+- Time-view header arrows now select the previous/next enabled day while preserving the clock and keeping the time selector open. They skip disabled dates, respect date limits, and disable exhausted directions. The demo includes Skip weekends and preserves time mode across month boundaries. Accepted a 12.5 KiB gzip Datepicker ceiling for the enabled-day search and cancellation behavior; other limits remain unchanged.
+
+- Time navigation now titles the picker with the selected full date (for example, `19 October 2026`) and restores the visible month when returning to days. Optional `formatters.timeDate` customizes the localized date title.
+
+- Typed single-day clocks now ignore picker cadence and enabled hours by default. Add Date Input’s
+  `forceCadence={true}` to enforce both on commits and clock Arrow edits. The date-time demo and guides expose the
+  default-off setting; minute options now match calendar numbers’ 13px size and 550 weight.
+
+- Added optional single-day `timeMode` to Datepicker and Date Input with separate controlled/uncontrolled
+  `time`/`defaultTime` clocks, shared enabled hours and minute cadence, and `{ value, time }` changes.
+  Datepicker advances from day selection to in-place time navigation with sticky hour labels and at most six minute columns; selecting a
+  minute returns to dates and retains keyboard focus. Date Input recognizes familiar English/German clocks, optionally validates
+  the shared time settings with `forceCadence`, preserves time during date spins, and edits clocks at the caret.
+- Made the existing vertical draft browser assertion wait for its frame-scheduled geometry instead of reading the
+  initial preview height.
+- Added `/demo/date-time` and interactive public-entry-point compositions with copyable recipes in both guides.
+  Date-only/range defaults and the headless parser grammar remain unchanged. Accepted the added time UI/parser bundle
+  cost with Datepicker and Date Input JavaScript ceilings of 12.5 KiB and 10 KiB gzip; all other ceilings remain unchanged.
+  Measured artifacts are 12.46 KiB gzip for Datepicker and 9.60 KiB for Date Input; picker CSS is 3.36 KiB.
+
 ### Added
 
 - Added opt-in Date Parser clock recognition with `recognizeTime: true`: traditional 24-hour and AM/PM forms,
   time-only input anchored to the reference date, and time ranges with inherited dates and overnight rollover.
   Existing date values stay intact; optional `times` holds normalized `HH:mm` clocks. Tokenization can expose explicit
-  clock tokens with original spans. The guide and focused demo demonstrate the opt-in; Date Input remains date-only.
+  clock tokens with original spans. The guide and focused demo demonstrate the opt-in; Date Input consumes it only
+  when single-day time mode is enabled.
 
 - Added inclusive Datepicker `limitDateFrom` and `limitDateTo` selection bounds. Out-of-window dates are disabled before
   `isDayDisabled` runs, allowing consumer availability loaders to skip dates whose result is already known.

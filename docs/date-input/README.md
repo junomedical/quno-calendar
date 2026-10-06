@@ -34,5 +34,28 @@ Date Input consumes the headless implementation owned by Date Parser. Use `forma
 
 See the [breaking migration](../shared/migration.md#unreleased-named-contracts-and-product-ownership).
 
-Clock recognition is an opt-in headless [Date Parser capability](../date-parser/README.md#optional-clock-recognition).
-Date Input consumes the date-only analyzer and keeps its existing date values, formatting, and keyboard behavior.
+## Optional single-day clock input
+
+Use `selectionMode="single"` with `timeMode` to recognize a date and one clock through the existing
+[Date Parser grammar](../date-parser/README.md#optional-clock-recognition). `time`/`defaultTime` stores a separate
+`HH:mm` clock; successful Enter/blur commits emit `onChange({ value, time })`, including time-only changes.
+Date-only text commits with `time: null`; clearing emits both values as `null`. Intraday intervals with distinct clocks
+and overnight ranges are invalid because the field represents one day and one time. For dates without a year,
+`6 oct 2pm` recognizes one ranked day and the clock `14:00`.
+
+`enabledHours` and `minuteCadence` configure picker choices independently of typed recognition. Typed clocks ignore
+both settings by default. Omitted or empty `enabledHours` allows all hours, including with forced cadence. Set `forceCadence={true}` on Date Input to
+reject off-cadence or disabled-hour clocks as invalid drafts rather than rounding; date-only values remain valid.
+The field formats the date followed by the clock; optional `formatters.time({ time, locale })` overrides the clock.
+Custom output should stay parseable by the configured grammar. Controlled changes synchronize both values, while
+settings changes do not rewrite existing clocks. Range mode and omitted `timeMode` retain date-only behavior.
+
+Arrow keys retain the clock during date edits, adjust its hour or minute part under the caret, and remain drafts until Enter/blur. With `forceCadence`, minute
+steps use the cadence and hour edits skip disabled hours; otherwise all hours and single-minute edits are available. IME and native input events retain their existing contracts.
+The synchronous clock parser now enters the Date Input bundle to support this opt-in prop; the parser API remains
+owned by its separate headless product.
+
+Try `/demo/date-time` and the live date-time chapter, or copy the
+[composition recipe](../shared/usage.md#single-day-date-and-time).
+
+`minuteCadence` also accepts 20-minute steps for forced validation and clock arrow edits. Picker row sizes follow the [shared cadence table](../timepicker/README.md#value-and-settings).

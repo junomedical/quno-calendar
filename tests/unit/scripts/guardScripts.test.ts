@@ -73,10 +73,17 @@ describe("architecture guard", () => {
 
 describe("bundle-size guard", () => {
   function writePassingBundles(distRoot: string) {
-    for (const file of ["index.js", "infinite-calendar.js", "datepicker.js", "date-input.js", "date-parser.js"]) {
+    for (const file of [
+      "index.js",
+      "infinite-calendar.js",
+      "datepicker.js",
+      "date-input.js",
+      "date-parser.js",
+      "timepicker.js"
+    ]) {
       writeFileSync(join(distRoot, file), "export const value = 1;\n".repeat(10));
     }
-    for (const file of ["infinite-calendar.css", "datepicker.css", "date-input.css"]) {
+    for (const file of ["infinite-calendar.css", "datepicker.css", "date-input.css", "timepicker.css"]) {
       writeFileSync(join(distRoot, file), ".quno { display: grid; }\n".repeat(5));
     }
   }
@@ -88,6 +95,7 @@ describe("bundle-size guard", () => {
     const result = runScript(bundleScript, distRoot);
     expect(result.status).toBe(0);
     expect(result.stdout).toMatch(/Infinite Calendar JavaScript .*: raw .* gzip/);
+    expect(result.stdout).toMatch(/Timepicker JavaScript .*: raw .* gzip/);
     expect(result.stdout).toMatch(/Datepicker CSS .*: raw .* gzip/);
     expect(result.stdout).toContain("Bundle size check passed.");
   });
@@ -133,6 +141,20 @@ describe("library contract guard", () => {
     const result = runScript(contractScript, directory);
     expect(result.status).toBe(1);
     expect(result.stderr).toContain("Library functions accept one named object");
+  });
+
+  it("rejects Timepicker dependencies on a date calendar", () => {
+    const directory = temporaryDirectory();
+    mkdirSync(join(directory, "time-picker"));
+    mkdirSync(join(directory, "date-picker"));
+    writeFileSync(join(directory, "date-picker", "view.ts"), "export type View = { value: string };\n");
+    writeFileSync(
+      join(directory, "time-picker", "index.ts"),
+      'export type { View } from "#quno-internal/date-picker/view";\n'
+    );
+    const result = runScript(contractScript, directory);
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain("time-picker must not depend on date-picker");
   });
 
   it("rejects headless parser dependencies on input UI types", () => {

@@ -23,7 +23,8 @@
       "#quno-api/*": ["./api/*"],
       "#quno-e2e/*": ["./e2e/*"],
       "#quno-tests/*": ["./tests/*"],
-      "#quno-project/*": ["./*"]
+      "#quno-project/*": ["./*"],
+      "@quno/calendar/timepicker": ["./src/lib/time-picker/index.ts"]
     },
     "resolveJsonModule": true,
     "isolatedModules": true,

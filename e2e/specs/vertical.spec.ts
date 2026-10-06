@@ -369,9 +369,8 @@ test("supports draft creation and dragging in the vertical view", async ({ page 
     );
   }, drawPoint);
   await expect(page.getByTestId("draft-event")).toBeVisible();
-  const draftBox = await page.getByTestId("draft-event").boundingBox();
-  expect(draftBox).not.toBeNull();
-  expect(draftBox?.height ?? 0).toBeGreaterThan(40);
+  // Pointer previews publish on the next display frame; visibility can precede final geometry.
+  await expect.poll(async () => (await page.getByTestId("draft-event").boundingBox())?.height ?? 0).toBeGreaterThan(40);
   await page.evaluate(({ x, y }) => {
     window.dispatchEvent(new PointerEvent("pointerup", { bubbles: true, clientX: x, clientY: y + 80, pointerId: 1 }));
   }, drawPoint);

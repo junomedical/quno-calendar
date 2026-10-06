@@ -10,7 +10,7 @@ describe("date input field guide", () => {
     expect(screen.getByRole("link", { name: "All components" })).toHaveAttribute("href", "/");
     expect(screen.getByRole("link", { name: /Demo/ })).toHaveAttribute("href", "/demo/date-input");
     const contents = screen.getByRole("navigation", { name: "Table of contents" });
-    expect(within(contents).getAllByRole("link")).toHaveLength(8);
+    expect(within(contents).getAllByRole("link")).toHaveLength(9);
     for (const title of [
       "Keep one timezone-free value shape.",
       "Let the product own every committed change.",

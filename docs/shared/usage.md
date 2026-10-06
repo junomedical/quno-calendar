@@ -1,14 +1,15 @@
 # Unified Usage Guide
 
-The live project overview is available at `/`. It links to four task-oriented field guides:
+The live project overview is available at `/`. It links to five task-oriented field guides:
 
 - `/guide/infinite-calendar`
 - `/guide/datepicker`
 - `/guide/date-input`
 - `/guide/date-parser`
+- `/guide/timepicker`
 
 Each guide has a focused Demo destination. This document remains the single source for copyable production recipes
-across all four independent feature entry points.
+across all five independent feature entry points.
 
 ## Entry points
 
@@ -433,7 +434,7 @@ week. All seven English weekday names and their common abbreviations are recogni
 Compose `QunoDateInput` with `QunoDatePicker` by passing the same controlled `DateRange` and `onChange` to both public
 entry points. When an input update changes only one endpoint, move the picker’s visible month to that changed date;
 when both endpoints change, fall back to the nearest off-screen endpoint. The independently imported date-input payload
-is currently 7.82 KiB gzip for JavaScript and 0.58 KiB gzip for its optional stylesheet. It uses the React 18+ peer,
+is currently 9.60 KiB gzip for JavaScript and 0.58 KiB gzip for its optional stylesheet. It uses the React 18+ peer,
 supports Preact 10.18+ through `preact/compat`, imports safely in SSR, and has no date-library runtime dependency. The
 combined package’s TanStack virtualizer dependency belongs to Infinite Calendar and is not imported by the
 date-input entry.
@@ -447,6 +448,65 @@ jumping to their date and exiting. This keeps focus within the popup after point
 including with reduced motion. WebKit does not necessarily focus a clicked button, so keep the internal-pointer guard
 for other picker interactions rather than relying on a delayed `document.activeElement` check. Typing and picking
 continue to share one controlled `DateRange`; an empty committed input clears that value without a second action.
+
+## Single-day date and time
+
+With reference date `2026-10-06`, typing `6 oct 2pm` resolves one day at `14:00`, including across a multi-year expected range. Omitted years use Date Parser’s single-date ranking.
+
+Both controls keep `value: DateRange | null` and store a separate timezone-free `HH:mm` clock. Set `timeMode` and
+`selectionMode="single"` on both, then share `value`, `time`, `enabledHours`, `minuteCadence`, and `onChange`.
+Time mode is ignored for ranges. Default cadence is 15; supported steps are 1, 2, 3, 4, 5, 6, 10, 15, 20, and 30 minutes.
+Omitted or empty enabled hours means all 24. Date-only typing commits `time: null`; Clear removes both values.
+
+```tsx
+import { useState } from "react";
+import type { DateTimeSelectionChange } from "@quno/calendar";
+import { QunoDateInput } from "@quno/calendar/date-input";
+import { QunoDatePicker } from "@quno/calendar/datepicker";
+import "@quno/calendar/date-input/styles.css";
+import "@quno/calendar/datepicker/styles.css";
+
+function DateTimeField() {
+  const [selection, setSelection] = useState<DateTimeSelectionChange>({ value: null, time: null });
+  const [inputMonth, setInputMonth] = useState("empty");
+  const options = {
+    selectionMode: "single" as const,
+    timeMode: true,
+    enabledHours: [9, 10, 11, 12, 13, 14, 15, 16, 17],
+    minuteCadence: 15 as const,
+    value: selection.value,
+    time: selection.time,
+    onChange: setSelection
+  };
+  return (
+    <>
+      <QunoDateInput
+        {...options}
+        forceCadence={false}
+        onChange={(next) => {
+          setSelection(next);
+          setInputMonth(next.value?.start.slice(0, 7) ?? "empty");
+        }}
+        aria-label="Date and time"
+        expectedRange={{ start: "2025-01-01", end: "2027-12-31" }}
+      />
+      <QunoDatePicker key={inputMonth} {...options} initialMonth={selection.value?.start} />
+    </>
+  );
+}
+```
+
+Sticky hours use larger, bold text (16px/700), while minute numbers match calendar days (13px/550).
+Try `tomorrow 10:30AM`, press Enter, then select that day in the calendar to open time selection. Pick a minute beside a sticky
+hour to return to days. While time navigation is open, the title shows the selected full date (for example, `19 October 2026`); override it with `formatters.timeDate({ date, locale })`. The header arrows select the previous/next enabled day, skipping disabled dates and respecting date limits, while preserving the time and open selector. Click the date title to return to day selection in the selected date’s month without changing the value. Clicking the month title from day selection opens month/year navigation. Escape also returns without committing. The selected clock appears in the summary above the calendar; there is no footer time button. At most six minutes occupy
+one row, with [column counts chosen by cadence](../timepicker/README.md#value-and-settings). The input accepts the parser's English/German clocks regardless of picker cadence or enabled hours by
+default. Set `forceCadence={true}` on `QunoDateInput` to reject off-cadence/disabled-hour clocks without rounding.
+Distinct-clock intervals remain invalid. Date-field arrows retain time; clock arrows adjust hours or single minutes,
+or cadence-sized minutes and enabled hours when forced. Enter/blur remain the commit points.
+
+Use `defaultValue` and `defaultTime` for uncontrolled usage. Value and time can be controlled independently.
+Changing settings does not rewrite persisted clocks; consumers own revalidation. The example remounts only when typing changes the input’s month so typed dates become visible. Picker day arrows manage their own visible month without remounting or losing the time view.
+Live example: `/demo/date-time` and the date-time chapters in `/guide/datepicker` and `/guide/date-input`.
 
 ## Quno/Date Parser
 
@@ -489,7 +549,7 @@ const clockTokens = tokenizeDateInput({ text: "10:30PM", recognizeTime: true });
 Clock recognition defaults to false. Times remain separate `HH:mm` values without a timezone; missing endpoint times
 are `null` and date-only results omit `times`. Time-only input uses `referenceDate`; `23:00–01:00` advances an undated
 end to the next calendar day. Use `at` or `um` to disambiguate a bare hour from an accepted date. See the
-[complete clock and range rules](../date-parser/README.md#optional-clock-recognition). Date Input remains date-only.
+[complete clock and range rules](../date-parser/README.md#optional-clock-recognition). Date Input can opt into single-day `timeMode`; see the [date-time composition](#single-day-date-and-time).
 
 ## Compose Quno/Datepicker and Quno/Infinite Calendar
 
@@ -799,3 +859,34 @@ When extending Infinite Calendar, start with its [responsibility-domain index](.
 Each domain document lists every owning source file and links to the detailed runtime flows. The other products use
 their product `README.md` and `decisions.md` as their ownership index, so behavior should be added to its existing owner
 rather than a generic hooks or utilities folder.
+
+## Quno/Timepicker
+
+Select a clock independently of a date. Import the control and optional stylesheet through its own subpath:
+
+```tsx
+import { useState } from "react";
+import { QunoTimePicker } from "@quno/calendar/timepicker";
+import "@quno/calendar/timepicker/styles.css";
+
+function TimeField() {
+  const [value, setValue] = useState<string | null>("10:30");
+  return (
+    <QunoTimePicker
+      value={value}
+      onChange={({ value }) => setValue(value)}
+      enabledHours={[9, 10, 11, 12, 13, 14, 15, 16, 17]}
+      minuteCadence={15}
+    />
+  );
+}
+```
+
+For local state, supply `defaultValue="10:30"` and optionally observe `onChange`. Clear emits `null`. Omitted or empty hours
+allow all 24. Sticky hours use larger, bold text (16px/700) beside the smaller minutes (13px/550).
+Cadence defaults to 15, with the same ten supported values as
+Datepicker. Five-minute cadence lays out its 12 minutes as two rows of six choices. Settings changes preserve an existing clock, including times outside available slots. `disabled`
+prevents choosing or clearing. Use labels, `formatters.time({ time, locale })`, class names, and
+`--quno-time-picker-*` tokens for consumer-owned presentation. No date or parser is required.
+
+Try `/guide/timepicker` and `/demo/timepicker`; see [the full contract](../timepicker/README.md).

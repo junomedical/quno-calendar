@@ -91,3 +91,16 @@ JavaScript imports never imply a stylesheet. Import each UI primitive's `styles.
 ## Preact
 
 The source is authored for React 18+. Existing Preact applications should add the aliases in [the usage guide](./usage.md#react-preact-ssr-and-production-builds). The packed package is verified through those aliases.
+
+## Unreleased: time selection follows day selection
+
+With `selectionMode="single"` and `timeMode`, selecting an enabled calendar day opens time selection automatically. Reselect the selected day to edit its clock; use the date title or Escape to return to days. Selecting a minute also returns to days. Initial or externally controlled values do not advance the current view by themselves.
+
+The footer control is removed. Delete `classNames.timeButton`, `labels.chooseTime`, and CSS targeting `data-slot="time-button"`, `.quno-date-picker-time-control`, or `.quno-date-picker-time-button`. Use the existing `selectionSummary`/`selection-summary` hook to style the date and clock above the calendar; `formatters.time` still formats the clock and minute labels. The time navigator and minute-option slots remain unchanged, as do date/time values and callbacks.
+
+## Unreleased: empty enabled hours defaults to all hours
+
+Omitted `enabledHours` and `enabledHours={[]}` now both enable 00–23 in Timepicker, Datepicker, and forced Date Input
+validation/clock edits. An empty list previously offered no slots and rejected forced clock input. Nonempty hour
+lists still restrict hours. Use Timepicker's `disabled` prop to disable its actions, or disable Datepicker's `timeMode`
+when time selection should be unavailable.

@@ -20,6 +20,7 @@ type Props = {
   onBegin: (args: { date: IsoDate }) => void;
   onEnter: (args: { date: IsoDate }) => void;
   onFinish: (args: { date: IsoDate }) => void;
+  onActivate?: (args: { date: IsoDate }) => void;
   onCancel: () => void;
   onOverflowChange: (args: { index: number | null }) => void;
 };
@@ -38,6 +39,7 @@ export const CalendarGrid = ({
   onBegin,
   onEnter,
   onFinish,
+  onActivate,
   onCancel,
   onOverflowChange
 }: Props): JSX.Element => {
@@ -149,6 +151,9 @@ export const CalendarGrid = ({
             }}
             onPointerUp={(event) => pointer.finishPointer({ event, fallback: date })}
             onPointerCancel={pointer.cancelPointer}
+            onClick={(event) => {
+              if (event.detail === 0 && !event.defaultPrevented) onActivate?.({ date });
+            }}
           >
             <span>{dayNumber}</span>
             {(isStart || isEnd) && (

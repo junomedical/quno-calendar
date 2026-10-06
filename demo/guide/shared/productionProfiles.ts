@@ -31,8 +31,8 @@ export const datepickerProduction: FieldGuideProductionProfile = {
   entrypoint: "@quno/calendar/datepicker",
   stylesheet: "@quno/calendar/datepicker/styles.css",
   artifacts: [
-    { label: "JavaScript", gzip: "10.49 KiB", raw: "42.28 KiB", budget: "≤ 10.5 KiB gzip" },
-    { label: "Optional CSS", gzip: "3.22 KiB", raw: "20.08 KiB", budget: "≤ 3.5 KiB gzip" }
+    { label: "JavaScript", gzip: "12.46 KiB", raw: "50.37 KiB", budget: "≤ 12.5 KiB gzip" },
+    { label: "Optional CSS", gzip: "3.36 KiB", raw: "21.83 KiB", budget: "≤ 3.5 KiB gzip" }
   ],
   runtime: "React 18+ and React DOM peers",
   compatibility: "Preact 10.18+ through compat aliases",
@@ -44,7 +44,7 @@ export const dateInputProduction: FieldGuideProductionProfile = {
   entrypoint: "@quno/calendar/date-input",
   stylesheet: "@quno/calendar/date-input/styles.css",
   artifacts: [
-    { label: "JavaScript", gzip: "7.70 KiB", raw: "27.92 KiB", budget: "≤ 8 KiB gzip" },
+    { label: "JavaScript", gzip: "9.60 KiB", raw: "34.59 KiB", budget: "≤ 10 KiB gzip" },
     { label: "Optional CSS", gzip: "0.58 KiB", raw: "2.29 KiB", budget: "≤ 1 KiB gzip" }
   ],
   runtime: "React 18+ and React DOM peers",
@@ -56,8 +56,21 @@ export const dateParserProduction: FieldGuideProductionProfile = {
   product: "Quno/Date Parser",
   entrypoint: "@quno/calendar/date-parser",
   stylesheet: null,
-  artifacts: [{ label: "JavaScript", gzip: "6.00 KiB", raw: "22.63 KiB", budget: "≤ 6 KiB gzip" }],
+  artifacts: [{ label: "JavaScript", gzip: "6.00 KiB", raw: "22.55 KiB", budget: "≤ 6 KiB gzip" }],
   runtime: "No UI framework runtime",
   compatibility: "ESM, CommonJS, browser, Node, and SSR",
   dependencies: "No runtime dependencies"
+};
+
+export const timepickerProduction: FieldGuideProductionProfile = {
+  product: "Quno/Timepicker",
+  entrypoint: "@quno/calendar/timepicker",
+  stylesheet: "@quno/calendar/timepicker/styles.css",
+  artifacts: [
+    { label: "JavaScript", gzip: "1.59 KiB", raw: "4.68 KiB", budget: "≤ 3 KiB gzip" },
+    { label: "Optional CSS", gzip: "0.78 KiB", raw: "2.53 KiB", budget: "≤ 1.5 KiB gzip" }
+  ],
+  runtime: "React 18+ and React DOM peers",
+  compatibility: "Preact 10.18+ through compat aliases",
+  dependencies: "No bundled date, parser, or positioning library"
 };

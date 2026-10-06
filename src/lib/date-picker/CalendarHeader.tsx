@@ -6,11 +6,14 @@ import type { JSX } from "react";
 
 type Props = {
   visibleMonth: IsoDate;
+  timeDate?: IsoDate;
   monthMotion: MonthDirection | null;
   config: ResolvedDatePickerConfig;
   monthNavigationOpen: boolean;
+  previousDisabled: boolean;
+  nextDisabled: boolean;
   onNavigate: (args: { direction: MonthDirection }) => void;
-  onToggleMonthNavigation: () => void;
+  onHeadingClick: () => void;
 };
 
 const Chevron = ({ direction }: { direction: MonthDirection }): JSX.Element => (
@@ -28,14 +31,19 @@ const Chevron = ({ direction }: { direction: MonthDirection }): JSX.Element => (
 
 export const CalendarHeader = ({
   visibleMonth,
+  timeDate,
   monthMotion,
   config,
   monthNavigationOpen,
+  previousDisabled,
+  nextDisabled,
   onNavigate,
-  onToggleMonthNavigation
+  onHeadingClick
 }: Props): JSX.Element => {
   const { labels, formatters, locale, classNames } = config;
-  const monthLabel = formatters.month({ month: visibleMonth, locale });
+  const headingLabel = timeDate
+    ? formatters.timeDate({ date: timeDate, locale })
+    : formatters.month({ month: visibleMonth, locale });
   return (
     <div
       className={cx({ values: ["quno-date-picker-month-header", classNames?.monthHeader] })}
@@ -45,7 +53,8 @@ export const CalendarHeader = ({
         type="button"
         className={classNames?.previousButton}
         data-slot="previous-button"
-        aria-label={labels.previousMonth}
+        aria-label={timeDate ? labels.previousDay : labels.previousMonth}
+        disabled={previousDisabled}
         onClick={() => onNavigate({ direction: -1 })}
       >
         <Chevron direction={-1} />
@@ -59,20 +68,28 @@ export const CalendarHeader = ({
           type="button"
           className={cx({ values: ["quno-date-picker-month-heading-button", classNames?.monthHeadingButton] })}
           data-slot="month-heading-button"
-          aria-label={`${monthLabel}. ${
-            monthNavigationOpen ? labels.closeMonthNavigation : labels.openMonthNavigation
+          aria-label={`${headingLabel}. ${
+            timeDate
+              ? labels.chooseDate
+              : monthNavigationOpen
+                ? labels.closeMonthNavigation
+                : labels.openMonthNavigation
           }`}
-          aria-expanded={monthNavigationOpen}
-          onClick={onToggleMonthNavigation}
+          aria-expanded={timeDate ? undefined : monthNavigationOpen}
+          onClick={(event) => {
+            event.currentTarget.focus();
+            onHeadingClick();
+          }}
         >
-          <span key={visibleMonth}>{monthLabel}</span>
+          <span key={timeDate ?? visibleMonth}>{headingLabel}</span>
         </button>
       </h2>
       <button
         type="button"
         className={classNames?.nextButton}
         data-slot="next-button"
-        aria-label={labels.nextMonth}
+        aria-label={timeDate ? labels.nextDay : labels.nextMonth}
+        disabled={nextDisabled}
         onClick={() => onNavigate({ direction: 1 })}
       >
         <Chevron direction={1} />

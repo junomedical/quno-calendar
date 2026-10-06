@@ -11,7 +11,8 @@
     grid-template-rows: var(--quno-date-picker-day-size-mobile, 40px);
   }
 
-  .quno-date-picker-month-navigation {
+  .quno-date-picker-month-navigation,
+  .quno-date-picker-time-navigation {
     height: calc(7 * var(--quno-date-picker-day-size-mobile, 40px) + 32px);
   }
 }

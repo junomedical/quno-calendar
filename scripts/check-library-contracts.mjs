@@ -55,7 +55,8 @@ const allowedDomains = {
   shared: new Set(["shared"]),
   "date-parser": new Set(["shared", "date-parser"]),
   "date-input": new Set(["shared", "date-parser", "date-input"]),
-  "date-picker": new Set(["shared", "date-picker"]),
+  "date-picker": new Set(["shared", "date-picker", "time-picker"]),
+  "time-picker": new Set(["shared", "time-picker"]),
   timeline: new Set(["shared", "timeline"])
 };
 

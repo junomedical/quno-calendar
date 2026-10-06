@@ -35,9 +35,9 @@ test("renamed guide and demo routes redirect while preserving deep links", async
   await expect(page).toHaveURL(/\/demo\/date-input$/);
 });
 
-test("all four field guides share editorial structure and theme", async ({ page }) => {
+test("all five field guides share editorial structure and theme", async ({ page }) => {
   let referenceTheme: { background: string; color: string; font: string } | undefined;
-  for (const route of ["infinite-calendar", "datepicker", "date-input", "date-parser"]) {
+  for (const route of ["infinite-calendar", "datepicker", "date-input", "date-parser", "timepicker"]) {
     await page.goto(`/guide/${route}`);
     const guide = page.locator(".field-guide");
     await expect(guide.getByRole("link", { name: "All components" })).toHaveAttribute("href", "/");
@@ -95,10 +95,11 @@ test("project home keeps its sections, routes, and responsive layout", async ({ 
     ["/guide/infinite-calendar", "/demo/infinite-calendar", ".quno-calendar-viewport"],
     ["/guide/datepicker", "/demo/datepicker", ".quno-date-picker"],
     ["/guide/date-input", "/demo/date-input", ".quno-date-picker-input"],
-    ["/guide/date-parser", "/demo/date-parser", ".component-demo__panel"]
+    ["/guide/date-parser", "/demo/date-parser", ".component-demo__panel"],
+    ["/guide/timepicker", "/demo/timepicker", ".quno-time-picker"]
   ] as const;
   const cards = page.locator(".project-home__card");
-  await expect(cards).toHaveCount(4);
+  await expect(cards).toHaveCount(5);
   const desktopBoxes = await cards.evaluateAll((elements) =>
     elements.map((element) => element.getBoundingClientRect())
   );
@@ -140,7 +141,7 @@ test("date input field guide follows the task-oriented component contract", asyn
   await page.goto("/guide/date-input");
   const guide = page.locator(".date-input-guide");
   const contents = guide.getByRole("navigation", { name: "Table of contents" });
-  await expect(contents.getByRole("link")).toHaveCount(8);
+  await expect(contents.getByRole("link")).toHaveCount(9);
   expect(await contents.getByRole("link").allTextContents()).toEqual([
     "01Choose one date or a range",
     "02Control recognition and state",
@@ -148,8 +149,9 @@ test("date input field guide follows the task-oriented component contract", asyn
     "04Localize the field",
     "05Use Date Parser semantics",
     "06Compose with Datepicker",
-    "07Preserve native field contracts",
-    "08Ship the field independently"
+    "07Type and select a date and time",
+    "08Preserve native field contracts",
+    "09Ship the field independently"
   ]);
   await guide.getByRole("button", { name: "range", exact: true }).click();
   await expect(guide.getByRole("textbox", { name: "range date input" })).toBeVisible();
@@ -307,11 +309,12 @@ test("editorial CSS-native exhibit keeps stable chrome browser-positioned", asyn
     .toBeLessThanOrEqual(1);
 });
 
-test("all four guides separate exact payloads from runtime contracts", async ({ page }) => {
+test("all five guides separate exact payloads from runtime contracts", async ({ page }) => {
   const guides = [
     ["infinite-calendar", "37.56 KiB gzip", "1.95 KiB gzip", "@quno/calendar/infinite-calendar"],
-    ["datepicker", "10.49 KiB gzip", "3.22 KiB gzip", "@quno/calendar/datepicker"],
-    ["date-input", "7.70 KiB gzip", "0.58 KiB gzip", "@quno/calendar/date-input"],
+    ["datepicker", "12.46 KiB gzip", "3.36 KiB gzip", "@quno/calendar/datepicker"],
+    ["date-input", "9.60 KiB gzip", "0.58 KiB gzip", "@quno/calendar/date-input"],
+    ["timepicker", "1.59 KiB gzip", "0.78 KiB gzip", "@quno/calendar/timepicker"],
     ["date-parser", "6.00 KiB gzip", "No stylesheet", "@quno/calendar/date-parser"]
   ] as const;
 

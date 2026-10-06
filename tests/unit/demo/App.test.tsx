@@ -28,8 +28,16 @@ vi.mock("#quno-demo/demos/DateRangeDemo", () => ({
 vi.mock("#quno-demo/demos/DateInputDemo", () => ({
   DateInputDemo: () => <div data-testid="route-date-input-demo" />
 }));
+vi.mock("#quno-demo/demos/DateTimeDemo", () => ({ DateTimeDemo: () => <div data-testid="route-date-time-demo" /> }));
 vi.mock("#quno-demo/demos/DateParserDemo", () => ({
   DateParserDemo: () => <div data-testid="route-date-parser-demo" />
+}));
+
+vi.mock("#quno-demo/demos/TimePickerDemo", () => ({
+  TimePickerDemo: () => <div data-testid="route-time-picker-demo" />
+}));
+vi.mock("#quno-demo/guide/time-picker/TimePickerFieldGuide", () => ({
+  TimePickerFieldGuide: () => <div data-testid="route-time-picker-guide" />
 }));
 
 import { App, demoRoutes } from "#quno-demo/app/App";
@@ -53,6 +61,9 @@ describe("application route registry", () => {
     ["/demo/infinite-calendar", "route-default"],
     ["/demo/datepicker", "route-date-range-demo"],
     ["/demo/date-input", "route-date-input-demo"],
+    ["/guide/timepicker", "route-time-picker-guide"],
+    ["/demo/timepicker", "route-time-picker-demo"],
+    ["/demo/date-time", "route-date-time-demo"],
     ["/demo/date-parser", "route-date-parser-demo"],
     ["/demo1", "route-demo1"],
     ["/demo2", "route-demo2"],

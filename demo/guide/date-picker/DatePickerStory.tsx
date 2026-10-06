@@ -2,6 +2,7 @@ import { FieldGuidePage } from "#quno-demo/guide/shared/FieldGuidePage";
 import type { JSX } from "react";
 import { ArchitectureStory, DifferenceStory, FootprintStory } from "./StoryDetails";
 import { StoryTopics } from "./StoryTopics";
+import { DateTimeStory } from "./DateTimeStory";
 import "./story-details.css";
 import "./story-topics.css";
 import "./story-themes.css";
@@ -18,7 +19,8 @@ const contents = [
   ["#theming", "08", "Theme with scoped tokens"],
   ["#single-day", "09", "Choose one day"],
   ["#date-input-composition", "10", "Combine with Date Input"],
-  ["#idea", "11", "Separate value, view, and gesture state"]
+  ["#date-time", "11", "Choose a date and time"],
+  ["#idea", "12", "Separate value, view, and gesture state"]
 ] as const;
 
 export const DatePickerStory = ({ embedded = false }: { embedded?: boolean }): JSX.Element => {
@@ -35,6 +37,7 @@ export const DatePickerStory = ({ embedded = false }: { embedded?: boolean }): J
       <DifferenceStory />
 
       <StoryTopics />
+      <DateTimeStory />
 
       <ArchitectureStory />
 

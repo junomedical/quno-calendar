@@ -1,103 +1,16 @@
 import { Calendar } from "./Calendar";
 import { classNames as cx } from "#quno-internal/shared/classNames";
 import { monthRelation } from "#quno-internal/date-picker/datePickerModel";
-import { DEFAULT_FORMATTERS, DEFAULT_LABELS } from "./datePickerFormatters";
 import { OffscreenPills } from "./OffscreenPills";
 import { SelectionHeader } from "./SelectionHeader";
-import { useDatePickerController } from "./useDatePickerController";
-import { resolveDatePickerDisabledDayPredicate } from "./datePickerDisabledDays";
-import type { QunoDatePickerProps, ResolvedDatePickerConfig } from "./datePickerTypes";
+import { useDatePickerSetup } from "./useDatePickerSetup";
+import type { QunoDatePickerProps } from "./datePickerTypes";
 import type { JSX } from "react";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 
-function useResolvedConfig({
-  selectionMode,
-  locale,
-  labels,
-  formatters,
-  classNames,
-  limitDateFrom,
-  limitDateTo,
-  isDayDisabled,
-  getDayCellProps
-}: Pick<
-  QunoDatePickerProps,
-  | "selectionMode"
-  | "locale"
-  | "labels"
-  | "formatters"
-  | "classNames"
-  | "limitDateFrom"
-  | "limitDateTo"
-  | "isDayDisabled"
-  | "getDayCellProps"
->) {
-  const effectiveIsDayDisabled = useMemo(
-    () => resolveDatePickerDisabledDayPredicate({ matcher: isDayDisabled, limitDateFrom, limitDateTo }),
-    [isDayDisabled, limitDateFrom, limitDateTo]
-  );
-  const config: ResolvedDatePickerConfig = useMemo(() => {
-    const modeLabels =
-      selectionMode === "single"
-        ? { calendar: "Date picker", selectedPeriod: "Selected day", hint: "Choose one day." }
-        : {};
-    return {
-      locale: locale ?? "en-GB",
-      labels: { ...DEFAULT_LABELS, ...modeLabels, ...labels },
-      formatters: { ...DEFAULT_FORMATTERS, ...formatters },
-      classNames,
-      isDayDisabled: effectiveIsDayDisabled,
-      getDayCellProps
-    };
-  }, [classNames, effectiveIsDayDisabled, formatters, getDayCellProps, labels, locale, selectionMode]);
-  return { config, effectiveIsDayDisabled };
-}
-
-export const QunoDatePicker = ({
-  value,
-  defaultValue = null,
-  selectionMode = "range",
-  initialMonth,
-  locale = "en-GB",
-  labels,
-  formatters,
-  weekStartsOn = 1,
-  className,
-  classNames,
-  limitDateFrom,
-  limitDateTo,
-  isDayDisabled,
-  getDayCellProps,
-  calendarFooter,
-  autoNavigateDelay = 400,
-  autoNavigateRepeatDelay = 650,
-  onChange,
-  onVisibleMonthChange
-}: QunoDatePickerProps): JSX.Element => {
-  const [monthNavigationOpen, setMonthNavigationOpen] = useState(false);
-  const { config, effectiveIsDayDisabled } = useResolvedConfig({
-    selectionMode,
-    locale,
-    labels,
-    formatters,
-    classNames,
-    limitDateFrom,
-    limitDateTo,
-    isDayDisabled,
-    getDayCellProps
-  });
-  const controller = useDatePickerController({
-    value,
-    defaultValue,
-    selectionMode,
-    initialMonth,
-    weekStartsOn,
-    isDayDisabled: effectiveIsDayDisabled,
-    autoNavigateDelay,
-    autoNavigateRepeatDelay,
-    onChange,
-    onVisibleMonthChange
-  });
+export const QunoDatePicker = (props: QunoDatePickerProps): JSX.Element => {
+  const { className, classNames, calendarFooter, selectionMode = "range" } = props;
+  const { view, setView, clock, config, controller } = useDatePickerSetup(props);
   const endpointPositions = useMemo(
     () =>
       controller.selection
@@ -118,7 +31,12 @@ export const QunoDatePicker = ({
       aria-label={config.labels.calendar}
       onPointerUp={controller.stopEdgeNavigation}
     >
-      <SelectionHeader selection={controller.selection} config={config} onClear={controller.clear} />
+      <SelectionHeader
+        selection={controller.selection}
+        time={clock.enabled ? clock.time : null}
+        config={config}
+        onClear={controller.clear}
+      />
       <OffscreenPills
         selection={controller.selection}
         selectionMode={selectionMode}
@@ -128,14 +46,15 @@ export const QunoDatePicker = ({
         config={config}
         onJump={({ date }) => {
           controller.jumpToEndpoint({ date });
-          setMonthNavigationOpen(false);
+          setView("dates");
         }}
       />
       <Calendar
         controller={controller}
         config={config}
-        monthNavigationOpen={monthNavigationOpen}
-        onMonthNavigationOpenChange={({ open }) => setMonthNavigationOpen(open)}
+        view={view}
+        onViewChange={({ view }) => setView(view)}
+        clock={clock}
         footer={calendarFooter}
       />
       <OffscreenPills
@@ -147,7 +66,7 @@ export const QunoDatePicker = ({
         config={config}
         onJump={({ date }) => {
           controller.jumpToEndpoint({ date });
-          setMonthNavigationOpen(false);
+          setView("dates");
         }}
       />
       {config.labels.hint && (

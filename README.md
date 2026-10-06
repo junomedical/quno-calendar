@@ -1,6 +1,6 @@
 # @quno/calendar
 
-Four opinionated date and scheduling primitives in one React-authored package. Version `0.6.0` supports React 18+
+Five opinionated date and scheduling primitives in one React-authored package. Version `0.6.0` supports React 18+
 directly, verifies React 19 separately, and supports Preact through tested `preact/compat` aliases.
 
 ## Install
@@ -18,6 +18,9 @@ import "@quno/calendar/infinite-calendar/styles.css";
 import { QunoDatePicker } from "@quno/calendar/datepicker";
 import "@quno/calendar/datepicker/styles.css";
 
+import { QunoTimePicker } from "@quno/calendar/timepicker";
+import "@quno/calendar/timepicker/styles.css";
+
 import { QunoDateInput } from "@quno/calendar/date-input";
 import "@quno/calendar/date-input/styles.css";
 
@@ -25,8 +28,9 @@ import { parseDateInput, tokenizeDateInput } from "@quno/calendar/date-parser";
 ```
 
 - **Quno/Infinite Calendar** virtualizes horizontal and vertical schedules with event loading, rendering, editing, zoom, navigation, and focus.
-- **Quno/Datepicker** paints, resizes, and moves one timezone-free date or inclusive range; endpoint shortcuts keep composed input popups open while navigating.
-- **Quno/Date Input** provides a native controlled or uncontrolled field for typed dates and ranges.
+- **Quno/Datepicker** paints, resizes, and moves one timezone-free date or inclusive range, with optional single-day time selection; endpoint shortcuts keep composed input popups open while navigating.
+- **Quno/Date Input** provides a native controlled or uncontrolled field for typed dates, ranges, and optional single-day clock times.
+- **Quno/Timepicker** selects a standalone clock with prominent sticky hours, enabled-hour choices, and cadence-sized minute rows, including six choices per five-minute row and 20-minute steps. Omitted or empty enabled hours allows all 24 hours.
 - **Quno/Date Parser** recognizes formats, relative phrases, configurable weeks, ranges, optional clock times, and multilingual vocabulary without a UI runtime.
 
 The headless `@quno/calendar` root exports shared contracts such as `IsoDate`, `DateRange`, `DateSelectionMode`, `WeekStart`, and safe calendar-day helpers. It exports no UI. JavaScript entry points are ESM/CommonJS compatible, SSR-safe, and never inject CSS. The separately exported stylesheets remain readable, unminified CSS in `dist`.
@@ -45,13 +49,14 @@ keystrokes without changing the synchronous headless parser API.
 
 ## Guides and records
 
-Run `npm run dev` and open `/` for the four-product overview, its shared guiding principles, and creator attribution.
-Each card links to a dedicated field guide and focused demo:
+Run `npm run dev` and open `/` for the five-product overview, its shared guiding principles, and creator attribution.
+Each card links to a dedicated field guide and focused demo. `/demo/date-time` composes the single-day input and picker with enabled hours and minute cadence. Try `6 oct 2pm` to recognize a date without a year and a clock. Selecting a day opens time selection automatically. Its title shows the selected full date, and its arrows move through enabled days. Clicking the date title returns to day selection. Typed clocks stay unrestricted unless Date Input’s `forceCadence` is enabled:
 
 - `/guide/infinite-calendar`
 - `/guide/datepicker`
 - `/guide/date-input`
 - `/guide/date-parser`
+- `/guide/timepicker`
 
 Start with the [documentation index](./docs/README.md). Shared records cover [usage](./docs/shared/usage.md),
 [migration](./docs/shared/migration.md), [architecture](./docs/shared/architecture.md),
