@@ -719,6 +719,12 @@ anchor's participant. If it is removed, capture a surviving participant before c
 instance. Keep the original edit anchor separately for Cancel. The demo's participant checkboxes use this policy and
 retain browser focus while visual geometry settles.
 
+Capture the clicked `request.renderedCalendarId` before opening an edit draft and restore that instance after updating
+parent state; hiding the saved source can change collision geometry even when participants stay the same. Horizontal
+participant edits keep measured day sizes. Idle recentering waits while an explicit restore is active, then resumes
+on the next scroll signal. Use `requireVisible: true` to reject missing or offscreen event instances; these captures
+return `null` instead of falling back to a resource slot.
+
 The target is semantic rather than lane-index based. If a save introduces collisions, participant changes, or new
 metrics that move the event into another overlap lane, restoration resolves the new event geometry and keeps that event
 at the captured viewport position.

@@ -68,6 +68,11 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ### Fixed
 
+- Dense participant editing now preserves measured horizontal day heights when opening or changing a draft, restores
+  the clicked event instance, and prevents idle recentering from competing with an explicit anchor restore. Required
+  visible event captures reject missing/offscreen events instead of substituting resource slots. The 20,000-event
+  create/save/edit regression includes 30 rapid toggles and eight seconds of stationary geometry with no late mutations.
+
 - Accepted projected event drags now apply only proposed timestamps and participants to the persisted record. Clearing
   the projection restores saved metadata; projection-only events require an explicit commit or loader response.
 - Raw date navigation, explicit restoration, and cancellation supersede queued horizontal row requests. Centered
@@ -94,12 +99,12 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ### Verification notes
 
-- PR 25 follow-up and participant anchoring: all 506 unit tests (four workers) and 152 Chromium scenarios pass.
+- PR 25 follow-up and participant anchoring: all 509 unit tests (four workers) and 153 Chromium scenarios pass.
   Browser regressions cover accepted projected drags in both orientations, explicit/percentage/minimum loading
-  geometry, async collision centering, latest navigation, checkbox focus, and 60-frame participant stability.
+  geometry, async collision centering, latest navigation, checkbox focus, and eight-second dense participant stability.
   The new browser fixtures also pass with generated `dist` removed. Formatting, architecture/contracts, typecheck,
   lint, demo build, packed-package verification, Preact, React 19, size reporting, and pack dry-run pass.
-  Infinite Calendar measures 170,582 B raw and 40,335 B gzip (39.39 KiB); its CSS remains 2,041 B gzip.
+  Infinite Calendar measures 170,878 B raw and 40,417 B gzip (39.47 KiB); its CSS remains 2,041 B gzip.
   Both remain within the unchanged 50 KiB JavaScript and 2 KiB CSS ceilings.
 
 - Drag click tolerance: all 432 unit tests pass. The full Chromium run passed 133 scenarios; the new jitter case

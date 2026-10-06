@@ -54,6 +54,9 @@ create draft with no participants keeps the normal calendar set and drawn date v
 and Save action remain unavailable. Multi-participant edits retain one surviving visible event instance while participants
 are toggled; removing that participant transfers the anchor to another surviving instance. Captured event anchors
 record the resolved participant id. Cancel retains the original participant's independent edit anchor.
+Opening the editor restores the clicked instance's position. Horizontal draft and participant changes retain measured
+day heights, and idle recentering yields to an active explicit restore. A required visible event capture returns `null`
+when the event is missing or offscreen, rather than substituting its resource slot.
 
 TanStack Virtual notifications use its queued React update path. Layout restoration requests an ordinary React
 projection before paint, keeping React 19 development free of the virtualizer `flushSync` lifecycle warning while
@@ -77,7 +80,7 @@ Products own recurrence expansion; saves and filters still refresh through `even
 ## Bundle budget
 
 JavaScript is limited to 50 KiB gzip and the optional stylesheet to 2 KiB gzip. The current artifacts measure
-39.39 KiB and 1.99 KiB gzip respectively (Node 23, gzip level 9). See [Decision 100](./decisions.md#100---reconcile-the-infinite-calendar-budget-after-branch-integration).
+39.47 KiB and 1.99 KiB gzip respectively (Node 23, gzip level 9). See [Decision 100](./decisions.md#100---reconcile-the-infinite-calendar-budget-after-branch-integration).
 
 ## Named contracts
 

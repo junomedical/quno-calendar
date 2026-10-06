@@ -54,8 +54,11 @@ Architecture checks enforce object arguments and product dependency direction, i
 - Review regressions exercise raw-date/restore/cancel precedence over queued row navigation and recomputed centering
   after async collision growth. Both orientations assert loading geometry before resources exist, percentage/minimum
   dimensions after mounting, and accepted drags followed by projection removal without cached metadata leakage.
-- Three-participant create/save/edit coverage toggles membership repeatedly, removes/re-adds the first participant,
-  retains checkbox focus and surviving-instance geometry, and samples 60 frames to reject continuing scroll oscillation.
+- Three-participant create/save/edit coverage runs with 100 and 20,000 events/year, preserves the clicked instance
+  through opening, removes/re-adds the first participant, and retains checkbox focus and surviving-instance geometry.
+  The dense case includes 30 additional rapid toggles and samples eight seconds of card/scroll positions and late DOM
+  mutations to reject continuing oscillation. Unit coverage rejects resource-slot substitution for required visible
+  events and checks live restore ownership before scheduling or executing idle recenter work.
   Existing empty-selection, original-participant Cancel, and immediate manual-scroll regressions remain required.
 - Participant-driven draft relayouts opt into manual-scroll cancellation, and their anchor scheduler cancels before the browser applies the first wheel movement.
 - Deterministic demo event generation distributes events across every demo calendar.

@@ -911,3 +911,25 @@ participant; transfer to another surviving visible participant only when needed.
 after committed layout without a forced commit. An empty create selection retains its last slot anchor for the next
 participant selection. Keep the original first-person edit anchor separately so Cancel can restore it after removal.
 Browser checkbox focus and manual-scroll cancellation remain independent of visual anchoring.
+
+## 103 - Preserve Measured Draft Layout And Defer Idle Recenter
+
+Date: 2026-10-06
+Status: Accepted; refines Decisions 045, 097 and 102
+
+Horizontal draft presence and participant membership are data-layout changes, rather than settings-owned structural
+changes. Keep measured day heights through opening, editing and closing a draft; resource metrics and the existing
+parent restore handle the changed rows. Reset structural measurements only when header height, row height or excluded
+weekdays change. This replaces the draft-dependent structural signature that could move a dense schedule by thousands
+of pixels when entering edit mode.
+
+The external editor captures the clicked event instance before hiding the source, then restores that instance after
+the controlled draft commits. Preserve the original first-person Cancel anchor independently. A visible event capture
+with `requireVisible: true` returns `null` if that event is missing or offscreen; a resource slot is not an equivalent
+visible event anchor.
+
+An explicit horizontal restore cancels pending idle recenter work. The recenter scheduler reads live restore ownership
+both when scheduling and at an already armed deadline, preventing competing scroll corrections during row changes.
+After restoration ends, the next scroll signal can schedule ordinary maintenance. Restore deadlines and manual-scroll
+cancellation stay bounded as before. Dense three-participant create/save/edit tests include repeated rapid toggles and
+eight seconds of geometry and DOM-mutation observation after the final change.

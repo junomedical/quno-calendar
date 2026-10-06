@@ -32,6 +32,7 @@ import { parseDateInput, tokenizeDateInput } from "@quno/calendar/date-parser";
   Optional synchronous `projectEvents` displays local previews after caching without refetching persisted events.
   Resource-row navigation and anchor restoration wait for committed parent layout; ordinary state updates need no forced React commit.
   Captured event anchors retain their participant identity, and explicit row centering follows async collision sizing.
+  Horizontal participant edits retain measured day heights; idle recentering waits while an explicit anchor restore owns the viewport.
 - **Quno/Datepicker** paints, resizes, and moves one timezone-free date or inclusive range, with optional single-day time selection; endpoint shortcuts keep composed input popups open while navigating.
 - **Quno/Date Input** provides a native controlled or uncontrolled field for typed dates, ranges, and optional single-day clock times.
 - **Quno/Timepicker** selects a standalone clock with prominent sticky hours, enabled-hour choices, and cadence-sized minute rows, including six choices per five-minute row and 20-minute steps. Omitted or empty enabled hours allows all 24 hours.

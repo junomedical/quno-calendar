@@ -27,6 +27,8 @@ Local preview projection after the event cache is covered by Infinite Calendar D
 clarifies accepted moves, loading dimensions, and navigation precedence;
 [Decision 102](./infinite-calendar/decisions.md#102---retain-participant-identity-in-event-anchors)
 keeps multi-participant editing anchored to a surviving visible instance.
+[Decision 103](./infinite-calendar/decisions.md#103---preserve-measured-draft-layout-and-defer-idle-recenter)
+preserves dense editor transitions and gives explicit restores priority over idle recentering.
 
 The current responsiveness work is recorded in
 [QUNO-013](./shared/decisions.md#quno-013---bound-high-frequency-work-to-display-frames), with Infinite Calendar's

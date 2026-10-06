@@ -108,20 +108,28 @@ export function useExternalEventDrafts({
         calendarIds: eventParticipantIds(request.event)
       };
       activeEditSourceEventRef.current = draftEvent;
-      activeDraftLastSeenAnchorRef.current = captureEventAnchor(
+      activeEditSourceAnchorRef.current = captureEventAnchor(
         draftEvent,
         firstPersonParticipantId(eventParticipantIds(draftEvent)) ?? draftEvent.calendarId
       );
-      activeEditSourceAnchorRef.current = activeDraftLastSeenAnchorRef.current;
+      const visibleAnchor = captureEventAnchor(draftEvent, request.renderedCalendarId, true);
+      activeDraftLastSeenAnchorRef.current = visibleAnchor ?? activeEditSourceAnchorRef.current;
       setDraftParticipantsChanged(false);
       setActiveDraft({
         mode: "edit",
         sourceEventId: request.event.id,
         event: draftEvent
       });
+      if (visibleAnchor) {
+        restoreEventAnchor(visibleAnchor, draftEvent, {
+          afterRecenter: true,
+          allowNavigationFallback: false,
+          cancelOnManualScroll: true
+        });
+      }
       setMessage(`Editing ${request.event.title} in external popup`);
     },
-    [activeDraftLastSeenAnchorRef, captureEventAnchor, setMessage]
+    [activeDraftLastSeenAnchorRef, captureEventAnchor, restoreEventAnchor, setMessage]
   );
 
   const handleActiveDraftMove = useCallback(

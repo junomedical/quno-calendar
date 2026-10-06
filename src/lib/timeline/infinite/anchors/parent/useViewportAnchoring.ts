@@ -76,6 +76,7 @@ export function useViewportAnchoring(args: AnchoringArgs) {
       const viewportBox = viewport.getBoundingClientRect();
       const event = registry.event({ target, viewportBox });
       if (event) return relativeSnapshot({ element: event, viewportBox });
+      if (target.eventId && target.requireVisible) return null;
       if (!target.dateKey || !target.calendarId) return null;
       const resource = registry.resource({ dateKey: target.dateKey, calendarId: target.calendarId });
       if (!resource) return null;

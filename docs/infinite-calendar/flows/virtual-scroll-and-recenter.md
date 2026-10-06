@@ -27,6 +27,8 @@ The parent may update its selected resources or controlled draft, then call `scr
 updated geometry, then uses the existing virtual-window navigation or restoration session. The session continues to
 observe late row registration and layout changes. Capturing an anchor still happens before the parent change;
 cancelling a restore clears both queued and active work. Consumers do not force a React commit.
+Horizontal restores also clear idle recenter deadlines. The scheduler checks live restore ownership before scheduling
+or executing maintenance; after release, the next scroll signal can arm a new deadline.
 
 ## Settled Scroll Lifecycle
 
@@ -148,10 +150,11 @@ Changing `excludedWeekdays` replaces the virtualizer's date-to-index sequence, s
 interpreted in the new model. The structural restore first uses base geometry, then repeats the semantic-date alignment
 after the virtualizer has adopted the new keys and horizontal variable measurements. The transition window renders
 from semantic date keys and retains all resources for its bounded settling frames, so a still-visible weekday and its
-event nodes are never temporarily interpreted through replacement indexes or unmounted. During controlled-draft row
-collapse or expansion, a current or just-released draft date that belongs to the ordinary virtual viewport overrides
-transient top-date snapshots; an offscreen pinned draft yields to the visible date. The explicit parent event/slot
-restore remains responsible for the exact viewport-relative row position.
+event nodes are never temporarily interpreted through replacement indexes or unmounted. Horizontal controlled-draft
+opening and participant collapse/expansion keep measured sizes and use resource membership anchoring, rather than
+resetting structural geometry. The explicit parent event/slot restore remains responsible for the exact
+viewport-relative row position. A visible draft date can still guide settings-driven structural changes; an offscreen
+pinned draft yields to the visible date.
 
 Vertical dates have one uniform settings-owned height, so a structural zoom restore resets every bounded date measurement to the new base height before writing the translated scroll offset. While those measurements settle, rendering stays pinned to a base-geometry window around the semantic top date. This prevents pre-commit virtualizer measurements from converting the saved date-local position through stale zoom geometry or exposing a transient blank/wrong-date window.
 
@@ -237,6 +240,7 @@ flowchart TD
 - `src/lib/timeline/infinite/scroll/settlement/useScrollRecenter.ts`: scroll/scrollend scheduling and interaction guard.
 - `src/lib/timeline/infinite/scroll/recenter/useLayoutOffsetRestoration.ts`: structural layout translation.
 - `src/lib/timeline/infinite/scroll/window/useVirtualDateRenderItems.ts`: visible, fallback, and pinned render items.
+- `src/lib/timeline/infinite/scroll/window/virtualizerMeasurements.ts`: structural measurement reset and uniform vertical seeding.
 - `src/lib/timeline/infinite/scroll/resources/resourceWindow.ts`: resource prefix extents and cross-axis window search.
 - `src/lib/timeline/infinite/scroll/resources/viewportMetricsStore.ts`: frame-batched viewport snapshots for local subscribers.
 

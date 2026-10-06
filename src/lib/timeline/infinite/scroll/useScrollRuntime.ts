@@ -13,7 +13,7 @@
  * @see docs/infinite-calendar/flows/virtual-scroll-and-recenter.md
  */
 import { useVirtualizer, type Virtualizer, type VirtualizerOptions } from "@tanstack/react-virtual";
-import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useLayoutEffect, useMemo, useRef, useState, type MutableRefObject } from "react";
 import type { QunoInfiniteCalendarSettings } from "#quno-internal/timeline/core/types";
 import { VIRTUAL_DAY_NODE_OVERSCAN } from "./scrollConstants";
 import { createVirtualDateModel } from "#quno-internal/timeline/infinite/scroll/window/dateModel";
@@ -25,6 +25,7 @@ import { useVirtualScrollPosition } from "#quno-internal/timeline/infinite/scrol
 import { useVirtualWindowNavigation } from "#quno-internal/timeline/infinite/scroll/navigation/useVirtualWindowNavigation";
 import { useVisibleDateState } from "#quno-internal/timeline/infinite/scroll/position/useVisibleDateState";
 import { shouldAdjustForDateItemResize } from "#quno-internal/timeline/infinite/scroll/position/visibleSnapshot";
+import { resetVirtualizerMeasurements } from "#quno-internal/timeline/infinite/scroll/window/virtualizerMeasurements";
 
 type UseVirtualTimelineWindowArgs = {
   anchorDateKey: string;
@@ -35,6 +36,7 @@ type UseVirtualTimelineWindowArgs = {
   verticalLayoutSignature: string;
   topDateAlignmentKey: string;
   isInteractionActive: boolean;
+  recenterBlockedRef?: MutableRefObject<boolean>;
   eagerRange?: boolean;
   layoutAnchorDateKey?: string;
   resolveOffsetOnLayoutChange?: ResolveOffsetOnLayoutChange;
@@ -44,22 +46,6 @@ const shouldAdjustScrollPositionOnItemSizeChange: NonNullable<
   Virtualizer<HTMLDivElement, Element>["shouldAdjustScrollPositionOnItemSizeChange"]
 > = (item, _delta, instance) =>
   shouldAdjustForDateItemResize({ itemEnd: item.end, scrollOffset: instance.scrollOffset });
-
-function resetVirtualizerMeasurements({
-  virtualizer,
-  itemCount,
-  baseDayHeight,
-  forceUniformGeometry
-}: {
-  virtualizer: Virtualizer<HTMLDivElement, Element>;
-  itemCount: number;
-  baseDayHeight: number;
-  forceUniformGeometry: boolean;
-}) {
-  virtualizer.measure();
-  if (!forceUniformGeometry) return;
-  for (let index = 0; index < itemCount; index += 1) virtualizer.resizeItem(index, baseDayHeight);
-}
 
 function virtualViewportIncludesDate({
   virtualizer,
@@ -83,6 +69,7 @@ export function useScrollRuntime({
   verticalLayoutSignature,
   topDateAlignmentKey,
   isInteractionActive,
+  recenterBlockedRef,
   eagerRange = false,
   layoutAnchorDateKey,
   resolveOffsetOnLayoutChange
@@ -133,6 +120,7 @@ export function useScrollRuntime({
     excludedWeekdays: settings.excludedWeekdays,
     currentWindowAnchorDateKey: virtualWindow.anchorDateKey,
     isInteractionActive,
+    recenterBlockedRef,
     topVisibleDateRef,
     topVisibleOffsetRef,
     pendingScrollTargetRef,

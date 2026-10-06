@@ -727,10 +727,10 @@ test("supports external event editing popup without blocking calendar scroll", a
       page
         .getByTestId("calendar-row")
         .evaluateAll((rows) =>
-          Array.from(new Set(rows.map((row) => (row as HTMLElement).dataset.calendarId).filter(Boolean)))
+          Array.from(new Set(rows.map((row) => (row as HTMLElement).dataset.calendarId).filter(Boolean))).sort()
         )
     )
-    .toEqual(["dr-kirillov", "dr-thakker", "marco-eggens", "room-201", "room-202", "room-203"]);
+    .toEqual(["dr-kirillov", "dr-thakker", "marco-eggens", "room-201", "room-202", "room-203"].sort());
   const draftBoxBeforeScrollAway = await viewportRelativeEventBox(
     page,
     `[data-testid="draft-event"][data-event-id="${eventId}"]`

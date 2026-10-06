@@ -29,6 +29,9 @@ Priority and interaction with scroll maintenance are defined in the [Flow Guide]
   clears pending requests as well as active sessions. Consumers can update selection or drafts without forcing a React commit.
 - Event captures record the resolved participant id, even when the caller omitted it. Restoration cannot hop between
   copies of a multi-participant event as visibility changes. Consumers can explicitly transfer to another target.
+- Required visible event captures return `null` for missing/offscreen events without substituting resource slots.
+- Horizontal draft changes retain measured dates. Explicit restores cancel pending idle recenter work and block new
+  deadlines until they release ownership; the scheduler rechecks live ownership at racing deadlines.
 - New raw date navigation, explicit restoration, and cancellation discard queued horizontal resource navigation.
 - Explicit centered row navigation recomputes its desired snapshot from the live row height during the bounded session.
 - Manual user intent cancels eligible scheduled restoration.
@@ -57,4 +60,5 @@ Priority and interaction with scroll maintenance are defined in the [Flow Guide]
   Event projection tests assert accepted moves preserve persisted metadata and do not commit projection-only ids.
 - Browser: async height growth, external layout restore/cancel, conditional event-focus scrolling, date/time navigation,
   zoom continuity, and interaction priority. Dedicated regressions assert both orientations' loading geometry,
-  percentage/minimum sizing, accepted projected drags, async distant centering, and frame-stable three-participant editing.
+  percentage/minimum sizing, accepted projected drags, async distant centering, and frame-stable three-participant editing
+  with 100/20,000 events and eight seconds of post-toggle observation.
