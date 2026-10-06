@@ -17,6 +17,13 @@ days, hours, horizontal rows, and vertical columns without taking ownership of g
 - [Decisions](./decisions.md)
 - [Shared usage recipes](../shared/usage.md)
 
+Dragging an event back to its starting slot neither opens its editor nor requests a move. The calendar owns
+this distinction from an ordinary click, which still invokes `onEventActivate`. Pointer jitter within four pixels
+also activates, even if it crosses a snap boundary; consumers need no movement guard.
+
+`CalendarEventBase` exposes the shared `id`, `calendarId`, and `start` fields. `CalendarEvent` extends it with the
+remaining renderer data, so consumers can store an event's identity and start position without a local field selection.
+
 Day keys use shared timezone-free `IsoDate` values. Event `start` and `end` remain timestamp strings and retain their
 local or offset semantics.
 
@@ -26,7 +33,16 @@ consumer needs the background treatment; that layer has independent overlap lane
 
 The horizontal navigation handle can reveal a resource row with
 `scrollToDateTime({ date, time, calendarId })`. The calendar owns the virtual-row wait and viewport correction; consumers
-do not query its DOM.
+do not query its DOM. Parent selection or draft state can be updated immediately before resource-row navigation or restoration
+in the same handler. The package measures after the resulting layout commits; consumers need no `flushSync` wrapper.
+Pass `align: "center"` to center the requested row even when it is already visible. `getVisibleDateKeys()` returns
+only dates intersecting the usable viewport, so an external creation form can start on the middle visible date.
+
+Optional `isLoading` and `loadingFallback` props let a consumer supply its initial skeleton. While loading, the
+timeline waits to mount until a selected ID matches a supplied calendar. IDs that arrive before calendar metadata or
+match no resource keep the fallback visible without header-only geometry. Once a matching row exists, the timeline
+measures and loads events beneath the hidden surface. Clearing `isLoading` reveals that same timeline. Consumers own
+readiness, failures and any initial centered navigation.
 
 The field guide keeps its interaction contracts live: newly scrolled dates populate without a simulated delay, event
 cards can be resized in place, parent-reviewed mutations preserve their working row and restore the original view on
@@ -46,10 +62,15 @@ frame; release still flushes the final position synchronously.
 Untouched date buckets keep stable immutable snapshots, and prepared date/resource layers are reused until their
 bucket, resource selection, visible time bounds, or relevant draft source changes.
 
+`projectEvents` optionally transforms cached events for the inclusive rendered date window. It is synchronous and
+must leave its input records unchanged. Changing the callback updates event geometry in either orientation without
+invalidating API loading. Clearing it restores the persisted snapshot. Empty rendered dates also accept previews.
+Products own recurrence expansion; saves and filters still refresh through `eventVersion` or `loadEvents`.
+
 ## Bundle budget
 
 JavaScript is limited to 50 KiB gzip and the optional stylesheet to 2 KiB gzip. The current artifacts measure
-37.90 KiB and 1.95 KiB gzip respectively (Node 24). See [Decision 094](./decisions.md#094---allow-50-kib-for-infinite-calendar-javascript).
+38.94 KiB and 1.99 KiB gzip respectively (Node 24). See [Decision 100](./decisions.md#100---reconcile-the-infinite-calendar-budget-after-branch-integration).
 
 ## Named contracts
 

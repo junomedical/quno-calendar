@@ -15,7 +15,7 @@ import { useCalendarFocusCoordinator } from "./useCalendarFocusCoordinator";
  * @see docs/infinite-calendar/architecture.md#public-surface
  */
 export const QunoInfiniteCalendar = forwardRef<QunoInfiniteCalendarHandle, QunoInfiniteCalendarProps>(
-  function QunoInfiniteCalendar({ view = "infinite-horizontal", ...props }, ref) {
+  function QunoInfiniteCalendar({ view = "infinite-horizontal", isLoading = false, loadingFallback, ...props }, ref) {
     const viewRef = useRef<CalendarViewHandle | null>(null);
     const focus = useCalendarFocusCoordinator({
       calendars: props.calendars,
@@ -30,8 +30,8 @@ export const QunoInfiniteCalendar = forwardRef<QunoInfiniteCalendarHandle, QunoI
       ref,
       () => ({
         scrollToDate: ({ date: dateKey }) => viewRef.current?.scrollToDate({ date: dateKey }),
-        scrollToDateTime: ({ date: dateKey, time, calendarId }) =>
-          viewRef.current?.scrollToDateTime({ date: dateKey, time, calendarId }),
+        scrollToDateTime: (args) => viewRef.current?.scrollToDateTime(args),
+        getVisibleDateKeys: () => viewRef.current?.getVisibleDateKeys() ?? [],
         scrollToToday: () => viewRef.current?.scrollToToday(),
         captureViewportAnchor: (target) => viewRef.current?.captureViewportAnchor(target) ?? null,
         restoreViewportAnchor: ({ anchor, ...options }) =>
@@ -46,10 +46,29 @@ export const QunoInfiniteCalendar = forwardRef<QunoInfiniteCalendarHandle, QunoI
     );
 
     const internalProps = { ...props, focusedEventTarget: focus.focusedEventTarget };
-    if (view === "infinite-vertical") {
-      return <InfiniteVerticalTimelineView ref={viewRef} {...internalProps} />;
+    const calendar =
+      view === "infinite-vertical" ? (
+        <InfiniteVerticalTimelineView ref={viewRef} {...internalProps} />
+      ) : (
+        <InfiniteTimelineView ref={viewRef} {...internalProps} />
+      );
+    if (loadingFallback === undefined) {
+      return calendar;
     }
 
-    return <InfiniteTimelineView ref={viewRef} {...internalProps} />;
+    const hasSelectedCalendar = props.calendars.some(({ id }) => props.selectedCalendarIds.includes(id));
+
+    return (
+      <div className="quno-calendar-loading-shell" aria-busy={isLoading}>
+        <div
+          className="quno-calendar-loading-content"
+          aria-hidden={isLoading || undefined}
+          style={{ visibility: isLoading ? "hidden" : undefined }}
+        >
+          {!isLoading || hasSelectedCalendar ? calendar : null}
+        </div>
+        {isLoading ? <div className="quno-calendar-loading-fallback">{loadingFallback}</div> : null}
+      </div>
+    );
   }
 );

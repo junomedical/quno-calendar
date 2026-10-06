@@ -1,4 +1,5 @@
 import type { CalendarId, CalendarViewportAnchorTarget, EventId } from "#quno-internal/timeline/core/types";
+import type { IsoDate } from "#quno-internal/shared/dateRangeModel";
 
 type Listener = () => void;
 
@@ -41,6 +42,13 @@ export class ViewportGeometryRegistry {
 
   day({ dateKey }: { dateKey: string }) {
     return this.days.get(dateKey) ?? null;
+  }
+
+  visibleDateKeys({ viewportBox }: { viewportBox: DOMRect }): IsoDate[] {
+    return [...this.days]
+      .filter(([, element]) => isVisible({ element, viewportBox }))
+      .map(([dateKey]) => dateKey as IsoDate)
+      .sort();
   }
 
   resource({ dateKey, calendarId }: { dateKey: string; calendarId: CalendarId }) {

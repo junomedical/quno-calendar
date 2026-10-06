@@ -37,6 +37,48 @@ function calendar(props: TestCalendarProps) {
 const renderCalendar = (props: TestCalendarProps) => render(calendar(props));
 
 describe("InfiniteTimelineView", () => {
+  it.each(["infinite-horizontal", "infinite-vertical"] as const)(
+    "waits for a real selected resource before mounting the loading %s view",
+    async (view) => {
+      const loadEvents = vi.fn<LoadEvents>(async () => []);
+      const loadingProps = {
+        view,
+        loadEvents,
+        isLoading: true,
+        loadingFallback: <div role="status">Loading resources</div>
+      };
+      const result = renderCalendar({
+        ...loadingProps,
+        calendars: [],
+        selectedCalendarIds: ["calendar-a"]
+      });
+      expect(screen.getByRole("status")).toHaveTextContent("Loading resources");
+      expect(screen.queryByTestId("quno-calendar-timeline")).not.toBeInTheDocument();
+      expect(loadEvents).not.toHaveBeenCalled();
+
+      result.rerender(calendar({ ...loadingProps, selectedCalendarIds: ["missing-calendar"] }));
+      expect(screen.queryByTestId("quno-calendar-timeline")).not.toBeInTheDocument();
+      expect(loadEvents).not.toHaveBeenCalled();
+
+      result.rerender(calendar({ ...loadingProps, selectedCalendarIds: [] }));
+      expect(screen.queryByTestId("quno-calendar-timeline")).not.toBeInTheDocument();
+      expect(loadEvents).not.toHaveBeenCalled();
+
+      result.rerender(calendar({ ...loadingProps, selectedCalendarIds: ["missing-calendar", "calendar-a"] }));
+      const timeline = screen.getByTestId("quno-calendar-timeline");
+      expect(timeline.closest(".quno-calendar-loading-content")).toHaveStyle({ visibility: "hidden" });
+      expect(screen.getByRole("status")).toBeInTheDocument();
+      await waitFor(() => expect(loadEvents).toHaveBeenCalled());
+
+      result.rerender(
+        calendar({ ...loadingProps, isLoading: false, selectedCalendarIds: ["missing-calendar", "calendar-a"] })
+      );
+      expect(screen.getByTestId("quno-calendar-timeline")).toBe(timeline);
+      expect(timeline.closest(".quno-calendar-loading-content")).toHaveStyle({ visibility: "visible" });
+      expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    }
+  );
+
   it("passes className, style, and ariaLabel to the calendar surface", () => {
     const loadEvents = vi.fn<LoadEvents>(async () => []);
 

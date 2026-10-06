@@ -9,6 +9,17 @@ function elementAt(left: number, top: number, width = 20, height = 20): HTMLElem
 }
 
 describe("ViewportGeometryRegistry", () => {
+  it("returns sorted visible dates without overscan or header-only dates", () => {
+    const registry = new ViewportGeometryRegistry();
+    const viewportBox = { left: 0, top: 48, right: 200, bottom: 400 } as DOMRect;
+    registry.registerDay({ dateKey: "2026-10-03", element: elementAt(0, 420, 200, 100) });
+    registry.registerDay({ dateKey: "2026-10-02", element: elementAt(0, 320, 200, 100) });
+    registry.registerDay({ dateKey: "2026-09-30", element: elementAt(0, -52, 200, 100) });
+    registry.registerDay({ dateKey: "2026-10-01", element: elementAt(0, 48, 200, 272) });
+    expect(registry.visibleDateKeys({ viewportBox })).toEqual(["2026-10-01", "2026-10-02"]);
+    registry.registerDay({ dateKey: "2026-10-01", element: null });
+    expect(registry.visibleDateKeys({ viewportBox })).toEqual(["2026-10-02"]);
+  });
   it("resolves the requested calendar instance and respects visible-only targets", () => {
     const registry = new ViewportGeometryRegistry();
     const offscreen = elementAt(400, 400);

@@ -2,6 +2,12 @@
 
 The event API is additive to the calendar surface. Dates, resources, scrolling, hit-testing, zoom, and drafts render from settings, virtualization state, and the last accepted cache snapshot. None of them waits for `loadEvents`.
 
+Consumers can supply `loadingFallback` and control `isLoading` during startup. With an initially empty selection,
+the view waits for resource context before mounting. Once selected rows exist, the timeline measures and loads events
+beneath a hidden surface; the fallback occupies the same viewport. Clearing loading reveals the mounted view, and
+the consumer can center its initial date through the navigation handle. The loader itself does not infer readiness
+or replace consumer error handling, and ordinary refreshes can retain the visible grid.
+
 ## End-To-End Delayed Load
 
 ```mermaid
@@ -33,7 +39,7 @@ sequenceDiagram
     Coordinator->>Cache: Replace requested buckets, deduplicate, touch, and trim
     Cache-->>Coordinator: Accepted bounded snapshot
     Hook->>Hook: startTransition(setEventsByDate)
-    Hook-->>Layout: Revised date events
+    Hook-->>Layout: Revised date events after optional display projection
     Layout->>Layout: Membership, intervals, overlap lanes, row metrics
     Layout-->>View: Event shells and revised row/day heights
     View->>Measure: Resize affected virtual dates
@@ -47,6 +53,17 @@ While a controlled draft is active, participant filtering may make horizontal da
 date nodes. Event loading retains the last non-draft warm window instead of treating that geometry-only expansion as
 new navigation, then unions policy windows around the draft date and the explicit virtual-window anchor. A genuinely moved draft
 or viewport navigation still loads its destination without prefetching a transient extra date at the lower edge.
+
+## Display Projection
+
+Optional synchronous `projectEvents` receives persisted events and the inclusive rendered date window before layout.
+It can replace an edited series and add local previews on empty dates. Both orientations index the result with the
+existing event start-date semantics; returned events outside rendered dates are ignored. The callback must not mutate
+cached records. Unchanged date buckets retain their preparation identity.
+
+Changing or clearing this callback never invalidates the range coordinator or writes previews to the persisted cache.
+Clearing it restores the cached events immediately. Recurrence expansion remains consumer-owned. Actual navigation
+can still prefetch newly visible dates; saves and filters keep their existing loader/version invalidation.
 
 ## Date Request State
 

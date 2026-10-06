@@ -277,6 +277,7 @@ export function TimeMarkerDemo() {
 
 export function NavigationControlsDemo() {
   const calendarRef = useRef<QunoInfiniteCalendarHandle>(null);
+  const [selectedCalendarIds, setSelectedCalendarIds] = useState(["provider-a"]);
   const [date, setDate] = useState<IsoDate>(articleDateKey);
   const [status, setStatus] = useState(`Showing ${articleDateKey}`);
   const inputValue = useMemo<DateRange>(() => ({ start: date, end: date }), [date]);
@@ -342,16 +343,32 @@ export function NavigationControlsDemo() {
             className="article-button"
             onClick={() => {
               setDate(articleDateKey);
+              setSelectedCalendarIds(["provider-a", "room-1"]);
               calendarRef.current?.scrollToDateTime({
                 date: articleDateKey,
                 time: articleNowTime,
-                calendarId: "room-1"
+                calendarId: "room-1",
+                align: "center"
               });
               setStatus("Showing Room 1 at 13:30");
             }}
             type="button"
           >
             Show Room 1
+          </button>
+          <button
+            className="article-button"
+            type="button"
+            onClick={() => {
+              const dates = calendarRef.current?.getVisibleDateKeys() ?? [];
+              const middle = dates[Math.floor(dates.length / 2)];
+              if (middle) {
+                setDate(middle);
+                setStatus(`Visible middle date: ${middle}`);
+              }
+            }}
+          >
+            Use middle visible date
           </button>
         </div>
       }
@@ -365,7 +382,7 @@ export function NavigationControlsDemo() {
           initialDateKey={articleDateKey}
           loadEvents={loadNavigationEvents}
           now={articleNow}
-          selectedCalendarIds={["provider-a", "room-1"]}
+          selectedCalendarIds={selectedCalendarIds}
           settings={{ ...articleSettings, zoom: 1.3 }}
         />
       </div>

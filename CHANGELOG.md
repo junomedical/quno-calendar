@@ -4,17 +4,70 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+### Added
+
+- Optional synchronous `projectEvents` and its named types separate local preview rendering from persisted event loading. Both orientations prepare projected events without mutating cached data or invalidating requests; empty rendered dates support previews. The lazy guide example demonstrates preview movement with a stable load count.
+
+- Exported `CalendarEventBase` from `@quno/calendar/infinite-calendar`. `CalendarEvent` inherits its `id`, `calendarId`, and `start` fields so consumers can share a named contract for an event identity and start position.
+
+- Optional consumer-owned `isLoading`/`loadingFallback` for initial calendar loading. Resource selection can arrive before the hidden timeline mounts and loads events, avoiding the header-only startup layout. The prefetch guide demonstrates delayed context, a supplied skeleton and centered initial navigation.
+
+- Restored `getVisibleDateKeys()` for creation defaults based on the actual viewport. Added optional `align: "center"`
+  to horizontal resource-row navigation, including rows that are already visible. The navigation guide demonstrates both.
+
 ### Changed
 
-- Raised the Infinite Calendar JavaScript gzip ceiling from 38 KiB to 50 KiB, leaving comfortable headroom
-  above the reported 38.92 KiB artifact. Refreshed its field-guide JavaScript and CSS measurements against a fresh
-  library build on Node 24 (37.90 KiB and 1.95 KiB gzip respectively).
-- Raised the Date Parser JavaScript gzip ceiling from 6 KiB to 7 KiB to leave headroom across Node versions.
+- Merged Date Parser clock recognition and composed picker focus retention into the calendar improvements.
+- Retained the accepted 50 KiB Infinite Calendar and 7 KiB Date Parser JavaScript gzip ceilings, leaving room
+  for future changes. Refreshed production guide measurements for the combined implementation.
 
-### Verification
+- The earlier 39 KiB Infinite Calendar ceiling for version 0.6.2 is superseded by the merged 50 KiB ceiling.
+  Decision 099 preserves the original acceptance; Decision 100 records the combined branch budget.
 
-- Bundle checks pass on Node 24 and Node 26.7.0.
-- Corrected test formatting so the project-wide formatting check passes.
+- Corrected the local package version for `feat/more-improvements` to `0.6.2`. The manifest, lockfile, and current README use the same version. Earlier `0.6.3` and `0.6.4` local builds are verification history.
+
+### Fixed
+
+- Pointer jitter within the four-pixel click tolerance now activates an event even when it crosses a snap boundary.
+  A changed proposal requires movement beyond that tolerance before requesting a move or updating the event cache.
+
+- Initial loading now waits for a selected ID that exists in `calendars` before mounting the hidden timeline. IDs
+  arriving before resource metadata or matching no resource keep the fallback free of header-only geometry.
+
+- Corrected the navigation guide to describe `calendarId` as an optional field in the `scrollToDateTime` options object.
+
+- Resource-row navigation and viewport-anchor restoration now wait for committed parent layout. A selection or draft
+  update followed by the existing handle call works without consumer `flushSync` wrappers. Batched navigation uses
+  the latest request, and cancellation can discard a restore before it starts.
+
+- A drag dropped back onto its original minute and calendar now neither activates the event editor nor sends a move request. The calendar tracks movement before frame coalescing; ordinary clicks still activate without consumer-side suppression.
+
+### Verification notes
+
+- Drag click tolerance: all 432 unit tests pass. The full Chromium run passed 133 scenarios; the new jitter case
+  passes after removing an unrelated cancel-scroll assertion, with all four drag scenarios passing on rerun.
+  The 1–4 px unit cases and 1 px browser case reproduced the snap-boundary bug before the guard; 5 px still moves.
+  Formatting, architecture/contracts, typecheck, lint, library/demo builds, packed React/package and Preact checks,
+  size reporting, and pack dry-run pass. Infinite Calendar measures 168,202 B raw and 39,878 B gzip (38.94 KiB),
+  within its 50 KiB ceiling. The guide's raw-size figure is refreshed.
+
+- Loading resource intersection and navigation-guide correction: all 427 unit tests and all 133 Chromium scenarios pass.
+  Both orientation regressions and the startup browser check reproduced premature mounting before the fix. Formatting,
+  architecture/contracts, typecheck, lint, library/demo builds, packed React/package and Preact checks, size reporting,
+  and pack dry-run pass. Infinite Calendar measures 168,189 B raw and 39,875 B gzip (38.94 KiB), within its 50 KiB ceiling.
+  Guide figures and unit/browser payload expectations stay aligned.
+
+- Version 0.6.2 with the accepted 39 KiB budget: aggregate `npm run verify:package` passes. Formatting, architecture, typecheck, lint, 13 affected unit tests, the Chromium payload-guide test, the demo build, and pack dry-run pass. The earlier size-gate failures below describe verification against the previous 38 KiB ceiling.
+
+- Local event projection: all 351 unit tests and all 119 Chromium scenarios pass. Typecheck, lint, architecture, formatting, library/demo builds, packed Preact and React 19 compatibility, packed-package verification and pack dry-run pass. Infinite Calendar JavaScript is 39,858 bytes gzip, 946 bytes above the unchanged 38 KiB ceiling (358 bytes above the preceding 0.6.3 build). This existing size gate still blocks the aggregate `verify:package` command; its packed-package checks pass separately. Other artifact budgets pass.
+
+- Committed-layout navigation: all 347 unit tests and all 118 Chromium checks pass, including batched resource selection, controlled draft restoration and the saved-event motion regression. Typecheck, lint, architecture and formatting pass. Final Infinite Calendar JavaScript is 39,500 bytes gzip, 588 bytes above the unchanged 38 KiB limit (123 bytes more than the preceding build). Other artifact budgets pass.
+
+- After merging `0.6.1`, the corrected guide-size assertions pass: 341 unit tests, typecheck, lint, architecture, and formatting pass, and the library builds. The Infinite Calendar gzip result remains 39,377 bytes, 465 bytes over the 38 KiB budget; this pre-existing size gate still fails.
+
+- Drag-back activation: all 14 focused interaction tests pass, including 8 new gesture regressions, and all 3 Chromium drag scenarios pass. The full Chromium run passed 117 of 118 scenarios; the one guide timeout passed when retried after building. Package typecheck, lint, architecture/contracts, library/demo builds, Preact compatibility and packed React/import/style verification pass. Full unit tests pass 336 tests with the same five documented stale guide assertions; repository formatting still flags the unchanged `OffscreenPills.tsx`. The final Infinite Calendar artifact is 39,377 bytes gzip, 465 bytes above its unchanged 38 KiB ceiling (259 bytes more than the previous build).
+
+- Viewport navigation and startup loading: all 117 Chromium checks pass, including loading-fallback visibility, delayed-context initialization, centered resource-row geometry and middle-visible-date selection. Typecheck, architecture, lint, builds, Preact compatibility and packed-package verification pass. The full unit run has five existing stale guide-size assertions (`DemoStory.test.tsx`: one; `FieldGuideProduction.test.tsx`: four), with 328 tests passing. Repository-wide formatting flags the unchanged `src/lib/date-picker/OffscreenPills.tsx`; changed files pass. The Infinite Calendar bundle is 39,118 bytes gzip, 206 bytes above the existing 38 KiB ceiling; the ceiling remains unchanged. Calendar CSS remains within its 2 KiB ceiling at 2,035 bytes gzip.
 
 ## 0.6.1 - 2026-10-02
 

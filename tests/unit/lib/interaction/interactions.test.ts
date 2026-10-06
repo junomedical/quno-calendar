@@ -67,7 +67,7 @@ describe("calendar interaction math", () => {
     expect(proposal.proposedEnd).toContain("2026-07-07T");
   });
 
-  it("keeps a final release in the original snapped slot as activation", () => {
+  it("recognizes a final release in the original snapped slot as an unchanged proposal", () => {
     const event: CalendarEvent = {
       id: "event-1",
       calendarId: "calendar-a",

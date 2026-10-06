@@ -4,6 +4,7 @@ export type {
   CalendarThemeVariables as QunoInfiniteCalendarThemeVariables
 } from "#quno-internal/timeline/core/calendarTheme";
 export type { QunoInfiniteCalendarFormatters } from "#quno-internal/timeline/core/calendarFormatterTypes";
+export type { ProjectEvents, ProjectEventsArgs } from "#quno-internal/timeline/core/calendarEventProjectionTypes";
 export { defaultEventPrefetchPolicy } from "#quno-internal/timeline/data/eventPrefetch";
 export {
   applyEventMove,
@@ -18,6 +19,7 @@ export {
   type ActiveDraftReleaseOptions,
   type ActiveEventDraft,
   type CalendarEvent,
+  type CalendarEventBase,
   type CalendarEventKind,
   type CalendarRuleKind,
   type CalendarId,

@@ -2,6 +2,7 @@ import type { CSSProperties, ReactNode } from "react";
 import type { IsoDate } from "#quno-internal/shared/dateRangeModel";
 import type { CalendarDateLabelOptions } from "./calendarFormatterTypes";
 import type { CalendarStyle } from "./calendarTheme";
+import type { ProjectEvents } from "./calendarEventProjectionTypes";
 import type {
   CalendarId,
   CalendarRow,
@@ -53,14 +54,18 @@ export type CalendarRuleKind = (typeof CALENDAR_RULE_KINDS)[number];
 export const CALENDAR_EVENT_KINDS = ["appointment", ...CALENDAR_RULE_KINDS] as const;
 export type CalendarEventKind = (typeof CALENDAR_EVENT_KINDS)[number];
 
-/** Event data accepted by the reusable calendar renderer. */
-export type CalendarEvent = {
+/** Shared event identity and start position. */
+export type CalendarEventBase = {
   id: EventId;
   calendarId: CalendarId;
+  start: string;
+};
+
+/** Event data accepted by the reusable calendar renderer. */
+export type CalendarEvent = CalendarEventBase & {
   calendarIds?: CalendarId[];
   title: string;
   subtitle?: string;
-  start: string;
   end: string;
   color?: string;
   kind?: CalendarEventKind;
@@ -168,6 +173,7 @@ export type CalendarViewComponentProps = CalendarDateLabelOptions & {
   calendars: CalendarRow[];
   selectedCalendarIds: CalendarId[];
   loadEvents: LoadEvents;
+  projectEvents?: ProjectEvents;
   eventPrefetchPolicy?: EventPrefetchPolicy;
   eventVersion?: number | string;
   appearingEventIds?: EventId[];
@@ -198,7 +204,9 @@ export type CalendarViewComponentProps = CalendarDateLabelOptions & {
 export type QunoInfiniteCalendarHandle = {
   scrollToDate: (args: { date: IsoDate }) => void;
   /** A calendarId also reveals that resource row in the horizontal view. */
-  scrollToDateTime: (args: { date: IsoDate; time: string; calendarId?: CalendarId }) => void;
+  scrollToDateTime: (args: { date: IsoDate; time: string; calendarId?: CalendarId; align?: "center" }) => void;
+  /** Dates intersecting the viewport, excluding overscan and sticky chrome. */
+  getVisibleDateKeys: () => IsoDate[];
   scrollToToday: () => void;
   captureViewportAnchor: (target: CalendarViewportAnchorTarget) => CalendarViewportAnchor | null;
   restoreViewportAnchor: (
@@ -214,6 +222,9 @@ export type QunoInfiniteCalendarHandle = {
 /** Public reusable calendar shell props. */
 export type QunoInfiniteCalendarProps = CalendarViewComponentProps & {
   view?: CalendarView;
+  /** Consumer-owned initial loading state; selected rows measure and fetch events beneath the fallback. */
+  isLoading?: boolean;
+  loadingFallback?: ReactNode;
 };
 
 /** Defaults merged with caller-provided timeline settings. */

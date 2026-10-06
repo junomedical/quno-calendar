@@ -325,7 +325,7 @@ test("editorial CSS-native exhibit keeps stable chrome browser-positioned", asyn
 
 test("all four guides separate exact payloads from runtime contracts", async ({ page }) => {
   const guides = [
-    ["infinite-calendar", "37.90 KiB gzip", "1.95 KiB gzip", "@quno/calendar/infinite-calendar"],
+    ["infinite-calendar", "38.94 KiB gzip", "1.99 KiB gzip", "@quno/calendar/infinite-calendar"],
     ["datepicker", "10.49 KiB gzip", "3.22 KiB gzip", "@quno/calendar/datepicker"],
     ["date-input", "7.70 KiB gzip", "0.58 KiB gzip", "@quno/calendar/date-input"],
     ["date-parser", "6.00 KiB gzip", "No stylesheet", "@quno/calendar/date-parser"]
@@ -397,6 +397,7 @@ test("editorial Quno date input navigates directly to a selected date", async ({
     '[data-testid="calendar-day"][data-date="2026-07-06"] [data-testid="calendar-row"][data-calendar-id="room-1"]'
   );
   await expect(roomRow).toHaveCount(0);
+  await expect(demo.locator('[data-testid="calendar-row"][data-calendar-id="room-1"]')).toHaveCount(0);
   await demo.getByRole("button", { name: "Show Room 1" }).click();
   await expect(demo.getByText("Showing Room 1 at 13:30")).toBeVisible();
   await expect
@@ -409,11 +410,26 @@ test("editorial Quno date input navigates directly to a selected date", async ({
         if (!viewport || !row) return false;
         const viewportBox = viewport.getBoundingClientRect();
         const rowBox = row.getBoundingClientRect();
-        return rowBox.top >= viewportBox.top + 48 && rowBox.bottom <= viewportBox.bottom - 8;
+        const expectedCenter = (viewportBox.top + 48 + viewportBox.bottom) / 2;
+        return Math.abs((rowBox.top + rowBox.bottom) / 2 - expectedCenter) < 30;
       })
     )
     .toBe(true);
   const rowScrollTop = await demo.locator(".quno-calendar-viewport").evaluate((viewport) => viewport.scrollTop);
+  const middleDate = await demo.evaluate((element) => {
+    const viewport = element.querySelector<HTMLElement>(".quno-calendar-viewport")!;
+    const box = viewport.getBoundingClientRect();
+    const dates = [...viewport.querySelectorAll<HTMLElement>('[data-testid="calendar-day"]')]
+      .filter(
+        (day) => day.getBoundingClientRect().bottom > box.top + 48 && day.getBoundingClientRect().top < box.bottom
+      )
+      .map((day) => day.dataset.date!)
+      .sort();
+    return dates[Math.floor(dates.length / 2)];
+  });
+  await demo.getByRole("button", { name: "Use middle visible date" }).click();
+  await expect(demo.getByText(`Visible middle date: ${middleDate}`)).toBeVisible();
+  expect(await demo.locator(".quno-calendar-viewport").evaluate((viewport) => viewport.scrollTop)).toBe(rowScrollTop);
   await demo.getByRole("button", { name: "Show Room 1" }).click();
   await expect
     .poll(() =>
@@ -1203,6 +1219,38 @@ test("editorial hover demo reveals underlying overlap lanes in turn", async ({ p
   await expect(demo.locator(`[data-event-id="${lanePair[0].id}"][data-status="hovered"]`)).toHaveCount(0);
 });
 
+test("consumer loading fallback covers startup and reveals the initial date centered", async ({ page }) => {
+  await page.clock.install({ time: new Date("2026-07-06T08:00:00Z") });
+  await page.goto("/guide");
+  await page.clock.pauseAt(new Date("2026-07-06T09:00:00Z"));
+  const demo = await revealLazyArticleDemo(page, "event preloading example", "article-prefetch-demo");
+  // The selected resource ID is known before its calendar metadata arrives.
+  await expect(demo.locator(".quno-calendar-viewport")).toHaveCount(0);
+  await expect(demo.getByTestId("article-prefetch-count")).toContainText("0 requests");
+  await page.clock.resume();
+  const fallback = demo.getByRole("status", { name: "Loading calendar" });
+  await expect(fallback).toBeVisible();
+  await expect(demo.locator(".quno-calendar-loading-content")).toHaveCSS("visibility", "hidden");
+  const viewport = demo.locator(".quno-calendar-viewport");
+  await expect(demo.getByTestId("article-prefetch-count")).toContainText(/[1-9]\d* requests?/);
+  await expect(viewport).toHaveCount(1);
+  const [skeletonBox, viewportBox] = await Promise.all([fallback.boundingBox(), viewport.boundingBox()]);
+  expect(Math.abs(skeletonBox!.height - viewportBox!.height)).toBeLessThan(3);
+  await expect(fallback).toHaveCount(0);
+  await expect(demo.locator(".quno-calendar-loading-content")).toHaveCSS("visibility", "visible");
+  const centerDistance = () =>
+    demo.evaluate((element) => {
+      const viewport = element.querySelector(".quno-calendar-viewport")!.getBoundingClientRect();
+      const row = element
+        .querySelector('[data-date="2026-07-06"] [data-calendar-id="provider-a"][data-testid="calendar-row"]')
+        ?.getBoundingClientRect();
+      return row ? Math.abs((row.top + row.bottom) / 2 - (viewport.top + 48 + viewport.bottom) / 2) : Infinity;
+    });
+  await expect.poll(centerDistance).toBeLessThan(30);
+  await page.waitForTimeout(3_000);
+  expect(await centerDistance()).toBeLessThan(30);
+});
+
 test("editorial prefetch exhibit reveals a warm event before the next delayed range settles", async ({ page }) => {
   await page.goto("/guide");
   const demo = await revealLazyArticleDemo(page, "event preloading example", "article-prefetch-demo");
@@ -1210,7 +1258,7 @@ test("editorial prefetch exhibit reveals a warm event before the next delayed ra
     timeout: 10_000
   });
   const initialRange = await page.getByTestId("article-prefetch-range").textContent();
-  expect(initialRange).toContain("2026-07");
+  expect(initialRange).toMatch(/2026-\d{2}-\d{2} → 2026-\d{2}-\d{2}/);
   const loadedEvents = demo.getByTestId("article-prefetch-loaded-events");
   const prefetchedLoadedEvent = loadedEvents.locator('[data-loaded-event-id="article-prefetched-event"]');
   await expect(prefetchedLoadedEvent).toBeVisible();
@@ -1565,4 +1613,25 @@ test("showcase sidebars align dataset size and API delay on one row", async ({ p
     expect(datasetBox?.width ?? 0).toBeGreaterThan(70);
     expect(apiDelayBox?.width ?? 0).toBeGreaterThan(70);
   }
+});
+
+test("local event projection moves previews without loading persisted data again", async ({ page }) => {
+  await page.goto("/guide/infinite-calendar");
+  const demo = await revealLazyArticleDemo(page, "local event projection example", "article-projection-demo");
+  const loads = demo.getByTestId("projection-load-count");
+  await expect(loads).not.toHaveText("0 loads");
+  const loadedCount = await loads.textContent();
+  await demo.getByRole("button", { name: "Preview at 10:00" }).click();
+  const preview = demo.locator('[data-event-id="draft:preview"]');
+  await expect(preview).toBeVisible();
+  const before = await preview.boundingBox();
+  await demo.getByRole("button", { name: "Move preview to 12:00" }).click();
+  await expect(preview.locator(".article-event-card__time")).toHaveText("12:00–13:00");
+  const after = await preview.boundingBox();
+  expect(after!.x).toBeGreaterThan(before!.x + 50);
+  expect(Math.abs(after!.y - before!.y)).toBeLessThan(2);
+  await expect(loads).toHaveText(loadedCount!);
+  await demo.getByRole("button", { name: "Clear preview" }).click();
+  await expect(preview).toHaveCount(0);
+  await expect(loads).toHaveText(loadedCount!);
 });

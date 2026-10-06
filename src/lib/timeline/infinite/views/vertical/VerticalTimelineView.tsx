@@ -19,6 +19,7 @@ import {
 import { useVerticalColumnHover } from "#quno-internal/timeline/infinite/rendering/vertical/useVerticalColumnHover";
 import { useVerticalDayRenderProps } from "./useVerticalDayRenderProps";
 import { useVerticalNavigation } from "./useVerticalNavigation";
+import { useEventProjection } from "#quno-internal/timeline/infinite/events/metrics/useEventProjection";
 import { useVerticalPreparedColumns } from "#quno-internal/timeline/infinite/events/metrics/useVerticalPreparedColumns";
 import { useVerticalInteractionWindowSync, useVerticalViewportWindow } from "./useVerticalViewportWindow";
 import {
@@ -37,13 +38,32 @@ function useVerticalViewSetup({ props, now }: { props: CalendarInternalViewProps
   });
 }
 
-function verticalLoaderProps(props: CalendarInternalViewProps) {
-  return {
+function useVerticalEventStore({
+  props,
+  viewport,
+  selectedIds
+}: {
+  props: CalendarInternalViewProps;
+  viewport: ReturnType<typeof useVerticalViewportWindow>;
+  selectedIds: string[];
+}) {
+  const store = useEventRangeLoader({
+    activeDraftDateKey: props.activeDraft ? eventDateKey(props.activeDraft.event) : undefined,
+    activeDraftLoadAnchorDateKey: viewport.virtualWindow.anchorDateKey,
     loadEvents: props.loadEvents,
     eventPrefetchPolicy: props.eventPrefetchPolicy,
     eventVersion: props.eventVersion,
-    requestedAppearingEventIds: props.appearingEventIds
-  };
+    requestedAppearingEventIds: props.appearingEventIds,
+    selectedIds,
+    visibleDateKeys: viewport.visibleDateKeys
+  });
+  const eventsByDate = useEventProjection({
+    eventsByDate: store.eventsByDate,
+    projectEvents: props.projectEvents,
+    selectedIds,
+    visibleDateKeys: viewport.visibleDateKeys
+  });
+  return { ...store, eventsByDate };
 }
 
 function verticalPresentationProps(props: CalendarInternalViewProps) {
@@ -88,13 +108,7 @@ export const InfiniteVerticalTimelineView = forwardRef<CalendarViewHandle, Calen
       topDateAlignmentKey: "",
       layoutAnchorDateKey: props.activeDraft ? eventDateKey(props.activeDraft.event) : undefined
     });
-    const eventStore = useEventRangeLoader({
-      activeDraftDateKey: props.activeDraft ? eventDateKey(props.activeDraft.event) : undefined,
-      activeDraftLoadAnchorDateKey: viewport.virtualWindow.anchorDateKey,
-      ...verticalLoaderProps(props),
-      selectedIds,
-      visibleDateKeys: viewport.visibleDateKeys
-    });
+    const eventStore = useVerticalEventStore({ props, viewport, selectedIds });
     const columns = useVerticalPreparedColumns({
       activeDraft: props.activeDraft,
       eventsByDate: eventStore.eventsByDate,
