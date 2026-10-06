@@ -196,8 +196,14 @@ test("date parser guide keeps parsing semantics headless and interactive", async
   await guide.locator("#preferred-date-order").getByRole("button", { name: "MDY" }).click();
   await expect(guide.locator("#preferred-date-order output")).toHaveText("2026-03-04");
   await guide.locator("#relative-dates").getByRole("button", { name: "this week" }).click();
-  await expect(guide.locator("#relative-dates .date-input-parser-example pre")).toContainText('"start": "2026-08-23"');
-  await expect(guide.locator("#relative-dates .date-input-parser-example pre")).toContainText('"end": "2026-08-29"');
+  const relativeOutput = guide.locator("#relative-dates .date-input-parser-example pre");
+  await expect
+    .poll(async () => JSON.parse((await relativeOutput.textContent())!))
+    .toEqual({
+      status: "success",
+      start: { date: "2026-08-23", time: null },
+      end: { date: "2026-08-29", time: null }
+    });
   const languages = guide.locator("#multiple-languages");
   const output = languages.locator(".date-input-parser-example pre");
   for (const [sample, expectedStart] of [
@@ -208,9 +214,19 @@ test("date parser guide keeps parsing semantics headless and interactive", async
     ["prior week", "2026-08-17"]
   ]) {
     await languages.getByRole("button", { name: sample }).click();
-    await expect(output).toContainText(`"start": "${expectedStart}"`);
+    await expect
+      .poll(async () => JSON.parse((await output.textContent())!).start)
+      .toEqual({
+        date: expectedStart,
+        time: null
+      });
   }
-  await expect(output).toContainText('"end": "2026-08-23"');
+  await expect
+    .poll(async () => JSON.parse((await output.textContent())!).end)
+    .toEqual({
+      date: "2026-08-23",
+      time: null
+    });
   const production = guide.locator("#parser-production");
   await expect(production.getByText(/^Implementation/)).toHaveCount(0);
   await expect(production.getByText("Import Date Parser")).toHaveCount(0);
@@ -329,9 +345,9 @@ test("all five guides separate exact payloads from runtime contracts", async ({ 
   const guides = [
     ["infinite-calendar", "39.47 KiB gzip", "1.99 KiB gzip", "@quno/calendar/infinite-calendar"],
     ["datepicker", "12.46 KiB gzip", "3.36 KiB gzip", "@quno/calendar/datepicker"],
-    ["date-input", "9.60 KiB gzip", "0.58 KiB gzip", "@quno/calendar/date-input"],
+    ["date-input", "9.64 KiB gzip", "0.58 KiB gzip", "@quno/calendar/date-input"],
     ["timepicker", "1.59 KiB gzip", "0.78 KiB gzip", "@quno/calendar/timepicker"],
-    ["date-parser", "6.00 KiB gzip", "No stylesheet", "@quno/calendar/date-parser"]
+    ["date-parser", "6.03 KiB gzip", "No stylesheet", "@quno/calendar/date-parser"]
   ] as const;
 
   for (const [route, javascript, styles, entrypoint] of guides) {

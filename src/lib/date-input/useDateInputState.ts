@@ -97,10 +97,10 @@ export function useDateInputState(props: QunoDateInputProps) {
   const parse = ({ text }: { text: string }) => {
     const result = analyzer.analyze({ text }).result;
     if (timeMode && (result.status === "success" || result.status === "partial-range")) {
-      const clock = result.times?.start;
+      const clock = result.start.time;
       if (
         (forceCadence && clock && !clockTimeIsEnabled({ time: clock, enabledHours, minuteCadence })) ||
-        result.times?.end !== result.times?.start
+        result.end.time !== result.start.time
       )
         return { status: "invalid" } as const;
     }
@@ -114,8 +114,8 @@ export function useDateInputState(props: QunoDateInputProps) {
       setInvalid(true);
       return;
     }
-    const value = result.status === "empty" ? null : result.value;
-    const clock = result.status === "empty" ? null : (result.times?.start ?? null);
+    const value = result.status === "empty" ? null : { start: result.start.date, end: result.end.date };
+    const clock = result.status === "empty" ? null : result.start.time;
     setInvalid(false);
     setDraft(value ? format({ value, time: clock }) : "");
     if (!controlled) setInternalValue(value);
@@ -134,7 +134,7 @@ export function useDateInputState(props: QunoDateInputProps) {
     const result = parse({ text });
     startTransition(() => setRecognition(recognitionOf(result)));
     if (result.status === "partial-range" && text.length >= draft.length) {
-      const formatted = `${format({ value: result.value })} – `;
+      const formatted = `${format({ value: { start: result.start.date, end: result.end.date } })} – `;
       element.value = formatted;
       element.setSelectionRange(formatted.length, formatted.length);
       setDraft(formatted);

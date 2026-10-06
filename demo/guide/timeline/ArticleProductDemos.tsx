@@ -320,7 +320,7 @@ export function NavigationControlsDemo() {
                     referenceDate: date
                   }
                 });
-                if (result.status === "success") navigate(result.value.start);
+                if (result.status === "success") navigate(result.start.date);
               });
             }}
             selectionMode="single"

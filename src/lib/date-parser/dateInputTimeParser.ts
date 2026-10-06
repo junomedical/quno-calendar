@@ -49,9 +49,11 @@ export const parseTimeInput = ({ tokens, options, vocabulary }: DateEndpointCont
   }
   const swap =
     pair.start > pair.end || (pair.start === pair.end && first.time && second.time && first.time > second.time);
+  const start = { date: pair.start, time: first.time };
+  const end = { date: pair.end, time: second.time };
   return {
     status: partial ? "partial-range" : "success",
-    value: swap ? { start: pair.end, end: pair.start } : pair,
-    times: swap ? { start: second.time, end: first.time } : { start: first.time, end: second.time }
+    start: swap ? end : start,
+    end: swap ? start : end
   };
 };

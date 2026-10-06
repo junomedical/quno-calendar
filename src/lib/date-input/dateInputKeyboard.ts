@@ -163,21 +163,21 @@ export const spinDateInput = ({
   if (duration) return duration;
   const divider = tokens.find((token) => token.type === "range-separator");
   const endpoint = divider && current && current.start >= divider.end ? "end" : "start";
-  const original = parsed.value[endpoint];
+  const original = parsed[endpoint].date;
   const part = partFor({ token: current, date: original });
   const date = shift({ date: original, part, direction });
-  const start = endpoint === "start" ? date : parsed.value.start;
-  const end = endpoint === "end" ? date : parsed.value.end;
+  const start = endpoint === "start" ? date : parsed.start.date;
+  const end = endpoint === "end" ? date : parsed.end.date;
   const value = divider
     ? normalizeRange({ first: start, second: end })
-    : parsed.value.start === parsed.value.end
+    : parsed.start.date === parsed.end.date
       ? { start: date, end: date }
       : normalizeRange({ first: start, second: end });
   const next = format({ value, preserveRange: Boolean(divider && start === end) });
   const crossed =
     endpoint === "start"
-      ? compareDates({ left: date, right: parsed.value.end }) > 0
-      : compareDates({ left: date, right: parsed.value.start }) < 0;
+      ? compareDates({ left: date, right: parsed.end.date }) > 0
+      : compareDates({ left: date, right: parsed.start.date }) < 0;
   const targetEndpoint = crossed ? (endpoint === "start" ? "end" : "start") : endpoint;
   const previousKey = `${endpoint}:${part}`;
   const key = `${targetEndpoint}:${part}`;

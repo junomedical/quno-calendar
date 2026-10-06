@@ -13,6 +13,10 @@ the shared timezone-free `DateRange` model.
 The component owns draft text, recognition state, keyboard edits, formatting, commit behavior, and accessibility. It
 does not re-export parser utilities, and composition with Datepicker remains consumer-owned.
 
+Date Parser's `start`/`end` objects pair `{ date, time }`. The input projects their dates into its existing `DateRange`
+and reads `start.time` in single-day time mode; its public values and callbacks retain their shapes. See the
+[parser endpoint migration](../shared/migration.md#unreleased-paired-parser-endpoints).
+
 In the focused picker composition, Start and End shortcuts navigate while keeping the popup open and the typed value
 intact. Picker focus moves to its month heading; leaving the composed control through focus or an outside click closes it.
 

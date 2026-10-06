@@ -2,6 +2,43 @@
 
 Version `0.6.0` presents Infinite Calendar, Datepicker, Date Input, and Date Parser as independent package surfaces. There are no legacy JavaScript exports or wrapper packages.
 
+## Unreleased: paired parser endpoints
+
+Successful and partial-range `parseDateInput` results now contain top-level `start` and `end` objects, each with
+`{ date: IsoDate, time: string | null }`. This is an immediate breaking replacement; there are no deprecated result
+fields or type aliases. Empty and invalid results still contain only `status`.
+
+| Previous API                                | Replacement                                |
+| ------------------------------------------- | ------------------------------------------ |
+| `result.value.start` / `result.value.end`   | `result.start.date` / `result.end.date`    |
+| `result.times?.start` / `result.times?.end` | `result.start.time` / `result.end.time`    |
+| `DateInputTimeRange`                        | `DateInputParseEndpoint` for each endpoint |
+
+Date-only results also include both endpoint objects with `time: null`. Clocks remain normalized timezone-free
+`HH:mm`. A single input duplicates both endpoints; a partial range duplicates the start date and leaves the end
+time `null`. Recognition remains opt-in through `recognizeTime`; grammar, ranking, and overnight rules are unchanged.
+
+```ts
+import { parseDateInput, type DateInputParseEndpoint } from "@quno/calendar/date-parser";
+
+const result = parseDateInput({
+  text: "tomorrow 10AM",
+  recognizeTime: true,
+  referenceDate: "2026-10-05",
+  expectedRange: { start: "2026-01-01", end: "2027-12-31" }
+});
+if (result.status === "success" || result.status === "partial-range") {
+  const start: DateInputParseEndpoint = result.start;
+  const value = { start: start.date, end: result.end.date };
+  const time = start.time;
+  // Use value and time with Date Input's existing props/callbacks.
+}
+```
+
+`DateInputParseEndpoint` is exported only from the parser subpath. The shared `DateRange`, parser `expectedRange`,
+Date Input/Datepicker props and callbacks, token values/spans, and Infinite Calendar timestamp contracts retain
+their existing shapes. See [QDPR-007](../date-parser/decisions.md#qdpr-007---return-paired-date-and-clock-endpoints).
+
 ## Unreleased: named contracts and product ownership
 
 This cleanup is a breaking change with no compatibility aliases or positional overloads. Package entry points,

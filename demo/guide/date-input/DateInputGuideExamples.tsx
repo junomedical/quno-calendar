@@ -99,7 +99,7 @@ export function PreferredDateOrderExample() {
       </div>
       <code className="date-input-guide__ambiguous">3/4/2026</code>
       <output className="date-input-guide__value" aria-live="polite">
-        {result.status === "success" ? result.value.start : "Unrecognized"}
+        {result.status === "success" ? result.start.date : "Unrecognized"}
       </output>
     </div>
   );

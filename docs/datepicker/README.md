@@ -65,6 +65,8 @@ The rail width uses `--quno-date-picker-time-label-width`; other colors and radi
 
 See the [copyable composition](../shared/usage.md#single-day-date-and-time), both public guides, and `/demo/date-time`.
 The composed input also accepts an omitted year, such as `6 oct 2pm`, using Date Parser’s single-date ranking.
+Headless parser results pair `{ date, time }` in `start` and `end`; direct parser compositions project endpoint dates
+into the picker's existing `DateRange`. See the [endpoint migration](../shared/migration.md#unreleased-paired-parser-endpoints).
 
 Sticky hour headings use 16px and weight 700 with the normal text color to stand out from minutes.
 Minute options use the calendar day numbers’ 13px font size and 550 weight, independent of surrounding inherited

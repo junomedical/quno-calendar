@@ -456,8 +456,8 @@ const parsed = parseDateInput({
 />;
 ```
 
-The input consumes the headless parser contract internally while both share the timezone-free range model. Use `selectionMode="single"` for one day or the
-default `selectionMode="range"` for an inclusive period; both return `DateRange`. Numeric, ISO-like, and month-name
+The input projects the headless parser's endpoint dates into its timezone-free `DateRange` value. Use `selectionMode="single"` for one day or the
+default `selectionMode="range"` for an inclusive period; both input modes emit `DateRange`. Numeric, ISO-like, and month-name
 formats are accepted, while `locale` and `preferredDateOrder` resolve ambiguous numeric dates. The required
 `expectedRange` supplies the realistic period used to infer missing years and rank ambiguity. It is a ranking hint
 rather than a validity boundary: an explicit date outside it still resolves, so products apply their own disabled-date
@@ -482,7 +482,7 @@ week. All seven English weekday names and their common abbreviations are recogni
 Compose `QunoDateInput` with `QunoDatePicker` by passing the same controlled `DateRange` and `onChange` to both public
 entry points. When an input update changes only one endpoint, move the picker’s visible month to that changed date;
 when both endpoints change, fall back to the nearest off-screen endpoint. The independently imported date-input payload
-is currently 9.60 KiB gzip for JavaScript and 0.58 KiB gzip for its optional stylesheet. It uses the React 18+ peer,
+is currently 9.64 KiB gzip for JavaScript and 0.58 KiB gzip for its optional stylesheet. It uses the React 18+ peer,
 supports Preact 10.18+ through `preact/compat`, imports safely in SSR, and has no date-library runtime dependency. The
 combined package’s TanStack virtualizer dependency belongs to Infinite Calendar and is not imported by the
 date-input entry.
@@ -574,6 +574,12 @@ const result = parseDateInput({
   }
 });
 const tokens = tokenizeDateInput({ text: "next Monday" });
+
+// Read the parser's endpoint dates when composing with date-only UI values.
+if (result.status === "success") {
+  const value = { start: result.start.date, end: result.end.date };
+  // Pass value to QunoDateInput or QunoDatePicker.
+}
 ```
 
 The parser recognizes explicit formats, relative dates and calendar periods, inclusive ranges, multilingual vocabulary, and consumer lexicon extensions. It remains timezone-free and safe to import in ESM, CommonJS, Node, and SSR.
@@ -589,13 +595,15 @@ const timed = parseDateInput({
   referenceDate: "2026-10-05",
   expectedRange: { start: "2026-01-01", end: "2027-12-31" }
 });
-// value: { start: "2026-10-06", end: "2026-10-06" }
-// times: { start: "22:30", end: "22:30" }
+// { status: "success",
+//   start: { date: "2026-10-06", time: "22:30" },
+//   end: { date: "2026-10-06", time: "22:30" } }
 const clockTokens = tokenizeDateInput({ text: "10:30PM", recognizeTime: true });
 ```
 
-Clock recognition defaults to false. Times remain separate `HH:mm` values without a timezone; missing endpoint times
-are `null` and date-only results omit `times`. Time-only input uses `referenceDate`; `23:00–01:00` advances an undated
+Clock recognition defaults to false. Successful and partial-range results always have `start` and `end` objects with
+`date: IsoDate` and `time: string | null`. Clocks use `HH:mm` without a timezone; date-only or missing endpoint times
+are `null`. Empty and invalid results contain only `status`. Time-only input uses `referenceDate`; `23:00–01:00` advances an undated
 end to the next calendar day. Use `at` or `um` to disambiguate a bare hour from an accepted date. See the
 [complete clock and range rules](../date-parser/README.md#optional-clock-recognition). Date Input can opt into single-day `timeMode`; see the [date-time composition](#single-day-date-and-time).
 

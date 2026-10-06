@@ -133,7 +133,7 @@ export function DateParserFieldGuide() {
         number="07"
         kicker="Optional times"
         title="Pair a date with the time people write."
-        copy="Enable clock recognition for 24-hour and AM/PM forms. Times stay separate from dates; an overnight interval advances its end date. Time-only input uses the reference date, and valid numeric dates keep their meaning."
+        copy="Enable clock recognition for 24-hour and AM/PM forms. Each start and end pairs a date with its clock, or null when no clock was supplied. An overnight interval advances its end date. Time-only input uses the reference date, and valid numeric dates keep their meaning."
         instruction="Try the individual hours and tomorrow’s overnight range, then switch to Date only. Use at or um to mark an ambiguous bare hour. Times on whole calendar periods are not supported."
         howTo={recipe(
           "Recognize dates and times",
@@ -159,7 +159,7 @@ export function DateParserFieldGuide() {
         number="09"
         kicker="Production"
         title="Ship Date Parser independently."
-        copy="Date Parser JavaScript is 6.00 KiB gzip. It has no stylesheet, UI framework runtime, or runtime dependency."
+        copy="Date Parser JavaScript is 6.03 KiB gzip. It has no stylesheet, UI framework runtime, or runtime dependency."
         instruction="Review its JavaScript artifact, runtime contract, and public surface without a UI payload."
       >
         <FieldGuideProduction profile={dateParserProduction} />

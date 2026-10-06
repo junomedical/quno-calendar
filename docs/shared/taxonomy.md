@@ -194,7 +194,8 @@ flowchart LR
 ## Parser clocks
 
 - **Clock time**: A timezone-free `HH:mm` value recognized only with `recognizeTime: true`.
-- **Time range**: `DateInputTimeRange` pairs clocks with `DateRange` endpoints; `null` means no clock was supplied.
+- **Parser endpoint**: `DateInputParseEndpoint` pairs a timezone-free `date: IsoDate` with `time: string | null`.
+  Successful and partial-range parser results contain `start` and `end` endpoints; `null` means no clock was supplied.
 - **Time token**: An explicit colon or AM/PM clock, normalized in `value` while preserving `raw` and source offsets.
   Bare hours remain number tokens until resolved in context.
 - **Overnight range**: An interval whose undated end clock precedes its start; its end date advances one calendar day.

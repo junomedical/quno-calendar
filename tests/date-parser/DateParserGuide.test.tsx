@@ -24,7 +24,7 @@ describe("date parser field guide", () => {
     render(<DateParserFieldGuide />);
     const formats = document.querySelector<HTMLElement>('[data-story-topic="date-formats"]') as HTMLElement;
     fireEvent.click(within(formats).getByRole("button", { name: "2026-04-03" }));
-    expect(within(formats).getByText(/"start": "2026-04-03"/)).toBeInTheDocument();
+    expect(within(formats).getByText(/"date": "2026-04-03"/)).toBeInTheDocument();
 
     const tokenization = document.querySelector<HTMLElement>('[data-story-topic="tokenization"]') as HTMLElement;
     fireEvent.change(within(tokenization).getByRole("textbox"), { target: { value: "next Monday" } });
@@ -37,7 +37,7 @@ describe("date parser field guide", () => {
     render(<DateParserFieldGuide />);
     const times = document.querySelector<HTMLElement>('[data-story-topic="time-parsing"]') as HTMLElement;
     fireEvent.click(within(times).getByRole("button", { name: "tomorrow 23:00–01:00" }));
-    expect(within(times).getByText(/"end": "2026-08-27"/)).toHaveTextContent('"start": "23:00"');
+    expect(within(times).getByText(/"date": "2026-08-27"/)).toHaveTextContent('"time": "23:00"');
     fireEvent.change(within(times).getByRole("combobox", { name: "Clock times" }), { target: { value: "false" } });
     expect(within(times).getByText(/"status": "invalid"/)).toBeInTheDocument();
   });
@@ -47,17 +47,17 @@ describe("date parser field guide", () => {
     const languages = document.querySelector<HTMLElement>('[data-story-topic="multiple-languages"]') as HTMLElement;
     const output = languages.querySelector(".date-input-parser-example pre") as HTMLElement;
     const samples = [
-      ["12 June 2026", '"start": "2026-06-12"'],
-      ["14 Juli 2026", '"start": "2026-07-14"'],
-      ["tomorrow", '"start": "2026-08-26"'],
-      ["gestern", '"start": "2026-08-24"'],
-      ["prior week", '"start": "2026-08-17"']
+      ["12 June 2026", '"date": "2026-06-12"'],
+      ["14 Juli 2026", '"date": "2026-07-14"'],
+      ["tomorrow", '"date": "2026-08-26"'],
+      ["gestern", '"date": "2026-08-24"'],
+      ["prior week", '"date": "2026-08-17"']
     ] as const;
 
     for (const [sample, expectedStart] of samples) {
       fireEvent.click(within(languages).getByRole("button", { name: sample }));
       expect(output).toHaveTextContent(expectedStart);
     }
-    expect(output).toHaveTextContent('"end": "2026-08-23"');
+    expect(output).toHaveTextContent('"date": "2026-08-23"');
   });
 });

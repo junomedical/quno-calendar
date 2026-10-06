@@ -57,7 +57,10 @@ import { QunoTimePicker } from "@quno/calendar/timepicker";
 import "@quno/calendar/timepicker/styles.css";
 import { parseDateInput } from "@quno/calendar/date-parser";
 const value = { start: "2026-08-24", end: "2026-08-24" };
-parseDateInput({ text: "today", ...({ expectedRange: value, referenceDate: value.start }) });
+const parsed = parseDateInput({ text: "today", expectedRange: value, referenceDate: value.start });
+if (parsed.status !== "success" || parsed.start.date !== value.start || parsed.start.time !== null ||
+    parsed.end.date !== value.end || parsed.end.time !== null || "value" in parsed || "times" in parsed)
+  throw new Error("Preact consumer lost paired parser endpoints");
 render(<><QunoTimePicker defaultValue="10:30" enabledHours={[10]} /><QunoDatePicker value={value} selectionMode="single" timeMode time="10:30" minuteCadence={15} enabledHours={[10, 11]} /><QunoDateInput expectedRange={value} value={value} selectionMode="single" timeMode forceCadence time="10:30" />
   <QunoInfiniteCalendar calendars={[{ id: "team", name: "Team" }]} selectedCalendarIds={["team"]}
     loadEvents={async () => []} renderEvent={() => null} initialDateKey="2026-08-24" /></>, document.getElementById("root"));

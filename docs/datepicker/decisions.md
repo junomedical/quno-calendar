@@ -1131,3 +1131,9 @@ count in QUNO-018: both time selectors now use two rows of six minute choices pe
 
 [QUNO-021](../shared/decisions.md#quno-021---emphasize-hours-above-minute-options) makes sticky hour headings
 larger and bold (16px/700), using normal text color beside 13px/550 minutes. Existing geometry and interaction remain.
+
+## Parser composition update — 2026-10-07
+
+[QDPR-007](../date-parser/decisions.md#qdpr-007---return-paired-date-and-clock-endpoints) changes headless parser
+results to `start`/`end` objects containing `{ date, time }`. The live typing composition projects endpoint dates into
+the existing picker `DateRange`; selection, focus, direct time manipulation, and picker callbacks retain their contracts.

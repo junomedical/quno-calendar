@@ -69,10 +69,15 @@ import { QunoDatePicker, type DateRange } from "@quno/calendar/datepicker";
 import { QunoDateInput } from "@quno/calendar/date-input";
 import { QunoTimePicker } from "@quno/calendar/timepicker";
 import "@quno/calendar/timepicker/styles.css";
-import { parseDateInput } from "@quno/calendar/date-parser";
+import { parseDateInput, type DateInputParseEndpoint } from "@quno/calendar/date-parser";
 
 const initial: DateRange = { start: "2026-08-24", end: "2026-08-24" };
-parseDateInput({ text: "today", ...({ expectedRange: initial, referenceDate: initial.start }) });
+const parsed = parseDateInput({ text: "today", expectedRange: initial, referenceDate: initial.start });
+if (parsed.status !== "success") throw new Error("React 19 parser fixture did not recognize today");
+const endpoint: DateInputParseEndpoint = parsed.start;
+if (endpoint.date !== initial.start || endpoint.time !== null || parsed.end.date !== initial.end ||
+    parsed.end.time !== null || "value" in parsed || "times" in parsed)
+  throw new Error("React 19 consumer lost paired parser endpoints");
 
 function Fixture() {
   const [value, setValue] = useState<DateRange | null>(initial);

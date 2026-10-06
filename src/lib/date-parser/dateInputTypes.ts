@@ -69,19 +69,19 @@ export type DateInputParseEmptyResult = {
   status: "empty";
 };
 
-/** Normalized timezone-free HH:mm clocks; null means the endpoint has no supplied time. */
-export type DateInputTimeRange = { start: string | null; end: string | null };
+/** A timezone-free day with a normalized HH:mm clock, or null when no time was supplied. */
+export type DateInputParseEndpoint = { date: IsoDate; time: string | null };
 
 export type DateInputParseSuccessResult = {
   status: "success";
-  value: DateRange;
-  times?: DateInputTimeRange;
+  start: DateInputParseEndpoint;
+  end: DateInputParseEndpoint;
 };
 
 export type DateInputParsePartialRangeResult = {
   status: "partial-range";
-  value: DateRange;
-  times?: DateInputTimeRange;
+  start: DateInputParseEndpoint;
+  end: DateInputParseEndpoint;
 };
 
 export type DateInputParseResult =

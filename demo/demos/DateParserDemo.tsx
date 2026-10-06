@@ -36,7 +36,7 @@ export function DateParserDemo() {
   };
   return (
     <ComponentDemoShell
-      description="Try dates and ranges, or enable clock times to recognize hours and overnight intervals."
+      description="Inspect paired start and end dates and clocks. Enable clock times to recognize hours and overnight intervals; missing clocks are null."
       guideHref="/guide/date-parser"
       title="Quno/Date Parser"
     >

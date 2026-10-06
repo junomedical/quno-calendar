@@ -88,3 +88,7 @@ Use `renderEvent`, component-level `locale` and `formatters.dayLabel({ date, loc
 `getDayCellProps`, and `getHourProps` for presentation. Navigation commands and zoom notifications use named objects.
 
 See the [breaking migration](../shared/migration.md#unreleased-named-contracts-and-product-ownership).
+
+The guide's headless typed-date navigation reads `result.start.date` from Date Parser's paired endpoint result.
+See the [endpoint migration](../shared/migration.md#unreleased-paired-parser-endpoints); calendar navigation and event
+timestamp contracts retain their existing shapes.

@@ -10,8 +10,8 @@ const options = {
 const parse = (text: string) => parseDateInput({ text, ...options });
 const success = (start: string, startTime: string | null, end = start, endTime = startTime) => ({
   status: "success",
-  value: { start, end },
-  times: { start: startTime, end: endTime }
+  start: { date: start, time: startTime },
+  end: { date: end, time: endTime }
 });
 
 afterEach(() => vi.useRealTimers());
@@ -97,7 +97,7 @@ describe("optional clock recognition", () => {
     );
     for (const text of ["12 June 13", "10-11", "13 days", "next 2 weeks", "20 12 12", "3/4/2026", "this week"]) {
       expect(parse(text)).toEqual(parseDateInput({ text, ...options, recognizeTime: false }));
-      expect(parse(text)).not.toHaveProperty("times");
+      expect(parse(text)).toMatchObject({ start: { time: null }, end: { time: null } });
     }
   });
 
@@ -114,8 +114,8 @@ describe("optional clock recognition", () => {
       expect(parseDateInput({ text, ...config, selectionMode: "single" })).toEqual(success("2026-10-06", "14:00"));
       expect(parseDateInput({ text: `${text} -`, ...config })).toEqual({
         status: "partial-range",
-        value: { start: "2026-10-06", end: "2026-10-06" },
-        times: { start: "14:00", end: null }
+        start: { date: "2026-10-06", time: "14:00" },
+        end: { date: "2026-10-06", time: null }
       });
     }
   );
@@ -200,13 +200,13 @@ describe("timed range composition", () => {
   it("retains partial-range and single-calendar-day selection semantics", () => {
     expect(parse("tomorrow 10AM -")).toEqual({
       status: "partial-range",
-      value: { start: "2026-10-06", end: "2026-10-06" },
-      times: { start: "10:00", end: null }
+      start: { date: "2026-10-06", time: "10:00" },
+      end: { date: "2026-10-06", time: null }
     });
     expect(parse("13 -")).toEqual({
       status: "partial-range",
-      value: { start: "2026-10-05", end: "2026-10-05" },
-      times: { start: "13:00", end: null }
+      start: { date: "2026-10-05", time: "13:00" },
+      end: { date: "2026-10-05", time: null }
     });
     expect(parse("tomorrow 10AM - 11:")).toEqual({ status: "invalid" });
     expect(parseDateInput({ text: "10:00–11:00", ...options, selectionMode: "single" })).toEqual(

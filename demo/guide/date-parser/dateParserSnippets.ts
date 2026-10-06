@@ -57,8 +57,9 @@ const result = parseDateInput({
   referenceDate: "2026-08-25",
   expectedRange: { start: "2026-01-01", end: "2027-12-31" }
 });
-// value: { start: "2026-08-26", end: "2026-08-27" }
-// times: { start: "23:00", end: "01:00" }
+// { status: "success",
+//   start: { date: "2026-08-26", time: "23:00" },
+//   end: { date: "2026-08-27", time: "01:00" } }
 
 const tokens = tokenizeDateInput({ text: "10:30PM", recognizeTime: true });
 // A time token has value "22:30" and raw "10:30PM".`;
