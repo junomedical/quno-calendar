@@ -58,4 +58,50 @@ describe("viewport anchoring after parent layout updates", () => {
     unmount();
     frame.mockRestore();
   });
+  it("captures the identity of the visible participant and never retargets another instance", () => {
+    const { result, viewport, unmount } = setup();
+    const first = document.createElement("div");
+    const second = document.createElement("div");
+    let firstTop = 800;
+    let secondTop = 200;
+    first.getBoundingClientRect = () => new DOMRect(300, firstTop, 100, 30);
+    second.getBoundingClientRect = () => new DOMRect(300, secondTop, 100, 30);
+    result.current.registration.registerEventElement({ eventId: "shared", calendarId: "first", element: first });
+    result.current.registration.registerEventElement({ eventId: "shared", calendarId: "second", element: second });
+    const anchor = result.current.captureViewportAnchor({ eventId: "shared", requireVisible: true });
+    expect(anchor?.target.calendarId).toBe("second");
+    firstTop = 180;
+    secondTop = 400;
+    act(() => result.current.restoreViewportAnchor({ anchor, allowNavigationFallback: false }));
+    expect(viewport.scrollTop).toBe(200); // Follow second even though first is now visible.
+    unmount();
+  });
+  it("never substitutes a resource slot for a required visible event", () => {
+    const { result, unmount } = setup();
+    const event = document.createElement("div");
+    event.getBoundingClientRect = () => new DOMRect(300, 900, 100, 30);
+    result.current.registration.registerEventElement({ eventId: "offscreen", calendarId: "doctor", element: event });
+    expect(
+      result.current.captureViewportAnchor({
+        eventId: "offscreen",
+        calendarId: "doctor",
+        dateKey: "2026-07-06",
+        time: "09:00",
+        requireVisible: true
+      })
+    ).toBeNull();
+    expect(
+      result.current.captureViewportAnchor({
+        eventId: "missing",
+        calendarId: "doctor",
+        dateKey: "2026-07-06",
+        time: "09:00",
+        requireVisible: true
+      })
+    ).toBeNull();
+    expect(
+      result.current.captureViewportAnchor({ calendarId: "doctor", dateKey: "2026-07-06", time: "09:00" })
+    ).not.toBeNull();
+    unmount();
+  });
 });

@@ -21,6 +21,7 @@ type UseVirtualWindowNavigationArgs = {
   excludedWeekdays: number[];
   currentWindowAnchorDateKey: string;
   isInteractionActive: boolean;
+  recenterBlockedRef?: MutableRefObject<boolean>;
   topVisibleDateRef: MutableRefObject<string>;
   topVisibleOffsetRef: MutableRefObject<number>;
   pendingScrollTargetRef: MutableRefObject<PendingScrollTarget | null>;
@@ -41,6 +42,7 @@ export function useVirtualWindowNavigation({
   excludedWeekdays,
   currentWindowAnchorDateKey,
   isInteractionActive,
+  recenterBlockedRef,
   topVisibleDateRef,
   topVisibleOffsetRef,
   pendingScrollTargetRef,
@@ -94,6 +96,7 @@ export function useVirtualWindowNavigation({
   const { clearScrollEndTimer, updateTopVisibleDate } = useScrollRecenter({
     containerRef,
     isInteractionActive,
+    recenterBlockedRef,
     updateVisibleSnapshot,
     recenterVisibleSnapshot
   });

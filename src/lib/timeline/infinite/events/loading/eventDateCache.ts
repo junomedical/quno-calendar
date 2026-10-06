@@ -43,6 +43,11 @@ export class EventDateCache {
     return this.dateByEventId.has(eventId);
   }
 
+  event({ eventId }: { eventId: EventId }): CalendarEvent | undefined {
+    const dateKey = this.dateByEventId.get(eventId);
+    return dateKey ? this.buckets.get(dateKey)?.get(eventId) : undefined;
+  }
+
   replaceDates({ dateKeys, events }: { dateKeys: Iterable<string>; events: CalendarEvent[] }): boolean {
     const replacedDateKeys = new Set(dateKeys);
     let renderedEventsChanged = false;
@@ -109,7 +114,8 @@ export class EventDateCache {
     const evictedDateKeys: string[] = [];
     while (this.buckets.size > this.maximumDateBuckets) {
       // Visible protection is preferred; the fallback keeps the hard size bound absolute.
-      const dateKey = this.oldestEvictableDate({ protectedDateKeys }) ?? this.oldestDate();
+      const dateKey =
+        this.oldestDate({ predicate: ({ dateKey }) => !protectedDateKeys.has(dateKey) }) ?? this.oldestDate();
       if (!dateKey) {
         break;
       }
@@ -214,10 +220,6 @@ export class EventDateCache {
   private touch({ dateKey }: { dateKey: string }): void {
     this.accessSequence += 1;
     this.lastAccessByDate.set(dateKey, this.accessSequence);
-  }
-
-  private oldestEvictableDate({ protectedDateKeys }: { protectedDateKeys: ReadonlySet<string> }): string | undefined {
-    return this.oldestDate({ predicate: ({ dateKey }) => !protectedDateKeys.has(dateKey) });
   }
 
   private oldestDate({ predicate = () => true }: { predicate?: (args: { dateKey: string }) => boolean } = {}):

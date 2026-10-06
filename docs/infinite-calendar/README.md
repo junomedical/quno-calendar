@@ -37,18 +37,26 @@ do not query its DOM. Parent selection or draft state can be updated immediately
 in the same handler. The package measures after the resulting layout commits; consumers need no `flushSync` wrapper.
 Pass `align: "center"` to center the requested row even when it is already visible. `getVisibleDateKeys()` returns
 only dates intersecting the usable viewport, so an external creation form can start on the middle visible date.
+Explicit centering follows the resource's actual collision height as asynchronous events arrive. A newer date request,
+restoration, or cancellation supersedes queued row navigation.
 
 Optional `isLoading` and `loadingFallback` props let a consumer supply its initial skeleton. While loading, the
 timeline waits to mount until a selected ID matches a supplied calendar. IDs that arrive before calendar metadata or
 match no resource keep the fallback visible without header-only geometry. Once a matching row exists, the timeline
 measures and loads events beneath the hidden surface. Clearing `isLoading` reveals that same timeline. Consumers own
-readiness, failures and any initial centered navigation.
+readiness, failures and any initial centered navigation. The loading shell retains explicit, percentage, and minimum
+component dimensions before metadata exists and the mounted timeline fills that same space.
 
 The field guide keeps its interaction contracts live: newly scrolled dates populate without a simulated delay, event
 cards can be resized in place, parent-reviewed mutations preserve their working row and restore the original view on
 Cancel, Date Input arrow changes navigate immediately, and motion begins from an explicit draft action. An external
 create draft with no participants keeps the normal calendar set and drawn date visible while its unassigned preview
-and Save action remain unavailable.
+and Save action remain unavailable. Multi-participant edits retain one surviving visible event instance while participants
+are toggled; removing that participant transfers the anchor to another surviving instance. Captured event anchors
+record the resolved participant id. Cancel retains the original participant's independent edit anchor.
+Opening the editor restores the clicked instance's position. Horizontal draft and participant changes retain measured
+day heights, and idle recentering yields to an active explicit restore. A required visible event capture returns `null`
+when the event is missing or offscreen, rather than substituting its resource slot.
 
 TanStack Virtual notifications use its queued React update path. Layout restoration requests an ordinary React
 projection before paint, keeping React 19 development free of the virtualizer `flushSync` lifecycle warning while
@@ -65,12 +73,14 @@ bucket, resource selection, visible time bounds, or relevant draft source change
 `projectEvents` optionally transforms cached events for the inclusive rendered date window. It is synchronous and
 must leave its input records unchanged. Changing the callback updates event geometry in either orientation without
 invalidating API loading. Clearing it restores the persisted snapshot. Empty rendered dates also accept previews.
+Accepted moves patch time and participant geometry on the cached saved record, preserving saved metadata.
+Projection-only events require an explicit commit or loader response to enter the saved cache.
 Products own recurrence expansion; saves and filters still refresh through `eventVersion` or `loadEvents`.
 
 ## Bundle budget
 
 JavaScript is limited to 50 KiB gzip and the optional stylesheet to 2 KiB gzip. The current artifacts measure
-38.94 KiB and 1.99 KiB gzip respectively (Node 24). See [Decision 100](./decisions.md#100---reconcile-the-infinite-calendar-budget-after-branch-integration).
+39.47 KiB and 1.99 KiB gzip respectively (Node 23, gzip level 9). See [Decision 100](./decisions.md#100---reconcile-the-infinite-calendar-budget-after-branch-integration).
 
 ## Named contracts
 

@@ -6,7 +6,9 @@ Consumers can supply `loadingFallback` and control `isLoading` during startup. W
 the view waits for resource context before mounting. Once selected rows exist, the timeline measures and loads events
 beneath a hidden surface; the fallback occupies the same viewport. Clearing loading reveals the mounted view, and
 the consumer can center its initial date through the navigation handle. The loader itself does not infer readiness
-or replace consumer error handling, and ordinary refreshes can retain the visible grid.
+or replace consumer error handling, and ordinary refreshes can retain the visible grid. The shell applies component
+size/flex constraints before metadata exists; the timeline fills it after mounting. Percentage dimensions are applied
+once, and minimum sizing reserves space even in an auto-height parent.
 
 ## End-To-End Delayed Load
 
@@ -63,7 +65,9 @@ cached records. Unchanged date buckets retain their preparation identity.
 
 Changing or clearing this callback never invalidates the range coordinator or writes previews to the persisted cache.
 Clearing it restores the cached events immediately. Recurrence expansion remains consumer-owned. Actual navigation
-can still prefetch newly visible dates; saves and filters keep their existing loader/version invalidation.
+can still prefetch newly visible dates; saves and filters keep their existing loader/version invalidation. Accepted
+move patches first look up the persisted record by id and apply only proposed timestamps and participant geometry.
+Projected display metadata and projection-only ids never enter the cache through that path.
 
 ## Date Request State
 

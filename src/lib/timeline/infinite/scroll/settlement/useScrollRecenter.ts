@@ -3,7 +3,7 @@
  * bounded-window recenter request.
  *
  * Flow: scroll signal -> refresh visible snapshot -> replace idle timer ->
- * final snapshot -> recenter unless an interaction owns focus. Preserves one
+ * final snapshot -> recenter unless an interaction or explicit restore owns focus. Preserves one
  * timer and the newest visible position. Does not own date normalization,
  * virtual-window state, or scroll writes. More movement replaces pending work;
  * unmount clears it; active draw/drag skips that deadline so a later scroll
@@ -11,7 +11,7 @@
  *
  * @see docs/infinite-calendar/flows/virtual-scroll-and-recenter.md#settled-scroll-lifecycle
  */
-import { useCallback, useEffect, useLayoutEffect, useRef, type RefObject } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, type MutableRefObject, type RefObject } from "react";
 import {
   SCROLL_RECENTER_DELAY_MS,
   scrollRecenterDelayMs
@@ -20,6 +20,7 @@ import {
 type UseScrollRecenterArgs = {
   containerRef: RefObject<HTMLDivElement | null>;
   isInteractionActive: boolean;
+  recenterBlockedRef?: MutableRefObject<boolean>;
   updateVisibleSnapshot: () => boolean;
   recenterVisibleSnapshot: () => void;
 };
@@ -27,6 +28,7 @@ type UseScrollRecenterArgs = {
 export function useScrollRecenter({
   containerRef,
   isInteractionActive,
+  recenterBlockedRef,
   updateVisibleSnapshot,
   recenterVisibleSnapshot
 }: UseScrollRecenterArgs) {
@@ -44,19 +46,19 @@ export function useScrollRecenter({
     clearScrollEndTimer();
     // Re-read at the deadline so a scrollbar drag's final native position wins.
     updateVisibleSnapshot();
-    // Gesture geometry owns focus; a later scroll signal can schedule another deadline.
-    if (!interactionActiveRef.current) recenterVisibleSnapshot();
-  }, [clearScrollEndTimer, recenterVisibleSnapshot, updateVisibleSnapshot]);
+    // Gesture or restore geometry owns focus; a later scroll signal can schedule another deadline.
+    if (!interactionActiveRef.current && !recenterBlockedRef?.current) recenterVisibleSnapshot();
+  }, [clearScrollEndTimer, recenterBlockedRef, recenterVisibleSnapshot, updateVisibleSnapshot]);
 
   const scheduleScrollRecenter = useCallback(() => {
     // The eager snapshot keeps refs useful even if a later jump has no mounted item yet.
     updateVisibleSnapshot();
     clearScrollEndTimer();
-    if (interactionActiveRef.current) return;
+    if (interactionActiveRef.current || recenterBlockedRef?.current) return;
     const container = containerRef.current;
     const delayMs = container ? scrollRecenterDelayMs(container) : SCROLL_RECENTER_DELAY_MS;
     scrollEndTimerRef.current = window.setTimeout(finishScrollRecenter, delayMs);
-  }, [clearScrollEndTimer, containerRef, finishScrollRecenter, updateVisibleSnapshot]);
+  }, [clearScrollEndTimer, containerRef, finishScrollRecenter, recenterBlockedRef, updateVisibleSnapshot]);
 
   useEffect(() => clearScrollEndTimer, [clearScrollEndTimer]);
 

@@ -238,6 +238,7 @@ const loadingSnippet = `const loadEvents = async ({ startDate, endDate, calendar
   loadEvents={loadEvents}
   isLoading={!initialDataReady}
   loadingFallback={<MyCalendarSkeleton />}
+  style={{ height: 600 }}
 />`;
 
 const availabilitySnippet = `const [interactionMode, setInteractionMode] =
@@ -920,7 +921,8 @@ export function IntegrationWalkthrough({ embedded = false }: { embedded?: boolea
         <p>
           Keep <code>loadEvents</code> for persisted data. A synchronous <code>projectEvents</code> callback can replace
           or add local previews in the rendered date window without invalidating loaded events. Return a new collection;
-          leave cached records unchanged. Recurrence expansion stays in your application.
+          leave cached records unchanged. Accepted moves preserve saved metadata when the projection is cleared.
+          Recurrence expansion stays in your application.
         </p>
         <Callout>Try it: show the preview, move it to noon, then clear it. The load count stays unchanged.</Callout>
         <DemoBreakout>
@@ -987,7 +989,7 @@ export function IntegrationWalkthrough({ embedded = false }: { embedded?: boolea
 
       <ArticleSection id="package-footprint" number="26" title="Ship Infinite Calendar independently">
         <p>
-          Infinite Calendar JavaScript is 38.94 KiB gzip. Its optional stylesheet is a separate 1.99 KiB gzip import;
+          Infinite Calendar JavaScript is 39.47 KiB gzip. Its optional stylesheet is a separate 1.99 KiB gzip import;
           neither number includes React, React DOM, or the external virtualizer supplied by the application.
         </p>
         <p>

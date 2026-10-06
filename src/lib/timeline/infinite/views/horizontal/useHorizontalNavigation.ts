@@ -11,6 +11,7 @@ import { toDateKey } from "#quno-internal/timeline/date/dateVirtualization";
 import type { QunoInfiniteCalendarHandle, QunoInfiniteCalendarSettings } from "#quno-internal/timeline/core/types";
 import type { CalendarViewHandle } from "#quno-internal/timeline/core/internalTypes";
 import { minuteToX, parseClockToMinutes } from "#quno-internal/timeline/time/time";
+import { scrollToRow } from "./horizontalRowNavigation";
 import { useViewportAnchoring } from "#quno-internal/timeline/infinite/anchors/parent/useViewportAnchoring";
 import { TIMELINE_LEFT_GUTTER_PX } from "#quno-internal/timeline/time/timelineTicks";
 import type { IsoDate } from "#quno-internal/shared/dateRangeModel";
@@ -29,68 +30,12 @@ type HorizontalNavigationArgs = {
   scrollToDate: QunoInfiniteCalendarHandle["scrollToDate"];
 };
 
-type RowNavigationArgs = Pick<HorizontalNavigationArgs, "containerRef" | "settings"> & {
-  request: Parameters<QunoInfiniteCalendarHandle["scrollToDateTime"]>[0];
-  anchoring: ReturnType<typeof useViewportAnchoring>;
-  scrollToDateTimeBase: QunoInfiniteCalendarHandle["scrollToDateTime"];
-  scrollToTime: (args: { time: string }) => void;
-};
-
-function scrollToRow({
-  request,
-  containerRef,
-  settings,
-  anchoring,
-  scrollToDateTimeBase,
-  scrollToTime
-}: RowNavigationArgs) {
-  const { date: dateKey, time, calendarId, align } = request;
-  const { getResourceElement, restoreViewportAnchor } = anchoring;
-  const viewport = containerRef.current;
-  if (!calendarId || !viewport || !/^\d{2}:\d{2}$/.test(time)) {
-    scrollToDateTimeBase({ date: dateKey, time });
-    return;
-  }
-
-  const row = getResourceElement({ dateKey, calendarId });
-  if (row?.dataset.retainedHidden === "true") {
-    scrollToDateTimeBase({ date: dateKey, time });
-    return;
-  }
-
-  const viewportBox = viewport.getBoundingClientRect();
-  const rowBox = row?.getBoundingClientRect();
-  scrollToTime({ time });
-  if (
-    align !== "center" &&
-    rowBox &&
-    rowBox.top >= viewportBox.top + settings.dayHeaderHeight &&
-    rowBox.bottom <= viewportBox.bottom - 8
-  ) {
-    return;
-  }
-
-  const target = { dateKey, time, calendarId };
-  const rowHeight = rowBox?.height ?? settings.rowHeight;
-  const top = Math.max(settings.dayHeaderHeight, (viewport.clientHeight + settings.dayHeaderHeight - rowHeight) / 2);
-  const left =
-    settings.labelWidth +
-    TIMELINE_LEFT_GUTTER_PX +
-    minuteToX({ minute: parseClockToMinutes({ clock: time }), geometry: settings }) -
-    viewport.scrollLeft;
-  restoreViewportAnchor({
-    anchor: { target, snapshot: { top, left } },
-    afterRecenter: true,
-    cancelOnManualScroll: true
-  });
-}
-
 export function useHorizontalNavigation({
   forwardedRef,
   containerRef,
   settings,
   now,
-  scrollToDate
+  scrollToDate: scrollToDateBase
 }: HorizontalNavigationArgs) {
   const scrollToTime = useCallback(
     ({ time }: { time: string }) => {
@@ -104,11 +49,11 @@ export function useHorizontalNavigation({
   );
   const scrollToDateTimeBase = useCallback(
     ({ date: dateKey, time }: { date: IsoDate; time: string }) => {
-      scrollToDate({ date: dateKey });
+      scrollToDateBase({ date: dateKey });
       scrollToTime({ time });
       window.requestAnimationFrame(() => scrollToTime({ time }));
     },
-    [scrollToDate, scrollToTime]
+    [scrollToDateBase, scrollToTime]
   );
   const anchoring = useViewportAnchoring({
     containerRef,
@@ -129,10 +74,27 @@ export function useHorizontalNavigation({
   } = anchoring;
   const pendingNavigationRef = useRef<Parameters<QunoInfiniteCalendarHandle["scrollToDateTime"]>[0] | null>(null);
   const [navigationVersion, setNavigationVersion] = useState(0);
+  const cancelNavigation = useCallback(() => {
+    pendingNavigationRef.current = null;
+    cancelViewportAnchorRestore();
+  }, [cancelViewportAnchorRestore]);
+  const scrollToDate = useCallback<QunoInfiniteCalendarHandle["scrollToDate"]>(
+    (request) => {
+      cancelNavigation();
+      scrollToDateBase(request);
+    },
+    [cancelNavigation, scrollToDateBase]
+  );
+  const restoreAnchor = useCallback<QunoInfiniteCalendarHandle["restoreViewportAnchor"]>(
+    (request) => {
+      pendingNavigationRef.current = null;
+      restoreViewportAnchor(request);
+    },
+    [restoreViewportAnchor]
+  );
   const scrollToDateTime = useCallback<QunoInfiniteCalendarHandle["scrollToDateTime"]>(
     (request) => {
-      cancelViewportAnchorRestore();
-      pendingNavigationRef.current = null;
+      cancelNavigation();
       if (!request.calendarId) {
         scrollToDateTimeBase(request);
         return;
@@ -140,7 +102,7 @@ export function useHorizontalNavigation({
       pendingNavigationRef.current = request;
       setNavigationVersion((current) => current + 1);
     },
-    [cancelViewportAnchorRestore, scrollToDateTimeBase]
+    [cancelNavigation, scrollToDateTimeBase]
   );
   useLayoutEffect(() => {
     const request = pendingNavigationRef.current;
@@ -167,19 +129,19 @@ export function useHorizontalNavigation({
         }),
       captureViewportAnchor,
       isEventFullyVisible,
-      restoreViewportAnchor,
-      cancelViewportAnchorRestore,
+      restoreViewportAnchor: restoreAnchor,
+      cancelViewportAnchorRestore: cancelNavigation,
       commitVisibleEvent: ({ event, ...options }) => commitVisibleEventRef.current({ event, ...options }),
       removeVisibleEvent: ({ eventId }) => removeVisibleEventRef.current({ eventId }),
       releaseActiveDraft: (options) => releaseActiveDraftRef.current(options)
     }),
     [
-      cancelViewportAnchorRestore,
+      cancelNavigation,
       getVisibleDateKeys,
       captureViewportAnchor,
       isEventFullyVisible,
       now,
-      restoreViewportAnchor,
+      restoreAnchor,
       scrollToDate,
       scrollToDateTime
     ]

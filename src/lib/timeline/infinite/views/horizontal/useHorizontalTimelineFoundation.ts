@@ -11,7 +11,7 @@
  *
  * @see docs/infinite-calendar/flows/async-loading-and-layout.md
  */
-import { useEffect, useMemo, useState, type ForwardedRef } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ForwardedRef } from "react";
 import type { CalendarInternalViewProps, CalendarViewHandle } from "#quno-internal/timeline/core/internalTypes";
 import { useEventProjection } from "#quno-internal/timeline/infinite/events/metrics/useEventProjection";
 import { useDayMetrics } from "#quno-internal/timeline/infinite/events/metrics/useDayMetrics";
@@ -62,10 +62,9 @@ export function useHorizontalTimelineFoundation({
   const [windowAnchorDateKey, setWindowAnchorDateKey] = useState<string>(initialAnchorDateKey);
   const baseDayHeight = settings.dayHeaderHeight + renderedCalendars.length * settings.rowHeight;
   const renderedCalendarIds = useMemo(() => renderedCalendars.map((calendar) => calendar.id), [renderedCalendars]);
-  const activeDraftLayoutSignature = props.activeDraft
-    ? `${renderedCalendarIds.join("|")}:${Array.from(hiddenCalendarIds).join("|")}`
-    : "stable-resources";
-  const verticalLayoutSignature = `${activeDraftLayoutSignature}:${settings.dayHeaderHeight}:${settings.rowHeight}:${settings.excludedWeekdays.join("|")}`;
+  // Draft and resource changes use measured data-layout anchoring, not structural resets.
+  const verticalLayoutSignature = `${settings.dayHeaderHeight}:${settings.rowHeight}:${settings.excludedWeekdays.join("|")}`;
+  const recenterBlockedRef = useRef(false);
   const virtualTimeline = useScrollRuntime({
     anchorDateKey: windowAnchorDateKey,
     setAnchorDateKey: setWindowAnchorDateKey,
@@ -75,6 +74,7 @@ export function useHorizontalTimelineFoundation({
     verticalLayoutSignature,
     topDateAlignmentKey: "",
     isInteractionActive,
+    recenterBlockedRef,
     eagerRange: props.activeDraft?.mode === "create" || createTransitionActive,
     layoutAnchorDateKey: props.activeDraft ? eventDateKey(props.activeDraft.event) : undefined
   });
@@ -87,6 +87,11 @@ export function useHorizontalTimelineFoundation({
     now,
     scrollToDate: virtualTimeline.scrollToDate
   });
+  const { clearScrollEndTimer } = virtualTimeline;
+  useLayoutEffect(() => {
+    recenterBlockedRef.current = Boolean(navigation.activeRestoreTarget);
+    if (recenterBlockedRef.current) clearScrollEndTimer();
+  }, [navigation.activeRestoreTarget, clearScrollEndTimer]);
   const eventRange = useEventRangeLoader({
     activeDraftDateKey: props.activeDraft ? eventDateKey(props.activeDraft.event) : undefined,
     activeDraftLoadAnchorDateKey: windowAnchorDateKey,

@@ -879,3 +879,57 @@ The two Decision 094 records were assigned independently on separate branches. P
 complete titles, and their distinct anchors; [094 - Contextual Creation And Explicit Row Centering](#094---contextual-creation-and-explicit-row-centering)
 continues to define contextual creation and row navigation. The field guide and verification fixtures report fresh
 measurements of the combined implementation beside the 50 KiB ceiling.
+
+## 101 - Preserve Loading, Cache And Navigation Contracts Through Follow-up Actions
+
+Date: 2026-10-06
+Status: Accepted; refines Decisions 094 (Contextual Creation), 095, 097 and 098
+
+An accepted drag applies proposed time and participant geometry to the cached persisted event, rather than copying
+its projected display record into the cache. Projection-only ids are not added through moves; consumers explicitly
+commit or load saved records. Removing a projection therefore restores saved titles, colors, and other metadata.
+
+The loading shell owns supplied dimensions, including percentage and minimum sizes, before resource metadata exists.
+Its mounted timeline fills the same space so dimensions are not applied twice. Other component presentation styles
+remain on the timeline.
+
+A later raw date request, explicit anchor restoration, or cancellation discards queued horizontal resource navigation.
+Explicit centered navigation re-resolves the desired position from the current row height during the existing bounded
+restore session, including async collision growth. Manual intent still cancels it; no new public option is introduced.
+
+## 102 - Retain Participant Identity In Event Anchors
+
+Date: 2026-10-06
+Status: Accepted; refines Decisions 045 and 097
+
+When capturing an event without a resource id, resolve one mounted instance and record that instance's calendar id
+in the anchor target. Restoring that anchor follows the same participant instead of selecting a different visible copy
+after each scroll correction. Explicit replacement targets remain consumer-owned.
+
+The external editor preserves a surviving visible participant while toggling membership. Prefer the current anchor's
+participant; transfer to another surviving visible participant only when needed. Capture before the update, then restore
+after committed layout without a forced commit. An empty create selection retains its last slot anchor for the next
+participant selection. Keep the original first-person edit anchor separately so Cancel can restore it after removal.
+Browser checkbox focus and manual-scroll cancellation remain independent of visual anchoring.
+
+## 103 - Preserve Measured Draft Layout And Defer Idle Recenter
+
+Date: 2026-10-06
+Status: Accepted; refines Decisions 045, 097 and 102
+
+Horizontal draft presence and participant membership are data-layout changes, rather than settings-owned structural
+changes. Keep measured day heights through opening, editing and closing a draft; resource metrics and the existing
+parent restore handle the changed rows. Reset structural measurements only when header height, row height or excluded
+weekdays change. This replaces the draft-dependent structural signature that could move a dense schedule by thousands
+of pixels when entering edit mode.
+
+The external editor captures the clicked event instance before hiding the source, then restores that instance after
+the controlled draft commits. Preserve the original first-person Cancel anchor independently. A visible event capture
+with `requireVisible: true` returns `null` if that event is missing or offscreen; a resource slot is not an equivalent
+visible event anchor.
+
+An explicit horizontal restore cancels pending idle recenter work. The recenter scheduler reads live restore ownership
+both when scheduling and at an already armed deadline, preventing competing scroll corrections during row changes.
+After restoration ends, the next scroll signal can schedule ordinary maintenance. Restore deadlines and manual-scroll
+cancellation stay bounded as before. Dense three-participant create/save/edit tests include repeated rapid toggles and
+eight seconds of geometry and DOM-mutation observation after the final change.

@@ -51,6 +51,15 @@ Architecture checks enforce object arguments and product dependency direction, i
 - Save-triggered range reloads only mark ids provided in `appearingEventIds` as appearing; unrelated reloaded created events remain `existing`, and the same active requested id is consumed once rather than replaying on later range responses.
 - Imperative visible-event commits replace or insert one saved event in the loaded visible cache without calling `loadEvents`, and can mark that event as appearing.
 - External save patches the committed event into the visible cache instead of showing a released save draft or invalidating the range, avoiding double glints and reload jumps. Manual scrolling immediately after save is not pulled back by delayed anchor corrections.
+- Review regressions exercise raw-date/restore/cancel precedence over queued row navigation and recomputed centering
+  after async collision growth. Both orientations assert loading geometry before resources exist, percentage/minimum
+  dimensions after mounting, and accepted drags followed by projection removal without cached metadata leakage.
+- Three-participant create/save/edit coverage runs with 100 and 20,000 events/year, preserves the clicked instance
+  through opening, removes/re-adds the first participant, and retains checkbox focus and surviving-instance geometry.
+  The dense case includes 30 additional rapid toggles and samples eight seconds of card/scroll positions and late DOM
+  mutations to reject continuing oscillation. Unit coverage rejects resource-slot substitution for required visible
+  events and checks live restore ownership before scheduling or executing idle recenter work.
+  Existing empty-selection, original-participant Cancel, and immediate manual-scroll regressions remain required.
 - Participant-driven draft relayouts opt into manual-scroll cancellation, and their anchor scheduler cancels before the browser applies the first wheel movement.
 - Deterministic demo event generation distributes events across every demo calendar.
 - The demo range loader filters offset timestamps by their local calendar date rather than the raw timestamp prefix.

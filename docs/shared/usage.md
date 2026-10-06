@@ -43,9 +43,12 @@ For initial calendar loading, supply your own skeleton and keep it mounted as a 
   {...calendarProps}
   isLoading={!initialDataReady && !initialError}
   loadingFallback={<MyCalendarSkeleton />}
+  style={{ height: 600 }}
 />
 ```
 
+The loading shell reserves the component's explicit dimensions even before resource metadata exists. Percentage
+sizes and minimum dimensions apply once at that shell; the mounted timeline fills it. The skeleton can use `height: "100%"`.
 The consumer owns readiness and error UI. While loading, the timeline mounts only when `selectedCalendarIds`
 intersects the supplied `calendars`. Known IDs can arrive before calendar metadata; unmatched IDs keep the fallback
 visible without mounting an empty timeline. Once a matching resource exists, event loading and layout continue beneath
@@ -114,7 +117,10 @@ const projectEvents = useCallback<ProjectEvents>(
 The dates are inclusive local date keys and include empty rendered dates. Return a new collection without mutating
 cached records. Events outside the rendered dates are ignored. Changing or clearing the projection never refreshes
 persisted data; use `eventVersion` or a changed `loadEvents` for saves and filters. Both orientations use projected
-events for layout. Recurrence expansion remains consumer-owned. Try the lazy local-projection example in the field guide.
+events for layout. An accepted drag updates only time and participant geometry on the cached saved record; projected
+titles, colors, and other display fields stay local. Projection-only events enter the saved cache only through an explicit
+`commitVisibleEvent` or loader response, not an accepted move. Recurrence expansion remains consumer-owned.
+Try the lazy local-projection example in the field guide.
 
 ## Custom Event Card Structure
 
@@ -706,6 +712,19 @@ calendarRef.current?.restoreViewportAnchor({
 });
 ```
 
+Capturing an event without `calendarId` resolves one mounted instance and records its actual participant id in
+`anchor.target.calendarId`. Restore retains that identity instead of choosing another visible copy on each frame.
+When toggling participants, capture a visible instance whose participant survives the change; prefer the previous
+anchor's participant. If it is removed, capture a surviving participant before changing state and restore that same
+instance. Keep the original edit anchor separately for Cancel. The demo's participant checkboxes use this policy and
+retain browser focus while visual geometry settles.
+
+Capture the clicked `request.renderedCalendarId` before opening an edit draft and restore that instance after updating
+parent state; hiding the saved source can change collision geometry even when participants stay the same. Horizontal
+participant edits keep measured day sizes. Idle recentering waits while an explicit restore is active, then resumes
+on the next scroll signal. Use `requireVisible: true` to reject missing or offscreen event instances; these captures
+return `null` instead of falling back to a resource slot.
+
 The target is semantic rather than lane-index based. If a save introduces collisions, participant changes, or new
 metrics that move the event into another overlap lane, restoration resolves the new event geometry and keeps that event
 at the captured viewport position.
@@ -829,7 +848,9 @@ calendarRef.current?.scrollToDateTime({ date, time, calendarId: "room-1", align:
 ```
 
 The package waits for the updated selection to commit before measuring the row. Multiple resource-row navigation requests in
-one batch use the latest request. Use `align: "center"` when the row should move to the middle even if already visible. To start a new
+one batch use the latest request. A later `scrollToDate`, explicit restoration, or cancellation also discards queued
+row navigation. Use `align: "center"` when the row should move to the middle even if already visible. Centering follows
+the live row height while async events settle within the existing bounded restoration session; manual scrolling cancels it. To start a new
 draft where the operator is looking without scrolling:
 
 ```tsx

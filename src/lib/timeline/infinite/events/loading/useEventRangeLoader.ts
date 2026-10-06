@@ -125,7 +125,9 @@ export function useEventRangeLoader({
 
   const applyMoveToLoadedEvents = useCallback(
     (proposal: EventMoveRequest) => {
-      const movedEvent = applyEventMove({ event: proposal.event, request: proposal });
+      const persistedEvent = coordinator.event({ eventId: proposal.event.id });
+      if (!persistedEvent) return;
+      const movedEvent = applyEventMove({ event: persistedEvent, request: proposal });
       // A destination outside loaded buckets remains parent-owned until that date loads.
       if (coordinator.patchMovedEvent({ eventId: proposal.event.id, event: movedEvent })) {
         setEventsByDate(coordinator.toRecord());

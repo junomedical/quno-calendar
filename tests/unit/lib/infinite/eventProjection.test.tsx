@@ -115,4 +115,45 @@ describe("local event projection", () => {
       expect(loadEvents).toHaveBeenCalledTimes(requests);
     }
   );
+  it("accepts move geometry without persisting projected metadata or projection-only events", async () => {
+    const selectedIds = ["a"];
+    const visibleDateKeys = ["2026-07-18", "2026-07-19"];
+    const loadEvents = vi.fn<LoadEvents>(async () => [saved]);
+    const projectEvents: ProjectEvents = ({ events }) => [
+      ...events.map((event) => ({ ...event, title: "Local preview", color: "red" })),
+      preview
+    ];
+    const { result, rerender } = renderHook(
+      ({ projection }: { projection?: ProjectEvents }) => {
+        const loaded = useEventRangeLoader({ loadEvents, selectedIds, visibleDateKeys });
+        const projected = useEventProjection({
+          eventsByDate: loaded.eventsByDate,
+          selectedIds,
+          visibleDateKeys,
+          projectEvents: projection
+        });
+        return { ...loaded, projected };
+      },
+      { initialProps: { projection: projectEvents as ProjectEvents | undefined } }
+    );
+    await waitFor(() => expect(result.current.projected["2026-07-18"]?.[0]?.title).toBe("Local preview"));
+    const proposal = {
+      event: result.current.projected["2026-07-18"][0],
+      sourceCalendarId: "a",
+      proposedCalendarId: "a",
+      proposedCalendarIds: ["a"],
+      proposedStart: "2026-07-19T11:00:00",
+      proposedEnd: "2026-07-19T12:00:00"
+    };
+    act(() => {
+      result.current.applyMoveToLoadedEvents(proposal);
+      result.current.applyMoveToLoadedEvents({ ...proposal, event: preview });
+    });
+    rerender({ projection: undefined });
+    expect(result.current.projected["2026-07-18"]).toEqual([]);
+    expect(result.current.projected["2026-07-19"]).toEqual([
+      { ...saved, calendarIds: ["a"], start: proposal.proposedStart, end: proposal.proposedEnd }
+    ]);
+    expect(loadEvents).toHaveBeenCalledTimes(1);
+  });
 });
