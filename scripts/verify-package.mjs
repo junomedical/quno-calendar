@@ -193,4 +193,9 @@ for (const oldSubpath of [
   }
 }
 execFileSync("npm", ["run", "build"], { cwd: appDir, env: npmEnvironment, stdio: "inherit" });
-console.log("Packed React, type, stylesheet, ESM, CommonJS, and SSR verification passed.");
+execFileSync("npm", ["exec", "--", "tsc", "--noEmit", "--moduleResolution", "node", "--module", "ESNext"], {
+  cwd: appDir,
+  env: npmEnvironment,
+  stdio: "inherit"
+});
+console.log("Packed React, modern/legacy TypeScript, stylesheet, ESM, CommonJS, and SSR verification passed.");

@@ -82,6 +82,7 @@ export function useVerticalNavigation({
     () => ({
       scrollToDate,
       scrollToDateTime,
+      getVisibleDateKeys: anchoring.getVisibleDateKeys,
       scrollToToday: () =>
         scrollToDateTime({
           date: toDateKey({ date: now }),

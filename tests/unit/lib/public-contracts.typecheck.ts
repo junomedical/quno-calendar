@@ -8,7 +8,8 @@ import { parseDateInput, tokenizeDateInput, type DateInputTimeRange } from "@qun
 import type {
   QunoInfiniteCalendarHandle,
   QunoInfiniteCalendarProps,
-  CalendarEvent
+  CalendarEvent,
+  CalendarEventBase
 } from "@quno/calendar/infinite-calendar";
 // @ts-expect-error Shared runtime helpers have one public home.
 import { addDays as pickerAddDays } from "@quno/calendar/datepicker";
@@ -23,6 +24,14 @@ import type { DateInputFormatter } from "@quno/calendar/date-parser";
 
 /** Compiled with the consumer surface; never executed by the runtime tests. */
 export function checkPublicContracts(handle: QunoInfiniteCalendarHandle, event: CalendarEvent) {
+  const eventBase: CalendarEventBase = {
+    id: event.id,
+    calendarId: event.calendarId,
+    start: event.start
+  };
+  // @ts-expect-error A base event still needs title and end to be rendered.
+  const incompleteEvent: CalendarEvent = eventBase;
+  void incompleteEvent;
   const date: IsoDate = "2026-08-12";
   const expectedRange: DateRange = { start: date, end: addDays({ date, amount: 1 }) };
   const candidate: { value: string } = { value: date };
@@ -41,6 +50,9 @@ export function checkPublicContracts(handle: QunoInfiniteCalendarHandle, event: 
   tokenizeDateInput({ text: "10AM", recognizeTime: true });
   handle.scrollToDate({ date });
   handle.scrollToDateTime({ date, time: "09:00" });
+  handle.scrollToDateTime({ date, time: "09:00", calendarId: "provider-a", align: "center" });
+  const visibleDates: IsoDate[] = handle.getVisibleDateKeys();
+  void visibleDates;
   handle.focusEvent({ event, preferredCalendarId: event.calendarId });
   handle.commitVisibleEvent({ event, previousEventId: "temporary", appearing: true });
   handle.restoreViewportAnchor({ anchor: null, cancelOnManualScroll: true });
@@ -125,6 +137,14 @@ export function checkPublicContracts(handle: QunoInfiniteCalendarHandle, event: 
   // @ts-expect-error Clock recognition is owned by the headless parser.
   input.recognizeTime = true;
   const calendar: Partial<QunoInfiniteCalendarProps> = {
+    projectEvents: ({ events, startDate, endDate, calendarIds }) => {
+      void [startDate, endDate, calendarIds];
+      // @ts-expect-error Display projection does not mutate cached collections.
+      events.push(event);
+      return [...events, event];
+    },
+    isLoading: true,
+    loadingFallback: "Loading schedule…",
     locale: "en-GB",
     formatters: { dayLabel: ({ date }) => date },
     onZoomChange: ({ zoom }) => {

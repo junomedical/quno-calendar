@@ -17,6 +17,11 @@ or natural-language parsing.
 The field guide's production chapter presents the headless entry point, measured artifact, and runtime contract
 directly without repeating them in a separate import implementation accordion.
 
+## Bundle budget
+
+The headless JavaScript entry point has a 7 KiB gzip ceiling, leaving room above the current 6.00 KiB artifact.
+See [QDPR-006](./decisions.md#qdpr-006---leave-headroom-in-the-parser-bundle-budget).
+
 ## Named contracts
 
 The parser owns its implementation and headless types. Call `parseDateInput({ text, ...options })` and

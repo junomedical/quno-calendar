@@ -16,7 +16,11 @@ test("legacy guides redirect to the infinite-calendar field guide", async ({ pag
   for (const route of ["/story", "/examples/integration-walkthrough"]) {
     await page.goto(route);
     await expect(page).toHaveURL(/\/guide\/infinite-calendar$/);
-    await expect(page.getByRole("heading", { name: "A simple, fast calendar for complex schedules." })).toBeVisible();
+    await expect(
+      page.getByRole("heading", {
+        name: "A simple, fast calendar for complex schedules."
+      })
+    ).toBeVisible();
   }
 });
 
@@ -59,7 +63,11 @@ test("all five field guides share editorial structure and theme", async ({ page 
     const theme = await guide.evaluate((element) => {
       const guideStyle = getComputedStyle(element);
       const contentStyle = getComputedStyle(element.querySelector(".field-guide__content") as Element);
-      return { background: guideStyle.backgroundColor, color: guideStyle.color, font: contentStyle.fontFamily };
+      return {
+        background: guideStyle.backgroundColor,
+        color: guideStyle.color,
+        font: contentStyle.fontFamily
+      };
     });
     referenceTheme ??= theme;
     expect(theme).toEqual(referenceTheme);
@@ -224,22 +232,30 @@ test("editorial table of contents presents the feature chapters and navigates th
     );
   expect(chapterBreakoutCounts).toHaveLength(26);
   expect(chapterBreakoutCounts.every((count) => count <= 1)).toBe(true);
-  await expect(contents.getByRole("link", { name: /Fit dense schedules into a clear view/ })).toHaveAttribute(
-    "href",
-    "#horizontal-first"
-  );
-  await expect(contents.getByRole("link", { name: /Style days, hours, rows, and columns from data/ })).toHaveAttribute(
-    "href",
-    "#calendar-cell-styling"
-  );
+  await expect(
+    contents.getByRole("link", {
+      name: /Fit dense schedules into a clear view/
+    })
+  ).toHaveAttribute("href", "#horizontal-first");
+  await expect(
+    contents.getByRole("link", {
+      name: /Style days, hours, rows, and columns from data/
+    })
+  ).toHaveAttribute("href", "#calendar-cell-styling");
   const horizontalSection = page.locator("#horizontal-first");
-  await expect(page.getByRole("heading", { name: "Fit dense schedules into a clear view" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", {
+      name: "Fit dense schedules into a clear view"
+    })
+  ).toBeVisible();
   await expect(horizontalSection).toContainText(
     "Most calendars are built around a month, a week, or one person’s agenda"
   );
   await expect(horizontalSection).toContainText("Time runs horizontally");
   await expect(horizontalSection).toContainText("mouse wheel or touchpad");
-  const motionLink = contents.getByRole("link", { name: /Support motion without losing state/ });
+  const motionLink = contents.getByRole("link", {
+    name: /Support motion without losing state/
+  });
   await expect(motionLink).toHaveAttribute("href", "#motion");
   await motionLink.click();
   await expect(page.locator(".calendar-article #motion")).toBeVisible();
@@ -311,7 +327,7 @@ test("editorial CSS-native exhibit keeps stable chrome browser-positioned", asyn
 
 test("all five guides separate exact payloads from runtime contracts", async ({ page }) => {
   const guides = [
-    ["infinite-calendar", "37.56 KiB gzip", "1.95 KiB gzip", "@quno/calendar/infinite-calendar"],
+    ["infinite-calendar", "38.94 KiB gzip", "1.99 KiB gzip", "@quno/calendar/infinite-calendar"],
     ["datepicker", "12.46 KiB gzip", "3.36 KiB gzip", "@quno/calendar/datepicker"],
     ["date-input", "9.60 KiB gzip", "0.58 KiB gzip", "@quno/calendar/date-input"],
     ["timepicker", "1.59 KiB gzip", "0.78 KiB gzip", "@quno/calendar/timepicker"],
@@ -379,6 +395,52 @@ test("editorial Quno date input navigates directly to a selected date", async ({
   await expect(demo.locator('[data-testid="calendar-day"][data-date="2026-07-09"]')).toBeInViewport();
   await demo.getByLabel("Destination date").press("ArrowDown");
   await expect(demo.getByText("Showing 2026-07-08")).toBeVisible();
+
+  const roomRow = demo.locator(
+    '[data-testid="calendar-day"][data-date="2026-07-06"] [data-testid="calendar-row"][data-calendar-id="room-1"]'
+  );
+  await expect(roomRow).toHaveCount(0);
+  await expect(demo.locator('[data-testid="calendar-row"][data-calendar-id="room-1"]')).toHaveCount(0);
+  await demo.getByRole("button", { name: "Show Room 1" }).click();
+  await expect(demo.getByText("Showing Room 1 at 13:30")).toBeVisible();
+  await expect
+    .poll(() =>
+      demo.evaluate((element) => {
+        const viewport = element.querySelector<HTMLElement>(".quno-calendar-viewport");
+        const row = element.querySelector<HTMLElement>(
+          '[data-testid="calendar-day"][data-date="2026-07-06"] [data-testid="calendar-row"][data-calendar-id="room-1"]'
+        );
+        if (!viewport || !row) return false;
+        const viewportBox = viewport.getBoundingClientRect();
+        const rowBox = row.getBoundingClientRect();
+        const expectedCenter = (viewportBox.top + 48 + viewportBox.bottom) / 2;
+        return Math.abs((rowBox.top + rowBox.bottom) / 2 - expectedCenter) < 30;
+      })
+    )
+    .toBe(true);
+  const rowScrollTop = await demo.locator(".quno-calendar-viewport").evaluate((viewport) => viewport.scrollTop);
+  const middleDate = await demo.evaluate((element) => {
+    const viewport = element.querySelector<HTMLElement>(".quno-calendar-viewport")!;
+    const box = viewport.getBoundingClientRect();
+    const dates = [...viewport.querySelectorAll<HTMLElement>('[data-testid="calendar-day"]')]
+      .filter(
+        (day) => day.getBoundingClientRect().bottom > box.top + 48 && day.getBoundingClientRect().top < box.bottom
+      )
+      .map((day) => day.dataset.date!)
+      .sort();
+    return dates[Math.floor(dates.length / 2)];
+  });
+  await demo.getByRole("button", { name: "Use middle visible date" }).click();
+  await expect(demo.getByText(`Visible middle date: ${middleDate}`)).toBeVisible();
+  expect(await demo.locator(".quno-calendar-viewport").evaluate((viewport) => viewport.scrollTop)).toBe(rowScrollTop);
+  await demo.getByRole("button", { name: "Show Room 1" }).click();
+  await expect
+    .poll(() =>
+      demo
+        .locator(".quno-calendar-viewport")
+        .evaluate((viewport, before) => Math.abs(viewport.scrollTop - before), rowScrollTop)
+    )
+    .toBeLessThanOrEqual(1);
 
   await demo.getByRole("button", { name: "Today", exact: true }).click();
   await expect(demo.locator(".quno-calendar-now-pin.is-current")).toBeInViewport();
@@ -537,7 +599,11 @@ test("editorial article preserves its inline calendar through full-screen expans
   const calendar = demo.getByTestId("quno-calendar-timeline");
   const viewport = demo.locator(".quno-calendar-viewport");
 
-  await expect(page.getByRole("heading", { name: "A simple, fast calendar for complex schedules." })).toBeVisible();
+  await expect(
+    page.getByRole("heading", {
+      name: "A simple, fast calendar for complex schedules."
+    })
+  ).toBeVisible();
   await expect(article.locator(".calendar-article__footer")).toHaveCount(0);
   await expect(page.getByRole("navigation", { name: "Integration walkthrough steps" })).toHaveCount(0);
   await expect(article).toHaveCSS("overflow-y", "auto");
@@ -559,7 +625,10 @@ test("editorial article preserves its inline calendar through full-screen expans
   await expect(demo).toHaveAttribute("role", "dialog");
   await expect(demo).toHaveCSS("position", "fixed");
   const expandedBox = await demo.boundingBox();
-  const windowSize = await page.evaluate(() => ({ width: window.innerWidth, height: window.innerHeight }));
+  const windowSize = await page.evaluate(() => ({
+    width: window.innerWidth,
+    height: window.innerHeight
+  }));
   expect(Math.abs((expandedBox?.width ?? 0) - windowSize.width)).toBeLessThanOrEqual(1);
   expect(Math.abs((expandedBox?.height ?? 0) - windowSize.height)).toBeLessThanOrEqual(1);
   await expect(viewport).toHaveAttribute("data-article-calendar-identity", "preserved");
@@ -605,7 +674,11 @@ test("editorial calendars keep date typography compact and expose scroll settlem
   const viewportBox = await viewport.boundingBox();
   expect(viewportBox).not.toBeNull();
   if (!viewportBox) return;
-  await viewport.dispatchEvent("wheel", { bubbles: true, cancelable: true, deltaY: 180 });
+  await viewport.dispatchEvent("wheel", {
+    bubbles: true,
+    cancelable: true,
+    deltaY: 180
+  });
   await viewport.evaluate((element) => {
     element.scrollTop += element.clientHeight * 4;
   });
@@ -945,7 +1018,10 @@ test("editorial drag/create exhibit stages parent-owned changes for accept or ca
   expect(eventBox).not.toBeNull();
   if (!eventBox) return;
   const viewport = demo.locator(".quno-calendar-viewport");
-  const beforeMoveScroll = await viewport.evaluate((element) => ({ left: element.scrollLeft, top: element.scrollTop }));
+  const beforeMoveScroll = await viewport.evaluate((element) => ({
+    left: element.scrollLeft,
+    top: element.scrollTop
+  }));
   const targetRow = demo.locator(
     '[data-testid="calendar-day"][data-date="2026-07-06"] [data-testid="calendar-row"][data-calendar-id="room-1"] .quno-calendar-row-grid'
   );
@@ -981,7 +1057,12 @@ test("editorial drag/create exhibit stages parent-owned changes for accept or ca
   await expect(demo.getByText(/Cancelled the move for “Post-op follow-up”/)).toBeVisible();
   await expect.poll(async () => Math.abs(((await event.boundingBox())?.x ?? 0) - eventBox.x)).toBeLessThan(3);
   await expect
-    .poll(() => viewport.evaluate((element) => ({ left: element.scrollLeft, top: element.scrollTop })))
+    .poll(() =>
+      viewport.evaluate((element) => ({
+        left: element.scrollLeft,
+        top: element.scrollTop
+      }))
+    )
     .toEqual(beforeMoveScroll);
 
   const grid = demo.locator(
@@ -1014,7 +1095,9 @@ test("editorial drag/create exhibit stages parent-owned changes for accept or ca
   expect(await acceptedCard.evaluate((element) => getComputedStyle(element, "::before").animationName)).toBe(
     "article-event-appearing-glint"
   );
-  await expect(acceptedEvent).toHaveAttribute("data-status", "existing", { timeout: 3_000 });
+  await expect(acceptedEvent).toHaveAttribute("data-status", "existing", {
+    timeout: 3_000
+  });
   await expect(
     demo.getByText("Accepted the new appointment. Parent state and the visible calendar now match.")
   ).toBeVisible();
@@ -1139,12 +1222,46 @@ test("editorial hover demo reveals underlying overlap lanes in turn", async ({ p
   await expect(demo.locator(`[data-event-id="${lanePair[0].id}"][data-status="hovered"]`)).toHaveCount(0);
 });
 
+test("consumer loading fallback covers startup and reveals the initial date centered", async ({ page }) => {
+  await page.clock.install({ time: new Date("2026-07-06T08:00:00Z") });
+  await page.goto("/guide");
+  await page.clock.pauseAt(new Date("2026-07-06T09:00:00Z"));
+  const demo = await revealLazyArticleDemo(page, "event preloading example", "article-prefetch-demo");
+  // The selected resource ID is known before its calendar metadata arrives.
+  await expect(demo.locator(".quno-calendar-viewport")).toHaveCount(0);
+  await expect(demo.getByTestId("article-prefetch-count")).toContainText("0 requests");
+  await page.clock.resume();
+  const fallback = demo.getByRole("status", { name: "Loading calendar" });
+  await expect(fallback).toBeVisible();
+  await expect(demo.locator(".quno-calendar-loading-content")).toHaveCSS("visibility", "hidden");
+  const viewport = demo.locator(".quno-calendar-viewport");
+  await expect(demo.getByTestId("article-prefetch-count")).toContainText(/[1-9]\d* requests?/);
+  await expect(viewport).toHaveCount(1);
+  const [skeletonBox, viewportBox] = await Promise.all([fallback.boundingBox(), viewport.boundingBox()]);
+  expect(Math.abs(skeletonBox!.height - viewportBox!.height)).toBeLessThan(3);
+  await expect(fallback).toHaveCount(0);
+  await expect(demo.locator(".quno-calendar-loading-content")).toHaveCSS("visibility", "visible");
+  const centerDistance = () =>
+    demo.evaluate((element) => {
+      const viewport = element.querySelector(".quno-calendar-viewport")!.getBoundingClientRect();
+      const row = element
+        .querySelector('[data-date="2026-07-06"] [data-calendar-id="provider-a"][data-testid="calendar-row"]')
+        ?.getBoundingClientRect();
+      return row ? Math.abs((row.top + row.bottom) / 2 - (viewport.top + 48 + viewport.bottom) / 2) : Infinity;
+    });
+  await expect.poll(centerDistance).toBeLessThan(30);
+  await page.waitForTimeout(3_000);
+  expect(await centerDistance()).toBeLessThan(30);
+});
+
 test("editorial prefetch exhibit reveals a warm event before the next delayed range settles", async ({ page }) => {
   await page.goto("/guide");
   const demo = await revealLazyArticleDemo(page, "event preloading example", "article-prefetch-demo");
-  await expect(demo.getByText("Warm window accepted and cached")).toBeVisible({ timeout: 10_000 });
+  await expect(demo.getByText("Warm window accepted and cached")).toBeVisible({
+    timeout: 10_000
+  });
   const initialRange = await page.getByTestId("article-prefetch-range").textContent();
-  expect(initialRange).toContain("2026-07");
+  expect(initialRange).toMatch(/2026-\d{2}-\d{2} → 2026-\d{2}-\d{2}/);
   const loadedEvents = demo.getByTestId("article-prefetch-loaded-events");
   const prefetchedLoadedEvent = loadedEvents.locator('[data-loaded-event-id="article-prefetched-event"]');
   await expect(prefetchedLoadedEvent).toBeVisible();
@@ -1179,7 +1296,9 @@ test("editorial stability lab retains stale events and row focus during delayed 
   expect(loadingBox).not.toBeNull();
   expect(denseButtonBox).not.toBeNull();
   expect((loadingBox?.x ?? 0) + (loadingBox?.width ?? 0)).toBeLessThanOrEqual(denseButtonBox?.x ?? 0);
-  await expect(demo.getByText("Shared consultation").first()).toBeVisible({ timeout: 10_000 });
+  await expect(demo.getByText("Shared consultation").first()).toBeVisible({
+    timeout: 10_000
+  });
   await demo.getByLabel("Room 4").check();
   await expect(demo.getByText("Settled")).toBeVisible({ timeout: 10_000 });
   await expect(demo.locator('[data-event-id="stability-shared-event"][data-calendar-id="room-1"]').first()).toBeVisible(
@@ -1260,7 +1379,9 @@ test("editorial stability lab retains stale events and row focus during delayed 
 test("editorial stability lab reveals and focuses a shared participant", async ({ page }) => {
   await page.goto("/guide");
   const demo = await revealLazyArticleDemo(page, "delayed loading stability example", "article-stability-demo");
-  await expect(demo.getByText("Shared consultation").first()).toBeVisible({ timeout: 10_000 });
+  await expect(demo.getByText("Shared consultation").first()).toBeVisible({
+    timeout: 10_000
+  });
   await demo.getByRole("button", { name: "Reveal shared room" }).click();
   const focused = demo
     .locator('[data-event-id="stability-shared-event"][data-calendar-id="room-1"][data-status="focused"]')
@@ -1288,7 +1409,9 @@ test("editorial stability lab reveals and focuses a shared participant", async (
 test("repeated focus leaves a fully visible shared-room event and viewport in place", async ({ page }) => {
   await page.goto("/guide");
   const demo = await revealLazyArticleDemo(page, "delayed loading stability example", "article-stability-demo");
-  await expect(demo.getByText("Shared consultation").first()).toBeVisible({ timeout: 10_000 });
+  await expect(demo.getByText("Shared consultation").first()).toBeVisible({
+    timeout: 10_000
+  });
   const reveal = demo.getByRole("button", { name: "Reveal shared room" });
   await reveal.click();
   const roomEvent = demo.locator(
@@ -1313,7 +1436,10 @@ test("repeated focus leaves a fully visible shared-room event and viewport in pl
       roomEvent.boundingBox(),
       viewport.boundingBox(),
       demo.locator(".quno-calendar-time-header").boundingBox(),
-      viewport.evaluate((element) => ({ left: element.scrollLeft, top: element.scrollTop }))
+      viewport.evaluate((element) => ({
+        left: element.scrollLeft,
+        top: element.scrollTop
+      }))
     ]);
     expect(eventBox).not.toBeNull();
     expect(viewportBox).not.toBeNull();
@@ -1386,14 +1512,22 @@ test("editorial event focus preserves a visible card through save and lane chang
   const demo = await revealLazyArticleDemo(page, "visual focus lane-change example", "article-event-focus-demo");
   await expect(demo.getByTestId("draft-event")).toBeVisible();
   const viewport = demo.locator(".quno-calendar-viewport");
-  const beforeSaveScroll = await viewport.evaluate((element) => ({ left: element.scrollLeft, top: element.scrollTop }));
+  const beforeSaveScroll = await viewport.evaluate((element) => ({
+    left: element.scrollLeft,
+    top: element.scrollTop
+  }));
   await demo.getByRole("button", { name: "Save draft" }).click();
 
   const saved = demo.locator('[data-event-id="article-focus-event"]');
   await expect(saved).toBeVisible();
   await expect(saved).toHaveAttribute("data-status", "focused");
   await expect
-    .poll(() => viewport.evaluate((element) => ({ left: element.scrollLeft, top: element.scrollTop })))
+    .poll(() =>
+      viewport.evaluate((element) => ({
+        left: element.scrollLeft,
+        top: element.scrollTop
+      }))
+    )
     .toEqual(beforeSaveScroll);
 
   const beforeCollisionsScroll = await viewport.evaluate((element) => ({
@@ -1406,7 +1540,12 @@ test("editorial event focus preserves a visible card through save and lane chang
   await expect(page.getByTestId("article-focus-state")).toHaveText("5 overlap lanes");
   await expect(saved).toBeVisible();
   await expect
-    .poll(() => viewport.evaluate((element) => ({ left: element.scrollLeft, top: element.scrollTop })))
+    .poll(() =>
+      viewport.evaluate((element) => ({
+        left: element.scrollLeft,
+        top: element.scrollTop
+      }))
+    )
     .toEqual(beforeCollisionsScroll);
 });
 
@@ -1435,7 +1574,9 @@ test("editorial motion demo animates both add and cancel outcomes", async ({ pag
   await expect(inserted).toBeVisible();
   await expect(inserted).toHaveAttribute("data-status", "appearing");
   await expect(inserted.locator(".article-event-card")).toHaveAttribute("data-render-status", "appearing");
-  await expect(inserted).toHaveAttribute("data-status", "existing", { timeout: 3_000 });
+  await expect(inserted).toHaveAttribute("data-status", "existing", {
+    timeout: 3_000
+  });
   await newDraftButton.click();
   const draft = demo.getByTestId("draft-event");
   await expect(draft).toBeVisible();
@@ -1475,4 +1616,25 @@ test("showcase sidebars align dataset size and API delay on one row", async ({ p
     expect(datasetBox?.width ?? 0).toBeGreaterThan(70);
     expect(apiDelayBox?.width ?? 0).toBeGreaterThan(70);
   }
+});
+
+test("local event projection moves previews without loading persisted data again", async ({ page }) => {
+  await page.goto("/guide/infinite-calendar");
+  const demo = await revealLazyArticleDemo(page, "local event projection example", "article-projection-demo");
+  const loads = demo.getByTestId("projection-load-count");
+  await expect(loads).not.toHaveText("0 loads");
+  const loadedCount = await loads.textContent();
+  await demo.getByRole("button", { name: "Preview at 10:00" }).click();
+  const preview = demo.locator('[data-event-id="draft:preview"]');
+  await expect(preview).toBeVisible();
+  const before = await preview.boundingBox();
+  await demo.getByRole("button", { name: "Move preview to 12:00" }).click();
+  await expect(preview.locator(".article-event-card__time")).toHaveText("12:00–13:00");
+  const after = await preview.boundingBox();
+  expect(after!.x).toBeGreaterThan(before!.x + 50);
+  expect(Math.abs(after!.y - before!.y)).toBeLessThan(2);
+  await expect(loads).toHaveText(loadedCount!);
+  await demo.getByRole("button", { name: "Clear preview" }).click();
+  await expect(preview).toHaveCount(0);
+  await expect(loads).toHaveText(loadedCount!);
 });

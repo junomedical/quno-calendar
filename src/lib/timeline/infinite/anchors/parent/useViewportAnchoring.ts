@@ -1,16 +1,15 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type RefObject } from "react";
+import { useCallback, useEffect, useMemo, type RefObject } from "react";
 import { minuteToX, minuteToY, parseClockToMinutes } from "#quno-internal/timeline/time/time";
 import type {
   QunoInfiniteCalendarHandle,
   CalendarViewportAnchor,
-  CalendarViewportAnchorRestoreOptions,
   CalendarViewportAnchorTarget,
   QunoInfiniteCalendarSettings
 } from "#quno-internal/timeline/core/types";
 import { TIMELINE_LEFT_GUTTER_PX } from "#quno-internal/timeline/time/timelineTicks";
 import type { ViewportGeometryRegistration } from "./viewportAnchorTypes";
 import { relativeSnapshot, ViewportGeometryRegistry } from "./viewportGeometryRegistry";
-import { ViewportAnchorRestoreSession } from "./viewportAnchorRestoreSession";
+import { useViewportAnchorRestore } from "./useViewportAnchorRestore";
 
 type AnchoringArgs = {
   containerRef: RefObject<HTMLElement | null>;
@@ -52,27 +51,23 @@ function captureAnchor({
   return snapshot ? { snapshot, target } : null;
 }
 
+function visibleDateKeys({ registry, args }: { registry: ViewportGeometryRegistry; args: AnchoringArgs }) {
+  const viewport = args.containerRef.current;
+  return viewport
+    ? registry.visibleDateKeys({
+        viewportBox: insetViewportBox({
+          viewport,
+          leftInset: args.visibilityInsets?.left,
+          topInset: args.visibilityInsets?.top
+        })
+      })
+    : [];
+}
+
 /** Captures and restores event/slot geometry through an instance-owned registry. */
 export function useViewportAnchoring(args: AnchoringArgs) {
   const registry = useMemo(() => new ViewportGeometryRegistry(), []);
-  const restoreTokenRef = useRef(0);
-  const cleanupRef = useRef<(() => void) | null>(null);
-  const [activeRestoreTarget, setActiveRestoreTarget] = useState<CalendarViewportAnchorTarget | null>(null);
-
-  const cancelViewportAnchorRestore = useCallback(() => {
-    restoreTokenRef.current += 1;
-    cleanupRef.current?.();
-    cleanupRef.current = null;
-    setActiveRestoreTarget(null);
-  }, []);
-
   useEffect(() => registry.invalidate(), [args.orientation, args.settings, registry]);
-  useEffect(
-    () => () => {
-      cancelViewportAnchorRestore();
-    },
-    [cancelViewportAnchorRestore]
-  );
 
   const resolveSnapshot = useCallback(
     (target: CalendarViewportAnchorTarget) => {
@@ -131,30 +126,12 @@ export function useViewportAnchoring(args: AnchoringArgs) {
     [args.containerRef, args.visibilityInsets?.left, args.visibilityInsets?.top, registry]
   );
 
-  const restoreViewportAnchor = useCallback(
-    ({ anchor, ...options }: { anchor: CalendarViewportAnchor | null } & CalendarViewportAnchorRestoreOptions) => {
-      if (!anchor) return;
-      cancelViewportAnchorRestore();
-      const viewport = args.containerRef.current;
-      if (!viewport) return;
-      const target = options.target ?? anchor.target;
-      setActiveRestoreTarget(target);
-      const token = ++restoreTokenRef.current;
-      const session = new ViewportAnchorRestoreSession({
-        viewport,
-        anchor,
-        target,
-        options,
-        registry,
-        resolveSnapshot,
-        scrollToDateTime: args.scrollToDateTime,
-        isCurrent: () => restoreTokenRef.current === token,
-        cancel: cancelViewportAnchorRestore
-      });
-      cleanupRef.current = session.start();
-    },
-    [args.containerRef, args.scrollToDateTime, cancelViewportAnchorRestore, registry, resolveSnapshot]
-  );
+  const restoration = useViewportAnchorRestore({
+    containerRef: args.containerRef,
+    registry,
+    resolveSnapshot,
+    scrollToDateTime: args.scrollToDateTime
+  });
 
   const registration: ViewportGeometryRegistration = useMemo(
     () => ({
@@ -167,12 +144,14 @@ export function useViewportAnchoring(args: AnchoringArgs) {
     [registry]
   );
 
+  const getResourceElement = useMemo(() => registry.resource.bind(registry), [registry]);
+
   return {
-    activeRestoreTarget,
+    getVisibleDateKeys: () => visibleDateKeys({ registry, args }),
+    ...restoration,
     captureViewportAnchor,
     isEventFullyVisible,
-    restoreViewportAnchor,
-    cancelViewportAnchorRestore,
+    getResourceElement,
     registration
   };
 }

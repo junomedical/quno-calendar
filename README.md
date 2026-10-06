@@ -1,6 +1,6 @@
 # @quno/calendar
 
-Five opinionated date and scheduling primitives in one React-authored package. Version `0.6.0` supports React 18+
+Five opinionated date and scheduling primitives in one React-authored package. Version `0.6.2` supports React 18+
 directly, verifies React 19 separately, and supports Preact through tested `preact/compat` aliases.
 
 ## Install
@@ -27,13 +27,18 @@ import "@quno/calendar/date-input/styles.css";
 import { parseDateInput, tokenizeDateInput } from "@quno/calendar/date-parser";
 ```
 
-- **Quno/Infinite Calendar** virtualizes horizontal and vertical schedules with event loading, rendering, editing, zoom, navigation, and focus.
+- **Quno/Infinite Calendar** virtualizes horizontal and vertical schedules with event loading, rendering, editing, zoom, navigation, focus, and an optional consumer-owned loading fallback.
+  Its handle exposes visible date keys for contextual creation and optional centered horizontal resource navigation.
+  Optional synchronous `projectEvents` displays local previews after caching without refetching persisted events.
+  Resource-row navigation and anchor restoration wait for committed parent layout; ordinary state updates need no forced React commit.
 - **Quno/Datepicker** paints, resizes, and moves one timezone-free date or inclusive range, with optional single-day time selection; endpoint shortcuts keep composed input popups open while navigating.
 - **Quno/Date Input** provides a native controlled or uncontrolled field for typed dates, ranges, and optional single-day clock times.
 - **Quno/Timepicker** selects a standalone clock with prominent sticky hours, enabled-hour choices, and cadence-sized minute rows, including six choices per five-minute row and 20-minute steps. Omitted or empty enabled hours allows all 24 hours.
 - **Quno/Date Parser** recognizes formats, relative phrases, configurable weeks, ranges, optional clock times, and multilingual vocabulary without a UI runtime.
 
 The headless `@quno/calendar` root exports shared contracts such as `IsoDate`, `DateRange`, `DateSelectionMode`, `WeekStart`, and safe calendar-day helpers. It exports no UI. JavaScript entry points are ESM/CommonJS compatible, SSR-safe, and never inject CSS. The separately exported stylesheets remain readable, unminified CSS in `dist`.
+
+Type declarations for the public subpaths resolve through package `exports` in modern TypeScript projects and through `typesVersions` in projects still using Node-style module resolution. Consumers do not need ambient module declarations or TypeScript path aliases.
 
 Library functions and customization callbacks receive named objects: `addDays({ date, amount })`,
 `parseDateInput({ text, expectedRange })`, and `onChange({ value })`. Text overrides use `formatters`; presentation
@@ -43,8 +48,8 @@ uses `getDayProps`, `getDayCellProps`, and `getHourProps` where supported. See t
 Calendar day keys use timezone-free `YYYY-MM-DD` values. Infinite Calendar event `start` and `end` remain timestamp strings with their local or offset semantics.
 
 High-frequency pointer, zoom, and quick-navigation work is frame-bounded while release and commit paths stay
-synchronous. Infinite Calendar prepares appointment and availability collision lanes independently, reuses unchanged
-date buckets, and grows each resource to the deeper layer. Date Input reuses compiled parser configuration across
+synchronous. Infinite Calendar prepares foreground events and explicitly background-layered availability in independent
+collision lanes, reuses unchanged date buckets, and grows each resource to the deeper layer. Date Input reuses compiled parser configuration across
 keystrokes without changing the synchronous headless parser API.
 
 ## Guides and records
@@ -73,6 +78,7 @@ npm run lint
 npm run check:architecture
 npm run build
 npm run verify:package
+npm run check:bundle-size
 npm run test:compat
 npm run test:compat:react19
 ```

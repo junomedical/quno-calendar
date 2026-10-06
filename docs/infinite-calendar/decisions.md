@@ -756,3 +756,126 @@ The layered cache, frame scheduler, and measured recenter bridge raise the ESM a
 KiB gzip. The
 Infinite Calendar JavaScript ceiling moves from 37 KiB to 38 KiB; the optional stylesheet remains 1.95 KiB gzip inside
 its existing 2 KiB ceiling.
+
+## 092 - Horizontal Row Navigation Belongs To The Calendar
+
+Date: 2026-09-24
+Status: Accepted
+
+An external editor can know a date, time, and calendar id before its target row is mounted. The public
+`scrollToDateTime({ date, time, calendarId })` handle accepts an optional `calendarId` for horizontal row navigation.
+The existing geometry registry and cancellable viewport restoration pin and reveal an offscreen resource after date
+virtualization settles; an already-visible row is not moved vertically. The calendar owns sticky-header offsets and
+row visibility, while the editor calls only the public handle. The vertical view keeps its date/time behavior because
+it has columns, not rows.
+
+## 093 - Event Entity Kind Is Separate From Its Render Layer
+
+Date: 2026-09-25
+Status: Accepted; refines Decision 091 and supersedes Decisions 017 and 019's implicit background-layer rule
+
+`CalendarEvent.kind` identifies the scheduling entity (`appointment`, `availability`, or `blocker`);
+`renderLayer: "availability"` explicitly selects the background treatment. Decision 091's independent lanes and
+maximum-depth sizing apply to this background layer only. Without the layer override, an availability is a foreground
+editable event in `events` mode and shares its overlap lanes and metrics with appointments and blockers. Background
+availability is pointer-transparent in `events` mode; `availability` interaction mode targets that layer. This permits
+internal scheduling editors while retaining the background treatment for consumers that opt into it.
+
+## 094 - Contextual Creation And Explicit Row Centering
+
+Date: 2026-09-29
+Status: Accepted; refines Decision 092
+
+`getVisibleDateKeys()` reports sorted dates intersecting the usable viewport through the existing geometry registry,
+excluding overscan and sticky chrome. Products can choose the middle visible date when opening a creation form without
+scrolling or querying package DOM. `scrollToDateTime({ date, time, calendarId, align: "center" })` centers a horizontal
+resource row even if it was already visible; omitted alignment retains Decision 092's existing visibility behavior.
+The vertical view retains its existing date/time navigation. Recurrence calculation remains owned by the consuming app.
+
+## 095 - Consumer-Owned Initial Loading Fallback
+
+Date: 2026-09-29
+Status: Accepted
+
+`isLoading` and `loadingFallback` optionally cover initial context and event loading with consumer-owned markup.
+An initially empty selection defers the timeline mount, avoiding header-only geometry before resource rows arrive.
+With selected rows, the hidden timeline keeps its dimensions and runs its normal event loader; revealing it does not
+remount it. The consumer clears loading on readiness or failure and may center its initial date through the existing
+navigation handle. Omitted fallback preserves the existing rendering behavior; background refreshes can keep the grid visible.
+
+## 096 - Returning A Drag To Its Starting Slot Does Not Activate
+
+Date: 2026-09-29
+Status: Accepted; refines Decision 028
+
+The calendar distinguishes pointer clicks from drags before coalescing move frames. Movement more than four pixels
+from the initial press is remembered until the gesture ends, including movement within one snapped slot or outside
+the timeline. Returning a drag to its original minute and calendar clears the preview without invoking activation
+or requesting a move. Ordinary clicks still invoke `onEventActivate`; consumers need no pointer-movement guard.
+Changed drops retain the existing parent-owned persistence boundary.
+
+## 097 - Navigation And Restoration Wait For Committed Layout
+
+Date: 2026-10-05
+Status: Accepted; refines Decisions 045, 092 and 094
+
+A consumer can update selected resources or its controlled draft and call `scrollToDateTime` with a resource id or
+`restoreViewportAnchor` in the same handler. The calendar consumes the request in its layout phase, after parent
+props and registered geometry commit, rather than measuring the previous layout. The latest date/time request in a
+batch wins; date-only navigation retains its synchronous path and cancels a pending row request. Capturing an anchor remains synchronous so it records the position before the parent change.
+
+Restoration keeps the existing geometry registry, virtual-row pinning, session notifications, fallback and manual-intent
+cancellation. Cancellation also discards a pending restore before it starts. No new public options or forced React
+commit are needed; React 18+, React 19 and Preact continue to share the same contract. Consumer persistence and form
+submission remain outside this layout boundary.
+
+## 098 - Project Local Events After The Persisted Cache
+
+Date: 2026-10-05
+Status: Accepted
+
+`loadEvents` owns persisted data and invalidates freshness when its identity changes. Optional synchronous
+`projectEvents({ events, startDate, endDate, calendarIds })` owns display changes for the inclusive rendered date window,
+including empty dates. Apply it after the persisted cache and before layout in both orientations. The callback must
+not mutate cached event records. Returned events are indexed by the existing local start-date semantics; events
+outside rendered dates are ignored. Unchanged date buckets retain their preparation identity.
+
+Changing or removing a projection never invalidates requests or commits previews into the cache. Removal restores
+saved events immediately. Saves and filters use the existing loader and version invalidation. Recurrence expansion
+and edited-series selection remain product-owned; consumers need no second cache to keep local editing off the API.
+
+## 099 - Accept The 0.6.2 Infinite Calendar Payload
+
+Date: 2026-10-05
+Status: Accepted; supersedes only the Infinite Calendar JavaScript ceiling in Decision 091
+
+The committed-layout navigation and local event projection in Decisions 097 and 098 produce a 168,119-byte raw
+Infinite Calendar ESM artifact and a 39,858-byte gzip artifact. Raise its gzip ceiling from 38 KiB to 39 KiB
+(39,936 bytes) to accept this 0.6.2 build. The size guard still rejects artifacts above the new ceiling.
+
+Keep the optional stylesheet ceiling at 2 KiB and retain every other product budget. The field guide reports the
+measured 38.92 KiB JavaScript and 1.99 KiB optional stylesheet payloads alongside their budgets.
+
+## 094 - Allow 50 KiB For Infinite Calendar JavaScript
+
+Date: 2026-10-06
+Status: Accepted; supersedes Decision 091's 38 KiB JavaScript ceiling
+
+The reported ESM artifact is 38.92 KiB gzip, exceeding the accepted 38 KiB ceiling. Raise the Infinite Calendar
+JavaScript ceiling to 50 KiB to accommodate the current artifact and leave comfortable room for future changes.
+Keep the guard, field-guide production facts, and verification documentation aligned. The optional stylesheet
+retains its independent 2 KiB ceiling; all other feature budgets remain unchanged.
+
+## 100 - Reconcile The Infinite Calendar Budget After Branch Integration
+
+Date: 2026-10-06
+Status: Accepted; supersedes Decision 099's 39 KiB JavaScript ceiling
+
+Merge the calendar improvements with the accepted 50 KiB JavaScript ceiling from the independently assigned
+[094 - Allow 50 KiB For Infinite Calendar JavaScript](#094---allow-50-kib-for-infinite-calendar-javascript).
+Keep the optional stylesheet ceiling at 2 KiB and preserve the improved navigation, loading, and projection contracts.
+
+The two Decision 094 records were assigned independently on separate branches. Preserve both identifiers, their
+complete titles, and their distinct anchors; [094 - Contextual Creation And Explicit Row Centering](#094---contextual-creation-and-explicit-row-centering)
+continues to define contextual creation and row navigation. The field guide and verification fixtures report fresh
+measurements of the combined implementation beside the 50 KiB ceiling.

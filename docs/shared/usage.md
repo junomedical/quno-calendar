@@ -21,7 +21,11 @@ import { QunoDateInput } from "@quno/calendar/date-input";
 import { parseDateInput, tokenizeDateInput } from "@quno/calendar/date-parser";
 ```
 
+Infinite Calendar JavaScript has a 50 KiB gzip ceiling; its optional stylesheet has a separate 2 KiB ceiling.
+The headless Date Parser JavaScript entry point has a 7 KiB gzip ceiling.
+
 Add only the optional stylesheets needed by the browser application. JavaScript imports do not inject CSS.
+The package's public subpath types resolve under both modern and legacy Node-style TypeScript module resolution; no consumer-side declaration shim is needed.
 
 Import the component and stylesheet from the package entrypoint:
 
@@ -31,6 +35,21 @@ import "@quno/calendar/infinite-calendar/styles.css";
 ```
 
 Repository examples use the same public subpath aliases as package consumers.
+
+For initial calendar loading, supply your own skeleton and keep it mounted as a prop:
+
+```tsx
+<QunoInfiniteCalendar
+  {...calendarProps}
+  isLoading={!initialDataReady && !initialError}
+  loadingFallback={<MyCalendarSkeleton />}
+/>
+```
+
+The consumer owns readiness and error UI. While loading, the timeline mounts only when `selectedCalendarIds`
+intersects the supplied `calendars`. Known IDs can arrive before calendar metadata; unmatched IDs keep the fallback
+visible without mounting an empty timeline. Once a matching resource exists, event loading and layout continue beneath
+the fallback. Clear loading after the initial data arrives; ordinary refreshes need not hide the calendar.
 
 The stylesheet is an explicit package asset; JavaScript does not inject it. This keeps both ESM imports and CommonJS `require("@quno/calendar/infinite-calendar")` safe in Node/SSR code. Import the stylesheet from the browser application entrypoint once.
 
@@ -73,6 +92,29 @@ Parent controls that store the active orientation can import the package-owned
 Repository example: the read-only chapter in
 [`ArticleRecipeDemos.tsx`](../../demo/guide/timeline/ArticleRecipeDemos.tsx) and the
 [integration field guide](../../demo/guide/timeline/README.md).
+
+## Local Event Previews
+
+Keep `loadEvents` stable while editing a draft. Use `projectEvents` to change the display after the calendar cache:
+
+```tsx
+import type { ProjectEvents } from "@quno/calendar/infinite-calendar";
+
+const projectEvents = useCallback<ProjectEvents>(
+  ({ events, startDate, endDate, calendarIds }) => {
+    const previews = expandDraft({ draft, startDate, endDate, calendarIds });
+    return [...events.filter(keepSavedEvent), ...previews];
+  },
+  [draft]
+);
+
+<QunoInfiniteCalendar {...calendarProps} loadEvents={loadEvents} projectEvents={projectEvents} />;
+```
+
+The dates are inclusive local date keys and include empty rendered dates. Return a new collection without mutating
+cached records. Events outside the rendered dates are ignored. Changing or clearing the projection never refreshes
+persisted data; use `eventVersion` or a changed `loadEvents` for saves and filters. Both orientations use projected
+events for layout. Recurrence expansion remains consumer-owned. Try the lazy local-projection example in the field guide.
 
 ## Custom Event Card Structure
 
@@ -258,8 +300,8 @@ Return `{ beforeDays: 0, afterDays: 0 }` to load only rendered dates. Keep a cus
 
 When navigation reaches a date before its events load, the date/resource grid is already real and interactive. Late events are added without receiving browser focus. In the horizontal view:
 
-- `scrollToDate(date)` keeps that date header at the same viewport Y while dense rows expand below it.
-- `scrollToDateTime(date, time)` applies the same vertical rule and leaves the requested time coordinate unchanged on the X axis.
+- `scrollToDate({ date })` keeps that date header at the same viewport Y while dense rows expand below it.
+- `scrollToDateTime({ date, time })` applies the same vertical rule and leaves the requested time coordinate unchanged on the X axis.
 - If the viewport is already partway inside a calendar row, the calendar preserves the date, calendar id, and pixel offset inside that row. Height added above the row is compensated before paint.
 - If that calendar disappears during the same update, restoration falls back to the captured date-local pixel and clamps it inside the date.
 
@@ -610,6 +652,10 @@ these callbacks is read-only.
 />
 ```
 
+A normal click invokes `onEventActivate`, including pointer jitter within four pixels that crosses a snap boundary.
+A move request requires movement beyond that tolerance. Dragging away and back to the original slot invokes neither
+activation nor a move request; the calendar tracks the gesture, so consumers need no pointer-movement suppression.
+
 Returning `false` from `onEventMoveRequest` rejects a drop. Returning a created event from `onEventCreateRequest` lets the visible cache show the committed event immediately. Newly committed visible events briefly receive `status: "appearing"` in `renderEvent` props so product renderers can play a save/create highlight. For parent-owned save flows, update your own event store and call `commitVisibleEvent` so the loaded visible cache changes one record instead of reloading the range.
 
 Repository example: the parent-owned mutation chapter in
@@ -664,8 +710,9 @@ The target is semantic rather than lane-index based. If a save introduces collis
 metrics that move the event into another overlap lane, restoration resolves the new event geometry and keeps that event
 at the captured viewport position.
 
-Capture the source event before staging a move, restore the anchor against the proposed event after rendering the
-controlled draft, and retain that original anchor until the review ends. Accept can keep the proposed event at its
+Capture the source event before staging a move, update the controlled draft, then request restoration against the
+proposed event in the same handler. Capture stays synchronous; restoration waits for the committed layout, so no
+`flushSync` wrapper is needed. Retain that original anchor until the review ends. Accept can keep the proposed event at its
 current viewport-relative position; Cancel should restore the same anchor against the original saved event (or the
 original drawn slot for a create draft). Set `allowNavigationFallback: false` when the workflow must stay inside the
 currently visible date and resource view.
@@ -704,14 +751,15 @@ Repository example: the focused creation, visual-focus, and motion chapters in
 
 ## Availability Editing
 
-Availability uses normal events with `kind: "availability"`. In appointment mode, availability renders as
-pointer-transparent background context. In availability mode, normal appointment cards remain visible but become
-pointer-transparent, and only availability blocks participate in move/draw hit-testing.
+Availability uses normal events with `kind: "availability"`. By default it is a foreground event in `events` mode.
+Set `renderLayer: "availability"` to paint it behind foreground events. In `events` mode, that background layer is
+pointer-transparent. In `availability` mode, foreground cards remain visible but become pointer-transparent, and only
+background-layered availability blocks participate in move/draw hit-testing.
 
-Overlapping availability for one person or resource receives independent deterministic lanes. It uses vertical
+Overlapping background-layered availability for one person or resource receives independent deterministic lanes. It uses vertical
 mini-lanes in the horizontal calendar and side-by-side lanes in the vertical calendar. `renderEvent` receives the
 availability lane through `lane`, its collision-group depth through `laneCount`, and collision state through
-`isOverlapping`. Appointments use a separate lane grid, and the resource grows to the greater of the two depths.
+`isOverlapping`. Foreground events use a separate lane grid, and the resource grows to the greater of the two depths.
 
 ```tsx
 <QunoInfiniteCalendar
@@ -772,6 +820,30 @@ const [date, setDate] = useState<DateRange>({
 Date pickers, search results, command palettes, and “Today” controls can call the same handle without knowing the
 calendar’s virtual-window geometry. Use `settings` for density and dimensions, then scope product CSS through
 `className`; changing either preserves the same calendar integration and renderer contract.
+
+For an editor that knows the resource row, supply its id while navigating the horizontal timeline:
+
+```tsx
+setSelectedCalendarIds(["provider-a", "room-1"]);
+calendarRef.current?.scrollToDateTime({ date, time, calendarId: "room-1", align: "center" });
+```
+
+The package waits for the updated selection to commit before measuring the row. Multiple resource-row navigation requests in
+one batch use the latest request. Use `align: "center"` when the row should move to the middle even if already visible. To start a new
+draft where the operator is looking without scrolling:
+
+```tsx
+const visibleDates = calendarRef.current?.getVisibleDateKeys() ?? [];
+const initialDate = visibleDates[Math.floor(visibleDates.length / 2)] ?? toolbarDate;
+openCreateForm(initialDate);
+```
+
+Try **Use middle visible date** and **Show Room 1** in the date-navigation field-guide example. The former reads
+the current viewport without moving it; the latter centers the selected resource row.
+
+The optional target brings an offscreen or virtualized row into the unobscured viewport after the date mounts. An
+already-visible row stays in place unless `align: "center"` is requested; the time still moves into view. Omitting `calendarId` preserves the original
+date/time navigation, and the vertical view continues to navigate by date/time without a row axis.
 
 Product controls do not need a separate submit step. The infinite-calendar demo uses `QunoDateInput` in single-date mode
 and navigates to the committed day at its product-owned default focus time. It has no separate time field or Add event

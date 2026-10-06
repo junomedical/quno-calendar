@@ -67,7 +67,7 @@ describe("calendar interaction math", () => {
     expect(proposal.proposedEnd).toContain("2026-07-07T");
   });
 
-  it("keeps a final release in the original snapped slot as activation", () => {
+  it("recognizes a final release in the original snapped slot as an unchanged proposal", () => {
     const event: CalendarEvent = {
       id: "event-1",
       calendarId: "calendar-a",
@@ -95,5 +95,15 @@ describe("calendar interaction math", () => {
     expect(draft.id).toBe("draft-new-event");
     expect(draft.calendarId).toBe("calendar-a");
     expect(draft.title).toBe("New appointment");
+    expect(draft.kind).toBe("appointment");
+    expect(draft.renderLayer).toBeUndefined();
+
+    const availabilityDraft = buildDraftEvent({
+      startHit: { dateKey: "2026-07-06", calendarId: "calendar-a", minute: 9 * 60, dayIndex: 0, rowIndex: 0 },
+      endHit: { dateKey: "2026-07-06", calendarId: "calendar-a", minute: 10 * 60, dayIndex: 0, rowIndex: 0 },
+      kind: "availability"
+    });
+    expect(availabilityDraft.kind).toBe("availability");
+    expect(availabilityDraft.renderLayer).toBe("availability");
   });
 });

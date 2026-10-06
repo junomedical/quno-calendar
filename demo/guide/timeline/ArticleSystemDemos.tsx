@@ -36,7 +36,8 @@ const availabilityEvents = [
     start: `${articleDateKey}T09:00:00`,
     end: `${articleDateKey}T10:45:00`,
     color: "#6372a7",
-    kind: "availability" as const
+    kind: "availability" as const,
+    renderLayer: "availability" as const
   },
   {
     id: "availability-a-overlap-2",
@@ -46,7 +47,8 @@ const availabilityEvents = [
     start: `${articleDateKey}T09:30:00`,
     end: `${articleDateKey}T11:00:00`,
     color: "#9b6a9e",
-    kind: "availability" as const
+    kind: "availability" as const,
+    renderLayer: "availability" as const
   },
   {
     id: "availability-a-overlap-3",
@@ -56,7 +58,8 @@ const availabilityEvents = [
     start: `${articleDateKey}T09:45:00`,
     end: `${articleDateKey}T10:30:00`,
     color: "#b66a3c",
-    kind: "availability" as const
+    kind: "availability" as const,
+    renderLayer: "availability" as const
   }
 ];
 
@@ -207,7 +210,7 @@ export function EventFocusDemo() {
   const eventsRef = useRef<CalendarEvent[]>([articleEvents[0]]);
   const [activeDraft, setActiveDraft] = useState<ActiveEventDraft | null>(() => ({
     mode: "create",
-    event: { ...focusEvent, id: "article-focus-draft", kind: "draft", title: "Draft appointment" }
+    event: { ...focusEvent, id: "article-focus-draft", kind: "appointment", title: "Draft appointment" }
   }));
   const [saved, setSaved] = useState(false);
   const [hasCollisions, setHasCollisions] = useState(false);

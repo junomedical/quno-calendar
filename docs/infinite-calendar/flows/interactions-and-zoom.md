@@ -7,7 +7,7 @@ Both orientations share one Pointer Events lifecycle. Projection-specific hit te
 ```mermaid
 flowchart TD
   Down["Pointer down inside viewport"] --> Event{"Closest target has event id?"}
-  Event -->|Yes| Eligibility{"Event kind matches interaction mode and active-draft rules?"}
+  Event -->|Yes| Eligibility{"Render layer matches interaction mode and active-draft rules?"}
   Eligibility -->|No| Ignore["Leave state unchanged"]
   Eligibility -->|Yes| EventHit["Resolve pointer minute from owned grid"]
   EventHit --> CaptureEvent["Capture pointer and start drag candidate"]
@@ -28,9 +28,10 @@ stateDiagram-v2
   [*] --> Idle
   Idle --> Drawing: empty grid pointer down
   Idle --> DragCandidate: event pointer down
-  DragCandidate --> Dragging: pointer resolves a changed proposal
-  DragCandidate --> Activating: pointer up without a move proposal
-  Dragging --> Validating: pointer up
+  DragCandidate --> Dragging: pointer moves beyond click tolerance
+  DragCandidate --> Activating: pointer up without dragging
+  Dragging --> Validating: pointer up with a changed proposal
+  Dragging --> Idle: pointer up at original slot
   Drawing --> Creating: pointer up with positive duration
   Drawing --> Idle: zero duration or cancellation
   Activating --> Idle: onEventActivate notified
@@ -46,7 +47,9 @@ stateDiagram-v2
   Drawing --> Idle: pointercancel or Escape
 ```
 
-`DragCandidate` is represented by drag state with no preview rather than by a separate exported enum. A click is recognized when pointer-up finds no changed proposal.
+`DragCandidate` is represented by drag state rather than a separate exported enum. Movement is remembered before
+frame coalescing, even within a snapped slot or outside the grid. A click activates the event. A drag returning to
+the same minute and resource clears its preview without calling either activation or the parent's move callback.
 
 ## Drag And Drop Validation
 

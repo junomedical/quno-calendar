@@ -16,7 +16,8 @@ export function buildExternalCreateDraft(
     start: request.start,
     end: request.end,
     color: calendar.color,
-    kind: request.kind === "availability" ? "availability" : "draft"
+    kind: request.kind === "availability" ? "availability" : "appointment",
+    ...(request.kind === "availability" ? { renderLayer: "availability" as const } : {})
   };
 }
 

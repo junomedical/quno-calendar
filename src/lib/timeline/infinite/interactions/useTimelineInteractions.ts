@@ -71,14 +71,18 @@ function resolveDraftRenderState({
   };
 }
 
+function useIsActiveDraftEvent({ activeDraft }: Pick<UseTimelineInteractionsArgs, "activeDraft">) {
+  return useCallback(
+    (event: CalendarEvent) => Boolean(activeDraft && event.id === activeDraft.event.id),
+    [activeDraft]
+  );
+}
+
 /** Coordinates the single Pointer Events lifecycle shared by both projections. */
 export function useTimelineInteractions(args: UseTimelineInteractionsArgs) {
   const [hoveredEvent, setHoveredEvent] = useState<HoveredTimelineEvent>(null);
   const { releasedDraft, releaseActiveDraft } = useReleasedDraft({ activeDraft: args.activeDraft });
-  const isActiveDraftEvent = useCallback(
-    (event: CalendarEvent) => Boolean(args.activeDraft && event.id === args.activeDraft.event.id),
-    [args.activeDraft]
-  );
+  const isActiveDraftEvent = useIsActiveDraftEvent({ activeDraft: args.activeDraft });
   const drag = useTimelineDragInteraction({
     settings: args.settings,
     getHit: args.getHit,
@@ -122,7 +126,7 @@ export function useTimelineInteractions(args: UseTimelineInteractionsArgs) {
   const handleEventPointerDown = ({ event, calendarEvent, renderedCalendarId }: EventPointerDownArgs) => {
     event.stopPropagation();
     if (args.activeDraft && !isActiveDraftEvent(calendarEvent)) return;
-    if ((args.interactionMode === "availability") !== (calendarEvent.kind === "availability")) return;
+    if ((args.interactionMode === "availability") !== (calendarEvent.renderLayer === "availability")) return;
     const canInteract = isActiveDraftEvent(calendarEvent)
       ? Boolean(args.onActiveDraftMoveRequest)
       : Boolean(args.onEventMoveRequest || args.onEventActivate);
@@ -133,7 +137,8 @@ export function useTimelineInteractions(args: UseTimelineInteractionsArgs) {
     drag.startDrag({
       event: calendarEvent,
       sourceCalendarId: renderedCalendarId,
-      offsetMinutes: pointerMinute - minutesSinceStartOfDay({ value: calendarEvent.start })
+      offsetMinutes: pointerMinute - minutesSinceStartOfDay({ value: calendarEvent.start }),
+      point: event
     });
     setHoveredEvent(null);
   };
@@ -158,6 +163,7 @@ export function useTimelineInteractions(args: UseTimelineInteractionsArgs) {
     cancelFromPointer
   } = useTimelinePointerFrames({
     update: updateInteraction,
+    observe: drag.trackPointerMovement,
     finish: finishInteraction,
     cancel: cancelInteraction
   });

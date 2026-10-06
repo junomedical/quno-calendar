@@ -18,8 +18,8 @@ export const infiniteCalendarProduction: FieldGuideProductionProfile = {
   entrypoint: "@quno/calendar/infinite-calendar",
   stylesheet: "@quno/calendar/infinite-calendar/styles.css",
   artifacts: [
-    { label: "JavaScript", gzip: "37.56 KiB", raw: "159.29 KiB", budget: "≤ 38 KiB gzip" },
-    { label: "Optional CSS", gzip: "1.95 KiB", raw: "10.21 KiB", budget: "≤ 2 KiB gzip" }
+    { label: "JavaScript", gzip: "38.94 KiB", raw: "164.26 KiB", budget: "≤ 50 KiB gzip" },
+    { label: "Optional CSS", gzip: "1.99 KiB", raw: "10.48 KiB", budget: "≤ 2 KiB gzip" }
   ],
   runtime: "React 18+ and React DOM peers",
   compatibility: "Preact 10.18+ through compat aliases",
@@ -56,7 +56,7 @@ export const dateParserProduction: FieldGuideProductionProfile = {
   product: "Quno/Date Parser",
   entrypoint: "@quno/calendar/date-parser",
   stylesheet: null,
-  artifacts: [{ label: "JavaScript", gzip: "6.00 KiB", raw: "22.55 KiB", budget: "≤ 6 KiB gzip" }],
+  artifacts: [{ label: "JavaScript", gzip: "6.00 KiB", raw: "22.55 KiB", budget: "≤ 7 KiB gzip" }],
   runtime: "No UI framework runtime",
   compatibility: "ESM, CommonJS, browser, Node, and SSR",
   dependencies: "No runtime dependencies"

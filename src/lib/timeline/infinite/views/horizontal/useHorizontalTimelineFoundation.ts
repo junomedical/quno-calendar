@@ -13,6 +13,7 @@
  */
 import { useEffect, useMemo, useState, type ForwardedRef } from "react";
 import type { CalendarInternalViewProps, CalendarViewHandle } from "#quno-internal/timeline/core/internalTypes";
+import { useEventProjection } from "#quno-internal/timeline/infinite/events/metrics/useEventProjection";
 import { useDayMetrics } from "#quno-internal/timeline/infinite/events/metrics/useDayMetrics";
 import { useEventRangeLoader } from "#quno-internal/timeline/infinite/events/loading/useEventRangeLoader";
 import { useRetainedCalendarRows } from "#quno-internal/timeline/infinite/events/metrics/useRetainedCalendarRows";
@@ -96,8 +97,14 @@ export function useHorizontalTimelineFoundation({
     selectedIds,
     visibleDateKeys: virtualTimeline.visibleDateKeys
   });
-  const dayMetrics = useDayMetrics({
+  const eventsByDate = useEventProjection({
     eventsByDate: eventRange.eventsByDate,
+    projectEvents: props.projectEvents,
+    selectedIds,
+    visibleDateKeys: virtualTimeline.visibleDateKeys
+  });
+  const dayMetrics = useDayMetrics({
+    eventsByDate,
     selectedCalendars: renderedCalendars,
     settings,
     baseDayHeight,

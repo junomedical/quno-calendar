@@ -23,6 +23,7 @@ import {
   TimeMarkerDemo
 } from "./ArticleProductDemos";
 import { DragCreateArticleDemo, PrefetchLoadingDemo, ReadOnlyArticleDemo } from "./ArticleRecipeDemos";
+import { EventProjectionDemo } from "./EventProjectionDemo";
 import { ReactStateDemo } from "./ReactStateDemo";
 import { FieldGuidePage } from "#quno-demo/guide/shared/FieldGuidePage";
 import { FieldGuideProduction } from "#quno-demo/guide/shared/FieldGuideProduction";
@@ -235,6 +236,8 @@ const loadingSnippet = `const loadEvents = async ({ startDate, endDate, calendar
   {...calendarProps}
   selectedCalendarIds={visibleCalendarIds}
   loadEvents={loadEvents}
+  isLoading={!initialDataReady}
+  loadingFallback={<MyCalendarSkeleton />}
 />`;
 
 const availabilitySnippet = `const [interactionMode, setInteractionMode] =
@@ -574,11 +577,11 @@ export function IntegrationWalkthrough({ embedded = false }: { embedded?: boolea
           harder to read and easier to edit by mistake.
         </p>
         <p>
-          Availability has its own collision lanes, separate from appointments. Parallel windows for one person use
-          mini-lanes horizontally and side-by-side lanes vertically; the resource grows to the deeper layer rather than
-          adding both depths. In appointment mode availability remains behind events and does not intercept the pointer.
-          In <code>interactionMode="availability"</code>, appointments become inactive context so only availability can
-          be drawn or moved.
+          Background-layered availability has its own collision lanes, separate from foreground events. Parallel windows
+          for one person use mini-lanes horizontally and side-by-side lanes vertically; the resource grows to the deeper
+          layer rather than adding both depths. In appointment mode background availability remains behind events and
+          does not intercept the pointer. In <code>interactionMode="availability"</code>, appointments become inactive
+          context so only availability can be drawn or moved.
         </p>
         <CodeBlock code={availabilitySnippet} title="Choose the editable layer" />
         <Callout>
@@ -645,6 +648,11 @@ export function IntegrationWalkthrough({ embedded = false }: { embedded?: boolea
           Quno Date Input accepts familiar dates and natural phrases, then passes its timezone-free day key to the
           navigation handle. Products can connect the same handle to a command palette, search result, or deep link
           without learning how the infinite date window works.
+        </p>
+        <p>
+          When an editor knows its resource, include its id as the optional <code>calendarId</code> field in the{" "}
+          <code>scrollToDateTime</code> options object to reveal that row without querying the timeline DOM. The
+          calendar keeps an already-visible row in place.
         </p>
         <Callout>
           Place the caret over part of the date and press Arrow Up or Arrow Down. Each recognized change moves the
@@ -909,11 +917,29 @@ export function IntegrationWalkthrough({ embedded = false }: { embedded?: boolea
           Switch between one and two calendars, then change zoom. The state summary and calendar update together because
           React owns both values; the calendar keeps its visible date and loaded events while those props change.
         </Callout>
+        <p>
+          Keep <code>loadEvents</code> for persisted data. A synchronous <code>projectEvents</code> callback can replace
+          or add local previews in the rendered date window without invalidating loaded events. Return a new collection;
+          leave cached records unchanged. Recurrence expansion stays in your application.
+        </p>
+        <Callout>Try it: show the preview, move it to noon, then clear it. The load count stays unchanged.</Callout>
         <DemoBreakout>
           <LazyArticleDemo label="React-controlled calendar example">
             <ReactStateDemo />
           </LazyArticleDemo>
+          <LazyArticleDemo label="local event projection example">
+            <EventProjectionDemo />
+          </LazyArticleDemo>
         </DemoBreakout>
+        <CodeBlock
+          code={`const projectEvents = useCallback(({ events, startDate, endDate }) => {
+  const previews = expandDraft({ draft, startDate, endDate });
+  return [...events.filter(keepSavedEvent), ...previews];
+}, [draft]);
+
+<QunoInfiniteCalendar {...calendarProps} loadEvents={loadEvents} projectEvents={projectEvents} />`}
+          title="Project local previews after loading"
+        />
         <CodeBlock code={completeSnippet} title="Complete minimal integration" />
       </ArticleSection>
 
@@ -961,7 +987,7 @@ export function IntegrationWalkthrough({ embedded = false }: { embedded?: boolea
 
       <ArticleSection id="package-footprint" number="26" title="Ship Infinite Calendar independently">
         <p>
-          Infinite Calendar JavaScript is 37.56 KiB gzip. Its optional stylesheet is a separate 1.95 KiB gzip import;
+          Infinite Calendar JavaScript is 38.94 KiB gzip. Its optional stylesheet is a separate 1.99 KiB gzip import;
           neither number includes React, React DOM, or the external virtualizer supplied by the application.
         </p>
         <p>

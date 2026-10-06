@@ -201,6 +201,14 @@ because that repository was the consolidation source. Its identifier and text re
 - Consequences: Both public guide compositions support repeated Start/End jumps with pointer, Enter, and Space,
   with ordinary or reduced motion, while subsequent Tab navigation remains within the picker until focus leaves.
 
+## QUNO-015 - Resolve public subpath types for legacy TypeScript consumers
+
+- Date: 2026-09-24
+- Status: Accepted
+- Context: Modern TypeScript resolves declaration subpaths from package `exports`, but the onboarding monorepo still uses Node-style module resolution and required ambient declarations for Infinite Calendar and Datepicker.
+- Decision: Keep the existing `exports` type conditions and add `typesVersions` mappings for every public JavaScript subpath. Do not add consumer-side TypeScript paths, which can affect runtime bundler resolution.
+- Consequences: Legacy consumers can import the package's real declarations directly, remove local declaration shims, and keep runtime imports at public subpaths. No JavaScript or CSS payload changes.
+
 ## QUNO-015 - Compose a single day and a separate clock across picker and input
 
 - Date: 2026-10-06
@@ -290,3 +298,10 @@ because that repository was the consolidation source. Its identifier and text re
 - Consequences: Hours anchor the minute grids without changing rail width, option geometry, or interaction.
   Existing scoped text tokens and hour-heading hooks remain available. Desktop and mobile browser checks cover
   computed typography/color, rail fit, sticky position, and layering in both controls.
+
+## Concurrent decision records reconciled — 2026-10-06
+
+The merged branches independently assigned QUNO-015 to [legacy TypeScript subpath resolution](#quno-015---resolve-public-subpath-types-for-legacy-typescript-consumers)
+and [single-day clock composition](#quno-015---compose-a-single-day-and-a-separate-clock-across-picker-and-input).
+Both accepted identifiers and texts are preserved; references distinguish these records by their full title/anchor.
+New decisions continue after QUNO-021. The legacy TypeScript mapping also covers the new Timepicker subpath.

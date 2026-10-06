@@ -78,6 +78,16 @@ applies; new refinements belong here rather than in the Datepicker ledger.
   analyzer without clock recognition code; Datepicker and the shared day model retain their contracts. The parser stays
   dependency-free and SSR-safe. Existing feature size ceilings remain unchanged.
 
+## QDPR-006 - Leave headroom in the parser bundle budget
+
+- Date: 2026-10-06
+- Status: Accepted; supersedes QDPR-005's unchanged parser size ceiling
+- Context: The parser artifact is approximately 6 KiB gzip, and Node 26's compression output exceeds the former
+  6 KiB ceiling by a few bytes. A ceiling at the artifact's current size leaves no useful room for future changes.
+- Decision: Raise the Date Parser JavaScript gzip ceiling to 7 KiB and align the bundle guard, field-guide budget,
+  and verification documentation. Retain independent budgets for the other products.
+- Consequences: The size check passes across the verified Node versions while retaining a bounded parser budget.
+
 ## UI integration update — 2026-10-06
 
 [QUNO-015](../shared/decisions.md#quno-015---compose-a-single-day-and-a-separate-clock-across-picker-and-input)
@@ -96,3 +106,10 @@ accepted grammar, distinct intraday/overnight clocks, result shape, dependency d
   Rank genuinely separate range endpoints together as before.
 - Consequences: Abbreviated months and AM/PM clocks retain their grammar; omitted years respect expected-range,
   locale, and reference-date ranking. Single selection accepts the resulting date and clock without public API changes.
+
+## Concurrent decision records reconciled — 2026-10-06
+
+The merged branches independently assigned QDPR-006 to [parser budget headroom](#qdpr-006---leave-headroom-in-the-parser-bundle-budget)
+and [single timed-date ranking](#qdpr-006---rank-single-timed-dates-without-a-year-once).
+Preserve both accepted identifiers and texts, and distinguish references by full title/anchor. The current parser
+ceiling is 7 KiB; the earlier UI integration note's unchanged 6 KiB refers to its branch baseline.

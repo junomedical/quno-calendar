@@ -5,7 +5,7 @@
  * Flow: date events -> resource membership -> prepared timed lanes -> row
  * heights -> total date height plus row/cell lookup functions.
  *
- * Preserves: foreground and availability use independent lanes; transient
+ * Preserves: foreground and explicitly background-layered availability use independent lanes; transient
  * drafts never increase metrics; zoom-only changes retain model identities.
  * Does not own virtual measurement or viewport correction.
  *
