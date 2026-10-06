@@ -120,4 +120,41 @@ describe("horizontal navigation after parent layout updates", () => {
       })
     );
   });
+  it("lets a later raw date navigation replace a queued row navigation", () => {
+    const { calendarRef, scrollToDate } = setup();
+    act(() => {
+      calendarRef.current?.scrollToDateTime({ date: "2026-07-27", time: "09:00", calendarId: "doctor" });
+      calendarRef.current?.scrollToDate({ date: "2026-08-03" });
+    });
+    expect(scrollToDate).toHaveBeenCalledExactlyOnceWith({ date: "2026-08-03" });
+    expect(anchoring.restoreViewportAnchor).not.toHaveBeenCalled();
+  });
+
+  it.each(["cancel", "restore"])("%s discards row navigation queued before the layout commit", (action) => {
+    const { calendarRef, scrollToDate } = setup();
+    act(() => {
+      calendarRef.current?.scrollToDateTime({ date: "2026-07-27", time: "09:00", calendarId: "doctor" });
+      if (action === "cancel") calendarRef.current?.cancelViewportAnchorRestore();
+      else calendarRef.current?.restoreViewportAnchor({ anchor: null });
+    });
+    expect(scrollToDate).not.toHaveBeenCalled();
+    expect(anchoring.getResourceElement).not.toHaveBeenCalled();
+    expect(anchoring.restoreViewportAnchor).toHaveBeenCalledTimes(action === "cancel" ? 0 : 1);
+  });
+
+  it("recomputes the centered snapshot when asynchronously loaded events grow the resource", () => {
+    const { calendarRef, rerender, settings } = setup();
+    act(() =>
+      calendarRef.current?.scrollToDateTime({
+        date: "2026-07-27",
+        time: "09:00",
+        calendarId: "doctor",
+        align: "center"
+      })
+    );
+    const options = anchoring.restoreViewportAnchor.mock.calls[0][0];
+    expect(options.resolveAnchorSnapshot().top).toBe((600 + settings.dayHeaderHeight - 50) / 2);
+    rerender({ height: 288, hidden: false });
+    expect(options.resolveAnchorSnapshot().top).toBe((600 + settings.dayHeaderHeight - 288) / 2);
+  });
 });

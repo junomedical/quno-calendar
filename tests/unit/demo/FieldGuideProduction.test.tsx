@@ -10,7 +10,7 @@ import {
 
 describe("field guide production facts", () => {
   it.each([
-    [infiniteCalendarProduction, "38.94 KiB gzip", "1.99 KiB gzip"],
+    [infiniteCalendarProduction, "39.39 KiB gzip", "1.99 KiB gzip"],
     [datepickerProduction, "12.46 KiB gzip", "3.36 KiB gzip"],
     [dateInputProduction, "9.60 KiB gzip", "0.58 KiB gzip"],
     [timepickerProduction, "1.59 KiB gzip", "0.78 KiB gzip"],

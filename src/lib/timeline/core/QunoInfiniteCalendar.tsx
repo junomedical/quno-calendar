@@ -45,7 +45,27 @@ export const QunoInfiniteCalendar = forwardRef<QunoInfiniteCalendarHandle, QunoI
       [focus.focusEvent]
     );
 
-    const internalProps = { ...props, focusedEventTarget: focus.focusedEventTarget };
+    const internalProps = {
+      ...props,
+      focusedEventTarget: focus.focusedEventTarget,
+      style:
+        loadingFallback === undefined || props.style === undefined
+          ? props.style
+          : {
+              ...props.style,
+              width: props.style.width === undefined ? undefined : "100%",
+              height: props.style.height === undefined && props.style.minHeight === undefined ? undefined : "100%",
+              minWidth: props.style.minWidth === undefined ? undefined : 0,
+              minHeight: props.style.minHeight === undefined ? undefined : 0,
+              maxWidth: undefined,
+              maxHeight: undefined,
+              flex: undefined,
+              flexBasis: undefined,
+              flexGrow: undefined,
+              flexShrink: undefined,
+              alignSelf: undefined
+            }
+    };
     const calendar =
       view === "infinite-vertical" ? (
         <InfiniteVerticalTimelineView ref={viewRef} {...internalProps} />
@@ -56,14 +76,35 @@ export const QunoInfiniteCalendar = forwardRef<QunoInfiniteCalendarHandle, QunoI
       return calendar;
     }
 
+    const minimumHeightOnly = props.style?.minHeight !== undefined && props.style.height === undefined;
     const hasSelectedCalendar = props.calendars.some(({ id }) => props.selectedCalendarIds.includes(id));
 
     return (
-      <div className="quno-calendar-loading-shell" aria-busy={isLoading}>
+      <div
+        className="quno-calendar-loading-shell"
+        aria-busy={isLoading}
+        style={{
+          width: props.style?.width,
+          height: props.style?.height,
+          minWidth: props.style?.minWidth,
+          minHeight: props.style?.minHeight,
+          maxWidth: props.style?.maxWidth,
+          maxHeight: props.style?.maxHeight,
+          flex: props.style?.flex,
+          flexBasis: props.style?.flexBasis,
+          flexGrow: props.style?.flexGrow,
+          flexShrink: props.style?.flexShrink,
+          alignSelf: props.style?.alignSelf
+        }}
+      >
         <div
           className="quno-calendar-loading-content"
           aria-hidden={isLoading || undefined}
-          style={{ visibility: isLoading ? "hidden" : undefined }}
+          style={{
+            visibility: isLoading ? "hidden" : undefined,
+            position: minimumHeightOnly ? "absolute" : undefined,
+            inset: minimumHeightOnly ? 0 : undefined
+          }}
         >
           {!isLoading || hasSelectedCalendar ? calendar : null}
         </div>

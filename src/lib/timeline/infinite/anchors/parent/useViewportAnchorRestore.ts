@@ -8,10 +8,14 @@ import type {
 import type { ViewportGeometryRegistry } from "./viewportGeometryRegistry";
 import { ViewportAnchorRestoreSession } from "./viewportAnchorRestoreSession";
 
+type RestoreOptions = Parameters<QunoInfiniteCalendarHandle["restoreViewportAnchor"]>[0] & {
+  resolveAnchorSnapshot?: () => CalendarViewportAnchor["snapshot"];
+};
 type RestoreRequest = {
   anchor: CalendarViewportAnchor;
   target: CalendarViewportAnchorTarget;
   options: CalendarViewportAnchorRestoreOptions;
+  resolveAnchorSnapshot?: RestoreOptions["resolveAnchorSnapshot"];
 };
 type RestoreArgs = {
   containerRef: RefObject<HTMLElement | null>;
@@ -36,14 +40,14 @@ export function useViewportAnchorRestore(args: RestoreArgs) {
   }, []);
   useEffect(() => () => cancelViewportAnchorRestore(), [cancelViewportAnchorRestore]);
 
-  const restoreViewportAnchor = useCallback<QunoInfiniteCalendarHandle["restoreViewportAnchor"]>(
-    ({ anchor, ...options }) => {
+  const restoreViewportAnchor = useCallback<(options: RestoreOptions) => void>(
+    ({ anchor, resolveAnchorSnapshot, ...options }) => {
       if (!anchor) {
         return;
       }
       cancelViewportAnchorRestore();
       const target = options.target ?? anchor.target;
-      pendingRestoreRef.current = { anchor, target, options };
+      pendingRestoreRef.current = { anchor, target, options, resolveAnchorSnapshot };
       setActiveRestoreTarget({ ...target });
     },
     [cancelViewportAnchorRestore]

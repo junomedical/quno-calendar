@@ -62,7 +62,11 @@ export function useExternalDraftNavigation(calendarRef: RefObject<QunoInfiniteCa
       calendarRef.current?.restoreViewportAnchor({
         anchor,
         ...{
-          target: eventTarget(event, options.targetCalendarId, options.eventId ?? event.id),
+          target: eventTarget(
+            event,
+            options.targetCalendarId ?? anchor?.target.calendarId,
+            options.eventId ?? event.id
+          ),
           afterRecenter: options.afterRecenter ?? true,
           allowNavigationFallback: options.allowNavigationFallback,
           cancelOnManualScroll: options.cancelOnManualScroll

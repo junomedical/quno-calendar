@@ -7,12 +7,14 @@ import {
   type QunoInfiniteCalendarHandle,
   type EventActivateRequest,
   type EventCreateRequest,
-  type EventMoveRequest
+  type EventMoveRequest,
+  type CalendarViewportAnchor
 } from "@quno/calendar/infinite-calendar";
 import { demoCalendars } from "./data";
 import { draftParticipantIds, eventParticipantIds, isoDateInputValue } from "./draftFormUtils";
 import { buildExternalCreateDraft, calendarColor } from "./externalDraftEvents";
 import { firstPersonParticipantId } from "./externalDraftParticipants";
+import { captureParticipantAnchor } from "./externalDraftParticipantAnchor";
 import { useExternalDraftCommit } from "./useExternalDraftCommit";
 import { useExternalDraftNavigation } from "./useExternalDraftNavigation";
 
@@ -33,6 +35,7 @@ export function useExternalEventDrafts({
   const [draftParticipantsChanged, setDraftParticipantsChanged] = useState(false);
   const draftSequenceRef = useRef(0);
   const activeEditSourceEventRef = useRef<CalendarEvent | null>(null);
+  const activeEditSourceAnchorRef = useRef<CalendarViewportAnchor | null>(null);
   const {
     lastSeenAnchorRef: activeDraftLastSeenAnchorRef,
     captureEventAnchor,
@@ -63,6 +66,7 @@ export function useExternalEventDrafts({
     setDraftParticipantsChanged(false);
     activeDraftLastSeenAnchorRef.current = null;
     activeEditSourceEventRef.current = null;
+    activeEditSourceAnchorRef.current = null;
   }, [activeDraftLastSeenAnchorRef]);
 
   const openCreateDraft = useCallback(
@@ -108,6 +112,7 @@ export function useExternalEventDrafts({
         draftEvent,
         firstPersonParticipantId(eventParticipantIds(draftEvent)) ?? draftEvent.calendarId
       );
+      activeEditSourceAnchorRef.current = activeDraftLastSeenAnchorRef.current;
       setDraftParticipantsChanged(false);
       setActiveDraft({
         mode: "edit",
@@ -207,45 +212,42 @@ export function useExternalEventDrafts({
       if (!activeDraft) {
         return;
       }
-      const sourceParticipantIds = activeEditSourceEventRef.current
-        ? eventParticipantIds(activeEditSourceEventRef.current)
-        : [];
-      const sourcePrimaryCalendarId =
-        activeDraft.mode === "edit" ? firstPersonParticipantId(sourceParticipantIds) : undefined;
-      const anchor =
-        (sourcePrimaryCalendarId ? captureEventAnchor(activeDraft.event, sourcePrimaryCalendarId, true) : null) ??
-        captureEventAnchor(activeDraft.event, undefined, true) ??
-        activeDraftLastSeenAnchorRef.current;
+      const sourcePrimaryId = activeEditSourceEventRef.current
+        ? firstPersonParticipantId(eventParticipantIds(activeEditSourceEventRef.current))
+        : undefined;
+      const sourceAnchor = sourcePrimaryId ? captureEventAnchor(activeDraft.event, sourcePrimaryId, true) : null;
+      if (sourceAnchor) activeEditSourceAnchorRef.current = sourceAnchor;
       const nextEvent = updater(activeDraft.event);
-      if (anchor) {
-        activeDraftLastSeenAnchorRef.current = anchor;
-        flushSync(() => {
-          setDraftParticipantsChanged(true);
-          setActiveDraft({ ...activeDraft, event: nextEvent });
-        });
-        if (nextEvent.calendarIds?.length === 0) {
-          restoreSlotAnchor(anchor, nextEvent, {
-            afterRecenter: true,
-            cancelOnManualScroll: true
-          });
-          return;
-        }
-        restoreEventAnchor(anchor, nextEvent, {
-          afterRecenter: true,
-          allowNavigationFallback: false,
-          cancelOnManualScroll: true
-        });
-        return;
-      }
+      const anchor = captureParticipantAnchor({
+        event: activeDraft.event,
+        nextEvent,
+        previousAnchor: activeDraftLastSeenAnchorRef.current,
+        captureEventAnchor
+      });
+      calendarRef.current?.cancelViewportAnchorRestore();
       setDraftParticipantsChanged(true);
       setActiveDraft({ ...activeDraft, event: nextEvent });
+      if (!anchor) return;
+      activeDraftLastSeenAnchorRef.current = anchor;
+      const options = {
+        targetCalendarId: anchor.target.calendarId,
+        afterRecenter: true,
+        allowNavigationFallback: false,
+        cancelOnManualScroll: true
+      };
+      if (nextEvent.calendarIds?.length === 0) {
+        restoreSlotAnchor(anchor, nextEvent, options);
+      } else {
+        restoreEventAnchor(anchor, nextEvent, options);
+      }
     },
-    [activeDraft, activeDraftLastSeenAnchorRef, captureEventAnchor, restoreEventAnchor, restoreSlotAnchor]
+    [activeDraft, activeDraftLastSeenAnchorRef, calendarRef, captureEventAnchor, restoreEventAnchor, restoreSlotAnchor]
   );
 
   const { saveActiveDraft, cancelActiveDraft } = useExternalDraftCommit({
     activeDraft,
     activeEditSourceEventRef,
+    activeEditSourceAnchorRef,
     lastSeenAnchorRef: activeDraftLastSeenAnchorRef,
     calendarRef,
     captureEventAnchor,

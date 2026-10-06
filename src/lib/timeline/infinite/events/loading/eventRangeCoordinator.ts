@@ -171,6 +171,10 @@ export class EventRangeCoordinator {
     return this.cache.hasEvent({ eventId });
   }
 
+  event({ eventId }: { eventId: EventId }): CalendarEvent | undefined {
+    return this.cache.event({ eventId });
+  }
+
   patchMovedEvent({ eventId, event }: { eventId: EventId; event: CalendarEvent }): boolean {
     return this.cache.patchMovedEvent({ eventId, movedEvent: event });
   }

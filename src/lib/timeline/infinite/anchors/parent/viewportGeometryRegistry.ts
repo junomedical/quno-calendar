@@ -56,15 +56,19 @@ export class ViewportGeometryRegistry {
   }
 
   event({ target, viewportBox }: { target: CalendarViewportAnchorTarget; viewportBox: DOMRect }) {
+    return this.eventInstance({ target, viewportBox })?.element ?? null;
+  }
+
+  eventInstance({ target, viewportBox }: { target: CalendarViewportAnchorTarget; viewportBox: DOMRect }) {
     if (!target.eventId) return null;
     const instances = this.events.get(target.eventId);
     if (!instances) return null;
-    const candidates = target.calendarId
-      ? [instances.get(target.calendarId)].filter((element): element is HTMLElement => Boolean(element))
-      : Array.from(instances.values());
+    const candidates = [...instances]
+      .filter(([calendarId]) => !target.calendarId || calendarId === target.calendarId)
+      .map(([calendarId, element]) => ({ calendarId, element }));
     return (
-      candidates.find((element) => isVisible({ element, viewportBox })) ??
-      (target.requireVisible ? null : candidates[0])
+      candidates.find(({ element }) => isVisible({ element, viewportBox })) ??
+      (target.requireVisible ? null : (candidates[0] ?? null))
     );
   }
 

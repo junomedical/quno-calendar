@@ -27,6 +27,10 @@ Priority and interaction with scroll maintenance are defined in the [Flow Guide]
 - Controlled zoom remains parent-owned through `settings.zoom` and only requests changes with `onZoomChange`.
 - Captures read the current geometry synchronously. Restore requests start after the parent layout commits; cancellation
   clears pending requests as well as active sessions. Consumers can update selection or drafts without forcing a React commit.
+- Event captures record the resolved participant id, even when the caller omitted it. Restoration cannot hop between
+  copies of a multi-participant event as visibility changes. Consumers can explicitly transfer to another target.
+- New raw date navigation, explicit restoration, and cancellation discard queued horizontal resource navigation.
+- Explicit centered row navigation recomputes its desired snapshot from the live row height during the bounded session.
 - Manual user intent cancels eligible scheduled restoration.
 - Horizontal date/time navigation can target a resource row; visible rows stay put while virtualized rows are pinned
   and revealed after the date jump.
@@ -49,6 +53,8 @@ Priority and interaction with scroll maintenance are defined in the [Flow Guide]
 
 - Unit: geometry registry full-visibility checks, data-layout anchor, controlled zoom anchor, and resize compensation.
   `viewportAnchoring.test.tsx` covers committed geometry and cancellation before commit; `horizontalNavigation.test.tsx`
-  covers updated row sizing, newly selected rows, and latest-request navigation.
+  covers updated/async row sizing, newly selected rows, and precedence across navigation, restore, and cancellation.
+  Event projection tests assert accepted moves preserve persisted metadata and do not commit projection-only ids.
 - Browser: async height growth, external layout restore/cancel, conditional event-focus scrolling, date/time navigation,
-  zoom continuity, and interaction priority.
+  zoom continuity, and interaction priority. Dedicated regressions assert both orientations' loading geometry,
+  percentage/minimum sizing, accepted projected drags, async distant centering, and frame-stable three-participant editing.

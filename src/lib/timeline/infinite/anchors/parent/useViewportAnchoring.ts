@@ -106,8 +106,15 @@ export function useViewportAnchoring(args: AnchoringArgs) {
   );
 
   const captureViewportAnchor = useCallback(
-    (target: CalendarViewportAnchorTarget): CalendarViewportAnchor | null => captureAnchor({ target, resolveSnapshot }),
-    [resolveSnapshot]
+    (target: CalendarViewportAnchorTarget): CalendarViewportAnchor | null => {
+      const viewport = args.containerRef.current;
+      const instance = viewport
+        ? registry.eventInstance({ target, viewportBox: viewport.getBoundingClientRect() })
+        : null;
+      const resolvedTarget = instance ? { ...target, calendarId: instance.calendarId } : target;
+      return captureAnchor({ target: resolvedTarget, resolveSnapshot });
+    },
+    [args.containerRef, registry, resolveSnapshot]
   );
 
   const isEventFullyVisible = useCallback(

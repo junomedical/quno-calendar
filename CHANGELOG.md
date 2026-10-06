@@ -68,6 +68,16 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ### Fixed
 
+- Accepted projected event drags now apply only proposed timestamps and participants to the persisted record. Clearing
+  the projection restores saved metadata; projection-only events require an explicit commit or loader response.
+- Raw date navigation, explicit restoration, and cancellation supersede queued horizontal row requests. Centered
+  distant navigation follows the live row height when async collision layout grows it.
+- Initial loading retains component dimensions before resource metadata exists. Percentage and minimum dimensions
+  apply once to the loading shell and remain consistent after the timeline mounts.
+- Multi-participant event anchors retain the captured participant. The external editor keeps a surviving visible instance
+  fixed through repeated participant toggles and transfers only when needed, preserving checkbox focus, empty-selection
+  behavior, manual scrolling, and the original first-person Cancel anchor.
+
 - Pointer jitter within the four-pixel click tolerance now activates an event even when it crosses a snap boundary.
   A changed proposal requires movement beyond that tolerance before requesting a move or updating the event cache.
 
@@ -83,6 +93,14 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 - A drag dropped back onto its original minute and calendar now neither activates the event editor nor sends a move request. The calendar tracks movement before frame coalescing; ordinary clicks still activate without consumer-side suppression.
 
 ### Verification notes
+
+- PR 25 follow-up and participant anchoring: all 506 unit tests (four workers) and 152 Chromium scenarios pass.
+  Browser regressions cover accepted projected drags in both orientations, explicit/percentage/minimum loading
+  geometry, async collision centering, latest navigation, checkbox focus, and 60-frame participant stability.
+  The new browser fixtures also pass with generated `dist` removed. Formatting, architecture/contracts, typecheck,
+  lint, demo build, packed-package verification, Preact, React 19, size reporting, and pack dry-run pass.
+  Infinite Calendar measures 170,582 B raw and 40,335 B gzip (39.39 KiB); its CSS remains 2,041 B gzip.
+  Both remain within the unchanged 50 KiB JavaScript and 2 KiB CSS ceilings.
 
 - Drag click tolerance: all 432 unit tests pass. The full Chromium run passed 133 scenarios; the new jitter case
   passes after removing an unrelated cancel-scroll assertion, with all four drag scenarios passing on rerun.

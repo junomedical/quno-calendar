@@ -58,4 +58,22 @@ describe("viewport anchoring after parent layout updates", () => {
     unmount();
     frame.mockRestore();
   });
+  it("captures the identity of the visible participant and never retargets another instance", () => {
+    const { result, viewport, unmount } = setup();
+    const first = document.createElement("div");
+    const second = document.createElement("div");
+    let firstTop = 800;
+    let secondTop = 200;
+    first.getBoundingClientRect = () => new DOMRect(300, firstTop, 100, 30);
+    second.getBoundingClientRect = () => new DOMRect(300, secondTop, 100, 30);
+    result.current.registration.registerEventElement({ eventId: "shared", calendarId: "first", element: first });
+    result.current.registration.registerEventElement({ eventId: "shared", calendarId: "second", element: second });
+    const anchor = result.current.captureViewportAnchor({ eventId: "shared", requireVisible: true });
+    expect(anchor?.target.calendarId).toBe("second");
+    firstTop = 180;
+    secondTop = 400;
+    act(() => result.current.restoreViewportAnchor({ anchor, allowNavigationFallback: false }));
+    expect(viewport.scrollTop).toBe(200); // Follow second even though first is now visible.
+    unmount();
+  });
 });

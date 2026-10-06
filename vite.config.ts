@@ -7,6 +7,10 @@ export default defineConfig({
   plugins: [react(), demoEventsApiPlugin()],
   resolve: {
     alias: [
+      {
+        find: /^@quno\/calendar\/infinite-calendar\/styles\.css$/,
+        replacement: resolve(__dirname, "src/lib/timeline/infinite/rendering/styles/calendar.css")
+      },
       { find: /^@quno\/calendar\/infinite-calendar$/, replacement: resolve(__dirname, "src/lib/timeline/index.ts") },
       { find: /^@quno\/calendar\/timepicker$/, replacement: resolve(__dirname, "src/lib/time-picker/index.ts") },
       { find: /^@quno\/calendar\/datepicker$/, replacement: resolve(__dirname, "src/lib/date-picker/index.ts") },

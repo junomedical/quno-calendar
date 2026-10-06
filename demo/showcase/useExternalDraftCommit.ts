@@ -32,6 +32,7 @@ type RestoreSlotAnchor = (
 type ExternalDraftCommitArgs = {
   activeDraft: ActiveEventDraft | null;
   activeEditSourceEventRef: RefObject<CalendarEvent | null>;
+  activeEditSourceAnchorRef: RefObject<CalendarViewportAnchor | null>;
   lastSeenAnchorRef: RefObject<CalendarViewportAnchor | null>;
   calendarRef: RefObject<QunoInfiniteCalendarHandle | null>;
   captureEventAnchor: CaptureEventAnchor;
@@ -45,6 +46,7 @@ type ExternalDraftCommitArgs = {
 export function useExternalDraftCommit({
   activeDraft,
   activeEditSourceEventRef,
+  activeEditSourceAnchorRef,
   lastSeenAnchorRef,
   calendarRef,
   captureEventAnchor,
@@ -99,7 +101,7 @@ export function useExternalDraftCommit({
       firstPersonParticipantId(sourceParticipantIds) ?? sourceEvent?.calendarId ?? activeDraft?.event.calendarId;
     const anchor = activeDraft
       ? ((sourcePrimaryCalendarId ? captureEventAnchor(activeDraft.event, sourcePrimaryCalendarId, true) : null) ??
-        (activeDraft.mode === "edit" ? lastSeenAnchorRef.current : null) ??
+        (activeDraft.mode === "edit" ? activeEditSourceAnchorRef.current : null) ??
         captureEventAnchor(activeDraft.event, undefined, true) ??
         lastSeenAnchorRef.current)
       : null;
@@ -143,6 +145,7 @@ export function useExternalDraftCommit({
   }, [
     activeDraft,
     activeEditSourceEventRef,
+    activeEditSourceAnchorRef,
     calendarRef,
     captureEventAnchor,
     clearActiveDraft,

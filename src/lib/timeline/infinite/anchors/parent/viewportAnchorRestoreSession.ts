@@ -34,6 +34,7 @@ type RestoreSessionArgs = {
   scrollToDateTime: QunoInfiniteCalendarHandle["scrollToDateTime"];
   isCurrent: () => boolean;
   cancel: () => void;
+  resolveAnchorSnapshot?: () => CalendarViewportAnchor["snapshot"];
 };
 
 export class ViewportAnchorRestoreSession {
@@ -107,9 +108,10 @@ export class ViewportAnchorRestoreSession {
       return;
     }
     const { viewport, anchor } = this.args;
+    const desired = this.args.resolveAnchorSnapshot?.() ?? anchor.snapshot;
     const next = {
-      top: viewport.scrollTop + snapshot.top - anchor.snapshot.top,
-      left: viewport.scrollLeft + snapshot.left - anchor.snapshot.left
+      top: viewport.scrollTop + snapshot.top - desired.top,
+      left: viewport.scrollLeft + snapshot.left - desired.left
     };
     if (Math.abs(next.top - viewport.scrollTop) <= 0.5 && Math.abs(next.left - viewport.scrollLeft) <= 0.5) return;
     this.expectedScroll = next;
