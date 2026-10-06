@@ -9,17 +9,21 @@ import {
 
 describe("field guide production facts", () => {
   it.each([
-    [infiniteCalendarProduction, "37.88 KiB gzip", "1.96 KiB gzip"],
-    [datepickerProduction, "10.46 KiB gzip", "3.23 KiB gzip"],
-    [dateInputProduction, "7.80 KiB gzip", "0.58 KiB gzip"],
-    [dateParserProduction, "5.21 KiB gzip", "No stylesheet"]
+    [infiniteCalendarProduction, "37.90 KiB gzip", "1.95 KiB gzip"],
+    [datepickerProduction, "10.49 KiB gzip", "3.22 KiB gzip"],
+    [dateInputProduction, "7.70 KiB gzip", "0.58 KiB gzip"],
+    [dateParserProduction, "6.00 KiB gzip", "No stylesheet"]
   ] as const)("separates exact artifacts and runtime contracts for $product", (profile, javascript, styles) => {
     const { unmount } = render(<FieldGuideProduction profile={profile} />);
     const payload = screen.getByLabelText(`${profile.product} production payload`);
     const contract = screen.getByLabelText(`${profile.product} runtime contract`);
 
     expect(within(payload).getByText(javascript, { exact: true })).toBeInTheDocument();
-    expect(within(profile.stylesheet ? payload : contract).getByText(styles, { exact: true })).toBeInTheDocument();
+    expect(
+      within(profile.stylesheet ? payload : contract).getByText(styles, {
+        exact: true
+      })
+    ).toBeInTheDocument();
     expect(within(contract).getByText(profile.entrypoint, { exact: true })).toBeInTheDocument();
     expect(screen.queryByText("Public API at a glance")).not.toBeInTheDocument();
     expect(screen.queryByText(/Total package/)).not.toBeInTheDocument();

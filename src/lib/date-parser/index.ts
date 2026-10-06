@@ -9,6 +9,7 @@ export type {
   DateInputParseResult,
   DateInputParseSuccessResult,
   DateInputParserLanguage,
+  DateInputTimeRange,
   DateInputToken,
   DateInputTokenType
 } from "#quno-internal/date-parser/dateInputTypes";

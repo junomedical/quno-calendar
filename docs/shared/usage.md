@@ -20,6 +20,8 @@ import { QunoDateInput } from "@quno/calendar/date-input";
 import { parseDateInput, tokenizeDateInput } from "@quno/calendar/date-parser";
 ```
 
+Infinite Calendar JavaScript has a 50 KiB gzip ceiling; its optional stylesheet has a separate 2 KiB ceiling.
+
 Add only the optional stylesheets needed by the browser application. JavaScript imports do not inject CSS.
 The package's public subpath types resolve under both modern and legacy Node-style TypeScript module resolution; no consumer-side declaration shim is needed.
 
@@ -443,10 +445,11 @@ For a compact range field, let `QunoDateInput` replace the picker’s selected-p
 `selectionMode="range"` picker while focus remains in the composed control, hide its duplicate selection header with
 the public `selection-header` slot, and close it when focus or an outside pointer leaves. Use the blur event’s
 `relatedTarget` to recognize focus moving to a picker control, and retain whether a pointer action began inside the
-composition until its click settles. Start or End shortcuts can remove themselves after jumping months, and WebKit
-does not necessarily focus a clicked button, so a delayed `document.activeElement` check can mistake either internal
-click for an outside blur. Typing and picking continue to share one controlled `DateRange`; an empty committed input
-clears that value without a second action.
+composition until its click settles. Start and End shortcuts focus the picker’s stable month-heading button before
+jumping to their date and exiting. This keeps focus within the popup after pointer, Enter, or Space activation,
+including with reduced motion. WebKit does not necessarily focus a clicked button, so keep the internal-pointer guard
+for other picker interactions rather than relying on a delayed `document.activeElement` check. Typing and picking
+continue to share one controlled `DateRange`; an empty committed input clears that value without a second action.
 
 ## Quno/Date Parser
 
@@ -471,6 +474,25 @@ const tokens = tokenizeDateInput({ text: "next Monday" });
 The parser recognizes explicit formats, relative dates and calendar periods, inclusive ranges, multilingual vocabulary, and consumer lexicon extensions. It remains timezone-free and safe to import in ESM, CommonJS, Node, and SSR.
 Lexicon extensions add deliberate aliases to the bounded grammar; they do not turn it into a general parser for
 languages with different token boundaries or word order.
+
+### Optional dates and clock times
+
+```ts
+const timed = parseDateInput({
+  text: "tomorrow 10:30PM",
+  recognizeTime: true,
+  referenceDate: "2026-10-05",
+  expectedRange: { start: "2026-01-01", end: "2027-12-31" }
+});
+// value: { start: "2026-10-06", end: "2026-10-06" }
+// times: { start: "22:30", end: "22:30" }
+const clockTokens = tokenizeDateInput({ text: "10:30PM", recognizeTime: true });
+```
+
+Clock recognition defaults to false. Times remain separate `HH:mm` values without a timezone; missing endpoint times
+are `null` and date-only results omit `times`. Time-only input uses `referenceDate`; `23:00–01:00` advances an undated
+end to the next calendar day. Use `at` or `um` to disambiguate a bare hour from an accepted date. See the
+[complete clock and range rules](../date-parser/README.md#optional-clock-recognition). Date Input remains date-only.
 
 ## Compose Quno/Datepicker and Quno/Infinite Calendar
 

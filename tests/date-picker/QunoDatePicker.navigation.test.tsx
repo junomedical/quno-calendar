@@ -96,6 +96,31 @@ describe("QunoDatePicker navigation", () => {
     expect(slot("grid")).toHaveAttribute("data-month-motion", "previous");
   });
 
+  it("hands shortcut focus to the month heading before navigating without editing selection", () => {
+    const onChange = vi.fn();
+    const onVisibleMonthChange = vi.fn();
+    render(
+      <QunoDatePicker
+        defaultValue={{ start: "2026-05-21", end: "2026-08-18" }}
+        initialMonth="2026-08-01"
+        onChange={onChange}
+        onVisibleMonthChange={onVisibleMonthChange}
+      />
+    );
+    const shortcut = pill("start", "before");
+    const focusDestination = vi.fn();
+    shortcut.addEventListener("blur", (event) => focusDestination((event as FocusEvent).relatedTarget));
+    shortcut.focus();
+    fireEvent.click(shortcut);
+
+    expect(focusDestination).toHaveBeenCalledWith(slot("month-heading-button"));
+    expect(slot("month-heading-button")).toHaveFocus();
+    expect(slot("month-heading")).toHaveTextContent("May 2026");
+    expect(day("2026-05-21")).toHaveAttribute("data-range-start", "true");
+    expect(onVisibleMonthChange).toHaveBeenCalledExactlyOnceWith({ month: "2026-05-01" });
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
   it("switches month when a click releases on an outside-month day", () => {
     const onChange = vi.fn();
     const onVisibleMonthChange = vi.fn();

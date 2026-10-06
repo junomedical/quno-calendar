@@ -6,7 +6,7 @@ import { StoryHowTo } from "#quno-demo/guide/date-picker/StoryHowTo";
 import { FieldGuidePage } from "#quno-demo/guide/shared/FieldGuidePage";
 import { FieldGuideProduction } from "#quno-demo/guide/shared/FieldGuideProduction";
 import { dateParserProduction } from "#quno-demo/guide/shared/productionProfiles";
-import { PreferredOrderParserExample, TokenParserExample } from "./DateParserExamples";
+import { PreferredOrderParserExample, TokenParserExample, TimeParserExample } from "./DateParserExamples";
 import {
   expectedRecipe,
   formatsRecipe,
@@ -14,7 +14,8 @@ import {
   orderRecipe,
   rangeRecipe,
   relativeRecipe,
-  tokenizeRecipe
+  tokenizeRecipe,
+  timeRecipe
 } from "./dateParserSnippets";
 
 const contents = [
@@ -24,8 +25,9 @@ const contents = [
   ["#range-parsing", "04", "Parse inclusive ranges"],
   ["#expected-period", "05", "Rank a useful period"],
   ["#multiple-languages", "06", "Recognize languages together"],
-  ["#tokenization", "07", "Inspect the headless grammar"],
-  ["#parser-production", "08", "Ship without a UI runtime"]
+  ["#time-parsing", "07", "Recognize optional clock times"],
+  ["#tokenization", "08", "Inspect the headless grammar"],
+  ["#parser-production", "09", "Ship without a UI runtime"]
 ] as const;
 
 const recipe = (title: string, copy: string, code: string) => (
@@ -127,11 +129,26 @@ export function DateParserFieldGuide() {
         />
       </StoryFeature>
       <StoryFeature
-        id="tokenization"
+        id="time-parsing"
         number="07"
+        kicker="Optional times"
+        title="Pair a date with the time people write."
+        copy="Enable clock recognition for 24-hour and AM/PM forms. Times stay separate from dates; an overnight interval advances its end date. Time-only input uses the reference date, and valid numeric dates keep their meaning."
+        instruction="Try the individual hours and tomorrow’s overnight range, then switch to Date only. Use at or um to mark an ambiguous bare hour. Times on whole calendar periods are not supported."
+        howTo={recipe(
+          "Recognize dates and times",
+          "Opt in with recognizeTime: true; clocks return as HH:mm without a timezone.",
+          timeRecipe
+        )}
+      >
+        <TimeParserExample />
+      </StoryFeature>
+      <StoryFeature
+        id="tokenization"
+        number="08"
         kicker="Headless grammar"
         title="Inspect recognition before resolving a value."
-        copy="Tokenization exposes words, numbers, date separators, and range separators without rendering a component."
+        copy="Tokenization exposes words, numbers, date separators, and range separators. Opt in to clock tokens with recognizeTime."
         instruction="Edit the phrase and inspect each token boundary."
         howTo={recipe("Tokenize input", "Use tokens for diagnostics or complementary UI.", tokenizeRecipe)}
       >
@@ -139,10 +156,10 @@ export function DateParserFieldGuide() {
       </StoryFeature>
       <StoryFeature
         id="parser-production"
-        number="08"
+        number="09"
         kicker="Production"
         title="Ship Date Parser independently."
-        copy="Date Parser JavaScript is 5.20 KiB gzip. It has no stylesheet, UI framework runtime, or runtime dependency."
+        copy="Date Parser JavaScript is 6.00 KiB gzip. It has no stylesheet, UI framework runtime, or runtime dependency."
         instruction="Review its JavaScript artifact, runtime contract, and public surface without a UI payload."
       >
         <FieldGuideProduction profile={dateParserProduction} />

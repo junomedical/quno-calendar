@@ -14,6 +14,9 @@ The visible month remains independent from the selected value. Controlled and un
 with equal endpoints representing a single day. The field guide demonstrates `selectionMode="single"` on Datepicker by
 itself before separately composing a range-enabled picker with a focused Quno/Date Input selection surface.
 
+Start and End shortcuts reveal the endpoint month without editing selection. Activation focuses the stable month
+heading before the shortcut exits, preserving focus inside a composed input popup for pointer and keyboard use.
+
 The guide presents range selection as direct manipulation instead of a forced from-to sequence. Its in-place month
 navigator follows seasonal groups—March–May, June–August, September–November, and December continuing into
 January–February—while sticky year labels preserve context during fast scrolling.

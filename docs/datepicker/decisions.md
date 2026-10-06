@@ -1039,3 +1039,15 @@ future identifiers are documented in [Date Input decisions](../date-input/decisi
 supersedes historical positional signatures and customization names for this product. The accepted interaction,
 presentation, and geometry behavior in this ledger remains in force. See the
 [migration guide](../shared/migration.md#unreleased-named-contracts-and-product-ownership) for exact replacements.
+
+## QDP-124 — Transfer shortcut focus before endpoint navigation
+
+- Date: 2026-10-05
+- Status: Accepted; refines QDP-030 and QDP-034
+- Context: An activated endpoint shortcut is disabled and removed when its month becomes visible. Losing the focused
+  button can trigger a host popup's blur dismissal or strand keyboard focus on the document.
+- Decision: Focus the stable month-heading button before a Start or End shortcut jumps to its
+  endpoint month. Apply the same handoff to pointer and native keyboard activation; preserve selection and existing
+  shortcut exit motion.
+- Consequences: Focus remains within the picker throughout shortcut removal, including without animations. Host
+  compositions can distinguish internal navigation from leaving the control through the normal blur `relatedTarget`.

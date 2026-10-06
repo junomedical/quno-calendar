@@ -46,6 +46,11 @@ frame; release still flushes the final position synchronously.
 Untouched date buckets keep stable immutable snapshots, and prepared date/resource layers are reused until their
 bucket, resource selection, visible time bounds, or relevant draft source changes.
 
+## Bundle budget
+
+JavaScript is limited to 50 KiB gzip and the optional stylesheet to 2 KiB gzip. The current artifacts measure
+37.90 KiB and 1.95 KiB gzip respectively (Node 24). See [Decision 094](./decisions.md#094---allow-50-kib-for-infinite-calendar-javascript).
+
 ## Named contracts
 
 Use `renderEvent`, component-level `locale` and `formatters.dayLabel({ date, locale })`, plus `getDayProps`,

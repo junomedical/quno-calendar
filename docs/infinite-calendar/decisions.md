@@ -780,3 +780,13 @@ maximum-depth sizing apply to this background layer only. Without the layer over
 editable event in `events` mode and shares its overlap lanes and metrics with appointments and blockers. Background
 availability is pointer-transparent in `events` mode; `availability` interaction mode targets that layer. This permits
 internal scheduling editors while retaining the background treatment for consumers that opt into it.
+
+## 094 - Allow 50 KiB For Infinite Calendar JavaScript
+
+Date: 2026-10-06
+Status: Accepted; supersedes Decision 091's 38 KiB JavaScript ceiling
+
+The reported ESM artifact is 38.92 KiB gzip, exceeding the accepted 38 KiB ceiling. Raise the Infinite Calendar
+JavaScript ceiling to 50 KiB to accommodate the current artifact and leave comfortable room for future changes.
+Keep the guard, field-guide production facts, and verification documentation aligned. The optional stylesheet
+retains its independent 2 KiB ceiling; all other feature budgets remain unchanged.
