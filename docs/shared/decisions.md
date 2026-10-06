@@ -305,3 +305,9 @@ The merged branches independently assigned QUNO-015 to [legacy TypeScript subpat
 and [single-day clock composition](#quno-015---compose-a-single-day-and-a-separate-clock-across-picker-and-input).
 Both accepted identifiers and texts are preserved; references distinguish these records by their full title/anchor.
 New decisions continue after QUNO-021. The legacy TypeScript mapping also covers the new Timepicker subpath.
+
+## Parser endpoint integration update — 2026-10-07
+
+[QDPR-007](../date-parser/decisions.md#qdpr-007---return-paired-date-and-clock-endpoints) owns the parser-only public
+result change to paired `{ date, time }` endpoints. Date Input and public demo compositions project endpoint dates
+into the existing shared `DateRange`; the independent UI value/callback shapes under QUNO-015 remain unchanged.

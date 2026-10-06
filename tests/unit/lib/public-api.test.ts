@@ -38,6 +38,29 @@ describe("public API", () => {
     expect(Object.keys(dateParserApi).sort()).toEqual(["parseDateInput", "tokenizeDateInput"]);
   });
 
+  it.each([false, true])("returns paired endpoints for date-only input with recognizeTime=%s", (recognizeTime) => {
+    const options = {
+      expectedRange: { start: "2026-01-01", end: "2026-12-31" } as const,
+      referenceDate: "2026-10-05" as const,
+      recognizeTime
+    };
+    for (const [text, status] of [
+      ["today", "success"],
+      ["today -", "partial-range"]
+    ]) {
+      const result = dateParserApi.parseDateInput({ text, ...options });
+      expect(result).toEqual({
+        status,
+        start: { date: "2026-10-05", time: null },
+        end: { date: "2026-10-05", time: null }
+      });
+      expect(result).not.toHaveProperty("value");
+      expect(result).not.toHaveProperty("times");
+    }
+    expect(dateParserApi.parseDateInput({ text: "", ...options })).toEqual({ status: "empty" });
+    expect(dateParserApi.parseDateInput({ text: "nope", ...options })).toEqual({ status: "invalid" });
+  });
+
   it("does not retain legacy timeline facade names", () => {
     const facade = readFileSync("src/lib/timeline/index.ts", "utf8");
     for (const name of [

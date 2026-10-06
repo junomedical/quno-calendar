@@ -41,7 +41,9 @@ through a separate `HH:mm` clock. Picker cadence/hours constrain typing only whe
 Timepicker and Datepicker use [cadence-specific row sizes](./timepicker/README.md#value-and-settings), including six choices per five-minute row and 20-minute slots. Omitted or empty enabled hours enables all 24 hours in both selectors and forced input validation.
 Both time selectors emphasize sticky hour headings with larger, bold text above the minute-number hierarchy.
 
-Date Parser can opt into traditional clock times and overnight ranges with `recognizeTime: true`.
+Date Parser returns paired `start`/`end` objects with `{ date, time }`; missing clocks are `null`.
+See the [endpoint migration](./shared/migration.md#unreleased-paired-parser-endpoints) for the breaking replacement of `value` and `times`.
+It can opt into traditional clock times and overnight ranges with `recognizeTime: true`.
 Single dates without a year, such as `6 oct 2pm`, use the same year ranking as date-only input.
 See [optional clock recognition](./date-parser/README.md#optional-clock-recognition) and its live guide chapter.
 

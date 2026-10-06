@@ -113,3 +113,20 @@ The merged branches independently assigned QDPR-006 to [parser budget headroom](
 and [single timed-date ranking](#qdpr-006---rank-single-timed-dates-without-a-year-once).
 Preserve both accepted identifiers and texts, and distinguish references by full title/anchor. The current parser
 ceiling is 7 KiB; the earlier UI integration note's unchanged 6 KiB refers to its branch baseline.
+
+## QDPR-007 - Return paired date and clock endpoints
+
+- Date: 2026-10-07
+- Status: Accepted; supersedes only the result shape in QDPR-005
+- Context: Parallel `value: DateRange` and optional `times` force consumers to assemble a date and clock from two
+  separate objects, even though each clock belongs to a specific endpoint.
+- Decision: Return top-level `start` and `end` objects from successful and partial-range results. Export
+  `DateInputParseEndpoint = { date: IsoDate; time: string | null }` only from the parser subpath. Always include both
+  endpoint fields, including `time: null` for date-only or missing clocks. Remove `value`, `times`, and
+  `DateInputTimeRange` immediately without compatibility aliases. Empty/invalid results remain status-only. Single
+  inputs duplicate their date and clock; partial ranges duplicate the start date and leave the end clock null.
+  Preserve grammar, ranking, date/time normalization, overnight inference, tokenization, and opt-in clock recognition.
+- Consequences: All parser consumers and packed fixtures use the paired endpoints. Date Input projects endpoint dates
+  into its existing `DateRange` and reads the start clock without changing its public callbacks or keyboard behavior.
+  UI date/clock models, shared contracts, dependency direction, and the 7 KiB parser ceiling remain unchanged.
+  The [migration guide](../shared/migration.md#unreleased-paired-parser-endpoints) documents the public break.

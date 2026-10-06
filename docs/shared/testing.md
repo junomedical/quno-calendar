@@ -7,6 +7,10 @@ Public contract tests verify named arguments, formatter contexts, notification p
 Compile-time consumers reject removed names, positional signatures, duplicate exports, and parser-private types.
 Architecture checks enforce object arguments and product dependency direction, including headless type imports.
 
+- Parser results pair dates and clocks in top-level endpoints for date-only, timed, partial, reversed, intraday, and
+  overnight input. Exact result assertions reject legacy `value`/`times` fields; type guards require endpoint narrowing
+  and reject `DateInputTimeRange`. Packed ESM/CommonJS checks verify the same shape without a DOM. Browser guide/demo
+  checks verify endpoint pairing and null clocks while retaining desktop/mobile containment and overflow assertions.
 - Date virtualization with excluded weekdays.
 - Natural-date parsing covers complete previous day/week/month/year periods, the current configured calendar week,
   Sunday-, Monday-, and Saturday-first boundaries, last/this/next weekday resolution against that same week model,
@@ -356,7 +360,7 @@ and 10 KiB for Date Input.
 Parser tests cover clock formats and validation, AM/PM boundaries, reference dates, numeric-date precedence,
 English/German connectors, omitted-year single/partial endpoints across multi-year windows, inherited dates, overnight and explicitly reversed endpoints, missing clocks, partial
 ranges, single-day selection, unchanged defaults, token spans, and compiled analysis. Public consumer types require
-`DateInputTimeRange` on the parser subpath, the shared `DateTimeSelectionChange`/`TimeSelectionOptions`, and single-day
+`DateInputParseEndpoint` on the parser subpath and reject the removed `DateInputTimeRange`, while retaining the shared `DateTimeSelectionChange`/`TimeSelectionOptions` and single-day
 `timeMode` on the input and picker; `recognizeTime` remains exclusive to parser options. Packed Node ESM/CommonJS
 checks execute timed parsing without `document`. Chromium tests toggle recognition in the guide and demo, verify
 resolved dates and times, and assert usable control geometry and bounded overflow at desktop and mobile widths.

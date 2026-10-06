@@ -82,3 +82,10 @@ layout; existing value, focus, formatting, and typed-clock ownership contracts r
 [QUNO-019](../shared/decisions.md#quno-019---default-omitted-or-empty-enabled-hours-to-all-hours) supersedes the empty-list
 restriction: omitted or empty enabled hours now allows all 24 hours, including forced typed-clock validation and spins.
 Nonempty lists retain their restrictions; disabled state, cadence, and existing values keep their contracts.
+
+## Parser endpoint integration update — 2026-10-07
+
+[QDPR-007](../date-parser/decisions.md#qdpr-007---return-paired-date-and-clock-endpoints) replaces the parser's parallel
+date/clock results with `start` and `end` objects containing `{ date, time }`. Date Input projects their dates into its
+existing `DateRange` and uses the start clock in single-day time mode. Controlled/uncontrolled values, commits,
+recognition, partial completion, keyboard edits, cadence validation, and public callbacks retain QDI-001–QDI-003 semantics.

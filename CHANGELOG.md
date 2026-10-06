@@ -4,6 +4,18 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+- **Breaking:** Date Parser now returns top-level `start` and `end` objects containing `{ date: IsoDate, time: string | null }`
+  for successful and partial-range results. Removed `value`, `times`, and `DateInputTimeRange`; export
+  `DateInputParseEndpoint` from the parser subpath instead. Date-only and missing clocks are `null`; empty/invalid
+  results remain status-only. Updated internal analyzers, Date Input, public demos/guides, package/type guards,
+  and migration recipes together. Grammar, ranking, overnight rules, and UI value/callback shapes remain unchanged.
+
+- Paired parser endpoint verification: all 511 unit tests and all 153 Chromium scenarios pass, including desktop/mobile
+  endpoint output and containment checks. Formatting, architecture/contracts, typecheck, lint, library/demo builds,
+  packed modern/legacy TypeScript, ESM/CommonJS/SSR, Preact, React 19, size reporting, and pack dry-run pass.
+  Date Parser measures 23,178 B raw and 6,172 B gzip (6.03 KiB) against its unchanged 7 KiB ceiling; Date Input
+  measures 35,547 B raw and 9,868 B gzip (9.64 KiB) against its unchanged 10 KiB ceiling. Guide measurements are refreshed.
+
 - Additional browser verification: WebKit passes the time-selector typography/geometry checks but fails the existing enabled-day arrow focus assertion at 1280px and 390px (`Next enabled day` is inactive after a click). The Firefox probe was stopped while browser startup remained pending. Required Chromium verification remains the handoff baseline.
 
 - Hour headings now stand out from minute numbers in standalone Timepicker and Datepicker time mode: 16px bold text in the normal text color, beside 13px/550 minute options. Desktop/mobile browser checks verify computed styles, rail fit, and sticky layering.

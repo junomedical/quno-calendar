@@ -18,8 +18,16 @@ describe("natural date parser", () => {
     const second = analyzer.analyze({ text: "12 Dezember 2026" });
 
     expect(first.tokens.map((token) => token.value).filter((value) => value.trim())).toEqual(["next", "monday"]);
-    expect(first.result).toEqual({ status: "success", value: { start: "2026-08-24", end: "2026-08-24" } });
-    expect(second.result).toEqual({ status: "success", value: { start: "2026-12-12", end: "2026-12-12" } });
+    expect(first.result).toEqual({
+      status: "success",
+      start: { date: "2026-08-24", time: null },
+      end: { date: "2026-08-24", time: null }
+    });
+    expect(second.result).toEqual({
+      status: "success",
+      start: { date: "2026-12-12", time: null },
+      end: { date: "2026-12-12", time: null }
+    });
   });
 
   it("tokenizes date parts separately from explicit range separators", () => {
@@ -41,14 +49,16 @@ describe("natural date parser", () => {
   it("uses the expected window to infer a missing year", () => {
     expect(parseDateInput({ text: "12/14", ...options })).toEqual({
       status: "success",
-      value: { start: "2025-12-14", end: "2025-12-14" }
+      start: { date: "2025-12-14", time: null },
+      end: { date: "2025-12-14", time: null }
     });
   });
 
   it("rejects range results in single-day mode", () => {
     expect(parseDateInput({ text: "12/14", ...{ ...options, selectionMode: "single" } })).toEqual({
       status: "success",
-      value: { start: "2025-12-14", end: "2025-12-14" }
+      start: { date: "2025-12-14", time: null },
+      end: { date: "2025-12-14", time: null }
     });
     expect(parseDateInput({ text: "12/14 – 15/12", ...{ ...options, selectionMode: "single" } })).toEqual({
       status: "invalid"
@@ -58,61 +68,74 @@ describe("natural date parser", () => {
     });
     expect(parseDateInput({ text: "12/14 –", ...{ ...options, selectionMode: "single" } })).toEqual({
       status: "partial-range",
-      value: { start: "2025-12-14", end: "2025-12-14" }
+      start: { date: "2025-12-14", time: null },
+      end: { date: "2025-12-14", time: null }
     });
   });
 
   it("lets business preference resolve numeric date order conflicts", () => {
     expect(parseDateInput({ text: "3/4/2026", ...{ ...options, preferredDateOrder: "dmy" } })).toEqual({
       status: "success",
-      value: { start: "2026-04-03", end: "2026-04-03" }
+      start: { date: "2026-04-03", time: null },
+      end: { date: "2026-04-03", time: null }
     });
     expect(parseDateInput({ text: "3/4/2026", ...{ ...options, preferredDateOrder: "mdy" } })).toEqual({
       status: "success",
-      value: { start: "2026-03-04", end: "2026-03-04" }
+      start: { date: "2026-03-04", time: null },
+      end: { date: "2026-03-04", time: null }
     });
     expect(parseDateInput({ text: "20 12 12", ...{ ...options, preferredDateOrder: "ymd" } })).toEqual({
       status: "success",
-      value: { start: "2020-12-12", end: "2020-12-12" }
+      start: { date: "2020-12-12", time: null },
+      end: { date: "2020-12-12", time: null }
     });
   });
 
   it("resolves two-digit years, month words, locale order, and leap days", () => {
     expect(parseDateInput({ text: "22 / 07 / 80", ...options })).toEqual({
       status: "success",
-      value: { start: "1980-07-22", end: "1980-07-22" }
+      start: { date: "1980-07-22", time: null },
+      end: { date: "1980-07-22", time: null }
     });
     expect(parseDateInput({ text: "22 80 07", ...options })).toEqual({
       status: "success",
-      value: { start: "1980-07-22", end: "1980-07-22" }
+      start: { date: "1980-07-22", time: null },
+      end: { date: "1980-07-22", time: null }
     });
     expect(parseDateInput({ text: "22-07-80", ...options })).toEqual({
       status: "success",
-      value: { start: "1980-07-22", end: "1980-07-22" }
+      start: { date: "1980-07-22", time: null },
+      end: { date: "1980-07-22", time: null }
     });
     expect(parseDateInput({ text: "22–07–80", ...options })).toEqual({
       status: "success",
-      value: { start: "1980-07-22", end: "1980-07-22" }
+      start: { date: "1980-07-22", time: null },
+      end: { date: "1980-07-22", time: null }
     });
     expect(parseDateInput({ text: "22—07—80", ...options })).toEqual({
       status: "success",
-      value: { start: "1980-07-22", end: "1980-07-22" }
+      start: { date: "1980-07-22", time: null },
+      end: { date: "1980-07-22", time: null }
     });
     expect(parseDateInput({ text: "12 jul", ...options })).toEqual({
       status: "success",
-      value: { start: "2026-07-12", end: "2026-07-12" }
+      start: { date: "2026-07-12", time: null },
+      end: { date: "2026-07-12", time: null }
     });
     expect(parseDateInput({ text: "12 juni", ...{ ...options, parserLanguages: ["en", "de"] } })).toEqual({
       status: "success",
-      value: { start: "2026-06-12", end: "2026-06-12" }
+      start: { date: "2026-06-12", time: null },
+      end: { date: "2026-06-12", time: null }
     });
     expect(parseDateInput({ text: "3/4/2026", ...{ ...options, locale: "en-US" } })).toEqual({
       status: "success",
-      value: { start: "2026-03-04", end: "2026-03-04" }
+      start: { date: "2026-03-04", time: null },
+      end: { date: "2026-03-04", time: null }
     });
     expect(parseDateInput({ text: "December 14, 2025", ...{ ...options, locale: "en-US" } })).toEqual({
       status: "success",
-      value: { start: "2025-12-14", end: "2025-12-14" }
+      start: { date: "2025-12-14", time: null },
+      end: { date: "2025-12-14", time: null }
     });
     expect(parseDateInput({ text: "29/02/2024", ...options }).status).toBe("success");
     expect(parseDateInput({ text: "29/02/2025", ...options })).toEqual({ status: "invalid" });
@@ -121,111 +144,136 @@ describe("natural date parser", () => {
   it("recognizes German forms and completed relative periods", () => {
     expect(parseDateInput({ text: "heute", ...{ ...options, parserLanguages: ["de"] } })).toEqual({
       status: "success",
-      value: { start: "2026-08-19", end: "2026-08-19" }
+      start: { date: "2026-08-19", time: null },
+      end: { date: "2026-08-19", time: null }
     });
     expect(parseDateInput({ text: "letzte 2 monate", ...{ ...options, parserLanguages: ["de"] } })).toEqual({
       status: "success",
-      value: { start: "2026-06-01", end: "2026-07-31" }
+      start: { date: "2026-06-01", time: null },
+      end: { date: "2026-07-31", time: null }
     });
     expect(parseDateInput({ text: "last 3 days", ...options })).toEqual({
       status: "success",
-      value: { start: "2026-08-16", end: "2026-08-18" }
+      start: { date: "2026-08-16", time: null },
+      end: { date: "2026-08-18", time: null }
     });
     expect(parseDateInput({ text: "past 90 days", ...options })).toEqual({
       status: "success",
-      value: { start: "2026-05-22", end: "2026-08-19" }
+      start: { date: "2026-05-22", time: null },
+      end: { date: "2026-08-19", time: null }
     });
     expect(parseDateInput({ text: "past 3 months", ...options })).toEqual({
       status: "success",
-      value: { start: "2026-05-19", end: "2026-08-19" }
+      start: { date: "2026-05-19", time: null },
+      end: { date: "2026-08-19", time: null }
     });
     expect(parseDateInput({ text: "90 days", ...options })).toEqual({
       status: "success",
-      value: { start: "2026-05-22", end: "2026-08-19" }
+      start: { date: "2026-05-22", time: null },
+      end: { date: "2026-08-19", time: null }
     });
     expect(parseDateInput({ text: "3 months", ...options })).toEqual({
       status: "success",
-      value: { start: "2026-05-19", end: "2026-08-19" }
+      start: { date: "2026-05-19", time: null },
+      end: { date: "2026-08-19", time: null }
     });
     expect(parseDateInput({ text: "7 days ago", ...options })).toEqual({
       status: "success",
-      value: { start: "2026-08-12", end: "2026-08-12" }
+      start: { date: "2026-08-12", time: null },
+      end: { date: "2026-08-12", time: null }
     });
     expect(parseDateInput({ text: "day ago", ...options })).toEqual({
       status: "success",
-      value: { start: "2026-08-18", end: "2026-08-18" }
+      start: { date: "2026-08-18", time: null },
+      end: { date: "2026-08-18", time: null }
     });
     expect(parseDateInput({ text: "month ago", ...options })).toEqual({
       status: "success",
-      value: { start: "2026-07-19", end: "2026-07-19" }
+      start: { date: "2026-07-19", time: null },
+      end: { date: "2026-07-19", time: null }
     });
     expect(parseDateInput({ text: "year ago", ...options })).toEqual({
       status: "success",
-      value: { start: "2025-08-19", end: "2025-08-19" }
+      start: { date: "2025-08-19", time: null },
+      end: { date: "2025-08-19", time: null }
     });
   });
 
   it("recognizes English this and next calendar periods", () => {
     expect(parseDateInput({ text: "this day", ...options })).toEqual({
       status: "success",
-      value: { start: "2026-08-19", end: "2026-08-19" }
+      start: { date: "2026-08-19", time: null },
+      end: { date: "2026-08-19", time: null }
     });
     expect(parseDateInput({ text: "next day", ...options })).toEqual({
       status: "success",
-      value: { start: "2026-08-20", end: "2026-08-20" }
+      start: { date: "2026-08-20", time: null },
+      end: { date: "2026-08-20", time: null }
     });
     expect(parseDateInput({ text: "next week", ...options })).toEqual({
       status: "success",
-      value: { start: "2026-08-24", end: "2026-08-30" }
+      start: { date: "2026-08-24", time: null },
+      end: { date: "2026-08-30", time: null }
     });
     expect(parseDateInput({ text: "next 2 weeks", ...options })).toEqual({
       status: "success",
-      value: { start: "2026-08-24", end: "2026-09-06" }
+      start: { date: "2026-08-24", time: null },
+      end: { date: "2026-09-06", time: null }
     });
     expect(parseDateInput({ text: "this month", ...options })).toEqual({
       status: "success",
-      value: { start: "2026-08-01", end: "2026-08-31" }
+      start: { date: "2026-08-01", time: null },
+      end: { date: "2026-08-31", time: null }
     });
     expect(parseDateInput({ text: "next month", ...options })).toEqual({
       status: "success",
-      value: { start: "2026-09-01", end: "2026-09-30" }
+      start: { date: "2026-09-01", time: null },
+      end: { date: "2026-09-30", time: null }
     });
     expect(parseDateInput({ text: "next 2 months", ...options })).toEqual({
       status: "success",
-      value: { start: "2026-09-01", end: "2026-10-31" }
+      start: { date: "2026-09-01", time: null },
+      end: { date: "2026-10-31", time: null }
     });
     expect(parseDateInput({ text: "this year", ...options })).toEqual({
       status: "success",
-      value: { start: "2026-01-01", end: "2026-12-31" }
+      start: { date: "2026-01-01", time: null },
+      end: { date: "2026-12-31", time: null }
     });
     expect(parseDateInput({ text: "next year", ...options })).toEqual({
       status: "success",
-      value: { start: "2027-01-01", end: "2027-12-31" }
+      start: { date: "2027-01-01", time: null },
+      end: { date: "2027-12-31", time: null }
     });
   });
 
   it("normalizes absolute ranges and protects incomplete or invalid drafts", () => {
     expect(parseDateInput({ text: "18/12 – 14/12", ...options })).toEqual({
       status: "success",
-      value: { start: "2025-12-14", end: "2025-12-18" }
+      start: { date: "2025-12-14", time: null },
+      end: { date: "2025-12-18", time: null }
     });
     expect(parseDateInput({ text: "18/12 — 14/12", ...options })).toEqual({
       status: "success",
-      value: { start: "2025-12-14", end: "2025-12-18" }
+      start: { date: "2025-12-14", time: null },
+      end: { date: "2025-12-18", time: null }
     });
     expect(parseDateInput({ text: "22.07 - 7 days ago", ...options })).toEqual({
       status: "success",
-      value: { start: "2026-07-22", end: "2026-08-12" }
+      start: { date: "2026-07-22", time: null },
+      end: { date: "2026-08-12", time: null }
     });
     expect(
       parseDateInput({ text: "12 June 2026 – next Monday", ...{ ...options, referenceDate: "2026-08-25" } })
     ).toEqual({
       status: "success",
-      value: { start: "2026-06-12", end: "2026-08-31" }
+      start: { date: "2026-06-12", time: null },
+      end: { date: "2026-08-31", time: null }
     });
     expect(parseDateInput({ text: "12/14 -", ...options })).toEqual({
       status: "partial-range",
-      value: { start: "2025-12-14", end: "2025-12-14" }
+      start: { date: "2025-12-14", time: null },
+      end: { date: "2025-12-14", time: null }
     });
     expect(parseDateInput({ text: "12 jul nope", ...options })).toEqual({ status: "invalid" });
     expect(parseDateInput({ text: "1 January 198", ...options })).toEqual({ status: "invalid" });

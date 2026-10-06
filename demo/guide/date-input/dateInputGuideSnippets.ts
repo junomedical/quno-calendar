@@ -22,7 +22,8 @@ export const formatsSnippet = `const result = parseDateInput({ text: text, ...({
 }) });
 
 // 3/4/2026, 2026-04-03, 3 April 2026,
-// and April 3, 2026 all resolve to the same IsoDate.`;
+// and April 3, 2026 all resolve to the same IsoDate.
+// Read result.start.date and result.end.date; absent clocks are null.`;
 
 export const preferredOrderSnippet = `<QunoDateInput
   expectedRange={expectedRange}

@@ -84,8 +84,9 @@ export const TypeToEditExample = (): JSX.Element => {
       }
     });
     if (result.status !== "success") return;
-    moveCalendar(result.value, onlyChangedDate(preview ?? value, result.value));
-    setPreview(result.value);
+    const next = { start: result.start.date, end: result.end.date };
+    moveCalendar(next, onlyChangedDate(preview ?? value, next));
+    setPreview(next);
   };
   const previewArrow: KeyboardEventHandler<HTMLInputElement> = (event) => {
     if (event.key !== "ArrowUp" && event.key !== "ArrowDown") return;

@@ -5,7 +5,11 @@ const options = {
   referenceDate: "2026-08-19" as const
 };
 
-const success = (start: string, end = start) => ({ status: "success", value: { start, end } });
+const success = (start: string, end = start) => ({
+  status: "success",
+  start: { date: start, time: null },
+  end: { date: end, time: null }
+});
 
 describe("calendar-relative natural date phrases", () => {
   it.each([

@@ -50,7 +50,11 @@ describe("named public callback contracts", () => {
     for (const parserLanguages of [undefined, []]) {
       expect(
         parseDateInput({ text: "heute", expectedRange, locale: "de-DE", referenceDate: "2026-08-12", parserLanguages })
-      ).toEqual({ status: "success", value: { start: "2026-08-12", end: "2026-08-12" } });
+      ).toEqual({
+        status: "success",
+        start: { date: "2026-08-12", time: null },
+        end: { date: "2026-08-12", time: null }
+      });
     }
   });
 });

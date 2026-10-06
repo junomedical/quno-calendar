@@ -933,3 +933,9 @@ both when scheduling and at an already armed deadline, preventing competing scro
 After restoration ends, the next scroll signal can schedule ordinary maintenance. Restore deadlines and manual-scroll
 cancellation stay bounded as before. Dense three-participant create/save/edit tests include repeated rapid toggles and
 eight seconds of geometry and DOM-mutation observation after the final change.
+
+## Parser navigation example update — 2026-10-07
+
+[QDPR-007](../date-parser/decisions.md#qdpr-007---return-paired-date-and-clock-endpoints) changes the independent
+headless parser result. The guide's typed-date example now reads `start.date`; Infinite Calendar's navigation,
+day-key model, and event timestamp contracts remain unchanged.

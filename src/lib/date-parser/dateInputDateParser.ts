@@ -1,4 +1,4 @@
-import { todayIso } from "#quno-internal/shared/dateRangeModel";
+import { todayIso, type DateRange } from "#quno-internal/shared/dateRangeModel";
 import { resolveAbsoluteDateCandidates } from "./dateInputAbsoluteResolver";
 import { resolveRelativeDateRange } from "./dateInputRelativeResolver";
 import { tokenizeDateTokens as tokenizeDateInput } from "./dateInputDateTokenizer";
@@ -34,6 +34,11 @@ export type DateInputAnalyzer = {
   analyze: (args: { text: string }) => DateInputAnalysis;
 };
 
+const dateEndpoints = ({ start, end }: DateRange) => ({
+  start: { date: start, time: null },
+  end: { date: end, time: null }
+});
+
 export const parseDateTokens = ({
   tokens,
   options,
@@ -47,9 +52,9 @@ export const parseDateTokens = ({
   const divider = tokens.findIndex((token) => token.type === "range-separator");
   if (divider === -1) {
     const relative = resolveRelativeDateRange({ tokens, options, vocabulary });
-    if (relative) return { status: "success", value: relative };
+    if (relative) return { status: "success", ...dateEndpoints(relative) };
     const date = pickBestDate({ candidates: resolveAbsoluteDateCandidates({ tokens, options, vocabulary }), options });
-    return date ? { status: "success", value: { start: date.date, end: date.date } } : { status: "invalid" };
+    return date ? { status: "success", ...dateEndpoints({ start: date.date, end: date.date }) } : { status: "invalid" };
   }
   if (tokens.slice(divider + 1).some((token) => token.type === "range-separator")) return { status: "invalid" };
   const firstCandidates = endpointCandidates({ tokens: tokens.slice(0, divider), options, vocabulary });
@@ -57,12 +62,12 @@ export const parseDateTokens = ({
   if (!first) return { status: "invalid" };
   const rest = tokens.slice(divider + 1);
   if (!rest.some((token) => token.type !== "date-separator")) {
-    return { status: "partial-range", value: { start: first.date, end: first.date } };
+    return { status: "partial-range", ...dateEndpoints({ start: first.date, end: first.date }) };
   }
   const secondCandidates = endpointCandidates({ tokens: rest, options, vocabulary });
   if (!secondCandidates.length) return { status: "invalid" };
   const value = pickBestDateRange({ starts: firstCandidates, ends: secondCandidates, options });
-  return value ? { status: "success", value } : { status: "invalid" };
+  return value ? { status: "success", ...dateEndpoints(value) } : { status: "invalid" };
 };
 
 /** Compiles stable vocabulary while retaining a live default reference date. */
@@ -93,7 +98,7 @@ export const createDateInputAnalyzer = ({
         result:
           parseOptions.selectionMode === "single" &&
           result.status === "success" &&
-          result.value.start !== result.value.end
+          result.start.date !== result.end.date
             ? { status: "invalid" }
             : result
       };

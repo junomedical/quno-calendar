@@ -8,15 +8,32 @@ for (const width of [1280, 390]) {
     const mode = chapter.getByRole("combobox", { name: "Clock times" });
     const output = chapter.locator(".date-input-parser-example pre");
     await chapter.getByRole("button", { name: "tomorrow 23:00–01:00" }).click();
-    await expect(output).toContainText('"start": "2026-08-26"');
-    await expect(output).toContainText('"end": "2026-08-27"');
-    await expect(output).toContainText('"start": "23:00"');
-    await expect(output).toContainText('"end": "01:00"');
+    await expect
+      .poll(async () => JSON.parse((await output.textContent())!))
+      .toEqual({
+        status: "success",
+        start: { date: "2026-08-26", time: "23:00" },
+        end: { date: "2026-08-27", time: "01:00" }
+      });
     await mode.selectOption("false");
     await expect(output).toContainText('"status": "invalid"');
     await mode.selectOption("true");
     await chapter.getByRole("textbox", { name: "Date and time to parse" }).fill("12 June at 13");
-    await expect(output).toContainText('"start": "13:00"');
+    await expect
+      .poll(async () => JSON.parse((await output.textContent())!))
+      .toEqual({
+        status: "success",
+        start: { date: "2026-06-12", time: "13:00" },
+        end: { date: "2026-06-12", time: "13:00" }
+      });
+    await chapter.getByRole("textbox", { name: "Date and time to parse" }).fill("today -");
+    await expect
+      .poll(async () => JSON.parse((await output.textContent())!))
+      .toEqual({
+        status: "partial-range",
+        start: { date: "2026-08-25", time: null },
+        end: { date: "2026-08-25", time: null }
+      });
     const geometry = await chapter.locator(".date-input-parser-example").evaluate((element) => {
       const box = element.getBoundingClientRect();
       const controls = [...element.querySelectorAll("input, select, button, pre")];
@@ -40,8 +57,13 @@ for (const width of [1280, 390]) {
     const result = page.getByRole("heading", { name: "Resolved output" }).locator("..").locator("pre");
     await expect(result).toContainText('"status": "invalid"');
     await page.getByRole("combobox", { name: "Clock times" }).selectOption("true");
-    await expect(result).toContainText('"end": "2026-08-26"');
-    await expect(result).toContainText('"start": "23:00"');
+    await expect
+      .poll(async () => JSON.parse((await result.textContent())!))
+      .toEqual({
+        status: "success",
+        start: { date: "2026-08-25", time: "23:00" },
+        end: { date: "2026-08-26", time: "01:00" }
+      });
     const tokens = page.getByRole("heading", { name: "Tokens", exact: true }).locator("..").locator("pre");
     await expect(tokens).toContainText('"type": "time"');
     const demoGeometry = await page.locator(".date-parser-demo").evaluate((element) => {

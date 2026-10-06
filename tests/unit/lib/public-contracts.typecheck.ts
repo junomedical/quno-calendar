@@ -4,7 +4,11 @@ import { QunoTimePicker, type QunoTimePickerProps } from "@quno/calendar/timepic
 // @ts-expect-error Slot renderer remains private.
 import { TimeOptions } from "@quno/calendar/timepicker";
 import type { QunoDateInputProps } from "@quno/calendar/date-input";
-import { parseDateInput, tokenizeDateInput, type DateInputTimeRange } from "@quno/calendar/date-parser";
+import { parseDateInput, tokenizeDateInput, type DateInputParseEndpoint } from "@quno/calendar/date-parser";
+// @ts-expect-error Clocks now belong to parser endpoints.
+import type { DateInputTimeRange } from "@quno/calendar/date-parser";
+// @ts-expect-error Parser endpoints belong to the parser subpath only.
+import type { DateInputParseEndpoint as RootParseEndpoint } from "@quno/calendar";
 import type {
   QunoInfiniteCalendarHandle,
   QunoInfiniteCalendarProps,
@@ -43,9 +47,18 @@ export function checkPublicContracts(handle: QunoInfiniteCalendarHandle, event: 
   tokenizeDateInput({ text: "today" });
   const timed = parseDateInput({ text: "tomorrow 10AM", expectedRange, recognizeTime: true });
   if (timed.status === "success" || timed.status === "partial-range") {
-    const dates: DateRange = timed.value;
-    const times: DateInputTimeRange | undefined = timed.times;
-    void [dates, times];
+    const start: DateInputParseEndpoint = timed.start;
+    const end: DateInputParseEndpoint = timed.end;
+    const date: IsoDate = start.date;
+    const time: string | null = end.time;
+    // @ts-expect-error Parallel date values are removed.
+    void timed.value;
+    // @ts-expect-error Parallel clock values are removed.
+    void timed.times;
+    void [start, end, date, time];
+  } else {
+    // @ts-expect-error Empty and invalid results do not have endpoints.
+    void timed.start;
   }
   tokenizeDateInput({ text: "10AM", recognizeTime: true });
   handle.scrollToDate({ date });
@@ -165,6 +178,8 @@ export function checkPublicContracts(handle: QunoInfiniteCalendarHandle, event: 
 }
 
 export type RejectedPrivateTypes =
+  | DateInputTimeRange
+  | RootParseEndpoint
   | DateInputResolveOptions
   | ResolvedDateCandidate
   | DateInputVocabulary

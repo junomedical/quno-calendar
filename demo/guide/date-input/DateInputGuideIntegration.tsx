@@ -91,7 +91,7 @@ export function DateInputGuideIntegration() {
         number="09"
         kicker="Production"
         title="Ship Date Input independently."
-        copy="Date Input JavaScript is 9.60 KiB gzip. Its optional stylesheet is a separate 0.58 KiB gzip import; neither number includes external application runtimes."
+        copy="Date Input JavaScript is 9.64 KiB gzip. Its optional stylesheet is a separate 0.58 KiB gzip import; neither number includes external application runtimes."
         instruction="Compare JavaScript, optional CSS, runtime contracts, and the public surface without treating them as one payload."
       >
         <FieldGuideProduction profile={dateInputProduction} anchorIds={["dependencies"]} />

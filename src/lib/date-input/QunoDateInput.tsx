@@ -71,7 +71,7 @@ export const QunoDateInput = (props: QunoDateInputProps): JSX.Element => {
             const cursor = event.currentTarget.selectionStart ?? state.draft.length;
             const direction = event.key === "ArrowUp" ? 1 : -1;
             const result = state.parse({ text: state.draft });
-            const clock = result.status === "success" ? result.times?.start : undefined;
+            const clock = result.status === "success" ? result.start.time : undefined;
             const spun =
               (state.timeMode &&
                 spinClockInput({

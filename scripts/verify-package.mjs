@@ -74,7 +74,9 @@ import { QunoDatePicker } from "@quno/calendar/datepicker";
 import { QunoDateInput } from "@quno/calendar/date-input";
 import { QunoTimePicker } from "@quno/calendar/timepicker";
 import "@quno/calendar/timepicker/styles.css";
-import { parseDateInput, tokenizeDateInput } from "@quno/calendar/date-parser";
+import { parseDateInput, tokenizeDateInput, type DateInputParseEndpoint } from "@quno/calendar/date-parser";
+// @ts-expect-error The parallel clock range is removed.
+import type { DateInputTimeRange } from "@quno/calendar/date-parser";
 import "@quno/calendar/infinite-calendar/styles.css";
 import "@quno/calendar/datepicker/styles.css";
 import "@quno/calendar/date-input/styles.css";
@@ -85,7 +87,16 @@ const loadEvents: LoadEvents = async ({ startDate }) => [{
 }];
 function EventCard({ event, style }: EventRendererProps) { return <div style={style}>{event.title}</div>; }
 const value: DateRange = { start: "2026-08-24", end: addDays({ date: "2026-08-24", amount: 1 }) };
-parseDateInput({ text: "tomorrow", ...({ referenceDate: "2026-08-24", expectedRange: value }) });
+const parsed = parseDateInput({ text: "tomorrow", referenceDate: "2026-08-24", expectedRange: value });
+if (parsed.status === "success" || parsed.status === "partial-range") {
+  const endpoint: DateInputParseEndpoint = parsed.start;
+  const clock: string | null = endpoint.time;
+  // @ts-expect-error Dates now belong to endpoints.
+  void parsed.value;
+  // @ts-expect-error Clocks now belong to endpoints.
+  void parsed.times;
+  void clock;
+}
 tokenizeDateInput({ text: "tomorrow" });
 createRoot(document.getElementById("root")!).render(<>
   <QunoTimePicker defaultValue="10:30" enabledHours={[10, 11]} minuteCadence={15} />
@@ -161,11 +172,15 @@ for (const mode of ["module", "commonjs"]) {
       "--input-type=" + mode,
       "--eval",
       `
+    const { deepStrictEqual } = ${mode === "module" ? 'await import("node:assert")' : 'require("node:assert")'};
     const { parseDateInput, tokenizeDateInput } = ${load};
     const result = parseDateInput({ text: "23:00–01:00", recognizeTime: true,
       referenceDate: "2026-10-05", expectedRange: { start: "2026-01-01", end: "2027-12-31" } });
-    if (result.status !== "success" || result.value.end !== "2026-10-06" || result.times.start !== "23:00" || result.times.end !== "01:00")
-      throw new Error("Packed parser lost clock recognition or overnight composition");
+    deepStrictEqual(result, { status: "success",
+      start: { date: "2026-10-05", time: "23:00" }, end: { date: "2026-10-06", time: "01:00" } });
+    deepStrictEqual(parseDateInput({ text: "today", referenceDate: "2026-10-05",
+      expectedRange: { start: "2026-01-01", end: "2027-12-31" } }), { status: "success",
+      start: { date: "2026-10-05", time: null }, end: { date: "2026-10-05", time: null } });
     if (tokenizeDateInput({ text: "10:30PM", recognizeTime: true })[0].value !== "22:30")
       throw new Error("Packed clock tokenization failed");
   `

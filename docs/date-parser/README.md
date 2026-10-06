@@ -19,7 +19,7 @@ directly without repeating them in a separate import implementation accordion.
 
 ## Bundle budget
 
-The headless JavaScript entry point has a 7 KiB gzip ceiling, leaving room above the current 6.00 KiB artifact.
+The headless JavaScript entry point has a 7 KiB gzip ceiling, leaving room above the current 6.03 KiB artifact.
 See [QDPR-006](./decisions.md#qdpr-006---leave-headroom-in-the-parser-bundle-budget).
 
 ## Named contracts
@@ -27,14 +27,20 @@ See [QDPR-006](./decisions.md#qdpr-006---leave-headroom-in-the-parser-bundle-bud
 The parser owns its implementation and headless types. Call `parseDateInput({ text, ...options })` and
 `tokenizeDateInput({ text })`. `parserLanguages` is the single language setting; resolution internals are private.
 
+Successful and partial-range results return top-level `start` and `end` objects of type `DateInputParseEndpoint`:
+`{ date: IsoDate, time: string | null }`. Clocks are normalized timezone-free `HH:mm`; `null` means no clock was supplied.
+Date-only parsing has the same endpoint shape with both times set to `null`. Empty and invalid results contain only
+their `status`. Single inputs duplicate both endpoints. A partial range duplicates the start date and leaves the end
+time `null`. The former `value`, `times`, and `DateInputTimeRange` are removed; see the
+[endpoint migration](../shared/migration.md#unreleased-paired-parser-endpoints).
+
 See the [breaking migration](../shared/migration.md#unreleased-named-contracts-and-product-ownership).
 
 ## Optional clock recognition
 
 Set `recognizeTime: true` on `parseDateInput` to recognize `10:00`, `10AM`, `10:30PM`, `13`, `23`, and `12:59`.
-The default remains date-only. `value` still contains timezone-free `IsoDate` endpoints; optional `times` contains
-normalized `HH:mm` clocks with `null` for an endpoint whose time was not supplied. A single date/time duplicates both
-endpoints; date-only results omit `times`.
+The default remains date-only. Each `start`/`end` pairs its timezone-free `IsoDate` with a normalized `HH:mm` clock,
+or `null` when the endpoint's time was not supplied.
 
 ```ts
 import { parseDateInput, tokenizeDateInput } from "@quno/calendar/date-parser";
@@ -45,8 +51,9 @@ const result = parseDateInput({
   referenceDate: "2026-10-05",
   expectedRange: { start: "2026-01-01", end: "2027-12-31" }
 });
-// value: { start: "2026-10-06", end: "2026-10-07" }
-// times: { start: "23:00", end: "01:00" }
+// { status: "success",
+//   start: { date: "2026-10-06", time: "23:00" },
+//   end: { date: "2026-10-07", time: "01:00" } }
 
 const tokens = tokenizeDateInput({ text: "10:30PM", recognizeTime: true });
 // { type: "time", value: "22:30", raw: "10:30PM", start: 0, end: 7 }

@@ -44,7 +44,7 @@ export const dateInputProduction: FieldGuideProductionProfile = {
   entrypoint: "@quno/calendar/date-input",
   stylesheet: "@quno/calendar/date-input/styles.css",
   artifacts: [
-    { label: "JavaScript", gzip: "9.60 KiB", raw: "34.59 KiB", budget: "≤ 10 KiB gzip" },
+    { label: "JavaScript", gzip: "9.64 KiB", raw: "34.71 KiB", budget: "≤ 10 KiB gzip" },
     { label: "Optional CSS", gzip: "0.58 KiB", raw: "2.29 KiB", budget: "≤ 1 KiB gzip" }
   ],
   runtime: "React 18+ and React DOM peers",
@@ -56,7 +56,7 @@ export const dateParserProduction: FieldGuideProductionProfile = {
   product: "Quno/Date Parser",
   entrypoint: "@quno/calendar/date-parser",
   stylesheet: null,
-  artifacts: [{ label: "JavaScript", gzip: "6.00 KiB", raw: "22.55 KiB", budget: "≤ 7 KiB gzip" }],
+  artifacts: [{ label: "JavaScript", gzip: "6.03 KiB", raw: "22.63 KiB", budget: "≤ 7 KiB gzip" }],
   runtime: "No UI framework runtime",
   compatibility: "ESM, CommonJS, browser, Node, and SSR",
   dependencies: "No runtime dependencies"

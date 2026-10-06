@@ -3,13 +3,13 @@ export type {
   DateInputDateOrder,
   DateInputLexicon,
   DateInputParseEmptyResult,
+  DateInputParseEndpoint,
   DateInputParseErrorResult,
   DateInputParseOptions,
   DateInputParsePartialRangeResult,
   DateInputParseResult,
   DateInputParseSuccessResult,
   DateInputParserLanguage,
-  DateInputTimeRange,
   DateInputToken,
   DateInputTokenType
 } from "#quno-internal/date-parser/dateInputTypes";
