@@ -78,10 +78,17 @@
 
 .date-parser-demo {
   width: min(100%, 760px);
+  min-width: 0;
+}
+
+.date-parser-demo .component-demo__value {
+  min-width: 0;
+  overflow: auto;
 }
 
 .date-parser-demo > input,
 .date-parser-demo select {
+  min-width: 0;
   min-height: 44px;
   padding: 0 12px;
   color: #17202a;

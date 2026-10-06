@@ -3,6 +3,10 @@
 The documentation follows the four public `@quno/calendar` products. Start with the product you are changing, then
 use the shared records for package-wide contracts and release work.
 
+Focused input/picker compositions keep Start and End shortcut navigation inside the popup. See the
+[composition recipe](./shared/usage.md#qunodate-input) and
+[focus contract](./shared/decisions.md#quno-014---retain-focus-through-composed-endpoint-navigation).
+
 | Product                | Public entry point                 | Documentation                                      | Live field guide           |
 | ---------------------- | ---------------------------------- | -------------------------------------------------- | -------------------------- |
 | Quno/Infinite Calendar | `@quno/calendar/infinite-calendar` | [Infinite Calendar](./infinite-calendar/README.md) | `/guide/infinite-calendar` |
@@ -23,6 +27,14 @@ The current responsiveness work is recorded in
 [QUNO-013](./shared/decisions.md#quno-013---bound-high-frequency-work-to-display-frames), with Infinite Calendar's
 multilane background availability geometry in [Decision 091](./infinite-calendar/decisions.md#091---availability-has-independent-collision-lanes),
 refined by the explicit background opt-in in [Decision 093](./infinite-calendar/decisions.md#093---event-entity-kind-is-separate-from-its-render-layer).
+
+Date Parser can opt into traditional clock times and overnight ranges with `recognizeTime: true`.
+See [optional clock recognition](./date-parser/README.md#optional-clock-recognition) and its live guide chapter.
+
+The Infinite Calendar JavaScript gzip ceiling is 50 KiB; see
+[Decision 094](./infinite-calendar/decisions.md#094---allow-50-kib-for-infinite-calendar-javascript).
+Date Parser has a 7 KiB gzip ceiling; see
+[QDPR-006](./date-parser/decisions.md#qdpr-006---leave-headroom-in-the-parser-bundle-budget).
 
 ## Shared package records
 

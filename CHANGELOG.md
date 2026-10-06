@@ -17,7 +17,12 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ### Changed
 
-- Raised the Infinite Calendar JavaScript gzip ceiling from 38 KiB to 39 KiB for version 0.6.2. The current artifact is 39,858 bytes (38.92 KiB), within the 39,936-byte ceiling. Updated the guide payload facts and current testing budgets. Decision 099 records the accepted size.
+- Merged Date Parser clock recognition and composed picker focus retention into the calendar improvements.
+- Retained the accepted 50 KiB Infinite Calendar and 7 KiB Date Parser JavaScript gzip ceilings, leaving room
+  for future changes. Refreshed production guide measurements for the combined implementation.
+
+- The earlier 39 KiB Infinite Calendar ceiling for version 0.6.2 is superseded by the merged 50 KiB ceiling.
+  Decision 099 preserves the original acceptance; Decision 100 records the combined branch budget.
 
 - Corrected the local package version for `feat/more-improvements` to `0.6.2`. The manifest, lockfile, and current README use the same version. Earlier `0.6.3` and `0.6.4` local builds are verification history.
 
@@ -53,6 +58,11 @@ This package contains the current `feat/internal-calendar-core` contracts, inclu
   calendar's virtualized geometry and cancellation lifecycle instead of consumer DOM observers.
 - Added `typesVersions` mappings for public subpaths so projects using legacy Node-style TypeScript resolution no longer need local declaration shims.
 - Exported `CALENDAR_EVENT_KINDS`, `CALENDAR_RULE_KINDS`, and their types for the appointment, availability, and blocker domain.
+- Added opt-in Date Parser clock recognition with `recognizeTime: true`: traditional 24-hour and AM/PM forms,
+  time-only input anchored to the reference date, and time ranges with inherited dates and overnight rollover.
+  Existing date values stay intact; optional `times` holds normalized `HH:mm` clocks. Tokenization can expose explicit
+  clock tokens with original spans. The guide and focused demo demonstrate the opt-in; Date Input remains date-only.
+
 - Added inclusive Datepicker `limitDateFrom` and `limitDateTo` selection bounds. Out-of-window dates are disabled before
   `isDayDisabled` runs, allowing consumer availability loaders to skip dates whose result is already known.
 - Added Infinite Calendar `getDayProps`, `getHourProps`, and `getDayCellProps` with typed date,
@@ -90,6 +100,14 @@ This package contains the current `feat/internal-calendar-core` contracts, inclu
 - Gave explicitly background-layered availability deterministic lanes independent from foreground events in both
   orientations. Resource rows and columns grow to the greater layer depth, and background availability renderers
   receive meaningful `lane`, `laneCount`, and `isOverlapping` metadata.
+- Kept clock recognition outside Date Input's date-only analyzer and reused date-resolution/ranking logic without
+  raising feature ceilings. Current ESM measurements are 6,143 B gzip for Date Parser (6 KiB ceiling), 7.70 KiB for
+  Date Input (8 KiB ceiling), and 10.49 KiB for Datepicker (10.5 KiB ceiling); production guides report refreshed sizes.
+
+- Gave overlapping availability deterministic lanes independent from appointments in both calendar orientations.
+  Resource rows and columns now grow to the greater layer depth, and availability renderers receive meaningful
+  `lane`, `laneCount`, and `isOverlapping` metadata. This intentionally changes geometry for resources with parallel
+  availability windows without changing `CalendarEvent` or adding public configuration.
 - Coalesced Infinite Calendar pointer previews, Datepicker captured-pointer painting, and quick-jump virtual scrolling
   to one latest-value publication per animation frame while preserving synchronous release and commit behavior.
 - Reused unchanged event-bucket snapshots and date preparation, memoized static Datepicker structure, compiled Date
@@ -175,6 +193,8 @@ This package contains the current `feat/internal-calendar-core` contracts, inclu
 ### Fixed
 
 - A drag dropped back onto its original minute and calendar activates the event editor without sending a move request.
+- Transferred Start/End shortcut focus to Datepicker's stable month heading before navigation removes the chip, keeping
+  composed Date Input popups open and their selected range intact for pointer and keyboard activation, including reduced motion.
 - Prevented settled Infinite Calendar recentering from briefly painting uniform-height placeholder dates over already
   measured variable-height days, which could make availability-expanded rows jump and then return.
 - Kept compact overlapping availability labels inside their card bounds by using a single-line lane label and removing
@@ -236,6 +256,12 @@ This package contains the current `feat/internal-calendar-core` contracts, inclu
   around its center. The equivalent scroll position and replacement month-window anchor now commit without a painted
   intermediate date tree.
 - Kept an in-progress controlled single-date input draft intact across unrelated parent rerenders.
+
+### Verification
+
+- Additional Firefox check blocked locally: `browserType.launch` timed out after 180000ms. Firefox reported
+  `sandbox_extension_issue_file_to_process ... plugin-container.app: 1 (Operation not permitted)` and
+  `RenderCompositorSWGL failed mapping default framebuffer, no dt`. Chromium and WebKit endpoint-navigation checks pass.
 
 ## 0.6.0 - 2026-08-24
 

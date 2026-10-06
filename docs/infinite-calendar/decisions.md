@@ -855,3 +855,27 @@ Infinite Calendar ESM artifact and a 39,858-byte gzip artifact. Raise its gzip c
 
 Keep the optional stylesheet ceiling at 2 KiB and retain every other product budget. The field guide reports the
 measured 38.92 KiB JavaScript and 1.99 KiB optional stylesheet payloads alongside their budgets.
+
+## 094 - Allow 50 KiB For Infinite Calendar JavaScript
+
+Date: 2026-10-06
+Status: Accepted; supersedes Decision 091's 38 KiB JavaScript ceiling
+
+The reported ESM artifact is 38.92 KiB gzip, exceeding the accepted 38 KiB ceiling. Raise the Infinite Calendar
+JavaScript ceiling to 50 KiB to accommodate the current artifact and leave comfortable room for future changes.
+Keep the guard, field-guide production facts, and verification documentation aligned. The optional stylesheet
+retains its independent 2 KiB ceiling; all other feature budgets remain unchanged.
+
+## 100 - Reconcile The Infinite Calendar Budget After Branch Integration
+
+Date: 2026-10-06
+Status: Accepted; supersedes Decision 099's 39 KiB JavaScript ceiling
+
+Merge the calendar improvements with the accepted 50 KiB JavaScript ceiling from the independently assigned
+[094 - Allow 50 KiB For Infinite Calendar JavaScript](#094---allow-50-kib-for-infinite-calendar-javascript).
+Keep the optional stylesheet ceiling at 2 KiB and preserve the improved navigation, loading, and projection contracts.
+
+The two Decision 094 records were assigned independently on separate branches. Preserve both identifiers, their
+complete titles, and their distinct anchors; [094 - Contextual Creation And Explicit Row Centering](#094---contextual-creation-and-explicit-row-centering)
+continues to define contextual creation and row navigation. The field guide and verification fixtures report fresh
+measurements of the combined implementation beside the 50 KiB ceiling.

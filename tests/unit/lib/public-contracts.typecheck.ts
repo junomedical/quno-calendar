@@ -1,7 +1,7 @@
 import { addDays, isIsoDate, type DateRange, type IsoDate } from "@quno/calendar";
 import { QunoDatePicker, type QunoDatePickerProps } from "@quno/calendar/datepicker";
 import type { QunoDateInputProps } from "@quno/calendar/date-input";
-import { parseDateInput, tokenizeDateInput } from "@quno/calendar/date-parser";
+import { parseDateInput, tokenizeDateInput, type DateInputTimeRange } from "@quno/calendar/date-parser";
 import type {
   QunoInfiniteCalendarHandle,
   QunoInfiniteCalendarProps,
@@ -38,6 +38,13 @@ export function checkPublicContracts(handle: QunoInfiniteCalendarHandle, event: 
   }
   parseDateInput({ text: "today", expectedRange, parserLanguages: ["en"] });
   tokenizeDateInput({ text: "today" });
+  const timed = parseDateInput({ text: "tomorrow 10AM", expectedRange, recognizeTime: true });
+  if (timed.status === "success" || timed.status === "partial-range") {
+    const dates: DateRange = timed.value;
+    const times: DateInputTimeRange | undefined = timed.times;
+    void [dates, times];
+  }
+  tokenizeDateInput({ text: "10AM", recognizeTime: true });
   handle.scrollToDate({ date });
   handle.scrollToDateTime({ date, time: "09:00" });
   handle.scrollToDateTime({ date, time: "09:00", calendarId: "provider-a", align: "center" });
@@ -83,6 +90,8 @@ export function checkPublicContracts(handle: QunoInfiniteCalendarHandle, event: 
   picker.disabledDays = () => false;
   // @ts-expect-error Input formatting uses the plural collection.
   input.formatter = { range: () => "" };
+  // @ts-expect-error Clock recognition is owned by the headless parser.
+  input.recognizeTime = true;
   const calendar: Partial<QunoInfiniteCalendarProps> = {
     projectEvents: ({ events, startDate, endDate, calendarIds }) => {
       void [startDate, endDate, calendarIds];

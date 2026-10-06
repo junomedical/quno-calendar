@@ -21,10 +21,11 @@ describe("datepicker field guide", () => {
     expect(within(contents).queryByRole("link", { name: /Interactive demo/ })).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: "All components" })).toHaveAttribute("href", "/");
     expect(screen.getByRole("link", { name: /Demo/ })).toHaveAttribute("href", "/demo/datepicker");
-    expect(within(contents).getByRole("link", { name: /Customize meaningful dates/ })).toHaveAttribute(
-      "href",
-      "#day-handler"
-    );
+    expect(
+      within(contents).getByRole("link", {
+        name: /Customize meaningful dates/
+      })
+    ).toHaveAttribute("href", "#day-handler");
     expect(document.querySelector("#quick-jump")).toBeInTheDocument();
     expect(screen.getByText(/Months follow the seasons/)).toBeInTheDocument();
     expect(screen.getByText(/Sticky year labels keep the year readable during fast scrolling/)).toBeInTheDocument();
@@ -59,14 +60,15 @@ describe("datepicker field guide", () => {
       "href",
       "#date-input-composition"
     );
-    expect(within(contents).getByRole("link", { name: /Separate value, view, and gesture state/ })).toHaveAttribute(
-      "href",
-      "#idea"
-    );
+    expect(
+      within(contents).getByRole("link", {
+        name: /Separate value, view, and gesture state/
+      })
+    ).toHaveAttribute("href", "#idea");
     expect(within(contents).queryByText("Understand and ship the model")).not.toBeInTheDocument();
     expect(document.querySelector('[data-story-topic="natural-input"]')).not.toBeInTheDocument();
-    expect(screen.getByText("10.46 KiB gzip")).toBeInTheDocument();
-    expect(screen.getByText("3.23 KiB gzip")).toBeInTheDocument();
+    expect(screen.getByText("10.49 KiB gzip")).toBeInTheDocument();
+    expect(screen.getByText("3.22 KiB gzip")).toBeInTheDocument();
     expect(screen.queryByText("Public API at a glance")).not.toBeInTheDocument();
     expect(screen.queryByText(/docs\/shared\/usage\.md/)).not.toBeInTheDocument();
   });
@@ -119,7 +121,9 @@ describe("datepicker field guide", () => {
   it("opens the range picker only from its Date Input selection surface", () => {
     render(<DatePickerStory />);
     const topic = document.querySelector<HTMLElement>('[data-story-topic="date-input-composition"]') as HTMLElement;
-    const editor = within(topic).getByRole("textbox", { name: "Choose a period" });
+    const editor = within(topic).getByRole("textbox", {
+      name: "Choose a period"
+    });
 
     expect(within(topic).queryByRole("grid")).not.toBeInTheDocument();
     fireEvent.focus(editor);
@@ -137,7 +141,9 @@ describe("datepicker field guide", () => {
   it("opens the range picker from the selected-period input", () => {
     render(<DatePickerStory />);
     const topic = document.querySelector<HTMLElement>("#difference") as HTMLElement;
-    const input = within(topic).getByRole("textbox", { name: "Choose a period" });
+    const input = within(topic).getByRole("textbox", {
+      name: "Choose a period"
+    });
 
     expect(within(topic).queryByRole("grid")).not.toBeInTheDocument();
     fireEvent.focus(input);

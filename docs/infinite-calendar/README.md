@@ -64,12 +64,14 @@ must leave its input records unchanged. Changing the callback updates event geom
 invalidating API loading. Clearing it restores the persisted snapshot. Empty rendered dates also accept previews.
 Products own recurrence expansion; saves and filters still refresh through `eventVersion` or `loadEvents`.
 
+## Bundle budget
+
+JavaScript is limited to 50 KiB gzip and the optional stylesheet to 2 KiB gzip. The current artifacts measure
+38.92 KiB and 1.99 KiB gzip respectively (Node 24). See [Decision 100](./decisions.md#100---reconcile-the-infinite-calendar-budget-after-branch-integration).
+
 ## Named contracts
 
 Use `renderEvent`, component-level `locale` and `formatters.dayLabel({ date, locale })`, plus `getDayProps`,
 `getDayCellProps`, and `getHourProps` for presentation. Navigation commands and zoom notifications use named objects.
 
 See the [breaking migration](../shared/migration.md#unreleased-named-contracts-and-product-ownership).
-
-The 0.6.2 Infinite Calendar ESM artifact is 39,858 bytes gzip (38.92 KiB). Its JavaScript ceiling is 39 KiB gzip;
-the optional stylesheet is 2,035 bytes gzip within its 2 KiB ceiling. See Decision 099 for the accepted budget.

@@ -224,7 +224,7 @@ export const StoryTopics = (): JSX.Element => (
       kicker="Date Input composition"
       title="Combines with Date Input beautifully."
       copy="Replace the Datepicker’s selected-period summary and Clear action with QunoDateInput. The picker appears only while focus remains in the composed control, and both public components share one controlled range."
-      instruction="Focus the date input to reveal the picker. Type 12 juni – 18 juni or paint a range, then click elsewhere to close it."
+      instruction="Focus the date input to reveal the picker. Type 21 May 2026 – 18 August 2026, then use Start or End to reveal that date while keeping the picker open. Click elsewhere to close it."
       howTo={
         <StoryHowTo
           title="Use Date Input as the range surface"

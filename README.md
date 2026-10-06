@@ -28,9 +28,9 @@ import { parseDateInput, tokenizeDateInput } from "@quno/calendar/date-parser";
   Its handle exposes visible date keys for contextual creation and optional centered horizontal resource navigation.
   Optional synchronous `projectEvents` displays local previews after caching without refetching persisted events.
   Resource-row navigation and anchor restoration wait for committed parent layout; ordinary state updates need no forced React commit.
-- **Quno/Datepicker** paints, resizes, and moves one timezone-free date or inclusive range.
+- **Quno/Datepicker** paints, resizes, and moves one timezone-free date or inclusive range; endpoint shortcuts keep composed input popups open while navigating.
 - **Quno/Date Input** provides a native controlled or uncontrolled field for typed dates and ranges.
-- **Quno/Date Parser** recognizes formats, relative phrases, configurable weeks, ranges, and multilingual vocabulary without a UI runtime.
+- **Quno/Date Parser** recognizes formats, relative phrases, configurable weeks, ranges, optional clock times, and multilingual vocabulary without a UI runtime.
 
 The headless `@quno/calendar` root exports shared contracts such as `IsoDate`, `DateRange`, `DateSelectionMode`, `WeekStart`, and safe calendar-day helpers. It exports no UI. JavaScript entry points are ESM/CommonJS compatible, SSR-safe, and never inject CSS. The separately exported stylesheets remain readable, unminified CSS in `dist`.
 
@@ -73,6 +73,7 @@ npm run lint
 npm run check:architecture
 npm run build
 npm run verify:package
+npm run check:bundle-size
 npm run test:compat
 npm run test:compat:react19
 ```

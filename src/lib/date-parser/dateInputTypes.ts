@@ -4,7 +4,7 @@ export type DateInputParserLanguage = "en" | "de";
 
 export type DateInputDateOrder = "locale" | "dmy" | "mdy" | "ymd";
 
-export type DateInputTokenType = "number" | "word" | "date-separator" | "range-separator";
+export type DateInputTokenType = "number" | "word" | "date-separator" | "range-separator" | "time";
 
 export type DateInputToken = {
   type: DateInputTokenType;
@@ -43,12 +43,15 @@ export type DateInputParseOptions = {
   weekStartsOn?: WeekStart;
   locale?: string;
   preferredDateOrder?: DateInputDateOrder;
+  /** Recognize timezone-free clocks alongside dates; defaults to false. */
+  recognizeTime?: boolean;
 
   parserLanguages?: ReadonlyArray<DateInputParserLanguage>;
   lexicon?: Partial<DateInputLexicon>;
 };
 
 export type DateInputResolveOptions = {
+  recognizeTime?: boolean;
   expectedRange: DateRange;
   referenceDate: IsoDate;
   weekStartsOn: WeekStart;
@@ -66,14 +69,19 @@ export type DateInputParseEmptyResult = {
   status: "empty";
 };
 
+/** Normalized timezone-free HH:mm clocks; null means the endpoint has no supplied time. */
+export type DateInputTimeRange = { start: string | null; end: string | null };
+
 export type DateInputParseSuccessResult = {
   status: "success";
   value: DateRange;
+  times?: DateInputTimeRange;
 };
 
 export type DateInputParsePartialRangeResult = {
   status: "partial-range";
   value: DateRange;
+  times?: DateInputTimeRange;
 };
 
 export type DateInputParseResult =
