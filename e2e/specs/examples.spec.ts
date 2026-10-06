@@ -325,7 +325,7 @@ test("editorial CSS-native exhibit keeps stable chrome browser-positioned", asyn
 
 test("all four guides separate exact payloads from runtime contracts", async ({ page }) => {
   const guides = [
-    ["infinite-calendar", "38.92 KiB gzip", "1.99 KiB gzip", "@quno/calendar/infinite-calendar"],
+    ["infinite-calendar", "38.94 KiB gzip", "1.99 KiB gzip", "@quno/calendar/infinite-calendar"],
     ["datepicker", "10.49 KiB gzip", "3.22 KiB gzip", "@quno/calendar/datepicker"],
     ["date-input", "7.70 KiB gzip", "0.58 KiB gzip", "@quno/calendar/date-input"],
     ["date-parser", "6.00 KiB gzip", "No stylesheet", "@quno/calendar/date-parser"]
@@ -1220,8 +1220,14 @@ test("editorial hover demo reveals underlying overlap lanes in turn", async ({ p
 });
 
 test("consumer loading fallback covers startup and reveals the initial date centered", async ({ page }) => {
+  await page.clock.install({ time: new Date("2026-07-06T08:00:00Z") });
   await page.goto("/guide");
+  await page.clock.pauseAt(new Date("2026-07-06T09:00:00Z"));
   const demo = await revealLazyArticleDemo(page, "event preloading example", "article-prefetch-demo");
+  // The selected resource ID is known before its calendar metadata arrives.
+  await expect(demo.locator(".quno-calendar-viewport")).toHaveCount(0);
+  await expect(demo.getByTestId("article-prefetch-count")).toContainText("0 requests");
+  await page.clock.resume();
   const fallback = demo.getByRole("status", { name: "Loading calendar" });
   await expect(fallback).toBeVisible();
   await expect(demo.locator(".quno-calendar-loading-content")).toHaveCSS("visibility", "hidden");

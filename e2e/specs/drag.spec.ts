@@ -188,3 +188,34 @@ test("does not open an editor or move an event dragged back to its starting slot
   await page.mouse.click(x, y);
   await expect(page.getByTestId("external-event-popup")).toBeVisible();
 });
+
+test("activates instead of moving after one-pixel jitter across a snap boundary", async ({ page }) => {
+  await page.goto("/demo/infinite-calendar");
+  await goToWorkday(page);
+  await page.getByTestId("snap-select").selectOption("5");
+  await waitForDemoEvents(page);
+  const duplicate = await firstDuplicatedViewportEvent(page);
+  const source = page.locator(`[data-testid="calendar-event"][data-event-id="${duplicate.id}"]`).first();
+  const press = await source.evaluate((element) => {
+    const grid = element.closest(".quno-calendar-row-grid");
+    if (!grid) return null;
+    const style = getComputedStyle(grid);
+    const origin = grid.getBoundingClientRect().left + parseFloat(style.backgroundPositionX);
+    // The default visual grid has fifteen-minute cells; snapping is set to five minutes above.
+    const snapWidth = parseFloat(style.backgroundSize) / 3;
+    const box = element.getBoundingClientRect();
+    const boundary = origin + (Math.ceil((box.left + 8 - origin) / snapWidth - 0.5) + 0.5) * snapWidth;
+    return { x: boundary - 0.5, y: box.top + 12, right: box.right };
+  });
+  expect(press).not.toBeNull();
+  if (!press) return;
+  expect(press.x + 1).toBeLessThan(press.right);
+  await page.mouse.move(press.x, press.y);
+  await page.mouse.down();
+  await page.mouse.move(press.x + 1, press.y);
+  await expect(page.getByTestId("drag-preview-event").first()).toBeVisible();
+  await page.mouse.up();
+  await expect(page.getByTestId("external-event-popup")).toBeVisible();
+  await expect(page.getByTestId("drag-preview-event")).toHaveCount(0);
+  await expect(page.getByTestId("demo-message")).not.toContainText(/Move accepted|Move rejected/);
+});

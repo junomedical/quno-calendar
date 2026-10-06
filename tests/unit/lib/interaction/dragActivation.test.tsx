@@ -14,7 +14,7 @@ const event: CalendarEvent = {
   end: "2026-09-29T09:30:00"
 };
 
-function setup(kind: CalendarEvent["kind"] = "appointment") {
+function setup(kind: CalendarEvent["kind"] = "appointment", startPoint = point) {
   vi.stubGlobal(
     "requestAnimationFrame",
     vi.fn(() => 1)
@@ -57,7 +57,7 @@ function setup(kind: CalendarEvent["kind"] = "appointment") {
         event: { ...event, kind },
         sourceCalendarId: "doctor",
         offsetMinutes: 0,
-        point
+        point: startPoint
       })
     );
   start();
@@ -125,6 +125,43 @@ describe("event drag activation", () => {
       renderedCalendarId: "doctor"
     });
     expect(onEventMoveRequest).not.toHaveBeenCalled();
+  });
+
+  it.each([1, 2, 3, 4])("activates after %s-pixel jitter across a snap boundary", async (distance) => {
+    const { result, onEventActivate, onEventMoveRequest, applyMoveToLoadedEvents } = setup("appointment", {
+      clientX: 29,
+      clientY: 0
+    });
+    const releasePoint = { clientX: 29 + distance, clientY: 0 };
+    act(() => {
+      result.current.schedule(releasePoint);
+      result.current.updateDragFromPoint(releasePoint);
+    });
+    expect(result.current.dragPreviewEvent?.start).toBe(new Date("2026-09-29T09:30:00").toISOString());
+    await act(async () => {
+      await result.current.finishFromPoint(releasePoint);
+    });
+    expect(onEventActivate).toHaveBeenCalledExactlyOnceWith({
+      event: { ...event, kind: "appointment" },
+      renderedCalendarId: "doctor"
+    });
+    expect(onEventMoveRequest).not.toHaveBeenCalled();
+    expect(applyMoveToLoadedEvents).not.toHaveBeenCalled();
+    expect(result.current.dragState).toBeNull();
+    expect(result.current.dragPreviewEvent).toBeNull();
+  });
+
+  it("moves after five-pixel movement across a snap boundary", async () => {
+    const { result, onEventActivate, onEventMoveRequest, applyMoveToLoadedEvents } = setup("appointment", {
+      clientX: 29,
+      clientY: 0
+    });
+    await act(async () => {
+      await result.current.finishFromPoint({ clientX: 34, clientY: 0 });
+    });
+    expect(onEventActivate).not.toHaveBeenCalled();
+    expect(onEventMoveRequest).toHaveBeenCalledOnce();
+    expect(applyMoveToLoadedEvents).toHaveBeenCalledExactlyOnceWith(onEventMoveRequest.mock.calls[0][0]);
   });
 
   it("still submits and applies a changed drop", async () => {

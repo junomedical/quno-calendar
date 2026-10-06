@@ -650,8 +650,9 @@ export function IntegrationWalkthrough({ embedded = false }: { embedded?: boolea
           without learning how the infinite date window works.
         </p>
         <p>
-          When an editor knows its resource, pass its calendar id as the optional third argument to reveal that row
-          without querying the timeline DOM. The calendar keeps an already-visible row in place.
+          When an editor knows its resource, include its id as the optional <code>calendarId</code> field in the{" "}
+          <code>scrollToDateTime</code> options object to reveal that row without querying the timeline DOM. The
+          calendar keeps an already-visible row in place.
         </p>
         <Callout>
           Place the caret over part of the date and press Arrow Up or Arrow Down. Each recognized change moves the
@@ -986,7 +987,7 @@ export function IntegrationWalkthrough({ embedded = false }: { embedded?: boolea
 
       <ArticleSection id="package-footprint" number="26" title="Ship Infinite Calendar independently">
         <p>
-          Infinite Calendar JavaScript is 38.92 KiB gzip. Its optional stylesheet is a separate 1.99 KiB gzip import;
+          Infinite Calendar JavaScript is 38.94 KiB gzip. Its optional stylesheet is a separate 1.99 KiB gzip import;
           neither number includes React, React DOM, or the external virtualizer supplied by the application.
         </p>
         <p>

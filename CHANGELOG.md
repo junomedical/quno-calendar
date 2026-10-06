@@ -28,6 +28,14 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ### Fixed
 
+- Pointer jitter within the four-pixel click tolerance now activates an event even when it crosses a snap boundary.
+  A changed proposal requires movement beyond that tolerance before requesting a move or updating the event cache.
+
+- Initial loading now waits for a selected ID that exists in `calendars` before mounting the hidden timeline. IDs
+  arriving before resource metadata or matching no resource keep the fallback free of header-only geometry.
+
+- Corrected the navigation guide to describe `calendarId` as an optional field in the `scrollToDateTime` options object.
+
 - Resource-row navigation and viewport-anchor restoration now wait for committed parent layout. A selection or draft
   update followed by the existing handle call works without consumer `flushSync` wrappers. Batched navigation uses
   the latest request, and cancellation can discard a restore before it starts.
@@ -35,6 +43,19 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 - A drag dropped back onto its original minute and calendar now neither activates the event editor nor sends a move request. The calendar tracks movement before frame coalescing; ordinary clicks still activate without consumer-side suppression.
 
 ### Verification notes
+
+- Drag click tolerance: all 432 unit tests pass. The full Chromium run passed 133 scenarios; the new jitter case
+  passes after removing an unrelated cancel-scroll assertion, with all four drag scenarios passing on rerun.
+  The 1–4 px unit cases and 1 px browser case reproduced the snap-boundary bug before the guard; 5 px still moves.
+  Formatting, architecture/contracts, typecheck, lint, library/demo builds, packed React/package and Preact checks,
+  size reporting, and pack dry-run pass. Infinite Calendar measures 168,202 B raw and 39,878 B gzip (38.94 KiB),
+  within its 50 KiB ceiling. The guide's raw-size figure is refreshed.
+
+- Loading resource intersection and navigation-guide correction: all 427 unit tests and all 133 Chromium scenarios pass.
+  Both orientation regressions and the startup browser check reproduced premature mounting before the fix. Formatting,
+  architecture/contracts, typecheck, lint, library/demo builds, packed React/package and Preact checks, size reporting,
+  and pack dry-run pass. Infinite Calendar measures 168,189 B raw and 39,875 B gzip (38.94 KiB), within its 50 KiB ceiling.
+  Guide figures and unit/browser payload expectations stay aligned.
 
 - Version 0.6.2 with the accepted 39 KiB budget: aggregate `npm run verify:package` passes. Formatting, architecture, typecheck, lint, 13 affected unit tests, the Chromium payload-guide test, the demo build, and pack dry-run pass. The earlier size-gate failures below describe verification against the previous 38 KiB ceiling.
 

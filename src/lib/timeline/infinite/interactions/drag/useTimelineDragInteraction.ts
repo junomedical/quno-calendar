@@ -134,7 +134,7 @@ export function useTimelineDragInteraction({
         return true;
       }
       // The release frame clears a preview that returns to the original minute and calendar.
-      if (proposal && onEventMoveRequest) {
+      if (movedRef.current && proposal && onEventMoveRequest) {
         try {
           const accepted = await onEventMoveRequest(proposal);
           if (accepted !== false) {

@@ -45,6 +45,9 @@ precision, theming, day/hour/row/column styling, custom card structure, date loc
 [`articleSupport.tsx`](./articleSupport.tsx) contains deterministic fixtures and the external event renderer. Every live
 calendar imports the public `@quno/calendar/infinite-calendar` entrypoint.
 
+The prefetch loading exhibit supplies its selected resource ID before calendar metadata arrives. The loading fallback
+waits for a matching resource before the hidden timeline mounts and requests events.
+
 Each chapter leads with a concrete outcome and the problem it solves. Behavior and implementation follow only after
 that context, and control instructions remain in callouts beside the relevant live example.
 
@@ -52,5 +55,5 @@ Every live calendar expands through a shared viewport overlay rather than the br
 the same React calendar instance mounted, so its visible date, intra-date offset, and loaded event cache survive the
 transition.
 
-The payload chapter reports the 0.6.2 Infinite Calendar artifacts: 38.92 KiB gzip JavaScript with a 39 KiB ceiling,
+The payload chapter reports the 0.6.2 Infinite Calendar artifacts: 38.94 KiB gzip JavaScript with a 50 KiB ceiling,
 and 1.99 KiB gzip optional CSS with a 2 KiB ceiling. The shared production profile supplies the same facts.

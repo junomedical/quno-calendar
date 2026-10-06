@@ -18,7 +18,8 @@ days, hours, horizontal rows, and vertical columns without taking ownership of g
 - [Shared usage recipes](../shared/usage.md)
 
 Dragging an event back to its starting slot neither opens its editor nor requests a move. The calendar owns
-this distinction from an ordinary click, which still invokes `onEventActivate`; consumers need no movement guard.
+this distinction from an ordinary click, which still invokes `onEventActivate`. Pointer jitter within four pixels
+also activates, even if it crosses a snap boundary; consumers need no movement guard.
 
 `CalendarEventBase` exposes the shared `id`, `calendarId`, and `start` fields. `CalendarEvent` extends it with the
 remaining renderer data, so consumers can store an event's identity and start position without a local field selection.
@@ -37,9 +38,11 @@ in the same handler. The package measures after the resulting layout commits; co
 Pass `align: "center"` to center the requested row even when it is already visible. `getVisibleDateKeys()` returns
 only dates intersecting the usable viewport, so an external creation form can start on the middle visible date.
 
-Optional `isLoading` and `loadingFallback` props let a consumer supply its initial skeleton. With no selected rows,
-the initial timeline waits to mount; once rows exist it measures and loads events beneath the hidden surface. Clearing
-`isLoading` reveals that same timeline. Consumers own readiness, failures and any initial centered navigation.
+Optional `isLoading` and `loadingFallback` props let a consumer supply its initial skeleton. While loading, the
+timeline waits to mount until a selected ID matches a supplied calendar. IDs that arrive before calendar metadata or
+match no resource keep the fallback visible without header-only geometry. Once a matching row exists, the timeline
+measures and loads events beneath the hidden surface. Clearing `isLoading` reveals that same timeline. Consumers own
+readiness, failures and any initial centered navigation.
 
 The field guide keeps its interaction contracts live: newly scrolled dates populate without a simulated delay, event
 cards can be resized in place, parent-reviewed mutations preserve their working row and restore the original view on
@@ -67,7 +70,7 @@ Products own recurrence expansion; saves and filters still refresh through `even
 ## Bundle budget
 
 JavaScript is limited to 50 KiB gzip and the optional stylesheet to 2 KiB gzip. The current artifacts measure
-38.92 KiB and 1.99 KiB gzip respectively (Node 24). See [Decision 100](./decisions.md#100---reconcile-the-infinite-calendar-budget-after-branch-integration).
+38.94 KiB and 1.99 KiB gzip respectively (Node 24). See [Decision 100](./decisions.md#100---reconcile-the-infinite-calendar-budget-after-branch-integration).
 
 ## Named contracts
 

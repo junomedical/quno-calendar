@@ -56,6 +56,8 @@ export const QunoInfiniteCalendar = forwardRef<QunoInfiniteCalendarHandle, QunoI
       return calendar;
     }
 
+    const hasSelectedCalendar = props.calendars.some(({ id }) => props.selectedCalendarIds.includes(id));
+
     return (
       <div className="quno-calendar-loading-shell" aria-busy={isLoading}>
         <div
@@ -63,7 +65,7 @@ export const QunoInfiniteCalendar = forwardRef<QunoInfiniteCalendarHandle, QunoI
           aria-hidden={isLoading || undefined}
           style={{ visibility: isLoading ? "hidden" : undefined }}
         >
-          {!isLoading || props.selectedCalendarIds.length > 0 ? calendar : null}
+          {!isLoading || hasSelectedCalendar ? calendar : null}
         </div>
         {isLoading ? <div className="quno-calendar-loading-fallback">{loadingFallback}</div> : null}
       </div>

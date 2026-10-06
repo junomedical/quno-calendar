@@ -45,8 +45,10 @@ For initial calendar loading, supply your own skeleton and keep it mounted as a 
 />
 ```
 
-The consumer owns readiness and error UI. Once selected rows exist, event loading and layout continue beneath the
-fallback. Clear loading after the initial data arrives; ordinary refreshes need not hide the calendar.
+The consumer owns readiness and error UI. While loading, the timeline mounts only when `selectedCalendarIds`
+intersects the supplied `calendars`. Known IDs can arrive before calendar metadata; unmatched IDs keep the fallback
+visible without mounting an empty timeline. Once a matching resource exists, event loading and layout continue beneath
+the fallback. Clear loading after the initial data arrives; ordinary refreshes need not hide the calendar.
 
 The stylesheet is an explicit package asset; JavaScript does not inject it. This keeps both ESM imports and CommonJS `require("@quno/calendar/infinite-calendar")` safe in Node/SSR code. Import the stylesheet from the browser application entrypoint once.
 
@@ -590,7 +592,9 @@ these callbacks is read-only.
 />
 ```
 
-A normal click invokes `onEventActivate`. Dragging away and back to the original slot invokes neither activation nor a move request; the calendar tracks the gesture, so consumers need no pointer-movement suppression.
+A normal click invokes `onEventActivate`, including pointer jitter within four pixels that crosses a snap boundary.
+A move request requires movement beyond that tolerance. Dragging away and back to the original slot invokes neither
+activation nor a move request; the calendar tracks the gesture, so consumers need no pointer-movement suppression.
 
 Returning `false` from `onEventMoveRequest` rejects a drop. Returning a created event from `onEventCreateRequest` lets the visible cache show the committed event immediately. Newly committed visible events briefly receive `status: "appearing"` in `renderEvent` props so product renderers can play a save/create highlight. For parent-owned save flows, update your own event store and call `commitVisibleEvent` so the loaded visible cache changes one record instead of reloading the range.
 

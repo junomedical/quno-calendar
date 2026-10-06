@@ -379,7 +379,7 @@ export function PrefetchLoadingDemo() {
           renderEvent={ArticleEventCard}
           initialDateKey={articleDateKey}
           loadEvents={loadEvents}
-          selectedCalendarIds={contextReady ? ["provider-a"] : []}
+          selectedCalendarIds={["provider-a"]}
           settings={articleSettings}
         />
       </div>
