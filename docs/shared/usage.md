@@ -20,7 +20,11 @@ import { QunoDateInput } from "@quno/calendar/date-input";
 import { parseDateInput, tokenizeDateInput } from "@quno/calendar/date-parser";
 ```
 
+Infinite Calendar JavaScript has a 50 KiB gzip ceiling; its optional stylesheet has a separate 2 KiB ceiling.
+The headless Date Parser JavaScript entry point has a 7 KiB gzip ceiling.
+
 Add only the optional stylesheets needed by the browser application. JavaScript imports do not inject CSS.
+The package's public subpath types resolve under both modern and legacy Node-style TypeScript module resolution; no consumer-side declaration shim is needed.
 
 Import the component and stylesheet from the package entrypoint:
 
@@ -257,8 +261,8 @@ Return `{ beforeDays: 0, afterDays: 0 }` to load only rendered dates. Keep a cus
 
 When navigation reaches a date before its events load, the date/resource grid is already real and interactive. Late events are added without receiving browser focus. In the horizontal view:
 
-- `scrollToDate(date)` keeps that date header at the same viewport Y while dense rows expand below it.
-- `scrollToDateTime(date, time)` applies the same vertical rule and leaves the requested time coordinate unchanged on the X axis.
+- `scrollToDate({ date })` keeps that date header at the same viewport Y while dense rows expand below it.
+- `scrollToDateTime({ date, time })` applies the same vertical rule and leaves the requested time coordinate unchanged on the X axis.
 - If the viewport is already partway inside a calendar row, the calendar preserves the date, calendar id, and pixel offset inside that row. Height added above the row is compensated before paint.
 - If that calendar disappears during the same update, restoration falls back to the captured date-local pixel and clamps it inside the date.
 
@@ -644,14 +648,15 @@ Repository example: the focused creation, visual-focus, and motion chapters in
 
 ## Availability Editing
 
-Availability uses normal events with `kind: "availability"`. In appointment mode, availability renders as
-pointer-transparent background context. In availability mode, normal appointment cards remain visible but become
-pointer-transparent, and only availability blocks participate in move/draw hit-testing.
+Availability uses normal events with `kind: "availability"`. By default it is a foreground event in `events` mode.
+Set `renderLayer: "availability"` to paint it behind foreground events. In `events` mode, that background layer is
+pointer-transparent. In `availability` mode, foreground cards remain visible but become pointer-transparent, and only
+background-layered availability blocks participate in move/draw hit-testing.
 
-Overlapping availability for one person or resource receives independent deterministic lanes. It uses vertical
+Overlapping background-layered availability for one person or resource receives independent deterministic lanes. It uses vertical
 mini-lanes in the horizontal calendar and side-by-side lanes in the vertical calendar. `renderEvent` receives the
 availability lane through `lane`, its collision-group depth through `laneCount`, and collision state through
-`isOverlapping`. Appointments use a separate lane grid, and the resource grows to the greater of the two depths.
+`isOverlapping`. Foreground events use a separate lane grid, and the resource grows to the greater of the two depths.
 
 ```tsx
 <QunoInfiniteCalendar
@@ -712,6 +717,16 @@ const [date, setDate] = useState<DateRange>({
 Date pickers, search results, command palettes, and “Today” controls can call the same handle without knowing the
 calendar’s virtual-window geometry. Use `settings` for density and dimensions, then scope product CSS through
 `className`; changing either preserves the same calendar integration and renderer contract.
+
+For an editor that knows the resource row, supply its id while navigating the horizontal timeline:
+
+```tsx
+calendarRef.current?.scrollToDateTime({ date, time, calendarId: "provider-a" });
+```
+
+The optional target brings an offscreen or virtualized row into the unobscured viewport after the date mounts. An
+already-visible row stays in place; the time still moves into view. Omitting `calendarId` preserves the original
+date/time navigation, and the vertical view continues to navigate by date/time without a row axis.
 
 Product controls do not need a separate submit step. The infinite-calendar demo uses `QunoDateInput` in single-date mode
 and navigates to the committed day at its product-owned default focus time. It has no separate time field or Add event

@@ -290,7 +290,8 @@ describe("InfiniteTimelineView", () => {
         title: `Availability ${index}`,
         start: "2026-07-04T09:00:00",
         end: "2026-07-04T10:00:00",
-        kind: "availability" as const
+        kind: "availability" as const,
+        renderLayer: "availability" as const
       })),
       ...Array.from({ length: 2 }, (_, index) => ({
         id: `appointment-${index}`,

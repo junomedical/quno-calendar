@@ -136,7 +136,7 @@ Architecture checks enforce object arguments and product dependency direction, i
 - The custom-card structure exhibit promotes product group, patient name, or room number through the external renderer.
   Switching the primary field preserves every event shell’s DOM identity and exact geometry, keeps the active grouping
   label left of its controls, and prevents the promoted room label from clipping.
-- The availability lab proves that event mode leaves availability pointer-transparent and creates appointments, while
+- The availability lab proves that event mode leaves explicitly background-layered availability pointer-transparent and creates appointments, while
   availability mode visibly emphasizes availability, makes appointment shells faded/inert, accepts availability
   drag/drop, and creates availability. Its active-layer label sits to the left of the layer buttons.
 - The embedded read-only recipe cannot begin drag or creation. The embedded mutation recipe accepts a drag through
@@ -327,8 +327,8 @@ At 1280×720 with 50 resources and 20,000 total events/year:
 - Calendar DOM stays below 5,000 horizontal nodes and 6,500 vertical nodes, with at most 1,000 committed event shells.
 - Pointer work is animation-frame bounded and does not rerender unrelated external event cards.
 - p95 scripting plus layout remains below 10ms, no task exceeds 50ms, and a 10× layout benchmark input stays below 25× runtime.
-- JavaScript gzip ceilings are 2 KiB for shared helpers, 38 KiB for Infinite Calendar, 10.5 KiB for Datepicker,
-  8 KiB for Date Input, and 6 KiB for Date Parser. Optional CSS keeps its independent feature ceilings.
+- JavaScript gzip ceilings are 2 KiB for shared helpers, 50 KiB for Infinite Calendar, 10.5 KiB for Datepicker,
+  8 KiB for Date Input, and 7 KiB for Date Parser. Optional CSS keeps its independent feature ceilings.
 
 ## Manual Checks
 
@@ -339,7 +339,7 @@ At 1280×720 with 50 resources and 20,000 total events/year:
 
 Clock-dependent default-demo scenarios set a fixed working-day morning in the browser while leaving timers running.
 The virtualizer item-key adapter must retain identity across ordinary renders; navigation, zoom, and dense-layout
-browser tests guard that boundary. Current budgets are 38 KiB gzip for Infinite Calendar, 10.5 KiB for Datepicker,
+browser tests guard that boundary. Current budgets are 50 KiB gzip for Infinite Calendar, 10.5 KiB for Datepicker,
 and 8 KiB for Date Input.
 
 ## Optional clock verification

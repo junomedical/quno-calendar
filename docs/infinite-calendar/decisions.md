@@ -756,3 +756,37 @@ The layered cache, frame scheduler, and measured recenter bridge raise the ESM a
 KiB gzip. The
 Infinite Calendar JavaScript ceiling moves from 37 KiB to 38 KiB; the optional stylesheet remains 1.95 KiB gzip inside
 its existing 2 KiB ceiling.
+
+## 092 - Horizontal Row Navigation Belongs To The Calendar
+
+Date: 2026-09-24
+Status: Accepted
+
+An external editor can know a date, time, and calendar id before its target row is mounted. The public
+`scrollToDateTime({ date, time, calendarId })` handle accepts an optional `calendarId` for horizontal row navigation.
+The existing geometry registry and cancellable viewport restoration pin and reveal an offscreen resource after date
+virtualization settles; an already-visible row is not moved vertically. The calendar owns sticky-header offsets and
+row visibility, while the editor calls only the public handle. The vertical view keeps its date/time behavior because
+it has columns, not rows.
+
+## 093 - Event Entity Kind Is Separate From Its Render Layer
+
+Date: 2026-09-25
+Status: Accepted; refines Decision 091 and supersedes Decisions 017 and 019's implicit background-layer rule
+
+`CalendarEvent.kind` identifies the scheduling entity (`appointment`, `availability`, or `blocker`);
+`renderLayer: "availability"` explicitly selects the background treatment. Decision 091's independent lanes and
+maximum-depth sizing apply to this background layer only. Without the layer override, an availability is a foreground
+editable event in `events` mode and shares its overlap lanes and metrics with appointments and blockers. Background
+availability is pointer-transparent in `events` mode; `availability` interaction mode targets that layer. This permits
+internal scheduling editors while retaining the background treatment for consumers that opt into it.
+
+## 094 - Allow 50 KiB For Infinite Calendar JavaScript
+
+Date: 2026-10-06
+Status: Accepted; supersedes Decision 091's 38 KiB JavaScript ceiling
+
+The reported ESM artifact is 38.92 KiB gzip, exceeding the accepted 38 KiB ceiling. Raise the Infinite Calendar
+JavaScript ceiling to 50 KiB to accommodate the current artifact and leave comfortable room for future changes.
+Keep the guard, field-guide production facts, and verification documentation aligned. The optional stylesheet
+retains its independent 2 KiB ceiling; all other feature budgets remain unchanged.

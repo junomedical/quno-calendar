@@ -75,18 +75,18 @@ Use code identifiers such as `QunoInfiniteCalendar` and `QunoDatePicker` only fo
 
 | Term                  | Meaning                                                                                                                                                                       | Implementation reference                   |
 | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
-| Calendar event        | The data object returned by `loadEvents`. It may represent an appointment, availability, or another product-specific block.                                                   | `CalendarEvent`                            |
+| Calendar event        | The data object returned by `loadEvents`. Its kind identifies an appointment, availability, or blocker.                                                                       | `CalendarEvent`                            |
 | Event version         | Parent-controlled invalidation token for the loaded visible-range cache. Bump it after persisted event-store changes that should be reloaded through `loadEvents`.            | `eventVersion`                             |
 | Event prefetch policy | Strategy that derives the adjacent before/after date buffer from the current rendered dates and selected calendars.                                                           | `eventPrefetchPolicy`                      |
 | Event load window     | Rendered date keys plus the adjacent dates selected by the prefetch policy; fresh and in-flight dates are excluded from new requests.                                         | `eventLoadDateKeys`                        |
 | Appearing event ids   | Parent-provided ids that receive `status="appearing"` when they are present in loaded visible events after a save or reload.                                                  | `appearingEventIds`                        |
 | Visible event commit  | Imperative patch that replaces or inserts one persisted event in loaded visible buckets without a full range reload.                                                          | `commitVisibleEvent`                       |
-| Appointment           | A normal timed event that users move/create in `events` interaction mode.                                                                                                     | `kind` omitted or product-specific         |
-| Availability          | A background schedulable interval, usually full row height, shown with `kind: "availability"`.                                                                                | `kind: "availability"`                     |
+| Appointment           | A normal timed event that users move/create in `events` interaction mode.                                                                                                     | `kind: "appointment"` or omitted           |
+| Availability          | A schedulable interval. Foreground by default; opt into full-cell background painting with `renderLayer: "availability"`.                                                     | `kind: "availability"`, `renderLayer`      |
 | Multi-calendar event  | One event that belongs to more than one calendar and renders once in each matching selected calendar row.                                                                     | `calendarIds`                              |
 | Event shell           | The calendar-owned positioned wrapper that controls geometry, hover size, z-index, and CSS variables.                                                                         | `EventShell`, `.quno-calendar-event-shell` |
 | Event card            | The product-owned visual content rendered inside an event shell. The demo card is only one possible renderer.                                                                 | `renderEvent`, `.demo-event-card`          |
-| Availability shell    | An event shell used for an availability event. It is pointer-transparent in event mode and active in availability mode.                                                       | `.quno-calendar-availability-shell`        |
+| Availability shell    | An explicitly background-layered availability shell. It has independent collision lanes, is pointer-transparent in events mode, and is active in availability mode.           | `.quno-calendar-availability-shell`        |
 | Draft                 | A temporary event shown while the user draws a new time range.                                                                                                                | `draft-new-event`, `status="new"`          |
 | Active draft          | A parent-owned create or edit preview rendered while an external popup is open. Create active drafts render as `new`; edit active drafts replace their source event visually. | `activeDraft`                              |
 | Exiting draft         | A released active draft shell retained briefly after parent state clears so cancellation can fade out without losing the visual anchor.                                       | `releaseActiveDraft`, `.is-exiting`        |
@@ -102,8 +102,8 @@ Use code identifiers such as `QunoInfiniteCalendar` and `QunoDatePicker` only fo
 | Term                     | Meaning                                                                                                                                                          | Implementation reference                     |
 | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
 | Interaction mode         | The active editing layer: `events` or `availability`.                                                                                                            | `interactionMode`                            |
-| Events mode              | Appointments are interactive. Availability is background context.                                                                                                | `interactionMode="events"`                   |
-| Availability mode        | Availability blocks are interactive. Appointments are inactive background context.                                                                               | `interactionMode="availability"`             |
+| Events mode              | Foreground appointments, availabilities, and blockers are interactive; background-layer availability is context.                                                 | `interactionMode="events"`                   |
+| Availability mode        | Explicit background-layer availability blocks are interactive; foreground events are inactive context.                                                           | `interactionMode="availability"`             |
 | Hovered event            | The single row-local event instance currently focused by pointer position. Multi-calendar siblings do not all hover.                                             | `status="hovered"`                           |
 | Dragging event           | The original event instance during pointer drag. Multi-calendar siblings share drag status by event id.                                                          | `status="dragging"`                          |
 | Drop proposal            | The snapped date, time range, and calendar membership proposed by a drag.                                                                                        | `buildMoveProposal`                          |
@@ -149,7 +149,8 @@ Use code identifiers such as `QunoInfiniteCalendar` and `QunoDatePicker` only fo
 - Use `event shell` for calendar-owned geometry and `event card` for product-owned renderer content.
 - Use `date header` for the gray sticky day band and `date label` for its left text cell.
 - Use `time scale` for the sticky top header and `time label` for individual numbers.
-- Use `availability` for schedulable background intervals, not `free time` or `working hours`, unless product copy explicitly requires those words.
+- Use `availability` for schedulable intervals regardless of render layer, not `free time` or `working hours`,
+  unless product copy explicitly requires those words.
 
 ## Architecture Language
 

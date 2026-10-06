@@ -144,14 +144,31 @@ describe("event overlap layout", () => {
     expect(rowHeightForEvents({ events: denseRow, settings })).toBe(96);
   });
 
-  it("grows rows and columns for overlapping availability", () => {
+  it("grows rows and columns for overlapping background availability", () => {
     const availability = Array.from({ length: 4 }, (_, index) => ({
       ...event(`availability-${index}`, "09:00", "10:00"),
-      kind: "availability" as const
+      kind: "availability" as const,
+      renderLayer: "availability" as const
     }));
 
     expect(rowHeightForEvents({ events: availability, settings })).toBe(96);
     expect(columnWidthForEvents({ events: availability, settings })).toBe(320);
+  });
+
+  it("counts foreground availability as an ordinary editable event", () => {
+    const availability: CalendarEvent = {
+      ...event("availability", "09:00", "10:00"),
+      kind: "availability"
+    };
+    const preparedCell = prepareEventCell({ events: [availability, event("appointment", "09:00", "10:00")], settings });
+
+    expect(preparedCell.metricLaneCount).toBe(2);
+    const preparedLayers = prepareEventLayers({
+      events: [availability, event("appointment", "09:00", "10:00")],
+      settings
+    });
+    expect(preparedLayers.events.metricLaneCount).toBe(2);
+    expect(preparedLayers.availability.items).toHaveLength(0);
   });
 
   it("prepares a cell once for metrics and both geometry projections", () => {
@@ -176,12 +193,28 @@ describe("event overlap layout", () => {
     );
   });
 
-  it("prepares appointment and availability collisions independently and sizes by their maximum depth", () => {
+  it("prepares foreground and background availability collisions independently and sizes by maximum depth", () => {
     const availability = [
-      { ...event("availability-first", "09:00", "10:30"), kind: "availability" as const },
-      { ...event("availability-second", "09:00", "10:00"), kind: "availability" as const },
-      { ...event("availability-later", "10:30", "11:00"), kind: "availability" as const },
-      { ...event("availability-third", "09:30", "10:15"), kind: "availability" as const }
+      {
+        ...event("availability-first", "09:00", "10:30"),
+        kind: "availability" as const,
+        renderLayer: "availability" as const
+      },
+      {
+        ...event("availability-second", "09:00", "10:00"),
+        kind: "availability" as const,
+        renderLayer: "availability" as const
+      },
+      {
+        ...event("availability-later", "10:30", "11:00"),
+        kind: "availability" as const,
+        renderLayer: "availability" as const
+      },
+      {
+        ...event("availability-third", "09:30", "10:15"),
+        kind: "availability" as const,
+        renderLayer: "availability" as const
+      }
     ];
     const timedEvents = [
       event("timed-a", "09:00", "10:00"),

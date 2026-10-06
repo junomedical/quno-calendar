@@ -134,8 +134,9 @@ flowchart LR
 ## Late Events That Increase Horizontal Height
 
 Before the API resolves, an unloaded horizontal date uses compact base row heights. After loaded overlaps are prepared,
-dense appointment or availability collisions may grow only their date/resource row. The two layers are prepared
-independently and sizing uses their maximum depth; draft and drag-preview overlays do not contribute lanes.
+dense foreground or explicitly background-layered availability collisions may grow only their date/resource row.
+The two layers are prepared independently and sizing uses their maximum depth; draft and drag-preview overlays do not
+contribute lanes.
 
 ### What Stays In Focus?
 
@@ -173,14 +174,16 @@ For horizontal `scrollToDateTime`, vertical focus follows the date/resource poli
 
 ## Orientation Differences
 
-| Concern                               | Infinite horizontal                                         | Infinite vertical                                                                                                           |
-| ------------------------------------- | ----------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| Time axis                             | X                                                           | Y                                                                                                                           |
-| Resource axis inside a date           | Variable-height rows                                        | Variable-width columns                                                                                                      |
-| Late overlap metric                   | Can increase row height and total date height               | Can increase column width; date/time height remains determined by settings and zoom                                         |
-| Primary scroll focus after event load | Date header or date/resource/local-row offset               | Date/time remains stable because event data does not change day height                                                      |
-| Cross-axis identity                   | Calendar row id is restored when horizontal heights change  | Calendar column id is the semantic cross-axis identity; this change does not add a separate automatic width-correction pass |
-| Availability/draft/preview effect     | Availability can grow its own mini-lanes; transients do not | Availability can grow its own side-by-side lanes; transients do not                                                         |
+| Concern                               | Infinite horizontal                                        | Infinite vertical                                                                                                           |
+| ------------------------------------- | ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| Time axis                             | X                                                          | Y                                                                                                                           |
+| Resource axis inside a date           | Variable-height rows                                       | Variable-width columns                                                                                                      |
+| Late overlap metric                   | Can increase row height and total date height              | Can increase column width; date/time height remains determined by settings and zoom                                         |
+| Primary scroll focus after event load | Date header or date/resource/local-row offset              | Date/time remains stable because event data does not change day height                                                      |
+| Cross-axis identity                   | Calendar row id is restored when horizontal heights change | Calendar column id is the semantic cross-axis identity; this change does not add a separate automatic width-correction pass |
+| Foreground availability               | Ordinary event lanes may increase row height               | Ordinary event lanes may increase column width                                                                              |
+| Background availability               | Independent mini-lanes may increase row height             | Independent side-by-side lanes may increase column width                                                                    |
+| Draft/preview                         | Transient only; no row-height growth                       | Transient only; no column-width growth                                                                                      |
 
 ## Runtime Invalidation Matrix
 

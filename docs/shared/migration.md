@@ -11,7 +11,7 @@ return values, date semantics, CSS tokens, slots, and native React event signatu
 | -------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
 | `parseDateInput(text, options)`                                                  | `parseDateInput({ text, ...options })`                                                                            |
 | `tokenizeDateInput(text)`                                                        | `tokenizeDateInput({ text })`                                                                                     |
-| `addDays(date, amount)` and positional date helpers                              | `addDeays({ date, amount })`; pass each helper's named fields                                                     |
+| `addDays(date, amount)` and positional date helpers                              | `addDays({ date, amount })`; pass each helper's named fields                                                      |
 | Datepicker shared runtime helper exports                                         | Import the same helpers from `@quno/calendar`                                                                     |
 | Picker/input `onChange(value)`                                                   | `onChange({ value })`                                                                                             |
 | `onVisibleMonthChange(month)` / `onZoomChange(zoom)`                             | `onVisibleMonthChange({ month })` / `onZoomChange({ zoom })`                                                      |
@@ -74,6 +74,16 @@ Date Parser has no stylesheet. Date Input may use it internally but does not re-
 | `defaultQunoCalendarSettings`                      | `defaultQunoInfiniteCalendarSettings` |
 
 Event-domain names such as `CalendarEvent`, `EventRendererProps`, and `LoadEvents` are unchanged. Infinite Calendar day keys use shared `IsoDate`; event `start` and `end` values remain timestamp strings.
+
+## Event kinds and availability presentation
+
+`CalendarEvent.kind` and `EventCreateRequest.kind` now accept `appointment`, `availability`, or `blocker`. Map older
+`consultation` and `draft` values to `appointment`, and `blocked` to `blocker`; a create/edit preview is represented
+by `ActiveEventDraft`, not a persisted event kind.
+
+An event with `kind: "availability"` is now a foreground, editable event and participates in overlap sizing. To retain
+the former background appearance, also set `renderLayer: "availability"` on that event. The optional `renderLayer`
+changes presentation, interaction, and overlap geometry; it is not a scheduling entity or persistence field.
 
 ## Headless root and styling
 

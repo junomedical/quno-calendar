@@ -163,7 +163,8 @@ recipes. `/guide/infinite-calendar` mounts later calendar exhibits only when the
 each exhibit mounted afterward. Every exhibit uses the same demo-owned full-screen shell, which places its existing
 mounted `QunoInfiniteCalendar` in a fixed viewport overlay; it does not invoke the browser Fullscreen API or move calendar state
 into the reusable library. Its system-design labs also expose two existing library boundaries without adding article
-state to the runtime: `interactionMode` switches pointer ownership between committed event and availability layers, and
+state to the runtime: `interactionMode` switches pointer ownership between foreground events and the explicit
+background availability layer, and
 the public viewport-anchor handle carries visual focus from a controlled draft to its saved replacement or through
 overlap-lane recomputation. A CSS-native lab demonstrates that sticky days and resource names remain browser-positioned
 instead of entering high-frequency React scroll state. Product-control labs use the existing navigation handle,
@@ -213,7 +214,7 @@ sequenceDiagram
   participant Anchor as Data-layout anchor
   participant Virtual as Date virtualizer
 
-  User->>Nav: scrollToDateTime(D, T)
+  User->>Nav: scrollToDateTime({ date: D, time: T })
   Nav->>View: paint D immediately at base row heights
   Nav->>View: keep time T on the horizontal axis
   View->>API: request visible/overscan range
@@ -231,8 +232,8 @@ The resulting focus contract is explicit:
 
 | View state before response                   | Position preserved after response                                                  |
 | -------------------------------------------- | ---------------------------------------------------------------------------------- |
-| Exact `scrollToDate(D)`                      | D's date header; dense rows grow downward.                                         |
-| `scrollToDateTime(D, T)`                     | The same date policy vertically and time T horizontally.                           |
+| Exact `scrollToDate({ date: D })`            | D's date header; dense rows grow downward.                                         |
+| `scrollToDateTime({ date: D, time: T })`     | The same date policy vertically and time T horizontally.                           |
 | Viewport partway inside resource R on date D | `{ D, R, offsetWithinRow }`; growth above R is compensated.                        |
 | Anchored resource removed by another change  | Captured date-local fallback offset, clamped inside D.                             |
 | Vertical orientation receives dense overlaps | Date/time Y stays fixed; overlap changes column width rather than vertical height. |
@@ -255,16 +256,17 @@ Important invariants:
 
 ## Prepared Cell Pipeline
 
-Each revised date is indexed by calendar membership in one pass. Each date/calendar cell separates availability from
-appointments and prepares both layers independently with the same deterministic heap-based `O(n log n)` algorithm.
+Each revised date is indexed by calendar membership in one pass. Each date/calendar cell separates explicit background
+availability from foreground events of every kind and prepares both layers independently with the same deterministic
+heap-based `O(n log n)` algorithm.
 Unchanged bucket arrays reuse the complete prepared date model.
 
 ```mermaid
 flowchart LR
   Events["date events"] --> Membership["calendar membership index"]
   Membership --> Cell["date/resource cell"]
-  Cell --> Availability["prepared availability lanes"]
-  Cell --> Prepared["prepared appointment lanes"]
+  Cell --> Availability["explicit background availability lanes"]
+  Cell --> Prepared["foreground event lanes"]
   Availability --> Metrics["max layer depth"]
   Prepared --> Metrics
   Availability --> Horizontal["horizontal mini-lanes"]
@@ -288,11 +290,12 @@ flowchart LR
   Translate --> Paint["paint event shells in stable viewport"]
 ```
 
-Sizing and rendering reuse the same layered prepared cell. Resource size uses the larger appointment or availability
-depth rather than adding them. Non-overlapping availability still fills one resource lane; overlapping availability
-uses real lane rectangles and remains behind appointments. One shared state layer assigns availability, draft, and
-drop-preview statuses; horizontal and vertical views provide their own geometry adapters. Drafts and previews remain
-transient and never perturb committed layout.
+Sizing and rendering reuse the same layered prepared cell. Resource size uses the larger foreground or background
+depth rather than adding them. Only events explicitly marked `renderLayer: "availability"` use the background lane;
+unmarked availability joins ordinary foreground events and can grow its row or column. Non-overlapping background
+availability fills one resource lane; overlapping background availability uses real lane rectangles behind foreground
+events. Horizontal and vertical views provide their own geometry adapters. Drafts and previews remain transient and
+never perturb committed layout.
 
 ## Date And Resource Virtualization
 

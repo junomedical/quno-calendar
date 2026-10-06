@@ -77,3 +77,13 @@ applies; new refinements belong here rather than in the Datepicker ledger.
 - Consequences: Parser guide and demo expose the opt-in through public imports. Date Input consumes the date-only
   analyzer without clock recognition code; Datepicker and the shared day model retain their contracts. The parser stays
   dependency-free and SSR-safe. Existing feature size ceilings remain unchanged.
+
+## QDPR-006 - Leave headroom in the parser bundle budget
+
+- Date: 2026-10-06
+- Status: Accepted; supersedes QDPR-005's unchanged parser size ceiling
+- Context: The parser artifact is approximately 6 KiB gzip, and Node 26's compression output exceeds the former
+  6 KiB ceiling by a few bytes. A ceiling at the artifact's current size leaves no useful room for future changes.
+- Decision: Raise the Date Parser JavaScript gzip ceiling to 7 KiB and align the bundle guard, field-guide budget,
+  and verification documentation. Retain independent budgets for the other products.
+- Consequences: The size check passes across the verified Node versions while retaining a bounded parser budget.

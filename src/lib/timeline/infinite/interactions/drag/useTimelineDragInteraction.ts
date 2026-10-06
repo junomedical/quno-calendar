@@ -108,6 +108,7 @@ export function useTimelineDragInteraction({
       if (isActiveDraftEvent(currentDrag.event)) {
         return true;
       }
+      // The release frame clears a preview that returns to the original minute and calendar.
       if (proposal && onEventMoveRequest) {
         try {
           const accepted = await onEventMoveRequest(proposal);
@@ -117,7 +118,8 @@ export function useTimelineDragInteraction({
         } catch {
           // A rejected parent mutation is a rejected drop; local cache stays unchanged.
         }
-      } else if (!proposal && onEventActivate) {
+      } else if (onEventActivate) {
+        // Also fires when the pointer ended on the original slot.
         onEventActivate({ event: currentDrag.event, renderedCalendarId: currentDrag.sourceCalendarId });
       }
       return true;

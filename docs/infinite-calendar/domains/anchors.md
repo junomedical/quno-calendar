@@ -26,6 +26,8 @@ Priority and interaction with scroll maintenance are defined in the [Flow Guide]
 - Horizontal late-data restoration preserves date/resource/local-row offset; missing resources fall back to date-local offset.
 - Controlled zoom remains parent-owned through `settings.zoom` and only requests changes with `onZoomChange`.
 - Manual user intent cancels eligible scheduled restoration.
+- Horizontal date/time navigation can target a resource row; visible rows stay put while virtualized rows are pinned
+  and revealed after the date jump.
 
 ## Source Map
 

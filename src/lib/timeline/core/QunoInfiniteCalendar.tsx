@@ -30,7 +30,8 @@ export const QunoInfiniteCalendar = forwardRef<QunoInfiniteCalendarHandle, QunoI
       ref,
       () => ({
         scrollToDate: ({ date: dateKey }) => viewRef.current?.scrollToDate({ date: dateKey }),
-        scrollToDateTime: ({ date: dateKey, time }) => viewRef.current?.scrollToDateTime({ date: dateKey, time }),
+        scrollToDateTime: ({ date: dateKey, time, calendarId }) =>
+          viewRef.current?.scrollToDateTime({ date: dateKey, time, calendarId }),
         scrollToToday: () => viewRef.current?.scrollToToday(),
         captureViewportAnchor: (target) => viewRef.current?.captureViewportAnchor(target) ?? null,
         restoreViewportAnchor: ({ anchor, ...options }) =>

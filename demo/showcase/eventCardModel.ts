@@ -5,8 +5,8 @@ export function eventCardModel(
   { event, status, isOverlapping }: Pick<EventRendererProps, "event" | "status" | "isOverlapping">
 ) {
   const isAvailability = event.kind === "availability";
-  const isConsultation = event.kind === "consultation";
-  const isBlocked = event.kind === "blocked" || event.title.startsWith("Locked");
+  const isConsultation = event.title.toLowerCase().includes("consultation");
+  const isBlocked = event.kind === "blocker" || event.title.startsWith("Locked");
   const formatTime = (value: string) => {
     const date = new Date(value);
     return `${date.getHours()}:${String(date.getMinutes()).padStart(2, "0")}`;

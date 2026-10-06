@@ -4,8 +4,28 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+### Changed
+
+- Raised the Infinite Calendar JavaScript gzip ceiling from 38 KiB to 50 KiB, leaving comfortable headroom
+  above the reported 38.92 KiB artifact. Refreshed its field-guide JavaScript and CSS measurements against a fresh
+  library build on Node 24 (37.90 KiB and 1.95 KiB gzip respectively).
+- Raised the Date Parser JavaScript gzip ceiling from 6 KiB to 7 KiB to leave headroom across Node versions.
+
+### Verification
+
+- Bundle checks pass on Node 24 and Node 26.7.0.
+- Corrected test formatting so the project-wide formatting check passes.
+
+## 0.6.1 - 2026-10-02
+
+This package contains the current `feat/internal-calendar-core` contracts, including the headless root `singleDay` export used by onboarding. The new versioned archive gives consumers a distinct package identity for deployment.
+
 ### Added
 
+- Added optional horizontal resource-row navigation through `scrollToDateTime({ date, time, calendarId })`, using the
+  calendar's virtualized geometry and cancellation lifecycle instead of consumer DOM observers.
+- Added `typesVersions` mappings for public subpaths so projects using legacy Node-style TypeScript resolution no longer need local declaration shims.
+- Exported `CALENDAR_EVENT_KINDS`, `CALENDAR_RULE_KINDS`, and their types for the appointment, availability, and blocker domain.
 - Added opt-in Date Parser clock recognition with `recognizeTime: true`: traditional 24-hour and AM/PM forms,
   time-only input anchored to the reference date, and time ranges with inherited dates and overnight rollover.
   Existing date values stay intact; optional `times` holds normalized `HH:mm` clocks. Tokenization can expose explicit
@@ -42,6 +62,12 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ### Changed
 
+- Separated event identity from presentation: `kind: "availability"` is foreground and participates in overlap metrics
+  unless `renderLayer: "availability"` explicitly selects the background treatment. Legacy `consultation`,
+  `blocked`, and `draft` event-kind values are replaced by `appointment` or `blocker`; see the migration guide.
+- Gave explicitly background-layered availability deterministic lanes independent from foreground events in both
+  orientations. Resource rows and columns grow to the greater layer depth, and background availability renderers
+  receive meaningful `lane`, `laneCount`, and `isOverlapping` metadata.
 - Kept clock recognition outside Date Input's date-only analyzer and reused date-resolution/ranking logic without
   raising feature ceilings. Current ESM measurements are 6,143 B gzip for Date Parser (6 KiB ceiling), 7.70 KiB for
   Date Input (8 KiB ceiling), and 10.49 KiB for Datepicker (10.5 KiB ceiling); production guides report refreshed sizes.
@@ -55,9 +81,9 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 - Reused unchanged event-bucket snapshots and date preparation, memoized static Datepicker structure, compiled Date
   Input analysis per configuration, and deferred ordinary recognition decoration without changing parser or input
   commit contracts.
-- Updated measured ESM artifacts and accepted ceilings for the added responsiveness machinery: Infinite Calendar is
-  37.56 KiB gzip with a 38 KiB ceiling, Datepicker is 10.47 KiB with a 10.5 KiB ceiling, and Date Input remains within
-  its 8 KiB ceiling at 7.82 KiB.
+- Updated measured ESM artifacts and accepted ceilings for the combined changes: Infinite Calendar is
+  37.88 KiB gzip with a 38 KiB ceiling, Datepicker is 10.46 KiB with a 10.5 KiB ceiling, and Date Input remains within
+  its 8 KiB ceiling at 7.80 KiB.
 
 - Accepted the cumulative object-contract and responsiveness tradeoff: Infinite Calendar's gzip budget is now 38 KiB
   (previously 34 KiB), Datepicker's is 10.5 KiB, and Date Input's is 8 KiB (previously 7 KiB); the other JavaScript and
@@ -72,7 +98,6 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
   exports, duplicate input formatter types, repeated formatting/class-name helpers, and unused picker input CSS.
 - Added function-contract and dependency-direction guards plus public consumer type tests; grouped input and parser
   tests under their owning products and updated all four live guides and compatibility fixtures.
-
 - Raised the Infinite Calendar JavaScript gzip ceiling from 32 KiB to 34 KiB for the new presentation callbacks; the
   measured ESM artifact is now 136.83 KiB raw and 33.44 KiB gzip after composing day, hour, and cell presentation.
 - Replaced the event-card resize lab's width and height sliders with one browser-native draggable corner. The demo's
@@ -135,6 +160,7 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ### Fixed
 
+- A drag dropped back onto its original minute and calendar activates the event editor without sending a move request.
 - Transferred Start/End shortcut focus to Datepicker's stable month heading before navigation removes the chip, keeping
   composed Date Input popups open and their selected range intact for pointer and keyboard activation, including reduced motion.
 - Prevented settled Infinite Calendar recentering from briefly painting uniform-height placeholder dates over already

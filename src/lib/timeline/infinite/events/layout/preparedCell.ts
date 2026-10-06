@@ -160,7 +160,7 @@ export function prepareEventLayers({
   const foreground: CalendarEvent[] = [];
   const availability: CalendarEvent[] = [];
   for (const event of events) {
-    (event.kind === "availability" ? availability : foreground).push(event);
+    (event.renderLayer === "availability" ? availability : foreground).push(event);
   }
   const preparedEvents = prepareEventCell({ events: foreground, settings });
   const preparedAvailability = prepareEventCell({ events: availability, settings });

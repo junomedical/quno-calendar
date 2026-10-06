@@ -50,7 +50,7 @@ const navigationEvents: CalendarEvent[] = [
     start: "2026-07-10T10:00:00",
     end: "2026-07-10T11:15:00",
     color: "#c77b45",
-    kind: "consultation"
+    kind: "appointment"
   }
 ];
 const loadNavigationEvents: LoadEvents = async (request) => filterEvents(navigationEvents, request);
@@ -337,6 +337,21 @@ export function NavigationControlsDemo() {
             type="button"
           >
             Today
+          </button>
+          <button
+            className="article-button"
+            onClick={() => {
+              setDate(articleDateKey);
+              calendarRef.current?.scrollToDateTime({
+                date: articleDateKey,
+                time: articleNowTime,
+                calendarId: "room-1"
+              });
+              setStatus("Showing Room 1 at 13:30");
+            }}
+            type="button"
+          >
+            Show Room 1
           </button>
         </div>
       }
@@ -733,7 +748,7 @@ export function EverythingTogetherDemo() {
       start: `${articleDateKey}T15:30:00`,
       end: `${articleDateKey}T16:30:00`,
       color: "#9b6a9e",
-      kind: "consultation"
+      kind: "appointment"
     };
     eventsRef.current = [
       ...eventsRef.current.filter((candidate) => !candidate.id.startsWith("article-summary-inserted-")),

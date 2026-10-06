@@ -200,3 +200,11 @@ because that repository was the consolidation source. Its identifier and text re
   on focus moving outside or an outside pointer action, and retain internal-pointer guards for other interactions.
 - Consequences: Both public guide compositions support repeated Start/End jumps with pointer, Enter, and Space,
   with ordinary or reduced motion, while subsequent Tab navigation remains within the picker until focus leaves.
+
+## QUNO-015 - Resolve public subpath types for legacy TypeScript consumers
+
+- Date: 2026-09-24
+- Status: Accepted
+- Context: Modern TypeScript resolves declaration subpaths from package `exports`, but the onboarding monorepo still uses Node-style module resolution and required ambient declarations for Infinite Calendar and Datepicker.
+- Decision: Keep the existing `exports` type conditions and add `typesVersions` mappings for every public JavaScript subpath. Do not add consumer-side TypeScript paths, which can affect runtime bundler resolution.
+- Consequences: Legacy consumers can import the package's real declarations directly, remove local declaration shims, and keep runtime imports at public subpaths. No JavaScript or CSS payload changes.

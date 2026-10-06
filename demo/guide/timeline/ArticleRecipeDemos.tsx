@@ -255,7 +255,7 @@ const preloadEvents: CalendarEvent[] = [
     start: `${prefetchedDate}T09:30:00`,
     end: `${prefetchedDate}T10:30:00`,
     color: "#6372a7",
-    kind: "consultation"
+    kind: "appointment"
   }
 ];
 const articlePrefetchPolicy: EventPrefetchPolicy = () => ({ beforeDays: 3, afterDays: 8 });
