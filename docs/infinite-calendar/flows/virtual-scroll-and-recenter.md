@@ -173,7 +173,12 @@ flowchart TD
   Sorted --> Keys["Map every rendered item to visible loader key"]
 ```
 
-The pinned layout date is mounted once without widening ordinary overscan. Pinning makes geometry resolvable; it does
+The pinned layout date is mounted once without widening ordinary overscan. A horizontal parent restore also pins
+its target date through the same layout pin, taking priority over the draft date, deduplicating it against existing
+items and adding it to loader keys. This keeps original row geometry
+resolvable after Cancel rebuilds participant rows and clears the draft pin. The restore pin ends with its bounded
+session or cancellation. Creation retains eager-range ownership during its existing closing transition before a
+restore can take over the pin. Pinning makes geometry resolvable; it does
 not replace the current scroll anchor. A date-sequence or base-geometry transition keeps its resource nodes mounted
 until the virtualizer settles. When an idle recenter changes only the bounded-window anchor, measured semantic date
 items are translated to their replacement indexes and centered absolute offset while preserving their measured sizes.

@@ -54,9 +54,20 @@ create draft with no participants keeps the normal calendar set and drawn date v
 and Save action remain unavailable. Multi-participant edits retain one surviving visible event instance while participants
 are toggled; removing that participant transfers the anchor to another surviving instance. Captured event anchors
 record the resolved participant id. Cancel retains the original participant's independent edit anchor.
-Opening the editor restores the clicked instance's position. Horizontal draft and participant changes retain measured
+Opening the demo editor preserves the clicked resource row in horizontal view and the event instance in vertical view.
+Horizontal draft and participant changes retain measured
 day heights, and idle recentering yields to an active explicit restore. A required visible event capture returns `null`
 when the event is missing or offscreen, rather than substituting its resource slot.
+
+The focused demo captures the clicked participant's resource/time slot when opening or cancelling a horizontal editor.
+This keeps the row and top visible day stationary as a compact overlap card becomes a full-row draft or hover card.
+Vertical editor transitions continue to anchor the event instance; participant edits keep their surviving-instance policy.
+Try `/demo/infinite-calendar`: select one calendar, open an overlapping appointment, close its editor, and hover again.
+The grid should remain in place. Active horizontal restores keep their target date mounted through resource resizing,
+including Cancel after removing the original participant. Try adding Marco, Room 202 and Surgery A, then removing Marco
+and Dmitry before Cancel; repeat with one or six calendars. October 8 and Dmitry return to their original position.
+See [Decision 104](./decisions.md#104---anchor-horizontal-demo-editor-transitions-to-resource-slots) and
+[Decision 105](./decisions.md#105---retain-horizontal-restore-dates-through-resource-changes).
 
 TanStack Virtual notifications use its queued React update path. Layout restoration requests an ordinary React
 projection before paint, keeping React 19 development free of the virtualizer `flushSync` lifecycle warning while
@@ -80,7 +91,7 @@ Products own recurrence expansion; saves and filters still refresh through `even
 ## Bundle budget
 
 JavaScript is limited to 50 KiB gzip and the optional stylesheet to 2 KiB gzip. The current artifacts measure
-39.47 KiB and 1.99 KiB gzip respectively (Node 23, gzip level 9). See [Decision 100](./decisions.md#100---reconcile-the-infinite-calendar-budget-after-branch-integration).
+39.57 KiB and 1.99 KiB gzip respectively (Node 23, gzip level 9). See [Decision 100](./decisions.md#100---reconcile-the-infinite-calendar-budget-after-branch-integration).
 
 ## Named contracts
 

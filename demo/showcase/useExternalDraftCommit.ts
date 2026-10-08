@@ -36,6 +36,8 @@ type ExternalDraftCommitArgs = {
   lastSeenAnchorRef: RefObject<CalendarViewportAnchor | null>;
   calendarRef: RefObject<QunoInfiniteCalendarHandle | null>;
   captureEventAnchor: CaptureEventAnchor;
+  captureEditorAnchor: CaptureEventAnchor;
+  restoreEditorAnchor: RestoreEventAnchor;
   restoreEventAnchor: RestoreEventAnchor;
   restoreSlotAnchor: RestoreSlotAnchor;
   clearActiveDraft: () => void;
@@ -50,6 +52,8 @@ export function useExternalDraftCommit({
   lastSeenAnchorRef,
   calendarRef,
   captureEventAnchor,
+  captureEditorAnchor,
+  restoreEditorAnchor,
   restoreEventAnchor,
   restoreSlotAnchor,
   clearActiveDraft,
@@ -100,9 +104,9 @@ export function useExternalDraftCommit({
     const sourcePrimaryCalendarId =
       firstPersonParticipantId(sourceParticipantIds) ?? sourceEvent?.calendarId ?? activeDraft?.event.calendarId;
     const anchor = activeDraft
-      ? ((sourcePrimaryCalendarId ? captureEventAnchor(activeDraft.event, sourcePrimaryCalendarId, true) : null) ??
+      ? ((sourcePrimaryCalendarId ? captureEditorAnchor(activeDraft.event, sourcePrimaryCalendarId, true) : null) ??
         (activeDraft.mode === "edit" ? activeEditSourceAnchorRef.current : null) ??
-        captureEventAnchor(activeDraft.event, undefined, true) ??
+        captureEditorAnchor(activeDraft.event, undefined, true) ??
         lastSeenAnchorRef.current)
       : null;
     const cancelledEvent =
@@ -117,16 +121,18 @@ export function useExternalDraftCommit({
       activeDraft?.mode === "edit" ? (activeDraft.sourceEventId ?? activeDraft.event.id) : undefined;
 
     calendarRef.current?.releaseActiveDraft({ animation: "fade-out" });
-    flushSync(() => {
+    const clearDraft = () => {
       clearActiveDraft();
       setMessage("External popup cancelled");
-    });
+    };
+    if (activeDraft?.mode === "edit") clearDraft();
+    else flushSync(clearDraft);
     if (!anchor || !cancelledEvent) {
       setMessage("Scroll reset skipped: no captured popup anchor");
       return;
     }
     if (activeDraft?.mode === "edit") {
-      restoreEventAnchor(anchor, cancelledEvent, {
+      restoreEditorAnchor(anchor, cancelledEvent, {
         eventId: sourceEventId,
         targetCalendarId: sourcePrimaryCalendarId,
         afterRecenter: true,
@@ -147,10 +153,10 @@ export function useExternalDraftCommit({
     activeEditSourceEventRef,
     activeEditSourceAnchorRef,
     calendarRef,
-    captureEventAnchor,
+    captureEditorAnchor,
     clearActiveDraft,
     lastSeenAnchorRef,
-    restoreEventAnchor,
+    restoreEditorAnchor,
     restoreSlotAnchor,
     setMessage
   ]);

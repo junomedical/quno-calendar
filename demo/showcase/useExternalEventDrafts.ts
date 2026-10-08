@@ -8,7 +8,8 @@ import {
   type EventActivateRequest,
   type EventCreateRequest,
   type EventMoveRequest,
-  type CalendarViewportAnchor
+  type CalendarViewportAnchor,
+  type CalendarView
 } from "@quno/calendar/infinite-calendar";
 import { demoCalendars } from "./data";
 import { draftParticipantIds, eventParticipantIds, isoDateInputValue } from "./draftFormUtils";
@@ -20,6 +21,7 @@ import { useExternalDraftNavigation } from "./useExternalDraftNavigation";
 
 type UseExternalEventDraftsArgs = {
   selectedCalendarIds: CalendarId[];
+  view: CalendarView;
   calendarRef: RefObject<QunoInfiniteCalendarHandle | null>;
   setEvents: Dispatch<SetStateAction<CalendarEvent[]>>;
   setMessage: (message: string) => void;
@@ -27,6 +29,7 @@ type UseExternalEventDraftsArgs = {
 
 export function useExternalEventDrafts({
   selectedCalendarIds,
+  view,
   calendarRef,
   setEvents,
   setMessage
@@ -40,10 +43,12 @@ export function useExternalEventDrafts({
     lastSeenAnchorRef: activeDraftLastSeenAnchorRef,
     captureEventAnchor,
     captureSlotAnchor,
+    captureEditorAnchor,
+    restoreEditorAnchor,
     restoreEventAnchor,
     restoreSlotAnchor,
     focusDraftEvent
-  } = useExternalDraftNavigation(calendarRef);
+  } = useExternalDraftNavigation(calendarRef, view);
 
   const activeDraftParticipants = useMemo(
     () => (activeDraft ? draftParticipantIds(activeDraft.event) : []),
@@ -108,11 +113,11 @@ export function useExternalEventDrafts({
         calendarIds: eventParticipantIds(request.event)
       };
       activeEditSourceEventRef.current = draftEvent;
-      activeEditSourceAnchorRef.current = captureEventAnchor(
+      activeEditSourceAnchorRef.current = captureEditorAnchor(
         draftEvent,
         firstPersonParticipantId(eventParticipantIds(draftEvent)) ?? draftEvent.calendarId
       );
-      const visibleAnchor = captureEventAnchor(draftEvent, request.renderedCalendarId, true);
+      const visibleAnchor = captureEditorAnchor(draftEvent, request.renderedCalendarId, true);
       activeDraftLastSeenAnchorRef.current = visibleAnchor ?? activeEditSourceAnchorRef.current;
       setDraftParticipantsChanged(false);
       setActiveDraft({
@@ -121,7 +126,7 @@ export function useExternalEventDrafts({
         event: draftEvent
       });
       if (visibleAnchor) {
-        restoreEventAnchor(visibleAnchor, draftEvent, {
+        restoreEditorAnchor(visibleAnchor, draftEvent, {
           afterRecenter: true,
           allowNavigationFallback: false,
           cancelOnManualScroll: true
@@ -129,7 +134,7 @@ export function useExternalEventDrafts({
       }
       setMessage(`Editing ${request.event.title} in external popup`);
     },
-    [activeDraftLastSeenAnchorRef, captureEventAnchor, restoreEventAnchor, setMessage]
+    [activeDraftLastSeenAnchorRef, captureEditorAnchor, restoreEditorAnchor, setMessage]
   );
 
   const handleActiveDraftMove = useCallback(
@@ -259,6 +264,8 @@ export function useExternalEventDrafts({
     lastSeenAnchorRef: activeDraftLastSeenAnchorRef,
     calendarRef,
     captureEventAnchor,
+    captureEditorAnchor,
+    restoreEditorAnchor,
     restoreEventAnchor,
     restoreSlotAnchor,
     clearActiveDraft,

@@ -23,6 +23,8 @@ See [Virtual Scroll And Recenter](../flows/virtual-scroll-and-recenter.md) for e
 - Active pointer interactions cancel pending idle recentering and suppress new deadlines until the gesture releases.
 - Resource windowing never compacts the full board; unmounted resources keep their original offsets.
 - Structural size restoration is separate from late-event data-layout anchoring.
+- Horizontal parent restores retain their target date in rendering and loading through resource resizing, then release
+  restore ownership of the layout pin when the session ends. Ordinary overscan stays bounded.
 - Structural transitions keep the semantic date and its resources mounted until replacement indexes and offsets settle.
 - Bounded-window recentering changes the anchor and scrollbar offset without replacing visible semantic nodes.
 - Ordinary resource-count changes preserve a surviving visible resource and do not rebuild the date window.

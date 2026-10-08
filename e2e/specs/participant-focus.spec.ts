@@ -55,19 +55,19 @@ for (const density of ["100", "20000"]) {
     );
     await expect(saved).toBeVisible();
     await saved.scrollIntoViewIfNeeded();
-    const sourceBeforeEdit = await viewportRelativeEventBox(
+    const savedId = await saved.getAttribute("data-event-id");
+    const sourceRowBeforeEdit = await viewportRelativeEventBox(
       page,
-      '[data-testid="calendar-event"][data-calendar-id="dr-kirillov"]',
-      "Participant focus regression"
+      `[data-testid="calendar-row"][data-calendar-id="dr-kirillov"]:has([data-event-id="${savedId}"])`
     );
-    expect(sourceBeforeEdit).not.toBeNull();
+    expect(sourceRowBeforeEdit).not.toBeNull();
     await saved.click({ position: { x: 12, y: 12 } });
     await expect(page.getByTestId("external-event-popup")).toBeVisible();
     const draftSelector = '[data-testid="draft-event"][data-calendar-id="dr-kirillov"]';
     await expect
       .poll(async () => {
         const box = await viewportRelativeEventBox(page, draftSelector);
-        return box ? Math.abs(box.y - sourceBeforeEdit!.y) : Infinity;
+        return box ? Math.abs(box.y - sourceRowBeforeEdit!.y) : Infinity;
       })
       .toBeLessThanOrEqual(8);
     const before = await viewportRelativeEventBox(page, draftSelector);
