@@ -4,7 +4,8 @@ import type {
   CalendarId,
   QunoInfiniteCalendarHandle,
   CalendarViewportAnchor,
-  CalendarViewportAnchorTarget
+  CalendarViewportAnchorTarget,
+  CalendarView
 } from "@quno/calendar/infinite-calendar";
 import { isoDateInputValue, isoTimeInputValue } from "./draftFormUtils";
 
@@ -42,7 +43,10 @@ function slotTarget(event: CalendarEvent, calendarId?: CalendarId): CalendarView
   };
 }
 
-export function useExternalDraftNavigation(calendarRef: RefObject<QunoInfiniteCalendarHandle | null>) {
+export function useExternalDraftNavigation(
+  calendarRef: RefObject<QunoInfiniteCalendarHandle | null>,
+  view: CalendarView
+) {
   const lastSeenAnchorRef = useRef<CalendarViewportAnchor | null>(null);
 
   const captureEventAnchor = useCallback(
@@ -81,7 +85,7 @@ export function useExternalDraftNavigation(calendarRef: RefObject<QunoInfiniteCa
       calendarRef.current?.restoreViewportAnchor({
         anchor,
         ...{
-          target: slotTarget(event, options.targetCalendarId),
+          target: slotTarget(event, options.targetCalendarId ?? anchor?.target.calendarId),
           afterRecenter: options.afterRecenter ?? true,
           allowNavigationFallback: options.allowNavigationFallback,
           cancelOnManualScroll: options.cancelOnManualScroll
@@ -90,6 +94,17 @@ export function useExternalDraftNavigation(calendarRef: RefObject<QunoInfiniteCa
     },
     [calendarRef]
   );
+
+  // Horizontal edit chrome fills the row; anchoring its compact lane would move
+  // the grid on open and make a closing restore chase hover expansion.
+  const captureEditorAnchor = useCallback(
+    (event: CalendarEvent, calendarId?: CalendarId, requireVisible = false) => {
+      const anchor = captureEventAnchor(event, calendarId, requireVisible);
+      return anchor && view === "infinite-horizontal" ? captureSlotAnchor(event, anchor.target.calendarId) : anchor;
+    },
+    [captureEventAnchor, captureSlotAnchor, view]
+  );
+  const restoreEditorAnchor = view === "infinite-horizontal" ? restoreSlotAnchor : restoreEventAnchor;
 
   const focusDraftEvent = useCallback(
     (event: CalendarEvent, anchor: CalendarViewportAnchor | null) => {
@@ -110,6 +125,8 @@ export function useExternalDraftNavigation(calendarRef: RefObject<QunoInfiniteCa
     lastSeenAnchorRef,
     captureEventAnchor,
     captureSlotAnchor,
+    captureEditorAnchor,
+    restoreEditorAnchor,
     restoreEventAnchor,
     restoreSlotAnchor,
     focusDraftEvent

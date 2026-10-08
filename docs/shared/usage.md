@@ -736,6 +736,9 @@ anchor's participant. If it is removed, capture a surviving participant before c
 instance. Keep the original edit anchor separately for Cancel. The demo's participant checkboxes use this policy and
 retain browser focus while visual geometry settles.
 
+Choose one restoration target for each editor transition. A date target preserves the displayed day; a resource/time
+slot preserves a participant position. The following recipes describe those consumer policies.
+
 For a consumer editor that must return to a day rather than a participant, store `getVisibleDateKeys()[0]` when
 opening or clicking Save. After releasing the editor and its row filter, request the desired date position:
 
@@ -749,13 +752,40 @@ calendarRef.current?.restoreViewportAnchor({
 });
 ```
 
+Capture the clicked `request.renderedCalendarId` before opening an edit draft; hiding the saved source can change
+collision geometry even when participants stay the same. The focused demo preserves the horizontal resource/time slot
+on open and Cancel so expanding a compact card into a full-row editor does not scroll the grid. Capture an event with
+`requireVisible: true` first to confirm the clicked instance exists, then capture and restore a slot without `eventId`:
+
+```tsx
+const target = { calendarId: request.renderedCalendarId, dateKey: date, time };
+const visible = calendarRef.current?.captureViewportAnchor({
+  ...target,
+  eventId: request.event.id,
+  requireVisible: true
+});
+const rowAnchor = visible ? (calendarRef.current?.captureViewportAnchor(target) ?? null) : null;
+setActiveDraft({ mode: "edit", sourceEventId: request.event.id, event: request.event });
+calendarRef.current?.restoreViewportAnchor({
+  anchor: rowAnchor,
+  target,
+  afterRecenter: true,
+  allowNavigationFallback: false,
+  cancelOnManualScroll: true
+});
+```
+
 The date-only target preserves horizontal scrolling. Navigation fallback can mount a day that left the rendered
 window while the editor was open. Use `captureViewportAnchor({ dateKey })` to retain the day's current vertical offset
 instead of aligning its header to the top. A new editor should cancel its preceding restore.
 
-Capture the clicked `request.renderedCalendarId` before opening an edit draft and restore that instance after updating
-parent state; hiding the saved source can change collision geometry even when participants stay the same. Horizontal
-participant edits keep measured day sizes. Idle recentering waits while an explicit restore is active, then resumes
+Before Cancel, capture the current draft's slot and restore against the original participant's slot after clearing
+the draft. Hover changes only the card's presentation and cannot move a slot target. Keep the original slot anchor
+as a fallback if that participant is removed. Clear the draft and request restoration in the same handler, without
+a forced intermediate commit. The horizontal view retains the restore date while rows resize, even with
+`allowNavigationFallback: false`; the date pin ends with the bounded restore or cancellation. Vertical editors and
+participant changes can retain event targets.
+Horizontal participant edits keep measured day sizes. Idle recentering waits while an explicit restore is active, then resumes
 on the next scroll signal. Use `requireVisible: true` to reject missing or offscreen event instances; these captures
 return `null` instead of falling back to a resource slot.
 

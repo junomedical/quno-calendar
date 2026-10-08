@@ -11,7 +11,7 @@
  *
  * @see docs/infinite-calendar/flows/async-loading-and-layout.md
  */
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ForwardedRef } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ForwardedRef } from "react";
 import type { CalendarInternalViewProps, CalendarViewHandle } from "#quno-internal/timeline/core/internalTypes";
 import { useEventProjection } from "#quno-internal/timeline/infinite/events/metrics/useEventProjection";
 import { useDayMetrics } from "#quno-internal/timeline/infinite/events/metrics/useDayMetrics";
@@ -65,7 +65,26 @@ export function useHorizontalTimelineFoundation({
   // Draft and resource changes use measured data-layout anchoring, not structural resets.
   const verticalLayoutSignature = `${settings.dayHeaderHeight}:${settings.rowHeight}:${settings.excludedWeekdays.join("|")}`;
   const recenterBlockedRef = useRef(false);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  // Navigation owns the restore date before the window projects it; late-bind date scrolling.
+  const scrollToDateRef = useRef<ReturnType<typeof useScrollRuntime>["scrollToDate"]>(() => undefined);
+  const scrollToDate = useCallback<ReturnType<typeof useScrollRuntime>["scrollToDate"]>(
+    (request) => scrollToDateRef.current(request),
+    []
+  );
+  const viewportMetricsStore = useViewportMetricsStore(containerRef);
+  const sizing = useHorizontalViewportSizing({ containerRef, settings });
+  const navigation = useHorizontalNavigation({
+    forwardedRef,
+    containerRef,
+    settings: sizing.effectiveSettings,
+    now,
+    scrollToDate
+  });
+  const createRangeActive = props.activeDraft?.mode === "create" || createTransitionActive;
+  // Creation's eager range owns its closing frames; edit restores retain the single date pin.
   const virtualTimeline = useScrollRuntime({
+    containerRef,
     anchorDateKey: windowAnchorDateKey,
     setAnchorDateKey: setWindowAnchorDateKey,
     initialAnchorDateKey,
@@ -76,18 +95,12 @@ export function useHorizontalTimelineFoundation({
     topDateAlignmentKey: "",
     isInteractionActive,
     recenterBlockedRef,
-    eagerRange: props.activeDraft?.mode === "create" || createTransitionActive,
-    layoutAnchorDateKey: props.activeDraft ? eventDateKey(props.activeDraft.event) : undefined
+    eagerRange: createRangeActive,
+    layoutAnchorDateKey:
+      (createRangeActive ? undefined : navigation.activeRestoreTarget?.dateKey) ??
+      (props.activeDraft ? eventDateKey(props.activeDraft.event) : undefined)
   });
-  const viewportMetricsStore = useViewportMetricsStore(virtualTimeline.containerRef);
-  const sizing = useHorizontalViewportSizing({ containerRef: virtualTimeline.containerRef, settings });
-  const navigation = useHorizontalNavigation({
-    forwardedRef,
-    containerRef: virtualTimeline.containerRef,
-    settings: sizing.effectiveSettings,
-    now,
-    scrollToDate: virtualTimeline.scrollToDate
-  });
+  scrollToDateRef.current = virtualTimeline.scrollToDate;
   const { clearScrollEndTimer } = virtualTimeline;
   useLayoutEffect(() => {
     recenterBlockedRef.current = Boolean(navigation.activeRestoreTarget);

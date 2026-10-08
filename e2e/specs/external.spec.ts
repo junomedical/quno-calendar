@@ -739,10 +739,13 @@ test("supports external event editing popup without blocking calendar scroll", a
 
   const viewport = page.locator(".quno-calendar-viewport");
   const scrollTopBefore = await viewport.evaluate((element) => element.scrollTop);
-  await viewport.evaluate((element) => {
-    const maxScrollTop = element.scrollHeight - element.clientHeight;
-    element.scrollTop += element.scrollTop > maxScrollTop - 480 ? -420 : 420;
-  });
+  const wheelDelta = await viewport.evaluate((element) =>
+    element.scrollTop > element.scrollHeight - element.clientHeight - 480 ? -420 : 420
+  );
+  const viewportBox = (await viewport.boundingBox())!;
+  // Wheel intent cancels restoration; assigning scrollTop is a programmatic layout change.
+  await page.mouse.move(viewportBox.x + 15, viewportBox.y + viewportBox.height / 2);
+  await page.mouse.wheel(0, wheelDelta);
   await expect.poll(async () => viewport.evaluate((element) => element.scrollTop)).not.toBe(scrollTopBefore);
   await expect(page.getByTestId("external-event-popup")).toBeVisible();
 

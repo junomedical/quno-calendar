@@ -4,6 +4,22 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+### 0.6.3 upstream integration - 2026-10-08
+
+- Merged upstream `b774e96`. Preserve the demo's resource-slot opening/Cancel policy, hover stability and active
+  restore-date pin alongside late-data anchoring and date-only consumer editor outcomes. Each transition uses one
+  restoration target. Onboarding retains the opening date on Cancel and the Save-click date on successful Save.
+- Added frame-by-frame regressions for real 3-second demo responses during rapid wheel reversals with one and six
+  calendars. Keep the last viewed date and row through delayed responses and idle recentering.
+- Stabilized two existing browser checks: wait for today's loaded events before selecting empty drawing space, and
+  use wheel input to test manual-scroll cancellation instead of a programmatic scroll assignment.
+- Verification: 515 unit tests, all 175 Chromium scenarios and 348 onboarding calendar tests pass. Formatting,
+  architecture/contracts, typecheck, lint, library/demo builds, packed modern/legacy TypeScript, ESM/CommonJS/SSR,
+  Preact, React 19 and pack dry-run pass. The installed onboarding runtime and declarations match the rebuilt library.
+- The merged Infinite Calendar measures 173,133 B raw and 41,248 B gzip (40.28 KiB), plus 2,035 B gzip optional CSS
+  (1.99 KiB), within the unchanged 50 KiB/2 KiB budgets. Preserve both branches' accepted decision records and
+  distinguish concurrent identifiers by their full title/anchor.
+
 ### 0.6.3 local package - 2026-10-08
 
 - Date-only parent anchors keep the opening or Save-click day through editor completion and returning participant rows.
@@ -26,6 +42,21 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
   Both remain within the 50 KiB JavaScript and 2 KiB CSS ceilings.
 
 ### Changes from latest main
+
+- Fixed `/demo/infinite-calendar` jumping to the previous day when opening a compact overlapping appointment and
+  shifting again on hover after Cancel. Horizontal editor transitions now restore the clicked participant's resource/time
+  slot, retaining the original participant fallback and manual-scroll cancellation. Added October 8 Acne Therapy
+  regressions at two desktop widths with repeated open/Cancel/hover and eight seconds of geometry/mutation checks.
+
+- Fixed Cancel jumping to October 14 after removing Dmitry from the Acne Therapy draft. Horizontal restores now
+  retain their target date through resource resizing, and edit Cancel queues the restore with the draft update. Creation retains its existing closing-range handling. Added three
+  repetitions of the exact participant sequence at 1280 × 800 and 1440 × 900 with one and six calendars, plus a larger
+  desktop case, including immediate hover and post-restore geometry checks.
+
+- Editor stability verification: all 511 unit tests and all 160 Chromium scenarios pass. Formatting, architecture/contracts,
+  typecheck, warning-free lint, demo build, package verification, Preact, React 19, size reporting, and pack dry-run pass.
+  Refreshed guide measurements to 39.57 KiB gzip Infinite Calendar JavaScript and 1.99 KiB optional CSS against
+  the unchanged ceilings. Final complete runs pass; no verification blocker remains.
 
 - **Breaking:** Date Parser now returns top-level `start` and `end` objects containing `{ date: IsoDate, time: string | null }`
   for successful and partial-range results. Removed `value`, `times`, and `DateInputTimeRange`; export

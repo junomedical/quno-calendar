@@ -984,3 +984,61 @@ Refresh base measurements once after a date restore's draft releases. Compact pr
 when the original row count returns. Keep event/resource restore and drag policies unchanged. Consumer editors choose
 the opening date for Cancel and the Save-click date for a successful mutation. Appointments, availability and blockers
 share that consumer policy. No new handle method or required prop is added.
+
+## 104 - Anchor Horizontal Demo Editor Transitions To Resource Slots
+
+Date: 2026-10-08
+Status: Accepted; supersedes only the demo opening/Cancel event-point policy in Decisions 102 and 103
+
+A compact overlap card can sit below its resource row's origin, while its edit draft and hovered presentation fill
+that row. Capturing the compact card and restoring the full-row draft therefore scrolls the grid by the lane inset.
+A closing event restore can then follow hover expansion and repeatedly correct the viewport despite unchanged data.
+
+The focused demo verifies the clicked event instance before capturing its participant's resource/time slot for
+horizontal editor opening and Cancel. Restore that slot after committed layout, retaining the captured participant
+unless an explicit target replaces it. Keep the original first-person slot anchor for Cancel when that participant
+is removed. Slot resolution stays independent of card hover and released-draft geometry. Vertical editors retain
+instance anchoring; save and participant-edit policies, required-visible event captures, measured day retention,
+bounded restore deadlines, and manual-scroll cancellation remain unchanged. This is consumer policy implemented
+through the existing public handle, without a new package option or internal DOM query.
+
+Browser regressions use the October 8, 2026 Acne Therapy overlap in one calendar at 1280px and 1800px. They require
+unchanged row coordinates and top visible date through repeated opening, cancellation, and immediate hover while the
+release/restore is active. Eight seconds of frame sampling and late DOM-mutation observation reject continuing
+movement or redraws. Dense participant coverage now asserts the resource origin on editor opening and retains its
+existing surviving-instance assertions through membership changes.
+
+## 105 - Retain Horizontal Restore Dates Through Resource Changes
+
+Date: 2026-10-08
+Status: Accepted; refines Decisions 045, 102, 103 and 104
+
+A parent restore must keep its target date mounted as well as its target resource. Closing an edit after participant
+changes can resize every measured day and move the captured date outside ordinary overscan before restoration resolves.
+The draft's date pin ends when the draft is cleared; restoring only the resource cannot recover a date that has unmounted.
+
+The horizontal foundation supplies the active restore date to the existing layout-date pin and loader keys, using
+measured or estimated offsets without expanding overscan or resetting day measurements. The restore target takes
+priority over the controlled draft date, keeping one pin through draft closure rather than composing another render
+window. Deduplicate dates already present. When the bounded session ends or manual intent cancels it, the pin returns
+to the active draft date, or releases if the draft is gone. Creation retains its existing eager-range ownership
+through the closing transition; the restore date can own the pin after that transition settles. Restoration keeps working with `allowNavigationFallback: false` inside the current bounded
+window. Dates outside that window retain the existing navigation-fallback policy. No public option is added.
+
+Demo edit Cancel clears the draft and queues its original participant restoration in the same handler without a forced
+intermediate commit. Create Cancel retains its established commit and eager-range handling. Regressions repeat Acne Therapy → Marco → Room 202 → Surgery A → Marco → Dmitry → Cancel three
+times at 1280 × 800 and 1440 × 900 with one and six calendars, plus the larger desktop case. They assert the October 8
+row returns to its original position, immediate hover stays stationary, and no movement occurs after the restore ends.
+The rebuilt Infinite Calendar artifact measures 39.57 KiB gzip JavaScript and 1.99 KiB optional CSS; the guide and
+verification fixtures report those measurements against the unchanged 50 KiB and 2 KiB ceilings.
+
+## Concurrent decision records reconciled — 2026-10-08
+
+The merged branches independently assigned 104 to [horizontal base estimates](#104---rebuild-base-estimates-when-horizontal-row-counts-change)
+and [demo resource-slot restoration](#104---anchor-horizontal-demo-editor-transitions-to-resource-slots), and 105 to
+[late offscreen data](#105---keep-late-offscreen-loads-from-moving-the-displayed-calendar) and
+[restore-date retention](#105---retain-horizontal-restore-dates-through-resource-changes).
+Both accepted identifiers and texts are preserved. References distinguish these records by their full title/anchor.
+New decisions continue after 106. These behaviors coexist: explicit editor restores own their target date, while
+ordinary late data retains the date/resource visible when the response changes geometry. Consumer editors choose
+their outcome policy through the existing handle; onboarding keeps its opening-date Cancel and Save-click-date policies.

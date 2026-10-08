@@ -327,6 +327,7 @@ The cross axis has its own resource window:
 - Horizontal dates mount only intersecting calendar rows plus two rows of overscan on either side.
 - Vertical dates mount only intersecting columns plus two columns of overscan on either side.
 - Prefix extents preserve the full row/column spacer geometry; skipped resources never compact the layout.
+- Active horizontal viewport restores also pin their target date through resource resizing and draft closure. The pin participates in event loading and ends with the restore session; it does not widen ordinary overscan.
 - Active draft, drop-preview, and active viewport-restore target resources are pinned even when outside the ordinary cross-axis window. Event timestamps are mapped through the canonical local-date helper before choosing either a date or resource pin; raw UTC string prefixes never drive calendar membership.
 
 Async event metrics use a separate one-commit data-layout anchor; they do not replace the bounded virtual-window anchor. The concrete scroll-event, idle timer, pending target, window rebuild, and restore sequence is documented in [Virtual Scroll And Recenter](./flows/virtual-scroll-and-recenter.md).

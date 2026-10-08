@@ -95,6 +95,7 @@ export function DefaultDemo() {
 
   const drafts = useExternalEventDrafts({
     selectedCalendarIds,
+    view: controls.calendarView,
     calendarRef,
     setEvents: updateEvents,
     setMessage

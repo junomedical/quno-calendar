@@ -55,3 +55,14 @@ flowchart LR
     Layout --> View[Same displayed date]
     Restore --> Manual[Manual navigation cancels restore]
 ```
+
+6. Merge the current upstream editor fixes with local viewport preservation.
+   1. Merge `origin/main` at `b774e969eab56ca4499a610320df915265968ec6`. Keep the demo's resource-slot open/Cancel restore and hover stability checks.
+   2. Keep the active restore date mounted. Retain late-data anchoring, base estimate refresh and date-only parent restores.
+   3. Keep editor outcome policy in the consumer. Cancel returns to the opening day. Save retains the day visible when Save was clicked.
+   4. Add frame-by-frame browser checks for 3-second responses during rapid wheel reversals, with one and six calendars.
+   5. Stabilize popup-layering setup with a fixed clock and completed loading. Exercise editor manual scrolling with a real wheel gesture. Keep both assertions intact.
+   6. Preserve concurrent accepted decision identifiers and distinguish their records by full title. Report the combined artifact as 40.28 KiB gzip JavaScript and 1.99 KiB CSS.
+   7. Pass 515 unit tests, all 175 Chromium scenarios and 348 onboarding calendar tests. Pass formatting, architecture, typecheck, lint, builds and packed React/Preact/TypeScript/SSR checks. Verify the installed consumer runtime against the rebuilt files.
+      Why: Upstream editor fixes and local late-response fixes address different causes of viewport movement.
+      Files: horizontal foundation, scroll runtime, demo editor hooks, delayed-load browser tests, usage, decisions and production facts.

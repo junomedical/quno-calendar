@@ -29,6 +29,10 @@ clarifies accepted moves, loading dimensions, and navigation precedence;
 keeps multi-participant editing anchored to a surviving visible instance.
 [Decision 103](./infinite-calendar/decisions.md#103---preserve-measured-draft-layout-and-defer-idle-recenter)
 preserves dense editor transitions and gives explicit restores priority over idle recentering.
+[Decision 104](./infinite-calendar/decisions.md#104---anchor-horizontal-demo-editor-transitions-to-resource-slots)
+keeps horizontal demo rows steady through editor opening, cancellation, and subsequent hover.
+[Decision 105](./infinite-calendar/decisions.md#105---retain-horizontal-restore-dates-through-resource-changes)
+keeps the restore date mounted when participant changes resize the date window.
 
 The current responsiveness work is recorded in
 [QUNO-013](./shared/decisions.md#quno-013---bound-high-frequency-work-to-display-frames), with Infinite Calendar's

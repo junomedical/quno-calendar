@@ -55,5 +55,5 @@ Every live calendar expands through a shared viewport overlay rather than the br
 the same React calendar instance mounted, so its visible date, intra-date offset, and loaded event cache survive the
 transition.
 
-The payload chapter reports the 0.6.3 Infinite Calendar artifacts: 39.80 KiB gzip JavaScript with a 50 KiB ceiling,
+The payload chapter reports the 0.6.3 Infinite Calendar artifacts: 40.28 KiB gzip JavaScript with a 50 KiB ceiling,
 and 1.99 KiB gzip optional CSS with a 2 KiB ceiling. The shared production profile supplies the same facts.
