@@ -32,6 +32,7 @@ type RestoreSessionArgs = {
   registry: ViewportGeometryRegistry;
   resolveSnapshot: (target: CalendarViewportAnchorTarget) => CalendarViewportAnchor["snapshot"] | null;
   scrollToDateTime: QunoInfiniteCalendarHandle["scrollToDateTime"];
+  scrollToDate?: QunoInfiniteCalendarHandle["scrollToDate"];
   isCurrent: () => boolean;
   cancel: () => void;
   resolveAnchorSnapshot?: () => CalendarViewportAnchor["snapshot"];
@@ -121,6 +122,19 @@ export class ViewportAnchorRestoreSession {
 
   private useNavigationFallback() {
     const { options, scrollToDateTime, target } = this.args;
+    if (
+      options.allowNavigationFallback !== false &&
+      target.dateKey &&
+      !target.time &&
+      !target.calendarId &&
+      !target.eventId &&
+      this.args.scrollToDate
+    ) {
+      // A missing date must enter the virtual range after draft measurements
+      // commit. Retry on layout notifications; manual intent cancels the session.
+      this.args.scrollToDate({ date: target.dateKey });
+      return;
+    }
     if (this.fallbackUsed || options.allowNavigationFallback === false || !target.dateKey || !target.time) return;
     this.fallbackUsed = true;
     scrollToDateTime({ date: target.dateKey, time: target.time });

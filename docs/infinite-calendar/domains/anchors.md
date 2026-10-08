@@ -21,6 +21,8 @@ Priority and interaction with scroll maintenance are defined in the [Flow Guide]
 
 - Parent restore outranks gesture, navigation, automatic data-layout correction, and idle recentering.
 - Newly loaded events never become focus targets merely because they appeared.
+- A target with only `dateKey` anchors the date axis. It leaves horizontal scrolling unchanged. It can navigate to
+  an unmounted date after parent selection and draft changes. Manual intent cancels the session when requested.
 - Event focus is a visibility guarantee: fully visible shells do not cause scroll writes, while clipped or offscreen
   shells are brought into the uncovered content viewport.
 - Horizontal late-data restoration preserves date/resource/local-row offset; missing resources fall back to date-local offset.

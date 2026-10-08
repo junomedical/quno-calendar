@@ -34,6 +34,7 @@ type UseVirtualTimelineWindowArgs = {
   settings: QunoInfiniteCalendarSettings;
   baseDayHeight: number;
   verticalLayoutSignature: string;
+  preserveResourceLayout?: boolean;
   topDateAlignmentKey: string;
   isInteractionActive: boolean;
   recenterBlockedRef?: MutableRefObject<boolean>;
@@ -67,6 +68,7 @@ export function useScrollRuntime({
   settings,
   baseDayHeight,
   verticalLayoutSignature,
+  preserveResourceLayout = true,
   topDateAlignmentKey,
   isInteractionActive,
   recenterBlockedRef,
@@ -166,9 +168,13 @@ export function useScrollRuntime({
   const virtualItems = virtualizer.getVirtualItems();
   const dateSequenceKey = settings.excludedWeekdays.join("|");
   const dateModelTransitionKey = `${dateSequenceKey}:${virtualWindow.anchorDateKey}`;
+  const renderedBaseHeightRef = useRef(baseDayHeight);
+  if (preserveResourceLayout && !isInteractionActive && !recenterBlockedRef?.current) {
+    renderedBaseHeightRef.current = baseDayHeight;
+  }
   const structuralRenderKey = resolveOffsetOnLayoutChange
     ? `${verticalLayoutSignature}:${baseDayHeight}:${virtualWindow.anchorDateKey}`
-    : `horizontal-dates:${dateModelTransitionKey}`;
+    : `horizontal-dates:${renderedBaseHeightRef.current}:${dateModelTransitionKey}`;
   const structuralRenderWindow = useStructuralRenderWindow({
     transitionKey: structuralRenderKey,
     resourceTransitionKey: dateModelTransitionKey,

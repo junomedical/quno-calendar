@@ -60,6 +60,7 @@ export function useHorizontalNavigation({
     settings: settings,
     orientation: "horizontal",
     scrollToDateTime: scrollToDateTimeBase,
+    scrollToDate: scrollToDateBase,
     visibilityInsets: {
       left: settings.labelWidth,
       top: settings.dayHeaderHeight

@@ -80,7 +80,7 @@ Products own recurrence expansion; saves and filters still refresh through `even
 ## Bundle budget
 
 JavaScript is limited to 50 KiB gzip and the optional stylesheet to 2 KiB gzip. The current artifacts measure
-39.47 KiB and 1.99 KiB gzip respectively (Node 23, gzip level 9). See [Decision 100](./decisions.md#100---reconcile-the-infinite-calendar-budget-after-branch-integration).
+39.80 KiB and 1.99 KiB gzip respectively (Node 24, gzip level 9). See [Decision 100](./decisions.md#100---reconcile-the-infinite-calendar-budget-after-branch-integration).
 
 ## Named contracts
 
@@ -92,3 +92,18 @@ See the [breaking migration](../shared/migration.md#unreleased-named-contracts-a
 The guide's headless typed-date navigation reads `result.start.date` from Date Parser's paired endpoint result.
 See the [endpoint migration](../shared/migration.md#unreleased-paired-parser-endpoints); calendar navigation and event
 timestamp contracts retain their existing shapes.
+
+## Row visibility changes
+
+Horizontal row filters keep the current date and a surviving resource’s local position. When the row count changes,
+the calendar rebuilds cached base estimates and reapplies known dense-day measurements. It repeats the anchor correction
+after the new scroll spacer commits. Consumers can retain their last compact selection while new dates load.
+
+Late responses for other dates also preserve the displayed date and row. Large overlap updates can exceed the old
+scroll area. Keep the original anchor through the new spacer commit, then publish and render the corrected virtual
+range before paint. New events never become navigation targets. A user's newer navigation takes priority.
+
+Parent editors can restore a date-only target after Cancel or Save. Use the opening date for cancellation and the date
+displayed at the Save click for success. A bounded restore keeps that date through deferred draft measurements and
+returning rows. Date-only restores leave horizontal scrolling unchanged and yield to manual navigation. Availability,
+blocker and appointment outcome policy remains in the consumer.

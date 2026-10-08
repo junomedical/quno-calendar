@@ -27,6 +27,8 @@ export class ViewportMetricsStore {
 
   readonly getSnapshot = () => this.snapshot;
   readonly getServerSnapshot = () => EMPTY_METRICS;
+  // Layout-owned scroll corrections need current row geometry before paint.
+  readonly refresh = () => this.read();
 
   subscribe = ({ listener }: { listener: () => void }) => {
     this.listeners.add(listener);

@@ -939,3 +939,48 @@ eight seconds of geometry and DOM-mutation observation after the final change.
 [QDPR-007](../date-parser/decisions.md#qdpr-007---return-paired-date-and-clock-endpoints) changes the independent
 headless parser result. The guide's typed-date example now reads `start.date`; Infinite Calendar's navigation,
 day-key model, and event timestamp contracts remain unchanged.
+
+## 104 - Rebuild Base Estimates When Horizontal Row Counts Change
+
+Date: 2026-10-08
+Status: Accepted; refines Decisions 049, 073 and 103
+
+A changed row count changes every base day height. TanStack retains cached prefix positions when only `estimateSize`
+changes. Capture the date/resource anchor first, clear estimates, then reapply known dense-day sizes. Carry the anchor
+through one layout projection so expansion can restore after the larger scroll spacer commits. Keep ordinary metric
+updates and drafts with unchanged base height on the existing measured path. Explicit restores and gestures keep priority.
+
+Clamp a missing-resource fallback inside the new base date height when event metrics are absent. Leave room for the
+one-pixel visible-date probe. Defer base-estimate resets and render-window changes while an editor restore, draft or pointer gesture owns focus.
+Refresh them after that owner releases. No public API changes are required. Chromium regressions cover 135-row contraction,
+expansion, distant scrolling, empty selection, local row offsets, bounded reads and idle settling.
+
+## 105 - Keep Late Offscreen Loads From Moving The Displayed Calendar
+
+Date: 2026-10-08
+Status: Accepted; refines Decisions 049, 073 and 104
+
+Apply the committed-spacer anchor path to changed event heights as well as changed row counts. A large delayed
+overlap update on an earlier date can exceed the old scroll area and clamp an immediate correction into that date.
+Retain the displayed date/resource anchor through the spacer commit. Publish the corrected virtual range and render
+it before paint so the anchored row never disappears for an intermediate frame. New events are never focus targets.
+Refresh resource viewport metrics at the correction; ordinary native scrolling retains its frame-coalesced reader.
+
+Skip the additional layout projections when heights have not changed. Keep explicit navigation, parent restores and
+gestures authoritative. Capture current focus at the metric update rather than at request start. Chromium regressions
+check every painted frame during offscreen growth, later-date growth, changed participant rows, shrinkage and navigation
+while a response is pending. No public contracts change.
+
+## 106 - Preserve Editor Outcome Dates Through Deferred Layout
+
+Date: 2026-10-08
+Status: Accepted; extends Decisions 097, 104 and 105
+
+Support a parent anchor target containing only `dateKey`. Resolve the registered day on the vertical date axis and
+leave horizontal scrolling unchanged. Keep the existing bounded restore session, explicit-navigation priority and
+manual-intent cancellation. A missing date can retry navigation when committed geometry changes.
+
+Refresh base measurements once after a date restore's draft releases. Compact prefix sizes can remain cached even
+when the original row count returns. Keep event/resource restore and drag policies unchanged. Consumer editors choose
+the opening date for Cancel and the Save-click date for a successful mutation. Appointments, availability and blockers
+share that consumer policy. No new handle method or required prop is added.

@@ -343,7 +343,7 @@ test("editorial CSS-native exhibit keeps stable chrome browser-positioned", asyn
 
 test("all five guides separate exact payloads from runtime contracts", async ({ page }) => {
   const guides = [
-    ["infinite-calendar", "39.47 KiB gzip", "1.99 KiB gzip", "@quno/calendar/infinite-calendar"],
+    ["infinite-calendar", "40.01 KiB gzip", "1.99 KiB gzip", "@quno/calendar/infinite-calendar"],
     ["datepicker", "12.46 KiB gzip", "3.36 KiB gzip", "@quno/calendar/datepicker"],
     ["date-input", "9.64 KiB gzip", "0.58 KiB gzip", "@quno/calendar/date-input"],
     ["timepicker", "1.59 KiB gzip", "0.78 KiB gzip", "@quno/calendar/timepicker"],

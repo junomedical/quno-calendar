@@ -75,6 +75,25 @@ describe("horizontal late-data layout anchoring", () => {
     expect(resolveHorizontalDataLayoutOffset({ anchor, metric: reducedMetric, geometry: reducedGeometry })).toBe(104);
   });
 
+  it("clamps a removed row inside an unloaded date's new base geometry", () => {
+    const anchor = captureHorizontalDataLayoutAnchor({
+      dateKey: "2026-10-15",
+      offsetWithinDate: 42 + 50 + 12,
+      metric: undefined,
+      geometry
+    });
+    expect(
+      resolveHorizontalDataLayoutOffset({
+        anchor,
+        metric: undefined,
+        geometry: { ...geometry, calendarIds: ["provider-a"] }
+      })
+    ).toBe(90);
+    expect(
+      resolveHorizontalDataLayoutOffset({ anchor, metric: undefined, geometry: { ...geometry, calendarIds: [] } })
+    ).toBe(40);
+  });
+
   it("keeps a surviving resource local offset when resources are appended", () => {
     const anchor = captureHorizontalDataLayoutAnchor({
       dateKey: "2026-08-12",

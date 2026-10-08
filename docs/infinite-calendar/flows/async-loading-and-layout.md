@@ -163,6 +163,17 @@ contribute lanes.
 
 The calendar preserves the semantic location that was visible before the metric commit. It does not focus the first newly loaded event.
 
+Capture the anchor before resizing any date. Offscreen overlap growth can exceed the old scroll area's maximum;
+an immediate scroll correction would be clamped into the growing date. Carry the anchor through a synchronous layout
+projection that commits the revised spacer. Restore from that anchor, publish the corrected virtual range and project
+it again before paint. Do not capture a replacement anchor from the temporary clamped offset. Height reductions follow
+the same path. Unchanged height snapshots do not need these extra projections. Explicit navigation and restores retain
+priority, and pending reads do not retain a focus target from when the request started.
+
+Refresh the resource viewport snapshot synchronously after the correction. Its ordinary scroll reader runs on the next
+animation frame; leaving its old absolute offset in place can unmount the displayed row for one frame after a large
+correction, even when the date range is already correct. Normal manual-scroll reads remain frame-coalesced.
+
 ```mermaid
 flowchart TD
   Commit["Late events revise row/day heights"] --> Owner{"Higher-priority owner active?"}
@@ -192,6 +203,18 @@ Concrete cases:
 | User starts a new manual scroll          | The user’s new position                            | Scheduled correction is cancelled or superseded.                            |
 
 For horizontal `scrollToDateTime`, vertical focus follows the date/resource policy while the requested time remains on the horizontal time axis.
+
+### Changing the selected row count
+
+Changing `estimateSize` alone does not invalidate virtualizer prefix positions. Capture the semantic anchor before
+clearing estimates. Reapply current known day measurements, including overlap heights. Request one layout projection
+and carry the anchor through that commit. Expansion can exceed the old scroll spacer and clamp date-offset resolution. Hold the semantic render window during
+that transition. Restore in the next layout phase, after the spacer commits, and publish the corrected virtual range
+before native scroll observation. Defer these resets while a draft, editor restore or pointer gesture owns focus.
+
+The missing-resource fallback stays inside the new base date height even before event metrics exist. Keep room for
+the visible-date resolver's one-pixel probe so the fallback cannot become the following date. Ordinary event refreshes
+and drafts with an unchanged row count retain their measurements. Explicit restores and active gestures keep priority.
 
 ## Orientation Differences
 

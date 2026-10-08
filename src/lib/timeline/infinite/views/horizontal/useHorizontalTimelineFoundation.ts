@@ -71,6 +71,7 @@ export function useHorizontalTimelineFoundation({
     initialAnchorDateKey,
     settings,
     baseDayHeight,
+    preserveResourceLayout: !props.activeDraft && !createTransitionActive,
     verticalLayoutSignature,
     topDateAlignmentKey: "",
     isInteractionActive,
@@ -126,8 +127,21 @@ export function useHorizontalTimelineFoundation({
     dayMetricsByDate: dayMetrics.dayMetricsByDate,
     layoutSignature: verticalLayoutSignature,
     preserveVisibleResource: !isInteractionActive && !navigation.activeRestoreTarget,
+    // After an interaction ends, let a date-only restore refresh cached day heights.
+    // Removing draft row filters can leave compact offsets cached even when the
+    // original row count returns, shifting the saved date. Resource, event and time
+    // targets retain their existing restore behavior.
+    measureBaseDuringDateRestore: Boolean(
+      !isInteractionActive &&
+      navigation.activeRestoreTarget?.dateKey &&
+      !navigation.activeRestoreTarget.calendarId &&
+      !navigation.activeRestoreTarget.eventId &&
+      !navigation.activeRestoreTarget.time
+    ),
+    deferBaseMeasurement: Boolean(props.activeDraft || createTransitionActive),
     virtualItemCount: virtualTimeline.virtualWindow.count,
-    virtualizer: virtualTimeline.virtualizer
+    virtualizer: virtualTimeline.virtualizer,
+    refreshViewport: viewportMetricsStore.refresh
   });
 
   return {

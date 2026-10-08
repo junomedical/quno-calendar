@@ -13,19 +13,27 @@
  * @see docs/infinite-calendar/flows/async-loading-and-layout.md
  */
 import type { Virtualizer } from "@tanstack/react-virtual";
-import { useLayoutEffect, useRef, type RefObject } from "react";
+import { useLayoutEffect, useRef, useState, type RefObject } from "react";
 import type { CalendarId } from "#quno-internal/timeline/core/types";
 import { resolveVisibleDateSnapshot } from "#quno-internal/timeline/infinite/scroll/position/visibleSnapshot";
 import {
   captureHorizontalDataLayoutAnchor,
   resolveHorizontalDataLayoutOffset,
+  type HorizontalDataLayoutAnchor,
   type HorizontalDayMetric
 } from "./horizontalDataLayoutAnchor";
 
 type DayMetrics = ReadonlyMap<string, HorizontalDayMetric>;
 type DayVirtualizer = Pick<
   Virtualizer<HTMLDivElement, Element>,
-  "getOffsetForIndex" | "getVirtualItemForOffset" | "getVirtualItems" | "measure" | "resizeItem" | "scrollToOffset"
+  | "calculateRange"
+  | "getOffsetForIndex"
+  | "getVirtualItemForOffset"
+  | "getVirtualItems"
+  | "measure"
+  | "resizeItem"
+  | "scrollOffset"
+  | "scrollToOffset"
 >;
 
 type HorizontalDayMeasurementArgs = {
@@ -39,8 +47,11 @@ type HorizontalDayMeasurementArgs = {
   dayMetricsByDate: DayMetrics;
   layoutSignature: string;
   preserveVisibleResource: boolean;
+  measureBaseDuringDateRestore?: boolean;
+  deferBaseMeasurement: boolean;
   virtualItemCount: number;
   virtualizer: DayVirtualizer;
+  refreshViewport: () => void;
 };
 
 export function useHorizontalDayMeasurement({
@@ -54,12 +65,19 @@ export function useHorizontalDayMeasurement({
   dayMetricsByDate,
   layoutSignature,
   preserveVisibleResource,
+  measureBaseDuringDateRestore = false,
+  deferBaseMeasurement,
   virtualItemCount,
-  virtualizer
+  virtualizer,
+  refreshViewport
 }: HorizontalDayMeasurementArgs) {
   const previousMetricsRef = useRef(dayMetricsByDate);
   const previousLayoutSignatureRef = useRef(layoutSignature);
   const previousCalendarIdsRef = useRef(calendarIds);
+  const previousBaseDayHeightRef = useRef(baseDayHeight);
+  const dateRestoreMeasuredRef = useRef(false);
+  const pendingAnchorRef = useRef<HorizontalDataLayoutAnchor | null>(null);
+  const [layoutVersion, setLayoutVersion] = useState(0);
 
   useLayoutEffect(() => {
     const previousMetrics = previousMetricsRef.current;
@@ -76,16 +94,39 @@ export function useHorizontalDayMeasurement({
         : null;
     const previousGeometry = { calendarIds: previousCalendarIdsRef.current, dayHeaderHeight, baseRowHeight };
     const nextGeometry = { calendarIds, dayHeaderHeight, baseRowHeight };
-    const anchor = snapshot
-      ? captureHorizontalDataLayoutAnchor({
-          dateKey: snapshot.dateKey,
-          offsetWithinDate: snapshot.offsetWithinDate,
-          metric: previousMetrics.get(snapshot.dateKey),
-          geometry: previousGeometry
-        })
-      : null;
+    const restoringCommittedAnchor = pendingAnchorRef.current !== null;
+    const anchor =
+      preserveVisibleResource && !structuralLayoutChanged
+        ? (pendingAnchorRef.current ??
+          (snapshot
+            ? captureHorizontalDataLayoutAnchor({
+                dateKey: snapshot.dateKey,
+                offsetWithinDate: snapshot.offsetWithinDate,
+                metric: previousMetrics.get(snapshot.dateKey),
+                geometry: previousGeometry
+              })
+            : null))
+        : null;
+    pendingAnchorRef.current = null;
 
-    resizeAffectedDays({
+    // Changed estimates do not invalidate TanStack's cached prefix positions.
+    // Capture first, clear those estimates, then restore known dense-day sizes.
+    if (!measureBaseDuringDateRestore) {
+      dateRestoreMeasuredRef.current = false;
+    }
+    // A draft can return to its original row count with compact prefix sizes
+    // still cached. Refresh once after the draft releases for a date restore.
+    const baseHeightChanged =
+      (previousBaseDayHeightRef.current !== baseDayHeight ||
+        (measureBaseDuringDateRestore && !dateRestoreMeasuredRef.current)) &&
+      (preserveVisibleResource || measureBaseDuringDateRestore) &&
+      !deferBaseMeasurement;
+    if (baseHeightChanged) {
+      virtualizer.measure();
+      previousBaseDayHeightRef.current = baseDayHeight;
+      dateRestoreMeasuredRef.current = measureBaseDuringDateRestore;
+    }
+    const metricHeightsChanged = resizeAffectedDays({
       previousMetrics,
       nextMetrics: dayMetricsByDate,
       baseDayHeight,
@@ -96,6 +137,14 @@ export function useHorizontalDayMeasurement({
     previousMetricsRef.current = dayMetricsByDate;
     previousLayoutSignatureRef.current = layoutSignature;
     previousCalendarIdsRef.current = calendarIds;
+    if ((baseHeightChanged || metricHeightsChanged) && anchor) {
+      // Late overlap growth can exceed the old spacer just like a row-count
+      // expansion. Keep the original focus through the spacer commit; never
+      // infer a new focus from its temporarily clamped absolute scroll offset.
+      pendingAnchorRef.current = anchor;
+      setLayoutVersion((version) => version + 1);
+      return;
+    }
     if (!viewport || !anchor) return;
 
     // `resizeItem` invalidates cached prefix positions; materialize them before
@@ -113,6 +162,14 @@ export function useHorizontalDayMeasurement({
     if (Math.abs(viewport.scrollTop - nextScrollTop) > 0.5) {
       virtualizer.scrollToOffset(nextScrollTop, { align: "start" });
     }
+    // Native scroll observation runs later. Publish the intended range now so
+    // the queued projection and loader cannot use the previous absolute offset.
+    virtualizer.scrollOffset = nextScrollTop;
+    virtualizer.calculateRange();
+    refreshViewport();
+    // This commit rendered before the corrected range was published. Project
+    // it once more before paint so the anchored row cannot briefly disappear.
+    if (restoringCommittedAnchor) setLayoutVersion((version) => version + 1);
   }, [
     baseDayHeight,
     baseRowHeight,
@@ -122,8 +179,12 @@ export function useHorizontalDayMeasurement({
     dateKeyToIndex,
     dayHeaderHeight,
     dayMetricsByDate,
+    deferBaseMeasurement,
     layoutSignature,
+    layoutVersion,
     preserveVisibleResource,
+    measureBaseDuringDateRestore,
+    refreshViewport,
     virtualItemCount,
     virtualizer
   ]);
@@ -145,14 +206,14 @@ function resizeAffectedDays({
   virtualizer: DayVirtualizer;
 }) {
   const affectedDateKeys = new Set([...previousMetrics.keys(), ...nextMetrics.keys()]);
-  if (affectedDateKeys.size === 0) {
-    virtualizer.measure();
-    return;
-  }
+  let heightsChanged = false;
   for (const dateKey of affectedDateKeys) {
     const index = dateKeyToIndex({ dateKey });
     if (index >= 0 && index < virtualItemCount) {
-      virtualizer.resizeItem(index, nextMetrics.get(dateKey)?.height ?? baseDayHeight);
+      const height = nextMetrics.get(dateKey)?.height ?? baseDayHeight;
+      heightsChanged ||= height !== (previousMetrics.get(dateKey)?.height ?? baseDayHeight);
+      virtualizer.resizeItem(index, height);
     }
   }
+  return heightsChanged;
 }

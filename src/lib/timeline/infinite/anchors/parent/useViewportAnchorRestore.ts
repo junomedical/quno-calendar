@@ -22,6 +22,7 @@ type RestoreArgs = {
   registry: ViewportGeometryRegistry;
   resolveSnapshot: (target: CalendarViewportAnchorTarget) => CalendarViewportAnchor["snapshot"] | null;
   scrollToDateTime: QunoInfiniteCalendarHandle["scrollToDateTime"];
+  scrollToDate?: QunoInfiniteCalendarHandle["scrollToDate"];
 };
 
 /** Starts each restore after parent props and registered geometry commit. See docs/infinite-calendar/domains/anchors.md. */
@@ -70,6 +71,7 @@ export function useViewportAnchorRestore(args: RestoreArgs) {
       registry: args.registry,
       resolveSnapshot: args.resolveSnapshot,
       scrollToDateTime: args.scrollToDateTime,
+      scrollToDate: args.scrollToDate,
       isCurrent: () => restoreTokenRef.current === token,
       cancel: cancelViewportAnchorRestore
     });
@@ -80,6 +82,7 @@ export function useViewportAnchorRestore(args: RestoreArgs) {
     args.registry,
     args.resolveSnapshot,
     args.scrollToDateTime,
+    args.scrollToDate,
     cancelViewportAnchorRestore
   ]);
 

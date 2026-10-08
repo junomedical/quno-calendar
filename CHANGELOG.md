@@ -4,6 +4,29 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+### 0.6.3 local package - 2026-10-08
+
+- Date-only parent anchors keep the opening or Save-click day through editor completion and returning participant rows.
+  They preserve horizontal scrolling, recover an unmounted date and yield to manual navigation. Deferred compact base
+  measurements refresh once while the date restore owns focus. Event/resource anchors and drag behavior stay unchanged.
+- Late offscreen overlap updates retain the displayed date and row through the scroll-area commit, then render the
+  corrected virtual range before paint. This prevents both persistent jumps and a missing-row intermediate frame.
+  Pending responses never override newer navigation. Coverage includes growth, shrinkage and changed participant rows.
+- Horizontal row-count changes rebuild cached base date estimates and retain known dense-day measurements.
+  Preserve the date and surviving resource offset after the new scroll spacer commits. This prevents distant
+  date jumps and request churn when a consumer hides empty rows or expands a compact selection.
+- Missing-resource anchors clamp inside an unloaded date's new base geometry, including an empty selection.
+  The visible-date probe stays within the captured date. There are no new public calendar contracts.
+- Verification: 515 unit tests and 166 Chromium scenarios pass. One existing external-editor scroll scenario needed
+  an isolated retry after the full browser run. Formatting, architecture/contracts,
+  typecheck, lint, library/demo builds, packed modern/legacy TypeScript, ESM/CommonJS/SSR, Preact and React 19 checks
+  pass. The 135-row regressions verify geometry, idle settling and bounded request ranges; existing create/cancel and
+  dense participant tests retain their positioning and no-refetch checks.
+- Infinite Calendar measures 172,649 B raw and 40,967 B gzip (40.01 KiB). Optional CSS is 2,035 B gzip (1.99 KiB).
+  Both remain within the 50 KiB JavaScript and 2 KiB CSS ceilings.
+
+### Changes from latest main
+
 - **Breaking:** Date Parser now returns top-level `start` and `end` objects containing `{ date: IsoDate, time: string | null }`
   for successful and partial-range results. Removed `value`, `times`, and `DateInputTimeRange`; export
   `DateInputParseEndpoint` from the parser subpath instead. Date-only and missing clocks are `null`; empty/invalid
