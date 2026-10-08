@@ -13,7 +13,7 @@
  * @see docs/infinite-calendar/flows/virtual-scroll-and-recenter.md
  */
 import { useVirtualizer, type Virtualizer, type VirtualizerOptions } from "@tanstack/react-virtual";
-import { useCallback, useLayoutEffect, useMemo, useRef, useState, type MutableRefObject } from "react";
+import { useCallback, useLayoutEffect, useMemo, useRef, useState, type MutableRefObject, type RefObject } from "react";
 import type { QunoInfiniteCalendarSettings } from "#quno-internal/timeline/core/types";
 import { VIRTUAL_DAY_NODE_OVERSCAN } from "./scrollConstants";
 import { createVirtualDateModel } from "#quno-internal/timeline/infinite/scroll/window/dateModel";
@@ -28,6 +28,7 @@ import { shouldAdjustForDateItemResize } from "#quno-internal/timeline/infinite/
 import { resetVirtualizerMeasurements } from "#quno-internal/timeline/infinite/scroll/window/virtualizerMeasurements";
 
 type UseVirtualTimelineWindowArgs = {
+  containerRef?: RefObject<HTMLDivElement | null>;
   anchorDateKey: string;
   setAnchorDateKey: import("react").Dispatch<import("react").SetStateAction<string>>;
   initialAnchorDateKey: string;
@@ -61,6 +62,7 @@ function virtualViewportIncludesDate({
 }
 
 export function useScrollRuntime({
+  containerRef: providedContainerRef,
   anchorDateKey,
   setAnchorDateKey,
   initialAnchorDateKey,
@@ -74,7 +76,8 @@ export function useScrollRuntime({
   layoutAnchorDateKey,
   resolveOffsetOnLayoutChange
 }: UseVirtualTimelineWindowArgs) {
-  const containerRef = useRef<HTMLDivElement | null>(null);
+  const ownContainerRef = useRef<HTMLDivElement | null>(null);
+  const containerRef = providedContainerRef ?? ownContainerRef;
   const { topVisibleDateRef, topVisibleOffsetRef, pendingScrollTargetRef, rememberVisibleDateOffset } =
     useVisibleDateState({ initialAnchorDateKey, excludedWeekdays: settings.excludedWeekdays, setAnchorDateKey });
 

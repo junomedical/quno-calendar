@@ -30,8 +30,13 @@ Priority and interaction with scroll maintenance are defined in the [Flow Guide]
 - Event captures record the resolved participant id, even when the caller omitted it. Restoration cannot hop between
   copies of a multi-participant event as visibility changes. Consumers can explicitly transfer to another target.
 - Required visible event captures return `null` for missing/offscreen events without substituting resource slots.
+- The demo verifies a visible clicked instance before capturing its horizontal resource/time slot for editor opening
+  and Cancel. These row targets stay independent of compact lanes and hover expansion (Decision 104).
 - Horizontal draft changes retain measured dates. Explicit restores cancel pending idle recenter work and block new
   deadlines until they release ownership; the scheduler rechecks live ownership at racing deadlines.
+- Horizontal parent restores pin their target date through resource resizing, keeping its geometry registered when
+  an edit draft clears and ordinary overscan moves away. Creation keeps its existing eager closing range. The pin
+  ends with restoration or cancellation (Decision 105).
 - New raw date navigation, explicit restoration, and cancellation discard queued horizontal resource navigation.
 - Explicit centered row navigation recomputes its desired snapshot from the live row height during the bounded session.
 - Manual user intent cancels eligible scheduled restoration.
