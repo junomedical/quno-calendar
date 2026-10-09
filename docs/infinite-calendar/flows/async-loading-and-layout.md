@@ -26,7 +26,7 @@ sequenceDiagram
 
   User->>View: Navigate or scroll to date D
   View->>Window: Render D from base/known date geometry
-  Window-->>Hook: Visible and overscan date keys
+  Window-->>Hook: Settled viewport date keys
   Hook->>Hook: Apply prefetch policy to build warm window
   Hook->>Coordinator: Update load dates; ask for missing ranges
   Coordinator-->>Hook: Contiguous keys not loaded or already loading
@@ -48,6 +48,8 @@ sequenceDiagram
     Measure->>View: Restore semantic date/resource focus when required
   end
 ```
+
+Render overscan and offscreen restore pins do not define the API window. Viewport intersections settle for 100 ms before requesting dates. Apply prefetch only after this separation. Optional `loadCalendarIds` keeps provider read coverage independent of displayed rows; its default remains the selected IDs.
 
 The response is indexed into the bounded cache before it becomes React state. Prepared-cell layout then reads the committed snapshot; React rendering does not coordinate requests or mutate the cache.
 
@@ -98,7 +100,7 @@ stateDiagram-v2
 
 ```mermaid
 flowchart TD
-  Visible["Visible/overscan date keys changed"] --> Policy["Derive before/after warm window"]
+  Visible["Settled viewport date keys changed"] --> Policy["Derive before/after warm window"]
   Policy --> Update["Touch warm-window cache dates"]
   Update --> Active{"Does an active request overlap the warm window?"}
   Active -->|No| Abort["Abort and release its loading keys"]
@@ -252,11 +254,11 @@ The loader retries after 250 ms and 1 second. The last accepted snapshot stays v
 
 ### Never-resolving loader
 
-The calendar surface stays interactive. If the request stops overlapping the active warm window, the coordinator aborts it and releases its loading keys. A loader that ignores abort may eventually resolve, but its request is no longer current and cannot commit.
+The calendar surface stays interactive. If the request leaves the active warm window and its adjacent boundary dates, the coordinator aborts it and releases its loading keys. A loader that ignores abort may eventually resolve, but its request is no longer current and cannot commit.
 
 ### Out-of-order responses
 
-Every request carries a generation, id, and calendar-id set. Loader or `eventVersion` changes advance the generation and abort registered requests. A selection change retains requests that cover the next subset and aborts incompatible ones. An older response fails the current-request predicate before touching rendered state.
+Every request carries a generation, id, and calendar-id set. Loader or `eventVersion` changes advance the generation and abort registered requests. A read-coverage selection change retains requests that cover the next subset and aborts incompatible ones. An older response fails the current-request predicate before touching rendered state.
 
 ### Empty response
 

@@ -79,7 +79,8 @@ export function useHorizontalTimelineFoundation({
     containerRef,
     settings: sizing.effectiveSettings,
     now,
-    scrollToDate
+    scrollToDate,
+    hasActiveDraft: Boolean(props.activeDraft)
   });
   const createRangeActive = props.activeDraft?.mode === "create" || createTransitionActive;
   // Creation's eager range owns its closing frames; edit restores retain the single date pin.
@@ -96,6 +97,7 @@ export function useHorizontalTimelineFoundation({
     isInteractionActive,
     recenterBlockedRef,
     eagerRange: createRangeActive,
+    retainLoadWindow: Boolean(props.activeDraft || createTransitionActive),
     layoutAnchorDateKey:
       (createRangeActive ? undefined : navigation.activeRestoreTarget?.dateKey) ??
       (props.activeDraft ? eventDateKey(props.activeDraft.event) : undefined)
@@ -113,8 +115,8 @@ export function useHorizontalTimelineFoundation({
     eventPrefetchPolicy: props.eventPrefetchPolicy,
     eventVersion: props.eventVersion,
     requestedAppearingEventIds: props.appearingEventIds,
-    selectedIds,
-    visibleDateKeys: virtualTimeline.visibleDateKeys
+    selectedIds: props.loadCalendarIds ?? selectedIds,
+    visibleDateKeys: virtualTimeline.viewportDateKeys
   });
   const eventsByDate = useEventProjection({
     eventsByDate: eventRange.eventsByDate,
@@ -154,11 +156,13 @@ export function useHorizontalTimelineFoundation({
     deferBaseMeasurement: Boolean(props.activeDraft || createTransitionActive),
     virtualItemCount: virtualTimeline.virtualWindow.count,
     virtualizer: virtualTimeline.virtualizer,
-    refreshViewport: viewportMetricsStore.refresh
+    refreshViewport: viewportMetricsStore.refresh,
+    readVisibleSnapshot: virtualTimeline.readVisibleSnapshot
   });
 
   return {
     dayMetrics,
+    retainTransitionResources: createTransitionActive,
     eventRange,
     hiddenCalendarIds,
     navigation,

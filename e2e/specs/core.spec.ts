@@ -484,6 +484,7 @@ test("keeps intra-day scroll offset when the virtual window recenters", async ({
   await page.waitForTimeout(40);
   const beforeRecenter = await topVisibleDayState(page);
   const visibleDay = page.locator(`[data-testid="calendar-day"][data-date="${beforeRecenter.date}"]`);
+  await expect.poll(() => visibleDay.getByTestId("calendar-event").count()).toBeGreaterThan(0);
   const visibleDayNode = await visibleDay.elementHandle();
   const eventNodes = await visibleDay.getByTestId("calendar-event").elementHandles();
   const beforeTop = await visibleDay.evaluate((element) => element.getBoundingClientRect().top);

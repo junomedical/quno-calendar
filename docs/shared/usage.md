@@ -341,6 +341,10 @@ To deploy this repository's demo on Vercel, leave the Root Directory at the repo
 `vercel.json` selects `npm run build:demo`, publishes `dist-demo`, provides client-side route fallback, and deploys the
 demo endpoint from `api/demo-events.ts`. No Vercel environment variables are required for the fixture-backed demo.
 
+### Read coverage while hiding calendar rows
+
+When the endpoint returns all owners, pass their IDs as `loadCalendarIds` while `selectedCalendarIds` controls displayed rows. Hidden or empty rows then reuse the same read coverage. Omit this prop for loaders scoped to selected calendars. `eventPrefetchPolicy={() => ({ beforeDays: 0, afterDays: 0 })}` limits new reads to settled viewport dates. Render overscan remains available for smooth scrolling and does not expand this request window.
+
 ## Vertical Planner
 
 Use `view="infinite-vertical"` for resource columns with time running vertically.

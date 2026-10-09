@@ -66,3 +66,12 @@ flowchart LR
    7. Pass 515 unit tests, all 175 Chromium scenarios and 348 onboarding calendar tests. Pass formatting, architecture, typecheck, lint, builds and packed React/Preact/TypeScript/SSR checks. Verify the installed consumer runtime against the rebuilt files.
       Why: Upstream editor fixes and local late-response fixes address different causes of viewport movement.
       Files: horizontal foundation, scroll runtime, demo editor hooks, delayed-load browser tests, usage, decisions and production facts.
+
+7. Keep filtered-row requests tied to the viewport.
+   1. Separate committed viewport dates from rendered overscan and editor pins. Coalesce rapid scroll changes for 100 ms.
+   2. Add optional `loadCalendarIds` for stable provider coverage while display rows change. Retain adjacent pending edge reads without requesting extra dates.
+   3. Preserve date/row anchoring, generation guards and bounded retries. Add real-browser checks for fixed filtered rows, an empty selection and fast reversals.
+   4. Retain the load window during drafts and closing transitions. Apply an existing Cancel restore before paint. Preserve the saved date during row-count resizing.
+   5. Verify 520 unit tests and all 180 Chromium scenarios, including the separately rerun recenter scenario after awaiting its initial read. Pass architecture, typecheck, lint, builds and packed compatibility checks.
+      Why: Row filters must not produce far-away request windows or repeated cancellation loops.
+      Files: viewport load-date hook, scroll runtime, view loaders, public props, unit/browser coverage and loading documentation.

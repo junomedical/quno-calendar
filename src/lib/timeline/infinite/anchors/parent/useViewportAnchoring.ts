@@ -15,6 +15,7 @@ type AnchoringArgs = {
   containerRef: RefObject<HTMLElement | null>;
   settings: QunoInfiniteCalendarSettings;
   orientation: "horizontal" | "vertical";
+  flushBeforePaint?: boolean;
   scrollToDateTime: QunoInfiniteCalendarHandle["scrollToDateTime"];
   scrollToDate?: QunoInfiniteCalendarHandle["scrollToDate"];
   verticalTimelineGutterPx?: number;
@@ -148,6 +149,7 @@ export function useViewportAnchoring(args: AnchoringArgs) {
     containerRef: args.containerRef,
     registry,
     resolveSnapshot,
+    flushBeforePaint: args.flushBeforePaint,
     scrollToDateTime: args.scrollToDateTime,
     scrollToDate: args.scrollToDate
   });

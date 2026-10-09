@@ -427,29 +427,35 @@ test("restores participant-filtered calendars without a delayed redraw or event 
     let unexpectedMutations = 0;
     const mutationDetails: string[] = [];
     let sameNodes = true;
+    // Overscan rows can unmount when compact draft geometry settles. The
+    // user-visible rows and events must retain their nodes and geometry.
+    const isVisible = (element: HTMLElement) => {
+      const box = element.getBoundingClientRect();
+      const viewportBox = viewport.getBoundingClientRect();
+      return box.bottom > viewportBox.top && box.top < viewportBox.bottom;
+    };
     const observer = new MutationObserver((records) => {
       if (!baselineNodes) return;
       for (const record of records) {
         const target = record.target instanceof HTMLElement ? record.target : record.target.parentElement;
-        const draftMutation = target?.closest('[data-testid="draft-event"]');
-        const removesOnlyDraft =
-          record.type === "childList" &&
-          record.removedNodes.length > 0 &&
-          Array.from(record.removedNodes).every(
-            (node) => node instanceof HTMLElement && node.matches('[data-testid="draft-event"]')
-          );
-        if (!draftMutation && !removesOnlyDraft) {
-          unexpectedMutations += 1;
-          if (mutationDetails.length < 20) {
-            mutationDetails.push(
-              `${record.type}:${record.attributeName ?? ""}:${target?.className ?? target?.nodeName ?? "unknown"}`
-            );
-          }
-        }
+        if (target?.closest('[data-testid="draft-event"]')) continue;
+        let visibleMutation = false;
         for (const removedNode of record.removedNodes) {
           if (!(removedNode instanceof HTMLElement)) continue;
-          if (removedNode.matches(selector)) removedSemanticNodes += 1;
-          removedSemanticNodes += removedNode.querySelectorAll(selector).length;
+          if (removedNode.matches('[data-testid="draft-event"]')) continue;
+          const removed = baselineNodes.filter((node) => node === removedNode || removedNode.contains(node));
+          removedSemanticNodes += removed.length;
+          visibleMutation ||= removed.length > 0;
+        }
+        for (const addedNode of record.addedNodes) {
+          if (!(addedNode instanceof HTMLElement)) continue;
+          if (addedNode.matches('[data-testid="draft-event"]')) continue;
+          const nodes = [addedNode, ...addedNode.querySelectorAll<HTMLElement>(selector)];
+          visibleMutation ||= nodes.some((node) => node.matches(selector) && isVisible(node));
+        }
+        if (visibleMutation) {
+          unexpectedMutations += 1;
+          mutationDetails.push(`${record.type}:${target?.className ?? "unknown"}`);
         }
       }
     });
@@ -460,7 +466,7 @@ test("restores participant-filtered calendars without a delayed redraw or event 
       const rows = Array.from(viewport.querySelectorAll<HTMLElement>('[data-testid="calendar-row"]'));
       const calendarIds = Array.from(new Set(rows.map((row) => row.dataset.calendarId).filter(Boolean)));
       if (calendarIds.join("|") !== expectedCalendarIds.join("|")) continue;
-      const nodes = Array.from(viewport.querySelectorAll<HTMLElement>(selector));
+      const nodes = Array.from(viewport.querySelectorAll<HTMLElement>(selector)).filter(isVisible);
       if (!baselineNodes) {
         baselineNodes = nodes;
         baselineBoxes = nodes.map((node) => node.getBoundingClientRect());

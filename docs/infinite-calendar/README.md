@@ -17,6 +17,12 @@ days, hours, horizontal rows, and vertical columns without taking ownership of g
 - [Decisions](./decisions.md)
 - [Shared usage recipes](../shared/usage.md)
 
+Event requests use dates intersecting the committed viewport after a 100 ms settling delay. Rendering overscan and
+offscreen restore pins do not widen that window. Prefetch remains configurable; return zero before/after days for
+viewport-only reads. Optional `loadCalendarIds` separates API read coverage from `selectedCalendarIds`, so hiding rows,
+including every row, can reuse an all-calendar read. Without it, read coverage follows the displayed selection.
+An adjacent in-flight edge date may finish through a layout correction; genuinely distant requests are cancelled.
+
 Dragging an event back to its starting slot neither opens its editor nor requests a move. The calendar owns
 this distinction from an ordinary click, which still invokes `onEventActivate`. Pointer jitter within four pixels
 also activates, even if it crosses a snap boundary; consumers need no movement guard.
@@ -91,7 +97,7 @@ Products own recurrence expansion; saves and filters still refresh through `even
 ## Bundle budget
 
 JavaScript is limited to 50 KiB gzip and the optional stylesheet to 2 KiB gzip. The current artifacts measure
-40.28 KiB and 1.99 KiB gzip respectively (Node 24, gzip level 9). See [Decision 100](./decisions.md#100---reconcile-the-infinite-calendar-budget-after-branch-integration).
+40.99 KiB and 1.99 KiB gzip respectively (Node 24, gzip level 9). See [Decision 100](./decisions.md#100---reconcile-the-infinite-calendar-budget-after-branch-integration).
 
 ## Named contracts
 

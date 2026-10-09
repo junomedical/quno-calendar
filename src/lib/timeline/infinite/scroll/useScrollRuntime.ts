@@ -26,6 +26,7 @@ import { useVirtualWindowNavigation } from "#quno-internal/timeline/infinite/scr
 import { useVisibleDateState } from "#quno-internal/timeline/infinite/scroll/position/useVisibleDateState";
 import { shouldAdjustForDateItemResize } from "#quno-internal/timeline/infinite/scroll/position/visibleSnapshot";
 import { resetVirtualizerMeasurements } from "#quno-internal/timeline/infinite/scroll/window/virtualizerMeasurements";
+import { useViewportLoadDates } from "#quno-internal/timeline/infinite/scroll/window/useViewportLoadDates";
 
 type UseVirtualTimelineWindowArgs = {
   containerRef?: RefObject<HTMLDivElement | null>;
@@ -40,6 +41,7 @@ type UseVirtualTimelineWindowArgs = {
   isInteractionActive: boolean;
   recenterBlockedRef?: MutableRefObject<boolean>;
   eagerRange?: boolean;
+  retainLoadWindow?: boolean;
   layoutAnchorDateKey?: string;
   resolveOffsetOnLayoutChange?: ResolveOffsetOnLayoutChange;
 };
@@ -48,19 +50,6 @@ const shouldAdjustScrollPositionOnItemSizeChange: NonNullable<
   Virtualizer<HTMLDivElement, Element>["shouldAdjustScrollPositionOnItemSizeChange"]
 > = (item, _delta, instance) =>
   shouldAdjustForDateItemResize({ itemEnd: item.end, scrollOffset: instance.scrollOffset });
-
-function virtualViewportIncludesDate({
-  virtualizer,
-  dateKeyToIndex,
-  dateKey
-}: {
-  virtualizer: Virtualizer<HTMLDivElement, Element>;
-  dateKeyToIndex: (args: { dateKey: string }) => number;
-  dateKey: string;
-}) {
-  const targetIndex = dateKeyToIndex({ dateKey });
-  return virtualizer.getVirtualItems().some((item) => item.index === targetIndex);
-}
 
 export function useScrollRuntime({
   containerRef: providedContainerRef,
@@ -75,13 +64,19 @@ export function useScrollRuntime({
   isInteractionActive,
   recenterBlockedRef,
   eagerRange = false,
+  retainLoadWindow = false,
   layoutAnchorDateKey,
   resolveOffsetOnLayoutChange
 }: UseVirtualTimelineWindowArgs) {
   const ownContainerRef = useRef<HTMLDivElement | null>(null);
   const containerRef = providedContainerRef ?? ownContainerRef;
-  const { topVisibleDateRef, topVisibleOffsetRef, pendingScrollTargetRef, rememberVisibleDateOffset } =
-    useVisibleDateState({ initialAnchorDateKey, excludedWeekdays: settings.excludedWeekdays, setAnchorDateKey });
+  const {
+    topVisibleDateRef,
+    topVisibleOffsetRef,
+    pendingScrollTargetRef,
+    rememberVisibleDateOffset,
+    readVisibleSnapshot
+  } = useVisibleDateState({ initialAnchorDateKey, excludedWeekdays: settings.excludedWeekdays, setAnchorDateKey });
 
   const dateModel = useMemo(
     () => createVirtualDateModel({ anchorDateKey, excludedWeekdays: settings.excludedWeekdays }),
@@ -106,7 +101,7 @@ export function useScrollRuntime({
     virtualizer.shouldAdjustScrollPositionOnItemSizeChange = shouldAdjustScrollPositionOnItemSizeChange;
   }, [virtualizer]);
 
-  const { scrollToVisibleDateOffset, updateVisibleSnapshot } = useVirtualScrollPosition({
+  const { scrollToVisibleDateOffset, updateVisibleSnapshot, isDateInVirtualViewport } = useVirtualScrollPosition({
     containerRef,
     virtualizer,
     virtualWindow,
@@ -144,10 +139,6 @@ export function useScrollRuntime({
       forceUniformGeometry: Boolean(resolveOffsetOnLayoutChange)
     });
   }, [baseDayHeight, resolveOffsetOnLayoutChange, virtualWindow.count, virtualizer]);
-  const isDateInVirtualViewport = useCallback(
-    ({ dateKey }: { dateKey: string }) => virtualViewportIncludesDate({ virtualizer, dateKeyToIndex, dateKey }),
-    [dateKeyToIndex, virtualizer]
-  );
   useLayoutOffsetRestoration({
     baseDayHeight,
     verticalLayoutSignature,
@@ -201,6 +192,13 @@ export function useScrollRuntime({
     offsetForIndex
   });
 
+  const viewportDateKeys = useViewportLoadDates({
+    containerRef,
+    renderItems,
+    dateKeyForIndex,
+    retainWindow: retainLoadWindow || isInteractionActive,
+    topInset: settings.dayHeaderHeight
+  });
   return {
     containerRef,
     virtualizer,
@@ -208,6 +206,8 @@ export function useScrollRuntime({
     dateKeyToIndex,
     renderItems,
     visibleDateKeys,
+    viewportDateKeys,
+    readVisibleSnapshot,
     dateKeyForIndex,
     scrollToDate,
     rememberVisibleDateOffset,

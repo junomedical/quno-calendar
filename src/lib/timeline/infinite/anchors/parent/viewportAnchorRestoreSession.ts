@@ -95,6 +95,14 @@ export class ViewportAnchorRestoreSession {
     window.removeEventListener("keydown", this.handleKey);
   };
 
+  // React commits can move a pinned day before the observer's next frame.
+  // Reapply an existing parent restore before paint, without starting navigation.
+  readonly flush = () => {
+    if (this.frame !== null) window.cancelAnimationFrame(this.frame);
+    this.frame = null;
+    this.apply();
+  };
+
   private readonly schedule = () => {
     if (!this.args.isCurrent() || this.frame !== null) return;
     this.frame = window.requestAnimationFrame(this.apply);

@@ -4,6 +4,14 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+### Viewport request stability - 2026-10-09
+
+- Load settled viewport dates independently of render overscan and offscreen editor pins. Coalesce fast scrolling
+  before deriving requests. Keep adjacent boundary reads alive through row contraction without requesting extra dates.
+- Add optional `loadCalendarIds` to keep read coverage independent of displayed rows, including an empty selection.
+  Existing consumers default to selected IDs. Retain generation guards, bounded retries and late-data anchoring.
+- Add Chromium coverage for 135-row filtering, zero-row reads, request boundaries, pending reads and fast reversals.
+
 ### 0.6.3 upstream integration - 2026-10-08
 
 - Merged upstream `b774e96`. Preserve the demo's resource-slot opening/Cancel policy, hover stability and active

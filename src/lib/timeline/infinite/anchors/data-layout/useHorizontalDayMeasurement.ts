@@ -15,7 +15,10 @@
 import type { Virtualizer } from "@tanstack/react-virtual";
 import { useLayoutEffect, useRef, useState, type RefObject } from "react";
 import type { CalendarId } from "#quno-internal/timeline/core/types";
-import { resolveVisibleDateSnapshot } from "#quno-internal/timeline/infinite/scroll/position/visibleSnapshot";
+import {
+  resolveVisibleDateSnapshot,
+  type VisibleDateSnapshot
+} from "#quno-internal/timeline/infinite/scroll/position/visibleSnapshot";
 import {
   captureHorizontalDataLayoutAnchor,
   resolveHorizontalDataLayoutOffset,
@@ -52,6 +55,7 @@ type HorizontalDayMeasurementArgs = {
   virtualItemCount: number;
   virtualizer: DayVirtualizer;
   refreshViewport: () => void;
+  readVisibleSnapshot?: () => VisibleDateSnapshot;
 };
 
 export function useHorizontalDayMeasurement({
@@ -69,12 +73,13 @@ export function useHorizontalDayMeasurement({
   deferBaseMeasurement,
   virtualItemCount,
   virtualizer,
-  refreshViewport
+  refreshViewport,
+  readVisibleSnapshot
 }: HorizontalDayMeasurementArgs) {
   const previousMetricsRef = useRef(dayMetricsByDate);
   const previousLayoutSignatureRef = useRef(layoutSignature);
   const previousCalendarIdsRef = useRef(calendarIds);
-  const previousBaseDayHeightRef = useRef(baseDayHeight);
+  const previousBaseHeightRef = useRef(baseDayHeight);
   const dateRestoreMeasuredRef = useRef(false);
   const pendingAnchorRef = useRef<HorizontalDataLayoutAnchor | null>(null);
   const [layoutVersion, setLayoutVersion] = useState(0);
@@ -86,6 +91,7 @@ export function useHorizontalDayMeasurement({
     const snapshot =
       viewport && preserveVisibleResource && !structuralLayoutChanged
         ? resolveVisibleDateSnapshot({
+            snapshotBeforeResize: previousBaseHeightRef.current !== baseDayHeight ? readVisibleSnapshot?.() : undefined,
             scrollTop: viewport.scrollTop,
             getItemForOffset: ({ offset }) => virtualizer.getVirtualItemForOffset(offset),
             virtualItems: virtualizer.getVirtualItems(),
@@ -111,19 +117,17 @@ export function useHorizontalDayMeasurement({
 
     // Changed estimates do not invalidate TanStack's cached prefix positions.
     // Capture first, clear those estimates, then restore known dense-day sizes.
-    if (!measureBaseDuringDateRestore) {
-      dateRestoreMeasuredRef.current = false;
-    }
+    if (!measureBaseDuringDateRestore) dateRestoreMeasuredRef.current = false;
     // A draft can return to its original row count with compact prefix sizes
     // still cached. Refresh once after the draft releases for a date restore.
     const baseHeightChanged =
-      (previousBaseDayHeightRef.current !== baseDayHeight ||
+      (previousBaseHeightRef.current !== baseDayHeight ||
         (measureBaseDuringDateRestore && !dateRestoreMeasuredRef.current)) &&
       (preserveVisibleResource || measureBaseDuringDateRestore) &&
       !deferBaseMeasurement;
     if (baseHeightChanged) {
       virtualizer.measure();
-      previousBaseDayHeightRef.current = baseDayHeight;
+      previousBaseHeightRef.current = baseDayHeight;
       dateRestoreMeasuredRef.current = measureBaseDuringDateRestore;
     }
     const metricHeightsChanged = resizeAffectedDays({
@@ -185,6 +189,7 @@ export function useHorizontalDayMeasurement({
     preserveVisibleResource,
     measureBaseDuringDateRestore,
     refreshViewport,
+    readVisibleSnapshot,
     virtualItemCount,
     virtualizer
   ]);

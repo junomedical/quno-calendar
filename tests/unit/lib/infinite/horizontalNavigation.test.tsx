@@ -37,6 +37,7 @@ function setup() {
         containerRef: { current: viewport },
         settings,
         now: new Date("2026-07-06T09:00:00"),
+        hasActiveDraft: false,
         scrollToDate
       });
     },

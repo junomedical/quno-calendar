@@ -20,6 +20,7 @@ type RestoreRequest = {
 type RestoreArgs = {
   containerRef: RefObject<HTMLElement | null>;
   registry: ViewportGeometryRegistry;
+  flushBeforePaint?: boolean;
   resolveSnapshot: (target: CalendarViewportAnchorTarget) => CalendarViewportAnchor["snapshot"] | null;
   scrollToDateTime: QunoInfiniteCalendarHandle["scrollToDateTime"];
   scrollToDate?: QunoInfiniteCalendarHandle["scrollToDate"];
@@ -29,6 +30,7 @@ type RestoreArgs = {
 export function useViewportAnchorRestore(args: RestoreArgs) {
   const restoreTokenRef = useRef(0);
   const cleanupRef = useRef<(() => void) | null>(null);
+  const sessionRef = useRef<ViewportAnchorRestoreSession | null>(null);
   const pendingRestoreRef = useRef<RestoreRequest | null>(null);
   const [activeRestoreTarget, setActiveRestoreTarget] = useState<CalendarViewportAnchorTarget | null>(null);
 
@@ -37,6 +39,7 @@ export function useViewportAnchorRestore(args: RestoreArgs) {
     pendingRestoreRef.current = null;
     cleanupRef.current?.();
     cleanupRef.current = null;
+    sessionRef.current = null;
     setActiveRestoreTarget(null);
   }, []);
   useEffect(() => () => cancelViewportAnchorRestore(), [cancelViewportAnchorRestore]);
@@ -57,6 +60,7 @@ export function useViewportAnchorRestore(args: RestoreArgs) {
   useLayoutEffect(() => {
     const request = pendingRestoreRef.current;
     if (!request) {
+      if (args.flushBeforePaint !== false) sessionRef.current?.flush();
       return;
     }
     pendingRestoreRef.current = null;
@@ -75,16 +79,9 @@ export function useViewportAnchorRestore(args: RestoreArgs) {
       isCurrent: () => restoreTokenRef.current === token,
       cancel: cancelViewportAnchorRestore
     });
+    sessionRef.current = session;
     cleanupRef.current = session.start();
-  }, [
-    activeRestoreTarget,
-    args.containerRef,
-    args.registry,
-    args.resolveSnapshot,
-    args.scrollToDateTime,
-    args.scrollToDate,
-    cancelViewportAnchorRestore
-  ]);
+  });
 
   return { activeRestoreTarget, restoreViewportAnchor, cancelViewportAnchorRestore };
 }

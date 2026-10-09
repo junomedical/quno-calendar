@@ -1042,3 +1042,20 @@ Both accepted identifiers and texts are preserved. References distinguish these 
 New decisions continue after 106. These behaviors coexist: explicit editor restores own their target date, while
 ordinary late data retains the date/resource visible when the response changes geometry. Consumer editors choose
 their outcome policy through the existing handle; onboarding keeps its opening-date Cancel and Save-click-date policies.
+
+## 107 - Separate Viewport Reads From Rendered Rows
+
+Date: 2026-10-09
+Status: Accepted; refines Decisions 070, 098 and 101
+
+Loading uses committed viewport intersections after a 100 ms settling interval, independently of five-date render
+overscan and pinned restore dates. Keep the last useful window while structural geometry is unavailable. Apply
+the caller's prefetch policy only to this viewport window. Fast scroll reversals coalesce before requesting dates.
+
+Optional `loadCalendarIds` describes provider read coverage separately from displayed `selectedCalendarIds`.
+It defaults to selected IDs for existing calendar-scoped loaders. Consumers whose endpoint returns all owners can
+keep that scope stable while filtering rows, including an empty selection. Do not invalidate data for owner display
+filters. Retain adjacent pending boundary reads without fetching extra dates; abort distant or obsolete-generation
+reads and keep the existing stale-response guards. Keep the last load window during drafts and their closing transition.
+Reapply an existing parent restore before paint after the draft closes. Opening draft participant layout keeps its
+existing restore sequence. A row-count resize uses the semantic date saved before its estimates change.

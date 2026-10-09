@@ -173,6 +173,8 @@ export type CalendarViewComponentProps = CalendarDateLabelOptions & {
   calendars: CalendarRow[];
   selectedCalendarIds: CalendarId[];
   loadEvents: LoadEvents;
+  /** Read coverage independent of displayed rows; defaults to selectedCalendarIds. */
+  loadCalendarIds?: CalendarId[];
   projectEvents?: ProjectEvents;
   eventPrefetchPolicy?: EventPrefetchPolicy;
   eventVersion?: number | string;
