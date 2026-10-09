@@ -26,6 +26,7 @@ import { useVirtualWindowNavigation } from "#quno-internal/timeline/infinite/scr
 import { useVisibleDateState } from "#quno-internal/timeline/infinite/scroll/position/useVisibleDateState";
 import { shouldAdjustForDateItemResize } from "#quno-internal/timeline/infinite/scroll/position/visibleSnapshot";
 import { resetVirtualizerMeasurements } from "#quno-internal/timeline/infinite/scroll/window/virtualizerMeasurements";
+import { useViewportLoadDates } from "#quno-internal/timeline/infinite/scroll/window/useViewportLoadDates";
 
 type UseVirtualTimelineWindowArgs = {
   containerRef?: RefObject<HTMLDivElement | null>;
@@ -35,10 +36,12 @@ type UseVirtualTimelineWindowArgs = {
   settings: QunoInfiniteCalendarSettings;
   baseDayHeight: number;
   verticalLayoutSignature: string;
+  preserveResourceLayout?: boolean;
   topDateAlignmentKey: string;
   isInteractionActive: boolean;
   recenterBlockedRef?: MutableRefObject<boolean>;
   eagerRange?: boolean;
+  retainLoadWindow?: boolean;
   layoutAnchorDateKey?: string;
   resolveOffsetOnLayoutChange?: ResolveOffsetOnLayoutChange;
 };
@@ -48,19 +51,6 @@ const shouldAdjustScrollPositionOnItemSizeChange: NonNullable<
 > = (item, _delta, instance) =>
   shouldAdjustForDateItemResize({ itemEnd: item.end, scrollOffset: instance.scrollOffset });
 
-function virtualViewportIncludesDate({
-  virtualizer,
-  dateKeyToIndex,
-  dateKey
-}: {
-  virtualizer: Virtualizer<HTMLDivElement, Element>;
-  dateKeyToIndex: (args: { dateKey: string }) => number;
-  dateKey: string;
-}) {
-  const targetIndex = dateKeyToIndex({ dateKey });
-  return virtualizer.getVirtualItems().some((item) => item.index === targetIndex);
-}
-
 export function useScrollRuntime({
   containerRef: providedContainerRef,
   anchorDateKey,
@@ -69,17 +59,24 @@ export function useScrollRuntime({
   settings,
   baseDayHeight,
   verticalLayoutSignature,
+  preserveResourceLayout = true,
   topDateAlignmentKey,
   isInteractionActive,
   recenterBlockedRef,
   eagerRange = false,
+  retainLoadWindow = false,
   layoutAnchorDateKey,
   resolveOffsetOnLayoutChange
 }: UseVirtualTimelineWindowArgs) {
   const ownContainerRef = useRef<HTMLDivElement | null>(null);
   const containerRef = providedContainerRef ?? ownContainerRef;
-  const { topVisibleDateRef, topVisibleOffsetRef, pendingScrollTargetRef, rememberVisibleDateOffset } =
-    useVisibleDateState({ initialAnchorDateKey, excludedWeekdays: settings.excludedWeekdays, setAnchorDateKey });
+  const {
+    topVisibleDateRef,
+    topVisibleOffsetRef,
+    pendingScrollTargetRef,
+    rememberVisibleDateOffset,
+    readVisibleSnapshot
+  } = useVisibleDateState({ initialAnchorDateKey, excludedWeekdays: settings.excludedWeekdays, setAnchorDateKey });
 
   const dateModel = useMemo(
     () => createVirtualDateModel({ anchorDateKey, excludedWeekdays: settings.excludedWeekdays }),
@@ -104,7 +101,7 @@ export function useScrollRuntime({
     virtualizer.shouldAdjustScrollPositionOnItemSizeChange = shouldAdjustScrollPositionOnItemSizeChange;
   }, [virtualizer]);
 
-  const { scrollToVisibleDateOffset, updateVisibleSnapshot } = useVirtualScrollPosition({
+  const { scrollToVisibleDateOffset, updateVisibleSnapshot, isDateInVirtualViewport } = useVirtualScrollPosition({
     containerRef,
     virtualizer,
     virtualWindow,
@@ -142,10 +139,6 @@ export function useScrollRuntime({
       forceUniformGeometry: Boolean(resolveOffsetOnLayoutChange)
     });
   }, [baseDayHeight, resolveOffsetOnLayoutChange, virtualWindow.count, virtualizer]);
-  const isDateInVirtualViewport = useCallback(
-    ({ dateKey }: { dateKey: string }) => virtualViewportIncludesDate({ virtualizer, dateKeyToIndex, dateKey }),
-    [dateKeyToIndex, virtualizer]
-  );
   useLayoutOffsetRestoration({
     baseDayHeight,
     verticalLayoutSignature,
@@ -169,9 +162,13 @@ export function useScrollRuntime({
   const virtualItems = virtualizer.getVirtualItems();
   const dateSequenceKey = settings.excludedWeekdays.join("|");
   const dateModelTransitionKey = `${dateSequenceKey}:${virtualWindow.anchorDateKey}`;
+  const renderedBaseHeightRef = useRef(baseDayHeight);
+  if (preserveResourceLayout && !isInteractionActive && !recenterBlockedRef?.current) {
+    renderedBaseHeightRef.current = baseDayHeight;
+  }
   const structuralRenderKey = resolveOffsetOnLayoutChange
     ? `${verticalLayoutSignature}:${baseDayHeight}:${virtualWindow.anchorDateKey}`
-    : `horizontal-dates:${dateModelTransitionKey}`;
+    : `horizontal-dates:${renderedBaseHeightRef.current}:${dateModelTransitionKey}`;
   const structuralRenderWindow = useStructuralRenderWindow({
     transitionKey: structuralRenderKey,
     resourceTransitionKey: dateModelTransitionKey,
@@ -195,6 +192,13 @@ export function useScrollRuntime({
     offsetForIndex
   });
 
+  const viewportDateKeys = useViewportLoadDates({
+    containerRef,
+    renderItems,
+    dateKeyForIndex,
+    retainWindow: retainLoadWindow || isInteractionActive,
+    topInset: settings.dayHeaderHeight
+  });
   return {
     containerRef,
     virtualizer,
@@ -202,6 +206,8 @@ export function useScrollRuntime({
     dateKeyToIndex,
     renderItems,
     visibleDateKeys,
+    viewportDateKeys,
+    readVisibleSnapshot,
     dateKeyForIndex,
     scrollToDate,
     rememberVisibleDateOffset,

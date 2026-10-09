@@ -940,6 +940,51 @@ eight seconds of geometry and DOM-mutation observation after the final change.
 headless parser result. The guide's typed-date example now reads `start.date`; Infinite Calendar's navigation,
 day-key model, and event timestamp contracts remain unchanged.
 
+## 104 - Rebuild Base Estimates When Horizontal Row Counts Change
+
+Date: 2026-10-08
+Status: Accepted; refines Decisions 049, 073 and 103
+
+A changed row count changes every base day height. TanStack retains cached prefix positions when only `estimateSize`
+changes. Capture the date/resource anchor first, clear estimates, then reapply known dense-day sizes. Carry the anchor
+through one layout projection so expansion can restore after the larger scroll spacer commits. Keep ordinary metric
+updates and drafts with unchanged base height on the existing measured path. Explicit restores and gestures keep priority.
+
+Clamp a missing-resource fallback inside the new base date height when event metrics are absent. Leave room for the
+one-pixel visible-date probe. Defer base-estimate resets and render-window changes while an editor restore, draft or pointer gesture owns focus.
+Refresh them after that owner releases. No public API changes are required. Chromium regressions cover 135-row contraction,
+expansion, distant scrolling, empty selection, local row offsets, bounded reads and idle settling.
+
+## 105 - Keep Late Offscreen Loads From Moving The Displayed Calendar
+
+Date: 2026-10-08
+Status: Accepted; refines Decisions 049, 073 and 104
+
+Apply the committed-spacer anchor path to changed event heights as well as changed row counts. A large delayed
+overlap update on an earlier date can exceed the old scroll area and clamp an immediate correction into that date.
+Retain the displayed date/resource anchor through the spacer commit. Publish the corrected virtual range and render
+it before paint so the anchored row never disappears for an intermediate frame. New events are never focus targets.
+Refresh resource viewport metrics at the correction; ordinary native scrolling retains its frame-coalesced reader.
+
+Skip the additional layout projections when heights have not changed. Keep explicit navigation, parent restores and
+gestures authoritative. Capture current focus at the metric update rather than at request start. Chromium regressions
+check every painted frame during offscreen growth, later-date growth, changed participant rows, shrinkage and navigation
+while a response is pending. No public contracts change.
+
+## 106 - Preserve Editor Outcome Dates Through Deferred Layout
+
+Date: 2026-10-08
+Status: Accepted; extends Decisions 097, 104 and 105
+
+Support a parent anchor target containing only `dateKey`. Resolve the registered day on the vertical date axis and
+leave horizontal scrolling unchanged. Keep the existing bounded restore session, explicit-navigation priority and
+manual-intent cancellation. A missing date can retry navigation when committed geometry changes.
+
+Refresh base measurements once after a date restore's draft releases. Compact prefix sizes can remain cached even
+when the original row count returns. Keep event/resource restore and drag policies unchanged. Consumer editors choose
+the opening date for Cancel and the Save-click date for a successful mutation. Appointments, availability and blockers
+share that consumer policy. No new handle method or required prop is added.
+
 ## 104 - Anchor Horizontal Demo Editor Transitions To Resource Slots
 
 Date: 2026-10-08
@@ -986,3 +1031,31 @@ times at 1280 × 800 and 1440 × 900 with one and six calendars, plus the larger
 row returns to its original position, immediate hover stays stationary, and no movement occurs after the restore ends.
 The rebuilt Infinite Calendar artifact measures 39.57 KiB gzip JavaScript and 1.99 KiB optional CSS; the guide and
 verification fixtures report those measurements against the unchanged 50 KiB and 2 KiB ceilings.
+
+## Concurrent decision records reconciled — 2026-10-08
+
+The merged branches independently assigned 104 to [horizontal base estimates](#104---rebuild-base-estimates-when-horizontal-row-counts-change)
+and [demo resource-slot restoration](#104---anchor-horizontal-demo-editor-transitions-to-resource-slots), and 105 to
+[late offscreen data](#105---keep-late-offscreen-loads-from-moving-the-displayed-calendar) and
+[restore-date retention](#105---retain-horizontal-restore-dates-through-resource-changes).
+Both accepted identifiers and texts are preserved. References distinguish these records by their full title/anchor.
+New decisions continue after 106. These behaviors coexist: explicit editor restores own their target date, while
+ordinary late data retains the date/resource visible when the response changes geometry. Consumer editors choose
+their outcome policy through the existing handle; onboarding keeps its opening-date Cancel and Save-click-date policies.
+
+## 107 - Separate Viewport Reads From Rendered Rows
+
+Date: 2026-10-09
+Status: Accepted; refines Decisions 070, 098 and 101
+
+Loading uses committed viewport intersections after a 100 ms settling interval, independently of five-date render
+overscan and pinned restore dates. Keep the last useful window while structural geometry is unavailable. Apply
+the caller's prefetch policy only to this viewport window. Fast scroll reversals coalesce before requesting dates.
+
+Optional `loadCalendarIds` describes provider read coverage separately from displayed `selectedCalendarIds`.
+It defaults to selected IDs for existing calendar-scoped loaders. Consumers whose endpoint returns all owners can
+keep that scope stable while filtering rows, including an empty selection. Do not invalidate data for owner display
+filters. Retain adjacent pending boundary reads without fetching extra dates; abort distant or obsolete-generation
+reads and keep the existing stale-response guards. Keep the last load window during drafts and their closing transition.
+Reapply an existing parent restore before paint after the draft closes. Opening draft participant layout keeps its
+existing restore sequence. A row-count resize uses the semantic date saved before its estimates change.

@@ -210,6 +210,7 @@ export function DefaultDemo() {
             ref={calendarRef}
             calendars={demoCalendars}
             selectedCalendarIds={drafts.visibleCalendarIds}
+            loadCalendarIds={selectedCalendarIds}
             loadEvents={simulatedApi.loadEvents}
             eventVersion={eventVersion}
             renderEvent={DemoEventCard}

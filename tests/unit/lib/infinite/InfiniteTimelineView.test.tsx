@@ -1,3 +1,4 @@
+import "#quno-tests/unit/lib/infinite/calendarViewport";
 import { act, render, screen, waitFor } from "@testing-library/react";
 import { createRef, type Ref } from "react";
 import { describe, expect, it, vi } from "vitest";

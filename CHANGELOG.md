@@ -4,6 +4,55 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+### Viewport request stability - 2026-10-09
+
+- Load settled viewport dates independently of render overscan and offscreen editor pins. Coalesce fast scrolling
+  before deriving requests. Keep adjacent boundary reads alive through row contraction without requesting extra dates.
+- Add optional `loadCalendarIds` to keep read coverage independent of displayed rows, including an empty selection.
+  Existing consumers default to selected IDs. Retain generation guards, bounded retries and late-data anchoring.
+- Add Chromium coverage for 135-row filtering, zero-row reads, request boundaries, pending reads and fast reversals.
+- Adapt the focused demo to use its base calendar selection for read coverage during participant editing. Verify
+  calendar-count filtering alongside the existing editor, cancellation and vertical-view regressions.
+
+### 0.6.3 upstream integration - 2026-10-08
+
+- Merged upstream `b774e96`. Preserve the demo's resource-slot opening/Cancel policy, hover stability and active
+  restore-date pin alongside late-data anchoring and date-only consumer editor outcomes. Each transition uses one
+  restoration target. Onboarding retains the opening date on Cancel and the Save-click date on successful Save.
+- Added frame-by-frame regressions for real 3-second demo responses during rapid wheel reversals with one and six
+  calendars. Keep the last viewed date and row through delayed responses and idle recentering.
+- Stabilized two existing browser checks: wait for today's loaded events before selecting empty drawing space, and
+  use wheel input to test manual-scroll cancellation instead of a programmatic scroll assignment.
+- Verification: 515 unit tests, all 175 Chromium scenarios and 348 onboarding calendar tests pass. Formatting,
+  architecture/contracts, typecheck, lint, library/demo builds, packed modern/legacy TypeScript, ESM/CommonJS/SSR,
+  Preact, React 19 and pack dry-run pass. The installed onboarding runtime and declarations match the rebuilt library.
+- The merged Infinite Calendar measures 173,133 B raw and 41,248 B gzip (40.28 KiB), plus 2,035 B gzip optional CSS
+  (1.99 KiB), within the unchanged 50 KiB/2 KiB budgets. Preserve both branches' accepted decision records and
+  distinguish concurrent identifiers by their full title/anchor.
+
+### 0.6.3 local package - 2026-10-08
+
+- Date-only parent anchors keep the opening or Save-click day through editor completion and returning participant rows.
+  They preserve horizontal scrolling, recover an unmounted date and yield to manual navigation. Deferred compact base
+  measurements refresh once while the date restore owns focus. Event/resource anchors and drag behavior stay unchanged.
+- Late offscreen overlap updates retain the displayed date and row through the scroll-area commit, then render the
+  corrected virtual range before paint. This prevents both persistent jumps and a missing-row intermediate frame.
+  Pending responses never override newer navigation. Coverage includes growth, shrinkage and changed participant rows.
+- Horizontal row-count changes rebuild cached base date estimates and retain known dense-day measurements.
+  Preserve the date and surviving resource offset after the new scroll spacer commits. This prevents distant
+  date jumps and request churn when a consumer hides empty rows or expands a compact selection.
+- Missing-resource anchors clamp inside an unloaded date's new base geometry, including an empty selection.
+  The visible-date probe stays within the captured date. There are no new public calendar contracts.
+- Verification: 515 unit tests and 166 Chromium scenarios pass. One existing external-editor scroll scenario needed
+  an isolated retry after the full browser run. Formatting, architecture/contracts,
+  typecheck, lint, library/demo builds, packed modern/legacy TypeScript, ESM/CommonJS/SSR, Preact and React 19 checks
+  pass. The 135-row regressions verify geometry, idle settling and bounded request ranges; existing create/cancel and
+  dense participant tests retain their positioning and no-refetch checks.
+- Infinite Calendar measures 172,649 B raw and 40,967 B gzip (40.01 KiB). Optional CSS is 2,035 B gzip (1.99 KiB).
+  Both remain within the 50 KiB JavaScript and 2 KiB CSS ceilings.
+
+### Changes from latest main
+
 - Fixed `/demo/infinite-calendar` jumping to the previous day when opening a compact overlapping appointment and
   shifting again on hover after Cancel. Horizontal editor transitions now restore the clicked participant's resource/time
   slot, retaining the original participant fallback and manual-scroll cancellation. Added October 8 Acne Therapy

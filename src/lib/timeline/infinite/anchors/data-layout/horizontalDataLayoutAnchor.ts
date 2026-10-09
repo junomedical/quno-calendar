@@ -77,8 +77,9 @@ export function resolveHorizontalDataLayoutOffset({
   metric: HorizontalDayMetric | undefined;
   geometry: HorizontalAnchorGeometry;
 }): number {
+  const height = metric?.height ?? geometry.dayHeaderHeight + geometry.calendarIds.length * geometry.baseRowHeight;
   if (anchor.kind === "date") {
-    return clampDateOffset({ offset: anchor.offsetWithinDate, height: metric?.height });
+    return clampDateOffset({ offset: anchor.offsetWithinDate, height });
   }
 
   let rowTop = geometry.dayHeaderHeight;
@@ -90,9 +91,9 @@ export function resolveHorizontalDataLayoutOffset({
     rowTop += rowHeight;
   }
 
-  return clampDateOffset({ offset: anchor.fallbackOffsetWithinDate, height: metric?.height });
+  return clampDateOffset({ offset: anchor.fallbackOffsetWithinDate, height });
 }
 
 function clampDateOffset({ offset, height }: { offset: number; height?: number }): number {
-  return height === undefined ? Math.max(0, offset) : Math.min(Math.max(0, offset), Math.max(0, height - 1));
+  return height === undefined ? Math.max(0, offset) : Math.min(Math.max(0, offset), Math.max(0, height - 2));
 }

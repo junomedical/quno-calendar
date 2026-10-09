@@ -55,6 +55,8 @@ Architecture checks enforce object arguments and product dependency direction, i
 - Save-triggered range reloads only mark ids provided in `appearingEventIds` as appearing; unrelated reloaded created events remain `existing`, and the same active requested id is consumed once rather than replaying on later range responses.
 - Imperative visible-event commits replace or insert one saved event in the loaded visible cache without calling `loadEvents`, and can mark that event as appearing.
 - External save patches the committed event into the visible cache instead of showing a released save draft or invalidating the range, avoiding double glints and reload jumps. Manual scrolling immediately after save is not pulled back by delayed anchor corrections.
+- Date-only editor completion tests cover create/edit, Cancel/Save, return to an unmounted opening date, 135-row
+  expansion, four-second settling and manual-scroll cancellation. Unit tests cover both views and time-axis preservation.
 - Review regressions exercise raw-date/restore/cancel precedence over queued row navigation and recomputed centering
   after async collision growth. Both orientations assert loading geometry before resources exist, percentage/minimum
   dimensions after mounting, and accepted drags followed by projection removal without cached metadata leakage.
@@ -211,6 +213,11 @@ Architecture checks enforce object arguments and product dependency direction, i
   calendar rows, and zoom output update together without replacing the visible date or loaded event surface.
 - The motion chapter commits an added draft with `appearing`, navigates its date/time into view, then releases a second
   draft through the exiting fade before removal.
+
+The `demo-late-loading.spec.ts` regressions select the real demo API's 3-second delay, reverse the wheel rapidly, then
+check every frame through response completion and idle recentering. One- and six-calendar cases retain the last viewed
+date and row offset. The popup-layering check uses a fixed clock and waits for today's data before choosing empty
+draw space, so arriving events cannot turn its creation gesture into an event move. Editor scrolling checks use wheel input to exercise manual-intent cancellation; a DOM scroll assignment has programmatic restoration semantics.
 
 Playwright coverage is split by behavior under `e2e/specs`: core navigation and interaction smoke tests, sticky/layering tests, event rendering tests, external popup draft tests, and vertical-orientation tests. Shared browser helpers live in `e2e/helpers.ts`.
 
