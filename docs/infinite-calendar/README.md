@@ -22,6 +22,7 @@ offscreen restore pins do not widen that window. Prefetch remains configurable; 
 viewport-only reads. Optional `loadCalendarIds` separates API read coverage from `selectedCalendarIds`, so hiding rows,
 including every row, can reuse an all-calendar read. Without it, read coverage follows the displayed selection.
 An adjacent in-flight edge date may finish through a layout correction; genuinely distant requests are cancelled.
+The focused demo passes its base calendar selection as read coverage while draft participants control displayed rows.
 
 Dragging an event back to its starting slot neither opens its editor nor requests a move. The calendar owns
 this distinction from an ordinary click, which still invokes `onEventActivate`. Pointer jitter within four pixels

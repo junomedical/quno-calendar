@@ -72,6 +72,5 @@ flowchart LR
    2. Add optional `loadCalendarIds` for stable provider coverage while display rows change. Retain adjacent pending edge reads without requesting extra dates.
    3. Preserve date/row anchoring, generation guards and bounded retries. Add real-browser checks for fixed filtered rows, an empty selection and fast reversals.
    4. Retain the load window during drafts and closing transitions. Apply an existing Cancel restore before paint. Preserve the saved date during row-count resizing.
-   5. Verify 520 unit tests and all 180 Chromium scenarios, including the separately rerun recenter scenario after awaiting its initial read. Pass architecture, typecheck, lint, builds and packed compatibility checks.
       Why: Row filters must not produce far-away request windows or repeated cancellation loops.
       Files: viewport load-date hook, scroll runtime, view loaders, public props, unit/browser coverage and loading documentation.

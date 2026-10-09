@@ -11,6 +11,8 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 - Add optional `loadCalendarIds` to keep read coverage independent of displayed rows, including an empty selection.
   Existing consumers default to selected IDs. Retain generation guards, bounded retries and late-data anchoring.
 - Add Chromium coverage for 135-row filtering, zero-row reads, request boundaries, pending reads and fast reversals.
+- Adapt the focused demo to use its base calendar selection for read coverage during participant editing. Verify
+  calendar-count filtering alongside the existing editor, cancellation and vertical-view regressions.
 
 ### 0.6.3 upstream integration - 2026-10-08
 
