@@ -13,11 +13,12 @@
  *
  * @see docs/infinite-calendar/flows/async-loading-and-layout.md
  */
-import { startTransition, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { startTransition, useCallback, useEffect, useState } from "react";
 import { applyEventMove } from "#quno-internal/timeline/data/calendarEvents";
 import { defaultEventPrefetchPolicy } from "#quno-internal/timeline/data/eventPrefetch";
-import { EventRangeCoordinator, eventLoadDateKeys } from "./eventRangeCoordinator";
+import { EventRangeCoordinator } from "./eventRangeCoordinator";
 import { loadEventRange } from "./loadEventRange";
+import { useEventLoadDates } from "./useEventLoadDates";
 import type {
   CalendarEvent,
   CalendarId,
@@ -38,8 +39,10 @@ type UseEventRangeLoaderArgs = {
   requestedAppearingEventIds?: EventId[];
   selectedIds: CalendarId[];
   visibleDateKeys: string[];
+  excludedWeekdays?: number[];
 };
 
+const EMPTY_EXCLUDED_WEEKDAYS: number[] = [];
 const EMPTY_REQUESTED_APPEARING_EVENT_IDS: EventId[] = [];
 
 export function useEventRangeLoader({
@@ -50,29 +53,19 @@ export function useEventRangeLoader({
   eventVersion,
   requestedAppearingEventIds = EMPTY_REQUESTED_APPEARING_EVENT_IDS,
   selectedIds,
-  visibleDateKeys
+  visibleDateKeys,
+  excludedWeekdays = EMPTY_EXCLUDED_WEEKDAYS
 }: UseEventRangeLoaderArgs) {
   const [coordinator] = useState(() => new EventRangeCoordinator());
   const [eventsByDate, setEventsByDate] = useState<Record<string, CalendarEvent[]>>({});
   const selectedIdsKey = JSON.stringify(selectedIds);
-  const visibleLoadDateKeys = useMemo(
-    () => eventLoadDateKeys({ visibleDateKeys, selectedCalendarIds: selectedIds, policy: eventPrefetchPolicy }),
-    [eventPrefetchPolicy, selectedIds, visibleDateKeys]
-  );
-  const inactiveLoadDateKeysRef = useRef(visibleLoadDateKeys);
-  if (!activeDraftDateKey) inactiveLoadDateKeysRef.current = visibleLoadDateKeys;
-  const loadDateKeys = useMemo(() => {
-    if (!activeDraftDateKey) return visibleLoadDateKeys;
-    const activeAnchorDateKeys = [activeDraftLoadAnchorDateKey, activeDraftDateKey].filter(
-      (dateKey): dateKey is string => Boolean(dateKey)
-    );
-    const activeLoadDateKeys = eventLoadDateKeys({
-      visibleDateKeys: activeAnchorDateKeys,
-      selectedCalendarIds: selectedIds,
-      policy: eventPrefetchPolicy
-    });
-    return [...new Set([...inactiveLoadDateKeysRef.current, ...activeLoadDateKeys])].sort();
-  }, [activeDraftDateKey, activeDraftLoadAnchorDateKey, eventPrefetchPolicy, selectedIds, visibleLoadDateKeys]);
+  const loadDateKeys = useEventLoadDates({
+    activeDraftDateKey,
+    activeDraftLoadAnchorDateKey,
+    eventPrefetchPolicy,
+    selectedIds,
+    visibleDateKeys
+  });
   const { appearingEventIds, hasRequestedEventIds, markEventsAppearing, markRequestedEventsAppearing } =
     useAppearingEvents({ requestedEventIds: requestedAppearingEventIds });
 
@@ -88,7 +81,7 @@ export function useEventRangeLoader({
   useEffect(() => {
     // The visible and policy-selected prefetch keys protect their accepted buckets from LRU eviction.
     coordinator.updateSelectedCalendarIds(selectedIds);
-    coordinator.updateLoadDates(loadDateKeys);
+    coordinator.updateLoadDates({ dateKeys: loadDateKeys, excludedWeekdays });
     const missingRanges = coordinator.missingLoadRanges();
     if (missingRanges.length === 0 || selectedIds.length === 0) {
       return;
@@ -113,7 +106,16 @@ export function useEventRangeLoader({
         });
       });
     }
-  }, [coordinator, eventVersion, loadDateKeys, loadEvents, markRequestedEventsAppearing, selectedIds, selectedIdsKey]);
+  }, [
+    coordinator,
+    eventVersion,
+    excludedWeekdays,
+    loadDateKeys,
+    loadEvents,
+    markRequestedEventsAppearing,
+    selectedIds,
+    selectedIdsKey
+  ]);
 
   useEffect(() => {
     if (!hasRequestedEventIds) {

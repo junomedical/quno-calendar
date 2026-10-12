@@ -21,7 +21,9 @@ Event requests use dates intersecting the committed viewport after a 100 ms sett
 offscreen restore pins do not widen that window. Prefetch remains configurable; return zero before/after days for
 viewport-only reads. Optional `loadCalendarIds` separates API read coverage from `selectedCalendarIds`, so hiding rows,
 including every row, can reuse an all-calendar read. Without it, read coverage follows the displayed selection.
-An adjacent in-flight edge date may finish through a layout correction; genuinely distant requests are cancelled.
+Pending reads for neighboring included dates survive viewport reversals across excluded weekdays: Friday and Monday
+are neighbors when weekends are hidden. Retention does not fetch extra dates or change prefetch calendar-day units.
+Distant reads and obsolete generations still abort. See [Decision 109](./decisions.md#109---retain-pending-reads-across-excluded-date-gaps).
 The focused demo passes its base calendar selection as read coverage while draft participants control displayed rows.
 
 Dragging an event back to its starting slot neither opens its editor nor requests a move. The calendar owns
@@ -46,6 +48,9 @@ Pass `align: "center"` to center the requested row even when it is already visib
 only dates intersecting the usable viewport, so an external creation form can start on the middle visible date.
 Explicit centering follows the resource's actual collision height as asynchronous events arrive. A newer date request,
 restoration, or cancellation supersedes queued row navigation.
+New `scrollToDate`, `scrollToDateTime`, and `scrollToToday` calls supersede an active restore in either orientation.
+Vertical navigation cancels queued time corrections when a newer navigation, restoration, cancellation, or unmount
+supersedes them. Internal restore fallbacks still run within their bounded session.
 
 Optional `isLoading` and `loadingFallback` props let a consumer supply its initial skeleton. While loading, the
 timeline waits to mount until a selected ID matches a supplied calendar. IDs that arrive before calendar metadata or
@@ -98,7 +103,7 @@ Products own recurrence expansion; saves and filters still refresh through `even
 ## Bundle budget
 
 JavaScript is limited to 50 KiB gzip and the optional stylesheet to 2 KiB gzip. The current artifacts measure
-40.99 KiB and 1.99 KiB gzip respectively (Node 24, gzip level 9). See [Decision 100](./decisions.md#100---reconcile-the-infinite-calendar-budget-after-branch-integration).
+41.31 KiB and 1.99 KiB gzip respectively (Node 23, gzip level 9). See [Decision 100](./decisions.md#100---reconcile-the-infinite-calendar-budget-after-branch-integration).
 
 ## Named contracts
 

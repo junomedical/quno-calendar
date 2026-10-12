@@ -1,5 +1,9 @@
 # Test Plan
 
+The calendar follow-up regressions cover vertical navigation superseding active restores and queued time corrections,
+bounded included-date retention across weekends and month/year boundaries, and zero-prefetch browser reversals in
+both orientations. Browser assertions check viewport geometry, exact request ranges, and abort state.
+
 ## Unit Tests
 
 Vitest unit tests live in `tests/unit`, `tests/date-picker`, `tests/date-input`, and `tests/date-parser`.

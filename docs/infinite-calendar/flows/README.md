@@ -59,6 +59,10 @@ When mechanisms overlap, use this order:
 4. Automatic data-layout correction.
 5. Idle virtual-window recenter.
 
+New public imperative navigation first cancels an older restore in either orientation. The priority list describes
+current owners; it does not let an old restore override a newer public request. Internal fallback navigation keeps
+its owning session alive. Vertical queued time corrections are canceled when superseded.
+
 Manual pointer, wheel, touch, or scroll-key intent cancels an opted-in restore immediately. Async event content never becomes an anchor merely because it arrived.
 
 ## Documentation Convention

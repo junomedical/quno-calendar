@@ -19,7 +19,8 @@ Priority and interaction with scroll maintenance are defined in the [Flow Guide]
 
 ## Contracts And Invariants
 
-- Parent restore outranks gesture, navigation, automatic data-layout correction, and idle recentering.
+- While active, parent restore outranks automatic layout correction and idle recentering. New public imperative
+  navigation cancels it in either orientation before taking ownership; internal fallback navigation retains the session.
 - Newly loaded events never become focus targets merely because they appeared.
 - A target with only `dateKey` anchors the date axis. It leaves horizontal scrolling unchanged. It can navigate to
   an unmounted date after parent selection and draft changes. Manual intent cancels the session when requested.

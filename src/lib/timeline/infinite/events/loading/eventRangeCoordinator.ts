@@ -21,6 +21,7 @@ import type {
 import { dateRangeFromKeys, fromDateKey, toDateKey } from "#quno-internal/timeline/date/dateVirtualization";
 import { addCalendarDays } from "#quno-internal/timeline/date/localDate";
 import { EventDateCache } from "./eventDateCache";
+import { retainedLoadDates } from "./retainedLoadDates";
 import { calendarIdsCover, DateCalendarCoverage } from "./dateCalendarCoverage";
 import type { IsoDate } from "#quno-internal/shared/dateRangeModel";
 
@@ -114,16 +115,19 @@ export class EventRangeCoordinator {
     }
   }
 
-  updateLoadDates(dateKeys: Iterable<string>): void {
+  updateLoadDates({
+    dateKeys,
+    excludedWeekdays = []
+  }: {
+    dateKeys: Iterable<string>;
+    excludedWeekdays?: number[];
+  }): void {
     this.loadDates = new Set(dateKeys);
     this.cache.touchDates(this.loadDates);
     // A row contraction can put the previous edge date under sticky chrome.
     // Let that adjacent in-flight read finish instead of cancelling/restarting
     // it on every boundary reversal. This does not request any extra dates.
-    const usefulDates = new Set(this.loadDates);
-    for (const dateKey of this.loadDates)
-      for (const amount of [-1, 1])
-        usefulDates.add(toDateKey({ date: addCalendarDays({ date: fromDateKey({ dateKey }), amount }) }));
+    const usefulDates = retainedLoadDates({ dateKeys: this.loadDates, excludedWeekdays });
     for (const request of this.activeRequests.values()) {
       // Window churn should not keep a request alive after none of its keys are useful.
       if (![...request.dateKeys].some((dateKey) => usefulDates.has(dateKey))) {

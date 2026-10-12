@@ -33,6 +33,10 @@ preserves dense editor transitions and gives explicit restores priority over idl
 keeps horizontal demo rows steady through editor opening, cancellation, and subsequent hover.
 [Decision 105](./infinite-calendar/decisions.md#105---retain-horizontal-restore-dates-through-resource-changes)
 keeps the restore date mounted when participant changes resize the date window.
+[Decision 108](./infinite-calendar/decisions.md#108---let-new-vertical-navigation-supersede-restoration)
+aligns vertical navigation cancellation with the horizontal view;
+[Decision 109](./infinite-calendar/decisions.md#109---retain-pending-reads-across-excluded-date-gaps)
+keeps pending neighboring reads through excluded-weekday gaps without expanding prefetch.
 
 The current responsiveness work is recorded in
 [QUNO-013](./shared/decisions.md#quno-013---bound-high-frequency-work-to-display-frames), with Infinite Calendar's
