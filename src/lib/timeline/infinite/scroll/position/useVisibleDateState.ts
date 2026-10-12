@@ -40,5 +40,15 @@ export function useVisibleDateState({
     [excludedWeekdays]
   );
 
-  return { topVisibleDateRef, topVisibleOffsetRef, pendingScrollTargetRef, rememberVisibleDateOffset };
+  const readVisibleSnapshot = useCallback(
+    () => ({ dateKey: topVisibleDateRef.current, offsetWithinDate: topVisibleOffsetRef.current }),
+    []
+  );
+  return {
+    topVisibleDateRef,
+    topVisibleOffsetRef,
+    pendingScrollTargetRef,
+    rememberVisibleDateOffset,
+    readVisibleSnapshot
+  };
 }

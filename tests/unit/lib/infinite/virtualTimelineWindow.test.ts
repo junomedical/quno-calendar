@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   clampVirtualDateIndex,
   createVirtualDateModel
@@ -132,6 +132,21 @@ describe("top visible date snapshots", () => {
     { index: 1, start: 100, size: 100 }
   ];
   const dateKeyForIndex = (index: number) => `date-${index}`;
+
+  it("uses the saved date when resized estimates reinterpret the same absolute scroll offset", () => {
+    const saved = { dateKey: "date-0", offsetWithinDate: 20 };
+    const getItemForOffset = vi.fn(() => items[1]);
+    expect(
+      resolveVisibleDateSnapshot({
+        snapshotBeforeResize: saved,
+        scrollTop: 150,
+        getItemForOffset,
+        virtualItems: items,
+        dateKeyForIndex: ({ index }) => dateKeyForIndex(index)
+      })
+    ).toBe(saved);
+    expect(getItemForOffset).not.toHaveBeenCalled();
+  });
 
   it("preserves the offset within the item returned by the virtualizer", () => {
     const snapshot = resolveVisibleDateSnapshot({

@@ -89,5 +89,10 @@ export function useVirtualScrollPosition({
     return true;
   }, [containerRef, dateKeyForIndex, topVisibleDateRef, topVisibleOffsetRef, virtualizer]);
 
-  return { scrollToVisibleDateOffset, updateVisibleSnapshot };
+  const isDateInVirtualViewport = useCallback(
+    ({ dateKey }: { dateKey: string }) =>
+      virtualizer.getVirtualItems().some((item) => item.index === dateKeyToIndex({ dateKey })),
+    [dateKeyToIndex, virtualizer]
+  );
+  return { scrollToVisibleDateOffset, updateVisibleSnapshot, isDateInVirtualViewport };
 }

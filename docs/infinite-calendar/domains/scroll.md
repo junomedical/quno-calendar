@@ -53,3 +53,5 @@ See [Virtual Scroll And Recenter](../flows/virtual-scroll-and-recenter.md) for e
 
 - Unit: `virtualTimelineWindow`, `resourceWindow`, and late-height resize predicate tests.
 - Browser: navigation, sticky positioning, recentering, resource windowing, async layout anchoring, and both orientations.
+
+Viewport API dates are owned by [`useViewportLoadDates.ts`](../../../src/lib/timeline/infinite/scroll/window/useViewportLoadDates.ts). It reads committed intersections and coalesces rapid scrolling independently of rendering overscan.

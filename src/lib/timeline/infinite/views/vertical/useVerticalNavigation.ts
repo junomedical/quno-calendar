@@ -70,6 +70,7 @@ export function useVerticalNavigation({
     settings,
     orientation: "vertical",
     scrollToDateTime,
+    scrollToDate,
     verticalTimelineGutterPx: VERTICAL_TIMELINE_GUTTER_PX,
     visibilityInsets: {
       left: buildVerticalViewGeometry(settings).labelWidth,

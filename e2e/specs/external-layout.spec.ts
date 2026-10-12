@@ -1,5 +1,11 @@
 import { expect, test } from "@playwright/test";
-import { goToWorkday, horizontalDrawTarget, openDrawnExternalDraft, viewportRelativeEventBox } from "#quno-e2e/helpers";
+import {
+  goToWorkday,
+  horizontalDrawTarget,
+  openDrawnExternalDraft,
+  viewportRelativeEventBox,
+  waitForDemoEvents
+} from "#quno-e2e/helpers";
 
 async function createOverlappingEvent(page: import("@playwright/test").Page, title: string, time = "22:00") {
   await page.getByRole("spinbutton", { name: "Start" }).fill("8");
@@ -252,8 +258,11 @@ test("keeps the calendar mounted while a draw is held across a pending idle rece
 });
 
 test("renders the external popup above the current-time marker", async ({ page }) => {
+  await page.clock.setFixedTime(new Date("2026-10-08T14:00:00+02:00"));
   await page.goto("/demo/infinite-calendar");
   await page.getByTestId("today-button").click();
+  // Choose empty draw space after the response has populated today's rows.
+  await waitForDemoEvents(page);
   await openDrawnExternalDraft(page);
 
   const layering = await page.evaluate(() => {

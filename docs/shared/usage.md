@@ -311,6 +311,15 @@ When navigation reaches a date before its events load, the date/resource grid is
 - If the viewport is already partway inside a calendar row, the calendar preserves the date, calendar id, and pixel offset inside that row. Height added above the row is compensated before paint.
 - If that calendar disappears during the same update, restoration falls back to the captured date-local pixel and clamps it inside the date.
 
+Row-count changes rebuild base date estimates as well as known loaded-day measurements. Horizontal selection changes
+retain the date and a surviving resource's local offset after the scroll spacer commits. If a consumer derives selected
+rows from loaded events, keep the previous nonempty selection while new dates load; do not temporarily select every
+resource. Keep that occupancy index separate from the event records and keep the loader identity stable.
+
+Delayed event loads preserve the currently displayed date and row, including large height changes on earlier dates.
+The calendar commits the new scroll area and renders the corrected virtual range before paint. Consumers do not
+need to scroll back after responses arrive. User navigation during a pending read remains authoritative.
+
 In the vertical view, event overlap can widen resource columns but does not change the settings-owned date/time height, so the visible date and time stay fixed. See [Async Loading And Layout](../infinite-calendar/flows/async-loading-and-layout.md) for the complete request, cache, measurement, and focus diagrams.
 
 Repository example: the preloading and late-data chapters in
@@ -331,6 +340,10 @@ obsolete-request cancellation. The HTTP adapter belongs to the demo; the library
 To deploy this repository's demo on Vercel, leave the Root Directory at the repository root. The checked-in
 `vercel.json` selects `npm run build:demo`, publishes `dist-demo`, provides client-side route fallback, and deploys the
 demo endpoint from `api/demo-events.ts`. No Vercel environment variables are required for the fixture-backed demo.
+
+### Read coverage while hiding calendar rows
+
+When the endpoint returns all owners, pass their IDs as `loadCalendarIds` while `selectedCalendarIds` controls displayed rows. Hidden or empty rows then reuse the same read coverage. Omit this prop for loaders scoped to selected calendars. `eventPrefetchPolicy={() => ({ beforeDays: 0, afterDays: 0 })}` limits new reads to settled viewport dates. Render overscan remains available for smooth scrolling and does not expand this request window.
 
 ## Vertical Planner
 
@@ -727,6 +740,22 @@ anchor's participant. If it is removed, capture a surviving participant before c
 instance. Keep the original edit anchor separately for Cancel. The demo's participant checkboxes use this policy and
 retain browser focus while visual geometry settles.
 
+Choose one restoration target for each editor transition. A date target preserves the displayed day; a resource/time
+slot preserves a participant position. The following recipes describe those consumer policies.
+
+For a consumer editor that must return to a day rather than a participant, store `getVisibleDateKeys()[0]` when
+opening or clicking Save. After releasing the editor and its row filter, request the desired date position:
+
+```tsx
+calendarRef.current?.scrollToDate({ date: retainedDate });
+calendarRef.current?.restoreViewportAnchor({
+  anchor: { target: { dateKey: retainedDate }, snapshot: { top: 0, left: 0 } },
+  afterRecenter: true,
+  allowNavigationFallback: true,
+  cancelOnManualScroll: true
+});
+```
+
 Capture the clicked `request.renderedCalendarId` before opening an edit draft; hiding the saved source can change
 collision geometry even when participants stay the same. The focused demo preserves the horizontal resource/time slot
 on open and Cancel so expanding a compact card into a full-row editor does not scroll the grid. Capture an event with
@@ -749,6 +778,10 @@ calendarRef.current?.restoreViewportAnchor({
   cancelOnManualScroll: true
 });
 ```
+
+The date-only target preserves horizontal scrolling. Navigation fallback can mount a day that left the rendered
+window while the editor was open. Use `captureViewportAnchor({ dateKey })` to retain the day's current vertical offset
+instead of aligning its header to the top. A new editor should cancel its preceding restore.
 
 Before Cancel, capture the current draft's slot and restore against the original participant's slot after clearing
 the draft. Hover changes only the card's presentation and cannot move a slot target. Keep the original slot anchor

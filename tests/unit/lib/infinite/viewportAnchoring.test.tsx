@@ -32,6 +32,56 @@ function setup() {
 }
 
 describe("viewport anchoring after parent layout updates", () => {
+  it("navigates to an unmounted date without changing the time axis", () => {
+    vi.spyOn(window, "requestAnimationFrame").mockReturnValue(1);
+    const scrollToDate = vi.fn();
+    const scrollToDateTime = vi.fn();
+    const { result, unmount } = renderHook(() =>
+      useViewportAnchoring({
+        containerRef: { current: document.createElement("div") },
+        settings: defaultQunoInfiniteCalendarSettings,
+        orientation: "horizontal",
+        scrollToDate,
+        scrollToDateTime
+      })
+    );
+    act(() =>
+      result.current.restoreViewportAnchor({
+        anchor: { target: { dateKey: "2026-07-06" }, snapshot: { top: 0, left: 0 } },
+        afterRecenter: true,
+        cancelOnManualScroll: true
+      })
+    );
+    expect(scrollToDate).toHaveBeenCalledWith({ date: "2026-07-06" });
+    expect(scrollToDateTime).not.toHaveBeenCalled();
+    unmount();
+  });
+  it.each(["horizontal", "vertical"] as const)("restores a date-only anchor on the date axis: %s", (orientation) => {
+    vi.spyOn(window, "requestAnimationFrame").mockReturnValue(1);
+    const viewport = document.createElement("div");
+    viewport.getBoundingClientRect = () => new DOMRect(0, 100, 800, 600);
+    viewport.scrollTop = 70;
+    viewport.scrollLeft = 120;
+    const day = document.createElement("div");
+    day.getBoundingClientRect = () => new DOMRect(40, 180, 800, 600);
+    const containerRef = { current: viewport };
+    const { result, unmount } = renderHook(() =>
+      useViewportAnchoring({
+        containerRef,
+        settings: defaultQunoInfiniteCalendarSettings,
+        orientation,
+        scrollToDateTime: vi.fn()
+      })
+    );
+    result.current.registration.registerDayElement({ dateKey: "2026-07-06", element: day });
+    const anchor = result.current.captureViewportAnchor({ dateKey: "2026-07-06" });
+    expect(anchor?.snapshot).toEqual({ top: 80, left: 0 });
+    day.getBoundingClientRect = () => new DOMRect(240, 380, 800, 600);
+    act(() => result.current.restoreViewportAnchor({ anchor, allowNavigationFallback: false }));
+    expect(viewport.scrollTop).toBe(270);
+    expect(viewport.scrollLeft).toBe(120);
+    unmount();
+  });
   it("restores against geometry committed with the parent update", () => {
     const frame = vi.spyOn(window, "requestAnimationFrame").mockReturnValue(1);
     const { result, rerender, viewport, anchor, unmount } = setup();

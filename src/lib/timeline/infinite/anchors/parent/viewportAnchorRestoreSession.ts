@@ -32,6 +32,7 @@ type RestoreSessionArgs = {
   registry: ViewportGeometryRegistry;
   resolveSnapshot: (target: CalendarViewportAnchorTarget) => CalendarViewportAnchor["snapshot"] | null;
   scrollToDateTime: QunoInfiniteCalendarHandle["scrollToDateTime"];
+  scrollToDate?: QunoInfiniteCalendarHandle["scrollToDate"];
   isCurrent: () => boolean;
   cancel: () => void;
   resolveAnchorSnapshot?: () => CalendarViewportAnchor["snapshot"];
@@ -94,6 +95,14 @@ export class ViewportAnchorRestoreSession {
     window.removeEventListener("keydown", this.handleKey);
   };
 
+  // React commits can move a pinned day before the observer's next frame.
+  // Reapply an existing parent restore before paint, without starting navigation.
+  readonly flush = () => {
+    if (this.frame !== null) window.cancelAnimationFrame(this.frame);
+    this.frame = null;
+    this.apply();
+  };
+
   private readonly schedule = () => {
     if (!this.args.isCurrent() || this.frame !== null) return;
     this.frame = window.requestAnimationFrame(this.apply);
@@ -121,6 +130,19 @@ export class ViewportAnchorRestoreSession {
 
   private useNavigationFallback() {
     const { options, scrollToDateTime, target } = this.args;
+    if (
+      options.allowNavigationFallback !== false &&
+      target.dateKey &&
+      !target.time &&
+      !target.calendarId &&
+      !target.eventId &&
+      this.args.scrollToDate
+    ) {
+      // A missing date must enter the virtual range after draft measurements
+      // commit. Retry on layout notifications; manual intent cancels the session.
+      this.args.scrollToDate({ date: target.dateKey });
+      return;
+    }
     if (this.fallbackUsed || options.allowNavigationFallback === false || !target.dateKey || !target.time) return;
     this.fallbackUsed = true;
     scrollToDateTime({ date: target.dateKey, time: target.time });

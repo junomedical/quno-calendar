@@ -117,9 +117,16 @@ export class EventRangeCoordinator {
   updateLoadDates(dateKeys: Iterable<string>): void {
     this.loadDates = new Set(dateKeys);
     this.cache.touchDates(this.loadDates);
+    // A row contraction can put the previous edge date under sticky chrome.
+    // Let that adjacent in-flight read finish instead of cancelling/restarting
+    // it on every boundary reversal. This does not request any extra dates.
+    const usefulDates = new Set(this.loadDates);
+    for (const dateKey of this.loadDates)
+      for (const amount of [-1, 1])
+        usefulDates.add(toDateKey({ date: addCalendarDays({ date: fromDateKey({ dateKey }), amount }) }));
     for (const request of this.activeRequests.values()) {
       // Window churn should not keep a request alive after none of its keys are useful.
-      if (![...request.dateKeys].some((dateKey) => this.loadDates.has(dateKey))) {
+      if (![...request.dateKeys].some((dateKey) => usefulDates.has(dateKey))) {
         this.cancel(request);
       }
     }

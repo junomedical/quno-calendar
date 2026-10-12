@@ -28,16 +28,20 @@ export function shouldAdjustForDateItemResize({
 }
 
 export function resolveVisibleDateSnapshot({
+  snapshotBeforeResize,
   scrollTop,
   getItemForOffset,
   virtualItems,
   dateKeyForIndex
 }: {
+  snapshotBeforeResize?: VisibleDateSnapshot;
   scrollTop: number;
   getItemForOffset: (args: { offset: number }) => VirtualItemPosition | undefined;
   virtualItems: VirtualItemPosition[];
   dateKeyForIndex: (args: { index: number }) => string;
 }): VisibleDateSnapshot | null {
+  // Changed estimates may already describe the next layout at the old scrollTop.
+  if (snapshotBeforeResize) return snapshotBeforeResize;
   const probeOffset = scrollTop + 1;
   const topItem =
     getItemForOffset({ offset: probeOffset }) ?? virtualItems.find((item) => item.start + item.size > probeOffset);

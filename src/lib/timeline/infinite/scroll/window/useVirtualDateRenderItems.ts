@@ -3,8 +3,8 @@ import type { VirtualDateWindow } from "#quno-internal/timeline/date/dateVirtual
 import { buildVirtualDateRenderItems, semanticDateKeyForRenderItem, type VirtualDateRenderItem } from "./renderItems";
 
 /**
- * Data flow: virtualizer output -> renderable date items -> loader-visible date keys.
- * Invariant: pinned and fallback items participate in loading exactly like measured items.
+ * Data flow: virtualizer output -> renderable date items -> projection date keys.
+ * Pinned and fallback items render/project normally; read coverage uses settled viewport geometry.
  */
 type UseVirtualDateRenderItemsArgs = {
   virtualItems: VirtualDateRenderItem[];

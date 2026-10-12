@@ -15,7 +15,9 @@ type AnchoringArgs = {
   containerRef: RefObject<HTMLElement | null>;
   settings: QunoInfiniteCalendarSettings;
   orientation: "horizontal" | "vertical";
+  flushBeforePaint?: boolean;
   scrollToDateTime: QunoInfiniteCalendarHandle["scrollToDateTime"];
+  scrollToDate?: QunoInfiniteCalendarHandle["scrollToDate"];
   verticalTimelineGutterPx?: number;
   visibilityInsets?: { left?: number; top?: number };
 };
@@ -77,6 +79,15 @@ export function useViewportAnchoring(args: AnchoringArgs) {
       const event = registry.event({ target, viewportBox });
       if (event) return relativeSnapshot({ element: event, viewportBox });
       if (target.eventId && target.requireVisible) return null;
+      if (target.dateKey && !target.calendarId && !target.eventId && !target.time) {
+        const day = registry.day({ dateKey: target.dateKey });
+        if (!day) {
+          return null;
+        }
+        const snapshot = relativeSnapshot({ element: day, viewportBox });
+        // A date anchor owns only the date axis; preserve time/resource scrolling.
+        return { top: snapshot.top, left: 0 };
+      }
       if (!target.dateKey || !target.calendarId) return null;
       const resource = registry.resource({ dateKey: target.dateKey, calendarId: target.calendarId });
       if (!resource) return null;
@@ -138,7 +149,9 @@ export function useViewportAnchoring(args: AnchoringArgs) {
     containerRef: args.containerRef,
     registry,
     resolveSnapshot,
-    scrollToDateTime: args.scrollToDateTime
+    flushBeforePaint: args.flushBeforePaint,
+    scrollToDateTime: args.scrollToDateTime,
+    scrollToDate: args.scrollToDate
   });
 
   const registration: ViewportGeometryRegistration = useMemo(

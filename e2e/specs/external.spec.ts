@@ -49,6 +49,8 @@ test("keeps popup cancellation and scroll reset visible in the activity pane", a
 test("supports drawing a new event area", async ({ page }) => {
   await page.goto("/demo/infinite-calendar");
   await goToWorkday(page);
+  // Date navigation is immediate; viewport reads deliberately settle first.
+  await expect(page.locator('[data-date="2026-07-06"]').getByTestId("calendar-event").first()).toBeVisible();
   const initialEventCount = await page.getByTestId("calendar-event").count();
   const viewport = page.locator(".quno-calendar-viewport");
   const box = await viewport.boundingBox();
@@ -559,7 +561,14 @@ test("keeps expanded calendar rows populated immediately after create cancel", a
     )
     .toEqual(["dr-kirillov"]);
 
+  // Navigation updates before the settled viewport loader issues its read.
+  const navigatedDateRead = page.waitForResponse((response) => {
+    if (!response.url().includes("/api/demo-events") || response.status() !== 200) return false;
+    const events = response.request().postDataJSON() as Array<{ start: string }>;
+    return events.some((event) => event.start.startsWith("2026-04-27"));
+  });
   await goToWorkday(page, "2026-04-27");
+  await navigatedDateRead;
   await expect.poll(async () => topVisibleDayDate(page)).toBe("2026-04-27");
   await waitForDemoEvents(page);
 
@@ -611,7 +620,7 @@ test("keeps expanded calendar rows populated immediately after create cancel", a
         samples.push({
           visibleCalendarIds,
           nonDraftVisibleEventCount,
-          topDate: topDay?.querySelector(".quno-calendar-day-label")?.textContent?.trim() ?? null
+          topDate: topDay?.dataset.date ?? null
         });
       }
       if (remainingFrames > 0) {
@@ -739,10 +748,13 @@ test("supports external event editing popup without blocking calendar scroll", a
 
   const viewport = page.locator(".quno-calendar-viewport");
   const scrollTopBefore = await viewport.evaluate((element) => element.scrollTop);
-  await viewport.evaluate((element) => {
-    const maxScrollTop = element.scrollHeight - element.clientHeight;
-    element.scrollTop += element.scrollTop > maxScrollTop - 480 ? -420 : 420;
-  });
+  const wheelDelta = await viewport.evaluate((element) =>
+    element.scrollTop > element.scrollHeight - element.clientHeight - 480 ? -420 : 420
+  );
+  const viewportBox = (await viewport.boundingBox())!;
+  // Wheel intent cancels restoration; assigning scrollTop is a programmatic layout change.
+  await page.mouse.move(viewportBox.x + 15, viewportBox.y + viewportBox.height / 2);
+  await page.mouse.wheel(0, wheelDelta);
   await expect.poll(async () => viewport.evaluate((element) => element.scrollTop)).not.toBe(scrollTopBefore);
   await expect(page.getByTestId("external-event-popup")).toBeVisible();
 
