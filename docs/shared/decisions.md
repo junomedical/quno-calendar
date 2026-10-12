@@ -311,3 +311,10 @@ New decisions continue after QUNO-021. The legacy TypeScript mapping also covers
 [QDPR-007](../date-parser/decisions.md#qdpr-007---return-paired-date-and-clock-endpoints) owns the parser-only public
 result change to paired `{ date, time }` endpoints. Date Input and public demo compositions project endpoint dates
 into the existing shared `DateRange`; the independent UI value/callback shapes under QUNO-015 remain unchanged.
+
+## Infinite Calendar navigation follow-up — 2026-10-12
+
+[Decision 108](../infinite-calendar/decisions.md#108---let-new-vertical-navigation-supersede-restoration) and
+[Decision 109](../infinite-calendar/decisions.md#109---retain-pending-reads-across-excluded-date-gaps) own the
+calendar-only navigation precedence and included-date request retention changes. Shared date contracts,
+public entry points, and the other products retain their existing behavior.

@@ -254,7 +254,9 @@ The loader retries after 250 ms and 1 second. The last accepted snapshot stays v
 
 ### Never-resolving loader
 
-The calendar surface stays interactive. If the request leaves the active warm window and its adjacent boundary dates, the coordinator aborts it and releases its loading keys. A loader that ignores abort may eventually resolve, but its request is no longer current and cannot commit.
+The calendar surface stays interactive. Adjacent boundary dates include the previous and next included dates under `excludedWeekdays`, as well as immediate
+calendar-day neighbors. Their retention keeps pending requests alive without fetching extra dates or changing prefetch
+units. If the request leaves the active warm window and these adjacent boundary dates, the coordinator aborts it and releases its loading keys. A loader that ignores abort may eventually resolve, but its request is no longer current and cannot commit.
 
 ### Out-of-order responses
 

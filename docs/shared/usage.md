@@ -343,6 +343,10 @@ demo endpoint from `api/demo-events.ts`. No Vercel environment variables are req
 
 ### Read coverage while hiding calendar rows
 
+Pending reads for the previous and next included dates remain useful when the viewport reverses across excluded
+weekdays. With weekends excluded, a pending Friday read survives a move to Monday and back. Retention starts no extra
+reads; prefetch still uses calendar-day units, and distant or obsolete reads still abort.
+
 When the endpoint returns all owners, pass their IDs as `loadCalendarIds` while `selectedCalendarIds` controls displayed rows. Hidden or empty rows then reuse the same read coverage. Omit this prop for loaders scoped to selected calendars. `eventPrefetchPolicy={() => ({ beforeDays: 0, afterDays: 0 })}` limits new reads to settled viewport dates. Render overscan remains available for smooth scrolling and does not expand this request window.
 
 ## Vertical Planner
@@ -905,7 +909,10 @@ const [date, setDate] = useState<DateRange>({
 ```
 
 Date pickers, search results, command palettes, and “Today” controls can call the same handle without knowing the
-calendar’s virtual-window geometry. Use `settings` for density and dimensions, then scope product CSS through
+calendar’s virtual-window geometry. In both orientations, `scrollToDate`, `scrollToDateTime`, and `scrollToToday`
+cancel an older viewport restore before navigating. A newer vertical navigation, explicit restoration, cancellation,
+or unmount also discards queued time corrections. Internal fallback navigation keeps its owning restore alive.
+Use `settings` for density and dimensions, then scope product CSS through
 `className`; changing either preserves the same calendar integration and renderer contract.
 
 For an editor that knows the resource row, supply its id while navigating the horizontal timeline:

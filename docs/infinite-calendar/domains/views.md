@@ -36,6 +36,8 @@ flowchart TD
 | [`useTimelineViewSetup.ts`](../../../src/lib/timeline/infinite/views/shared/useTimelineViewSetup.ts)                           | Normalizes settings, selected calendars, and the initial date anchor.                                    |
 | [`mergeQunoInfiniteCalendarSettings.ts`](../../../src/lib/timeline/infinite/views/shared/mergeQunoInfiniteCalendarSettings.ts) | Merges defaults and clamps caller-supplied timeline settings.                                            |
 
+- [`useVerticalTimeNavigation.ts`](../../../src/lib/timeline/infinite/views/vertical/useVerticalTimeNavigation.ts) owns internal date/time fallback and cancellable post-mount time frames.
+
 ## Verification Map
 
 - Unit: settings setup, route projections, vertical render props, and orientation geometry.

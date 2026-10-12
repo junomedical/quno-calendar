@@ -116,7 +116,8 @@ export function useHorizontalTimelineFoundation({
     eventVersion: props.eventVersion,
     requestedAppearingEventIds: props.appearingEventIds,
     selectedIds: props.loadCalendarIds ?? selectedIds,
-    visibleDateKeys: virtualTimeline.viewportDateKeys
+    visibleDateKeys: virtualTimeline.viewportDateKeys,
+    excludedWeekdays: settings.excludedWeekdays
   });
   const eventsByDate = useEventProjection({
     eventsByDate: eventRange.eventsByDate,

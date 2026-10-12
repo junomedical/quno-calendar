@@ -4,6 +4,20 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+### Navigation and excluded-date retention follow-up - 2026-10-12
+
+- New vertical date, date/time, and Today navigation cancels an older restore. Internal missing-date fallback keeps
+  its session alive; superseded or unmounted vertical time corrections no longer run in later frames.
+- Pending reads survive reversals between neighboring included dates across excluded weekdays without expanding
+  prefetch. Both orientations retain distant cancellation, coverage checks, and stale-generation guards.
+- Added unit regressions for restore priority, frame cancellation, weekday/month/year gaps, and loader propagation,
+  plus Chromium geometry and request/abort assertions through restoration deadlines and late responses.
+- Verification: all 540 unit tests and all 187 Chromium scenarios pass. Formatting, architecture/contracts, types,
+  lint, packed React/modern and legacy TypeScript/ESM/CommonJS/SSR, Preact, React 19, demo build, size reporting,
+  and pack dry-run pass.
+- Infinite Calendar measures 177,307 B raw and 42,298 B gzip (41.31 KiB) on Node 23, with 2,041 B gzip CSS
+  (1.99 KiB), within the unchanged 50 KiB JavaScript and 2 KiB CSS budgets.
+
 ### Viewport request stability - 2026-10-09
 
 - Load settled viewport dates independently of render overscan and offscreen editor pins. Coalesce fast scrolling

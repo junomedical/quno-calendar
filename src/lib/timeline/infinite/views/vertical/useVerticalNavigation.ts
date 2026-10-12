@@ -6,14 +6,10 @@ import { useCallback, useImperativeHandle, type ForwardedRef, type RefObject } f
 import type { QunoInfiniteCalendarHandle, QunoInfiniteCalendarSettings } from "#quno-internal/timeline/core/types";
 import type { CalendarViewHandle } from "#quno-internal/timeline/core/internalTypes";
 import { toDateKey } from "#quno-internal/timeline/date/dateVirtualization";
-import { parseClockToMinutes } from "#quno-internal/timeline/time/time";
-import {
-  verticalMinuteToY,
-  VERTICAL_TIMELINE_GUTTER_PX
-} from "#quno-internal/timeline/infinite/rendering/vertical/VerticalTimelineDay";
+import { VERTICAL_TIMELINE_GUTTER_PX } from "#quno-internal/timeline/infinite/rendering/vertical/VerticalTimelineDay";
 import { buildVerticalViewGeometry } from "#quno-internal/timeline/infinite/rendering/vertical/verticalViewGeometry";
 import { useViewportAnchoring } from "#quno-internal/timeline/infinite/anchors/parent/useViewportAnchoring";
-import type { IsoDate } from "#quno-internal/shared/dateRangeModel";
+import { useVerticalTimeNavigation } from "./useVerticalTimeNavigation";
 
 type VerticalNavigationArgs = {
   forwardedRef: ForwardedRef<CalendarViewHandle>;
@@ -32,51 +28,57 @@ export function useVerticalNavigation({
   containerRef,
   settings,
   now,
-  scrollToDate,
+  scrollToDate: scrollToDateBase,
   rememberVisibleDateOffset,
   commitVisibleEvent,
   removeVisibleEvent,
   releaseActiveDraft
 }: VerticalNavigationArgs) {
-  const scrollToTimeInDate = useCallback(
-    ({ dateKey, time }: { dateKey: IsoDate; time: string }) => {
-      const scrollElement = containerRef.current;
-      if (!scrollElement || !/^\d{2}:\d{2}$/.test(time)) return;
-      const dayElement = scrollElement.querySelector<HTMLElement>(
-        `[data-testid="calendar-day"][data-date="${dateKey}"]`
-      );
-      if (!dayElement) return;
-      const offsetWithinDate = Math.max(
-        0,
-        settings.dayHeaderHeight + verticalMinuteToY({ minute: parseClockToMinutes({ clock: time }), settings }) - 48
-      );
-      rememberVisibleDateOffset({ dateKey, offsetWithinDate });
-      scrollElement.scrollTop = Math.max(0, dayElement.offsetTop + offsetWithinDate);
-    },
-    [containerRef, rememberVisibleDateOffset, settings]
-  );
-  const scrollToDateTime = useCallback(
-    ({ date: dateKey, time }: { date: IsoDate; time: string }) => {
-      scrollToDate({ date: dateKey });
-      window.requestAnimationFrame(() => {
-        scrollToTimeInDate({ dateKey, time });
-        window.requestAnimationFrame(() => scrollToTimeInDate({ dateKey, time }));
-      });
-    },
-    [scrollToDate, scrollToTimeInDate]
-  );
+  const { scrollToDateTime: scrollToDateTimeBase, cancelPendingTime } = useVerticalTimeNavigation({
+    containerRef,
+    settings,
+    scrollToDate: scrollToDateBase,
+    rememberVisibleDateOffset
+  });
   const anchoring = useViewportAnchoring({
     containerRef,
     settings,
     orientation: "vertical",
-    scrollToDateTime,
-    scrollToDate,
+    scrollToDateTime: scrollToDateTimeBase,
+    scrollToDate: scrollToDateBase,
     verticalTimelineGutterPx: VERTICAL_TIMELINE_GUTTER_PX,
     visibilityInsets: {
       left: buildVerticalViewGeometry(settings).labelWidth,
       top: settings.dayHeaderHeight
     }
   });
+
+  const { cancelViewportAnchorRestore, restoreViewportAnchor: restoreAnchorBase } = anchoring;
+  const cancelNavigation = useCallback(() => {
+    cancelPendingTime();
+    cancelViewportAnchorRestore();
+  }, [cancelViewportAnchorRestore, cancelPendingTime]);
+  const scrollToDate = useCallback<QunoInfiniteCalendarHandle["scrollToDate"]>(
+    (request) => {
+      cancelNavigation();
+      scrollToDateBase(request);
+    },
+    [cancelNavigation, scrollToDateBase]
+  );
+  const scrollToDateTime = useCallback<QunoInfiniteCalendarHandle["scrollToDateTime"]>(
+    (request) => {
+      cancelNavigation();
+      scrollToDateTimeBase(request);
+    },
+    [cancelNavigation, scrollToDateTimeBase]
+  );
+  const restoreViewportAnchor = useCallback<QunoInfiniteCalendarHandle["restoreViewportAnchor"]>(
+    (request) => {
+      cancelPendingTime();
+      restoreAnchorBase(request);
+    },
+    [restoreAnchorBase, cancelPendingTime]
+  );
 
   useImperativeHandle(
     forwardedRef,
@@ -91,13 +93,23 @@ export function useVerticalNavigation({
         }),
       captureViewportAnchor: anchoring.captureViewportAnchor,
       isEventFullyVisible: anchoring.isEventFullyVisible,
-      restoreViewportAnchor: anchoring.restoreViewportAnchor,
-      cancelViewportAnchorRestore: anchoring.cancelViewportAnchorRestore,
+      restoreViewportAnchor,
+      cancelViewportAnchorRestore: cancelNavigation,
       commitVisibleEvent,
       removeVisibleEvent,
       releaseActiveDraft
     }),
-    [anchoring, commitVisibleEvent, now, releaseActiveDraft, removeVisibleEvent, scrollToDate, scrollToDateTime]
+    [
+      anchoring,
+      cancelNavigation,
+      commitVisibleEvent,
+      now,
+      releaseActiveDraft,
+      removeVisibleEvent,
+      restoreViewportAnchor,
+      scrollToDate,
+      scrollToDateTime
+    ]
   );
 
   return {

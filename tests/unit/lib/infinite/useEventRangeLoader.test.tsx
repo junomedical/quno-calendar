@@ -38,6 +38,33 @@ afterEach(() => {
 });
 
 describe("useEventRangeLoader", () => {
+  it("passes excluded weekdays to pending-read retention without expanding prefetch", async () => {
+    const response = deferred<CalendarEvent[]>();
+    const loadEvents = vi.fn<LoadEvents>(() => response.promise);
+    const eventPrefetchPolicy = () => ({ beforeDays: 0, afterDays: 0 });
+    const selectedIds = ["doctor"];
+    const excludedWeekdays = [0, 6];
+    const { rerender } = renderHook(
+      ({ visibleDateKeys }) =>
+        useEventRangeLoader({
+          loadEvents,
+          eventPrefetchPolicy,
+          selectedIds,
+          excludedWeekdays,
+          visibleDateKeys
+        }),
+      { initialProps: { visibleDateKeys: ["2026-10-16"] } }
+    );
+    rerender({ visibleDateKeys: ["2026-10-19"] });
+    expect(loadEvents).toHaveBeenCalledTimes(2);
+    expect(loadEvents.mock.calls[0][0].signal?.aborted).toBe(false);
+    rerender({ visibleDateKeys: ["2026-10-16"] });
+    expect(loadEvents).toHaveBeenCalledTimes(2);
+    expect(loadEvents.mock.calls[1][0]).toMatchObject({ startDate: "2026-10-19", endDate: "2026-10-19" });
+    response.resolve([]);
+    await waitFor(() => expect(loadEvents).toHaveBeenCalledTimes(2));
+  });
+
   it("prefetches one week around visible dates and renders without awaiting the API", async () => {
     const response = deferred<CalendarEvent[]>();
     const loadEvents = vi.fn<LoadEvents>(() => response.promise);

@@ -48,6 +48,9 @@ See [Async Loading And Layout](../flows/async-loading-and-layout.md) for request
 | [`useRetainedCalendarRows.ts`](../../../src/lib/timeline/infinite/events/metrics/useRetainedCalendarRows.ts)       | Retains hidden draft resources until their transient instance is released.        |
 | [`useVerticalPreparedColumns.ts`](../../../src/lib/timeline/infinite/events/metrics/useVerticalPreparedColumns.ts) | Builds vertical prepared cells, column widths, and lookup functions.              |
 
+- [`retainedLoadDates.ts`](../../../src/lib/timeline/infinite/events/loading/retainedLoadDates.ts) derives calendar-day and included-date neighbors for pending-request retention.
+- [`useEventLoadDates.ts`](../../../src/lib/timeline/infinite/events/loading/useEventLoadDates.ts) applies prefetch policy and retains pre-draft read coverage.
+
 ## Verification Map
 
 - Unit: cache, request loader, membership, prepared layout, scaling, active draft, and zoom-preparation stability tests.

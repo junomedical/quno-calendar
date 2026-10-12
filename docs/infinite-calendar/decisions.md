@@ -1059,3 +1059,31 @@ filters. Retain adjacent pending boundary reads without fetching extra dates; ab
 reads and keep the existing stale-response guards. Keep the last load window during drafts and their closing transition.
 Reapply an existing parent restore before paint after the draft closes. Opening draft participant layout keeps its
 existing restore sequence. A row-count resize uses the semantic date saved before its estimates change.
+
+## 108 - Let New Vertical Navigation Supersede Restoration
+
+Date: 2026-10-12
+Status: Accepted; refines Decisions 097, 101 and 106
+
+Expose vertical `scrollToDate`, `scrollToDateTime`, and `scrollToToday` through canceling public wrappers, matching
+horizontal navigation. A new imperative request clears pending or active parent restoration before navigating.
+Keep raw internal callbacks for restore fallback so mounting a missing target does not cancel its own session.
+
+Track vertical time-position animation frames separately. A newer navigation, explicit restoration, cancellation,
+or unmount clears queued corrections, including the second frame after the first correction ran. Save/Cancel policy,
+manual-intent cancellation, bounded restoration deadlines, and public signatures remain unchanged.
+
+## 109 - Retain Pending Reads Across Excluded-Date Gaps
+
+Date: 2026-10-12
+Status: Accepted; refines Decision 107
+
+Derive pending-request retention from the requested dates plus their immediate calendar-day and included-date
+neighbors. Both view loaders pass excluded weekdays privately to the coordinator. Friday and Monday are neighbors
+when weekends are excluded. Search at most seven days in each direction, retaining no additional included neighbor
+when every weekday is excluded.
+
+Retention only keeps useful in-flight requests registered. It does not expand missing-date requests, prefetch policy
+units, or cache protection. Preserve distant-request cancellation, read-coverage compatibility, generation guards,
+and rejection of stale responses. Browser coverage verifies zero-prefetch reversals in both orientations without
+additional reads, followed by distant cancellation.
