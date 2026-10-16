@@ -1059,3 +1059,64 @@ filters. Retain adjacent pending boundary reads without fetching extra dates; ab
 reads and keep the existing stale-response guards. Keep the last load window during drafts and their closing transition.
 Reapply an existing parent restore before paint after the draft closes. Opening draft participant layout keeps its
 existing restore sequence. A row-count resize uses the semantic date saved before its estimates change.
+
+## 108 - Load The Full Settled Viewport During Drafts
+
+Date: 2026-10-16
+Status: Accepted; supersedes Decision 107's draft-window retention while an editor remains open
+
+Participant contraction and scrolling with an open editor must load every visible date. Union the settled viewport
+with the retained pre-draft window and policy windows around the draft and anchor. Preserve the 100 ms settling delay,
+cache coverage, stale-response guards, positioning and brief creation closing-transition retention. Unit and Chromium
+regressions cover compact creation layouts and continued scrolling. No public contract changes.
+
+## 109 - Prioritize visible coverage before adjacent prefetch
+
+- Date: 2026-10-16
+- Status: Accepted
+- Decision: Keep visible-first scheduling in the existing event range coordinator. Reuse its selected-calendar
+  coverage, pending reads, invalidation and eviction. A successful empty response completes coverage. After each
+  acceptance, schedule missing ranges for the current viewport, then its policy-selected buffer. Consumers configure
+  buffer sizes without maintaining their own loaded-date set. This refines the existing prefetch decision.
+
+Excluded-weekday changes reset cached prefix geometry before dense-day sizes are reapplied. Excluded date metrics
+must not resize the visible date to which their normalized index points. Read completion order must not change hit-testing.
+
+## 110 - Demonstrate concurrent prefetch through the shared API loader
+
+- Date: 2026-10-16
+- Status: Accepted
+- Decision: The guide prefetch example reuses `useSimulatedApiLoader` for latency and pending-request tracking.
+  Its status becomes ready when all parallel reads finish. Tests verify visible-first acquisition and cached navigation.
+  Dense edit stability is measured through visible date and surviving draft positions, with no late DOM mutations.
+  Internal `scrollTop` translation during a compensated bounded-window recenter is not a visible positioning failure.
+
+## 111 - Gate response-driven reads on committed viewport settling
+
+- Date: 2026-10-16
+- Status: Accepted
+- Decision: Extend the existing viewport settling hook to gate foreground and adjacent reads. Invalidate readiness
+  synchronously on scrolling, resizing or layout changes. Publish readiness after the matching date snapshot commits.
+  A successful visible response resets settling before prefetch. Keep the prior cache and date array identities while
+  paused. This refines Decisions 107–109 without a consumer-owned debounce or loaded-date cache.
+
+## 112 - Expand the settled request instead of splitting visible and adjacent reads
+
+- Date: 2026-10-16
+- Status: Accepted; supersedes Decision 109's separate visible-first request phase and Decision 111's response-triggered settling
+- Decision: Apply `eventPrefetchPolicy` to the settled viewport before deriving missing ranges. A cold contiguous
+  window loads visible dates and both adjacent buffers together. Reuse the coordinator's selected-calendar coverage
+  and pending requests to fetch only missing gaps. A response never starts extra adjacent calls. Preserve the existing
+  100 ms settling gate for navigation, scrolling and layout changes. Cached data remains visible throughout.
+
+## 113 - Follow scroll completion and committed geometry for missing-date reads
+
+- Date: 2026-10-16
+- Status: Accepted; supersedes the general 100 ms settling interval in Decisions 107, 108, 111 and 112
+- Decision: Enable the existing virtualizer's native `scrollend` support and consume its `isScrolling` state.
+  Keep its fallback for browsers without that event. Publish viewport readiness after navigation/restoration frames
+  commit and structural geometry ownership releases. Invalidate readiness immediately on movement or resize.
+  Retain a 100 ms wheel-only idle guard: Chromium can emit `scrollend` between wheel steps in one rapid burst.
+  This guard runs alongside scroll tracking rather than adding a wait after it. Initial layout and date navigation
+  have no fixed delay. Only missing-date requests wait; cached events and completed responses render immediately.
+  Reuse the current coordinator's buffered window, coverage, pending reads and stale-response protections.

@@ -364,17 +364,45 @@ test("keeps the same calendar row anchored when drawing again after cancelling e
   }
 });
 
-test("restores participant-filtered calendars without a delayed redraw or event refetch", async ({ page }) => {
+test("restores participant-filtered calendars without a delayed redraw or refetching cached dates", async ({
+  page
+}) => {
   // This scenario needs working-hour events, independently of the machine clock.
   await page.clock.setFixedTime(new Date("2026-07-06T09:00:00+02:00"));
+  const coveredDates = new Set<string>();
+  const responseReads: Promise<void>[] = [];
+  page.on("response", (response) => {
+    if (response.url().includes("/api/demo-events") && response.ok()) {
+      responseReads.push(
+        response
+          .json()
+          .then((payload: { events: Array<{ start: string }> }) => {
+            for (const event of payload.events) {
+              coveredDates.add(event.start.slice(0, 10));
+            }
+          })
+          .catch(() => {})
+      );
+    }
+  });
   await page.goto("/demo/infinite-calendar");
   await waitForDemoEvents(page);
   await page.getByTestId("api-latency-select").selectOption("1000");
   await expect(page.getByTestId("api-loading-status")).toContainText("Loading events");
   await expect(page.getByTestId("api-loading-status")).toHaveText("API idle", { timeout: 5_000 });
-  let eventApiRequests = 0;
+  await Promise.all(responseReads);
+  const requestedCachedDates: string[] = [];
   page.on("request", (request) => {
-    if (request.url().includes("/api/demo-events")) eventApiRequests += 1;
+    if (request.url().includes("/api/demo-events")) {
+      const events = request.postDataJSON() as Array<{ start: string }>;
+      const dates = new Set(events.map((event) => event.start.slice(0, 10)));
+      for (const date of dates) {
+        if (coveredDates.has(date)) {
+          requestedCachedDates.push(date);
+        }
+        coveredDates.add(date);
+      }
+    }
   });
   const drawTarget = await horizontalDrawTarget(page, { distance: 240 });
   await page.mouse.move(drawTarget.startX, drawTarget.y);
@@ -534,5 +562,6 @@ test("restores participant-filtered calendars without a delayed redraw or event 
   expect(stability.maxGeometryDelta).toBe(0);
   expect(stability.removedSemanticNodes).toBe(0);
   expect(stability.unexpectedMutations, stability.mutationDetails.join("\n")).toBe(0);
-  expect(eventApiRequests).toBe(0);
+  // Compact creation can expose new dates; it must never refetch accepted or pending dates.
+  expect(requestedCachedDates).toEqual([]);
 });

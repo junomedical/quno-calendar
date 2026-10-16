@@ -57,3 +57,7 @@ transition.
 
 The payload chapter reports the 0.6.3 Infinite Calendar artifacts: 40.28 KiB gzip JavaScript with a 50 KiB ceiling,
 and 1.99 KiB gzip optional CSS with a 2 KiB ceiling. The shared production profile supplies the same facts.
+
+The prefetch exhibit uses the package's scroll/layout readiness without a consumer timer or cache. Jump to the warm
+date, then return to the starting date. Cached cards appear immediately; only missing dates use the delayed API.
+The request counter and loaded-event strip remain visible while those reads are pending.

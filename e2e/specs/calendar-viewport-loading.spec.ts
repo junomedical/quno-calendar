@@ -95,3 +95,59 @@ test("the consumer demo retains its date when calendar-count filtering changes",
     expect(await firstVisibleDate(), key).toBe(date);
   }
 });
+
+test("creation loads every visible day after contraction and scrolling", async ({ page }) => {
+  await page.goto("/e2e/fixtures/calendar-viewport-loading.html");
+  await expect(page.getByTestId("request-count")).toHaveText("1");
+  await page.getByRole("button", { name: "Create", exact: true }).click();
+  const expectVisibleCoverage = async () => {
+    await expect
+      .poll(async () =>
+        page.locator(".quno-calendar-viewport").evaluate((viewport) => {
+          const top = viewport.getBoundingClientRect().top + 42;
+          const bottom = viewport.getBoundingClientRect().bottom;
+          const visible = [...viewport.querySelectorAll<HTMLElement>(".quno-calendar-day")]
+            .filter((day) => day.getBoundingClientRect().bottom > top && day.getBoundingClientRect().top < bottom)
+            .map((day) => day.dataset.date!);
+          const requests: Array<{ startDate: string; endDate: string }> = JSON.parse(
+            document.querySelector('[data-testid="requests"]')!.textContent!
+          );
+          return (
+            visible.length > 2 &&
+            visible.every((date) => requests.some(({ startDate, endDate }) => startDate <= date && endDate >= date))
+          );
+        })
+      )
+      .toBe(true);
+  };
+  await expectVisibleCoverage();
+  await page.locator(".quno-calendar-viewport").hover();
+  await page.mouse.wheel(0, 1200);
+  await expect.poll(() => topDate(page)).not.toBe("2026-10-15");
+  await expectVisibleCoverage();
+  await page.mouse.wheel(0, -700);
+  await expectVisibleCoverage();
+});
+
+test("one settled request includes adjacent dates and cached navigation reads only the missing edge", async ({
+  page
+}) => {
+  type Request = { startDate: string; endDate: string; visible: string[]; completedAt?: number };
+  const read = async (): Promise<Request[]> => JSON.parse((await page.getByTestId("requests").textContent())!);
+  await page.goto("/e2e/fixtures/calendar-viewport-loading.html?prefetch");
+  await expect(page.getByTestId("request-count")).toHaveText("1");
+  const [first] = await read();
+  expect(first.startDate).toBe("2026-10-14");
+  expect(first.endDate).toBe("2026-10-16");
+  await expect.poll(async () => (await read())[0].completedAt !== undefined).toBe(true);
+  await page.waitForTimeout(250);
+  await expect(page.getByTestId("request-count")).toHaveText("1");
+  await page.getByRole("button", { name: "October 22", exact: true }).click();
+  await expect(page.getByTestId("request-count")).toHaveText("2");
+  const destination = (await read())[1];
+  expect(destination.startDate).toBe("2026-10-21");
+  expect(destination.endDate).toBe("2026-10-23");
+  await expect.poll(async () => (await read())[1].completedAt !== undefined).toBe(true);
+  await page.waitForTimeout(250);
+  await expect(page.getByTestId("request-count")).toHaveText("2");
+});

@@ -55,6 +55,7 @@ function useVerticalEventStore({
     eventVersion: props.eventVersion,
     requestedAppearingEventIds: props.appearingEventIds,
     selectedIds: props.loadCalendarIds ?? selectedIds,
+    viewportLoading: viewport.viewportLoading,
     visibleDateKeys: viewport.viewportDateKeys
   });
   const eventsByDate = useEventProjection({

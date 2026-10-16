@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import {
   QunoInfiniteCalendar,
   type LoadEvents,
+  type ActiveEventDraft,
   type QunoInfiniteCalendarHandle
 } from "@quno/calendar/infinite-calendar";
 import "@quno/calendar/infinite-calendar/styles.css";
@@ -10,22 +11,37 @@ import "@quno/calendar/infinite-calendar/styles.css";
 const calendars = Array.from({ length: 135 }, (_, index) => ({ id: `row-${index}`, name: `Row ${index}` }));
 const allIds = calendars.map(({ id }) => id);
 const viewportOnly = () => ({ beforeDays: 0, afterDays: 0 });
+const adjacent = () => ({ beforeDays: 1, afterDays: 1 });
+const usePrefetch = new URLSearchParams(window.location.search).has("prefetch");
 const dense = new URLSearchParams(window.location.search).has("dense");
 
 function Fixture() {
   const ref = useRef<QunoInfiniteCalendarHandle>(null);
   const [selected, setSelected] = useState(allIds);
+  const [draft, setDraft] = useState<ActiveEventDraft | null>(null);
   const [requests, setRequests] = useState<
-    Array<{ startDate: string; endDate: string; visible: string[]; ids: number }>
+    Array<{
+      startDate: string;
+      endDate: string;
+      visible: string[];
+      ids: number;
+      startedAt: number;
+      completedAt?: number;
+    }>
   >([]);
   const [aborted, setAborted] = useState(0);
   const loadEvents = useRef<LoadEvents>(async ({ startDate, endDate, calendarIds, signal }) => {
+    const startedAt = performance.now();
     setRequests((previous) => [
       ...previous,
-      { startDate, endDate, visible: ref.current?.getVisibleDateKeys() ?? [], ids: calendarIds.length }
+      { startDate, endDate, visible: ref.current?.getVisibleDateKeys() ?? [], ids: calendarIds.length, startedAt }
     ]);
     signal?.addEventListener("abort", () => setAborted((value) => value + 1), { once: true });
     await new Promise((resolve) => window.setTimeout(resolve, 500));
+    const completedAt = performance.now();
+    setRequests((previous) =>
+      previous.map((entry) => (entry.startedAt === startedAt ? { ...entry, completedAt } : entry))
+    );
     if (dense)
       return calendars.flatMap(({ id }, index) =>
         Array.from({ length: (index % 3) + 1 }, (_, lane) => ({
@@ -65,6 +81,23 @@ function Fixture() {
       >
         Compact
       </button>
+      <button
+        onClick={() => {
+          setDraft({
+            mode: "create",
+            event: {
+              id: "draft",
+              calendarId: "row-134",
+              title: "Draft",
+              start: "2026-10-15T09:00:00",
+              end: "2026-10-15T09:30:00"
+            }
+          });
+          setSelected(["row-134"]);
+        }}
+      >
+        Create
+      </button>
       <button onClick={() => setSelected(allIds)}>All rows</button>
       <button onClick={() => setSelected(allIds.slice(0, 115))}>Staff rows</button>
       <button onClick={() => setSelected(allIds.slice(115))}>Room rows</button>
@@ -76,7 +109,8 @@ function Fixture() {
         calendars={calendars}
         selectedCalendarIds={selected}
         loadCalendarIds={allIds}
-        eventPrefetchPolicy={viewportOnly}
+        activeDraft={draft}
+        eventPrefetchPolicy={usePrefetch ? adjacent : viewportOnly}
         loadEvents={loadEvents}
         initialDateKey="2026-10-15"
         settings={{ excludedWeekdays: [], rowHeight: 58, dayHeaderHeight: 42 }}

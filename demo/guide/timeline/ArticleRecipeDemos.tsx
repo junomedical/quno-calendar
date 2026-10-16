@@ -1,3 +1,4 @@
+import { useSimulatedApiLoader } from "#quno-demo/showcase/hooks/useSimulatedApiLoader";
 import {
   QunoInfiniteCalendar,
   applyEventMove,
@@ -15,7 +16,6 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react
 import { flushSync } from "react-dom";
 import { CalendarDemoShell } from "./ArticleDemos";
 import {
-  abortableDelay,
   ArticleEventCard,
   articleCalendars,
   articleDateKey,
@@ -253,6 +253,7 @@ const preloadEvents: CalendarEvent[] = [
   }
 ];
 const articlePrefetchPolicy: EventPrefetchPolicy = () => ({ beforeDays: 3, afterDays: 8 });
+const loadPreloadEvents: LoadEvents = async (request) => filterEvents(preloadEvents, request);
 
 export function PrefetchLoadingDemo() {
   const calendarRef = useRef<QunoInfiniteCalendarHandle>(null);
@@ -272,32 +273,35 @@ export function PrefetchLoadingDemo() {
       });
     }
   }, [initialLoaded]);
-  const latestRequestRef = useRef(0);
   const [requestCount, setRequestCount] = useState(0);
   const [range, setRange] = useState("Waiting for the first range");
-  const [status, setStatus] = useState("Calendar chrome is available before the event API");
   const [loadedEvents, setLoadedEvents] = useState<CalendarEvent[]>([]);
 
-  const loadEvents = useCallback<LoadEvents>(async (request) => {
-    latestRequestRef.current += 1;
-    const requestId = latestRequestRef.current;
-    setRequestCount((current) => current + 1);
-    setRange(`${request.startDate} → ${request.endDate}`);
-    setStatus("Loading a warm window; the existing grid remains interactive");
-    await abortableDelay(700, request.signal);
-    if (request.signal?.aborted) return [];
-    if (requestId === latestRequestRef.current) {
-      setStatus("Warm window accepted and cached");
-    }
-    const events = filterEvents(preloadEvents, request);
-    setInitialLoaded(true);
-    setLoadedEvents((current) => {
-      const eventsById = new Map(current.map((event) => [event.id, event]));
-      events.forEach((event) => eventsById.set(event.id, event));
-      return [...eventsById.values()].sort((left, right) => left.start.localeCompare(right.start));
-    });
-    return events;
-  }, []);
+  const { loadEvents: loadSimulatedEvents, isLoading: isFetching } = useSimulatedApiLoader(loadPreloadEvents, 700);
+  const status = isFetching
+    ? "Loading a warm window; the existing grid remains interactive"
+    : initialLoaded
+      ? "Warm window accepted and cached"
+      : "Calendar chrome is available before the event API";
+
+  const loadEvents = useCallback<LoadEvents>(
+    async (request) => {
+      setRequestCount((current) => current + 1);
+      setRange(`${request.startDate} → ${request.endDate}`);
+      const events = await loadSimulatedEvents(request);
+      if (request.signal?.aborted) {
+        return [];
+      }
+      setInitialLoaded(true);
+      setLoadedEvents((current) => {
+        const eventsById = new Map(current.map((event) => [event.id, event]));
+        events.forEach((event) => eventsById.set(event.id, event));
+        return [...eventsById.values()].sort((left, right) => left.start.localeCompare(right.start));
+      });
+      return events;
+    },
+    [loadSimulatedEvents]
+  );
 
   return (
     <CalendarDemoShell
@@ -311,12 +315,20 @@ export function PrefetchLoadingDemo() {
           <button
             className="article-button article-button--primary"
             onClick={() => {
-              setStatus("Navigating into the already requested warm window");
               calendarRef.current?.scrollToDateTime({ date: prefetchedDate, time: "09:30" });
             }}
             type="button"
           >
             Jump to prefetched date
+          </button>
+          <button
+            className="article-button"
+            onClick={() => {
+              calendarRef.current?.scrollToDateTime({ date: articleDateKey, time: "09:30" });
+            }}
+            type="button"
+          >
+            Back to starting date
           </button>
         </div>
       }

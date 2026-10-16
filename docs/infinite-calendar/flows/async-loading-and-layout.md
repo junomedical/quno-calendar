@@ -49,14 +49,14 @@ sequenceDiagram
   end
 ```
 
-Render overscan and offscreen restore pins do not define the API window. Viewport intersections settle for 100 ms before requesting dates. Apply prefetch only after this separation. Optional `loadCalendarIds` keeps provider read coverage independent of displayed rows; its default remains the selected IDs.
+Render overscan and offscreen restore pins do not define the API window. Viewport intersections publish after scroll and layout completion. Apply prefetch only after this separation. Optional `loadCalendarIds` keeps provider read coverage independent of displayed rows; its default remains the selected IDs.
 
 The response is indexed into the bounded cache before it becomes React state. Prepared-cell layout then reads the committed snapshot; React rendering does not coordinate requests or mutate the cache.
 
 While a controlled draft is active, participant filtering may make horizontal days shorter and expose more virtual
-date nodes. Event loading retains the last non-draft warm window instead of treating that geometry-only expansion as
-new navigation, then unions policy windows around the draft date and the explicit virtual-window anchor. A genuinely moved draft
-or viewport navigation still loads its destination without prefetching a transient extra date at the lower edge.
+date nodes. Event loading unions the settled viewport with the last non-draft warm window and policy windows around the draft
+date and explicit virtual-window anchor. This loads every visible date after participant contraction and while scrolling
+with an open editor. Only the brief creation closing transition and active pointer interactions retain the viewport window.
 
 ## Display Projection
 
@@ -280,3 +280,15 @@ The cache coordinator may already hold the accepted result while React defers th
 
 The complete ownership map is in the [events domain](../domains/events.md) and
 [anchors domain](../domains/anchors.md).
+
+### Settled buffered requests
+
+The coordinator expands each settled viewport through the prefetch policy, then removes loaded and pending coverage.
+A cold contiguous window uses one request for visible dates and both adjacent buffers. A cached middle is preserved;
+only missing contiguous gaps are requested. Responses update the cache without starting a separate prefetch phase.
+
+Missing-date requests follow the virtualizer's scrolling state and committed viewport geometry. Native `scrollend`
+ends scrolling where supported; the virtualizer supplies the fallback elsewhere. Date navigation and layout changes
+wait for their committed frames, without a fixed 100 ms delay. Wheel bursts retain a 100 ms idle guard because browsers
+can emit `scrollend` between wheel steps. Cached events render immediately throughout. Visible dates and adjacent
+buffers share one desired window; responses do not trigger separate prefetch calls.

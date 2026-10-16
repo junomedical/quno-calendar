@@ -15,8 +15,8 @@
  */
 import { startTransition, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { applyEventMove } from "#quno-internal/timeline/data/calendarEvents";
-import { defaultEventPrefetchPolicy } from "#quno-internal/timeline/data/eventPrefetch";
-import { EventRangeCoordinator, eventLoadDateKeys } from "./eventRangeCoordinator";
+import { defaultEventPrefetchPolicy, eventLoadDateKeys } from "#quno-internal/timeline/data/eventPrefetch";
+import { EventRangeCoordinator } from "./eventRangeCoordinator";
 import { loadEventRange } from "./loadEventRange";
 import type {
   CalendarEvent,
@@ -29,7 +29,10 @@ import type {
 } from "#quno-internal/timeline/core/types";
 import { useAppearingEvents } from "./useAppearingEvents";
 
+type ViewportLoading = { canLoad: () => boolean };
+
 type UseEventRangeLoaderArgs = {
+  viewportLoading?: ViewportLoading;
   activeDraftDateKey?: string;
   activeDraftLoadAnchorDateKey?: string;
   loadEvents: LoadEvents;
@@ -42,7 +45,32 @@ type UseEventRangeLoaderArgs = {
 
 const EMPTY_REQUESTED_APPEARING_EVENT_IDS: EventId[] = [];
 
+function loadMissingRanges({
+  coordinator,
+  loadEvents,
+  onAccepted
+}: {
+  coordinator: EventRangeCoordinator;
+  loadEvents: LoadEvents;
+  onAccepted: (args: { events: CalendarEvent[] }) => void;
+}): void {
+  for (const { dateKeys, startDate, endDate } of coordinator.missingLoadRanges()) {
+    const request = coordinator.begin(dateKeys);
+    const args = { startDate, endDate, calendarIds: [...request.calendarIds], signal: request.controller.signal };
+    void loadEventRange({ loadEvents, args, signal: request.controller.signal }).then((events) => {
+      if (!events) {
+        coordinator.reject(request);
+        return;
+      }
+      if (coordinator.accept({ request, events })) {
+        onAccepted({ events });
+      }
+    });
+  }
+}
+
 export function useEventRangeLoader({
+  viewportLoading,
   activeDraftDateKey,
   activeDraftLoadAnchorDateKey,
   loadEvents,
@@ -60,9 +88,13 @@ export function useEventRangeLoader({
     [eventPrefetchPolicy, selectedIds, visibleDateKeys]
   );
   const inactiveLoadDateKeysRef = useRef(visibleLoadDateKeys);
-  if (!activeDraftDateKey) inactiveLoadDateKeysRef.current = visibleLoadDateKeys;
+  if (!activeDraftDateKey) {
+    inactiveLoadDateKeysRef.current = visibleLoadDateKeys;
+  }
   const loadDateKeys = useMemo(() => {
-    if (!activeDraftDateKey) return visibleLoadDateKeys;
+    if (!activeDraftDateKey) {
+      return visibleLoadDateKeys;
+    }
     const activeAnchorDateKeys = [activeDraftLoadAnchorDateKey, activeDraftDateKey].filter(
       (dateKey): dateKey is string => Boolean(dateKey)
     );
@@ -71,7 +103,8 @@ export function useEventRangeLoader({
       selectedCalendarIds: selectedIds,
       policy: eventPrefetchPolicy
     });
-    return [...new Set([...inactiveLoadDateKeysRef.current, ...activeLoadDateKeys])].sort();
+    // Retain old coverage without excluding dates exposed by draft layout or scrolling.
+    return [...new Set([...inactiveLoadDateKeysRef.current, ...visibleLoadDateKeys, ...activeLoadDateKeys])].sort();
   }, [activeDraftDateKey, activeDraftLoadAnchorDateKey, eventPrefetchPolicy, selectedIds, visibleLoadDateKeys]);
   const { appearingEventIds, hasRequestedEventIds, markEventsAppearing, markRequestedEventsAppearing } =
     useAppearingEvents({ requestedEventIds: requestedAppearingEventIds });
@@ -81,39 +114,37 @@ export function useEventRangeLoader({
     coordinator.invalidate();
   }, [coordinator, eventVersion, loadEvents]);
 
-  useEffect(() => {
-    return () => coordinator.dispose();
-  }, [coordinator]);
+  useEffect(() => () => coordinator.dispose(), [coordinator]);
 
   useEffect(() => {
     // The visible and policy-selected prefetch keys protect their accepted buckets from LRU eviction.
     coordinator.updateSelectedCalendarIds(selectedIds);
     coordinator.updateLoadDates(loadDateKeys);
-    const missingRanges = coordinator.missingLoadRanges();
-    if (missingRanges.length === 0 || selectedIds.length === 0) {
+    if (viewportLoading?.canLoad() === false) {
       return;
     }
-
-    for (const { dateKeys, startDate, endDate } of missingRanges) {
-      const request = coordinator.begin(dateKeys);
-      const args = { startDate, endDate, calendarIds: [...request.calendarIds], signal: request.controller.signal };
-      void loadEventRange({ loadEvents, args, signal: request.controller.signal }).then((loadedEvents) => {
-        if (!loadedEvents) {
-          // Abort or exhausted retries make these dates requestable again later.
-          coordinator.reject(request);
-          return;
-        }
-        if (!coordinator.accept({ request, events: loadedEvents })) {
-          return;
-        }
-        // Cache indexing completes before React receives one atomic, deferrable snapshot.
+    // The buffer is part of the requested window. Existing coverage splits
+    // only missing gaps; responses do not initiate separate prefetch phases.
+    loadMissingRanges({
+      coordinator,
+      loadEvents,
+      onAccepted: ({ events }) =>
         startTransition(() => {
           setEventsByDate(() => coordinator.toRecord());
-          markRequestedEventsAppearing(loadedEvents.map((event) => event.id));
-        });
-      });
-    }
-  }, [coordinator, eventVersion, loadDateKeys, loadEvents, markRequestedEventsAppearing, selectedIds, selectedIdsKey]);
+          markRequestedEventsAppearing(events.map((event) => event.id));
+        })
+    });
+  }, [
+    viewportLoading,
+    coordinator,
+    eventVersion,
+    loadDateKeys,
+    loadEvents,
+    markRequestedEventsAppearing,
+    selectedIds,
+    selectedIdsKey,
+    visibleDateKeys
+  ]);
 
   useEffect(() => {
     if (!hasRequestedEventIds) {
