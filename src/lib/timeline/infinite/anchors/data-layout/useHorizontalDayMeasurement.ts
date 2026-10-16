@@ -98,8 +98,6 @@ export function useHorizontalDayMeasurement({
             dateKeyForIndex
           })
         : null;
-    const previousGeometry = { calendarIds: previousCalendarIdsRef.current, dayHeaderHeight, baseRowHeight };
-    const nextGeometry = { calendarIds, dayHeaderHeight, baseRowHeight };
     const restoringCommittedAnchor = pendingAnchorRef.current !== null;
     const anchor =
       preserveVisibleResource && !structuralLayoutChanged
@@ -109,7 +107,7 @@ export function useHorizontalDayMeasurement({
                 dateKey: snapshot.dateKey,
                 offsetWithinDate: snapshot.offsetWithinDate,
                 metric: previousMetrics.get(snapshot.dateKey),
-                geometry: previousGeometry
+                geometry: { calendarIds: previousCalendarIdsRef.current, dayHeaderHeight, baseRowHeight }
               })
             : null))
         : null;
@@ -121,10 +119,11 @@ export function useHorizontalDayMeasurement({
     // A draft can return to its original row count with compact prefix sizes
     // still cached. Refresh once after the draft releases for a date restore.
     const baseHeightChanged =
-      (previousBaseHeightRef.current !== baseDayHeight ||
+      structuralLayoutChanged ||
+      ((previousBaseHeightRef.current !== baseDayHeight ||
         (measureBaseDuringDateRestore && !dateRestoreMeasuredRef.current)) &&
-      (preserveVisibleResource || measureBaseDuringDateRestore) &&
-      !deferBaseMeasurement;
+        (preserveVisibleResource || measureBaseDuringDateRestore) &&
+        !deferBaseMeasurement);
     if (baseHeightChanged) {
       virtualizer.measure();
       previousBaseHeightRef.current = baseDayHeight;
@@ -134,6 +133,7 @@ export function useHorizontalDayMeasurement({
       previousMetrics,
       nextMetrics: dayMetricsByDate,
       baseDayHeight,
+      dateKeyForIndex,
       dateKeyToIndex,
       virtualItemCount,
       virtualizer
@@ -141,7 +141,7 @@ export function useHorizontalDayMeasurement({
     previousMetricsRef.current = dayMetricsByDate;
     previousLayoutSignatureRef.current = layoutSignature;
     previousCalendarIdsRef.current = calendarIds;
-    if ((baseHeightChanged || metricHeightsChanged) && anchor) {
+    if ((baseHeightChanged || metricHeightsChanged) && (anchor || structuralLayoutChanged)) {
       // Late overlap growth can exceed the old spacer just like a row-count
       // expansion. Keep the original focus through the spacer commit; never
       // infer a new focus from its temporarily clamped absolute scroll offset.
@@ -160,7 +160,7 @@ export function useHorizontalDayMeasurement({
     const nextOffset = resolveHorizontalDataLayoutOffset({
       anchor,
       metric: dayMetricsByDate.get(anchor.dateKey),
-      geometry: nextGeometry
+      geometry: { calendarIds, dayHeaderHeight, baseRowHeight }
     });
     const nextScrollTop = dateStart + nextOffset;
     if (Math.abs(viewport.scrollTop - nextScrollTop) > 0.5) {
@@ -199,6 +199,7 @@ function resizeAffectedDays({
   previousMetrics,
   nextMetrics,
   baseDayHeight,
+  dateKeyForIndex,
   dateKeyToIndex,
   virtualItemCount,
   virtualizer
@@ -206,6 +207,7 @@ function resizeAffectedDays({
   previousMetrics: DayMetrics;
   nextMetrics: DayMetrics;
   baseDayHeight: number;
+  dateKeyForIndex: (args: { index: number }) => string;
   dateKeyToIndex: (args: { dateKey: string }) => number;
   virtualItemCount: number;
   virtualizer: DayVirtualizer;
@@ -214,7 +216,9 @@ function resizeAffectedDays({
   let heightsChanged = false;
   for (const dateKey of affectedDateKeys) {
     const index = dateKeyToIndex({ dateKey });
-    if (index >= 0 && index < virtualItemCount) {
+    // An excluded date can map onto the next visible date's index. Never let
+    // its cached metric overwrite that visible date's size based on read order.
+    if (index >= 0 && index < virtualItemCount && dateKeyForIndex({ index }) === dateKey) {
       const height = nextMetrics.get(dateKey)?.height ?? baseDayHeight;
       heightsChanged ||= height !== (previousMetrics.get(dateKey)?.height ?? baseDayHeight);
       virtualizer.resizeItem(index, height);

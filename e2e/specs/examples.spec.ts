@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page, type Locator } from "@playwright/test";
 
 async function revealLazyArticleDemo(page: Page, label: string, testId: string) {
   const lazyRoot = page.locator(`.article-lazy-demo[data-demo-label="${label}"]`);
@@ -1271,11 +1271,37 @@ test("consumer loading fallback covers startup and reveals the initial date cent
 });
 
 test("editorial prefetch exhibit reveals a warm event before the next delayed range settles", async ({ page }) => {
+  const requests: Array<{ request: object; startedAt: number; respondedAt?: number }> = [];
+  let releaseNeighbor!: () => void;
+  const neighborGate = new Promise<void>((resolve) => {
+    releaseNeighbor = resolve;
+  });
+  let holdNextRequest = false;
+  let neighborHeld = false;
+  await page.route("**/api/demo-events?delay=700", async (route) => {
+    if (holdNextRequest && !neighborHeld) {
+      neighborHeld = true;
+      await neighborGate;
+    }
+    await route.continue();
+  });
+  page.on("request", (request) => {
+    if (new URL(request.url()).pathname === "/api/demo-events") {
+      requests.push({ request, startedAt: Date.now() });
+    }
+  });
+  page.on("response", (response) => {
+    const recorded = requests.find(({ request }) => request === response.request());
+    if (recorded) {
+      recorded.respondedAt = Date.now();
+    }
+  });
   await page.goto("/guide");
   const demo = await revealLazyArticleDemo(page, "event preloading example", "article-prefetch-demo");
-  await expect(demo.getByText("Warm window accepted and cached")).toBeVisible({
-    timeout: 10_000
-  });
+  await expect(demo.getByText("Warm window accepted and cached")).toBeVisible({ timeout: 10000 });
+  const initialRequestCount = requests.length;
+  expect(initialRequestCount).toBeGreaterThanOrEqual(1);
+  expect(requests[0].respondedAt).toBeDefined();
   const initialRange = await page.getByTestId("article-prefetch-range").textContent();
   expect(initialRange).toMatch(/2026-\d{2}-\d{2} → 2026-\d{2}-\d{2}/);
   const loadedEvents = demo.getByTestId("article-prefetch-loaded-events");
@@ -1296,11 +1322,26 @@ test("editorial prefetch exhibit reveals a warm event before the next delayed ra
     )
   ).toBe(true);
   await expect(demo.locator('[data-testid="calendar-event"][data-event-id="article-prefetched-event"]')).toHaveCount(0);
-  await demo.getByRole("button", { name: "Jump to prefetched date" }).click();
-  await expect(demo.locator('[data-testid="calendar-event"][data-event-id="article-prefetched-event"]')).toBeVisible({
+  holdNextRequest = true;
+  try {
+    await demo.getByRole("button", { name: "Jump to prefetched date" }).click();
+    await expect(demo.locator('[data-testid="calendar-event"][data-event-id="article-prefetched-event"]')).toBeVisible({
+      timeout: 500
+    });
+    await expect.poll(() => requests.length).toBe(initialRequestCount + 1);
+    expect(requests[initialRequestCount].respondedAt).toBeUndefined();
+    await expect(demo.getByText("Loading a warm window; the existing grid remains interactive")).toBeVisible();
+  } finally {
+    releaseNeighbor();
+  }
+  await expect(demo.getByText("Warm window accepted and cached")).toBeVisible({ timeout: 10000 });
+  expect(requests).toHaveLength(initialRequestCount + 1);
+  await demo.getByRole("button", { name: "Back to starting date" }).click();
+  await expect(demo.locator('[data-testid="calendar-event"][data-event-id="consultation-a"]')).toBeVisible({
     timeout: 500
   });
-  await expect(page.getByTestId("article-prefetch-count")).toContainText("request");
+  await page.waitForTimeout(250);
+  expect(requests).toHaveLength(initialRequestCount + 1);
 });
 
 test("editorial stability lab retains stale events and row focus during delayed dense loading", async ({ page }) => {
@@ -1528,41 +1569,30 @@ test("editorial event focus preserves a visible card through save and lane chang
   const demo = await revealLazyArticleDemo(page, "visual focus lane-change example", "article-event-focus-demo");
   await expect(demo.getByTestId("draft-event")).toBeVisible();
   const viewport = demo.locator(".quno-calendar-viewport");
-  const beforeSaveScroll = await viewport.evaluate((element) => ({
-    left: element.scrollLeft,
-    top: element.scrollTop
-  }));
+  const visibleTop = (card: Locator) =>
+    card.evaluate(
+      (element) =>
+        element.getBoundingClientRect().top - element.closest(".quno-calendar-viewport")!.getBoundingClientRect().top
+    );
+  const beforeSaveTop = await visibleTop(demo.getByTestId("draft-event"));
+  const beforeSaveLeft = await viewport.evaluate((element) => element.scrollLeft);
   await demo.getByRole("button", { name: "Save draft" }).click();
 
   const saved = demo.locator('[data-event-id="article-focus-event"]');
   await expect(saved).toBeVisible();
   await expect(saved).toHaveAttribute("data-status", "focused");
-  await expect
-    .poll(() =>
-      viewport.evaluate((element) => ({
-        left: element.scrollLeft,
-        top: element.scrollTop
-      }))
-    )
-    .toEqual(beforeSaveScroll);
-
-  const beforeCollisionsScroll = await viewport.evaluate((element) => ({
-    left: element.scrollLeft,
-    top: element.scrollTop
-  }));
+  // Bounded-window compensation can translate scrollTop without moving the card.
+  await expect.poll(async () => Math.abs((await visibleTop(saved)) - beforeSaveTop)).toBeLessThanOrEqual(2);
+  expect(await viewport.evaluate((element) => element.scrollLeft)).toBe(beforeSaveLeft);
+  const beforeCollisions = await viewport.evaluate((element) => ({ left: element.scrollLeft, top: element.scrollTop }));
   await demo.getByRole("button", { name: "Add collisions" }).click();
   await expect(saved).toHaveAttribute("data-lane-count", "5");
   await expect(saved).toHaveAttribute("data-status", "focused");
   await expect(page.getByTestId("article-focus-state")).toHaveText("5 overlap lanes");
   await expect(saved).toBeVisible();
-  await expect
-    .poll(() =>
-      viewport.evaluate((element) => ({
-        left: element.scrollLeft,
-        top: element.scrollTop
-      }))
-    )
-    .toEqual(beforeCollisionsScroll);
+  expect(await viewport.evaluate((element) => ({ left: element.scrollLeft, top: element.scrollTop }))).toEqual(
+    beforeCollisions
+  );
 });
 
 test("editorial motion demo animates both add and cancel outcomes", async ({ page }) => {

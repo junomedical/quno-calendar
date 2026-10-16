@@ -71,3 +71,20 @@ The package manifest provides both modern `exports` types and legacy Node-style 
 Each product owns its own `decisions.md`. Historical identifiers remain stable even when an older decision predates
 the four-product documentation structure. `CHANGELOG.md` remains at the repository root because releases apply to the
 combined package.
+
+Infinite Calendar [Decision 108](./infinite-calendar/decisions.md#108---load-the-full-settled-viewport-during-drafts)
+keeps all settled viewport dates loaded while creation or editing is open.
+
+Infinite Calendar expands each settled visible range by its policy-selected adjacent buffer and requests only missing
+coverage. It does not start separate adjacent fetches after each response. `eventPrefetchPolicy` configures the buffer only; the existing
+coordinator owns coverage and pending requests. Empty successful responses count as loaded; failed reads do not.
+
+The prefetch guide uses the shared simulated HTTP API loader and reports ready only when all parallel reads finish.
+Its regression checks one buffered cold request and immediate navigation into cached dates. Dense participant checks
+assert stable visible date/resource geometry while allowing the bounded virtual window to translate internal offsets.
+
+Missing-date requests follow the virtualizer's scrolling state and committed viewport geometry. Native `scrollend`
+ends scrolling where supported; the virtualizer supplies the fallback elsewhere. Date navigation and layout changes
+wait for their committed frames, without a fixed 100 ms delay. Wheel bursts retain a 100 ms idle guard because browsers
+can emit `scrollend` between wheel steps. Cached events render immediately throughout. Visible dates and adjacent
+buffers share one desired window; responses do not trigger separate prefetch calls.

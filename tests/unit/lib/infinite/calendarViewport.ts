@@ -5,6 +5,8 @@ import { vi } from "vitest";
 import type { useViewportLoadDates } from "#quno-internal/timeline/infinite/scroll/window/useViewportLoadDates";
 
 vi.mock("#quno-internal/timeline/infinite/scroll/window/useViewportLoadDates", () => ({
-  useViewportLoadDates: ({ renderItems, dateKeyForIndex }: Parameters<typeof useViewportLoadDates>[0]) =>
-    renderItems.map((item) => dateKeyForIndex({ index: item.index }))
+  useViewportLoadDates: ({ renderItems, dateKeyForIndex }: Parameters<typeof useViewportLoadDates>[0]) => ({
+    dateKeys: renderItems.map((item) => dateKeyForIndex({ index: item.index })),
+    canLoad: () => true
+  })
 }));

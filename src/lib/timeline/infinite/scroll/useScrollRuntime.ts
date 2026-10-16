@@ -94,6 +94,7 @@ export function useScrollRuntime({
     getItemKey,
     overscan: VIRTUAL_DAY_NODE_OVERSCAN,
     useFlushSync: false,
+    useScrollendEvent: true,
     initialRect: { width: 1400, height: 1100 },
     initialOffset: virtualWindow.anchorIndex * baseDayHeight
   });
@@ -192,11 +193,12 @@ export function useScrollRuntime({
     offsetForIndex
   });
 
-  const viewportDateKeys = useViewportLoadDates({
+  const viewportLoading = useViewportLoadDates({
     containerRef,
     renderItems,
     dateKeyForIndex,
-    retainWindow: retainLoadWindow || isInteractionActive,
+    isScrolling: virtualizer.isScrolling,
+    retainWindow: retainLoadWindow || isInteractionActive || structuralRenderWindow.anchorIndex !== undefined,
     topInset: settings.dayHeaderHeight
   });
   return {
@@ -206,7 +208,8 @@ export function useScrollRuntime({
     dateKeyToIndex,
     renderItems,
     visibleDateKeys,
-    viewportDateKeys,
+    viewportDateKeys: viewportLoading.dateKeys,
+    viewportLoading,
     readVisibleSnapshot,
     dateKeyForIndex,
     scrollToDate,

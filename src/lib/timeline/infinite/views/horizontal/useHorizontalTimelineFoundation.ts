@@ -97,7 +97,7 @@ export function useHorizontalTimelineFoundation({
     isInteractionActive,
     recenterBlockedRef,
     eagerRange: createRangeActive,
-    retainLoadWindow: Boolean(props.activeDraft || createTransitionActive),
+    retainLoadWindow: !props.activeDraft && createTransitionActive,
     layoutAnchorDateKey:
       (createRangeActive ? undefined : navigation.activeRestoreTarget?.dateKey) ??
       (props.activeDraft ? eventDateKey(props.activeDraft.event) : undefined)
@@ -116,6 +116,7 @@ export function useHorizontalTimelineFoundation({
     eventVersion: props.eventVersion,
     requestedAppearingEventIds: props.appearingEventIds,
     selectedIds: props.loadCalendarIds ?? selectedIds,
+    viewportLoading: virtualTimeline.viewportLoading,
     visibleDateKeys: virtualTimeline.viewportDateKeys
   });
   const eventsByDate = useEventProjection({

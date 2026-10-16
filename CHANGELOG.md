@@ -4,6 +4,35 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+- Replace the general viewport request timer with the virtualizer's scroll completion and committed layout frames.
+  Preserve immediate cached rendering. Keep a wheel-only idle fallback for browsers that end each wheel step separately.
+- Extend the prefetch guide with a return-to-start action. Verify cached cards appear while missing-edge requests wait.
+
+- Gate event requests through committed viewport settling. The visible range and its adjacent buffer are requested together after
+  settling; existing cache coverage removes loaded and pending dates without separate response-driven prefetch calls.
+
+## 0.6.4 - 2026-10-16
+
+### Buffered viewport loading - 2026-10-16
+
+- Expand settled event windows by the configured adjacent buffer and fetch only missing coverage through the existing
+  range coordinator. Reuse pending reads, abort/generation guards and invalidation without response-driven extra calls.
+- Consumers configure only their buffer through `eventPrefetchPolicy`; no consumer-owned readiness cache is needed.
+- Reset virtual geometry after excluded-weekday changes. Ignore excluded-date metrics that map onto another day.
+  This prevents neighboring days from overlapping when visible and adjacent responses arrive separately.
+- Use the existing simulated API loader in the prefetch guide so parallel reads share correct pending-request status.
+  Verify one buffered cold request and immediate navigation to prefetched events.
+- Assert visible date and draft positions during dense participant editing. A bounded-window recenter may translate
+  internal scroll offsets while preserving both positions; retain the strict late-DOM-mutation check.
+- Verification: 526 unit tests pass. Chromium passes 182/183 in the full run; the cancellation scenario passes three
+  consecutive isolated reruns. Architecture, typecheck, lint, formatting, builds, package, size, Preact and pack checks pass.
+
+### Creation viewport coverage - 2026-10-16
+
+- Load every settled visible date while a draft is open, including participant contraction and scrolling.
+  Retain cache coverage, draft anchors, scroll settling and creation closing-transition protection.
+- Add unit and Chromium regressions for multi-date creation coverage and continued scrolling.
+
 ### Viewport request stability - 2026-10-09
 
 - Load settled viewport dates independently of render overscan and offscreen editor pins. Coalesce fast scrolling

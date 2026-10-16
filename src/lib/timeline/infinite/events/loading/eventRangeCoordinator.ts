@@ -11,13 +11,7 @@
  *
  * @see docs/infinite-calendar/flows/async-loading-and-layout.md#date-request-state
  */
-import type {
-  CalendarEvent,
-  CalendarId,
-  EventId,
-  EventPrefetchPolicy,
-  EventPrefetchWindow
-} from "#quno-internal/timeline/core/types";
+import type { CalendarEvent, CalendarId, EventId } from "#quno-internal/timeline/core/types";
 import { dateRangeFromKeys, fromDateKey, toDateKey } from "#quno-internal/timeline/date/dateVirtualization";
 import { addCalendarDays } from "#quno-internal/timeline/date/localDate";
 import { EventDateCache } from "./eventDateCache";
@@ -31,43 +25,6 @@ export type EventRangeRequest = {
   generation: number;
   id: number;
 };
-
-function normalizedPrefetchDays({ value }: { value: number }): number {
-  return Number.isFinite(value) ? Math.max(0, Math.trunc(value)) : 0;
-}
-
-export function eventLoadDateKeys({
-  visibleDateKeys,
-  selectedCalendarIds,
-  policy
-}: {
-  visibleDateKeys: readonly string[];
-  selectedCalendarIds: readonly CalendarId[];
-  policy: EventPrefetchPolicy;
-}): string[] {
-  const sortedVisibleDateKeys = [...new Set(visibleDateKeys)].sort();
-  if (sortedVisibleDateKeys.length === 0) {
-    return [];
-  }
-
-  const requestedWindow: EventPrefetchWindow = policy({
-    visibleDateKeys: sortedVisibleDateKeys as IsoDate[],
-    selectedCalendarIds: [...selectedCalendarIds]
-  });
-  const beforeDays = normalizedPrefetchDays({ value: requestedWindow.beforeDays });
-  const afterDays = normalizedPrefetchDays({ value: requestedWindow.afterDays });
-  const dateKeys = new Set(sortedVisibleDateKeys);
-  const firstDate = fromDateKey({ dateKey: sortedVisibleDateKeys[0] });
-  const lastDate = fromDateKey({ dateKey: sortedVisibleDateKeys[sortedVisibleDateKeys.length - 1] });
-
-  for (let offset = 1; offset <= beforeDays; offset += 1) {
-    dateKeys.add(toDateKey({ date: addCalendarDays({ date: firstDate, amount: -offset }) }));
-  }
-  for (let offset = 1; offset <= afterDays; offset += 1) {
-    dateKeys.add(toDateKey({ date: addCalendarDays({ date: lastDate, amount: offset }) }));
-  }
-  return [...dateKeys].sort();
-}
 
 function contiguousDateGroups({ dateKeys }: { dateKeys: string[] }): string[][] {
   const groups: string[][] = [];
@@ -133,6 +90,9 @@ export class EventRangeCoordinator {
   }
 
   missingLoadRanges(): Array<{ dateKeys: string[]; startDate: IsoDate; endDate: IsoDate }> {
+    if (this.selectedCalendarIds.size === 0) {
+      return [];
+    }
     const missingDateKeys = [...this.loadDates].filter(
       (dateKey) =>
         !this.coverage.covers({ dateKey, calendarIds: this.selectedCalendarIds }) && !this.isLoading({ dateKey })
@@ -199,6 +159,7 @@ export class EventRangeCoordinator {
   }
 
   dispose(): void {
+    this.loadDates.clear();
     this.cancelAll();
   }
 
@@ -231,9 +192,7 @@ export class EventRangeCoordinator {
   }
 
   private release(request: EventRangeRequest): void {
-    // Idempotence prevents an obsolete promise from releasing a newer request's keys.
-    if (!this.activeRequests.delete(request.id)) {
-      return;
-    }
+    // Request ids make deletion idempotent across obsolete completions.
+    this.activeRequests.delete(request.id);
   }
 }

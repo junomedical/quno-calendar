@@ -3,6 +3,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { CalendarEvent, LoadEvents, LoadEventsArgs } from "#quno-internal/timeline/core/types";
 import { useEventRangeLoader } from "#quno-internal/timeline/infinite/events/loading/useEventRangeLoader";
 
+const visibleOnly = () => ({ beforeDays: 0, afterDays: 0 });
+
 type Deferred<T> = {
   promise: Promise<T>;
   resolve: (value: T) => void;
@@ -61,6 +63,7 @@ describe("useEventRangeLoader", () => {
 
     response.resolve([event("event-a")]);
     await waitFor(() => expect(result.current.eventsByDate["2026-07-18"]).toEqual([event("event-a")]));
+    expect(loadEvents).toHaveBeenCalledTimes(1);
   });
 
   it("uses a caller policy and only requests adjacent dates that are still missing", async () => {
@@ -97,7 +100,13 @@ describe("useEventRangeLoader", () => {
 
     const { result, rerender } = renderHook(
       ({ eventVersion }: { eventVersion: number }) =>
-        useEventRangeLoader({ loadEvents, eventVersion, selectedIds, visibleDateKeys }),
+        useEventRangeLoader({
+          eventPrefetchPolicy: visibleOnly,
+          loadEvents,
+          eventVersion,
+          selectedIds,
+          visibleDateKeys
+        }),
       { initialProps: { eventVersion: 1 } }
     );
 
@@ -123,6 +132,7 @@ describe("useEventRangeLoader", () => {
           activeDraftDateKey,
           activeDraftLoadAnchorDateKey,
           loadEvents,
+          eventPrefetchPolicy: visibleOnly,
           selectedIds,
           visibleDateKeys
         }),
@@ -142,7 +152,7 @@ describe("useEventRangeLoader", () => {
       activeDraftDateKey: "2026-07-18",
       activeDraftLoadAnchorDateKey: "2026-07-18",
       selectedIds: ["calendar-a"],
-      visibleDateKeys: [...visibleDateKeys, "2026-07-19"]
+      visibleDateKeys: [...visibleDateKeys]
     });
     await act(async () => Promise.resolve());
     rerender({
@@ -157,6 +167,57 @@ describe("useEventRangeLoader", () => {
     expect(result.current.eventsByDate).toBe(loadedSnapshot);
   });
 
+  it("loads the full visible range during draft expansion and forward/backward scrolling", async () => {
+    const loadEvents = vi.fn<LoadEvents>(async ({ startDate, endDate }) =>
+      Array.from({ length: 31 }, (_, index) => `2026-07-${String(index + 1).padStart(2, "0")}`)
+        .filter((date) => date >= startDate && date <= endDate)
+        .map((date) => ({ ...event(date), start: `${date}T09:00:00`, end: `${date}T10:00:00` }))
+    );
+    const selectedIds = ["calendar-a"];
+    const eventPrefetchPolicy = () => ({ beforeDays: 0, afterDays: 0 });
+    const { result, rerender } = renderHook(
+      ({ activeDraftDateKey, activeDraftLoadAnchorDateKey, visibleDateKeys }: LoaderSelectionProps) =>
+        useEventRangeLoader({
+          activeDraftDateKey,
+          activeDraftLoadAnchorDateKey,
+          visibleDateKeys,
+          selectedIds,
+          eventPrefetchPolicy,
+          loadEvents
+        }),
+      {
+        initialProps: {
+          activeDraftDateKey: undefined as string | undefined,
+          activeDraftLoadAnchorDateKey: "2026-07-18",
+          visibleDateKeys: ["2026-07-18"],
+          selectedIds
+        }
+      }
+    );
+    await waitFor(() => expect(result.current.eventsByDate["2026-07-18"]).toHaveLength(1));
+    const expandedDates = Array.from({ length: 10 }, (_, index) => `2026-07-${18 + index}`);
+    for (const visibleDateKeys of [
+      expandedDates,
+      ["2026-07-29", "2026-07-30", "2026-07-31"],
+      ["2026-07-14", "2026-07-15"]
+    ]) {
+      rerender({
+        activeDraftDateKey: "2026-07-18",
+        activeDraftLoadAnchorDateKey: visibleDateKeys[0],
+        visibleDateKeys,
+        selectedIds
+      });
+      await waitFor(() => {
+        for (const date of visibleDateKeys) {
+          expect(result.current.eventsByDate[date]).toHaveLength(1);
+        }
+      });
+    }
+    expect(loadEvents).toHaveBeenCalledTimes(4);
+    expect(loadEvents.mock.calls[1][0]).toMatchObject({ startDate: "2026-07-19", endDate: "2026-07-27" });
+    expect(result.current.eventsByDate["2026-07-18"]).toHaveLength(1);
+  });
+
   it("aborts requests that do not cover the next selection and ignores their late responses", async () => {
     const requests: Array<{ args: LoadEventsArgs; response: Deferred<CalendarEvent[]> }> = [];
     const loadEvents = vi.fn<LoadEvents>((args) => {
@@ -167,7 +228,13 @@ describe("useEventRangeLoader", () => {
     const visibleDateKeys = ["2026-07-18"];
 
     const { result, rerender } = renderHook(
-      ({ selectedIds }: { selectedIds: string[] }) => useEventRangeLoader({ loadEvents, selectedIds, visibleDateKeys }),
+      ({ selectedIds }: { selectedIds: string[] }) =>
+        useEventRangeLoader({
+          eventPrefetchPolicy: visibleOnly,
+          loadEvents,
+          selectedIds,
+          visibleDateKeys
+        }),
       { initialProps: { selectedIds: ["calendar-a"] } }
     );
 
@@ -191,6 +258,7 @@ describe("useEventRangeLoader", () => {
     renderHook(() =>
       useEventRangeLoader({
         loadEvents,
+        eventPrefetchPolicy: visibleOnly,
         selectedIds: ["calendar-a"],
         visibleDateKeys: ["2026-07-18"]
       })
@@ -212,6 +280,7 @@ describe("useEventRangeLoader", () => {
     const { result } = renderHook(() =>
       useEventRangeLoader({
         loadEvents,
+        eventPrefetchPolicy: visibleOnly,
         selectedIds: ["calendar-a"],
         visibleDateKeys: ["2026-07-18"]
       })

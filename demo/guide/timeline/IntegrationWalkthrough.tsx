@@ -825,9 +825,10 @@ export function IntegrationWalkthrough({ embedded = false }: { embedded?: boolea
           and backend capacity.
         </p>
         <p>
-          A bounded warm window loads likely destination dates before they enter the viewport. The calendar deduplicates
-          loaded and in-flight ranges, aborts obsolete requests when possible, and rejects stale responses. Nearby
-          navigation feels immediate while request and memory costs remain predictable.
+          The calendar waits for scrolling and layout to finish, expands that viewport by the configured buffer, and
+          requests only missing dates. Cached cards render immediately. It deduplicates loaded and in-flight ranges,
+          aborts obsolete requests when possible, and rejects stale responses. Nearby navigation feels immediate while
+          request and memory costs remain predictable.
         </p>
         <CodeBlock code={prefetchSnippet} title="Preload nearby dates with a bounded policy" />
         <Callout>

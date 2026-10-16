@@ -11,6 +11,8 @@ import {
 import { useEventRangeLoader } from "#quno-internal/timeline/infinite/events/loading/useEventRangeLoader";
 import { useEventProjection } from "#quno-internal/timeline/infinite/events/metrics/useEventProjection";
 
+const visibleOnly = () => ({ beforeDays: 0, afterDays: 0 });
+
 const saved: CalendarEvent = {
   id: "saved",
   calendarId: "a",
@@ -64,7 +66,13 @@ describe("local event projection", () => {
     const visibleDateKeys = ["2026-07-18", "2026-07-19"];
     const { result, rerender } = renderHook(
       ({ projectEvents, eventVersion }: { projectEvents?: ProjectEvents; eventVersion: number }) => {
-        const loaded = useEventRangeLoader({ loadEvents, selectedIds, visibleDateKeys, eventVersion });
+        const loaded = useEventRangeLoader({
+          eventPrefetchPolicy: visibleOnly,
+          loadEvents,
+          selectedIds,
+          visibleDateKeys,
+          eventVersion
+        });
         return useEventProjection({ eventsByDate: loaded.eventsByDate, projectEvents, selectedIds, visibleDateKeys });
       },
       { initialProps: { projectEvents: (() => [preview]) as ProjectEvents | undefined, eventVersion: 0 } }
@@ -126,7 +134,12 @@ describe("local event projection", () => {
     ];
     const { result, rerender } = renderHook(
       ({ projection }: { projection?: ProjectEvents }) => {
-        const loaded = useEventRangeLoader({ loadEvents, selectedIds, visibleDateKeys });
+        const loaded = useEventRangeLoader({
+          eventPrefetchPolicy: visibleOnly,
+          loadEvents,
+          selectedIds,
+          visibleDateKeys
+        });
         const projected = useEventProjection({
           eventsByDate: loaded.eventsByDate,
           selectedIds,

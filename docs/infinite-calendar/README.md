@@ -17,7 +17,7 @@ days, hours, horizontal rows, and vertical columns without taking ownership of g
 - [Decisions](./decisions.md)
 - [Shared usage recipes](../shared/usage.md)
 
-Event requests use dates intersecting the committed viewport after a 100 ms settling delay. Rendering overscan and
+Event requests use dates intersecting the committed viewport after scroll and layout completion. Rendering overscan and
 offscreen restore pins do not widen that window. Prefetch remains configurable; return zero before/after days for
 viewport-only reads. Optional `loadCalendarIds` separates API read coverage from `selectedCalendarIds`, so hiding rows,
 including every row, can reuse an all-calendar read. Without it, read coverage follows the displayed selection.
@@ -125,3 +125,20 @@ Parent editors can restore a date-only target after Cancel or Save. Use the open
 displayed at the Save click for success. A bounded restore keeps that date through deferred draft measurements and
 returning rows. Date-only restores leave horizontal scrolling unchanged and yield to manual navigation. Availability,
 blocker and appointment outcome policy remains in the consumer.
+
+While a calendar draft is open, event loading covers every settled viewport date, including dates exposed by participant
+filtering and scrolling. Draft anchors and the pre-draft cache window remain protected.
+
+Infinite Calendar expands each settled visible range by its policy-selected adjacent buffer and requests only missing
+coverage. It does not start separate adjacent fetches after each response. `eventPrefetchPolicy` configures the buffer only; the existing
+coordinator owns coverage and pending requests. Empty successful responses count as loaded; failed reads do not.
+
+The prefetch guide uses the shared simulated HTTP API loader and reports ready only when all parallel reads finish.
+Its regression checks one buffered cold request and immediate navigation into cached dates. Dense participant checks
+assert stable visible date/resource geometry while allowing the bounded virtual window to translate internal offsets.
+
+Missing-date requests follow the virtualizer's scrolling state and committed viewport geometry. Native `scrollend`
+ends scrolling where supported; the virtualizer supplies the fallback elsewhere. Date navigation and layout changes
+wait for their committed frames, without a fixed 100 ms delay. Wheel bursts retain a 100 ms idle guard because browsers
+can emit `scrollend` between wheel steps. Cached events render immediately throughout. Visible dates and adjacent
+buffers share one desired window; responses do not trigger separate prefetch calls.

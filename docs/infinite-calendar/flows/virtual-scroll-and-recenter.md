@@ -250,3 +250,11 @@ flowchart TD
 - `src/lib/timeline/infinite/scroll/resources/viewportMetricsStore.ts`: frame-batched viewport snapshots for local subscribers.
 
 The complete ownership map is in the [scroll domain](../domains/scroll.md).
+
+## Event Read Readiness
+
+Event fetching follows the virtualizer's scrolling state separately from the delayed bounded-window recenter.
+Native `scrollend` releases scrolling where supported, with the virtualizer's normal fallback elsewhere. The viewport
+hook invalidates readiness synchronously, waits for structural render ownership to release, then reads committed
+geometry across navigation/restoration frames. It does not delay cached event rendering. Individual wheel steps can
+end separately in Chromium, so wheel bursts retain a short idle guard before missing-date requests start.
