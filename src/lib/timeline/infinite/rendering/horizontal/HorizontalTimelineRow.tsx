@@ -85,6 +85,7 @@ export const InfiniteTimelineRow = memo(function InfiniteTimelineRow({
   rowEvents,
   preparedCell,
   isHidden = false,
+  isAlternate,
   calendarCellProps,
   calendarHourPresentations,
   settings,
@@ -135,6 +136,7 @@ export const InfiniteTimelineRow = memo(function InfiniteTimelineRow({
       top={top}
       rowHeight={rowHeight}
       isHidden={isHidden}
+      isAlternate={isAlternate}
       calendarCellProps={calendarCellProps}
       calendarHourPresentations={calendarHourPresentations}
       settings={settings}

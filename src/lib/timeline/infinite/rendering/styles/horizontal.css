@@ -85,7 +85,7 @@
   border-right: 1px solid var(--quno-calendar-cell-border, var(--_ic-default-cell-border));
 }
 
-.quno-calendar-row:nth-child(2n + 1) .quno-calendar-row-grid {
+.quno-calendar-row-grid.is-alternate {
   background-color: var(--quno-calendar-alternate-surface, var(--_ic-default-alternate-surface));
 }
 

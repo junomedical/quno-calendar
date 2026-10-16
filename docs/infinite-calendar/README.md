@@ -8,6 +8,11 @@ adds resource-specific classes, inline styles, or titles from typed date, weeken
 `getHourProps` styles clock-hour bands and their visible labels across both orientations. Together they style
 days, hours, horizontal rows, and vertical columns without taking ownership of geometry or interaction behavior.
 
+Alternating grid surfaces follow the resource's position in the complete displayed list in both orientations.
+Horizontal row virtualization never restarts that pattern. Try `/demo/infinite-calendar` with six calendars and
+navigate to October 30, 2026: scroll toward October 31 and back. Room 201 stays on the same surface even when earlier
+rows unmount. Customize the alternate color with `--quno-calendar-alternate-surface`.
+
 - Public entry point: `@quno/calendar/infinite-calendar`
 - Live field guide: `/guide/infinite-calendar`
 - Focused demo: `/demo/infinite-calendar`
@@ -98,7 +103,7 @@ Products own recurrence expansion; saves and filters still refresh through `even
 ## Bundle budget
 
 JavaScript is limited to 50 KiB gzip and the optional stylesheet to 2 KiB gzip. The current artifacts measure
-40.99 KiB and 1.99 KiB gzip respectively (Node 24, gzip level 9). See [Decision 100](./decisions.md#100---reconcile-the-infinite-calendar-budget-after-branch-integration).
+41.01 KiB and 1.97 KiB gzip respectively (Node 24, gzip level 9). See [Decision 100](./decisions.md#100---reconcile-the-infinite-calendar-budget-after-branch-integration).
 
 ## Named contracts
 

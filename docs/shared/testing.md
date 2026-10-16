@@ -109,6 +109,9 @@ Architecture checks enforce object arguments and product dependency direction, i
 
 ## Playwright Tests
 
+- Horizontal resource shading retains computed colors as odd and even numbers of preceding rows unmount. The focused
+  demo regression starts with October 30 and 31 visible and checks both dates through forward and backward scrolling.
+
 - The project home renders exactly four equal product cards with punchy descriptions and dedicated field-guide links,
   followed by six guiding principles and a distinct Created by section with Dmitry Kirillov's direct email link below
   them. Each guide exposes visible All components and Demo links to the project directory and its matching component

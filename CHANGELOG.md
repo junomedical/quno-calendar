@@ -4,6 +4,18 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+### Stable resource highlights - 2026-10-16
+
+- Fix alternating horizontal row highlights flipping as earlier rows leave the mounted window, including when
+  October 30 is first visible and October 31 is second. Use the complete displayed resource order for parity,
+  matching vertical columns. Update the field guide's night theme and add computed-color Chromium coverage.
+- Verification: 520 unit tests, formatting, architecture/contracts, typechecking, lint, packed-package verification,
+  Preact and React 19 compatibility, demo build, size reporting and pack dry-run pass. Infinite Calendar measures
+  41,999 B gzip JavaScript and 2,018 B gzip CSS, within the unchanged 50 KiB and 2 KiB ceilings.
+- Full Chromium run: 180/182 pass, including the new highlight regression. Both initial failures pass on a focused
+  rerun: the guide-size check had loaded its old expectation before the refreshed figures, and the later-participant
+  create/Cancel anchor check reported 500px drift once. No persistent verification blocker remains.
+
 ### Viewport request stability - 2026-10-09
 
 - Load settled viewport dates independently of render overscan and offscreen editor pins. Coalesce fast scrolling

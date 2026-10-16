@@ -20,6 +20,7 @@ type HorizontalRowFrameProps = PropsWithChildren<{
   top: number;
   rowHeight: number;
   isHidden: boolean;
+  isAlternate: boolean;
   calendarCellProps?: QunoInfiniteCalendarCellProps;
   calendarHourPresentations: CalendarHourPresentation[];
   settings: QunoInfiniteCalendarSettings;
@@ -46,6 +47,7 @@ export function HorizontalRowFrame({
   top,
   rowHeight,
   isHidden,
+  isAlternate,
   calendarCellProps,
   calendarHourPresentations,
   settings,
@@ -93,7 +95,9 @@ export function HorizontalRowFrame({
         {calendar.name}
       </div>
       <div
-        className={["quno-calendar-row-grid", calendarCellProps?.className].filter(Boolean).join(" ")}
+        className={["quno-calendar-row-grid", isAlternate ? "is-alternate" : "", calendarCellProps?.className]
+          .filter(Boolean)
+          .join(" ")}
         data-slot="calendar-cell"
         data-date={dateKey}
         data-calendar-id={calendar.id}

@@ -91,6 +91,7 @@ export type HorizontalTimelineRowProps = {
   rowEvents: CalendarEvent[];
   preparedCell: PreparedEventLayers;
   isHidden?: boolean;
+  isAlternate: boolean;
   calendarCellProps?: QunoInfiniteCalendarCellProps;
   calendarHourPresentations: CalendarHourPresentation[];
   settings: QunoInfiniteCalendarSettings;
