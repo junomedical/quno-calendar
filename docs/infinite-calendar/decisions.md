@@ -1059,3 +1059,16 @@ filters. Retain adjacent pending boundary reads without fetching extra dates; ab
 reads and keep the existing stale-response guards. Keep the last load window during drafts and their closing transition.
 Reapply an existing parent restore before paint after the draft closes. Opening draft participant layout keeps its
 existing restore sequence. A row-count resize uses the semantic date saved before its estimates change.
+
+## 108 - Alternate Horizontal Surfaces By Logical Resource Position
+
+Date: 2026-10-16
+Status: Accepted; refines Decisions 044 and 064
+
+Horizontal grid shading derives from the resource index in the complete displayed calendar list, matching the vertical
+view. Pass that parity through the row renderer and apply `is-alternate` to its grid. Mounted sibling position cannot
+own parity because pruning an odd number of preceding rows reverses every remaining shade. The field guide's night
+theme uses the same state. Keep existing surface tokens, slots, cell overrides and resource geometry intact.
+
+Chromium coverage starts with October 30 and 31 visible, scrolls in both directions through odd and even resource
+pruning, and asserts computed colors for both dates against their complete-list colors.

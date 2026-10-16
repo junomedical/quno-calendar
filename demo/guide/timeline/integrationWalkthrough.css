@@ -1336,7 +1336,7 @@
   background-color: #17231f;
 }
 
-.article-themed-calendar.theme-night .quno-calendar-row:nth-child(2n + 1) .quno-calendar-row-grid {
+.article-themed-calendar.theme-night .quno-calendar-row-grid.is-alternate {
   background-color: #1b2925;
 }
 

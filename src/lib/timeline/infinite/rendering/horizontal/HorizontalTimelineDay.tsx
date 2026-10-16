@@ -112,6 +112,7 @@ export function InfiniteTimelineDay(props: HorizontalTimelineDayProps) {
             rowEvents={isHidden ? EMPTY_ROW_EVENTS : props.eventsForRow({ dateKey, calendarId: calendar.id })}
             preparedCell={props.preparedCellForRow({ dateKey, calendarId: calendar.id })}
             isHidden={isHidden}
+            isAlternate={resourceIndex % 2 === 0}
             calendarCellProps={calendarCellProps}
             calendarHourPresentations={props.calendarHourPresentations}
             settings={settings}

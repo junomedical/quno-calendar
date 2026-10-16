@@ -204,6 +204,10 @@ properties. Set them on the calendar class or any ancestor; the library retains 
 `QunoInfiniteCalendarStyle` contract. `--quno-calendar-vertical-header-bg` remains a vertical-only compatibility override; new themes should
 use `--quno-calendar-header-surface`.
 
+`--quno-calendar-alternate-surface` follows every other resource in the complete displayed order, starting with the
+first resource, in both orientations. Scrolling and virtual row pruning do not change a resource's shade. Use the
+semantic surface tokens or `getDayCellProps` for custom treatments rather than mounted-child selectors.
+
 ## Calendar Day, Hour, Row, And Column Styling
 
 Use `getDayProps` for date-wide presentation and `getDayCellProps` for a specific date/resource

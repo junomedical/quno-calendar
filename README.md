@@ -36,6 +36,7 @@ import { parseDateInput, tokenizeDateInput } from "@quno/calendar/date-parser";
   Date-only anchors preserve the displayed day through editor completion without moving horizontal time/resource scrolling.
   Event loading uses settled viewport dates independently of rendering overscan. Optional `loadCalendarIds` keeps
   read coverage stable when consumers hide rows; it defaults to the displayed selection.
+  Alternating resource shading stays consistent as rows enter or leave the viewport.
 
   The demo anchors horizontal editor opening and cancellation to the resource row, keeping the grid steady through card hover expansion. Active horizontal restores keep their target date mounted through participant changes.
 
