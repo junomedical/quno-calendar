@@ -1,6 +1,45 @@
 import { expect, test } from "@playwright/test";
 import { firstViewportEventBox, goToWorkday, openDrawnExternalDraft, topVisibleDayState } from "#quno-e2e/helpers";
 
+for (const scale of [100, 5000]) {
+  test(`returns an offscreen October create to Marco's anchored row after saving with ${scale} events`, async ({
+    page
+  }) => {
+    await page.goto("/demo/infinite-calendar");
+    await page.getByTestId("scale-select").selectOption(String(scale));
+    await goToWorkday(page, "2026-10-20");
+    await openDrawnExternalDraft(page, { dateKey: "2026-10-20", calendarId: "marco-eggens" });
+    await page.getByTestId("draft-title-input").fill("Marco October return");
+    const row = page.locator(
+      '[data-testid="calendar-day"][data-date="2026-10-20"] [data-testid="calendar-row"][data-calendar-id="marco-eggens"]'
+    );
+    const rowOffset = () =>
+      row.evaluate((element) => {
+        const viewport = element.closest(".quno-calendar-viewport")!;
+        return element.getBoundingClientRect().top - viewport.getBoundingClientRect().top;
+      });
+    const anchorTop = await rowOffset();
+    const viewport = page.locator(".quno-calendar-viewport");
+    await viewport.hover();
+    for (let step = 0; step < 20; step += 1) {
+      if ((await topVisibleDayState(page)).date >= "2026-12-01") break;
+      await page.mouse.wheel(0, 3000);
+      await page.waitForTimeout(350);
+    }
+    expect((await topVisibleDayState(page)).date).toMatch(/^2026-12-/);
+    await page.waitForTimeout(1500);
+    await page.getByTestId("draft-save-button").click();
+    await expect(page.getByTestId("demo-message")).toContainText("Saved external create");
+    await expect(page.getByTestId("external-event-popup")).toHaveCount(0);
+    await expect.poll(async () => Math.abs((await rowOffset()) - anchorTop)).toBeLessThanOrEqual(4);
+    await expect(row.locator('[data-testid="calendar-event"][data-event-id^="created-"]')).toContainText(
+      "Marco October return"
+    );
+    await page.waitForTimeout(3200);
+    await expect.poll(async () => Math.abs((await rowOffset()) - anchorTop)).toBeLessThanOrEqual(4);
+  });
+}
+
 test("shows delayed external save errors in the edit popup", async ({ page }) => {
   await page.goto("/demo/infinite-calendar");
   await goToWorkday(page);

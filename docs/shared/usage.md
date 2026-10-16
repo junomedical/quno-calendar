@@ -801,6 +801,33 @@ The target is semantic rather than lane-index based. If a save introduces collis
 metrics that move the event into another overlap lane, restoration resolves the new event geometry and keeps that event
 at the captured viewport position.
 
+For a row-preserving horizontal Save, capture a visible event before its resource/time slot, as above. If the draft
+is offscreen, reuse the retained editor anchor rather than capturing its pinned offscreen coordinate. Restore the
+saved participant's slot without `eventId` so collision lanes cannot move the row. Keep an offscreen restore alive
+through navigation and deferred measurements:
+
+```tsx
+const visible = calendarRef.current?.captureViewportAnchor({
+  ...target,
+  eventId: draft.event.id,
+  requireVisible: true
+});
+const current = visible ? calendarRef.current?.captureViewportAnchor(target) : null;
+const anchor = current ?? retainedEditorAnchor;
+calendarRef.current?.commitVisibleEvent({ event: savedEvent, appearing: true });
+setActiveDraft(null);
+calendarRef.current?.restoreViewportAnchor({
+  anchor,
+  target: { ...target, calendarId: anchor?.target.calendarId ?? savedEvent.calendarId },
+  afterRecenter: !current,
+  cancelOnManualScroll: true
+});
+```
+
+Here `target` contains only the draft's `dateKey`, `time`, and `calendarId`; retain the opening anchor and refresh it
+when visible geometry edits transfer the editor position. The focused demo uses this policy for Save in horizontal
+view and retains event anchoring in vertical view. Try October 20 → Marco Eggens → scroll to December → Save.
+
 Capture the source event before staging a move, update the controlled draft, then request restoration against the
 proposed event in the same handler. Capture stays synchronous; restoration waits for the committed layout, so no
 `flushSync` wrapper is needed. Retain that original anchor until the review ends. Accept can keep the proposed event at its

@@ -4,6 +4,16 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+### Offscreen draft save anchoring - 2026-10-16
+
+- Fix saving an October 20 draft for Marco Eggens after scrolling to December showing another day. Save uses a
+  visible editor anchor or its retained last-seen position, then restores the horizontal participant slot through
+  returning rows and deferred measurements. Manual scrolling still cancels restoration.
+- Add sparse and dense Chromium regressions asserting the original row position, saved event and settled geometry.
+- Verification: 520 unit tests and all 184 Chromium scenarios pass. Formatting, architecture/contracts, typechecking,
+  lint, package verification, Preact and React 19 compatibility, demo build, size reporting and pack dry-run pass.
+  Library artifacts and public API remain unchanged; no verification blockers remain.
+
 ### Stable resource highlights - 2026-10-16
 
 - Fix alternating horizontal row highlights flipping as earlier rows leave the mounted window, including when

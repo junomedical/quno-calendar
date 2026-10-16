@@ -81,6 +81,12 @@ and Dmitry before Cancel; repeat with one or six calendars. October 8 and Dmitry
 See [Decision 104](./decisions.md#104---anchor-horizontal-demo-editor-transitions-to-resource-slots) and
 [Decision 105](./decisions.md#105---retain-horizontal-restore-dates-through-resource-changes).
 
+Saving uses the visible editor anchor when available, otherwise its retained last-seen anchor. Horizontal saves restore
+the participant's resource/time slot so collision lanes and hover expansion cannot shift the row. An offscreen save
+keeps the bounded restore active through date navigation and returning rows; manual scrolling still cancels it.
+Try drawing on October 20 for Marco Eggens, scrolling to December, then saving. October 20 and Marco's row return to
+the retained position. See [Decision 109](./decisions.md#109---restore-offscreen-saves-to-the-retained-editor-anchor).
+
 TanStack Virtual notifications use its queued React update path. Layout restoration requests an ordinary React
 projection before paint, keeping React 19 development free of the virtualizer `flushSync` lifecycle warning while
 semantic anchor and frame-stability browser coverage continues to guard against empty intermediate views.

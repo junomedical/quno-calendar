@@ -35,10 +35,8 @@ type ExternalDraftCommitArgs = {
   activeEditSourceAnchorRef: RefObject<CalendarViewportAnchor | null>;
   lastSeenAnchorRef: RefObject<CalendarViewportAnchor | null>;
   calendarRef: RefObject<QunoInfiniteCalendarHandle | null>;
-  captureEventAnchor: CaptureEventAnchor;
   captureEditorAnchor: CaptureEventAnchor;
   restoreEditorAnchor: RestoreEventAnchor;
-  restoreEventAnchor: RestoreEventAnchor;
   restoreSlotAnchor: RestoreSlotAnchor;
   clearActiveDraft: () => void;
   setEvents: Dispatch<SetStateAction<CalendarEvent[]>>;
@@ -51,10 +49,8 @@ export function useExternalDraftCommit({
   activeEditSourceAnchorRef,
   lastSeenAnchorRef,
   calendarRef,
-  captureEventAnchor,
   captureEditorAnchor,
   restoreEditorAnchor,
-  restoreEventAnchor,
   restoreSlotAnchor,
   clearActiveDraft,
   setEvents,
@@ -76,7 +72,10 @@ export function useExternalDraftCommit({
       calendarIds: participantIds,
       kind: activeDraft.event.kind ?? "appointment"
     };
-    const anchor = captureEventAnchor(activeDraft.event);
+    const visibleAnchor = captureEditorAnchor(activeDraft.event, undefined, true);
+    // A pinned offscreen draft has geometry, but its current coordinate is not
+    // the position the editor should return to after saving.
+    const anchor = visibleAnchor ?? lastSeenAnchorRef.current;
 
     flushSync(() => {
       if (activeDraft.mode === "edit") {
@@ -90,13 +89,22 @@ export function useExternalDraftCommit({
       clearActiveDraft();
     });
     if (anchor) {
-      restoreEventAnchor(anchor, savedEvent, {
+      restoreEditorAnchor(anchor, savedEvent, {
         eventId: savedEvent.id,
-        afterRecenter: false,
+        afterRecenter: !visibleAnchor,
         cancelOnManualScroll: true
       });
     }
-  }, [activeDraft, calendarRef, captureEventAnchor, clearActiveDraft, restoreEventAnchor, setEvents, setMessage]);
+  }, [
+    activeDraft,
+    calendarRef,
+    captureEditorAnchor,
+    clearActiveDraft,
+    lastSeenAnchorRef,
+    restoreEditorAnchor,
+    setEvents,
+    setMessage
+  ]);
 
   const cancelActiveDraft = useCallback(() => {
     const sourceEvent = activeEditSourceEventRef.current;
