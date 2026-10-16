@@ -4,6 +4,19 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+### Coordinated draw and Cancel layout - 2026-10-16
+
+- Batch drawn-create and Cancel draft changes with their restoration requests. Pin the restore date through create
+  closure, then coordinate measured date positions, anchor correction and both virtual windows before paint.
+- Add Chromium frame assertions at 1280px and 1800px for the October 17 Room 203 scenario: no displaced or missing
+  row, horizontal drift or blank date gap through opening, fade-out, deferred measurements and restoration completion.
+- Verification: all 520 unit tests and all 186 Chromium scenarios pass. Formatting, architecture/contracts,
+  typechecking, lint, packed-package verification, Preact and React 19 compatibility, demo build, size reporting and
+  pack dry-run pass. Infinite Calendar measures 42,101 B gzip JavaScript and 2,018 B gzip CSS against the unchanged
+  50 KiB and 2 KiB ceilings.
+- The first full Chromium run passed 185/186; dense participant editor opening reported 331px drift once. Three
+  focused repeats and a clean full 186-scenario rerun passed without further source changes. No persistent blocker remains.
+
 ### Offscreen draft save anchoring - 2026-10-16
 
 - Fix saving an October 20 draft for Marco Eggens after scrolling to December showing another day. Save uses a

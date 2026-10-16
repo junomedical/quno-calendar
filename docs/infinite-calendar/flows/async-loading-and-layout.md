@@ -206,6 +206,14 @@ Concrete cases:
 
 For horizontal `scrollToDateTime`, vertical focus follows the date/resource policy while the requested time remains on the horizontal time axis.
 
+### Explicit editor restoration
+
+Parent draft changes and restore requests share one committed update. The horizontal view pins the restore date
+through both create and edit closure. After date measurements, it reapplies the current session, synchronizes the
+virtualizer's offset and range with the actual viewport, and refreshes resource metrics. If that range differs from
+the rendered items, it projects once more before paint. This avoids a frame with newly measured dates and an old
+scroll range. The existing deadline, manual-intent cancellation and release animation remain independent.
+
 ### Changing the selected row count
 
 Changing `estimateSize` alone does not invalidate virtualizer prefix positions. Capture the semantic anchor before

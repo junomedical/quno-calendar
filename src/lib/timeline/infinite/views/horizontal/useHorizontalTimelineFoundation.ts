@@ -79,11 +79,10 @@ export function useHorizontalTimelineFoundation({
     containerRef,
     settings: sizing.effectiveSettings,
     now,
-    scrollToDate,
-    hasActiveDraft: Boolean(props.activeDraft)
+    scrollToDate
   });
   const createRangeActive = props.activeDraft?.mode === "create" || createTransitionActive;
-  // Creation's eager range owns its closing frames; edit restores retain the single date pin.
+  // The restore pin survives both creation and editing row transitions.
   const virtualTimeline = useScrollRuntime({
     containerRef,
     anchorDateKey: windowAnchorDateKey,
@@ -99,8 +98,7 @@ export function useHorizontalTimelineFoundation({
     eagerRange: createRangeActive,
     retainLoadWindow: Boolean(props.activeDraft || createTransitionActive),
     layoutAnchorDateKey:
-      (createRangeActive ? undefined : navigation.activeRestoreTarget?.dateKey) ??
-      (props.activeDraft ? eventDateKey(props.activeDraft.event) : undefined)
+      navigation.activeRestoreTarget?.dateKey ?? (props.activeDraft ? eventDateKey(props.activeDraft.event) : undefined)
   });
   scrollToDateRef.current = virtualTimeline.scrollToDate;
   const { clearScrollEndTimer } = virtualTimeline;
@@ -158,6 +156,19 @@ export function useHorizontalTimelineFoundation({
     virtualizer: virtualTimeline.virtualizer,
     refreshViewport: viewportMetricsStore.refresh,
     readVisibleSnapshot: virtualTimeline.readVisibleSnapshot
+  });
+
+  // Measurements can invalidate date positions after navigation's layout effect.
+  // Resolve the anchor again and publish both date and resource windows before paint.
+  useLayoutEffect(() => {
+    if (!navigation.activeRestoreTarget || !containerRef.current) return;
+    navigation.flushViewportAnchorRestore();
+    const virtualizer = virtualTimeline.virtualizer;
+    const scrollTop = containerRef.current.scrollTop;
+    virtualizer.scrollOffset = scrollTop;
+    virtualizer.calculateRange();
+    viewportMetricsStore.refresh();
+    if (virtualizer.getVirtualItems() !== virtualTimeline.virtualItems) virtualTimeline.projectRange();
   });
 
   return {

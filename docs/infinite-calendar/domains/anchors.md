@@ -37,8 +37,9 @@ Priority and interaction with scroll maintenance are defined in the [Flow Guide]
 - Horizontal draft changes retain measured dates. Explicit restores cancel pending idle recenter work and block new
   deadlines until they release ownership; the scheduler rechecks live ownership at racing deadlines.
 - Horizontal parent restores pin their target date through resource resizing, keeping its geometry registered when
-  an edit draft clears and ordinary overscan moves away. Creation keeps its existing eager closing range. The pin
-  ends with restoration or cancellation (Decision 105).
+  a create or edit draft clears and ordinary overscan moves away. The pin ends with restoration or cancellation
+  (Decisions 105 and 110). After date measurement, a final layout step reapplies the restore and publishes the corrected
+  date range and resource viewport before paint. Ordinary scrolling remains frame-coalesced.
 - New raw date navigation, explicit restoration, and cancellation discard queued horizontal resource navigation.
 - Explicit centered row navigation recomputes its desired snapshot from the live row height during the bounded session.
 - Manual user intent cancels eligible scheduled restoration.

@@ -38,6 +38,9 @@ keeps alternating resource shading stable as horizontal rows are virtualized.
 [Decision 109](./infinite-calendar/decisions.md#109---restore-offscreen-saves-to-the-retained-editor-anchor)
 returns offscreen demo saves to the retained participant row and date.
 
+[Decision 110](./infinite-calendar/decisions.md#110---coordinate-editor-restoration-and-virtual-projection-before-paint)
+coordinates horizontal editor measurements, restoration and virtual windows so drawing and Cancel never paint an intermediate position.
+
 The current responsiveness work is recorded in
 [QUNO-013](./shared/decisions.md#quno-013---bound-high-frequency-work-to-display-frames), with Infinite Calendar's
 multilane background availability geometry in [Decision 091](./infinite-calendar/decisions.md#091---availability-has-independent-collision-lanes),

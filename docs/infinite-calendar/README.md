@@ -87,6 +87,12 @@ keeps the bounded restore active through date navigation and returning rows; man
 Try drawing on October 20 for Marco Eggens, scrolling to December, then saving. October 20 and Marco's row return to
 the retained position. See [Decision 109](./decisions.md#109---restore-offscreen-saves-to-the-retained-editor-anchor).
 
+Drawing and Cancel batch the controlled draft change and restoration request in the same handler. After measuring
+horizontal dates, the view reapplies the anchor and publishes the date range and resource viewport together before
+paint. The restore date stays pinned through create closure as well as edit closure; fade-out remains independent.
+Try six calendars, draw on October 17 in Room 203, then Cancel. The row stays at its original screen position throughout,
+with no blank calendar frame. See [Decision 110](./decisions.md#110---coordinate-editor-restoration-and-virtual-projection-before-paint).
+
 TanStack Virtual notifications use its queued React update path. Layout restoration requests an ordinary React
 projection before paint, keeping React 19 development free of the virtualizer `flushSync` lifecycle warning while
 semantic anchor and frame-stability browser coverage continues to guard against empty intermediate views.

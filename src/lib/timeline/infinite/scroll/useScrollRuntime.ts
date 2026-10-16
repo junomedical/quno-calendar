@@ -202,6 +202,7 @@ export function useScrollRuntime({
   return {
     containerRef,
     virtualizer,
+    virtualItems,
     virtualWindow,
     dateKeyToIndex,
     renderItems,
@@ -213,6 +214,7 @@ export function useScrollRuntime({
     rememberVisibleDateOffset,
     updateTopVisibleDate,
     clearScrollEndTimer,
+    projectRange,
     retainAllResources: structuralRenderWindow.retainAllResources
   };
 }

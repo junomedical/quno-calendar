@@ -83,5 +83,6 @@ export function useViewportAnchorRestore(args: RestoreArgs) {
     cleanupRef.current = session.start();
   });
 
-  return { activeRestoreTarget, restoreViewportAnchor, cancelViewportAnchorRestore };
+  const flushViewportAnchorRestore = useCallback(() => sessionRef.current?.flush(), []);
+  return { activeRestoreTarget, restoreViewportAnchor, cancelViewportAnchorRestore, flushViewportAnchorRestore };
 }
