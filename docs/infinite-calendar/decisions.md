@@ -1072,3 +1072,21 @@ theme uses the same state. Keep existing surface tokens, slots, cell overrides a
 
 Chromium coverage starts with October 30 and 31 visible, scrolls in both directions through odd and even resource
 pruning, and asserts computed colors for both dates against their complete-list colors.
+
+## 109 - Restore Offscreen Saves To The Retained Editor Anchor
+
+Date: 2026-10-16
+Status: Accepted; refines Decisions 009, 035, 103 and 104 (demo resource-slot restoration)
+
+The focused demo captures only a visible editor instance on Save and falls back to the retained last-seen anchor
+when the user has scrolled away. A pinned offscreen draft's current coordinate must not replace that retained position.
+Horizontal saves restore the saved participant's resource/time slot, independent of collision lanes and hover;
+vertical saves retain event targets. The captured participant remains authoritative when rows expand after closing.
+
+Visible saves keep immediate-only correction. Offscreen saves use the existing bounded after-recenter session so
+date navigation and deferred row measurements can settle. Both paths yield to manual scrolling. This supersedes only
+Decision 009's immediate-only rule for offscreen saves; cache patching, appearance and consumer-owned date-only
+outcome policies remain unchanged. No public API changes are required.
+
+Chromium regressions draw on October 20 for Marco Eggens, wheel to December, Save, and assert the original row offset
+and saved event in both sparse and dense datasets, including settling beyond the restore deadline.

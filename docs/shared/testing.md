@@ -55,6 +55,8 @@ Architecture checks enforce object arguments and product dependency direction, i
 - Save-triggered range reloads only mark ids provided in `appearingEventIds` as appearing; unrelated reloaded created events remain `existing`, and the same active requested id is consumed once rather than replaying on later range responses.
 - Imperative visible-event commits replace or insert one saved event in the loaded visible cache without calling `loadEvents`, and can mark that event as appearing.
 - External save patches the committed event into the visible cache instead of showing a released save draft or invalidating the range, avoiding double glints and reload jumps. Manual scrolling immediately after save is not pulled back by delayed anchor corrections.
+- Offscreen Save regressions draw October 20 for Marco, wheel to December, and assert the retained October row offset
+  after Save and beyond the restore deadline with 100 and 5,000 events. Horizontal restoration targets the row slot.
 - Date-only editor completion tests cover create/edit, Cancel/Save, return to an unmounted opening date, 135-row
   expansion, four-second settling and manual-scroll cancellation. Unit tests cover both views and time-axis preservation.
 - Review regressions exercise raw-date/restore/cancel precedence over queued row navigation and recomputed centering

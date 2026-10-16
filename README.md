@@ -39,6 +39,7 @@ import { parseDateInput, tokenizeDateInput } from "@quno/calendar/date-parser";
   Alternating resource shading stays consistent as rows enter or leave the viewport.
 
   The demo anchors horizontal editor opening and cancellation to the resource row, keeping the grid steady through card hover expansion. Active horizontal restores keep their target date mounted through participant changes.
+  Saving after scrolling away returns the draft's participant row to its retained anchor position.
 
 - **Quno/Datepicker** paints, resizes, and moves one timezone-free date or inclusive range, with optional single-day time selection; endpoint shortcuts keep composed input popups open while navigating.
 - **Quno/Date Input** provides a native controlled or uncontrolled field for typed dates, ranges, and optional single-day clock times.
