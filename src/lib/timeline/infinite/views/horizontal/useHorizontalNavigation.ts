@@ -27,7 +27,6 @@ type HorizontalNavigationArgs = {
   containerRef: RefObject<HTMLDivElement | null>;
   settings: QunoInfiniteCalendarSettings;
   now: Date;
-  hasActiveDraft: boolean;
   scrollToDate: QunoInfiniteCalendarHandle["scrollToDate"];
 };
 
@@ -36,7 +35,6 @@ export function useHorizontalNavigation({
   containerRef,
   settings,
   now,
-  hasActiveDraft,
   scrollToDate: scrollToDateBase
 }: HorizontalNavigationArgs) {
   const scrollToTime = useCallback(
@@ -61,7 +59,7 @@ export function useHorizontalNavigation({
     containerRef,
     settings: settings,
     orientation: "horizontal",
-    flushBeforePaint: !hasActiveDraft,
+    flushBeforePaint: false,
     scrollToDateTime: scrollToDateTimeBase,
     scrollToDate: scrollToDateBase,
     visibilityInsets: {
@@ -153,6 +151,7 @@ export function useHorizontalNavigation({
 
   return {
     activeRestoreTarget: anchoring.activeRestoreTarget,
+    flushViewportAnchorRestore: anchoring.flushViewportAnchorRestore,
     commitVisibleEventRef,
     registration: anchoring.registration,
     releaseActiveDraftRef,

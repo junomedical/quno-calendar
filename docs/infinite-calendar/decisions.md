@@ -1090,3 +1090,24 @@ outcome policies remain unchanged. No public API changes are required.
 
 Chromium regressions draw on October 20 for Marco Eggens, wheel to December, Save, and assert the original row offset
 and saved event in both sparse and dense datasets, including settling beyond the restore deadline.
+
+## 110 - Coordinate Editor Restoration And Virtual Projection Before Paint
+
+Date: 2026-10-16
+Status: Accepted; refines Decisions 097, 103, 105 (restore-date retention) and 107
+
+Drawing and cancelling a create draft must batch parent state and its anchor request rather than committing the
+filtered rows before requesting restoration. Keep the active restore date pinned through create closure as well as
+edit closure. This supersedes only Decision 105's creation exception; eager navigation and the retained load window
+continue to support creation transitions.
+
+Horizontal date measurement can invalidate positions after the navigation layout effect runs. Finish the layout with
+one current-session restore, publish the actual scroll offset and virtual date range, and refresh resource viewport
+metrics. If the rendered range is stale, request another React layout projection before paint. Horizontal ongoing
+session flushes belong to this final step; vertical restoration keeps its existing timing. Keep ordinary scroll reads
+frame-coalesced, existing measured sizes, bounded restore deadlines, manual cancellation, and release fade-out.
+No new public methods or props are needed.
+
+Chromium regressions reproduce a one-frame 500px jump at October 17 in Room 203. At 1280px and 1800px they sample every
+frame through opening and four seconds of cancellation, rejecting missing rows, movement, horizontal drift and blank
+date gaps. Existing repeat-draw, participant-edit, save, loading and manual-scroll tests retain their contracts.

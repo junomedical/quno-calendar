@@ -133,8 +133,7 @@ export function useExternalDraftCommit({
       clearActiveDraft();
       setMessage("External popup cancelled");
     };
-    if (activeDraft?.mode === "edit") clearDraft();
-    else flushSync(clearDraft);
+    clearDraft();
     if (!anchor || !cancelledEvent) {
       setMessage("Scroll reset skipped: no captured popup anchor");
       return;

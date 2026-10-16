@@ -792,7 +792,10 @@ the draft. Hover changes only the card's presentation and cannot move a slot tar
 as a fallback if that participant is removed. Clear the draft and request restoration in the same handler, without
 a forced intermediate commit. The horizontal view retains the restore date while rows resize, even with
 `allowNavigationFallback: false`; the date pin ends with the bounded restore or cancellation. Vertical editors and
-participant changes can retain event targets.
+participant changes can retain event targets. Drawn creation follows the same batching rule: set the controlled draft
+and request its anchor restore in the same handler. Horizontal layout finishes measurements, restores the target,
+and publishes both virtual windows before paint. Avoid forcing a draft-only commit between capture and restore.
+Try drawing in Room 203 on October 17 with six calendars, then Cancel; the row should never leave its screen position.
 Horizontal participant edits keep measured day sizes. Idle recentering waits while an explicit restore is active, then resumes
 on the next scroll signal. Use `requireVisible: true` to reject missing or offscreen event instances; these captures
 return `null` instead of falling back to a resource slot.

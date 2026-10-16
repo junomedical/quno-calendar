@@ -83,10 +83,8 @@ export function useExternalEventDrafts({
       if (drawnDraftAnchor) {
         activeEditSourceEventRef.current = null;
         activeDraftLastSeenAnchorRef.current = drawnDraftAnchor;
-        flushSync(() => {
-          setDraftParticipantsChanged(false);
-          setActiveDraft({ mode: "create", event: nextEvent });
-        });
+        setDraftParticipantsChanged(false);
+        setActiveDraft({ mode: "create", event: nextEvent });
         restoreEventAnchor(drawnDraftAnchor, nextEvent, {
           eventId: draftId,
           afterRecenter: true,
@@ -96,10 +94,8 @@ export function useExternalEventDrafts({
       } else {
         activeEditSourceEventRef.current = null;
         activeDraftLastSeenAnchorRef.current = null;
-        flushSync(() => {
-          setDraftParticipantsChanged(false);
-          setActiveDraft({ mode: "create", event: nextEvent });
-        });
+        setDraftParticipantsChanged(false);
+        setActiveDraft({ mode: "create", event: nextEvent });
       }
       setMessage(source === "button" ? "External create popup opened" : "Drawn range delegated to external popup");
     },
