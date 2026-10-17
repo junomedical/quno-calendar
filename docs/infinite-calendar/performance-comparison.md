@@ -2,7 +2,8 @@
 
 PR integration note: the timing results below were measured before merging main `edc6f38`, which removes zoom
 transparency. They remain historical evidence for the rewrite, not fresh timings for the merged PR. The integrated
-package measures 32,224 B gzip JavaScript (31.47 KiB) and 2,018 B gzip CSS (1.97 KiB).
+package measured 32,224 B gzip JavaScript (31.47 KiB) and 2,018 B gzip CSS (1.97 KiB). The subsequent
+Shift-input capture fix measures 32,288 B JavaScript (31.53 KiB); timing results below have not been rerun for that fix.
 
 ## Optimized runtime — October 17, 2026
 

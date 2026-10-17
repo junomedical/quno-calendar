@@ -4,6 +4,22 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+### Keep Shift input from scrolling at zoom limits - 2026-10-17
+
+- Capture Shift-wheel before zoom-limit and anchor checks in both orientations. Mouse-wheel and horizontal/diagonal
+  trackpad input stay reserved for zoom at 0.5/8 without redundant controlled requests.
+- Capture Shift-touch panning without requesting zoom or cancelling viewport ownership. Preserve ordinary input
+  when zoom is disabled and resume ordinary wheel scrolling after the existing 300 ms momentum tail.
+- Add seven unit cases and four real-wheel browser regressions checking unchanged native scroll coordinates at both
+  limits and resumed scrolling after Shift release.
+- Verification: 545 functional tests plus both isolated scaling tests pass; all four new real-wheel cases pass in
+  Chromium and WebKit. The full Chromium run passes 218/219 cases; the row-filter restoration case times out waiting
+  for `row-134` after expansion, then passes all five isolated repeats unchanged. All 20 focused WebKit cases pass.
+  Formatting, architecture/contracts, types, lint, package verification, Preact, React 19, demo build, size reporting
+  and pack dry-run pass. JavaScript is 32,288 B gzip (31.53 KiB); CSS remains 2,018 B (1.97 KiB).
+- Firefox remains blocked at standalone startup with `sandbox_extension_issue_file_to_process ... Operation not permitted`
+  and `RenderCompositorSWGL failed mapping default framebuffer, no dt`, followed by timeout.
+
 ### Integrate current main for runtime PR - 2026-10-17
 
 - Merge main `edc6f38` and preserve its immediate full-opacity labels and 15/five-minute grid cadence in both new

@@ -129,9 +129,13 @@ Products own recurrence expansion; saves and filters still refresh through `even
 ## Bundle budget
 
 JavaScript is limited to 50 KiB gzip and the optional stylesheet to 2 KiB gzip. The current artifacts measure
-31.47 KiB and 1.97 KiB gzip respectively (Node 23.10.0, gzip level 9). See [Decision 100](./decisions.md#100---reconcile-the-infinite-calendar-budget-after-branch-integration).
+31.53 KiB and 1.97 KiB gzip respectively (Node 23.10.0, gzip level 9). See [Decision 100](./decisions.md#100---reconcile-the-infinite-calendar-budget-after-branch-integration).
 
 ## Zoom continuity
+
+With `onZoomChange`, Shift-wheel and trackpad input cannot fall through into native scrolling, even at zoom limits.
+Shift-touch movement suppresses panning. Ordinary scrolling resumes after the 300 ms momentum tail following Shift
+input. See [Decision 118](./decisions.md#118---capture-shift-input-even-when-zoom-cannot-change).
 
 Both Shift-wheel orientations restore their first pointer-nearest time node in the controlled zoom layout commit before paint,
 using actual effective geometry. External zoom immediately takes over anchoring; delayed parents retain the old view

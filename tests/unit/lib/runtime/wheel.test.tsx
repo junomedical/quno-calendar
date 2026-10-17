@@ -4,8 +4,11 @@ import { defaultQunoInfiniteCalendarSettings as settings } from "@quno/calendar/
 import { CalendarEngine, type EngineLayout } from "#quno-internal/timeline/runtime/viewport/CalendarEngine";
 import { useRuntimeZoom } from "#quno-internal/timeline/runtime/react/useRuntimeZoom";
 
-afterEach(() => vi.unstubAllGlobals());
-function setup() {
+afterEach(() => {
+  vi.unstubAllGlobals();
+  vi.restoreAllMocks();
+});
+function setup({ zoom = 1 } = {}) {
   const frames: FrameRequestCallback[] = [];
   vi.stubGlobal(
     "requestAnimationFrame",
@@ -14,7 +17,7 @@ function setup() {
   vi.stubGlobal("cancelAnimationFrame", vi.fn());
   const layout: EngineLayout = {
     orientation: "horizontal",
-    settings: { ...settings, zoom: 1 },
+    settings: { ...settings, zoom },
     calendars: [{ id: "one", name: "One" }],
     metrics: new Map(),
     anchorDate: "2026-07-06"
@@ -28,9 +31,9 @@ function setup() {
     flush: () => engine.observeScroll({ top: element.scrollTop, left: element.scrollLeft, now: performance.now() })
   };
   const hook = renderHook(() => useRuntimeZoom({ engine, adapter, containerRef: { current: element }, onZoomChange }));
-  const wheel = () =>
+  const wheel = (input: WheelEventInit = {}) =>
     element.dispatchEvent(
-      new WheelEvent("wheel", { shiftKey: true, deltaY: -100, clientX: 400, clientY: 100, cancelable: true })
+      new WheelEvent("wheel", { shiftKey: true, deltaY: -100, clientX: 400, clientY: 100, cancelable: true, ...input })
     );
   const flush = () =>
     act(async () => {
@@ -41,6 +44,54 @@ function setup() {
 }
 
 describe("controlled wheel input", () => {
+  it.each([
+    { zoom: 8, deltaY: -100, deltaX: 0 },
+    { zoom: 0.5, deltaY: 100, deltaX: 0 },
+    { zoom: 8, deltaY: 0, deltaX: -100 },
+    { zoom: 0.5, deltaY: 0, deltaX: 100 }
+  ])("captures Shift input at zoom $zoom with deltas $deltaX/$deltaY", async (input) => {
+    const { wheel, flush, onZoomChange } = setup(input);
+    expect(wheel(input)).toBe(false);
+    await flush();
+    expect(onZoomChange).not.toHaveBeenCalled();
+  });
+  it("suppresses the momentum tail at a zoom limit, then restores normal scrolling", () => {
+    let now = 100;
+    vi.spyOn(performance, "now").mockImplementation(() => now);
+    const { wheel } = setup({ zoom: 8 });
+    expect(wheel()).toBe(false);
+    now = 350;
+    expect(wheel({ shiftKey: false })).toBe(false);
+    now = 401;
+    expect(wheel({ shiftKey: false })).toBe(true);
+  });
+  it("starts a fresh pointer anchor after an expired gesture reaches the zoom limit", async () => {
+    let now = 100;
+    vi.spyOn(performance, "now").mockImplementation(() => now);
+    const { wheel, flush, engine, layout } = setup({ zoom: 7.85 });
+    const expectZoom = vi.spyOn(engine, "expectZoom");
+    act(() => wheel({ clientX: 400 }));
+    await flush();
+    engine.updateLayout({ layout: { ...layout, settings: { ...layout.settings, zoom: 8 } }, now });
+    const oldAnchor = expectZoom.mock.calls[0][0].anchor;
+    now = 1000;
+    act(() => wheel({ clientX: 700 }));
+    act(() => wheel({ clientX: 700, deltaY: 100 }));
+    await flush();
+    const newAnchor = expectZoom.mock.calls.at(-1)![0].anchor;
+    expect(newAnchor.screen.x).toBeGreaterThan(oldAnchor.screen.x + 200);
+    expect(Math.abs(newAnchor.screen.x - 700)).toBeLessThanOrEqual(20);
+  });
+  it("captures Shift-touch movement without requesting zoom and releases ordinary touch", () => {
+    const { element, onZoomChange, unmount } = setup();
+    const touch = (shiftKey: boolean) => new TouchEvent("touchmove", { shiftKey, cancelable: true });
+    expect(element.dispatchEvent(touch(true))).toBe(false);
+    expect(element.dispatchEvent(touch(false))).toBe(true);
+    expect(onZoomChange).not.toHaveBeenCalled();
+    unmount();
+    expect(element.dispatchEvent(touch(true))).toBe(true);
+  });
+
   it("coalesces several samples into one latest-value request", async () => {
     const { wheel, flush, onZoomChange } = setup();
     act(() => {

@@ -98,3 +98,5 @@ combined package.
 
 [Decision 117](./infinite-calendar/decisions.md#117---separate-stable-layout-from-viewport-presentation) records
 viewport presentation subscriptions, reusable geometry and native observation ordering.
+
+[Decision 118](./infinite-calendar/decisions.md#118---capture-shift-input-even-when-zoom-cannot-change) keeps Shift input captured at zoom limits and preserves ordinary scrolling after the momentum tail.

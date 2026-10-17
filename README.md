@@ -102,3 +102,5 @@ Release preparation is local only. Publishing, deprecating old packages, and del
 Infinite Calendar uses one mathematical viewport engine for both orientations, with stable semantic anchors and
 bounded date/resource windows. Native movement within an unchanged rendered window avoids React updates, while zoom
 reuses stable resource layout. See its [runtime architecture](docs/infinite-calendar/architecture.md).
+
+With Infinite Calendar zoom enabled, Shift-wheel stays reserved for zoom at both limits; it never falls through into scrolling.

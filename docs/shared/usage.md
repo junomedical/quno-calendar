@@ -1125,3 +1125,5 @@ Try `/guide/timepicker` and `/demo/timepicker`; see [the full contract](../timep
 Infinite Calendar consumers keep the same controlled zoom and renderer contracts. The runtime tracks native
 scrolling independently from React presentation and reuses prepared layout during zoom; custom event content
 continues to receive current geometry and interaction state.
+
+For Infinite Calendar, supplying `onZoomChange` reserves Shift-wheel/trackpad input even at the zoom limits. Shift-touch movement also suppresses panning; ordinary scrolling resumes after the 300 ms momentum tail.

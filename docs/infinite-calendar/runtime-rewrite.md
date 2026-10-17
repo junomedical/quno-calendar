@@ -27,6 +27,22 @@ have descending priority. Manual input cancels eligible restores immediately.
 | M6 Stability and performance                | Measured; Firefox blocked      | Repeated Chromium/WebKit and dense profiling; see exact environment blocker below                |
 | M7 Cutover and cleanup                      | Implemented; Firefox gate open | Both orientations switched on this branch; 62 obsolete modules and TanStack removed              |
 
+## Shift-input follow-up verification
+
+Decision 118 reserves Shift-wheel before no-op/limit checks and suppresses Shift-touch panning. New wheel bursts
+clear stale anchors even when their first sample cannot change zoom. Ordinary input returns after the existing
+300 ms wheel tail. The live demo and PR include the fix.
+
+All **545 functional unit tests plus two isolated scaling tests** pass. The full Chromium run passes **218/219**
+cases, including all four new real-wheel tests. The row-filter restoration scenario times out waiting for `row-134`
+after expansion, then passes **five isolated repeats unchanged**; retain this intermittent full-suite limitation.
+All **20 focused WebKit cases** pass, including the new input cases and both orientations' frame-stability checks.
+Formatting, architecture/contracts, types, lint, package verification, Preact, React 19, demo build, size reporting
+and pack dry-run pass. JavaScript is **32,288 B gzip (31.53 KiB)**; CSS remains **2,018 B (1.97 KiB)**. Firefox's
+standalone startup blocker is unchanged. Evidence uses `shift-*` logs in `/tmp/quno-runtime-rewrite/`; the earlier
+`shift-chromium.log` run was intentionally interrupted before adding the stale-anchor regression, and the complete
+run is `shift-chromium-final.log`.
+
 ## PR integration verification
 
 Current main `edc6f38` is integrated. Its removal of zoom transparency is preserved in both renderers, including

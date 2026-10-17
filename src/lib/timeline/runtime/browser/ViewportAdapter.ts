@@ -112,6 +112,7 @@ export class ViewportAdapter {
         });
       return;
     }
+    if (event.type === "touchmove" && (event as TouchEvent).shiftKey) return;
     this.manualIntent();
   };
   private manualIntent = () => {

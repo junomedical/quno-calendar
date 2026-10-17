@@ -50,6 +50,11 @@ export function useRuntimeZoom({
         }
         return;
       }
+      const continuing = now < tail;
+      if (!continuing) anchor = null;
+      event.preventDefault();
+      event.stopPropagation();
+      tail = now + 300;
       const delta = event.deltaY || event.deltaX;
       if (!delta) return;
       const zoom = Math.max(
@@ -60,7 +65,7 @@ export function useRuntimeZoom({
         )
       );
       if (zoom === state.geometry.settings.zoom && requested === null) return;
-      if (!anchor || now >= tail) {
+      if (!anchor || !continuing) {
         const box = viewport.getBoundingClientRect();
         anchor = wheelAnchor({
           geometry: state.geometry,
@@ -69,10 +74,7 @@ export function useRuntimeZoom({
         });
       }
       if (!anchor) return;
-      event.preventDefault();
-      event.stopPropagation();
       requested = zoom;
-      tail = now + 300;
       if (frame !== null) return;
       frame = requestAnimationFrame(() => {
         frame = null;
@@ -98,11 +100,19 @@ export function useRuntimeZoom({
         });
       });
     };
+    const handleTouch = (event: TouchEvent) => {
+      if (!callback.current || !event.shiftKey) return;
+      event.preventDefault();
+      event.stopPropagation();
+      tail = performance.now() + 300;
+    };
     viewport.addEventListener("wheel", handle, { passive: false });
+    viewport.addEventListener("touchmove", handleTouch, { passive: false });
     return () => {
       active = false;
       if (frame !== null) cancelAnimationFrame(frame);
       viewport.removeEventListener("wheel", handle);
+      viewport.removeEventListener("touchmove", handleTouch);
     };
   }, [adapter, containerRef, engine]);
 }

@@ -1297,3 +1297,21 @@ Preserve all pre-paint anchor corrections, overscan and draft/focus pins.
 Verify skipped React renders against live engine movement, navigation/pin publication, stable extents and correct
 projected coordinates, hour-range invalidation and DOM-read ordering. Retain full browser geometry coverage and
 repeat the production timing comparison against both the initial rewrite and main.
+
+## 118 - Capture Shift Input Even When Zoom Cannot Change
+
+Date: 2026-10-17
+Status: Accepted; refines Decisions 112, 113 and 117's input capture without changing controlled zoom or anchor contracts
+
+With `onZoomChange` present, reserve Shift-wheel input before checking wheel delta, zoom limits or anchor availability.
+At zoom 0.5 and 8, continued mouse-wheel or trackpad movement must not fall through into native scrolling on either
+axis. Do not request another controlled value when already at the limit. Extend the existing 300 ms momentum tail
+for captured limit input, then allow ordinary scrolling after the tail expires.
+
+Shift-modified `touchmove` also suppresses native panning without inventing a touch-to-zoom scale. It must not cancel
+viewport ownership as manual scrolling. Ordinary touch remains native. Keep listeners non-passive and remove them
+on unmount. Without `onZoomChange`, preserve native input behavior.
+
+Verify both orientations with real browser wheel input at both limits, including horizontal and diagonal trackpad
+deltas, unchanged native scroll coordinates, bounded momentum suppression and resumed ordinary scrolling. Unit
+coverage checks no redundant callback, touch cancellation and listener cleanup.

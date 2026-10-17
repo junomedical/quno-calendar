@@ -23,7 +23,10 @@ motion/status lifecycles and respect reduced motion.
 
 Shift-wheel samples coalesce to one request per frame. The first pointer-nearest time tick remains the burst anchor.
 Only a parent-accepted zoom changes geometry; ignored requests expire, and a newer external value cancels a queued
-wheel request. Gesture-tail capture suppresses momentum that would otherwise scroll after Shift release.
+wheel request. With `onZoomChange`, capture Shift-wheel before checking whether zoom can change, including at the
+0.5/8 limits and for horizontal trackpad deltas. Shift-touch movement suppresses panning without requesting zoom.
+Gesture-tail capture suppresses momentum for 300 ms after the latest Shift input, including limit input; ordinary
+scrolling resumes after that tail. See Decision 118.
 
 External horizontal zoom preserves a visible now marker, otherwise the visible grid center or its origin. External
 vertical zoom retains the day-board fraction at the viewport top. Both paths build final extents and rendering windows,
