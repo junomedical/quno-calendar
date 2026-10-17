@@ -52,7 +52,7 @@ for (const width of [1280, 390]) {
       sticky: "sticky",
       visible: true,
       fontSize: "13px",
-      weight: "550",
+      weight: "400",
       hourSize: "16px",
       hourWeight: "700",
       headingFits: true,

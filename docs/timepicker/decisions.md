@@ -35,3 +35,12 @@ count in QUNO-018: both time selectors now use two rows of six minute choices pe
 
 [QUNO-021](../shared/decisions.md#quno-021---emphasize-hours-above-minute-options) makes sticky hour headings
 larger and bold (16px/700), using normal text color beside 13px/550 minutes. Existing geometry and interaction remain.
+
+## QTP-002 - Use regular-weight minute options
+
+- Date: 2026-10-17
+- Status: Accepted; supersedes only standalone Timepicker's minute weight in QUNO-021
+- Decision: Set `.quno-time-picker-minute-option` to font weight 400 at the existing 13px size. Hour headings retain
+  16px/700; Datepicker's independently scoped minute styles retain their existing weight.
+- Consequences: Standalone minute options use regular text in every state. Existing desktop/mobile Chromium checks
+  assert computed weight alongside selection, geometry, sticky hour headings and keyboard behavior.

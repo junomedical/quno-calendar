@@ -15,6 +15,7 @@ import {
 } from "#quno-internal/timeline/infinite/rendering/shared/EventLayers";
 import type { VerticalCalendarColumnProps } from "./types";
 import { CalendarHourBands } from "#quno-internal/timeline/infinite/rendering/shared/CalendarHourBands";
+import { TimeGridDetails } from "#quno-internal/timeline/infinite/rendering/shared/TimeGridDetails";
 import {
   positionColumnLayoutItems,
   verticalEventBox,
@@ -145,6 +146,7 @@ export const VerticalCalendarColumn = memo(function VerticalCalendarColumn({
         backgroundPosition: `0 ${VERTICAL_TIMELINE_GUTTER_PX}px`
       }}
     >
+      <TimeGridDetails settings={settings} orientation="vertical" />
       <CalendarHourBands hours={calendarHourPresentations} orientation="vertical" settings={settings} />
       <AvailabilityLayer
         items={availabilityItems}

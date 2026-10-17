@@ -4,6 +4,27 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+### Regular-weight Timepicker minutes - 2026-10-17
+
+- Set `.quno-time-picker-minute-option` to font weight 400. Update its desktop/mobile computed-style assertions
+  and presentation documentation.
+- Verification: all 543 unit tests and all 213 Chromium scenarios pass, including standalone desktop/mobile typography.
+  Formatting, architecture/contracts, typechecking, lint, demo build, package verification, Preact and React 19
+  compatibility, size reporting and pack dry-run pass. Timepicker CSS is 803 B gzip within its unchanged budget.
+  No verification blockers remain.
+
+### Fade progressive zoom detail - 2026-10-17
+
+- Fade time labels and extra five-minute grid lines in and out over 160 ms in both orientations. Retain nodes and
+  update geometry immediately; rapid reversals continue from current opacity. Respect reduced-motion preferences.
+- Add Chromium checks for intermediate/final opacity, reversals, accessibility, stable nodes and grid geometry.
+- Keep the steady quarter-hour grid separate from its fading detail layer; update existing geometry and sticky-label
+  checks to distinguish retained hidden labels from visible ones. Refresh guide payload measurements.
+- Verification: all 543 unit tests and all 213 Chromium scenarios pass. Formatting, architecture/contracts, typechecking, lint, demo build,
+  packed-package verification, Preact and React 19 compatibility, size reporting and pack dry-run pass.
+  Infinite Calendar measures 42,543 B gzip JavaScript and 2,000 B gzip CSS against unchanged budgets.
+  No verification blockers remain.
+
 ### Vertical zoom paints its final layout directly - 2026-10-17
 
 - Use one committed-layout wheel zoom coordinator for both orientations. Remove vertical nine-frame scroll retries;

@@ -278,6 +278,9 @@ orientation, availability, loading, visual-focus, and motion assertions formerly
 - Horizontal rendering applies a viewport-fill floor so the timeline board does not become narrower than the available viewport width even when an incoming prop value falls below that floor; wheel gestures still stop at the slider minimum.
 - Zoom values above `6` switch the timeline row grid and time labels from 15-minute to 5-minute cadence.
 - Dense zoom levels progressively hide minor time labels so 15/45 disappear first and minute labels disappear entirely before labels overlap. Crossing the `6` fine-grid threshold retains the same tick elements and text children while the percentage-based tick track changes extent; it does not add or replace tick DOM nodes.
+- Both orientations fade progressive labels and five-minute grid details through intermediate opacity in both directions,
+  including an unfinished exit reversed into an entrance. Chromium asserts retained nodes, immediate grid geometry,
+  pointer-transparent detail layers and accessibility state; reduced motion has no opacity transition.
 - Sticky-header visual artefacts are covered: dates stay pinned to the top, the absolute day-header band does not create an extra visual row or overlap the first calendar row, day header background fills across the timeline below the time scale, sticky date labels and calendar row labels cover horizontally scrolled timeline content through CSS layering instead of JavaScript clipping, visible hour/minute labels remain painted above the day band at high zoom, the header marker stem begins at the bottom of its pin and per-day marker segments remain below the sticky time-scale context, current-time markers stay out of date/calendar names while layering above calendar data and the gray day band, and calendar cells share one 1px gray border color without doubled sticky-label seams.
 - Dataset scale can switch to 20,000 events per year.
 - Delayed, rejected, aborted, never-resolving, and out-of-order loaders leave scroll, zoom, draw, and drag interactions responsive; delayed commits preserve the captured viewport anchor within 1px and do not flash empty rows.
@@ -414,7 +417,7 @@ contexts, class names, and root attributes. Public surface/type guards include t
 private renderer, date-range values, unsupported cadence, and typed-input validation props.
 
 Chromium checks 1280px and 390px selection, Enter focus retention, selected-slot scrolling, empty-list fallback and disabled state,
-cadence-specific computed columns and full-row geometry for every supported cadence, sticky hour geometry and layering, 13px/550 minute typography, clipping and page overflow.
+cadence-specific computed columns and full-row geometry for every supported cadence, sticky hour geometry and layering, 13px/400 minute typography, clipping and page overflow.
 The home card and editorial guide expose live controlled/uncontrolled examples, recipes, scoped theme colors, and
 separate production measurements. Packed React, Node ESM/CommonJS/SSR, Preact, and React 19 consumers import the
 Timepicker alongside the original four surfaces. Its JavaScript and CSS budgets are 3 KiB and 1.5 KiB gzip.
@@ -423,7 +426,7 @@ Empty and omitted enabled-hour regressions verify all 24 groups, boundary-hour s
 
 Five-minute cadence geometry must produce six columns and two full rows per hour in both selectors.
 Both selectors assert 16px/700 hour headings, normal text color, and rail fit on desktop and mobile, alongside
-13px/550 minutes and sticky geometry/layering.
+13px minutes (400 weight in standalone Timepicker, 550 in Datepicker) and sticky geometry/layering.
 
 The packed React consumer also typechecks every product, including Timepicker, with legacy Node-style module
 resolution to verify `typesVersions` alongside the normal Bundler/`exports` resolution.

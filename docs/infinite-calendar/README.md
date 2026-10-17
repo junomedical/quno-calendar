@@ -125,7 +125,7 @@ Products own recurrence expansion; saves and filters still refresh through `even
 ## Bundle budget
 
 JavaScript is limited to 50 KiB gzip and the optional stylesheet to 2 KiB gzip. The current artifacts measure
-41.34 KiB and 1.97 KiB gzip respectively (Node 24, gzip level 9). See [Decision 100](./decisions.md#100---reconcile-the-infinite-calendar-budget-after-branch-integration).
+41.55 KiB and 1.95 KiB gzip respectively (Node 24, gzip level 9). See [Decision 100](./decisions.md#100---reconcile-the-infinite-calendar-budget-after-branch-integration).
 
 ## Zoom continuity
 
@@ -134,6 +134,11 @@ using actual effective geometry. External zoom immediately takes over anchoring;
 until they commit. Vertical dates and both virtual windows project to their final geometry before paint, including
 large zoom-outs. Horizontal slider changes prefer a visible current-time marker; vertical slider changes retain the
 top date/time. See [Decision 113](./decisions.md#113---commit-vertical-zoom-geometry-and-focus-before-paint).
+
+Progressive time labels and the extra five-minute grid lines fade in and out over 160 ms with the optional stylesheet.
+Quarter-hour grid lines remain steady. Geometry updates immediately; rapid reversals continue from the current opacity.
+Reduced-motion preferences disable these fades. Try the guide's **Reveal time progressively** controls in both directions.
+See [Decision 114](./decisions.md#114---fade-progressive-time-detail-in-both-orientations).
 
 ## Named contracts
 

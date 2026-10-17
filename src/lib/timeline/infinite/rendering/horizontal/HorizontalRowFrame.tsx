@@ -11,6 +11,7 @@ import { TIMELINE_LEFT_GUTTER_PX } from "#quno-internal/timeline/time/timelineTi
 import type { ViewportGeometryRegistration } from "#quno-internal/timeline/infinite/anchors/parent/viewportAnchorTypes";
 import type { HorizontalRowLayoutItems } from "./types";
 import { CalendarHourBands } from "#quno-internal/timeline/infinite/rendering/shared/CalendarHourBands";
+import { TimeGridDetails } from "#quno-internal/timeline/infinite/rendering/shared/TimeGridDetails";
 
 /** Row chrome: resource label + time grid + hover hit surface around event layers. */
 
@@ -117,6 +118,7 @@ export function HorizontalRowFrame({
           backgroundSize: `${gridCellWidth}px 100%`
         }}
       >
+        <TimeGridDetails settings={settings} orientation="horizontal" />
         <CalendarHourBands hours={calendarHourPresentations} orientation="horizontal" settings={settings} />
         {showNowLine ? (
           <div

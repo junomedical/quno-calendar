@@ -100,3 +100,17 @@
   font-weight: 750;
   pointer-events: auto;
 }
+
+.quno-calendar-time-detail {
+  transition: opacity 160ms ease;
+}
+
+.quno-calendar-time-detail.is-label-hidden {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quno-calendar-time-detail {
+    transition: none;
+  }
+}

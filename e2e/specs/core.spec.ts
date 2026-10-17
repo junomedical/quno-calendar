@@ -60,8 +60,16 @@ test("renders, scrolls vertically, zooms, and changes dataset scale", async ({ p
   await expect(page.getByTestId("zoom-value")).toHaveText("8.00");
   await expect(page.getByTestId("calendar-row").first().locator(".quno-calendar-row-grid")).toHaveCSS(
     "background-size",
-    "40px 100%"
+    "120px 100%"
   );
+  const fineGrid = page.getByTestId("calendar-row").first().locator(".quno-calendar-time-grid-detail");
+  await expect(fineGrid).toHaveCSS("opacity", "1");
+  await expect(fineGrid).toHaveCSS("background-size", "120px 100%");
+  expect(
+    await fineGrid.evaluate((element) =>
+      Array.from(getComputedStyle(element).backgroundImage.matchAll(/ (\d+(?:\.\d+)?)px/g), (match) => Number(match[1]))
+    )
+  ).toEqual([40, 40, 41, 41, 80, 80, 81, 81]);
   await expect(page.getByTestId("calendar-row").first().locator(".quno-calendar-row-grid")).toHaveCSS(
     "background-position-x",
     "8px"
@@ -71,6 +79,7 @@ test("renders, scrolls vertically, zooms, and changes dataset scale", async ({ p
     "repeat"
   );
   await setDemoZoom(page, 6);
+  await expect(fineGrid).toHaveCSS("opacity", "0");
   await expect(page.getByTestId("calendar-row").first().locator(".quno-calendar-row-grid")).toHaveCSS(
     "background-size",
     "90px 100%"

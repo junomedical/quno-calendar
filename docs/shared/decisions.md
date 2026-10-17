@@ -3,6 +3,12 @@
 This ledger owns decisions that affect more than one of the four products. Product-specific choices belong in the
 matching product's `decisions.md`.
 
+Infinite Calendar's progressive zoom-detail opacity fades are product-owned in
+[Decision 114](../infinite-calendar/decisions.md#114---fade-progressive-time-detail-in-both-orientations).
+
+Standalone Timepicker's regular-weight minute options are product-owned in
+[QTP-002](../timepicker/decisions.md#qtp-002---use-regular-weight-minute-options).
+
 The original consolidation record, `QUNO-001`, remains in the
 [Infinite Calendar historical ledger](../infinite-calendar/decisions.md#quno-001---consolidate-calendar-picker-and-natural-input)
 because that repository was the consolidation source. Its identifier and text remain unchanged.

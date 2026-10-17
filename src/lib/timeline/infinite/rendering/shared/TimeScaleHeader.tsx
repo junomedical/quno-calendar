@@ -72,6 +72,7 @@ export function InfiniteTimeScaleHeader({
               <span
                 className={[
                   "quno-calendar-time-tick",
+                  "quno-calendar-time-detail",
                   tick.isHour ? "is-hour" : "",
                   tick.showLabel ? "" : "is-label-hidden",
                   hourProps?.className

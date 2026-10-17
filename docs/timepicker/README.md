@@ -46,8 +46,8 @@ Locale is passed to the clock formatter; default clock presentation is `HH:mm`.
 
 The independent stylesheet uses `quno-time-picker-*` classes and `--quno-time-picker-*` tokens for colors, border,
 radius, height, and hour-rail width. Use `--quno-time-picker-minute-radius` for minute buttons,
-`--quno-time-picker-height` for the scroller, and `--quno-time-picker-time-label-width` for the hour rail. `--quno-font-family` provides the shared font. Minute numbers are 13px/550,
-aligned with Datepicker. Sticky hour headings use 16px/700 and the normal text color to stand out from minutes.
+`--quno-time-picker-height` for the scroller, and `--quno-time-picker-time-label-width` for the hour rail. `--quno-font-family` provides the shared font. Minute numbers are 13px/400.
+Sticky hour headings use 16px/700 and the normal text color to stand out from minutes.
 Consumers can theme the control without calendar styles.
 
 Datepicker's optional single-day time mode reuses the private slot renderer. Its date selection, view transitions,
