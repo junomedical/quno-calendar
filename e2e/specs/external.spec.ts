@@ -812,7 +812,7 @@ test("supports external event editing popup without blocking calendar scroll", a
   }
 
   const editDraftStartBeforeDrag = await page.getByTestId("draft-start-input").inputValue();
-  const editDraftBoxes: Array<{ x: number; y: number; width: number; height: number }> = [];
+  const editDraftBoxes: Array<{ x: number; y: number; width: number; height: number; dragX: number }> = [];
   await expect
     .poll(async () => {
       const box = await page.evaluate((activeEventId) => {
@@ -820,9 +820,17 @@ test("supports external event editing popup without blocking calendar scroll", a
           document.querySelectorAll<HTMLElement>(`[data-testid="draft-event"][data-event-id="${activeEventId}"]`)
         )) {
           const box = element.getBoundingClientRect();
-          const target = document.elementFromPoint(box.x + 18, box.y + box.height / 2);
-          if (target?.closest<HTMLElement>("[data-event-id]")?.dataset.eventId === activeEventId) {
-            return { x: box.x, y: box.y, width: box.width, height: box.height };
+          const pointerY = box.y + box.height / 2;
+          const target = document.elementFromPoint(box.x + 18, pointerY);
+          // The editor may cover the destination to the right; keep the drag on the calendar.
+          const dragX = [box.x + 118, box.x - 82].find((x) =>
+            document.elementFromPoint(x, pointerY)?.closest(".quno-calendar-row-grid")
+          );
+          if (
+            target?.closest<HTMLElement>("[data-event-id]")?.dataset.eventId === activeEventId &&
+            dragX !== undefined
+          ) {
+            return { x: box.x, y: box.y, width: box.width, height: box.height, dragX };
           }
         }
         return null;
@@ -840,7 +848,7 @@ test("supports external event editing popup without blocking calendar scroll", a
   await page.mouse.move(activeEditDraftBox.x + 18, activeEditDraftBox.y + activeEditDraftBox.height / 2);
   await page.mouse.down();
   await page.waitForTimeout(100);
-  await page.mouse.move(activeEditDraftBox.x + 118, activeEditDraftBox.y + activeEditDraftBox.height / 2);
+  await page.mouse.move(activeEditDraftBox.dragX, activeEditDraftBox.y + activeEditDraftBox.height / 2);
   await expect.poll(async () => page.getByTestId("draft-start-input").inputValue()).not.toBe(editDraftStartBeforeDrag);
   await page.mouse.up();
 

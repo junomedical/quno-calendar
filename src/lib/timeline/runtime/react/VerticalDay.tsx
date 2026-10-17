@@ -1,3 +1,4 @@
+import { gridCadenceMinutes } from "#quno-internal/timeline/time/timelineTicks";
 import { sameDayPresentation } from "./dayPresentation";
 /**
  * Vertical day coordinator.
@@ -28,7 +29,7 @@ export const VerticalDay = memo(function VerticalDay(
     renderedColumnIndexes: [...day.resourceIndexes],
     dayWidth: day.geometry.bounds.width,
     gridTemplateColumns: day.geometry.resources.map((resource) => `minmax(${resource.width}px, 1fr)`).join(" "),
-    cadenceHeight: Math.max(1, day.settings.zoom * 15)
+    cadenceHeight: Math.max(1, day.settings.zoom * gridCadenceMinutes({ zoom: day.settings.zoom }))
   };
   const calendarDayProps = calendarDayPresentation({
     dateKey: day.dateKey,

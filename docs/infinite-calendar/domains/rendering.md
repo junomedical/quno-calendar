@@ -15,8 +15,8 @@ settings and prepared lanes as the model. They neither fetch data nor calculate 
 The vertical time pane is separately memoized so resource-window changes do not rebuild unchanged time ticks.
 
 Event content remains external through `renderEvent`. Stable slots, state attributes and optional component-scoped
-CSS remain public contracts. Progressive detail follows Decision 115, with immediate scale-derived opacity and no
-animation tail. Resource parity uses the full list index even when earlier resources unmount.
+CSS remain public contracts. Time labels switch immediately at full opacity under Decision 116, with display-based hiding and no
+animation tail. Grid cadence switches from 15 to five minutes above zoom 6. Resource parity uses the full list index even when earlier resources unmount.
 
 Verification covers shell isolation, pure lane geometry, model projection and bounds, plus browser assertions for
 layering, clipping, sticky positions, resource identity, visible detail and frame-by-frame zoom continuity.

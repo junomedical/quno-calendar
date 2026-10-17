@@ -7,7 +7,7 @@ Baseline: `3138b28` on `main`. Implementation branch: `fix/infinite-calendar-run
 Replace the complete runtime alongside the existing implementation. The replacement owns data preparation,
 geometry, date/resource virtualization, viewport transactions and interactions. Preserve the public API,
 consumer-owned rendering/editors, CSS contracts, React 18+, React 19 and Preact compatibility. Switch both
-orientations only after parity. Progressive detail follows Decision 115: opacity updates immediately with zoom.
+orientations only after parity. Time-detail visibility follows Decision 116: labels switch immediately at full opacity with zoom.
 
 One committed geometry revision supplies rendering, visibility, hit testing and anchor resolution. Logical
 identity uses date/resource/time and event/participant identity, never a collision-lane index. One browser adapter
@@ -27,7 +27,24 @@ have descending priority. Manual input cancels eligible restores immediately.
 | M6 Stability and performance                | Measured; Firefox blocked      | Repeated Chromium/WebKit and dense profiling; see exact environment blocker below                |
 | M7 Cutover and cleanup                      | Implemented; Firefox gate open | Both orientations switched on this branch; 62 obsolete modules and TanStack removed              |
 
-## Latest optimization verification
+## PR integration verification
+
+Current main `edc6f38` is integrated. Its removal of zoom transparency is preserved in both renderers, including
+full-opacity labels, display-based hiding and the 15/five-minute grid cadence. The branch-local runtime Decision
+116 is disambiguated as `116-runtime`; the ledger records the collision and retains main's published Decision 116
+and the optimization's Decision 117.
+
+The integrated tree passes **538 functional unit tests plus both isolated scaling tests**, **215 Chromium
+scenarios**, and **24 focused WebKit scenarios**. Formatting, architecture/contracts, types, lint, packed package
+verification, Preact, React 19, demo build, size reporting and pack dry-run pass. The initial Chromium run had one
+editor drag failure: its fixed destination landed on the external popup's date input. The regression now selects
+an exposed calendar destination; five focused repeats and the final complete suite pass without runtime changes.
+
+Integrated JavaScript is **32,224 B gzip (31.47 KiB)**; CSS is **2,018 B gzip (1.97 KiB)**. Previous timings below
+precede this merge and are not presented as fresh measurements of the integrated runtime. Firefox remains blocked
+at standalone startup as detailed below. Current evidence uses `pr-*` logs in `/tmp/quno-runtime-rewrite/`.
+
+## Pre-integration optimization verification
 
 Decision 117 refines the completed cutover with stable React presentation snapshots, indexed resource metrics,
 reused geometry and captured native observations. All **541 unit tests in 66 files**, **223 Chromium scenarios**,
@@ -52,7 +69,7 @@ JavaScript is **32,555 B gzip (31.79 KiB)** and optional CSS remains **1,996 B g
 [complete comparison and raw samples](./performance-comparison.md). Logs are `opt-final-*`,
 `optimization-restore-fixes.log`, `optimized-comparison.log`, and `optimized-layout-summary.json` under
 `/tmp/quno-runtime-rewrite/`. Firefox remains blocked at standalone startup as recorded below; M7's complete
-cross-browser acceptance remains open. The branch remains uncommitted, unmerged and unpublished.
+cross-browser acceptance remains open. These measurements preceded PR preparation and the integration of main's removal of zoom transparency.
 
 ## Initial cutover verification record
 
@@ -122,15 +139,15 @@ Public imports continue through `@quno/calendar/infinite-calendar`; no runtime-s
 The old private-hook suites were replaced when their production modules were removed. Their public behaviors are
 covered by the engine and public entry-point suites:
 
-| Retired implementation coverage                | Replacement                                                                                                          |
-| ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| Date cache, request loader, membership index   | `runtime/repository`, `runtime/loading`, `runtime/data`, `runtime/preparation`; public projection tests              |
-| Draft source and prepared-date cache           | `runtime/preparation`: create/edit source handling, multi-participant membership, 119 untouched dates                |
-| Resource and date virtualizers                 | `runtime/geometry`, `runtime/columns`, `runtime/viewport`; loading-window and seeded browser scenarios               |
-| Data-layout, row navigation and parent anchors | `runtime/anchors`, `runtime/navigation`, `runtime/viewport`; row-filter, editor, external-save browser scenarios     |
-| Wheel coordinators and zoom preparation        | `runtime/wheel`, `runtime/zoom`, `runtime/preparation`; horizontal/vertical frame sampling and detail opacity suites |
-| Mounted hit targets                            | `runtime/hit`: owned viewport, chrome rejection and model projection; public drag/create browser coverage            |
-| Recenter timers                                | `runtime/viewport` ownership/expiry/recenter invariants; public edge scrolling and idle position assertions          |
+| Retired implementation coverage                | Replacement                                                                                                             |
+| ---------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| Date cache, request loader, membership index   | `runtime/repository`, `runtime/loading`, `runtime/data`, `runtime/preparation`; public projection tests                 |
+| Draft source and prepared-date cache           | `runtime/preparation`: create/edit source handling, multi-participant membership, 119 untouched dates                   |
+| Resource and date virtualizers                 | `runtime/geometry`, `runtime/columns`, `runtime/viewport`; loading-window and seeded browser scenarios                  |
+| Data-layout, row navigation and parent anchors | `runtime/anchors`, `runtime/navigation`, `runtime/viewport`; row-filter, editor, external-save browser scenarios        |
+| Wheel coordinators and zoom preparation        | `runtime/wheel`, `runtime/zoom`, `runtime/preparation`; horizontal/vertical frame sampling and detail visibility suites |
+| Mounted hit targets                            | `runtime/hit`: owned viewport, chrome rejection and model projection; public drag/create browser coverage               |
+| Recenter timers                                | `runtime/viewport` ownership/expiry/recenter invariants; public edge scrolling and idle position assertions             |
 
 Pure horizontal/vertical shell geometry tests remain. The old nine-item premeasurement fallback and TanStack callback
 identity assertions are retired because the replacement has complete mathematical geometry before measurement.

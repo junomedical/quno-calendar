@@ -34,6 +34,6 @@ phase consumes already captured native observations instead of reading the paren
 changes retain a full flush. Horizontal row/date extents and vertical column extents are reused when their inputs
 are unchanged; resource rectangles are projected on demand from those extents and the committed scale.
 
-Progressive labels and fine-grid opacity follow scale immediately (Decision 115); event and tick nodes remain stable.
+Labels switch immediately at full opacity and grid cadence follows scale (Decision 116); event and tick nodes remain stable.
 Tests sample every animation frame, compare event/tick positions, check layering and clipping, repeat reversals at low
 and high zoom, and verify delayed controlled acknowledgements and external takeover.

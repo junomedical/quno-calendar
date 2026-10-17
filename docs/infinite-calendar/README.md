@@ -106,7 +106,7 @@ with no blank calendar frame. See [Decision 110](./decisions.md#110---coordinate
 A shared mathematical engine now owns both orientations: logical coordinates, event preparation, virtual windows,
 anchor priority and committed viewport revisions. One browser adapter writes scroll offsets. Resource/time and
 participant anchors survive asynchronous layout changes without DOM measurement retries or forced React commits.
-See [Decision 116](./decisions.md#116---one-mathematical-runtime-for-both-orientations) and the
+See [Decision 116-runtime](./decisions.md#116-runtime---one-mathematical-runtime-for-both-orientations) and the
 [rewrite verification record](./runtime-rewrite.md). Scrolling within an unchanged rendered window updates the
 engine without rerendering React; zoom reuses prepared collision data and stable resource extents. See
 [Decision 117](./decisions.md#117---separate-stable-layout-from-viewport-presentation).
@@ -129,7 +129,7 @@ Products own recurrence expansion; saves and filters still refresh through `even
 ## Bundle budget
 
 JavaScript is limited to 50 KiB gzip and the optional stylesheet to 2 KiB gzip. The current artifacts measure
-31.79 KiB and 1.95 KiB gzip respectively (Node 23.10.0, gzip level 9). See [Decision 100](./decisions.md#100---reconcile-the-infinite-calendar-budget-after-branch-integration).
+31.47 KiB and 1.97 KiB gzip respectively (Node 23.10.0, gzip level 9). See [Decision 100](./decisions.md#100---reconcile-the-infinite-calendar-budget-after-branch-integration).
 
 ## Zoom continuity
 
@@ -139,11 +139,11 @@ until they commit. Vertical dates and both virtual windows project to their fina
 large zoom-outs. Horizontal slider changes prefer a visible current-time marker; vertical slider changes retain the
 top date/time. See [Decision 113](./decisions.md#113---commit-vertical-zoom-geometry-and-focus-before-paint).
 
-Progressive time labels and extra five-minute grid lines derive opacity directly from zoom with the optional stylesheet.
-Opacity and geometry update in the same commit, including rapid wheel/trackpad reversals, without an animation tail.
-Zero-opacity detail keeps its nodes but skips layout. Reduced motion gives visible detail full opacity.
+Time labels appear or disappear immediately at their readable zoom thresholds, at full opacity. The grid switches
+directly between quarter-hour and five-minute cadence above zoom 6. Hidden ticks retain their nodes with `display: none`;
+there are no detail overlays, opacity ramps or fade animations.
 Try the guide's **Reveal time progressively** controls in both directions.
-See [Decision 115](./decisions.md#115---derive-time-detail-opacity-from-zoom-without-an-animation-tail).
+See [Decision 116](./decisions.md#116---remove-zoom-detail-transparency).
 
 ## Named contracts
 

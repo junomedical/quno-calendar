@@ -1,5 +1,9 @@
 # Infinite Calendar before/after timing
 
+PR integration note: the timing results below were measured before merging main `edc6f38`, which removes zoom
+transparency. They remain historical evidence for the rewrite, not fresh timings for the merged PR. The integrated
+package measures 32,224 B gzip JavaScript (31.47 KiB) and 2,018 B gzip CSS (1.97 KiB).
+
 ## Optimized runtime — October 17, 2026
 
 The optimization reduces horizontal scroll p95 CPU by **20.0%** and horizontal zoom by **32.6%** against the initial

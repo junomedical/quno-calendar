@@ -18,8 +18,8 @@ export const infiniteCalendarProduction: FieldGuideProductionProfile = {
   entrypoint: "@quno/calendar/infinite-calendar",
   stylesheet: "@quno/calendar/infinite-calendar/styles.css",
   artifacts: [
-    { label: "JavaScript", gzip: "31.79 KiB", raw: "131.98 KiB", budget: "≤ 50 KiB gzip" },
-    { label: "Optional CSS", gzip: "1.95 KiB", raw: "10.44 KiB", budget: "≤ 2 KiB gzip" }
+    { label: "JavaScript", gzip: "31.47 KiB", raw: "130.41 KiB", budget: "≤ 50 KiB gzip" },
+    { label: "Optional CSS", gzip: "1.97 KiB", raw: "10.46 KiB", budget: "≤ 2 KiB gzip" }
   ],
   runtime: "React 18+ and React DOM peers",
   compatibility: "Preact 10.18+ through compat aliases",

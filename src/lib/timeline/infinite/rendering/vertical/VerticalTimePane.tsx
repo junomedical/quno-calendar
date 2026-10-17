@@ -1,7 +1,6 @@
 import { memo } from "react";
 import type { VerticalTimelineDayProps } from "./types";
 import { VERTICAL_TIMELINE_GUTTER_PX } from "./verticalGeometry";
-import { timeDetailOpacityStyle } from "#quno-internal/timeline/infinite/rendering/shared/TimeGridDetails";
 import {
   CalendarHourBands,
   calendarHourLabelProps
@@ -37,7 +36,6 @@ export const VerticalTimePane = memo(function VerticalTimePane(day: TimePaneProp
               <span
                 className={[
                   "icv-time-tick",
-                  "quno-calendar-time-detail",
                   tick.isHour ? "is-hour" : "",
                   tick.showLabel ? "" : "is-label-hidden",
                   hourProps?.className
@@ -49,7 +47,6 @@ export const VerticalTimePane = memo(function VerticalTimePane(day: TimePaneProp
                 key={`${day.dateKey}-time-${tick.minute}`}
                 aria-hidden={!tick.showLabel}
                 style={{
-                  ...timeDetailOpacityStyle({ opacity: tick.opacity }),
                   ...hourProps?.style,
                   top: `${tick.positionPercent}%`
                 }}

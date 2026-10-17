@@ -1225,7 +1225,25 @@ reversals, no CSS animations, display-hidden detail, geometry and node identity,
 stops. Existing per-frame wheel/slider anchor regressions remain required. Unit coverage checks current-scale opacity
 and tier boundaries independently of gesture history.
 
-## 116 - One Mathematical Runtime For Both Orientations
+## 116 - Remove Zoom Detail Transparency
+
+Date: 2026-10-17
+Status: Accepted; supersedes Decisions 114 and 115 and restores Decisions 006, 023 and 048's detail visibility
+
+Remove the zoom transparency feature entirely at the user's request. Restore boolean label visibility at the original
+readability thresholds, full opacity for visible labels, and display-based hiding with stable tick nodes. Render the
+grid directly as one repeating background at 15-minute cadence, switching to five minutes only above zoom 6.
+Remove the detail overlay component, opacity calculations, private opacity variable and transparency-specific styles.
+
+Keep wheel/slider scheduling, committed zoom geometry and anchor restoration unchanged. Timepicker minute options
+retain weight 400 under QTP-002. Browser coverage checks immediate visibility, grid cadence, stable nodes and no opacity
+animations in both orientations with wheel/slider input and ordinary/reduced motion. Preserve prior records as history.
+
+Integration note (2026-10-17): main published Decision 116 while the runtime branch used that number locally.
+The runtime record retains its branch identifier as `116-runtime` to distinguish it from published Decision 116;
+Decision 117 retains its identifier and refines that runtime record. The original branch record remains in commit `d8b6364`.
+
+## 116-runtime - One Mathematical Runtime For Both Orientations
 
 Date: 2026-10-17
 Status: Accepted; supersedes the runtime mechanisms in Decisions 103, 110, 112 and 113 while preserving their user-visible contracts
@@ -1248,7 +1266,7 @@ projection. Reuse unaffected date preparation and geometry. Virtualize dates and
 
 Remove the private migration selector, old viewport/load/anchor implementations and the unused TanStack dependency
 at cutover. Public names, props, handles, styling contracts and consumer-owned editing remain unchanged. Keep React
-18, React 19 and Preact support without forced commits. Detail opacity continues to follow Decision 115.
+18, React 19 and Preact support without forced commits. Time-detail visibility follows Decision 116, which supersedes Decision 115.
 
 Acceptance requires full public-contract browser coverage, seeded mixed actions, ten repeated frame-sensitive runs,
 focused Firefox/WebKit checks and measured dense-calendar budgets. The rewrite record tracks evidence and commands.
@@ -1256,7 +1274,7 @@ focused Firefox/WebKit checks and measured dense-calendar budgets. The rewrite r
 ## 117 - Separate Stable Layout From Viewport Presentation
 
 Date: 2026-10-17
-Status: Accepted; refines Decision 116 without changing its anchoring or public contracts
+Status: Accepted; refines Decision 116-runtime without changing its anchoring or public contracts
 
 Keep live viewport/ownership state in the engine, but expose a stable React snapshot while committed geometry,
 visible dates, mounted date indexes and pinned/visible resource indexes are unchanged. Imperative handles and

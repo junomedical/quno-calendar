@@ -4,7 +4,6 @@ import type { CalendarHourPresentation } from "#quno-internal/timeline/core/cale
 import type { QunoInfiniteCalendarSettings } from "#quno-internal/timeline/core/types";
 import { TIMELINE_LEFT_GUTTER_PX } from "#quno-internal/timeline/time/timelineTicks";
 import { CalendarHourBands, calendarHourLabelProps } from "./CalendarHourBands";
-import { timeDetailOpacityStyle } from "./TimeGridDetails";
 
 type TimeTick = {
   minute: number;
@@ -12,7 +11,6 @@ type TimeTick = {
   label: string;
   isHour: boolean;
   showLabel: boolean;
-  opacity: number;
 };
 
 type InfiniteTimeScaleHeaderProps = {
@@ -75,7 +73,6 @@ export const InfiniteTimeScaleHeader = memo(function InfiniteTimeScaleHeader({
               <span
                 className={[
                   "quno-calendar-time-tick",
-                  "quno-calendar-time-detail",
                   tick.isHour ? "is-hour" : "",
                   tick.showLabel ? "" : "is-label-hidden",
                   hourProps?.className
@@ -86,11 +83,7 @@ export const InfiniteTimeScaleHeader = memo(function InfiniteTimeScaleHeader({
                 data-hour={hourProps ? tick.minute / 60 : undefined}
                 key={`sticky-${tick.minute}`}
                 aria-hidden={!tick.showLabel}
-                style={{
-                  ...timeDetailOpacityStyle({ opacity: tick.opacity }),
-                  ...hourProps?.style,
-                  left: `${tick.positionPercent}%`
-                }}
+                style={{ ...hourProps?.style, left: `${tick.positionPercent}%` }}
                 title={hourProps?.title}
               >
                 {tick.isHour ? tick.label : <sup>{tick.label}</sup>}

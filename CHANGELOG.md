@@ -4,6 +4,21 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+### Integrate current main for runtime PR - 2026-10-17
+
+- Merge main `edc6f38` and preserve its immediate full-opacity labels and 15/five-minute grid cadence in both new
+  renderers. Disambiguate the runtime branch's Decision 116 as `116-runtime`, retaining the original record in Git
+  and main's published Decision 116; Decision 117 retains its identifier.
+- Keep the external-editor drag regression's destination on the exposed calendar instead of under the popup.
+  The original destination hit the editor's date input; five focused repeats and the final full browser run pass.
+- Integrated verification: 538 functional unit tests plus both isolated scaling tests, all 215 Chromium scenarios,
+  and 24 focused WebKit scenarios pass. Formatting, architecture/contracts, types, lint, package verification,
+  Preact, React 19, demo build, size reporting and pack dry-run pass.
+- Integrated JavaScript is 32,224 B gzip (31.47 KiB), with CSS at 2,018 B (1.97 KiB). Prior performance comparisons
+  remain explicitly historical: they precede this main integration and were not rerun for the merged runtime.
+- Firefox remains blocked at standalone startup: `sandbox_extension_issue_file_to_process ... Operation not permitted`
+  and `RenderCompositorSWGL failed mapping default framebuffer, no dt`, followed by timeout. Firefox acceptance remains open.
+
 ### Reuse viewport presentation and zoom layout - 2026-10-17
 
 - Keep live native position in the engine while React reuses its frame when geometry and visible/mounted identities
@@ -47,6 +62,17 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 - Firefox verification remains blocked before any application test: standalone browser launch times out after
   `sandbox_extension_issue_file_to_process ... Operation not permitted` and
   `RenderCompositorSWGL failed mapping default framebuffer, no dt`. Cross-browser acceptance remains open.
+
+### Remove zoom transparency - 2026-10-17
+
+- Remove the zoom transparency feature, including opacity ramps, fade styles and the extra grid-detail layer.
+  Restore immediate full-opacity time labels, original readability thresholds and direct grid-cadence changes.
+- Retain stable tick nodes, zoom anchoring and the standalone Timepicker's minute font weight of 400.
+- Replace transparency tests with immediate visibility, grid geometry and no-animation regressions in both orientations.
+- Verification in an isolated checkout: all 543 unit tests and all 213 Chromium scenarios pass. Formatting,
+  architecture/contracts, typechecking, lint, library/demo builds, package verification, Preact and React 19
+  compatibility, size reporting and pack dry-run pass. Infinite Calendar is 42,332 B gzip JavaScript and 2,018 B gzip CSS
+  (Node 23.10), within unchanged budgets. No verification blockers remain.
 
 ### Immediate wheel zoom detail - 2026-10-17
 

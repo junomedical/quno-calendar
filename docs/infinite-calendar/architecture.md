@@ -2,7 +2,7 @@
 
 The public `QunoInfiniteCalendar` facade selects a horizontal or vertical projection of one viewport engine.
 Its API, optional stylesheet, consumer-owned cards/editors, and React/Preact contracts are unchanged.
-See [Decision 116](./decisions.md#116---one-mathematical-runtime-for-both-orientations) and the
+See [Decision 116-runtime](./decisions.md#116-runtime---one-mathematical-runtime-for-both-orientations) and the
 [milestone record](./runtime-rewrite.md) for the replacement and its verification.
 
 ## Ownership
@@ -65,7 +65,7 @@ zoom preserves a visible current-time marker, otherwise the grid center or origi
 the visible fraction of the day board. Controlled requests are coalesced to one per frame; external values supersede
 queued wheel requests. Pending native scroll is flushed before the wheel claims ownership. External zoom retains
 its semantic anchor across successive values to avoid cumulative scroll rounding; movement, resize and navigation
-reset it. Time-label and fine-grid opacity follows zoom immediately (Decision 115).
+reset it. Time labels switch immediately at full opacity and grid cadence follows the zoom threshold (Decision 116).
 
 ## Data and preparation
 
