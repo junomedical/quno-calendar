@@ -21,19 +21,18 @@ flowchart LR
 - Native sticky positioning owns headers and labels.
 - Cross-axis windowing preserves original spacer size and resource offsets.
 - Dense time labels hide minor labels before overlap.
-- Progressive detail opacity follows committed zoom immediately; zero-opacity nodes skip layout, and reduced motion uses full visible opacity.
+- Readable time labels switch immediately at full opacity; hidden ticks retain their nodes with display-based hiding.
 
 ## Source Map
 
 ### Shared
 
-| Source file                                                                                          | Responsibility                                                                              |
-| ---------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| [`EventShell.tsx`](../../../src/lib/timeline/infinite/rendering/shared/EventShell.tsx)               | Hosts the external renderer inside geometry- and status-controlled shell layers.            |
-| [`EventLayers.tsx`](../../../src/lib/timeline/infinite/rendering/shared/EventLayers.tsx)             | Shares committed, availability, draft, and preview state while views supply geometry.       |
-| [`CalendarHourBands.tsx`](../../../src/lib/timeline/infinite/rendering/shared/CalendarHourBands.tsx) | Projects product-owned hour presentation onto horizontal and vertical time geometry.        |
-| [`TimeScaleHeader.tsx`](../../../src/lib/timeline/infinite/rendering/shared/TimeScaleHeader.tsx)     | Renders the sticky horizontal time scale, tick labels, and current-time pin.                |
-| [`TimeGridDetails.tsx`](../../../src/lib/timeline/infinite/rendering/shared/TimeGridDetails.tsx)     | Paints retained five-minute detail lines for reversible opacity fades in both orientations. |
+| Source file                                                                                          | Responsibility                                                                        |
+| ---------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| [`EventShell.tsx`](../../../src/lib/timeline/infinite/rendering/shared/EventShell.tsx)               | Hosts the external renderer inside geometry- and status-controlled shell layers.      |
+| [`EventLayers.tsx`](../../../src/lib/timeline/infinite/rendering/shared/EventLayers.tsx)             | Shares committed, availability, draft, and preview state while views supply geometry. |
+| [`CalendarHourBands.tsx`](../../../src/lib/timeline/infinite/rendering/shared/CalendarHourBands.tsx) | Projects product-owned hour presentation onto horizontal and vertical time geometry.  |
+| [`TimeScaleHeader.tsx`](../../../src/lib/timeline/infinite/rendering/shared/TimeScaleHeader.tsx)     | Renders the sticky horizontal time scale, tick labels, and current-time pin.          |
 
 ### Horizontal
 

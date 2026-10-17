@@ -16,6 +16,7 @@ import {
 } from "#quno-internal/timeline/infinite/scroll/resources/resourceWindow";
 import { useViewportMetrics } from "#quno-internal/timeline/infinite/scroll/resources/viewportMetricsStore";
 import { eventDateKey } from "#quno-internal/timeline/infinite/events/eventDateKey";
+import { gridCadenceMinutes } from "#quno-internal/timeline/time/timelineTicks";
 import type { VerticalTimelineDayProps } from "./types";
 
 type DayWindow = {
@@ -76,7 +77,7 @@ export function useVerticalDayWindow(day: VerticalTimelineDayProps): DayWindow {
   );
 
   return {
-    cadenceHeight: Math.max(1, settings.zoom * 15),
+    cadenceHeight: Math.max(1, settings.zoom * gridCadenceMinutes({ zoom: settings.zoom })),
     dayWidth: labelWidth + virtualBoardMinWidth,
     gridTemplateColumns: minimumColumnWidths.map((width) => `minmax(${width}px, 1fr)`).join(" "),
     renderedColumnIndexes

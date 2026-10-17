@@ -105,6 +105,10 @@
   font-weight: 800;
 }
 
+.icv-time-tick.is-label-hidden {
+  display: none;
+}
+
 .icv-day-board {
   position: absolute;
   display: grid;

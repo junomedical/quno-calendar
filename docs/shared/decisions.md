@@ -3,8 +3,8 @@
 This ledger owns decisions that affect more than one of the four products. Product-specific choices belong in the
 matching product's `decisions.md`.
 
-Infinite Calendar's immediate zoom-driven detail opacity is product-owned in
-[Decision 115](../infinite-calendar/decisions.md#115---derive-time-detail-opacity-from-zoom-without-an-animation-tail).
+Infinite Calendar's immediate time-detail visibility is product-owned in
+[Decision 116](../infinite-calendar/decisions.md#116---remove-zoom-detail-transparency).
 
 Standalone Timepicker's regular-weight minute options are product-owned in
 [QTP-002](../timepicker/decisions.md#qtp-002---use-regular-weight-minute-options).
