@@ -293,6 +293,7 @@ orientation, availability, loading, visual-focus, and motion assertions formerly
 - Compact event cards hide the time line when three lines do not fit and reveal it once the card has enough hover-expanded height, including single non-overlapping events in compact rows, without reducing hover typography, changing vertical text alignment, or hiding title icons.
 - Date navigation can jump to a specific date and back to today.
 - Date/time navigation can jump vertically to a date and horizontally to a requested time.
+- Dense 20,000-event vertical wheel and slider tests at 1280px and 1800px sample every frame through reversals, date-model changes, zoom from 8 through 0.5, abrupt minimum/maximum slider reversals, and idle recentering. Time focus and appointment projection remain within 1px for wheel zoom and 2px for repeated slider steps, date sections stay contiguous, and the tracked day/appointment remain mounted. Unit tests cover delayed committed geometry, synchronous model changes, release before later navigation, external takeover and retained/pinned uniform date projection.
 - Vertical `Shift` + wheel zoom anchors to the closest rendered in-range time node even when the pointer sits below the configured timeline end.
 - Calendar visibility/count changes preserve the top visible date plus a surviving resource's row-local position after
   row or column geometry settles. They do not sweep unrelated event rows through the viewport. Parent-only resizing

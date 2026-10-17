@@ -1,4 +1,10 @@
 import type { Virtualizer } from "@tanstack/react-virtual";
+import { shouldAdjustForDateItemResize } from "#quno-internal/timeline/infinite/scroll/position/visibleSnapshot";
+
+export const shouldAdjustScrollPositionOnItemSizeChange: NonNullable<
+  Virtualizer<HTMLDivElement, Element>["shouldAdjustScrollPositionOnItemSizeChange"]
+> = (item, _delta, instance) =>
+  shouldAdjustForDateItemResize({ itemEnd: item.end, scrollOffset: instance.scrollOffset });
 
 /** Invalidates old measurements, then seeds settings-owned vertical geometry when required. */
 export function resetVirtualizerMeasurements({

@@ -70,6 +70,9 @@ Date Parser has a 7 KiB gzip ceiling; see
 [Decision 112](./infinite-calendar/decisions.md#112---restore-horizontal-wheel-anchors-in-the-zoom-layout-commit)
 keeps horizontal wheel time geometry and scroll correction in the same layout commit.
 
+[Decision 113](./infinite-calendar/decisions.md#113---commit-vertical-zoom-geometry-and-focus-before-paint)
+extends committed zoom correction to vertical date/time anchors and uniform date/resource windows.
+
 ## Shared package records
 
 - [Architecture](./shared/architecture.md) defines public surfaces, dependency direction, framework compatibility,

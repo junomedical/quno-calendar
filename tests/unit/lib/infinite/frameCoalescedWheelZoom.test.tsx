@@ -1,10 +1,7 @@
 import { act, renderHook } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { defaultQunoInfiniteCalendarSettings } from "#quno-internal/timeline";
-import {
-  scheduleZoomCommit,
-  useFrameCoalescedWheelZoom
-} from "#quno-internal/timeline/infinite/interactions/zoom/shiftWheelZoomUtils";
+import { useFrameCoalescedWheelZoom } from "#quno-internal/timeline/infinite/interactions/zoom/shiftWheelZoomUtils";
 
 describe("frame-coalesced wheel zoom", () => {
   afterEach(() => vi.unstubAllGlobals());
@@ -32,26 +29,6 @@ describe("frame-coalesced wheel zoom", () => {
     act(() => frameCallbacks.shift()?.(16.7));
     expect(commit).toHaveBeenCalledTimes(1);
     expect(commit).toHaveBeenLastCalledWith(1.45);
-  });
-
-  it("schedules controlled state before restoring the scroll anchor", async () => {
-    const frameCallbacks: FrameRequestCallback[] = [];
-    vi.stubGlobal(
-      "requestAnimationFrame",
-      vi.fn((callback: FrameRequestCallback) => frameCallbacks.push(callback))
-    );
-    const commit = vi.fn();
-    const restore = vi.fn();
-
-    scheduleZoomCommit({ commit, restore, restoreFrameCount: 1 });
-
-    expect(commit).not.toHaveBeenCalled();
-    expect(restore).not.toHaveBeenCalled();
-    await Promise.resolve();
-    expect(commit).toHaveBeenCalledTimes(1);
-    expect(restore).not.toHaveBeenCalled();
-    frameCallbacks.shift()?.(16.7);
-    expect(restore).toHaveBeenCalledTimes(1);
   });
 
   it("drops a queued wheel value when an external controlled zoom wins the frame", () => {

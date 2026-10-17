@@ -125,13 +125,15 @@ Products own recurrence expansion; saves and filters still refresh through `even
 ## Bundle budget
 
 JavaScript is limited to 50 KiB gzip and the optional stylesheet to 2 KiB gzip. The current artifacts measure
-41.29 KiB and 1.97 KiB gzip respectively (Node 24, gzip level 9). See [Decision 100](./decisions.md#100---reconcile-the-infinite-calendar-budget-after-branch-integration).
+41.34 KiB and 1.97 KiB gzip respectively (Node 24, gzip level 9). See [Decision 100](./decisions.md#100---reconcile-the-infinite-calendar-budget-after-branch-integration).
 
 ## Zoom continuity
 
-Horizontal Shift-wheel restores its first pointer-nearest time node in the controlled zoom layout commit before paint,
+Both Shift-wheel orientations restore their first pointer-nearest time node in the controlled zoom layout commit before paint,
 using actual effective geometry. External zoom immediately takes over anchoring; delayed parents retain the old view
-until they commit. See [Decision 112](./decisions.md#112---restore-horizontal-wheel-anchors-in-the-zoom-layout-commit).
+until they commit. Vertical dates and both virtual windows project to their final geometry before paint, including
+large zoom-outs. Horizontal slider changes prefer a visible current-time marker; vertical slider changes retain the
+top date/time. See [Decision 113](./decisions.md#113---commit-vertical-zoom-geometry-and-focus-before-paint).
 
 ## Named contracts
 

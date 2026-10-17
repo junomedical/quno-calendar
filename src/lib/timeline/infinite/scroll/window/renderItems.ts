@@ -31,6 +31,7 @@ type BuildRenderItemsArgs = {
   anchorIndex: number;
   count: number;
   baseDayHeight: number;
+  uniformBaseGeometry?: boolean;
   forcedBaseGeometryAnchorIndex?: number;
   forcedGeometryAnchorDateKey?: string;
   layoutAnchorDateKey?: string;
@@ -47,6 +48,7 @@ export function buildVirtualDateRenderItems({
   anchorIndex,
   count,
   baseDayHeight,
+  uniformBaseGeometry = false,
   forcedBaseGeometryAnchorIndex,
   forcedGeometryAnchorDateKey,
   layoutAnchorDateKey,
@@ -68,6 +70,7 @@ export function buildVirtualDateRenderItems({
       ? null
       : translateMeasuredItems({
           virtualItems,
+          uniformBaseGeometry,
           anchorDateKey: forcedGeometryAnchorDateKey,
           anchorIndex: forcedBaseGeometryAnchorIndex,
           count,
@@ -100,7 +103,9 @@ export function buildVirtualDateRenderItems({
     {
       key: `layout-anchor-${layoutAnchorDateKey}`,
       index: pinnedIndex,
-      start: offsetForIndex({ index: pinnedIndex }) ?? pinnedIndex * baseDayHeight,
+      start: uniformBaseGeometry
+        ? pinnedIndex * baseDayHeight
+        : (offsetForIndex({ index: pinnedIndex }) ?? pinnedIndex * baseDayHeight),
       size: baseDayHeight
     }
   ].sort((left, right) => left.start - right.start);
@@ -108,6 +113,7 @@ export function buildVirtualDateRenderItems({
 
 function translateMeasuredItems({
   virtualItems,
+  uniformBaseGeometry,
   anchorDateKey,
   anchorIndex,
   count,
@@ -116,6 +122,7 @@ function translateMeasuredItems({
   offsetForIndex
 }: {
   virtualItems: VirtualDateRenderItem[];
+  uniformBaseGeometry: boolean;
   anchorDateKey: string;
   anchorIndex: number;
   count: number;
@@ -131,7 +138,16 @@ function translateMeasuredItems({
     .flatMap((item) => {
       if (typeof item.key !== "string" || !ISO_DATE_KEY.test(item.key)) return [];
       const index = dateKeyToIndex({ dateKey: item.key });
-      return index < 0 || index >= count ? [] : [{ ...item, index, start: item.start + translation }];
+      return index < 0 || index >= count
+        ? []
+        : [
+            {
+              ...item,
+              index,
+              start: uniformBaseGeometry ? index * baseDayHeight : item.start + translation,
+              size: uniformBaseGeometry ? baseDayHeight : item.size
+            }
+          ];
     })
     .sort((left, right) => left.start - right.start);
 }

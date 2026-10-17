@@ -1159,3 +1159,29 @@ vertical date/time restoration retain their existing contracts. No public props,
 Chromium samples every frame of dense 20,000-event wheel and slider zoom reversals at 1280px and 1800px, checking
 current-time position, appointment projection and DOM identity. Unit tests cover a delayed parent, actual committed
 geometry, external takeover and unmount before the scheduled notification.
+
+## 113 - Commit Vertical Zoom Geometry And Focus Before Paint
+
+Date: 2026-10-17
+Status: Accepted; supersedes vertical restoration timing in Decision 066 and extends Decision 112 to both orientations
+
+Both Shift-wheel orientations use one controlled commit coordinator. Coalesce raw wheel steps per frame and notify
+the parent in a microtask. After the requested value commits, restore the first pointer-nearest node with actual
+committed geometry in a layout effect. Vertical zoom no longer retries scroll correction over nine frames.
+Carry that anchor through synchronous structural date-model commits before paint, then release commit ownership in
+a microtask without scheduling another scroll write. Delayed parents keep their old view; newer external values
+cancel wheel ownership, and unmount drops scheduled notifications. Retain the bounded momentum tail and cross-axis
+scrolling captured for the latest wheel tick.
+
+Vertical dates have uniform settings-owned heights. During zoom and date-model transitions, project retained semantic
+date keys and pinned dates directly into their final index, start and size rather than translating stale measurements
+with old inter-date spacing. The canvas height is the bounded date count multiplied by the committed day height,
+so abrupt zoom-in cannot clamp against an old spacer. Publish the actual scroll offset, virtual range, visible date snapshot and resource
+viewport metrics before paint, and synchronously reproject a stale date window. Keep the saved semantic date while
+a structural scroll target awaits its new model; do not publish the temporary scroll position as a replacement anchor. Slider/external zoom retains its
+existing top-date/time focus policy; wheel zoom keeps its pointer-specific focus. No public API or style changes.
+
+Chromium samples dense 20,000-event wheel and slider reversals at 1280px and 1800px, including zoom from 8 through
+the 0.5 minimum, abrupt 0.5-to-8 slider reversals, and across date-model recentering. Every frame checks time focus, appointment projection, node
+identity and contiguous dates, including after the idle deadline. Unit tests cover delayed vertical commits,
+synchronous re-anchoring, release before later navigation, external takeover and retained/pinned uniform geometry.

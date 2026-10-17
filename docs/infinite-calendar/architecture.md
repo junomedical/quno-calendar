@@ -444,8 +444,9 @@ receives the status. Request ids are processed once; a newer request or manual i
 
 Anchor names describe different owners rather than interchangeable snapshots: parent viewport restore, active gesture, pending navigation, automatic data-layout correction, and idle virtual-window recenter. Higher-priority owners suppress lower-priority scroll writes. An active pointer gesture cancels an already pending idle deadline, whose callback also reads live ownership before changing the virtual window. See the [anchor taxonomy and priority diagram](./flows/README.md#anchor-taxonomy).
 
-Horizontal wheel zoom restores its pointer anchor in the committed effective layout before paint, without delayed
-correction frames. See [Decision 112](./decisions.md#112---restore-horizontal-wheel-anchors-in-the-zoom-layout-commit).
+Both wheel zoom orientations use a shared committed-layout coordinator, without delayed correction frames. Vertical
+zoom projects retained dates to uniform geometry and publishes date/resource windows before paint. See
+[Decision 113](./decisions.md#113---commit-vertical-zoom-geometry-and-focus-before-paint).
 
 ## Styling And Packaging
 

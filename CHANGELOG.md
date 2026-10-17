@@ -4,6 +4,23 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+### Vertical zoom paints its final layout directly - 2026-10-17
+
+- Use one committed-layout wheel zoom coordinator for both orientations. Remove vertical nine-frame scroll retries;
+  apply the pointer date/time anchor with actual geometry before paint, including synchronous date-model changes.
+- Project retained and pinned vertical dates into final uniform geometry; publish actual scroll, visible-date and
+  date/resource windows before paint. Use final canvas height immediately so abrupt minimum/maximum slider changes
+  cannot clamp against the old spacer. Retain the saved semantic date while a structural target awaits its new model.
+  Slider zoom keeps its existing top-date/time focus policy.
+- Add dense 20,000-event per-frame wheel/slider coverage at two window sizes, including the full zoom range and idle
+  recentering. Add delayed-parent, synchronous re-anchor, external takeover and uniform pinned-date unit coverage.
+- Verification: all 543 unit tests and all 205 Chromium scenarios pass. Formatting, architecture/contracts,
+  typechecking, lint, demo build, package verification, Preact and React 19 compatibility, size reporting and pack
+  dry-run pass. Infinite Calendar measures 42,332 B gzip JavaScript and 2,018 B gzip CSS against unchanged budgets.
+- The first full 205-scenario run passed 204; dense participant editor reopening reported 3,345px drift once.
+  Three focused repeats and a clean full 205-scenario rerun passed without further source changes.
+  No persistent verification blockers remain.
+
 ### Horizontal zoom without sideways correction frames - 2026-10-17
 
 - Restore the first pointer-nearest time node in the same layout commit as horizontal wheel zoom, using actual

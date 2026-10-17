@@ -12,20 +12,24 @@
  *
  * @see docs/infinite-calendar/flows/virtual-scroll-and-recenter.md
  */
-import { useVirtualizer, type Virtualizer, type VirtualizerOptions } from "@tanstack/react-virtual";
+import { useVirtualizer, type VirtualizerOptions } from "@tanstack/react-virtual";
 import { useCallback, useLayoutEffect, useMemo, useRef, useState, type MutableRefObject, type RefObject } from "react";
 import type { QunoInfiniteCalendarSettings } from "#quno-internal/timeline/core/types";
 import { VIRTUAL_DAY_NODE_OVERSCAN } from "./scrollConstants";
 import { createVirtualDateModel } from "#quno-internal/timeline/infinite/scroll/window/dateModel";
-import { useLayoutOffsetRestoration } from "#quno-internal/timeline/infinite/scroll/recenter/useLayoutOffsetRestoration";
-import type { ResolveOffsetOnLayoutChange } from "#quno-internal/timeline/infinite/scroll/recenter/useLayoutOffsetRestoration";
+import {
+  useLayoutOffsetRestoration,
+  type ResolveOffsetOnLayoutChange
+} from "#quno-internal/timeline/infinite/scroll/recenter/useLayoutOffsetRestoration";
 import { useVirtualDateRenderItems } from "#quno-internal/timeline/infinite/scroll/window/useVirtualDateRenderItems";
 import { useStructuralRenderWindow } from "#quno-internal/timeline/infinite/scroll/window/useStructuralRenderWindow";
 import { useVirtualScrollPosition } from "#quno-internal/timeline/infinite/scroll/position/useVirtualScrollPosition";
 import { useVirtualWindowNavigation } from "#quno-internal/timeline/infinite/scroll/navigation/useVirtualWindowNavigation";
 import { useVisibleDateState } from "#quno-internal/timeline/infinite/scroll/position/useVisibleDateState";
-import { shouldAdjustForDateItemResize } from "#quno-internal/timeline/infinite/scroll/position/visibleSnapshot";
-import { resetVirtualizerMeasurements } from "#quno-internal/timeline/infinite/scroll/window/virtualizerMeasurements";
+import {
+  resetVirtualizerMeasurements,
+  shouldAdjustScrollPositionOnItemSizeChange
+} from "#quno-internal/timeline/infinite/scroll/window/virtualizerMeasurements";
 import { useViewportLoadDates } from "#quno-internal/timeline/infinite/scroll/window/useViewportLoadDates";
 
 type UseVirtualTimelineWindowArgs = {
@@ -45,11 +49,6 @@ type UseVirtualTimelineWindowArgs = {
   layoutAnchorDateKey?: string;
   resolveOffsetOnLayoutChange?: ResolveOffsetOnLayoutChange;
 };
-
-const shouldAdjustScrollPositionOnItemSizeChange: NonNullable<
-  Virtualizer<HTMLDivElement, Element>["shouldAdjustScrollPositionOnItemSizeChange"]
-> = (item, _delta, instance) =>
-  shouldAdjustForDateItemResize({ itemEnd: item.end, scrollOffset: instance.scrollOffset });
 
 export function useScrollRuntime({
   containerRef: providedContainerRef,
@@ -160,8 +159,7 @@ export function useScrollRuntime({
   });
 
   const virtualItems = virtualizer.getVirtualItems();
-  const dateSequenceKey = settings.excludedWeekdays.join("|");
-  const dateModelTransitionKey = `${dateSequenceKey}:${virtualWindow.anchorDateKey}`;
+  const dateModelTransitionKey = `${settings.excludedWeekdays.join("|")}:${virtualWindow.anchorDateKey}`;
   const renderedBaseHeightRef = useRef(baseDayHeight);
   if (preserveResourceLayout && !isInteractionActive && !recenterBlockedRef?.current) {
     renderedBaseHeightRef.current = baseDayHeight;
@@ -184,6 +182,7 @@ export function useScrollRuntime({
     virtualItems,
     virtualWindow,
     baseDayHeight,
+    uniformBaseGeometry: Boolean(resolveOffsetOnLayoutChange),
     forcedBaseGeometryAnchorIndex: structuralRenderWindow.anchorIndex,
     forcedGeometryAnchorDateKey: structuralRenderWindow.anchorDateKey,
     layoutAnchorDateKey,
@@ -209,6 +208,7 @@ export function useScrollRuntime({
     visibleDateKeys,
     viewportDateKeys,
     readVisibleSnapshot,
+    hasPendingScrollTarget: () => pendingScrollTargetRef.current !== null,
     dateKeyForIndex,
     scrollToDate,
     rememberVisibleDateOffset,

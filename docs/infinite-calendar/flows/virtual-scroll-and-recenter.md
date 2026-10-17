@@ -156,7 +156,7 @@ resetting structural geometry. The explicit parent event/slot restore remains re
 viewport-relative row position. A visible draft date can still guide settings-driven structural changes; an offscreen
 pinned draft yields to the visible date.
 
-Vertical dates have one uniform settings-owned height, so a structural zoom restore resets every bounded date measurement to the new base height before writing the translated scroll offset. While those measurements settle, rendering stays pinned to a base-geometry window around the semantic top date. This prevents pre-commit virtualizer measurements from converting the saved date-local position through stale zoom geometry or exposing a transient blank/wrong-date window.
+Vertical dates have one uniform settings-owned height, so a structural zoom restore resets every bounded date measurement to the new base height before writing the translated scroll offset. While those measurements settle, rendering stays pinned to a base-geometry window around the semantic top date. A pending structural date restore retains its saved semantic date until the new model consumes the target; transient resize offsets must not replace that snapshot. The canvas uses the final bounded date count times the committed day height, so a large zoom-in cannot clamp against an old spacer. Retained semantic dates and pinned dates use their final uniform start and size, and the actual scroll offset, visible snapshot and date/resource ranges publish before paint. This prevents pre-commit virtualizer measurements from converting the saved date-local position through stale zoom geometry or exposing a transient blank/wrong-date window.
 
 ## Date Render Items
 

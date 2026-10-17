@@ -36,7 +36,7 @@ import { parseDateInput, tokenizeDateInput } from "@quno/calendar/date-parser";
   Date-only anchors preserve the displayed day through editor completion without moving horizontal time/resource scrolling.
   Event loading uses settled viewport dates independently of rendering overscan. Optional `loadCalendarIds` keeps
   read coverage stable when consumers hide rows; it defaults to the displayed selection.
-  Horizontal wheel zoom commits time geometry and its pointer anchor before paint, preventing sideways correction frames.
+  Both zoom orientations commit time geometry, virtual windows and their wheel anchor before paint.
   Alternating resource shading stays consistent as rows enter or leave the viewport.
 
   Horizontal editor transitions coordinate measured dates, anchor correction and visible rows before paint, keeping drawn rows steady through opening and cancellation.

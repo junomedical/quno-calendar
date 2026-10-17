@@ -171,7 +171,7 @@ sequenceDiagram
 
 ### Shift + Wheel Gesture Burst
 
-Raw mouse-wheel and touchpad events can arrive several times inside one paint interval. The gesture controller accumulates every `0.15` zoom step, retains the first pointer-nearest anchor, and schedules one controlled request from the next animation frame. Horizontal anchor restoration runs in the resulting layout commit before paint, using actual effective settings. It waits for a delayed parent instead of applying predicted geometry or correcting across later frames. Vertical restoration retains its bounded frame sequence. If another external controlled value commits first, the stale queued wheel value is discarded.
+Raw mouse-wheel and touchpad events can arrive several times inside one paint interval. The gesture controller accumulates every `0.15` zoom step, retains the first pointer-nearest anchor, and schedules one controlled request from the next animation frame. Both orientations restore their anchor in the resulting layout commit before paint, using actual effective settings. It waits for a delayed parent instead of applying predicted geometry or correcting across later frames. Vertical date-model changes retain wheel ownership through synchronous layout commits, then release it in a microtask without another scroll write. If another external controlled value commits first, the stale queued wheel value is discarded.
 
 The showcase keeps gesture projection separate from its sidebar display. Each committed wheel/touch frame reaches the controlled calendar immediately, but the native range thumb and numeric output synchronize only once after the 300ms gesture tail. Direct range input updates the thumb/readout immediately and coalesces calendar projection to the latest value once per animation frame. This prevents either input path from scheduling multiple calendar rasters inside one paint interval.
 
@@ -200,14 +200,14 @@ sequenceDiagram
   Wheel->>Parent: onZoomChange(nextZoom)
   Parent-->>Render: Commit settings.zoom
   Render->>Render: Reproject time geometry
-  alt Horizontal
-    Wheel->>View: Restore saved X node in layout effect before paint
-  else Vertical
-    Wheel->>View: Restore saved date/time node across bounded frames
+  Wheel->>View: Restore saved node in layout effect before paint
+  opt Vertical date model changes in the same commit
+    Render->>Render: Project retained dates into final uniform geometry
+    Wheel->>View: Reapply anchor, publish date/resource windows before paint
   end
   User->>Wheel: More ticks in same burst
   Wheel->>Wheel: Reuse first anchor; discard superseded work
-  Note over Wheel,View: Horizontal wheel commit owns correction; external prop changes immediately take over
+  Note over Wheel,View: Wheel commit owns correction; external prop changes immediately take over
 ```
 
 Horizontal wheel zoom preserves a time node on X. A newer external controlled value cancels wheel ownership even during the momentum tail; the external anchor uses the current scroll snapshot after the last wheel commit. Vertical wheel zoom preserves a date/time node on Y, clamps it to configured timeline bounds, records the translated visible date offset, and prevents the subsequent idle recenter from restoring stale pixels.
@@ -235,7 +235,7 @@ Horizontal wheel zoom preserves a time node on X. A newer external controlled va
 | Move/create callback throws                            | Clear transient state; keep committed cache unchanged.                                                           |
 | Hit moves outside the starting draft date/resource     | Keep the active draft lifecycle but ignore invalid range expansion.                                              |
 | Zoom callback is absent                                | Do not consume Shift-wheel as a controlled zoom mutation.                                                        |
-| Older scheduled zoom restore runs after a newer tick   | Horizontal commits have no delayed restore; vertical restore-version checks discard superseded work.             |
+| Older scheduled zoom restore runs after a newer tick   | Neither orientation schedules delayed restore frames; superseded controlled requests are discarded.              |
 | Immediate wheel momentum follows Shift release         | Capture it during the bounded gesture tail, then return control to normal scrolling.                             |
 | Manual scroll begins during an opted-in parent restore | Cancel the restore synchronously so correction cannot consume the first movement.                                |
 
@@ -246,7 +246,8 @@ Horizontal wheel zoom preserves a time node on X. A newer external controlled va
 - `src/lib/timeline/infinite/interactions/draft/useTimelineDraftInteraction.ts`: drawn range and internal/external create paths.
 - `src/lib/timeline/infinite/interactions/hit-testing/timelineHitTarget.ts`: mounted grid ownership.
 - `src/lib/timeline/infinite/interactions/hit-testing/useTimelineHitTesting.ts`: shared mounted-grid resolution with horizontal and vertical coordinate projections.
-- `src/lib/timeline/infinite/interactions/zoom/shiftWheelZoomUtils.ts`: shared gesture tail, versioning, and captured wheel utilities.
+- `src/lib/timeline/infinite/interactions/zoom/useCommittedWheelZoom.ts`: shared before-paint commit ownership and cancellation.
+- `src/lib/timeline/infinite/interactions/zoom/shiftWheelZoomUtils.ts`: shared gesture tail, frame coalescing, and captured wheel utilities.
 - `src/lib/timeline/infinite/interactions/zoom/useHorizontalShiftWheelZoom.ts`: pointer-nearest horizontal time anchor.
 - `src/lib/timeline/infinite/interactions/zoom/useVerticalShiftWheelZoom.ts`: date/time vertical anchor.
 - `src/lib/timeline/infinite/anchors/zoom/useHorizontalControlledZoomAnchor.ts`: slider/external visible-now-marker correction with center/origin fallback.
