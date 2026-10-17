@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { eventBelongsToCalendar } from "#quno-internal/timeline";
-import { createDemoEvents, createRangeLoader, demoCalendars } from "#quno-demo/showcase/data";
+import { demoCalendars } from "#quno-demo/showcase/data";
+import { createDemoEvents } from "#quno-demo/server/demoEventFixtures";
+import { mergeDemoEventOverrides } from "#quno-demo/showcase/mergeDemoEventOverrides";
 import { isoDateInputValue } from "#quno-demo/showcase/draftFormUtils";
 
 function minutes(value: string) {
@@ -10,20 +12,24 @@ function minutes(value: string) {
 
 describe("demo event generator", () => {
   it("uses varied treatment and patient names", () => {
-    const events = createDemoEvents(300).filter((event) => event.kind !== "availability");
+    const events = createDemoEvents({ eventsPerYear: 300, year: 2026 }).filter(
+      (event) => event.kind !== "availability"
+    );
     expect(new Set(events.map((event) => event.title.replace(/^Locked /, ""))).size).toBeGreaterThanOrEqual(15);
     expect(new Set(events.map((event) => event.subtitle)).size).toBeGreaterThanOrEqual(15);
   });
 
   it("assigns demo appointments to two calendars", () => {
-    const [event] = createDemoEvents(1).filter((generatedEvent) => generatedEvent.kind !== "availability");
+    const [event] = createDemoEvents({ eventsPerYear: 1, year: 2026 }).filter(
+      (generatedEvent) => generatedEvent.kind !== "availability"
+    );
     expect(event.calendarIds).toHaveLength(2);
     expect(eventBelongsToCalendar({ event, calendarId: event.calendarIds?.[0] ?? "" })).toBe(true);
     expect(eventBelongsToCalendar({ event, calendarId: event.calendarIds?.[1] ?? "" })).toBe(true);
   });
 
   it("creates weekday availability records for every demo calendar", () => {
-    const events = createDemoEvents(1);
+    const events = createDemoEvents({ eventsPerYear: 1, year: 2026 });
     const availabilityEvents = events.filter((event) => event.kind === "availability");
 
     expect(availabilityEvents).toHaveLength(261 * demoCalendars.length);
@@ -33,8 +39,8 @@ describe("demo event generator", () => {
     expect(availabilityEvents.every((event) => ![0, 6].includes(new Date(event.start).getDay()))).toBe(true);
   });
 
-  it("generates appointments inside the primary calendar availability window", () => {
-    const events = createDemoEvents(500);
+  it("generates appointments inside every participant availability window", () => {
+    const events = createDemoEvents({ eventsPerYear: 500, year: 2026 });
     const availabilityByCalendarAndDate = new Map(
       events
         .filter((event) => event.kind === "availability")
@@ -42,22 +48,24 @@ describe("demo event generator", () => {
     );
 
     for (const event of events.filter((generatedEvent) => generatedEvent.kind !== "availability")) {
-      const availability = availabilityByCalendarAndDate.get(`${event.calendarId}:${event.start.slice(0, 10)}`);
-      expect(availability).toBeTruthy();
-      if (!availability) continue;
-      expect(minutes(event.start)).toBeGreaterThanOrEqual(minutes(availability.start));
-      expect(minutes(event.end)).toBeLessThanOrEqual(minutes(availability.end));
+      for (const calendarId of event.calendarIds ?? [event.calendarId]) {
+        const availability = availabilityByCalendarAndDate.get(`${calendarId}:${event.start.slice(0, 10)}`);
+        expect(availability).toBeTruthy();
+        if (!availability) continue;
+        expect(minutes(event.start)).toBeGreaterThanOrEqual(minutes(availability.start));
+        expect(minutes(event.end)).toBeLessThanOrEqual(minutes(availability.end));
+      }
     }
   });
 
   it("distributes generated events across every demo calendar", () => {
-    const events = createDemoEvents(500);
+    const events = createDemoEvents({ eventsPerYear: 500, year: 2026 });
     const usedCalendarIds = new Set(events.flatMap((event) => event.calendarIds ?? [event.calendarId]));
 
     expect(usedCalendarIds).toEqual(new Set(demoCalendars.map((calendar) => calendar.id)));
   });
 
-  it("loads an event by its local calendar date instead of its timestamp prefix", async () => {
+  it("projects a session event by its local date instead of its timestamp prefix", () => {
     const offsetTimestamps = ["2026-07-18T00:30:00+14:00", "2026-07-18T23:30:00-12:00"];
     const start =
       offsetTimestamps.find((value) => isoDateInputValue(value) !== value.slice(0, 10)) ?? offsetTimestamps[0];
@@ -71,12 +79,16 @@ describe("demo event generator", () => {
     const dateKey = isoDateInputValue(event.start);
 
     expect(dateKey).not.toBe(event.start.slice(0, 10));
-    await expect(
-      createRangeLoader([event])({
-        startDate: dateKey,
-        endDate: dateKey,
-        calendarIds: [event.calendarId]
+    expect(
+      mergeDemoEventOverrides({
+        events: [],
+        overrides: [event],
+        query: {
+          startDate: dateKey,
+          endDate: dateKey,
+          calendarIds: [event.calendarId]
+        }
       })
-    ).resolves.toEqual([event]);
+    ).toEqual([event]);
   });
 });

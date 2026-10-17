@@ -36,11 +36,13 @@ import { parseDateInput, tokenizeDateInput } from "@quno/calendar/date-parser";
   Date-only anchors preserve the displayed day through editor completion without moving horizontal time/resource scrolling.
   Event loading uses settled viewport dates independently of rendering overscan. Optional `loadCalendarIds` keeps
   read coverage stable when consumers hide rows; it defaults to the displayed selection.
+  Both zoom orientations commit time geometry, virtual windows and their wheel anchor before paint.
   Alternating resource shading stays consistent as rows enter or leave the viewport.
 
   Horizontal editor transitions coordinate measured dates, anchor correction and visible rows before paint, keeping drawn rows steady through opening and cancellation.
   The demo anchors horizontal editor opening and cancellation to the resource row, keeping the grid steady through card hover expansion. Active horizontal restores keep their target date mounted through participant changes.
   Saving after scrolling away returns the draft's participant row to its retained anchor position.
+  Demo event requests send date/resource queries; server fixtures respect every participant's working hours, while session edits survive refetches.
 
 - **Quno/Datepicker** paints, resizes, and moves one timezone-free date or inclusive range, with optional single-day time selection; endpoint shortcuts keep composed input popups open while navigating.
 - **Quno/Date Input** provides a native controlled or uncontrolled field for typed dates, ranges, and optional single-day clock times.

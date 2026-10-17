@@ -94,52 +94,6 @@ export function gestureTailIsActive(untilRef: MutableRefObject<number>) {
   return performance.now() <= untilRef.current;
 }
 
-export function nextRestoreVersion(versionRef: MutableRefObject<number>) {
-  versionRef.current += 1;
-  return versionRef.current;
-}
-
-export function restoreIsCurrent({ versionRef, version }: { versionRef: MutableRefObject<number>; version: number }) {
-  return versionRef.current === version;
-}
-
-/** Reapplies a scroll anchor while controlled React layout settles. */
-export function restoreAcrossFrames({ restore, frameCount }: { restore: () => void; frameCount: number }) {
-  let cancelled = false;
-  let frame = 0;
-  const run = () => {
-    if (cancelled) return;
-    restore();
-    frame += 1;
-    if (frame < frameCount) window.requestAnimationFrame(run);
-  };
-  run();
-  return () => {
-    cancelled = true;
-  };
-}
-
-/**
- * Applies a controlled zoom outside React's current render/commit work, then
- * starts anchor restoration at the next paint boundary. Calling `flushSync`
- * from a wheel animation frame can overlap a concurrent React render and is
- * rejected by React 19.
- */
-export function scheduleZoomCommit({
-  commit,
-  restore,
-  restoreFrameCount
-}: {
-  commit: () => void;
-  restore: () => void;
-  restoreFrameCount: number;
-}) {
-  queueMicrotask(() => {
-    commit();
-    window.requestAnimationFrame(() => restoreAcrossFrames({ restore, frameCount: restoreFrameCount }));
-  });
-}
-
 export function useCapturedWheel({
   ref,
   listener

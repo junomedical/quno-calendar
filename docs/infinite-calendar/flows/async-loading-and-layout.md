@@ -58,6 +58,20 @@ date nodes. Event loading retains the last non-draft warm window instead of trea
 new navigation, then unions policy windows around the draft date and the explicit virtual-window anchor. A genuinely moved draft
 or viewport navigation still loads its destination without prefetching a transient extra date at the lower edge.
 
+## Showcase HTTP query boundary
+
+`POST /api/demo-events?delay=250` accepts `{ startDate, endDate, calendarIds, eventsPerYear }`, not event records.
+The Web handler validates inclusive ISO dates, known resources, supported dataset sizes and at most a 366-day span.
+It generates deterministic fixtures for every requested year, including leap days, and filters by date and participant.
+Vite development/preview invokes that same handler. The service keeps at most four annual datasets warm.
+
+Availability and appointment timestamps use local wall-clock strings; server timezone cannot shift a displayed shift.
+Appointment times fit the intersection of all participant availability windows. The browser retains only explicit
+session overrides. At response time, replace edited records in place, suppress moved sources outside the requested
+range or selection, and append matching local creations. This preserves overlap order and prevents a pending read
+from undoing an intervening save. Dataset changes clear the overrides. Session data is not shared across users or
+retained after a reload. The reusable calendar's loader, cache, cancellation and prefetch contracts are unchanged.
+
 ## Display Projection
 
 Optional synchronous `projectEvents` receives persisted events and the inclusive rendered date window before layout.

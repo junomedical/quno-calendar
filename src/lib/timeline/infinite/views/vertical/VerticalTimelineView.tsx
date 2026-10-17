@@ -157,7 +157,8 @@ export const InfiniteVerticalTimelineView = forwardRef<CalendarViewHandle, Calen
       settings,
       onZoomChange: props.onZoomChange,
       clearScrollEndTimer: viewport.clearScrollEndTimer,
-      rememberVisibleDateOffset: viewport.rememberVisibleDateOffset,
+      layoutKey: viewport.virtualWindow.anchorDateKey,
+      flushViewportLayout: viewport.flushViewportLayout,
       updateTopVisibleDate: viewport.updateTopVisibleDate,
       timelineGutterPx: VERTICAL_TIMELINE_GUTTER_PX
     });
@@ -194,7 +195,7 @@ export const InfiniteVerticalTimelineView = forwardRef<CalendarViewHandle, Calen
         onPointerMove={interactions.handlePointerMove}
         onPointerUp={interactions.handlePointerUp}
         onPointerCancel={interactions.handlePointerCancel}
-        totalHeight={viewport.virtualizer.getTotalSize()}
+        totalHeight={viewport.virtualWindow.count * geometry.dayHeight}
         labelWidth={geometry.labelWidth}
         maxVisibleDayMinWidth={columns.maxVisibleDayMinWidth}
         renderItems={viewport.renderItems}

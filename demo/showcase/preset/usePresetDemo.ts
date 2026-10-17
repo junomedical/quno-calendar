@@ -1,18 +1,11 @@
-import { useCallback, useMemo, useRef, useState, type SetStateAction } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import type { IsoDate } from "@quno/calendar";
 import type {
-  CalendarEvent,
   QunoInfiniteCalendarHandle,
   EventCreateRequest,
   EventMoveRequest
 } from "@quno/calendar/infinite-calendar";
-import {
-  appendCreatedEvent,
-  applyMove,
-  createDemoEvents,
-  createRangeLoader,
-  demoCalendars
-} from "#quno-demo/showcase/data";
+import { createDemoEvent, applyMove, demoCalendars } from "#quno-demo/showcase/data";
 import { useDemoControls } from "#quno-demo/showcase/hooks/useDemoControls";
 import { useSimulatedApiLoader } from "#quno-demo/showcase/hooks/useSimulatedApiLoader";
 import { useSystemNow } from "#quno-demo/showcase/hooks/useSystemNow";
@@ -20,9 +13,7 @@ import type { DemoPreset } from "./types";
 
 export function usePresetDemo(preset: DemoPreset) {
   const [scale, setScale] = useState(preset.initialScale);
-  const [events, setEvents] = useState(() => createDemoEvents(preset.initialScale));
   const [message, setMessage] = useState(preset.messages.initial);
-  const eventsRef = useRef(events);
   const calendarRef = useRef<QunoInfiniteCalendarHandle>(null);
   const controls = useDemoControls(preset.controls, preset.layout);
   const systemNow = useSystemNow();
@@ -33,28 +24,16 @@ export function usePresetDemo(preset: DemoPreset) {
     [controls.calendarCount]
   );
 
-  const loadStoredEvents = useCallback((args: Parameters<ReturnType<typeof createRangeLoader>>[0]) => {
-    return createRangeLoader(eventsRef.current)(args);
-  }, []);
-  const simulatedApi = useSimulatedApiLoader(loadStoredEvents, controls.apiLatencyMs);
-
-  const updateEvents = useCallback((updater: SetStateAction<CalendarEvent[]>) => {
-    setEvents((current) => {
-      const next = typeof updater === "function" ? updater(current) : updater;
-      eventsRef.current = next;
-      return next;
-    });
-  }, []);
+  const simulatedApi = useSimulatedApiLoader({ eventsPerYear: scale, latencyMs: controls.apiLatencyMs });
+  const { setEvents: updateEvents, resetEvents } = simulatedApi;
 
   const handleScaleChange = useCallback(
     (nextScale: number) => {
-      const nextEvents = createDemoEvents(nextScale);
-      eventsRef.current = nextEvents;
-      setEvents(nextEvents);
+      resetEvents();
       setScale(nextScale);
       setMessage(preset.messages.datasetLoaded(nextScale));
     },
-    [preset.messages]
+    [preset.messages, resetEvents]
   );
 
   const handleMove = useCallback(
@@ -72,8 +51,10 @@ export function usePresetDemo(preset: DemoPreset) {
 
   const handleCreate = useCallback(
     (request: EventCreateRequest) => {
-      updateEvents((current) => appendCreatedEvent(current, request));
+      const created = createDemoEvent(request);
+      updateEvents((current) => [...current, created]);
       setMessage(preset.messages.eventCreated(request));
+      return created;
     },
     [preset.messages, updateEvents]
   );

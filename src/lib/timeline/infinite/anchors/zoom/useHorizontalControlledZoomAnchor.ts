@@ -95,7 +95,12 @@ export function useHorizontalControlledZoomAnchor({
     const previousZoom = previousZoomRef.current;
     previousZoomRef.current = effectiveZoom;
     const viewport = containerRef.current;
-    if (!viewport || previousZoom === effectiveZoom || isGestureZoomActive()) return;
+    if (!viewport) return;
+    if (isGestureZoomActive()) {
+      lastScrollLeftRef.current = viewport.scrollLeft;
+      return;
+    }
+    if (previousZoom === effectiveZoom) return;
     const scrollLeftBeforeZoom =
       effectiveZoom < previousZoom ? Math.max(lastScrollLeftRef.current, viewport.scrollLeft) : viewport.scrollLeft;
     const currentTimeTimelineX = showNowLine

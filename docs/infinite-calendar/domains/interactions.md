@@ -24,7 +24,7 @@ See [Interactions And Zoom](../flows/interactions-and-zoom.md) for gesture seque
 - Pointer continuation may leave the viewport without losing the active gesture.
 - Multi-calendar hover is row-local; drag and draft status remains event-id based.
 - Accepted drag/create operations patch the event cache through callbacks owned by the view composition.
-- Shift-wheel captures one pointer-nearest time node for the wheel burst and requests controlled zoom.
+- Shift-wheel captures one pointer-nearest time node for the wheel burst and requests controlled zoom. Both orientations restore in the committed layout; vertical date/resource windows publish before paint. Correction runs in the resulting layout commit, using effective geometry; external controlled changes take over immediately.
 
 ## Source Map
 
@@ -43,7 +43,10 @@ See [Interactions And Zoom](../flows/interactions-and-zoom.md) for gesture seque
 | [`useReleasedDraft.ts`](../../../src/lib/timeline/infinite/interactions/draft/useReleasedDraft.ts)                           | Keeps a released draft rendered through its optional exit duration.                     |
 | [`useTimelineDraftInteraction.ts`](../../../src/lib/timeline/infinite/interactions/draft/useTimelineDraftInteraction.ts)     | Owns drawn ranges, draft delegation, immediate create, and cache insertion.             |
 | [`zoomLimits.ts`](../../../src/lib/timeline/infinite/interactions/zoom/zoomLimits.ts)                                        | Defines the supported controlled zoom interval.                                         |
-| [`shiftWheelZoomUtils.ts`](../../../src/lib/timeline/infinite/interactions/zoom/shiftWheelZoomUtils.ts)                      | Shares wheel-burst capture, gesture-tail timing, and version guards.                    |
+| [`shiftWheelZoomUtils.ts`](../../../src/lib/timeline/infinite/interactions/zoom/shiftWheelZoomUtils.ts)                      | Shares wheel-burst coalescing, gesture-tail timing, and captured input.                 |
+| [`horizontalWheelAnchor.ts`](../../../src/lib/timeline/infinite/interactions/zoom/horizontalWheelAnchor.ts)                  | Captures and restores horizontal wheel focus using committed effective settings.        |
+| [`useCommittedWheelZoom.ts`](../../../src/lib/timeline/infinite/interactions/zoom/useCommittedWheelZoom.ts)                  | Shares controlled requests, before-paint correction and synchronous commit ownership.   |
+| [`verticalWheelAnchor.ts`](../../../src/lib/timeline/infinite/interactions/zoom/verticalWheelAnchor.ts)                      | Captures and restores a rendered vertical date/time node.                               |
 | [`useHorizontalShiftWheelZoom.ts`](../../../src/lib/timeline/infinite/interactions/zoom/useHorizontalShiftWheelZoom.ts)      | Anchors horizontal shift-wheel zoom to the pointer-nearest time node.                   |
 | [`useVerticalShiftWheelZoom.ts`](../../../src/lib/timeline/infinite/interactions/zoom/useVerticalShiftWheelZoom.ts)          | Anchors vertical shift-wheel zoom to the pointer date/time location.                    |
 | [`useShiftWheelZoom.ts`](../../../src/lib/timeline/infinite/interactions/zoom/useShiftWheelZoom.ts)                          | Provides orientation zoom compatibility exports.                                        |

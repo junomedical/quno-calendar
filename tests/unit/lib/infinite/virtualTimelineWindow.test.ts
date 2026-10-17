@@ -108,6 +108,30 @@ describe("virtual timeline render items", () => {
     ]);
   });
 
+  it("projects every retained and pinned vertical date into final uniform geometry during zoom", () => {
+    const indexes: Record<string, number> = { "2026-07-06": 15, "2026-07-07": 16, "2026-07-08": 17 };
+    const items = buildVirtualDateRenderItems({
+      virtualItems: [
+        { key: "2026-07-06", index: 28, start: 2760, size: 140 },
+        { key: "2026-07-07", index: 29, start: 2900, size: 220 }
+      ],
+      anchorIndex: 15,
+      count: 31,
+      baseDayHeight: 200,
+      uniformBaseGeometry: true,
+      forcedBaseGeometryAnchorIndex: 15,
+      forcedGeometryAnchorDateKey: "2026-07-06",
+      layoutAnchorDateKey: "2026-07-08",
+      dateKeyToIndex: ({ dateKey }) => indexes[dateKey],
+      offsetForIndex: () => 9999
+    });
+    expect(items).toEqual([
+      { key: "2026-07-06", index: 15, start: 3000, size: 200 },
+      { key: "2026-07-07", index: 16, start: 3200, size: 200 },
+      { key: "layout-anchor-2026-07-08", index: 17, start: 3400, size: 200 }
+    ]);
+  });
+
   it("does not duplicate a measured or out-of-window pinned date", () => {
     const virtualItems = [{ key: "visible", index: 14, start: 1400, size: 100 }];
     const build = (pinnedIndex: number) =>

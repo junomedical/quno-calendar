@@ -1,4 +1,6 @@
-const MAX_BODY_BYTES = 8 * 1024 * 1024;
+import { parseDemoEventQuery, queryDemoEvents } from "#quno-api/demo-event-service";
+
+export const MAX_DEMO_QUERY_BYTES = 16 * 1024;
 
 async function fetch(request: Request): Promise<Response> {
   if (request.method !== "POST") {
@@ -10,41 +12,31 @@ async function fetch(request: Request): Promise<Response> {
       }
     );
   }
-
-  const declaredBodyBytes = Number(request.headers.get("content-length") ?? 0);
-  if (Number.isFinite(declaredBodyBytes) && declaredBodyBytes > MAX_BODY_BYTES) {
-    return jsonError(413, "Demo event payload is too large");
+  if (Number(request.headers.get("content-length") ?? 0) > MAX_DEMO_QUERY_BYTES) {
+    return jsonError(413, "Demo query payload is too large");
   }
-
   let body: string;
   try {
     body = await request.text();
   } catch {
-    return jsonError(400, "Invalid JSON event payload");
+    return jsonError(400, "Invalid JSON query payload");
   }
-
-  if (new TextEncoder().encode(body).byteLength > MAX_BODY_BYTES) {
-    return jsonError(413, "Demo event payload is too large");
+  if (new TextEncoder().encode(body).byteLength > MAX_DEMO_QUERY_BYTES) {
+    return jsonError(413, "Demo query payload is too large");
   }
-
-  let events: unknown;
+  let value: unknown;
   try {
-    events = JSON.parse(body);
+    value = JSON.parse(body);
   } catch {
-    return jsonError(400, "Invalid JSON event payload");
+    return jsonError(400, "Invalid JSON query payload");
   }
-
-  await wait(readDelay(request.url));
-  return Response.json({ events }, { headers: { "Cache-Control": "no-store" } });
-}
-
-function readDelay(url: string): number {
-  const requested = Number(new URL(url).searchParams.get("delay") ?? 0);
-  return Number.isFinite(requested) ? Math.min(10_000, Math.max(0, requested)) : 0;
-}
-
-function wait(delayMs: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, delayMs));
+  const query = parseDemoEventQuery(value);
+  if (!query) return jsonError(400, "Expected valid startDate, endDate, calendarIds and eventsPerYear");
+  const requested = Number(new URL(request.url).searchParams.get("delay") ?? 0);
+  const delay = Number.isFinite(requested) ? Math.min(10_000, Math.max(0, requested)) : 0;
+  if (delay) await new Promise((resolve) => setTimeout(resolve, delay));
+  if (request.signal.aborted) return jsonError(499, "Request cancelled");
+  return Response.json({ events: queryDemoEvents(query) }, { headers: { "Cache-Control": "no-store" } });
 }
 
 function jsonError(status: number, error: string): Response {

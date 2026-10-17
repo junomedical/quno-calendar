@@ -41,6 +41,10 @@ returns offscreen demo saves to the retained participant row and date.
 [Decision 110](./infinite-calendar/decisions.md#110---coordinate-editor-restoration-and-virtual-projection-before-paint)
 coordinates horizontal editor measurements, restoration and virtual windows so drawing and Cancel never paint an intermediate position.
 
+[Decision 111](./infinite-calendar/decisions.md#111---query-demo-event-ranges-on-the-server)
+moves showcase fixture generation and date/resource filtering to the HTTP endpoint. The
+[copyable request](./shared/usage.md#demo-range-query-endpoint) includes dates, calendars and dataset size.
+
 The current responsiveness work is recorded in
 [QUNO-013](./shared/decisions.md#quno-013---bound-high-frequency-work-to-display-frames), with Infinite Calendar's
 multilane background availability geometry in [Decision 091](./infinite-calendar/decisions.md#091---availability-has-independent-collision-lanes),
@@ -62,6 +66,12 @@ The Infinite Calendar JavaScript gzip ceiling is 50 KiB; see
 [Decision 094](./infinite-calendar/decisions.md#094---allow-50-kib-for-infinite-calendar-javascript).
 Date Parser has a 7 KiB gzip ceiling; see
 [QDPR-006](./date-parser/decisions.md#qdpr-006---leave-headroom-in-the-parser-bundle-budget).
+
+[Decision 112](./infinite-calendar/decisions.md#112---restore-horizontal-wheel-anchors-in-the-zoom-layout-commit)
+keeps horizontal wheel time geometry and scroll correction in the same layout commit.
+
+[Decision 113](./infinite-calendar/decisions.md#113---commit-vertical-zoom-geometry-and-focus-before-paint)
+extends committed zoom correction to vertical date/time anchors and uniform date/resource windows.
 
 ## Shared package records
 

@@ -58,7 +58,6 @@ export function useHorizontalTimelineRuntime({
     containerRef: foundation.virtualTimeline.containerRef,
     settings: foundation.settings,
     effectiveSettings: foundation.sizing.effectiveSettings,
-    horizontalRenderZoomFloor: foundation.sizing.horizontalRenderZoomFloor,
     onZoomChange: props.onZoomChange,
     clearScrollEndTimer: foundation.virtualTimeline.clearScrollEndTimer
   });

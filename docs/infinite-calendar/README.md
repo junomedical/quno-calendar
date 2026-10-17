@@ -29,6 +29,16 @@ including every row, can reuse an all-calendar read. Without it, read coverage f
 An adjacent in-flight edge date may finish through a layout correction; genuinely distant requests are cancelled.
 The focused demo passes its base calendar selection as read coverage while draft participants control displayed rows.
 
+Showcase HTTP requests send `{ startDate, endDate, calendarIds, eventsPerYear }` to `/api/demo-events`.
+The server generates deterministic fixtures for the requested years and returns only matching date/resource records.
+It never receives event arrays. Appointments fit the common working hours of both participants. Fixture timestamps
+express local wall-clock times, so an 08:00 doctor shift remains 08:00 in every browser timezone. Doctor shifts remain
+intentionally varied: Dmitry 08:00–14:00, Bhuvin 10:00–17:00 and Marco 12:00–18:00 on weekdays.
+Session creates, edits and moves overlay later responses locally; changing dataset resets those changes.
+Try opening browser Network tools, navigating to another month and inspecting the POST body. Edit an appointment,
+then change API delay to refetch: the saved edit remains. See
+[Decision 111](./decisions.md#111---query-demo-event-ranges-on-the-server).
+
 Dragging an event back to its starting slot neither opens its editor nor requests a move. The calendar owns
 this distinction from an ordinary click, which still invokes `onEventActivate`. Pointer jitter within four pixels
 also activates, even if it crosses a snap boundary; consumers need no movement guard.
@@ -115,7 +125,15 @@ Products own recurrence expansion; saves and filters still refresh through `even
 ## Bundle budget
 
 JavaScript is limited to 50 KiB gzip and the optional stylesheet to 2 KiB gzip. The current artifacts measure
-41.01 KiB and 1.97 KiB gzip respectively (Node 24, gzip level 9). See [Decision 100](./decisions.md#100---reconcile-the-infinite-calendar-budget-after-branch-integration).
+41.34 KiB and 1.97 KiB gzip respectively (Node 24, gzip level 9). See [Decision 100](./decisions.md#100---reconcile-the-infinite-calendar-budget-after-branch-integration).
+
+## Zoom continuity
+
+Both Shift-wheel orientations restore their first pointer-nearest time node in the controlled zoom layout commit before paint,
+using actual effective geometry. External zoom immediately takes over anchoring; delayed parents retain the old view
+until they commit. Vertical dates and both virtual windows project to their final geometry before paint, including
+large zoom-outs. Horizontal slider changes prefer a visible current-time marker; vertical slider changes retain the
+top date/time. See [Decision 113](./decisions.md#113---commit-vertical-zoom-geometry-and-focus-before-paint).
 
 ## Named contracts
 

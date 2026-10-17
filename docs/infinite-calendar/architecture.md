@@ -24,10 +24,12 @@ snapshot without awaiting `loadEvents`. The runtime is designed for schedules ra
 events per day and targets smooth 60–120fps scrolling. That frame-rate range is an engineering target, not a guarantee
 across every browser, device, viewport, data shape, or consumer-provided event renderer.
 
-The demo wraps its fixture range loader with a `POST /api/demo-events` mock transport: a Vite middleware serves local
-development and preview, while a root `api/` Web handler serves Vercel deployments. Both exist to make latency,
-cancellation, and concurrent requests observable in browser tooling; neither is part of the package or its runtime
-dependency graph. Vercel publishes the separately built `dist-demo` application and applies an SPA fallback after
+The showcase sends date/resource queries to `POST /api/demo-events`. `demo/server` owns deterministic generation,
+shared-participant availability and validated filtering. Vite development/preview adapts the same Web handler as
+Vercel's `api/demo-events.ts`; the browser receives only the requested records. A bounded four-entry annual fixture
+cache avoids repeated generation. Fixture timestamps retain local wall-clock semantics independently of server timezone.
+Browser-owned session overrides preserve edits, moves and creations across reads and yield on dataset reset.
+Server fixtures, HTTP adapters and session storage are outside the package runtime dependency graph. Vercel publishes the separately built `dist-demo` application and applies an SPA fallback after
 filesystem and function routing.
 
 ## Runtime Flow Atlas
@@ -442,6 +444,10 @@ receives the status. Request ids are processed once; a newer request or manual i
 
 Anchor names describe different owners rather than interchangeable snapshots: parent viewport restore, active gesture, pending navigation, automatic data-layout correction, and idle virtual-window recenter. Higher-priority owners suppress lower-priority scroll writes. An active pointer gesture cancels an already pending idle deadline, whose callback also reads live ownership before changing the virtual window. See the [anchor taxonomy and priority diagram](./flows/README.md#anchor-taxonomy).
 
+Both wheel zoom orientations use a shared committed-layout coordinator, without delayed correction frames. Vertical
+zoom projects retained dates to uniform geometry and publishes date/resource windows before paint. See
+[Decision 113](./decisions.md#113---commit-vertical-zoom-geometry-and-focus-before-paint).
+
 ## Styling And Packaging
 
 Native CSS sticky positioning owns date, resource, and time labels. The sticky time-scale stacking context sits above
@@ -450,3 +456,9 @@ date/resource labels remain above both. Reusable CSS is split into base, horizon
 files.
 
 Package builds emit independent ESM/CommonJS artifacts and explicit stylesheet exports for the three UI primitives. Date Parser has no stylesheet. JavaScript does not inject CSS or access `document` during import, so ESM import and CommonJS `require` remain safe in Node/SSR environments. Library date parsing and labels use small local/`Intl` helpers, so `date-fns` is not a runtime dependency of consumers.
+
+`build:demo` and the function's `vercel-build` hook bundle the server query service into `build/demo-api/events.js`. The deployed handler reaches
+that server-only bundle through a native private package import; Vite and TypeScript resolve the same name to its
+source during development. This avoids relying on development aliases in Vercel's emitted Node function. The server
+bundle is excluded from the published calendar package and the browser's `dist-demo` assets. Atomic publication
+allows the site and function build steps to run concurrently.

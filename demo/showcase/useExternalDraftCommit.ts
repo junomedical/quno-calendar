@@ -79,7 +79,7 @@ export function useExternalDraftCommit({
 
     flushSync(() => {
       if (activeDraft.mode === "edit") {
-        setEvents((current) => current.map((event) => (event.id === previousEventId ? savedEvent : event)));
+        setEvents((current) => [...current.filter((event) => event.id !== previousEventId), savedEvent]);
         setMessage("Saved external edit");
       } else {
         setEvents((current) => [...current, savedEvent]);

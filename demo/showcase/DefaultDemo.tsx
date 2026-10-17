@@ -1,11 +1,10 @@
-import { useCallback, useMemo, useRef, useState, type SetStateAction } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import {
-  type CalendarEvent,
   type QunoInfiniteCalendarHandle,
   type EventCreateRequest,
   type EventMoveRequest
 } from "@quno/calendar/infinite-calendar";
-import { createDemoEvents, createRangeLoader, demoCalendars, appendCreatedEvent, applyMove } from "./data";
+import { demoCalendars, createDemoEvent, applyMove } from "./data";
 import { DemoEventCard } from "./DemoEventCard";
 import { DefaultDemoSidebar } from "./default/DefaultDemoSidebar";
 import { useDraftSaveSimulation } from "./default/useDraftSaveSimulation";
@@ -56,12 +55,8 @@ export function DefaultDemo() {
   const controls = useDemoControls(controlDefaults, defaultLayout);
   const systemNow = useSystemNow();
   const [scale, setScale] = useState(1_000);
-  const [events, setEvents] = useState(() => createDemoEvents(1_000));
   const [eventVersion, setEventVersion] = useState(0);
   const [activityEntries, setActivityEntries] = useState(["Ready"]);
-  const eventsRef = useRef(events);
-  const selectedCalendarIdsRef = useRef<string[]>([]);
-  const isExternalDraftOpenRef = useRef(false);
   const calendarRef = useRef<QunoInfiniteCalendarHandle>(null);
   const calendarPanelRef = useRef<HTMLElement>(null);
   const setMessage = useCallback((message: string) => {
@@ -77,21 +72,8 @@ export function DefaultDemo() {
     () => demoCalendars.slice(0, controls.calendarCount).map((calendar) => calendar.id),
     [controls.calendarCount]
   );
-  selectedCalendarIdsRef.current = selectedCalendarIds;
-
-  const loadStoredEvents = useCallback((args: Parameters<ReturnType<typeof createRangeLoader>>[0]) => {
-    const calendarIds = isExternalDraftOpenRef.current ? selectedCalendarIdsRef.current : args.calendarIds;
-    return createRangeLoader(eventsRef.current)({ ...args, calendarIds });
-  }, []);
-  const simulatedApi = useSimulatedApiLoader(loadStoredEvents, controls.apiLatencyMs);
-
-  const updateEvents = useCallback((updater: SetStateAction<CalendarEvent[]>) => {
-    setEvents((current) => {
-      const next = typeof updater === "function" ? updater(current) : updater;
-      eventsRef.current = next;
-      return next;
-    });
-  }, []);
+  const simulatedApi = useSimulatedApiLoader({ eventsPerYear: scale, latencyMs: controls.apiLatencyMs });
+  const { setEvents: updateEvents, resetEvents } = simulatedApi;
 
   const drafts = useExternalEventDrafts({
     selectedCalendarIds,
@@ -100,7 +82,6 @@ export function DefaultDemo() {
     setEvents: updateEvents,
     setMessage
   });
-  isExternalDraftOpenRef.current = Boolean(drafts.activeDraft);
 
   const draftSave = useDraftSaveSimulation({
     activeDraft: drafts.activeDraft,
@@ -116,16 +97,14 @@ export function DefaultDemo() {
 
   const handleScaleChange = useCallback(
     (nextScale: number) => {
-      const nextEvents = createDemoEvents(nextScale);
-      eventsRef.current = nextEvents;
-      setEvents(nextEvents);
+      resetEvents();
       setScale(nextScale);
       setEventVersion((current) => current + 1);
       resetActiveDraft();
       resetSaveFeedback();
       setMessage(`Loaded deterministic ${nextScale.toLocaleString()} events/year dataset`);
     },
-    [resetActiveDraft, resetSaveFeedback, setMessage]
+    [resetActiveDraft, resetEvents, resetSaveFeedback, setMessage]
   );
 
   const handleMove = useCallback(
@@ -145,10 +124,12 @@ export function DefaultDemo() {
 
   const handleCreate = useCallback(
     (request: EventCreateRequest) => {
-      updateEvents((current) => appendCreatedEvent(current, request));
+      const created = createDemoEvent(request);
+      updateEvents((current) => [...current, created]);
       setMessage(
         request.kind === "availability" ? "Created availability from drawn area" : "Created new event from drawn area"
       );
+      return created;
     },
     [setMessage, updateEvents]
   );

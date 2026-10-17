@@ -29,10 +29,12 @@ Use code identifiers such as `QunoInfiniteCalendar` and `QunoDatePicker` only fo
 
 ## Demo Surface
 
-| Term          | Meaning                                                                                                                                                          | Implementation reference      |
-| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- |
-| Activity pane | The default showcase's bounded recent-history log for parent actions, settled viewport scrolling/repositioning, popup cancellation, and requested scroll resets. | `.demo-message`, `role="log"` |
-| Data/API row  | The shared showcase sidebar row that places dataset size and simulated API delay controls side by side.                                                          | `.data-api-control-row`       |
+| Term             | Meaning                                                                                                                                                          | Implementation reference      |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- |
+| Activity pane    | The default showcase's bounded recent-history log for parent actions, settled viewport scrolling/repositioning, popup cancellation, and requested scroll resets. | `.demo-message`, `role="log"` |
+| Range query      | Inclusive start/end dates, selected resource IDs and fixture dataset size sent to the demo server; contains no event records.                                    | `DemoEventQuery`              |
+| Session override | Browser-owned created, edited or moved event that replaces a server fixture on later reads; reset on dataset change or reload.                                   | `mergeDemoEventOverrides`     |
+| Data/API row     | The shared showcase sidebar row that places dataset size and simulated API delay controls side by side.                                                          | `.data-api-control-row`       |
 
 ## Axes And Headers
 

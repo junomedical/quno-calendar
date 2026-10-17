@@ -829,6 +829,11 @@ export function IntegrationWalkthrough({ embedded = false }: { embedded?: boolea
           loaded and in-flight ranges, aborts obsolete requests when possible, and rejects stale responses. Nearby
           navigation feels immediate while request and memory costs remain predictable.
         </p>
+        <p>
+          The focused demo sends startDate, endDate, calendarIds and dataset size to its HTTP endpoint. The server
+          returns only matching events; browser session edits survive later reads. Try another month in the demo and
+          inspect its request body, then edit a card and change API delay to refetch it.
+        </p>
         <CodeBlock code={prefetchSnippet} title="Preload nearby dates with a bounded policy" />
         <Callout>
           The loaded-events strip shows every event returned into the warm cache, including the July 13 consultation,

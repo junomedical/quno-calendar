@@ -335,7 +335,7 @@ window.
 The repository demo starts with an instant response from its `POST /api/demo-events` mock endpoint so its normal
 interaction path does not introduce a delayed full event-card paint after a quick create/cancel flow. Its **API delay**
 selector still offers 250ms, 1s, and 3s responses for deliberate loading tests. Vite middleware serves the endpoint
-locally and a matching Web handler serves it when the demo is deployed to Vercel. A sidebar status reports pending
+locally through the same Web query handler that serves deployed Vercel requests. A sidebar status reports pending
 requests even when stale events remain visible. Changing latency creates a new abort-aware loader generation;
 selecting a dataset or navigating while delayed demonstrates immediate grid rendering, stale-data retention, and
 obsolete-request cancellation. The HTTP adapter belongs to the demo; the library remains transport-agnostic through
@@ -343,7 +343,37 @@ obsolete-request cancellation. The HTTP adapter belongs to the demo; the library
 
 To deploy this repository's demo on Vercel, leave the Root Directory at the repository root. The checked-in
 `vercel.json` selects `npm run build:demo`, publishes `dist-demo`, provides client-side route fallback, and deploys the
-demo endpoint from `api/demo-events.ts`. No Vercel environment variables are required for the fixture-backed demo.
+demo endpoint from `api/demo-events.ts`. `build:demo` also bundles its server-only query service into `build/demo-api`;
+the function's `vercel-build` hook also prepares it before function tracing. It stays outside browser assets and the published package. No Vercel
+environment variables are required for the fixture-backed demo.
+
+### Demo range-query endpoint
+
+The showcase sends a query rather than uploading a browser-filtered event array:
+
+```tsx
+const loadEvents: LoadEvents = async ({ startDate, endDate, calendarIds, signal }) => {
+  const response = await fetch("/api/demo-events?delay=0", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ startDate, endDate, calendarIds, eventsPerYear: 1000 }),
+    signal
+  });
+  if (!response.ok) throw new Error(`Event query failed: ${response.status}`);
+  return (await response.json()).events;
+};
+```
+
+Dates are inclusive. The demo supports 100, 1,000, 5,000 and 20,000 appointments per year, plus weekday availability,
+for the requested years. The server accepts known calendar IDs and spans of at most 366 days. An empty calendar list
+returns no events. It rejects invalid dates, unsupported sizes and legacy event-array uploads with HTTP 400.
+The normal calendar issues much smaller settled-viewport reads plus its prefetch window.
+
+The server generates and filters the records. Fixtures use local wall-clock timestamps and appointments fit every
+participant's availability. The showcase overlays session creates, edits and moves after each response, including
+changes saved during a pending read, while suppressing moved originals. Edits retain response order so equal-start
+collision lanes remain stable. Dataset changes and page reloads reset local session edits; there is no shared backend
+persistence. Try navigating to another month in Network tools, editing an appointment, then changing API delay to refetch.
 
 ### Read coverage while hiding calendar rows
 
@@ -1046,7 +1076,7 @@ available sooner. Both paths preserve the visible date and its date-local pixel 
 `settings.excludedWeekdays` also preserves the current included date (or advances an excluded date to the next included
 date) while the bounded date sequence and dense variable row measurements are rebuilt.
 
-Slider or external prop zoom keeps a visible current-time marker stationary by default. If that marker is outside the viewport, horizontal scrolling uses the time at the center of the visible grid, while the timeline origin keeps its left edge stationary. `Shift` + wheel instead preserves the time node under the pointer. Zoom reprojects event-shell geometry without reloading events, rebuilding prepared overlap cells, or rerunning an unchanged external event renderer.
+Horizontal slider or external prop zoom keeps a visible current-time marker stationary by default. If that marker is outside the viewport, horizontal scrolling uses the time at the center of the visible grid, while the timeline origin keeps its left edge stationary. `Shift` + wheel instead preserves the first time node nearest the pointer throughout the gesture. Both orientations commit time geometry and their scroll correction together before paint; a delayed controlled parent retains the old view until its new zoom commits. External zoom changes immediately take over the anchor. Vertical zoom also publishes final uniform date geometry and date/resource windows before paint, preserving the top date/time for slider changes. Zoom reprojects event-shell geometry without reloading events, rebuilding prepared overlap cells, or rerunning an unchanged external event renderer.
 
 ## Finding The Owning Implementation
 

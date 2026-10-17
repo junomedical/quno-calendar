@@ -87,3 +87,14 @@ Timepicker stores a standalone `HH:mm` clock or null, with controlled/uncontroll
 The shared time-slot renderer chooses columns by cadence; twenty-minute slots extend the headless `MinuteCadence` contract consumed by Datepicker, Timepicker, and optional forced Date Input validation. See [QUNO-018](./decisions.md#quno-018---size-time-rows-by-minute-cadence).
 
 Omitted or empty enabled-hour lists enable all 24 hours in slot generation and forced clock validation, so Datepicker, Timepicker, and Date Input agree on defaults.
+
+The showcase HTTP boundary belongs to the demo: `demo/server` generates deterministic fixtures for requested dates
+and resources; local Vite and the deployed Web endpoint share one query handler. Browser session overrides retain
+edits without making fixtures or API transport a dependency of any package entry point. See Infinite Calendar
+[Decision 111](../infinite-calendar/decisions.md#111---query-demo-event-ranges-on-the-server).
+
+`build:demo` and the function's `vercel-build` hook bundle the server query service into `build/demo-api/events.js`. The deployed handler reaches
+that server-only bundle through a native private package import; Vite and TypeScript resolve the same name to its
+source during development. This avoids relying on development aliases in Vercel's emitted Node function. The server
+bundle is excluded from the published calendar package and the browser's `dist-demo` assets. Atomic publication
+allows the site and function build steps to run concurrently.

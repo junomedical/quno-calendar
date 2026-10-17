@@ -55,7 +55,8 @@ export function useVerticalViewportWindow({
     topDateAlignmentKey,
     isInteractionActive,
     layoutAnchorDateKey,
-    resolveOffsetOnLayoutChange
+    resolveOffsetOnLayoutChange,
+    eagerRange: true
   });
   const { dateKeyToIndex, virtualWindow, virtualizer, visibleDateKeys } = timeline;
   const viewportMetricsStore = useViewportMetricsStore(timeline.containerRef);
@@ -69,8 +70,24 @@ export function useVerticalViewportWindow({
     }
   }, [dateKeyToIndex, dayHeight, virtualWindow.count, virtualizer, visibleDateKeys]);
 
+  const flushViewportLayout = useCallback(() => {
+    const viewport = timeline.containerRef.current;
+    if (!viewport || timeline.hasPendingScrollTarget()) return;
+    virtualizer.scrollOffset = viewport.scrollTop;
+    virtualizer.calculateRange();
+    const index = Math.max(0, Math.min(virtualWindow.count - 1, Math.floor((viewport.scrollTop + 1) / dayHeight)));
+    timeline.rememberVisibleDateOffset({
+      dateKey: timeline.dateKeyForIndex({ index }),
+      offsetWithinDate: Math.max(0, viewport.scrollTop - index * dayHeight)
+    });
+    viewportMetricsStore.refresh();
+    if (virtualizer.getVirtualItems() !== timeline.virtualItems) timeline.projectRange();
+  }, [dayHeight, timeline, viewportMetricsStore, virtualizer, virtualWindow.count]);
+  useLayoutEffect(flushViewportLayout);
+
   return {
     ...timeline,
+    flushViewportLayout,
     viewportMetricsStore,
     setInteractionActive
   };
