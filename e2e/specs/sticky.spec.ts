@@ -277,7 +277,9 @@ test("keeps the time scale fixed and day dates css-sticky", async ({ page }) => 
     if (!viewport || !dateLabel || !timeHeader || !dayHeaderBand) {
       return null;
     }
-    const visibleTick = Array.from(document.querySelectorAll<HTMLElement>(".quno-calendar-time-tick")).find((tick) => {
+    const visibleTick = Array.from(
+      document.querySelectorAll<HTMLElement>(".quno-calendar-time-tick:not(.is-label-hidden)")
+    ).find((tick) => {
       const box = tick.getBoundingClientRect();
       return box.width > 0 && box.height > 0 && box.left > dateLabel.right + 8 && box.left < viewport.right - 20;
     });

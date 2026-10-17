@@ -50,10 +50,6 @@
   line-height: 1;
 }
 
-.quno-calendar-time-tick.is-label-hidden {
-  display: none;
-}
-
 .quno-calendar-row {
   position: absolute;
   left: 0;
@@ -76,11 +72,6 @@
   position: absolute;
   top: 0;
   background-color: var(--quno-calendar-surface, var(--_ic-default-surface));
-  background-image: linear-gradient(
-    to right,
-    var(--quno-calendar-cell-border, var(--_ic-default-cell-border)) 1px,
-    transparent 1px
-  );
   border-bottom: 1px solid var(--quno-calendar-cell-border, var(--_ic-default-cell-border));
   border-right: 1px solid var(--quno-calendar-cell-border, var(--_ic-default-cell-border));
 }

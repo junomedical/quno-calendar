@@ -693,11 +693,12 @@ export function IntegrationWalkthrough({ embedded = false }: { embedded?: boolea
         <p>
           The time scale reveals detail as space becomes available: hours and half hours for overview, quarter hours for
           planning, and five-minute labels for precise placement. The tick structure stays stable while the readable
-          labels change.
+          labels fade in or out over 160 ms. Extra five-minute grid lines use the same fade, and reduced motion disables
+          it.
         </p>
         <Callout>
-          Switch through the three precision levels. Minute labels appear in place while the same time-scale elements
-          and event cards remain mounted.
+          Switch through the three precision levels and back. Minute labels and fine grid lines fade in place while the
+          same time-scale elements and event cards remain mounted.
         </Callout>
         <DemoBreakout>
           <LazyArticleDemo label="progressive time reveal example">

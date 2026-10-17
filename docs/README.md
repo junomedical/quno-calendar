@@ -55,6 +55,7 @@ through a separate `HH:mm` clock. Picker cadence/hours constrain typing only whe
 
 Timepicker and Datepicker use [cadence-specific row sizes](./timepicker/README.md#value-and-settings), including six choices per five-minute row and 20-minute slots. Omitted or empty enabled hours enables all 24 hours in both selectors and forced input validation.
 Both time selectors emphasize sticky hour headings with larger, bold text above the minute-number hierarchy.
+Standalone Timepicker minute options use regular weight (400); see [QTP-002](./timepicker/decisions.md#qtp-002---use-regular-weight-minute-options).
 
 Date Parser returns paired `start`/`end` objects with `{ date, time }`; missing clocks are `null`.
 See the [endpoint migration](./shared/migration.md#unreleased-paired-parser-endpoints) for the breaking replacement of `value` and `times`.
@@ -72,6 +73,9 @@ keeps horizontal wheel time geometry and scroll correction in the same layout co
 
 [Decision 113](./infinite-calendar/decisions.md#113---commit-vertical-zoom-geometry-and-focus-before-paint)
 extends committed zoom correction to vertical date/time anchors and uniform date/resource windows.
+
+[Decision 114](./infinite-calendar/decisions.md#114---fade-progressive-time-detail-in-both-orientations)
+adds reversible opacity fades to progressive time labels and five-minute grid lines, with reduced-motion support.
 
 ## Shared package records
 

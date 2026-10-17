@@ -1185,3 +1185,22 @@ Chromium samples dense 20,000-event wheel and slider reversals at 1280px and 180
 the 0.5 minimum, abrupt 0.5-to-8 slider reversals, and across date-model recentering. Every frame checks time focus, appointment projection, node
 identity and contiguous dates, including after the idle deadline. Unit tests cover delayed vertical commits,
 synchronous re-anchoring, release before later navigation, external takeover and retained/pinned uniform geometry.
+
+## 114 - Fade Progressive Time Detail In Both Orientations
+
+Date: 2026-10-17
+Status: Accepted; refines Decisions 006, 023 and 048
+
+Use a 160 ms CSS opacity transition when progressive time labels and five-minute grid details appear or disappear
+in either orientation. Keep the existing five-minute tick skeleton, label thresholds, accessibility state and zoom
+anchors. Replace display-based hiding with transparent retained labels. Quarter-hour grid backgrounds remain steady;
+one retained, pointer-transparent detail layer per resource paints only the two intervening five-minute lines.
+Its gradient and gutter track committed geometry immediately, without animating coordinates or duplicating coarse lines.
+
+Rapid zoom reversals continue from current opacity. Newly virtualized resources start at their current detail state;
+scrolling does not trigger an entrance animation. Disable the transitions under `prefers-reduced-motion: reduce`.
+No new public props or tokens are required. Existing cell and hour presentation and event interaction retain their layers.
+
+Chromium checks both orientations across quarter-hour-label and five-minute-detail thresholds, pauses actual CSS
+transitions to assert intermediate opacity, reverses unfinished fades, and checks final state, accessibility, retained
+nodes, grid spacing and pointer transparency. Repeat with reduced motion and retain the frame-stability zoom regressions.

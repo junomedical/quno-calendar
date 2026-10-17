@@ -122,6 +122,7 @@ export function VerticalDayChrome({
                 <span
                   className={[
                     "icv-time-tick",
+                    "quno-calendar-time-detail",
                     tick.isHour ? "is-hour" : "",
                     tick.showLabel ? "" : "is-label-hidden",
                     hourProps?.className

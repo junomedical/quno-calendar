@@ -88,7 +88,7 @@
   color: var(--quno-time-picker-text, #15212a);
   font: inherit;
   font-size: 13px;
-  font-weight: 550;
+  font-weight: 400;
   cursor: pointer;
 }
 

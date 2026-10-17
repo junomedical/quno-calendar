@@ -1004,6 +1004,11 @@ action; creation begins by drawing on the timeline. Previous and next buttons ca
 same handle. Keep the five-minute time scale structure stable and let controlled zoom progressively reveal finer labels
 instead of replacing tick nodes.
 
+With the optional calendar stylesheet, changing zoom fades newly readable labels and five-minute grid lines in or
+out over 160 ms. Both orientations retain their nodes and update geometry immediately. Reduced-motion preferences
+disable the fade. Try Overview → Quarter hour → 5 minutes and back in the guide's **Reveal time progressively** chapter;
+the controlled-zoom recipe above needs no additional animation state.
+
 ## Reveal And Focus An Event
 
 Pass the complete event when the application already knows it. The calendar requests all known participant calendars
@@ -1108,7 +1113,7 @@ function TimeField() {
 ```
 
 For local state, supply `defaultValue="10:30"` and optionally observe `onChange`. Clear emits `null`. Omitted or empty hours
-allow all 24. Sticky hours use larger, bold text (16px/700) beside the smaller minutes (13px/550).
+allow all 24. Sticky hours use larger, bold text (16px/700) beside regular-weight minutes (13px/400).
 Cadence defaults to 15, with the same ten supported values as
 Datepicker. Five-minute cadence lays out its 12 minutes as two rows of six choices. Settings changes preserve an existing clock, including times outside available slots. `disabled`
 prevents choosing or clearing. Use labels, `formatters.time({ time, locale })`, class names, and
