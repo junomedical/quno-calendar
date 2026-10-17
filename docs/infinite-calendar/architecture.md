@@ -60,6 +60,11 @@ eligible owners. Late network data captures the current semantic position at com
 old request's date. Idle recentering rebuilds the date sequence around the current position, preserving its screen
 coordinate. Ordinary settlement waits 1,200 ms; a scrollbar edge uses 240 ms.
 
+`ZoomScrollLock` temporarily applies hidden overflow during captured Shift input and its 300 ms settling tail.
+This suspends Chrome's native momentum scrolling while `ViewportAdapter` retains programmatic anchor writes.
+The lock restores the original inline overflow declarations/priorities on settlement, observed takeover or unmount;
+it does not change render windows or add compositor layers. See Decision 119.
+
 Both wheel projections preserve the nearest time tick beneath the first pointer in a burst. External horizontal
 zoom preserves a visible current-time marker, otherwise the grid center or origin. External vertical zoom retains
 the visible fraction of the day board. Controlled requests are coalesced to one per frame; external values supersede

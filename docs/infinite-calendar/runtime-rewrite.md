@@ -27,6 +27,22 @@ have descending priority. Manual input cancels eligible restores immediately.
 | M6 Stability and performance                | Measured; Firefox blocked      | Repeated Chromium/WebKit and dense profiling; see exact environment blocker below                |
 | M7 Cutover and cleanup                      | Implemented; Firefox gate open | Both orientations switched on this branch; 62 obsolete modules and TanStack removed              |
 
+## Inertial zoom follow-up verification
+
+Decision 119 temporarily suspends native scrolling during captured Shift-wheel/touch input while programmatic
+anchor commits remain available. Original overflow declarations and priorities return after 300 ms without a
+captured sample, on observed external takeover or on unmount. The affected Chrome user confirmed the physical
+touchpad gesture no longer produces rectangular white gaps. Original zoom sensitivity and render bounds remain.
+
+All **549 unit tests** pass. The full Chromium run passes **218/219** cases, including the previously intermittent
+row-filter restoration scenario. Its only failure used the old 31.53 KiB guide expectation while the displayed
+measurement was updated during the run. The corrected guide assertion and Shift-input cases pass all **10 focused
+Chromium/WebKit tests**. An additional **40 focused frame/input tests** pass across those browsers. Formatting,
+architecture/contracts, types, lint, packed package verification, Preact, React 19, demo build, size reporting and
+pack dry-run pass. JavaScript is **32,543 B gzip (31.78 KiB)**, up 255 B from the prior Shift-input fix; CSS stays
+**2,018 B (1.97 KiB)**. Firefox's standalone startup blocker below remains open. Evidence uses `scroll-lock-*`
+logs in `/tmp/quno-runtime-rewrite/`.
+
 ## Shift-input follow-up verification
 
 Decision 118 reserves Shift-wheel before no-op/limit checks and suppresses Shift-touch panning. New wheel bursts

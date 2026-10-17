@@ -4,6 +4,7 @@ import type { CalendarEngine } from "#quno-internal/timeline/runtime/viewport/Ca
 import { wheelAnchor } from "#quno-internal/timeline/runtime/viewport/zoomAnchor";
 import type { ViewportAdapter } from "#quno-internal/timeline/runtime/browser/ViewportAdapter";
 import type { SemanticAnchor } from "#quno-internal/timeline/runtime/model/types";
+import { ZoomScrollLock } from "#quno-internal/timeline/runtime/browser/ZoomScrollLock";
 
 export function useRuntimeZoom({
   engine,
@@ -21,6 +22,7 @@ export function useRuntimeZoom({
   useEffect(() => {
     const viewport = containerRef.current;
     if (!viewport) return;
+    const scrollLock = new ZoomScrollLock({ viewport });
     let frame: number | null = null;
     let anchor: SemanticAnchor | null = null;
     let tail = 0;
@@ -39,6 +41,7 @@ export function useRuntimeZoom({
           anchor = null;
           tail = 0;
           requested = null;
+          scrollLock.release();
         }
         lastRequested = null;
       }
@@ -55,6 +58,7 @@ export function useRuntimeZoom({
       event.preventDefault();
       event.stopPropagation();
       tail = now + 300;
+      scrollLock.hold();
       const delta = event.deltaY || event.deltaX;
       if (!delta) return;
       const zoom = Math.max(
@@ -89,6 +93,7 @@ export function useRuntimeZoom({
             lastRequested = null;
             anchor = null;
             tail = 0;
+            scrollLock.release();
             return;
           }
           observedZoom = committedZoom;
@@ -105,11 +110,13 @@ export function useRuntimeZoom({
       event.preventDefault();
       event.stopPropagation();
       tail = performance.now() + 300;
+      scrollLock.hold();
     };
     viewport.addEventListener("wheel", handle, { passive: false });
     viewport.addEventListener("touchmove", handleTouch, { passive: false });
     return () => {
       active = false;
+      scrollLock.release();
       if (frame !== null) cancelAnimationFrame(frame);
       viewport.removeEventListener("wheel", handle);
       viewport.removeEventListener("touchmove", handleTouch);

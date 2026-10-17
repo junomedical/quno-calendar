@@ -86,9 +86,11 @@ describe("controlled wheel input", () => {
     const { element, onZoomChange, unmount } = setup();
     const touch = (shiftKey: boolean) => new TouchEvent("touchmove", { shiftKey, cancelable: true });
     expect(element.dispatchEvent(touch(true))).toBe(false);
+    expect(element.style.overflow).toBe("hidden");
     expect(element.dispatchEvent(touch(false))).toBe(true);
     expect(onZoomChange).not.toHaveBeenCalled();
     unmount();
+    expect(element.style.overflow).toBe("");
     expect(element.dispatchEvent(touch(true))).toBe(true);
   });
 
@@ -112,11 +114,12 @@ describe("controlled wheel input", () => {
     expect(onZoomChange.mock.calls.map(([request]) => request.zoom)).toEqual([1.15, 1.3]);
   });
   it("drops a queued wheel request when an external controlled value wins", async () => {
-    const { wheel, flush, engine, layout, onZoomChange } = setup();
+    const { wheel, flush, engine, layout, onZoomChange, element } = setup();
     act(() => wheel());
     engine.updateLayout({ layout: { ...layout, settings: { ...layout.settings, zoom: 3 } }, now: 0 });
     await flush();
     expect(onZoomChange).not.toHaveBeenCalled();
+    expect(element.style.overflow).toBe("");
   });
   it("observes pending native scroll before claiming wheel ownership", async () => {
     const { wheel, flush, engine, element, adapter } = setup();
@@ -130,9 +133,11 @@ describe("controlled wheel input", () => {
     expect(engine.read().owner).toBe(owner);
   });
   it("does not call the parent after unmount", async () => {
-    const { wheel, flush, onZoomChange, unmount } = setup();
+    const { wheel, flush, onZoomChange, unmount, element } = setup();
     act(() => wheel());
+    expect(element.style.overflow).toBe("hidden");
     unmount();
+    expect(element.style.overflow).toBe("");
     await flush();
     expect(onZoomChange).not.toHaveBeenCalled();
   });

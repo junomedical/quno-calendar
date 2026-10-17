@@ -27,6 +27,7 @@ for (const view of ["infinite-horizontal", "infinite-vertical"]) {
         // Real wheel input exercises the browser's default scroll action, unlike dispatchEvent.
         await page.mouse.wheel(x, y);
         await page.waitForTimeout(60);
+        await expect(viewport).toHaveCSS("overflow", "hidden");
         const position = await viewport.evaluate((element) => ({ top: element.scrollTop, left: element.scrollLeft }));
         expect(Math.abs(position.top - before.top)).toBeLessThanOrEqual(1);
         expect(Math.abs(position.left - before.left)).toBeLessThanOrEqual(1);
@@ -37,6 +38,7 @@ for (const view of ["infinite-horizontal", "infinite-vertical"]) {
       await page.waitForTimeout(60);
       expect(await viewport.evaluate((element) => element.scrollTop)).toBeCloseTo(before.top, 0);
       await page.waitForTimeout(350);
+      await expect(viewport).toHaveCSS("overflow", "auto");
       await page.mouse.wheel(0, 100);
       await expect.poll(() => viewport.evaluate((element) => element.scrollTop)).toBeGreaterThan(before.top + 20);
     });

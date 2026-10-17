@@ -1315,3 +1315,23 @@ on unmount. Without `onZoomChange`, preserve native input behavior.
 Verify both orientations with real browser wheel input at both limits, including horizontal and diagonal trackpad
 deltas, unchanged native scroll coordinates, bounded momentum suppression and resumed ordinary scrolling. Unit
 coverage checks no redundant callback, touch cancellation and listener cleanup.
+
+## 119 - Suspend Native Momentum Scrolling During Zoom
+
+Chrome on macOS can show rectangular white gaps through appointment cards, availability and grid backgrounds during
+inertial Shift-touchpad zoom while sticky labels remain painted. DOM identity and geometry checks alone did not
+reproduce the raster symptom. Preventing wheel defaults was insufficient; the affected session confirmed that
+suspending native scrolling during zoom removes the gaps.
+
+Extend Decision 118's Shift-input capture with a short-lived viewport overflow lock. Set `overflow: hidden` on the
+first captured Shift-wheel/touch input and keep it until 300 ms after the latest captured sample. Hidden overflow
+still permits the adapter's programmatic anchor scroll writes, but suspends native/compositor scrolling. Restore the
+original inline shorthand/axis declarations and priorities when the gesture settles, on observed external takeover,
+and on unmount. Ordinary scrolling resumes with the existing momentum-tail policy. Retain original zoom sensitivity,
+frame coalescing, event membership, prepared lanes and render bounds; add no persistent compositor layers.
+
+Unit coverage checks repeated hold/settle, style restoration, cancellation and unmount. Real-wheel Chromium/WebKit
+checks assert the temporary computed overflow, unchanged native position at zoom limits and resumed ordinary scrolling.
+Existing frame-by-frame tests assert pointer/time alignment and visible date geometry in both orientations. The user
+confirmed the physical-touchpad raster gaps disappeared with this lock; earlier compositor and input-sensitivity
+experiments were removed.

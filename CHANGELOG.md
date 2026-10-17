@@ -4,6 +4,24 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+### Prevent blank patches during inertial touchpad zoom - 2026-10-17
+
+- Temporarily suspend native scrolling during captured Shift-wheel/touch gestures while preserving programmatic
+  anchor positioning. Restore the viewport's original overflow declarations after the 300 ms settling tail,
+  on observed external takeover and on unmount.
+- The affected Chrome session confirms this removes the rectangular grid/card gaps during physical-touchpad inertia.
+  Preserve the original zoom sensitivity and render bounds; unsuccessful compositor/input-sensitivity experiments
+  were removed.
+- Add settling/style-restoration unit coverage and extend real-wheel Chromium/WebKit checks with computed overflow
+  assertions alongside native-position, resumed-scrolling and existing per-frame zoom geometry checks.
+- Verification: all 549 unit tests pass. The full Chromium run passes 218/219; its only failure used the old
+  31.53 KiB guide expectation while the displayed measurement was updated. The corrected guide assertion and
+  Shift-input tests pass all 10 focused Chromium/WebKit cases; 40 focused frame/input cases also pass.
+  Formatting, architecture/contracts, types, lint, package verification, Preact, React 19, demo build, size reporting
+  and pack dry-run pass. JavaScript is 32,543 B gzip (31.78 KiB), up 255 B; CSS remains 2,018 B (1.97 KiB).
+- Firefox remains blocked at standalone startup with `sandbox_extension_issue_file_to_process ... Operation not permitted`
+  and `RenderCompositorSWGL failed mapping default framebuffer, no dt`, followed by timeout.
+
 ### Keep Shift input from scrolling at zoom limits - 2026-10-17
 
 - Capture Shift-wheel before zoom-limit and anchor checks in both orientations. Mouse-wheel and horizontal/diagonal
