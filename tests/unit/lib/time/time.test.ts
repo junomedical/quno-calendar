@@ -12,7 +12,7 @@ import {
   xToMinute,
   yToMinute
 } from "#quno-internal/timeline/time/time";
-import { buildTimeTicks } from "#quno-internal/timeline/time/timelineTicks";
+import { buildTimeTicks, fineGridOpacity } from "#quno-internal/timeline/time/timelineTicks";
 
 describe("timeline math", () => {
   const geometry = { startHour: 8, endHour: 18, zoom: 2, snapMinutes: 15 };
@@ -81,5 +81,14 @@ describe("timeline math", () => {
     );
     expect(coarseTicks.find(({ minute }) => minute === 8 * 60 + 5)?.showLabel).toBe(false);
     expect(fineTicks.find(({ minute }) => minute === 8 * 60 + 5)?.showLabel).toBe(true);
+    expect(coarseTicks.find(({ minute }) => minute === 8 * 60 + 5)?.opacity).toBe(0);
+    expect(fineTicks.find(({ minute }) => minute === 8 * 60 + 5)?.opacity).toBeCloseTo(2 / 3);
+    expect(fineTicks.find(({ minute }) => minute === 8 * 60)?.opacity).toBe(1);
+  });
+
+  it("derives fine detail opacity from current zoom without retaining gesture history", () => {
+    const zooms = [5.9, 6, 6.05, 6.15, 8, 6.05, 6, 0.5];
+    const expected = [0, 0, 1 / 3, 1, 1, 1 / 3, 0, 0];
+    zooms.forEach((zoom, index) => expect(fineGridOpacity({ zoom })).toBeCloseTo(expected[index]));
   });
 });

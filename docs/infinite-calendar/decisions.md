@@ -1204,3 +1204,23 @@ No new public props or tokens are required. Existing cell and hour presentation 
 Chromium checks both orientations across quarter-hour-label and five-minute-detail thresholds, pauses actual CSS
 transitions to assert intermediate opacity, reverses unfinished fades, and checks final state, accessibility, retained
 nodes, grid spacing and pointer transparency. Repeat with reduced motion and retain the frame-stability zoom regressions.
+
+## 115 - Derive Time Detail Opacity From Zoom Without An Animation Tail
+
+Date: 2026-10-17
+Status: Accepted; supersedes Decision 114's timed transitions and refines progressive visibility in Decisions 006/023
+
+The 160 ms fade introduced visible catch-up during Shift-wheel/trackpad zoom. Derive detail opacity synchronously
+from the committed scale instead of starting a CSS animation. A reversal immediately restores the opacity for that
+scale and stopping a gesture leaves no transition running. Keep the existing wheel scheduling and anchor coordination.
+
+Use a 0.15-wide zoom ramp for each precision tier. Quarter-hour labels reach full opacity at zoom 2, five-minute
+labels and grid details begin above 6, and half-hour labels begin at their existing minimum spacing. Hours stay fully
+visible. Keep all semantic tick/detail nodes mounted, but use display-based hiding at zero opacity so hidden labels
+and offscreen transparent grid surfaces do not add layout or animation work. Reduced motion makes visible detail fully
+opaque. Preserve the steady quarter-hour background, gutters, custom hour presentation, accessibility and pointer behavior.
+
+Chromium checks dense Shift-wheel and slider changes in both orientations, including partial opacity, repeated immediate
+reversals, no CSS animations, display-hidden detail, geometry and node identity, and no later opacity change after input
+stops. Existing per-frame wheel/slider anchor regressions remain required. Unit coverage checks current-scale opacity
+and tier boundaries independently of gesture history.

@@ -74,8 +74,8 @@ keeps horizontal wheel time geometry and scroll correction in the same layout co
 [Decision 113](./infinite-calendar/decisions.md#113---commit-vertical-zoom-geometry-and-focus-before-paint)
 extends committed zoom correction to vertical date/time anchors and uniform date/resource windows.
 
-[Decision 114](./infinite-calendar/decisions.md#114---fade-progressive-time-detail-in-both-orientations)
-adds reversible opacity fades to progressive time labels and five-minute grid lines, with reduced-motion support.
+[Decision 115](./infinite-calendar/decisions.md#115---derive-time-detail-opacity-from-zoom-without-an-animation-tail)
+ties progressive label and grid opacity directly to zoom, removing the timed fade's wheel/trackpad delay.
 
 ## Shared package records
 

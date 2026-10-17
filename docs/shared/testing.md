@@ -278,9 +278,9 @@ orientation, availability, loading, visual-focus, and motion assertions formerly
 - Horizontal rendering applies a viewport-fill floor so the timeline board does not become narrower than the available viewport width even when an incoming prop value falls below that floor; wheel gestures still stop at the slider minimum.
 - Zoom values above `6` switch the timeline row grid and time labels from 15-minute to 5-minute cadence.
 - Dense zoom levels progressively hide minor time labels so 15/45 disappear first and minute labels disappear entirely before labels overlap. Crossing the `6` fine-grid threshold retains the same tick elements and text children while the percentage-based tick track changes extent; it does not add or replace tick DOM nodes.
-- Both orientations fade progressive labels and five-minute grid details through intermediate opacity in both directions,
-  including an unfinished exit reversed into an entrance. Chromium asserts retained nodes, immediate grid geometry,
-  pointer-transparent detail layers and accessibility state; reduced motion has no opacity transition.
+- Dense wheel and slider changes in both orientations project detail opacity with geometry in the same commit, including
+  repeated reversals. Chromium checks partial opacity, retained nodes, hidden-detail display, pointer transparency,
+  accessibility and absence of CSS animations or later settling; reduced motion uses full opacity for visible detail.
 - Sticky-header visual artefacts are covered: dates stay pinned to the top, the absolute day-header band does not create an extra visual row or overlap the first calendar row, day header background fills across the timeline below the time scale, sticky date labels and calendar row labels cover horizontally scrolled timeline content through CSS layering instead of JavaScript clipping, visible hour/minute labels remain painted above the day band at high zoom, the header marker stem begins at the bottom of its pin and per-day marker segments remain below the sticky time-scale context, current-time markers stay out of date/calendar names while layering above calendar data and the gray day band, and calendar cells share one 1px gray border color without doubled sticky-label seams.
 - Dataset scale can switch to 20,000 events per year.
 - Delayed, rejected, aborted, never-resolving, and out-of-order loaders leave scroll, zoom, draw, and drag interactions responsive; delayed commits preserve the captured viewport anchor within 1px and do not flash empty rows.

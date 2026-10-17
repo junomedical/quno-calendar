@@ -4,6 +4,20 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+### Immediate wheel zoom detail - 2026-10-17
+
+- Replace the 160 ms time-detail transition with opacity derived from committed zoom. Shift-wheel/trackpad reversals
+  update detail and geometry together and leave no fade catching up after input stops. Keep anchor scheduling unchanged.
+- Retain semantic nodes while hiding zero-opacity labels and grid layers from layout. Preserve reduced-motion support.
+- Add dense wheel/slider regressions for immediate intermediate opacity, reversals, stable nodes and geometry,
+  hidden-detail display and no animation tail, plus current-scale opacity unit coverage.
+- Verification: all 544 unit tests and all 221 Chromium scenarios pass. Formatting, architecture/contracts,
+  typechecking, lint, library/demo builds, package verification, Preact and React 19 compatibility, size reporting
+  and pack dry-run pass. Infinite Calendar measures 42,719 B gzip JavaScript and 1,996 B gzip CSS within unchanged budgets.
+- A shared-preview restart interrupted the initial browser run. An isolated run reproduced the previously recorded
+  3,345px dense-editor reopening jump; three focused repeats and the final full four-worker run pass without further
+  source changes. No verification blockers remain.
+
 ### Regular-weight Timepicker minutes - 2026-10-17
 
 - Set `.quno-time-picker-minute-option` to font weight 400. Update its desktop/mobile computed-style assertions

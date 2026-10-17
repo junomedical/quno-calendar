@@ -1,8 +1,18 @@
+import type { CSSProperties } from "react";
 import type { QunoInfiniteCalendarSettings } from "#quno-internal/timeline/core/types";
-import { gridCadenceMinutes, TIMELINE_LEFT_GUTTER_PX } from "#quno-internal/timeline/time/timelineTicks";
+import { fineGridOpacity, TIMELINE_LEFT_GUTTER_PX } from "#quno-internal/timeline/time/timelineTicks";
 import { VERTICAL_TIMELINE_GUTTER_PX } from "#quno-internal/timeline/infinite/rendering/vertical/verticalGeometry";
 
-/** Keeps the two extra five-minute lines per quarter hour mounted for reversible opacity fades. */
+/** Shared CSS opacity input; the stylesheet can bypass partial opacity for reduced motion. */
+export function timeDetailOpacityStyle({
+  opacity
+}: {
+  opacity: number;
+}): CSSProperties & { "--_ic-time-detail-opacity": number } {
+  return { "--_ic-time-detail-opacity": opacity };
+}
+
+/** Keeps detail nodes stable while opacity follows the committed zoom directly. */
 export function TimeGridDetails({
   settings,
   orientation
@@ -12,12 +22,14 @@ export function TimeGridDetails({
 }) {
   const horizontal = orientation === "horizontal";
   const step = settings.zoom * 5;
+  const opacity = fineGridOpacity({ zoom: settings.zoom });
   const border = "var(--quno-calendar-cell-border, var(--_ic-default-cell-border))";
   return (
     <div
-      className={`quno-calendar-time-detail quno-calendar-time-grid-detail${gridCadenceMinutes({ zoom: settings.zoom }) === 5 ? "" : " is-label-hidden"}`}
+      className={`quno-calendar-time-detail quno-calendar-time-grid-detail${opacity > 0 ? "" : " is-label-hidden"}`}
       aria-hidden="true"
       style={{
+        ...timeDetailOpacityStyle({ opacity }),
         position: "absolute",
         inset: 0,
         pointerEvents: "none",
