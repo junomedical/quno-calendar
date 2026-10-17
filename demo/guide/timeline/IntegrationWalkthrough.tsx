@@ -693,8 +693,8 @@ export function IntegrationWalkthrough({ embedded = false }: { embedded?: boolea
         <p>
           The time scale reveals detail as space becomes available: hours and half hours for overview, quarter hours for
           planning, and five-minute labels for precise placement. The tick structure stays stable while the readable
-          labels fade in or out over 160 ms. Extra five-minute grid lines use the same fade, and reduced motion disables
-          it.
+          labels and extra five-minute grid lines change opacity with the zoom value. Wheel and trackpad changes take
+          effect immediately; reduced motion keeps visible detail fully opaque.
         </p>
         <Callout>
           Switch through the three precision levels and back. Minute labels and fine grid lines fade in place while the

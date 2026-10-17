@@ -21,7 +21,7 @@ flowchart LR
 - Native sticky positioning owns headers and labels.
 - Cross-axis windowing preserves original spacer size and resource offsets.
 - Dense time labels hide minor labels before overlap.
-- Progressive labels and five-minute grid details retain their nodes and fade through CSS opacity; reduced motion disables fades.
+- Progressive detail opacity follows committed zoom immediately; zero-opacity nodes skip layout, and reduced motion uses full visible opacity.
 
 ## Source Map
 

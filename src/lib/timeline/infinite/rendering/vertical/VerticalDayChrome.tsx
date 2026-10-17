@@ -7,6 +7,7 @@ import { fromDateKey } from "#quno-internal/timeline/date/dateVirtualization";
 import { VERTICAL_TIMELINE_GUTTER_PX } from "./VerticalTimelineDay";
 import type { QunoInfiniteCalendarCellProps, QunoInfiniteCalendarDayProps } from "#quno-internal/timeline/core/types";
 import type { VerticalTimelineDayProps } from "./types";
+import { timeDetailOpacityStyle } from "#quno-internal/timeline/infinite/rendering/shared/TimeGridDetails";
 import {
   CalendarHourBands,
   calendarHourLabelProps
@@ -133,7 +134,11 @@ export function VerticalDayChrome({
                   data-hour={hourProps ? tick.minute / 60 : undefined}
                   key={`${day.dateKey}-time-${tick.minute}`}
                   aria-hidden={!tick.showLabel}
-                  style={{ ...hourProps?.style, top: `${tick.positionPercent}%` }}
+                  style={{
+                    ...timeDetailOpacityStyle({ opacity: tick.opacity }),
+                    ...hourProps?.style,
+                    top: `${tick.positionPercent}%`
+                  }}
                   title={hourProps?.title}
                 >
                   {formatVerticalTimeTick({ minute: tick.minute, isHour: tick.isHour })}
