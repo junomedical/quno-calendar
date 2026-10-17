@@ -2,6 +2,13 @@
 
 Version `0.6.0` presents Infinite Calendar, Datepicker, Date Input, and Date Parser as independent package surfaces. There are no legacy JavaScript exports or wrapper packages.
 
+## Unreleased: remove zoom transparency
+
+Infinite Calendar time labels and grid cadence switch immediately at the original zoom thresholds. The transparency-specific
+`.quno-calendar-time-detail` and `.quno-calendar-time-grid-detail` classes and private opacity variable are removed.
+Use the existing `.quno-calendar-time-tick` and `.icv-time-tick` label hooks for presentation. Component props,
+navigation and zoom callbacks retain their contracts. Standalone Timepicker minute options retain font weight 400.
+
 ## Unreleased: paired parser endpoints
 
 Successful and partial-range `parseDateInput` results now contain top-level `start` and `end` objects, each with

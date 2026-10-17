@@ -4,7 +4,7 @@ import {
   layoutPreparedEventsForRow,
   type EventLayoutItem
 } from "#quno-internal/timeline/infinite/events/layout/layout";
-import { TIMELINE_LEFT_GUTTER_PX } from "#quno-internal/timeline/time/timelineTicks";
+import { gridCadenceMinutes, TIMELINE_LEFT_GUTTER_PX } from "#quno-internal/timeline/time/timelineTicks";
 import {
   AvailabilityLayer,
   CommittedLayer,
@@ -141,7 +141,7 @@ export const InfiniteTimelineRow = memo(function InfiniteTimelineRow({
       calendarHourPresentations={calendarHourPresentations}
       settings={settings}
       timelineWidth={width}
-      gridCellWidth={Math.max(1, settings.zoom * 15)}
+      gridCellWidth={Math.max(1, settings.zoom * gridCadenceMinutes({ zoom: settings.zoom }))}
       eventCount={rowEvents.length}
       showNowLine={showNowLine}
       nowLineClassName={nowLineClassName}

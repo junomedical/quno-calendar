@@ -411,7 +411,7 @@ export function ProgressiveTimeRevealDemo() {
   return (
     <CalendarDemoShell
       data-testid="article-time-precision-demo"
-      note="Time-label and fine-grid opacity follows zoom immediately while their nodes stay mounted"
+      note="Readable time labels and grid cadence switch immediately while tick nodes stay mounted"
       tools={
         <div className="article-precision-controls">
           <span className="article-toolbar-badge" data-testid="article-precision-level">

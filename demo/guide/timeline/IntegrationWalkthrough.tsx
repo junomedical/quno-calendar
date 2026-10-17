@@ -693,12 +693,12 @@ export function IntegrationWalkthrough({ embedded = false }: { embedded?: boolea
         <p>
           The time scale reveals detail as space becomes available: hours and half hours for overview, quarter hours for
           planning, and five-minute labels for precise placement. The tick structure stays stable while the readable
-          labels and extra five-minute grid lines change opacity with the zoom value. Wheel and trackpad changes take
-          effect immediately; reduced motion keeps visible detail fully opaque.
+          labels appear or disappear immediately at full opacity. The grid switches directly to five-minute cadence when
+          zoom exceeds 6.
         </p>
         <Callout>
-          Switch through the three precision levels and back. Minute labels and fine grid lines fade in place while the
-          same time-scale elements and event cards remain mounted.
+          Switch through the three precision levels and back. Minute labels and fine grid lines switch in place while
+          the same time-scale elements and event cards remain mounted.
         </Callout>
         <DemoBreakout>
           <LazyArticleDemo label="progressive time reveal example">

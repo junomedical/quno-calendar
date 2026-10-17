@@ -4,6 +4,17 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+### Remove zoom transparency - 2026-10-17
+
+- Remove the zoom transparency feature, including opacity ramps, fade styles and the extra grid-detail layer.
+  Restore immediate full-opacity time labels, original readability thresholds and direct grid-cadence changes.
+- Retain stable tick nodes, zoom anchoring and the standalone Timepicker's minute font weight of 400.
+- Replace transparency tests with immediate visibility, grid geometry and no-animation regressions in both orientations.
+- Verification in an isolated checkout: all 543 unit tests and all 213 Chromium scenarios pass. Formatting,
+  architecture/contracts, typechecking, lint, library/demo builds, package verification, Preact and React 19
+  compatibility, size reporting and pack dry-run pass. Infinite Calendar is 42,332 B gzip JavaScript and 2,018 B gzip CSS
+  (Node 23.10), within unchanged budgets. No verification blockers remain.
+
 ### Immediate wheel zoom detail - 2026-10-17
 
 - Replace the 160 ms time-detail transition with opacity derived from committed zoom. Shift-wheel/trackpad reversals

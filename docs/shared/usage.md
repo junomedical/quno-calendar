@@ -1004,9 +1004,9 @@ action; creation begins by drawing on the timeline. Previous and next buttons ca
 same handle. Keep the five-minute time scale structure stable and let controlled zoom progressively reveal finer labels
 instead of replacing tick nodes.
 
-With the optional calendar stylesheet, time-label and five-minute grid opacity follows the current zoom in the same
-commit as geometry. Both orientations retain their nodes, hide zero-opacity detail from layout, and leave no animation
-running after a wheel/trackpad gesture. Reduced motion uses full opacity for visible detail.
+With the optional calendar stylesheet, readable time labels appear or disappear immediately at full opacity.
+The grid switches directly to five-minute cadence above zoom 6 and back to quarter-hour cadence on zoom-out.
+Hidden ticks keep their nodes with `display: none`. Both orientations use the same behavior without transparency effects.
 Try Overview → Quarter hour → 5 minutes and back in the guide's **Reveal time progressively** chapter;
 the controlled-zoom recipe above needs no additional animation state.
 
