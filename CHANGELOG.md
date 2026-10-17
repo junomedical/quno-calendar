@@ -4,6 +4,37 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+### Horizontal zoom without sideways correction frames - 2026-10-17
+
+- Restore the first pointer-nearest time node in the same layout commit as horizontal wheel zoom, using actual
+  effective settings. Remove predicted scroll writes and three-frame corrections that exposed sideways jumps.
+- Let external zoom take over immediately during a wheel gesture; retain the current scroll snapshot for its anchor.
+  Delayed controlled parents retain their old geometry until committing, and unmount drops pending notifications.
+- Add dense 20,000-event per-frame marker/appointment assertions for wheel and slider reversals at two window sizes,
+  plus controlled-commit, external takeover, intervening vertical correction and unmount unit regressions.
+- Verification: all 541 unit tests and all 193 Chromium scenarios pass; the final wheel/slider/core refinement also
+  passes all 12 focused Chromium scenarios. Formatting, architecture/contracts, typechecking, lint, demo build,
+  package verification, Preact and React 19 compatibility, size reporting and pack dry-run pass. Infinite Calendar
+  measures 42,276 B gzip JavaScript and 2,018 B gzip CSS, within the unchanged budgets.
+- The first concurrent unit run exceeded a timing-sensitive layout-scaling threshold. The final isolated full unit
+  suite passes without changing that benchmark or the layout implementation. No verification blockers remain.
+
+### Server-owned demo range queries - 2026-10-17
+
+- Replace browser-generated event uploads with `{ startDate, endDate, calendarIds, eventsPerYear }` queries. Vite and
+  Vercel use one validated Web handler to generate/filter requested years, with a bounded server fixture cache.
+  Build the server-only service behind a native private import so emitted Vercel functions resolve it without dev aliases.
+- Generate appointments inside every participant's working hours and use host-independent local wall-clock fixture
+  timestamps. Support leap days and distinct event identities across years.
+- Keep session creates, edits and moves across refetches, including saves during pending reads and moved-source
+  suppression. Preserve equal-start response ordering; dataset changes reset the local overlay.
+- Add API validation/determinism, session-race and Berlin/New York request/geometry browser regressions.
+- Verification: all 537 unit tests and all 189 Chromium scenarios pass. Four query/loading browser scenarios also
+  pass after the deployment wiring change. Formatting, architecture/contracts, typechecking, lint, demo build,
+  package verification, Preact/React 19 compatibility, size reporting and pack dry-run pass. A clean build with the
+  Vercel Node builder returns filtered events; native Node runtime coverage protects the server import mapping.
+  Library JavaScript/CSS artifacts and public API remain unchanged. No verification blockers remain.
+
 ### Coordinated draw and Cancel layout - 2026-10-16
 
 - Batch drawn-create and Cancel draft changes with their restoration requests. Pin the restore date through create

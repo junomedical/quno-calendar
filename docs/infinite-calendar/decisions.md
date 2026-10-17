@@ -1111,3 +1111,51 @@ No new public methods or props are needed.
 Chromium regressions reproduce a one-frame 500px jump at October 17 in Room 203. At 1280px and 1800px they sample every
 frame through opening and four seconds of cancellation, rejecting missing rows, movement, horizontal drift and blank
 date gaps. Existing repeat-draw, participant-edit, save, loading and manual-scroll tests retain their contracts.
+
+## 111 - Query Demo Event Ranges On The Server
+
+Date: 2026-10-17
+Status: Accepted; supersedes only the browser-filtered echo transport in Decision 043 and primary-only availability in Decision 020
+
+Showcase requests send `{ startDate, endDate, calendarIds, eventsPerYear }` rather than complete event arrays.
+The server validates inclusive dates, known resources, supported 100/1,000/5,000/20,000 dataset sizes, a 366-day maximum
+span and a 16 KiB request ceiling. It generates deterministic fixtures for requested years, including leap days,
+filters date/resource coverage and returns `{ events }`. Reuse one Web handler for Vite development/preview and Vercel.
+Keep the existing optional delay, abortable browser requests, stable read coverage and calendar-owned cache contracts.
+The demo build emits a server-only query bundle behind a native private package import. Development resolves it to
+source; deployed Node functions resolve the emitted bundle, independently of Vite/TypeScript aliases. Both the
+site build and the function's `vercel-build` hook prepare it; publish atomically to support concurrent builders.
+Retain at most four annual fixture datasets on the server; do not generate whole-year event arrays in the browser.
+
+Appointment times fit all participants' shared availability. Varied weekday shifts remain intentional. Use local
+wall-clock fixture timestamps so server and browser timezones cannot shift those hours. Include the fixture year in
+appointment IDs to keep cross-year reads distinct. This changes demo data, not the library timestamp contract.
+
+Keep browser session overrides for explicit creates, edits and accepted moves. Merge the latest overrides when a
+response resolves; replace edited records at their original response positions, suppress moved sources even outside
+the queried range/selection, and append matching creations. Reset on dataset change or page reload. No shared mutation
+backend or durable persistence is implied. No public package API, class or token changes are needed.
+
+Unit tests cover query validation and bounds, overlapping reads, leap/cross-year generation, all-participant working
+hours and pending-read/session-override races. Chromium asserts real request fields, working-hour geometry in Berlin
+and New York, and saved edits/creates surviving refetches, alongside the existing full interaction regressions.
+
+## 112 - Restore Horizontal Wheel Anchors In The Zoom Layout Commit
+
+Date: 2026-10-17
+Status: Accepted; supersedes only horizontal restoration timing in Decision 066; refines Decision 048
+
+Horizontal Shift-wheel keeps its first pointer-nearest rendered time node and coalesces raw steps into one controlled
+request per animation frame. Keep the parent notification in a microtask so React 19 never needs a forced commit.
+Wait for the requested controlled value, then restore the captured anchor in that layout commit using the actual
+effective settings, including the viewport-fill floor. Do not write predicted future geometry to the old DOM or retry
+horizontal corrections in later animation frames. A delayed parent may keep the old view until it commits.
+
+An external controlled value cancels wheel ownership immediately, including during the 300ms momentum tail. Its
+normal visible-now/center/origin anchor applies in the same commit. Keep that path's scroll snapshot current after
+wheel-owned corrections, and drop scheduled notifications on unmount. Ordinary trailing momentum suppression and
+vertical date/time restoration retain their existing contracts. No public props, classes or tokens change.
+
+Chromium samples every frame of dense 20,000-event wheel and slider zoom reversals at 1280px and 1800px, checking
+current-time position, appointment projection and DOM identity. Unit tests cover a delayed parent, actual committed
+geometry, external takeover and unmount before the scheduled notification.

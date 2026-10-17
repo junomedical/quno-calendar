@@ -564,8 +564,8 @@ test("keeps expanded calendar rows populated immediately after create cancel", a
   // Navigation updates before the settled viewport loader issues its read.
   const navigatedDateRead = page.waitForResponse((response) => {
     if (!response.url().includes("/api/demo-events") || response.status() !== 200) return false;
-    const events = response.request().postDataJSON() as Array<{ start: string }>;
-    return events.some((event) => event.start.startsWith("2026-04-27"));
+    const query = response.request().postDataJSON() as { startDate: string; endDate: string };
+    return query.startDate <= "2026-04-27" && query.endDate >= "2026-04-27";
   });
   await goToWorkday(page, "2026-04-27");
   await navigatedDateRead;
@@ -762,7 +762,9 @@ test("supports external event editing popup without blocking calendar scroll", a
   await expect(page.locator(`[data-testid="calendar-event"][data-event-id="${eventId}"]`)).toHaveCount(0);
   await expect(page.getByTestId("draft-title-input")).toHaveValue("Externally edited appointment");
   await expect(
-    page.locator(`[data-testid="draft-event"][data-event-id="${eventId}"]:has-text("Externally edited appointment")`)
+    page
+      .locator(`[data-testid="draft-event"][data-event-id="${eventId}"]:has-text("Externally edited appointment")`)
+      .first()
   ).toBeVisible();
   if (draftBoxBeforeScrollAway) {
     await expect

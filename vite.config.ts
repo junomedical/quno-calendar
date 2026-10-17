@@ -19,6 +19,7 @@ export default defineConfig({
       { find: /^@quno\/calendar$/, replacement: resolve(__dirname, "src/lib/index.ts") },
       { find: /^#quno-internal\//, replacement: `${resolve(__dirname, "src/lib")}/` },
       { find: /^#quno-demo\//, replacement: `${resolve(__dirname, "demo")}/` },
+      { find: /^#quno-api\/demo-event-service$/, replacement: resolve(__dirname, "demo/server/queryDemoEvents.ts") },
       { find: /^#quno-api\//, replacement: `${resolve(__dirname, "api")}/` },
       { find: /^#quno-e2e\//, replacement: `${resolve(__dirname, "e2e")}/` },
       { find: /^#quno-tests\//, replacement: `${resolve(__dirname, "tests")}/` },
