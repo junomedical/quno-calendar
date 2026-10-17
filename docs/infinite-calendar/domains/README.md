@@ -1,43 +1,17 @@
-# Runtime Responsibility Domains
+# Runtime responsibility domains
 
-The source tree is organized by **ownership**, while the [runtime flows](../flows/README.md) are organized by
-**execution order**. A domain answers “who owns this state or decision?”; a flow answers “what happens next?”.
+The source is organized by ownership; the [flows](../flows/README.md) describe execution order.
 
-```mermaid
-flowchart LR
-  Foundation["Foundation: public types, dates, time"] --> Scroll["Scroll"]
-  Foundation --> Events["Events"]
-  Foundation --> Interactions["Interactions"]
-  Scroll --> Anchors["Anchors"]
-  Events --> Anchors
-  Interactions --> Anchors
-  Scroll --> Views["Views"]
-  Events --> Views
-  Interactions --> Views
-  Anchors --> Views
-  Rendering["Rendering"] --> Views
-  Foundation --> Rendering
-```
+| Domain                            | Owns                                                               | Boundary                                |
+| --------------------------------- | ------------------------------------------------------------------ | --------------------------------------- |
+| [Foundation](./foundation.md)     | Public facade/types, dates, clocks, membership and focus callbacks | No viewport writes                      |
+| [Scroll](./scroll.md)             | Geometry revisions, windows, native observations and commits       | No event fetching                       |
+| [Events](./events.md)             | Request generations, immutable cache and deterministic preparation | No navigation                           |
+| [Anchors](./anchors.md)           | Semantic targets, projection and intent priority                   | No collision-lane identity              |
+| [Interactions](./interactions.md) | Pointer lifecycle and controlled zoom requests                     | Parent owns accepted settings/mutations |
+| [Rendering](./rendering.md)       | Sticky chrome, event layers and external card content              | No requests or scroll writes            |
+| [Views](./views.md)               | React adapters connecting the engine to public props               | No independent geometry authority       |
 
-## Domain Index
-
-| Domain                            | Owns                                                                          | Does not own                          |
-| --------------------------------- | ----------------------------------------------------------------------------- | ------------------------------------- |
-| [Foundation](./foundation.md)     | Public facade, shared types, dates, time, public event membership helpers     | Runtime coordination                  |
-| [Scroll](./scroll.md)             | Bounded date window, visible position, settlement, recenter, resource windows | Event requests or visual-focus policy |
-| [Events](./events.md)             | Loading, cache, indexing, overlap layout, measured event geometry             | Scrolling or rendering                |
-| [Anchors](./anchors.md)           | Semantic visual position across layout, zoom, and parent restore              | DOM focus or gesture recognition      |
-| [Interactions](./interactions.md) | Pointer lifecycle, hit testing, drag, draft, wheel-zoom requests              | Rendering or controlled zoom state    |
-| [Rendering](./rendering.md)       | DOM/CSS projection and render-only geometry                                   | Async loading or scroll writes        |
-| [Views](./views.md)               | Horizontal/vertical composition and public projection boundaries              | Feature-domain internals              |
-
-## Dependency Rules
-
-- Feature engines may import foundation modules, never views.
-- Scroll publishes visible positions and ranges; events decides what to prefetch.
-- Anchors translate semantic positions using scroll and event geometry; scroll does not import anchors.
-- Rendering receives prepared state and callbacks; it does not start requests or mutate controlled settings.
-- Views are the composition root and may import every runtime domain.
-- There are no generic `hooks`, `utils`, `common`, or `helpers` runtime directories.
-
-The folder containing a source file identifies its domain. The source maps in these guides are maintained as navigation aids rather than duplicated as banners in every module.
+`runtime/model` and `runtime/data` are framework-independent. `runtime/viewport` depends on that model;
+`runtime/browser` translates native observations and commits; `runtime/react` composes them with tested presentation
+and callback lifecycles. Both orientations share the same engine. See the [architecture](../architecture.md).

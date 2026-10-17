@@ -9,7 +9,7 @@ import {
   type QunoInfiniteCalendarProps,
   type EventRendererProps,
   type LoadEvents
-} from "#quno-internal/timeline";
+} from "@quno/calendar/infinite-calendar";
 
 const calendars = [
   { id: "calendar-a", name: "Calendar A", color: "#0b6eff" },

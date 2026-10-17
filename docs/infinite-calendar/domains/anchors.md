@@ -1,72 +1,19 @@
-# Anchors Domain
+# Semantic anchors
 
-## Responsibility
+`runtime/model/projection.ts` maps logical targets to content coordinates and back.
+`anchors.ts` captures the current date/resource position. `runtime/viewport/zoomAnchor.ts` captures pointer time,
+current-time, center/origin or vertical day-fraction anchors. `ownership.ts` arbitrates intent; `navigation.ts`
+builds navigation targets. `runtime/react/useRuntimeHandle.ts` defers public commands until parent layout commits.
 
-Own **visual focus**: the semantic date, resource, event, or time location that stays at the same viewport-relative coordinate while geometry changes. Visual focus is independent of browser DOM focus.
+The DOM registry in `infinite/anchors/parent/viewportGeometryRegistry.ts` records mounted participant instances.
+It determines actual visibility and captured card coordinates; it cannot independently move the viewport.
+`useRuntimeCapture.ts` resolves public event/resource/date/time requests into engine targets.
 
-```mermaid
-flowchart TD
-  Change["Geometry will change"] --> Priority{"Anchor owner?"}
-  Priority -->|Parent restore| Parent["Event/date/resource target"]
-  Priority -->|Late data| Data["Date/resource/local-row slot"]
-  Priority -->|Controlled zoom| Zoom["Visible now marker or center time"]
-  Parent --> Restore["Resolve next geometry and correct scroll"]
-  Data --> Restore
-  Zoom --> Restore
-```
+An anchor contains semantic identity, a screen point, and affected axes. Restore computes a new content point from the
+latest geometry and subtracts the screen point. Date-only anchors preserve horizontal scrolling. Resource centering
+uses a fraction of the current resource extent. Event anchors retain participant identity rather than a collision lane.
+Required visible events never silently become resource slots.
 
-Priority and interaction with scroll maintenance are defined in the [Flow Guide](../flows/README.md#anchor-priority).
-
-## Contracts And Invariants
-
-- Parent restore outranks gesture, navigation, automatic data-layout correction, and idle recentering.
-- Newly loaded events never become focus targets merely because they appeared.
-- A target with only `dateKey` anchors the date axis. It leaves horizontal scrolling unchanged. It can navigate to
-  an unmounted date after parent selection and draft changes. Manual intent cancels the session when requested.
-- Event focus is a visibility guarantee: fully visible shells do not cause scroll writes, while clipped or offscreen
-  shells are brought into the uncovered content viewport.
-- Horizontal late-data restoration preserves date/resource/local-row offset; missing resources fall back to date-local offset.
-- Controlled zoom remains parent-owned through `settings.zoom` and only requests changes with `onZoomChange`.
-- Captures read the current geometry synchronously. Restore requests start after the parent layout commits; cancellation
-  clears pending requests as well as active sessions. Consumers can update selection or drafts without forcing a React commit.
-- Event captures record the resolved participant id, even when the caller omitted it. Restoration cannot hop between
-  copies of a multi-participant event as visibility changes. Consumers can explicitly transfer to another target.
-- Required visible event captures return `null` for missing/offscreen events without substituting resource slots.
-- The demo verifies a visible clicked instance before capturing its horizontal resource/time slot for editor opening
-  and Cancel. These row targets stay independent of compact lanes and hover expansion (Decision 104).
-- Horizontal draft changes retain measured dates. Explicit restores cancel pending idle recenter work and block new
-  deadlines until they release ownership; the scheduler rechecks live ownership at racing deadlines.
-- Horizontal parent restores pin their target date through resource resizing, keeping its geometry registered when
-  a create or edit draft clears and ordinary overscan moves away. The pin ends with restoration or cancellation
-  (Decisions 105 and 110). After date measurement, a final layout step reapplies the restore and publishes the corrected
-  date range and resource viewport before paint. Ordinary scrolling remains frame-coalesced.
-- New raw date navigation, explicit restoration, and cancellation discard queued horizontal resource navigation.
-- Explicit centered row navigation recomputes its desired snapshot from the live row height during the bounded session.
-- Manual user intent cancels eligible scheduled restoration.
-- Horizontal date/time navigation can target a resource row; visible rows stay put while virtualized rows are pinned
-  and revealed after the date jump.
-
-## Source Map
-
-| Source file                                                                                                                    | Responsibility                                                                                               |
-| ------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------ |
-| [`viewportAnchorTypes.ts`](../../../src/lib/timeline/infinite/anchors/parent/viewportAnchorTypes.ts)                           | Defines internal geometry registration and restore-target contracts.                                         |
-| [`viewportGeometryRegistry.ts`](../../../src/lib/timeline/infinite/anchors/parent/viewportGeometryRegistry.ts)                 | Indexes mounted date, resource, and event elements for semantic resolution.                                  |
-| [`viewportAnchorRestoreSession.ts`](../../../src/lib/timeline/infinite/anchors/parent/viewportAnchorRestoreSession.ts)         | Schedules, retries, cancels, and completes one parent-owned restoration.                                     |
-| [`useViewportAnchoring.ts`](../../../src/lib/timeline/infinite/anchors/parent/useViewportAnchoring.ts)                         | Exposes capture/restore operations and geometry registration to a view.                                      |
-| [`horizontalDataLayoutAnchor.ts`](../../../src/lib/timeline/infinite/anchors/data-layout/horizontalDataLayoutAnchor.ts)        | Captures and resolves date/resource offsets across horizontal metric changes.                                |
-| [`useHorizontalDayMeasurement.ts`](../../../src/lib/timeline/infinite/anchors/data-layout/useHorizontalDayMeasurement.ts)      | Measures changed days and restores the current semantic slot before paint.                                   |
-| [`useHorizontalControlledZoomAnchor.ts`](../../../src/lib/timeline/infinite/anchors/zoom/useHorizontalControlledZoomAnchor.ts) | Preserves a visible now marker, with center/origin fallback, across controlled horizontal zoom prop changes. |
-
-- [`useViewportAnchorRestore.ts`](../../../src/lib/timeline/infinite/anchors/parent/useViewportAnchorRestore.ts) starts the existing restoration session after committed parent props and geometry.
-
-## Verification Map
-
-- Unit: geometry registry full-visibility checks, data-layout anchor, controlled zoom anchor, and resize compensation.
-  `viewportAnchoring.test.tsx` covers committed geometry and cancellation before commit; `horizontalNavigation.test.tsx`
-  covers updated/async row sizing, newly selected rows, and precedence across navigation, restore, and cancellation.
-  Event projection tests assert accepted moves preserve persisted metadata and do not commit projection-only ids.
-- Browser: async height growth, external layout restore/cancel, conditional event-focus scrolling, date/time navigation,
-  zoom continuity, and interaction priority. Dedicated regressions assert both orientations' loading geometry,
-  percentage/minimum sizing, accepted projected drags, async distant centering, and frame-stable three-participant editing
-  with 100/20,000 events and eight seconds of post-toggle observation.
+Priority: explicit restore, gesture, navigation, automatic layout correction, idle recenter. New equal-priority intents
+supersede old ones; obsolete cancellation cannot cancel a successor. Manual input cancels opted-in ownership.
+Network replies cannot claim navigation. All corrections reach the single browser commit adapter.

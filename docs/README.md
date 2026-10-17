@@ -92,3 +92,11 @@ The package manifest provides both modern `exports` types and legacy Node-style 
 Each product owns its own `decisions.md`. Historical identifiers remain stable even when an older decision predates
 the four-product documentation structure. `CHANGELOG.md` remains at the repository root because releases apply to the
 combined package.
+
+- [Infinite Calendar rewrite milestones and verification](./infinite-calendar/runtime-rewrite.md)
+- [Infinite Calendar production before/after timing](./infinite-calendar/performance-comparison.md)
+
+[Decision 117](./infinite-calendar/decisions.md#117---separate-stable-layout-from-viewport-presentation) records
+viewport presentation subscriptions, reusable geometry and native observation ordering.
+
+[Decision 118](./infinite-calendar/decisions.md#118---capture-shift-input-even-when-zoom-cannot-change) keeps Shift input captured at zoom limits and preserves ordinary scrolling after the momentum tail.

@@ -37,7 +37,7 @@ export default defineConfig(({ mode }) => {
         cssFileName: selected.file
       },
       rollupOptions: {
-        external: ["react", "react-dom", "react/jsx-runtime", "@tanstack/react-virtual"]
+        external: ["react", "react-dom", "react/jsx-runtime"]
       }
     }
   };

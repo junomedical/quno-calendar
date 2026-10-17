@@ -1,252 +1,39 @@
-# Virtual Scroll And Recenter
+# Native scrolling, navigation and recenter
 
-The calendar presents continuous date navigation through a bounded scrollbar. The virtual date model contains roughly one month before and after its current anchor, while the DOM contains only visible dates, overscan, and at most one pinned layout date.
+A finite sequence extends one month before and after its center date, excluding configured weekdays. Prefix extents
+represent each date and resource. Binary searches select visible intervals, five overscan dates per side and two
+overscan resources per side. Pins are deduplicated and do not expand the data-loading range by themselves.
 
-## Ownership Map
+## Native scroll
 
-```mermaid
-flowchart LR
-  Anchor["Virtual-window anchor date"] --> Model["Bounded date model"]
-  Model --> Virtualizer["Measured virtualizer"]
-  Virtualizer --> Items["Visible + overscan render items"]
-  Items --> Dates["Mounted date sections"]
-  Virtualizer --> Snapshot["Top visible date + local offset"]
-  Snapshot --> Idle["Scroll idle / scrollend coordinator"]
-  Idle --> Anchor
-  Items --> Loader["Visible keys for async loading"]
-  Metrics["Known date sizes"] --> Virtualizer
-  Pins["Draft or restore target date"] --> Items
-```
+The browser moves the viewport. The adapter batches observations to a display frame and publishes the latest actual
+position. Visible-date changes feed the settled loader. Resource/date rendering uses the same committed geometry;
+unchanged sections retain identity. A stable React snapshot skips rendering while geometry and visible/mounted
+identities match; the engine's live position still advances. Pending observations flush before a settings, size or
+data commit. A programmatic commit discards observations captured against the previous DOM. If only a pin/owner
+revision advanced without changing the rendered window, the adapter commits the current matching engine revision.
 
-The virtual-window anchor chooses the bounded date range. It is not itself the visible DOM element, browser focus, or an event anchor.
+Manual wheel, pointer, touch and scroll-key intent cancels eligible restoration. A wheel event captured by the zoom
+controller does not become a competing scroll intent. Reaching an edge schedules settlement even when further wheel
+input produces no scroll event.
 
-## Parent State And Navigation
+## Navigation
 
-The parent may update its selected resources or controlled draft, then call `scrollToDateTime` with a resource id or
-`restoreViewportAnchor` in the same handler. The calendar retains that request until its layout commit, measures the
-updated geometry, then uses the existing virtual-window navigation or restoration session. The session continues to
-observe late row registration and layout changes. Capturing an anchor still happens before the parent change;
-cancelling a restore clears both queued and active work. Consumers do not force a React commit.
-Horizontal restores also clear idle recenter deadlines. The scheduler checks live restore ownership before scheduling
-or executing maintenance; after release, the next scroll signal can arm a new deadline.
+Public date requests supersede queued resource navigation. Date/time and resource commands wait for committed parent
+selection/settings. Excluded dates normalize to the next included day; an all-excluded configuration has an empty window.
+The engine can construct a distant date window directly without waiting for mounted DOM.
 
-## Settled Scroll Lifecycle
+Horizontal time navigation places the clock 48 px inside the timeline after sticky labels. Vertical time navigation
+places it 48 px below the viewport top. Today uses the supplied/current local clock. Horizontal resource navigation
+preserves an already visible row or reveals it below chrome; explicit center alignment follows eventual collision height.
+Date-only anchors preserve the other axis. Parent restore options retain their navigation-fallback and manual-cancel rules.
 
-```mermaid
-sequenceDiagram
-  actor User
-  participant View as Scroll viewport
-  participant Position as Visible-position tracker
-  participant Idle as Recenter scheduler
-  participant Nav as Window navigation
-  participant Model as Bounded date model
-  participant Virtualizer as Virtualizer
+## Settlement
 
-  User->>View: Wheel, touch, keys, or scrollbar drag
-  View->>Position: scrollTop changed
-  Position->>Virtualizer: Resolve item containing one-pixel probe
-  Virtualizer-->>Position: Date index, start, and size
-  Position->>Position: Store dateKey + offsetWithinDate
-  Position->>Idle: Restart idle deadline
-  alt Browser emits scrollend
-    View->>Idle: Schedule the same settled path
-  end
-  alt Draw or drag begins
-    Idle->>Idle: Cancel the pending deadline
-  else Draw or drag remains active at a racing deadline
-    Idle->>Idle: Read live ownership and skip; a later scroll signal can reschedule
-  else Scroll settles
-    Idle->>Nav: Recenter visible snapshot
-    Nav->>Nav: Normalize date and store pending target
-    Nav->>Model: Set new virtual-window anchor
-    Model-->>Virtualizer: Rebuild bounded date/index mapping
-    Virtualizer-->>Nav: New offsets available
-    Nav->>View: Restore exact date-local offset in layout effect
-  end
-```
+Ordinary scrolling waits 1,200 ms; an edge waits 240 ms. If an explicit intent is active, recenter does not compete.
+Otherwise the current date/resource offset becomes a semantic anchor, the bounded sequence moves around that date,
+and reprojection preserves the same screen point. The adapter applies the new revision only after its spacer and
+sections render. Obsolete revisions cannot overwrite a newer navigation request.
 
-The one-pixel probe makes an exact item boundary belong to the following date rather than the date that ends at that coordinate.
-The scheduler uses the ordinary 1.2-second deadline inside the bounded range. When `scrollTop` reaches the absolute top
-or bottom within one device-independent pixel, it uses a 240 ms deadline instead. More scroll always replaces the
-pending timer and recalculates which deadline applies.
-Starting a pointer interaction cancels any deadline that was armed before the gesture. The deadline callback also reads
-the current interaction owner rather than the render that scheduled it, so a racing timer cannot rebuild the visible
-date tree while a draw or drag is held.
-
-## Recenter State Machine
-
-```mermaid
-stateDiagram-v2
-  [*] --> Centered
-  Centered --> Moving: first scroll event
-  Moving --> Moving: more scroll events update snapshot
-  Moving --> Waiting: idle timer armed
-  Waiting --> Moving: another scroll event
-  Waiting --> Deferred: pointer interaction begins; cancel deadline
-  Waiting --> SnapshotReady: idle deadline or scrollend path
-  SnapshotReady --> Deferred: pointer interaction active
-  Deferred --> Moving: later scroll signal after interaction
-  SnapshotReady --> SameAnchor: visible date already owns window
-  SnapshotReady --> Rebuild: visible date differs from window anchor
-  SameAnchor --> Centered: restore offset and reset bounded position
-  Rebuild --> PendingRestore: date model rebuilt
-  PendingRestore --> Centered: layout effect restores date + offset
-```
-
-Same-anchor recentering is intentional. It resets the scrollbar thumb toward the center of the bounded range even when the top date key has not changed.
-
-## Imperative Navigation
-
-```mermaid
-flowchart TD
-  Request["scrollToDate(dateKey)"] --> Normalize["Normalize excluded weekday"]
-  Normalize --> Save["Save pending target with offset 0"]
-  Save --> Same{"Target equals current window anchor?"}
-  Same -->|Yes| Offset["Resolve current item offset and scroll now"]
-  Same -->|No| Reanchor["Set virtual-window anchor to target date"]
-  Reanchor --> Render["Rebuild date model and mount target neighborhood"]
-  Render --> Layout["Layout effect consumes pending target"]
-  Layout --> Offset
-  Offset --> Time{"scrollToDateTime also requested?"}
-  Time -->|Horizontal| X["Place requested time on X axis; repeat next frame"]
-  Time -->|Vertical| Y["Resolve mounted day then place requested minute on Y axis across frames"]
-  Time -->|No| Done["Target date header remains navigation focus"]
-  X --> Done
-  Y --> Done
-```
-
-The repeated frame is a mount/measurement bridge, not polling. The bounded model may need one React commit before the target day exists.
-An optional `calendarId` on horizontal `scrollToDateTime` uses the instance geometry registry and restore target pin
-to reveal a row after that commit. An already-visible row keeps its vertical position.
-
-## Position Snapshots And Layout Changes
-
-Two translations use date-local offsets:
-
-1. **Window recenter:** preserve the exact raw offset and mounted semantic nodes inside the top date while date indexes
-   and the equivalent centered scrollbar position are rebuilt.
-2. **Structural layout change:** translate or clamp the saved offset for settings-driven geometry changes such as zoom
-   or excluded weekdays.
-3. **Resource membership change:** preserve the surviving resource and its row-local offset without rebuilding the
-   date model; if that resource disappears, clamp the captured date-local fallback inside the resized date.
-
-```mermaid
-flowchart LR
-  Signature["Structural layout signature changed"] --> Read["Read normalized top date + saved local offset"]
-  Read --> Translate{"Orientation supplied a translator?"}
-  Translate -->|Yes| Semantic["Translate header/time-relative portion"]
-  Translate -->|No| Clamp["Clamp raw offset inside next base height"]
-  Semantic --> Measure["Reset virtualizer to next uniform base geometry"]
-  Clamp --> Measure
-  Measure --> Same{"Top date is current window anchor?"}
-  Same -->|Yes| Restore["Scroll directly to date + translated offset"]
-  Same -->|No| Pending["Store pending target and re-anchor window"]
-  Pending --> Restore
-```
-
-This structural path is distinct from late horizontal event metrics. Async row-height commits use the data-layout anchor described in [Async Loading And Layout](./async-loading-and-layout.md#late-events-that-increase-horizontal-height).
-
-Changing `excludedWeekdays` replaces the virtualizer's date-to-index sequence, so its pre-change pixel offset cannot be
-interpreted in the new model. The structural restore first uses base geometry, then repeats the semantic-date alignment
-after the virtualizer has adopted the new keys and horizontal variable measurements. The transition window renders
-from semantic date keys and retains all resources for its bounded settling frames, so a still-visible weekday and its
-event nodes are never temporarily interpreted through replacement indexes or unmounted. Horizontal controlled-draft
-opening and participant collapse/expansion keep measured sizes and use resource membership anchoring, rather than
-resetting structural geometry. The explicit parent event/slot restore remains responsible for the exact
-viewport-relative row position. A visible draft date can still guide settings-driven structural changes; an offscreen
-pinned draft yields to the visible date.
-
-Vertical dates have one uniform settings-owned height, so a structural zoom restore resets every bounded date measurement to the new base height before writing the translated scroll offset. While those measurements settle, rendering stays pinned to a base-geometry window around the semantic top date. A pending structural date restore retains its saved semantic date until the new model consumes the target; transient resize offsets must not replace that snapshot. The canvas uses the final bounded date count times the committed day height, so a large zoom-in cannot clamp against an old spacer. Retained semantic dates and pinned dates use their final uniform start and size, and the actual scroll offset, visible snapshot and date/resource ranges publish before paint. This prevents pre-commit virtualizer measurements from converting the saved date-local position through stale zoom geometry or exposing a transient blank/wrong-date window.
-
-## Date Render Items
-
-```mermaid
-flowchart TD
-  Output["Virtualizer visible items"] --> Present{"Any measured items?"}
-  Present -->|Yes| Measured["Use measured starts and sizes"]
-  Present -->|No| Fallback["Render deterministic item at anchor index"]
-  Measured --> Pin{"Pinned layout date already present?"}
-  Fallback --> Pin
-  Pin -->|Yes| Sorted["Sort by virtual index"]
-  Pin -->|No| Add["Resolve pinned index and measured/estimated offset"]
-  Add --> Sorted
-  Sorted --> Keys["Map every rendered item to visible loader key"]
-```
-
-The pinned layout date is mounted once without widening ordinary overscan. A horizontal parent restore also pins
-its target date through the same layout pin, taking priority over the draft date, deduplicating it against existing
-items and adding it to loader keys. This keeps original row geometry
-resolvable after Cancel rebuilds participant rows and clears the draft pin. The restore pin ends with its bounded
-session or cancellation. Creation retains eager-range ownership during its existing closing transition before a
-restore can take over the pin. Pinning makes geometry resolvable; it does
-not replace the current scroll anchor. A date-sequence or base-geometry transition keeps its resource nodes mounted
-until the virtualizer settles. When an idle recenter changes only the bounded-window anchor, measured semantic date
-items are translated to their replacement indexes and centered absolute offset while preserving their measured sizes.
-This avoids both a wrong-date frame and a uniform-height placeholder frame for availability-expanded rows.
-Deterministic base geometry remains the fallback when the semantic anchor has not been measured or when a genuine
-base-geometry transition invalidates the old sizes.
-
-## Cross-Axis Resource Window
-
-Each mounted date independently windows its resource axis.
-
-```mermaid
-flowchart LR
-  Sizes["Per-resource row heights or column widths"] --> Prefix["Stable prefix extents"]
-  Viewport["Viewport scroll + size snapshot"] --> Search["Binary-search intersecting extents"]
-  Prefix --> Search
-  Search --> Overscan["Add two resources before and after"]
-  Draft["Draft / drop preview resources"] --> Pins["Pinned indexes"]
-  Restore["Active restore target resource"] --> Pins
-  Pins --> Overscan
-  Overscan --> Mount["Mount sorted original indexes"]
-  Prefix --> Geometry["Keep full spacer and original offsets"]
-  Mount --> Geometry
-```
-
-Unmounted resources never compact the board. Hit-testing reads the mounted grid’s `data-date` and `data-calendar-id`, so an async size change cannot make a pointer resolve through stale row arithmetic.
-
-## Recenter And Anchor Priority
-
-Idle recenter is lowest priority because it changes the virtual model for maintenance rather than responding to a direct user goal.
-
-```mermaid
-flowchart TD
-  Ready["Recenter deadline reached"] --> Interaction{"Draw or drag active?"}
-  Interaction -->|Yes| Defer["Keep latest snapshot; skip this deadline"]
-  Interaction -->|No| Pending{"Imperative navigation or explicit restore pending?"}
-  Pending -->|Yes| Yield["Let target-specific flow own scroll"]
-  Pending -->|No| Recenter["Promote visible snapshot to window anchor"]
-  Intent["New manual scroll intent"] --> Snapshot["Update visible snapshot"]
-  Snapshot --> Timer["Restart idle deadline"]
-```
-
-## Failure And Cancellation Subflows
-
-| Condition                                         | Resolution                                                                                 |
-| ------------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| Immediate snapshot unavailable after a large jump | Keep the last valid or imperative pending target; the deadline re-reads after items mount. |
-| Target date is excluded                           | Normalize to the nearest permitted date before storing refs or indexes.                    |
-| Saved offset is negative                          | Clamp it to zero.                                                                          |
-| Structural change makes a date shorter            | Clamp or orientation-translate the offset so the same date remains visible.                |
-| Viewport reaches the absolute top or bottom       | Reduce the recenter deadline from 1.2 seconds to 240 ms.                                   |
-| More scroll arrives before idle deadline          | Clear the old timer, update the snapshot, and schedule once.                               |
-| Component unmounts                                | Clear the fallback timer; no deferred scroll survives.                                     |
-| Interaction begins with a deadline pending        | Cancel it; do not rebuild while the pointer owns gesture geometry.                         |
-| Interaction remains active at a racing deadline   | Read live ownership and skip; the next settled path uses the newest snapshot.              |
-| Date already equals the window anchor             | Still restore the saved offset so the scrollbar returns to its centered bounded position.  |
-
-## Source Map
-
-- `src/lib/timeline/infinite/scroll/useScrollRuntime.ts`: composes the bounded model, virtualizer, position tracker, render items, navigation, and layout restoration.
-- `src/lib/timeline/infinite/scroll/window/dateModel.ts`: normalized date/index mapping.
-- `src/lib/timeline/infinite/scroll/position/useVirtualScrollPosition.ts`: scroll offset and visible snapshot bridge.
-- `src/lib/timeline/infinite/scroll/navigation/useVirtualWindowNavigation.ts`: pending targets, imperative navigation, and recenter ownership.
-- `src/lib/timeline/infinite/scroll/settlement/useScrollRecenter.ts`: scroll/scrollend scheduling and interaction guard.
-- `src/lib/timeline/infinite/scroll/recenter/useLayoutOffsetRestoration.ts`: structural layout translation.
-- `src/lib/timeline/infinite/scroll/window/useVirtualDateRenderItems.ts`: visible, fallback, and pinned render items.
-- `src/lib/timeline/infinite/scroll/window/virtualizerMeasurements.ts`: structural measurement reset and uniform vertical seeding.
-- `src/lib/timeline/infinite/scroll/resources/resourceWindow.ts`: resource prefix extents and cross-axis window search.
-- `src/lib/timeline/infinite/scroll/resources/viewportMetricsStore.ts`: frame-batched viewport snapshots for local subscribers.
-
-The complete ownership map is in the [scroll domain](../domains/scroll.md).
+Tests assert screen geometry and logical dates, including exact boundaries, rapid reversals, far navigation, variable
+row heights, empty selections, excluded weekdays, fractional zoom and repeated recentering.

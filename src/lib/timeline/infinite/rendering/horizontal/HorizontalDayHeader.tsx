@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import type { CalendarDateLabelOptions } from "#quno-internal/timeline/core/calendarFormatterTypes";
 import { formatHorizontalDateLabel } from "#quno-internal/timeline/date/dateLabels";
 import { fromDateKey } from "#quno-internal/timeline/date/dateVirtualization";
@@ -28,6 +29,10 @@ export function HorizontalDayHeader({
   nowMinute,
   calendarDayProps
 }: HorizontalDayHeaderProps) {
+  const label = useMemo(
+    () => formatHorizontalDateLabel({ date: fromDateKey({ dateKey }), options: { locale, formatters } }),
+    [dateKey, locale, formatters]
+  );
   const headerWidth = settings.labelWidth + TIMELINE_LEFT_GUTTER_PX + timelineWidth;
 
   return (
@@ -71,7 +76,7 @@ export function HorizontalDayHeader({
           style={{ ...calendarDayProps?.style, width: settings.labelWidth }}
           title={calendarDayProps?.title}
         >
-          {formatHorizontalDateLabel({ date: fromDateKey({ dateKey }), options: { locale, formatters } })}
+          {label}
         </div>
       </div>
     </>

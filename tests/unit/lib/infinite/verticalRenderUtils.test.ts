@@ -4,7 +4,6 @@ import {
   positionColumnLayoutItems,
   verticalEventBox
 } from "#quno-internal/timeline/infinite/rendering/vertical/verticalGeometry";
-import { pinnedVerticalColumnIndexes } from "#quno-internal/timeline/infinite/rendering/vertical/useVerticalDayWindow";
 
 const event: CalendarEvent = {
   id: "event-a",
@@ -39,35 +38,5 @@ describe("vertical render utilities", () => {
       top: 68,
       height: 60
     });
-  });
-
-  it("pins every matching multi-calendar instance only on its event date", () => {
-    const multiCalendarEvent: CalendarEvent = {
-      ...event,
-      calendarIds: ["calendar-a", "calendar-c"]
-    };
-    const calendars = [
-      { id: "calendar-a", name: "A" },
-      { id: "calendar-b", name: "B" },
-      { id: "calendar-c", name: "C" }
-    ];
-
-    expect([
-      ...pinnedVerticalColumnIndexes({ dateKey: "2026-07-18", calendars, transientEvents: [multiCalendarEvent] })
-    ]).toEqual([0, 2]);
-    expect([
-      ...pinnedVerticalColumnIndexes({ dateKey: "2026-07-19", calendars, transientEvents: [multiCalendarEvent] })
-    ]).toEqual([]);
-    expect([
-      ...pinnedVerticalColumnIndexes({
-        dateKey: "2026-07-18",
-        calendars,
-        transientEvents: [],
-        activeRestoreTarget: {
-          dateKey: "2026-07-18",
-          calendarId: "calendar-b"
-        }
-      })
-    ]).toEqual([1]);
   });
 });

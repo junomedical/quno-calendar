@@ -1,42 +1,13 @@
-# Views Domain
+# React composition
 
-## Responsibility
+`core/QunoInfiniteCalendar.tsx` retains the public loading shell, handles and focus coordination.
+`runtime/react/RuntimeView.tsx` selects an orientation and composes `useRuntimeView` with `RuntimeCanvas`.
 
-Own the horizontal and vertical composition roots. Views connect public props to scroll, events, anchors, interactions, and rendering without reimplementing those domains’ policies.
+`useEngine` subscribes to the engine, commits layout inputs, attaches native observations and applies the latest
+revision before paint. `useRuntimeView` adapts selection, data projection, preparation, gestures and pinned resources.
+`RuntimeCanvas`, `HorizontalDay` and `VerticalDay` consume the geometry/window snapshot. Resource identity and settings
+come from the same revision; a parent resource change cannot mix new resource indexes with old extents.
 
-```mermaid
-flowchart TD
-  Props["Calendar props"] --> Setup["Shared settings + selection"]
-  Setup --> Horizontal["Horizontal runtime"]
-  Setup --> Vertical["Vertical runtime"]
-  Horizontal --> Domains["Scroll + events + anchors + interactions"]
-  Vertical --> Domains
-  Domains --> Canvas["Render-only canvas"]
-```
-
-## Contracts And Invariants
-
-- `QunoInfiniteCalendar` remains the public orientation switch.
-- Views may compose every domain; feature domains never import views.
-- Horizontal and vertical projections preserve identical public event and interaction semantics.
-- Controlled settings are read from props and changes are requested through callbacks.
-
-## Source Map
-
-| Source file                                                                                                                    | Responsibility                                                                                           |
-| ------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------- |
-| [`HorizontalTimelineView.tsx`](../../../src/lib/timeline/infinite/views/horizontal/HorizontalTimelineView.tsx)                 | Exposes the horizontal projection and passes its runtime into the render-only canvas.                    |
-| [`useHorizontalTimelineRuntime.ts`](../../../src/lib/timeline/infinite/views/horizontal/useHorizontalTimelineRuntime.ts)       | Composes horizontal foundation, hit testing, interactions, hover, ticks, and zoom.                       |
-| [`useHorizontalTimelineFoundation.ts`](../../../src/lib/timeline/infinite/views/horizontal/useHorizontalTimelineFoundation.ts) | Composes horizontal setup, event loading, metrics, scroll runtime, measurement, and navigation.          |
-| [`useHorizontalNavigation.ts`](../../../src/lib/timeline/infinite/views/horizontal/useHorizontalNavigation.ts)                 | Defers row measurements until committed layout; adapts date/time scrolling and parent-anchor operations. |
-| [`VerticalTimelineView.tsx`](../../../src/lib/timeline/infinite/views/vertical/VerticalTimelineView.tsx)                       | Composes the complete vertical projection and render canvas.                                             |
-| [`useVerticalNavigation.ts`](../../../src/lib/timeline/infinite/views/vertical/useVerticalNavigation.ts)                       | Adapts generic date scrolling, multi-frame vertical time positioning, and parent anchors.                |
-| [`useVerticalViewportWindow.ts`](../../../src/lib/timeline/infinite/views/vertical/useVerticalViewportWindow.ts)               | Adapts the shared scroll runtime and viewport metrics to vertical geometry.                              |
-| [`useVerticalDayRenderProps.ts`](../../../src/lib/timeline/infinite/views/vertical/useVerticalDayRenderProps.ts)               | Assembles stable render props shared by vertical date items.                                             |
-| [`useTimelineViewSetup.ts`](../../../src/lib/timeline/infinite/views/shared/useTimelineViewSetup.ts)                           | Normalizes settings, selected calendars, and the initial date anchor.                                    |
-| [`mergeQunoInfiniteCalendarSettings.ts`](../../../src/lib/timeline/infinite/views/shared/mergeQunoInfiniteCalendarSettings.ts) | Merges defaults and clamps caller-supplied timeline settings.                                            |
-
-## Verification Map
-
-- Unit: settings setup, route projections, vertical render props, and orientation geometry.
-- Browser: full Chromium calendar suite plus focused WebKit orientation coverage.
+`dayPresentation.ts` avoids repainting a day when its immutable geometry, resource window and presentation are unchanged.
+Event callbacks still resolve current consumer callbacks. No view owns a second date window or a separate scroll model.
+The private dual-runtime build selector exists only during development and is removed at cutover.

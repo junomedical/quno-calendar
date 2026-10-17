@@ -1,11 +1,10 @@
 import type { CalendarDateLabelOptions } from "#quno-internal/timeline/core/calendarFormatterTypes";
-import type { Key, PointerEvent, RefCallback } from "react";
+import type { Key, PointerEvent } from "react";
 import type { CalendarHourPresentation } from "#quno-internal/timeline/core/calendarCellPresentation";
 import type {
   CalendarEvent,
   CalendarId,
   CalendarRow,
-  CalendarViewportAnchorTarget,
   EventRenderer,
   EventRenderStatus,
   QunoInfiniteCalendarCellCustomizer,
@@ -18,7 +17,6 @@ import type {
   layoutPreparedEventsForRow
 } from "#quno-internal/timeline/infinite/events/layout/layout";
 import type { ViewportGeometryRegistration } from "#quno-internal/timeline/infinite/anchors/parent/viewportAnchorTypes";
-import type { ViewportMetricsStore } from "#quno-internal/timeline/infinite/scroll/resources/viewportMetricsStore";
 import type { CalendarFocusedEventTarget } from "#quno-internal/timeline/core/internalTypes";
 
 /** Shared horizontal-render contracts: view coordinator -> day -> row -> event layers. */
@@ -60,17 +58,12 @@ export type HorizontalTimelineDayProps = CalendarDateLabelOptions & {
   eventInteractionEnabled: boolean;
   dragPreviewEvent: CalendarEvent | null;
   draftEvent: CalendarEvent | null;
-  activeRestoreTarget: CalendarViewportAnchorTarget | null;
   draftEventStatus: EventRenderStatus;
   draftEventIsDraggable: boolean;
   draftEventIsExiting: boolean;
   draftEventReleaseDurationMs?: number;
   renderEvent: EventRenderer;
   geometryRegistration: ViewportGeometryRegistration;
-  viewportMetricsStore: ViewportMetricsStore;
-  forceAllResources: boolean;
-  measureElement: RefCallback<HTMLDivElement>;
-  getRowHeight: (args: { dateKey: string; calendarId: CalendarId }) => number;
   eventsForRow: (args: { dateKey: string; calendarId: CalendarId }) => CalendarEvent[];
   preparedCellForRow: (args: { dateKey: string; calendarId: CalendarId }) => PreparedEventLayers;
   onHoverMove: (args: {
