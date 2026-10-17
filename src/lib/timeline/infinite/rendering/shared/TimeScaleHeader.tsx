@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { minuteToX } from "#quno-internal/timeline/time/time";
 import type { CalendarHourPresentation } from "#quno-internal/timeline/core/calendarCellPresentation";
 import type { QunoInfiniteCalendarSettings } from "#quno-internal/timeline/core/types";
@@ -28,7 +29,7 @@ type InfiniteTimeScaleHeaderProps = {
  *
  * @see docs/infinite-calendar/architecture.md#styling-and-packaging
  */
-export function InfiniteTimeScaleHeader({
+export const InfiniteTimeScaleHeader = memo(function InfiniteTimeScaleHeader({
   settings,
   width,
   timeTicks,
@@ -100,4 +101,4 @@ export function InfiniteTimeScaleHeader({
       </div>
     </div>
   );
-}
+});

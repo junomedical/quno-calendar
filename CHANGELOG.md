@@ -4,6 +4,50 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+### Reuse viewport presentation and zoom layout - 2026-10-17
+
+- Keep live native position in the engine while React reuses its frame when geometry and visible/mounted identities
+  are unchanged. Memoize the horizontal time scale and cache date-label formatting.
+- Reuse indexed resource metrics, prepared maps, date sequences and stable axis extents during zoom; project resource
+  rectangles only when requested. Skip unneeded pin scans and repeated snapshot comparisons.
+- Consume captured native observations for acknowledged wheel zoom without a redundant post-render DOM read.
+  Discard observations superseded by a programmatic commit, and commit the current matching revision after pin-only
+  updates so editor, focus and navigation restoration remain correct.
+- Add seven focused work-count, projection and observation-order regressions. All 541 unit tests, 223 Chromium
+  scenarios, 200 repeated frame/seeded cases and 18 focused WebKit cases pass. Architecture/contracts, typechecking,
+  lint, formatting, package verification, Preact, React 19, demo build, size reporting and pack dry-run pass.
+- Three rotating production rounds compare main, the initial rewrite and the optimized runtime across 3,006 samples.
+  Horizontal scroll/zoom p95 CPU improves 20.0%/32.6% against the initial rewrite; scrolling is at main parity and
+  zoom is 17.6% below main. Vertical zoom meets the 10 ms target at 9.112 ms. Vertical scroll p95 rises from
+  3.534 to 4.179 ms despite a lower median; retain this profiling follow-up. Raw evidence and limitations are in
+  `docs/infinite-calendar/performance-comparison.md`.
+- JavaScript is 32,555 B gzip (31.79 KiB), 809 B above the initial rewrite and below the unchanged 50 KiB budget.
+  Optional CSS remains 1,996 B gzip. The guide's displayed payloads and assertions match the measured artifacts.
+- Firefox remains blocked at standalone browser startup with
+  `sandbox_extension_issue_file_to_process ... Operation not permitted` and
+  `RenderCompositorSWGL failed mapping default framebuffer, no dt`; complete cross-browser acceptance remains open.
+
+### Unified Infinite Calendar runtime - 2026-10-17
+
+- Rebuild both orientations around one mathematical viewport engine, immutable event repository and bounded date/resource windows.
+- Preserve semantic event/participant/time anchors through zoom, async loading, editor changes and recentering. One adapter owns programmatic scroll writes.
+- Preserve public API, styling, consumer rendering and controlled behavior. Remove the old runtime and unused TanStack dependency.
+- Add model, request-race, public-handle, controlled-input and seeded browser coverage, with a repeatable dense-calendar profiling fixture.
+- Compare production builds against main `3138b28` with three alternating rounds and 2,004 sampled operations.
+  Vertical scroll/zoom p95 CPU falls 28.5%/40.6%; cached navigation medians fall 56.7%/61.1% in horizontal/vertical.
+  Horizontal scroll/zoom p95 CPU rises 22.9%/26.0%; vertical zoom remains 10.299 ms against the 10 ms target.
+  Keep these performance follow-ups open. Record raw samples and host-contention limitations in `docs/infinite-calendar/performance-comparison.md`.
+- Infinite Calendar JavaScript is 31,746 B gzip, down 25.7% from 42,719 B; optional CSS remains 1,996 B gzip.
+- Verification: 532 functional tests and both isolated scaling checks pass, as do all 223 final Chromium scenarios,
+  200 sensitive repeats, 140 post-memoization zoom/seeded repeats, and 18 final focused WebKit scenarios. Formatting,
+  architecture/contracts, typechecking, lint, demo/package builds, Preact, React 19, size reporting and pack dry-run pass.
+  An earlier complete unit run passed 534 tests; the final combined run had one noisy mixed-layer scaling ratio
+  of 27.42 against 25, with both isolated performance checks passing unchanged. A row-filter setup timeout passed
+  five isolated repeats and final full runs; the final guide assertion was updated to the measured bundle size.
+- Firefox verification remains blocked before any application test: standalone browser launch times out after
+  `sandbox_extension_issue_file_to_process ... Operation not permitted` and
+  `RenderCompositorSWGL failed mapping default framebuffer, no dt`. Cross-browser acceptance remains open.
+
 ### Immediate wheel zoom detail - 2026-10-17
 
 - Replace the 160 ms time-detail transition with opacity derived from committed zoom. Shift-wheel/trackpad reversals

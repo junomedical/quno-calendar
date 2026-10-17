@@ -54,9 +54,9 @@ default, so it can be selected and contributes to overlap sizing. Set `renderLay
 consumer needs the background treatment; that layer has independent overlap lanes and may grow the resource.
 
 The horizontal navigation handle can reveal a resource row with
-`scrollToDateTime({ date, time, calendarId })`. The calendar owns the virtual-row wait and viewport correction; consumers
+`scrollToDateTime({ date, time, calendarId })`. The calendar owns resource projection and viewport correction; consumers
 do not query its DOM. Parent selection or draft state can be updated immediately before resource-row navigation or restoration
-in the same handler. The package measures after the resulting layout commits; consumers need no `flushSync` wrapper.
+in the same handler. The package resolves geometry after the resulting layout commits; consumers need no `flushSync` wrapper.
 Pass `align: "center"` to center the requested row even when it is already visible. `getVisibleDateKeys()` returns
 only dates intersecting the usable viewport, so an external creation form can start on the middle visible date.
 Explicit centering follows the resource's actual collision height as asynchronous events arrive. A newer date request,
@@ -77,8 +77,8 @@ and Save action remain unavailable. Multi-participant edits retain one surviving
 are toggled; removing that participant transfers the anchor to another surviving instance. Captured event anchors
 record the resolved participant id. Cancel retains the original participant's independent edit anchor.
 Opening the demo editor preserves the clicked resource row in horizontal view and the event instance in vertical view.
-Horizontal draft and participant changes retain measured
-day heights, and idle recentering yields to an active explicit restore. A required visible event capture returns `null`
+Horizontal draft and participant changes retain semantic
+day positions, and idle recentering yields to an active explicit restore. A required visible event capture returns `null`
 when the event is missing or offscreen, rather than substituting its resource slot.
 
 The focused demo captures the clicked participant's resource/time slot when opening or cancelling a horizontal editor.
@@ -97,15 +97,19 @@ keeps the bounded restore active through date navigation and returning rows; man
 Try drawing on October 20 for Marco Eggens, scrolling to December, then saving. October 20 and Marco's row return to
 the retained position. See [Decision 109](./decisions.md#109---restore-offscreen-saves-to-the-retained-editor-anchor).
 
-Drawing and Cancel batch the controlled draft change and restoration request in the same handler. After measuring
+Drawing and Cancel batch the controlled draft change and restoration request in the same handler. After projecting
 horizontal dates, the view reapplies the anchor and publishes the date range and resource viewport together before
 paint. The restore date stays pinned through create closure as well as edit closure; fade-out remains independent.
 Try six calendars, draw on October 17 in Room 203, then Cancel. The row stays at its original screen position throughout,
 with no blank calendar frame. See [Decision 110](./decisions.md#110---coordinate-editor-restoration-and-virtual-projection-before-paint).
 
-TanStack Virtual notifications use its queued React update path. Layout restoration requests an ordinary React
-projection before paint, keeping React 19 development free of the virtualizer `flushSync` lifecycle warning while
-semantic anchor and frame-stability browser coverage continues to guard against empty intermediate views.
+A shared mathematical engine now owns both orientations: logical coordinates, event preparation, virtual windows,
+anchor priority and committed viewport revisions. One browser adapter writes scroll offsets. Resource/time and
+participant anchors survive asynchronous layout changes without DOM measurement retries or forced React commits.
+See [Decision 116](./decisions.md#116---one-mathematical-runtime-for-both-orientations) and the
+[rewrite verification record](./runtime-rewrite.md). Scrolling within an unchanged rendered window updates the
+engine without rerendering React; zoom reuses prepared collision data and stable resource extents. See
+[Decision 117](./decisions.md#117---separate-stable-layout-from-viewport-presentation).
 
 Foreground events and explicitly background-layered availability have independent deterministic collision lanes. A resource grows to the greater layer
 depth, not the sum, so foreground events remain overlaid on background availability while overlapping background availability stays readable in
@@ -125,7 +129,7 @@ Products own recurrence expansion; saves and filters still refresh through `even
 ## Bundle budget
 
 JavaScript is limited to 50 KiB gzip and the optional stylesheet to 2 KiB gzip. The current artifacts measure
-41.72 KiB and 1.95 KiB gzip respectively (Node 24, gzip level 9). See [Decision 100](./decisions.md#100---reconcile-the-infinite-calendar-budget-after-branch-integration).
+31.79 KiB and 1.95 KiB gzip respectively (Node 23.10.0, gzip level 9). See [Decision 100](./decisions.md#100---reconcile-the-infinite-calendar-budget-after-branch-integration).
 
 ## Zoom continuity
 

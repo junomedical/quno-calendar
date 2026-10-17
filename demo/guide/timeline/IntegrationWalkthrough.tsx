@@ -996,7 +996,7 @@ export function IntegrationWalkthrough({ embedded = false }: { embedded?: boolea
       <ArticleSection id="package-footprint" number="26" title="Ship Infinite Calendar independently">
         <p>
           Infinite Calendar JavaScript is 40.28 KiB gzip. Its optional stylesheet is a separate 1.99 KiB gzip import;
-          neither number includes React, React DOM, or the external virtualizer supplied by the application.
+          neither number includes React or React DOM supplied by the application.
         </p>
         <p>
           Keeping the artifacts separate makes the cost of behavior, default styling, and application-owned runtimes

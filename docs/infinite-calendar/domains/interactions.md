@@ -1,57 +1,17 @@
-# Interactions Domain
+# Interactions domain
 
-## Responsibility
+Pointer input resolves through `runtime/react/useRuntimeHit.ts`: the mounted DOM establishes ownership and
+occlusion, then the committed model converts pixels into date, resource and minute. Labels and chrome reject hits.
+The retained `infinite/interactions` draft, drag and pointer lifecycle hooks produce proposals and invoke consumer
+callbacks. They do not own viewport coordinates or programmatic scrolling.
 
-Own user-input interpretation from pointer or wheel signals through hit testing, draft/drag state, validation requests, and controlled zoom requests. It does not render product cards or mutate parent-controlled settings.
+`runtime/react/useRuntimeZoom.ts` coalesces Shift-wheel samples, retains the first pointer anchor, and requests a
+controlled value in a microtask. `runtime/viewport/CalendarEngine.ts` applies actual committed geometry before paint.
+External values cancel queued wheel proposals. A delayed parent leaves the existing view intact; unmount drops work.
 
-```mermaid
-flowchart LR
-  Input["Pointer / wheel"] --> Hit["Mounted-grid hit test"]
-  Hit --> Mode{"Interaction mode"}
-  Mode --> Drag["Drag proposal"]
-  Mode --> Draft["Draft range"]
-  Mode --> Zoom["Zoom request"]
-  Drag --> Coordinator["Shared interaction coordinator"]
-  Draft --> Coordinator
-  Zoom --> Coordinator
-```
+Gesture ownership outranks navigation, data correction and recentering. Pointer continuation survives leaving the
+viewport, release flushes the final position, and consumer cancellation releases the draft. Hover stays participant-local.
+The engine window pins the active draft resource without widening API read coverage.
 
-See [Interactions And Zoom](../flows/interactions-and-zoom.md) for gesture sequences and cancellation paths.
-
-## Contracts And Invariants
-
-- Hit testing is restricted to mounted timeline grid cells, never left-side labels.
-- Pointer continuation may leave the viewport without losing the active gesture.
-- Multi-calendar hover is row-local; drag and draft status remains event-id based.
-- Accepted drag/create operations patch the event cache through callbacks owned by the view composition.
-- Shift-wheel captures one pointer-nearest time node for the wheel burst and requests controlled zoom. Both orientations restore in the committed layout; vertical date/resource windows publish before paint. Correction runs in the resulting layout commit, using effective geometry; external controlled changes take over immediately.
-
-## Source Map
-
-| Source file                                                                                                                  | Responsibility                                                                          |
-| ---------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| [`timelineInteractionModel.ts`](../../../src/lib/timeline/infinite/interactions/timelineInteractionModel.ts)                 | Defines shared hit results and pure draft/move proposal construction.                   |
-| [`useTimelineInteractions.ts`](../../../src/lib/timeline/infinite/interactions/useTimelineInteractions.ts)                   | Composes drag, draft, pointer continuation, selection locking, and public render state. |
-| [`useGlobalPointerContinuation.ts`](../../../src/lib/timeline/infinite/interactions/pointer/useGlobalPointerContinuation.ts) | Continues active pointer gestures through window-level pointer events.                  |
-| [`useInteractionSelectionLock.ts`](../../../src/lib/timeline/infinite/interactions/pointer/useInteractionSelectionLock.ts)   | Temporarily disables text selection while drawing or dragging.                          |
-| [`hitTestingTypes.ts`](../../../src/lib/timeline/infinite/interactions/hit-testing/hitTestingTypes.ts)                       | Defines mounted-grid identity and coordinate projection contracts.                      |
-| [`timelineHitTarget.ts`](../../../src/lib/timeline/infinite/interactions/hit-testing/timelineHitTarget.ts)                   | Finds the owning mounted date/resource grid beneath a pointer.                          |
-| [`useTimelineHitTesting.ts`](../../../src/lib/timeline/infinite/interactions/hit-testing/useTimelineHitTesting.ts)           | Resolves mounted grids once and applies horizontal or vertical minute projection.       |
-| [`dragInteractionModel.ts`](../../../src/lib/timeline/infinite/interactions/drag/dragInteractionModel.ts)                    | Builds calendar-membership-aware drag previews and move proposals.                      |
-| [`sameMoveRequest.ts`](../../../src/lib/timeline/infinite/interactions/drag/sameMoveRequest.ts)                              | Detects semantic changes before publishing a new move proposal.                         |
-| [`useTimelineDragInteraction.ts`](../../../src/lib/timeline/infinite/interactions/drag/useTimelineDragInteraction.ts)        | Owns drag candidate, threshold, preview, validation, and accepted commit lifecycle.     |
-| [`useReleasedDraft.ts`](../../../src/lib/timeline/infinite/interactions/draft/useReleasedDraft.ts)                           | Keeps a released draft rendered through its optional exit duration.                     |
-| [`useTimelineDraftInteraction.ts`](../../../src/lib/timeline/infinite/interactions/draft/useTimelineDraftInteraction.ts)     | Owns drawn ranges, draft delegation, immediate create, and cache insertion.             |
-| [`zoomLimits.ts`](../../../src/lib/timeline/infinite/interactions/zoom/zoomLimits.ts)                                        | Defines the supported controlled zoom interval.                                         |
-| [`shiftWheelZoomUtils.ts`](../../../src/lib/timeline/infinite/interactions/zoom/shiftWheelZoomUtils.ts)                      | Shares wheel-burst coalescing, gesture-tail timing, and captured input.                 |
-| [`horizontalWheelAnchor.ts`](../../../src/lib/timeline/infinite/interactions/zoom/horizontalWheelAnchor.ts)                  | Captures and restores horizontal wheel focus using committed effective settings.        |
-| [`useCommittedWheelZoom.ts`](../../../src/lib/timeline/infinite/interactions/zoom/useCommittedWheelZoom.ts)                  | Shares controlled requests, before-paint correction and synchronous commit ownership.   |
-| [`verticalWheelAnchor.ts`](../../../src/lib/timeline/infinite/interactions/zoom/verticalWheelAnchor.ts)                      | Captures and restores a rendered vertical date/time node.                               |
-| [`useHorizontalShiftWheelZoom.ts`](../../../src/lib/timeline/infinite/interactions/zoom/useHorizontalShiftWheelZoom.ts)      | Anchors horizontal shift-wheel zoom to the pointer-nearest time node.                   |
-| [`useVerticalShiftWheelZoom.ts`](../../../src/lib/timeline/infinite/interactions/zoom/useVerticalShiftWheelZoom.ts)          | Anchors vertical shift-wheel zoom to the pointer date/time location.                    |
-| [`useShiftWheelZoom.ts`](../../../src/lib/timeline/infinite/interactions/zoom/useShiftWheelZoom.ts)                          | Provides orientation zoom compatibility exports.                                        |
-
-## Verification Map
-
-- Unit: hit target, interaction model, move membership, and zoom preparation tests.
-- Browser: drag, draft creation, external cancel, hover locality, shift-wheel zoom, and label hit-test exclusion.
+See [interaction flow](../flows/interactions-and-zoom.md), `tests/unit/lib/runtime/wheel.test.tsx`, and the drag,
+draft, editor and per-frame zoom browser suites. Public callbacks and external event rendering remain unchanged.

@@ -44,19 +44,18 @@ Its optional behavior increases the independently imported input bundle; Datepic
 - Demo compositions may import several public entry points.
 - React and React DOM remain runtime peers. The repository develops against React 18, verifies React 19 in a packed
   consumer fixture, and tests Preact through `preact/compat` aliases.
-- Framework runtimes and `@tanstack/react-virtual` remain external to generated feature bundles.
+- Framework runtimes remain external to generated feature bundles. Infinite Calendar owns its mathematical virtualization and has no external virtualizer dependency.
 
 ## Named function boundaries
 
 Production functions take one named object, including private helpers and commands; zero-argument functions remain
 unchanged. Existing object requests are passed directly. Native React/DOM events, refs, state setters, array iteration,
-promises, and virtualizer callbacks keep their required signatures through explicit types and boundary adapters.
+promises, and subscription callbacks keep their required signatures through explicit types and boundary adapters.
 
 Date Parser owns its implementation and types, and Date Input consumes it internally. Shared date primitives remain
 in the headless layer; picker actions live with Datepicker. Shared runtime helpers have one public home at the root.
 Parser internals and input formatting types do not leak through the parser public facade. Timeline local-date helpers
-remain distinct from timezone-free arithmetic. Horizontal/vertical projections continue to share event preparation
-while retaining their own geometry and scheduling.
+remain distinct from timezone-free arithmetic. Horizontal/vertical projections share event preparation and one viewport engine; its committed revision owns geometry and scheduling.
 
 `check:architecture` verifies object signatures and dependency direction as well as module and function size limits.
 
@@ -64,7 +63,7 @@ while retaining their own geometry and scheduling.
 
 The package applies frame-bounded work at input-rate boundaries: timeline pointer previews, Datepicker captured-pointer
 painting, quick-jump scrolling, and zoom consume only the latest useful value before a paint. Release and commit paths
-stay synchronous. React transitions defer non-urgent cache publication and Date Input recognition decoration, while
+stay synchronous. React transitions defer Date Input recognition decoration, while
 stable immutable buckets, prepared layers, grids, formatter configuration, and parser vocabulary eliminate repeated
 work before scheduling is needed.
 

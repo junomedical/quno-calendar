@@ -10,7 +10,7 @@ import {
   type CalendarVisibilityRequest,
   type EventRendererProps,
   type LoadEvents
-} from "#quno-internal/timeline";
+} from "@quno/calendar/infinite-calendar";
 import { visibleFocusAnchorCalendarId } from "#quno-internal/timeline/core/useCalendarFocusCoordinator";
 
 const event: CalendarEvent = {

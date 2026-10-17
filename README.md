@@ -98,3 +98,7 @@ npm run test:compat:react19
 ```
 
 Release preparation is local only. Publishing, deprecating old packages, and deleting archival repositories require separate authorization.
+
+Infinite Calendar uses one mathematical viewport engine for both orientations, with stable semantic anchors and
+bounded date/resource windows. Native movement within an unchanged rendered window avoids React updates, while zoom
+reuses stable resource layout. See its [runtime architecture](docs/infinite-calendar/architecture.md).

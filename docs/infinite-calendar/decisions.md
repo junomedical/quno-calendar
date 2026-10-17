@@ -1224,3 +1224,58 @@ Chromium checks dense Shift-wheel and slider changes in both orientations, inclu
 reversals, no CSS animations, display-hidden detail, geometry and node identity, and no later opacity change after input
 stops. Existing per-frame wheel/slider anchor regressions remain required. Unit coverage checks current-scale opacity
 and tier boundaries independently of gesture history.
+
+## 116 - One Mathematical Runtime For Both Orientations
+
+Date: 2026-10-17
+Status: Accepted; supersedes the runtime mechanisms in Decisions 103, 110, 112 and 113 while preserving their user-visible contracts
+
+Replace the independent viewport hooks and TanStack integration with one headless calendar engine. Pure prefix
+extents and logical date/resource/time coordinates define both orientations. Rendering, hit testing, visibility,
+virtualization and anchors consume one committed revision. One browser adapter owns programmatic scroll writes;
+native sticky layout remains browser-owned. Keep tested lane algorithms, event shells and consumer callback lifecycles.
+
+Explicit restore outranks gesture, navigation, data correction and idle recentering. Identity uses event and participant
+IDs rather than collision lanes. Resolve queued imperative operations after controlled props commit. Wheel requests
+remain frame-coalesced and controlled, and anchors use the actual accepted scale before paint. External changes and
+manual cancellation invalidate eligible work. Flush pending native scroll before claiming wheel ownership. Retain the
+external zoom anchor across successive values so browser scroll rounding cannot accumulate; manual movement, resize
+and navigation reset that anchor. Recenter only after settlement, preserving semantic screen position.
+
+Own immutable event buckets, request generations, retry cancellation and preparation in the new runtime. Keep the
+120-date bound, viewport-only load coverage with explicit prefetch, independent collision layers and ephemeral
+projection. Reuse unaffected date preparation and geometry. Virtualize dates and resources with bounded overscan.
+
+Remove the private migration selector, old viewport/load/anchor implementations and the unused TanStack dependency
+at cutover. Public names, props, handles, styling contracts and consumer-owned editing remain unchanged. Keep React
+18, React 19 and Preact support without forced commits. Detail opacity continues to follow Decision 115.
+
+Acceptance requires full public-contract browser coverage, seeded mixed actions, ten repeated frame-sensitive runs,
+focused Firefox/WebKit checks and measured dense-calendar budgets. The rewrite record tracks evidence and commands.
+
+## 117 - Separate Stable Layout From Viewport Presentation
+
+Date: 2026-10-17
+Status: Accepted; refines Decision 116 without changing its anchoring or public contracts
+
+Keep live viewport/ownership state in the engine, but expose a stable React snapshot while committed geometry,
+visible dates, mounted date indexes and pinned/visible resource indexes are unchanged. Imperative handles and
+pointer projection continue to read the current engine. Programmatic navigation and new geometry still produce a
+renderable revision; stale browser commits remain rejected. Native scrolling within an unchanged window does not
+require a React render.
+
+Separate prepared resource metrics and prefix extents from zoom-dependent rectangles. Reuse the prepared map when
+its date metrics are identical, index resource membership once, share empty resource metrics, and retain horizontal
+row/date extents during zoom. Vertical column extents survive zoom when their width is unchanged. Project resource
+rectangles only for requested targets. Date sequence caches and geometry caches are weakly keyed and do not retain
+previous geometry chains. Changes to hours, row sizing, resource membership or data invalidate the affected structure.
+
+Memoize the horizontal time scale and retain date-label formatting while its date/locale/formatter is unchanged.
+Capture native scroll coordinates in the event callback and coalesce publication to a frame. Wheel zoom flushes
+actual native position before claiming ownership; when that same request is accepted, consume any pending native
+observation without rereading DOM dirtied by the parent render. External takeovers retain the unconditional flush.
+Preserve all pre-paint anchor corrections, overscan and draft/focus pins.
+
+Verify skipped React renders against live engine movement, navigation/pin publication, stable extents and correct
+projected coordinates, hour-range invalidation and DOM-read ordering. Retain full browser geometry coverage and
+repeat the production timing comparison against both the initial rewrite and main.

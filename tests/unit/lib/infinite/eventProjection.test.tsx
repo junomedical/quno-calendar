@@ -8,8 +8,10 @@ import {
   type LoadEvents,
   type ProjectEvents
 } from "@quno/calendar/infinite-calendar";
-import { useEventRangeLoader } from "#quno-internal/timeline/infinite/events/loading/useEventRangeLoader";
-import { useEventProjection } from "#quno-internal/timeline/infinite/events/metrics/useEventProjection";
+import {
+  useDataHarness as useEventRangeLoader,
+  useProjectionHarness as useEventProjection
+} from "#quno-tests/unit/lib/runtime/dataHarness";
 
 const saved: CalendarEvent = {
   id: "saved",
@@ -72,7 +74,7 @@ describe("local event projection", () => {
     expect(result.current["2026-07-19"]).toEqual([preview]);
     rerender({ projectEvents: ({ events }) => [...events, { ...preview, title: "Changed preview" }], eventVersion: 0 });
     expect(result.current["2026-07-19"][0].title).toBe("Changed preview");
-    expect(loadEvents).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(loadEvents).toHaveBeenCalledTimes(1));
     await act(async () => resolve([saved]));
     expect(result.current["2026-07-18"]).toEqual([saved]);
     expect(result.current["2026-07-19"][0].title).toBe("Changed preview");

@@ -1,464 +1,109 @@
 # Quno/Infinite Calendar architecture
 
-Quno/Infinite Calendar is one of four independent primitives in the React-authored package. Interface vocabulary
-follows the [shared taxonomy](../shared/taxonomy.md); maintained responsibility maps and execution sequences live in
-[responsibility domains](./domains/README.md) and [runtime flows](./flows/README.md).
-
-```mermaid
-flowchart LR
-  Public["QunoInfiniteCalendar public facade"] --> Runtime["shared view runtime"]
-  Runtime --> Cache["bounded async cache"]
-  Runtime --> Viewport["date and resource windows"]
-  Runtime --> Gestures["pointer and zoom controllers"]
-  Cache --> Cells["indexed prepared cells"]
-  Cells --> Projection{"horizontal or vertical projection"}
-  Viewport --> Projection
-  Gestures --> Projection
-  Projection --> Layers["memoized render layers"]
-  Layers --> Renderer["external renderEvent"]
-```
-
-The central performance rule is simple: network work can add or refresh event shells, but it never owns the grid.
-Dates, resources, scrolling, sticky labels, zoom, hit-testing, and drafts render from settings and the last cache
-snapshot without awaiting `loadEvents`. The runtime is designed for schedules ranging from roughly four to hundreds of
-events per day and targets smooth 60–120fps scrolling. That frame-rate range is an engineering target, not a guarantee
-across every browser, device, viewport, data shape, or consumer-provided event renderer.
-
-The showcase sends date/resource queries to `POST /api/demo-events`. `demo/server` owns deterministic generation,
-shared-participant availability and validated filtering. Vite development/preview adapts the same Web handler as
-Vercel's `api/demo-events.ts`; the browser receives only the requested records. A bounded four-entry annual fixture
-cache avoids repeated generation. Fixture timestamps retain local wall-clock semantics independently of server timezone.
-Browser-owned session overrides preserve edits, moves and creations across reads and yield on dataset reset.
-Server fixtures, HTTP adapters and session storage are outside the package runtime dependency graph. Vercel publishes the separately built `dist-demo` application and applies an SPA fallback after
-filesystem and function routing.
-
-## Runtime Flow Atlas
-
-The overview below defines ownership and dependency direction. Concrete trigger-to-render stories are decomposed into focused guides so each async boundary, correction, and cancellation path can be followed independently.
-
-```mermaid
-flowchart LR
-  Trigger{"Runtime trigger"} --> Async["API response or invalidation"]
-  Trigger --> Scroll["scroll, navigation, or recenter"]
-  Trigger --> Pointer["draw, drag, activate, or cancel"]
-  Trigger --> Zoom["slider or Shift + wheel"]
-  Async --> AsyncGuide["Async loading and late layout guide"]
-  Scroll --> ScrollGuide["Virtual scroll and recenter guide"]
-  Pointer --> InteractionGuide["Interactions and zoom guide"]
-  Zoom --> InteractionGuide
-```
-
-- [Flow guide and anchor taxonomy](./flows/README.md)
-- [Async loading, cache commits, and late metric focus](./flows/async-loading-and-layout.md)
-- [Virtual scrolling, navigation, measurement, and recentering](./flows/virtual-scroll-and-recenter.md)
-- [Pointer interactions, mutation outcomes, and zoom subflows](./flows/interactions-and-zoom.md)
-
-## Public surfaces
-
-- `@quno/calendar/infinite-calendar` exports `QunoInfiniteCalendar`, its facade types, event-domain contracts, and optional stylesheet.
-- `@quno/calendar/datepicker` exports `QunoDatePicker`, its component contracts, and optional stylesheet.
-- `@quno/calendar/date-input` exports `QunoDateInput`, component-specific contracts, and optional stylesheet.
-- `@quno/calendar/date-parser` exports parsing, tokenization, parser configuration, vocabulary, token, language, and result contracts without a stylesheet or UI runtime.
-- `@quno/calendar` remains a headless shared root and exports no UI.
-
-Date Input may consume the parser implementation internally but does not re-export its public utilities. UI entry points are independent, and composition remains consumer-owned.
-
-`QunoInfiniteCalendar` accepts calendars, selected calendar ids, a range loader, an optional `eventPrefetchPolicy`, an external renderer, controlled settings, interaction callbacks, and an optional imperative ref.
-
-The optional `getDayProps` presentation boundary receives typed date context and projects its result across the
-date section, visible date header, and resource cells. `getDayCellProps` receives a more specific date/resource
-context and overrides conflicting day presentation on the horizontal row or vertical column plus its resource
-label/header. Both return only `className`, `style`, or `title`; fixed virtual geometry, event layers, hit-testing, and
-accessibility state stay inside the calendar.
-
-`getHourProps` receives one visible clock-hour interval and the active view. Its presentation projects onto
-horizontal or vertical hour bands and their visible time labels. Hour bands paint above date/resource backgrounds but
-below availability, event, draft, current-time, and pointer-interaction layers; fixed position and size remain
-calendar-owned.
-
-- `view="infinite-horizontal"`: dates flow down, calendars are rows, time runs left-to-right.
-- `view="infinite-vertical"`: dates flow down, calendars are columns, time runs top-to-bottom.
-
-Date-header text is configured through component-level `locale` and `formatters.dayLabel`. Both orientations
-receive the same ISO-date formatter context, which can replace the complete displayed label without changing date
-virtualization or date-key identity. Generated vertical labels use one primary line; default vertical labels retain
-their month/day and weekday lines. When no locale is supplied, `Intl.DateTimeFormat` uses the current runtime locale;
-server-rendered applications should pass an explicit locale when server and browser defaults may differ.
-
-Calendar chrome presentation is inherited through semantic `--quno-calendar-*` color variables. `styles/palette.css` is the one
-source of truth for internal fallback values; rendering selectors reference its private defaults instead of repeating
-color literals. The library does not declare the public variables on `.quno-calendar-shell`, so a value set by `className`, the
-typed `style` prop, or an ancestor remains effective independent of stylesheet order. Event-specific
-`CalendarEvent.color` values override only the shared default event accent.
-
-`LoadEventsArgs` includes `signal?: AbortSignal`; existing loaders remain valid and cancellation-aware loaders can stop obsolete requests early. `eventPrefetchPolicy` receives the rendered date keys and selected calendar ids and returns `{ beforeDays, afterDays }`. The exported `defaultEventPrefetchPolicy` requests seven calendar days before the first rendered date and seven after the last rendered date.
-
-`QunoInfiniteCalendar` also coordinates declarative `focusRequest` values and imperative `focusEvent` calls above both
-orientation views. A focus request contains a complete event, asks the parent to reveal all known participant calendars
-through `onCalendarVisibilityRequest`, and asks the selected view whether the preferred event shell is fully inside its
-uncovered content viewport. A fully visible target is highlighted without a scroll write; a clipped or offscreen target
-uses date/time navigation or geometry restoration to enter the view. A target on a weekday removed by
-`settings.excludedWeekdays` resolves unavailable before navigation, because no event instance can exist in that date
-model. `removeVisibleEvent` deletes one id from the loaded date cache; neither focus nor deletion persists data. When
-the preferred participant instance is already visible, subsequent focus requests use that same local instance and
-remain idempotent.
-
-## Dependency Direction
-
-```mermaid
-flowchart TD
-  Entry["foundation: facade, types, date, time"] --> Scroll["scroll"]
-  Entry --> Events["events"]
-  Entry --> Interactions["interactions"]
-  Scroll --> Anchors["anchors"]
-  Events --> Anchors
-  Interactions --> Anchors
-  Entry --> Rendering["rendering"]
-  Scroll --> Rendering
-  Events --> Rendering
-  Anchors --> Rendering
-  Scroll --> Views["orientation views"]
-  Events --> Views
-  Interactions --> Views
-  Anchors --> Views
-  Rendering --> Views
-  Views --> Shell["EventShell geometry boundary"]
-  Shell --> External["consumer renderEvent"]
-  Demo["demo and examples"] --> Entry
-```
-
-Feature domains do not import views or demo code. Scroll publishes visible positions; events decides what to prefetch. Anchors translate semantic focus using scroll and event geometry without becoming part of either engine. Product card markup stays outside the library internals: rendering positions `EventShell`, then calls `renderEvent` with event, status, lane, overlap, and full-size style data.
-Each `EventShell` is also a named `calendar-event` size container. Product renderers can therefore adapt their content
-hierarchy to the shell's own width and height with CSS container queries, without viewport media queries or
-layout-measurement state in React.
-
-Repository imports use stable responsibility aliases rather than directory depth: `@quno/calendar/*` for public
-surfaces, `#quno-internal/*` for private library modules, `#quno-demo/*` for demo code, `#quno-api/*` for handlers, and
-`#quno-e2e/*` and `#quno-tests/*` for test support, and `#quno-project/*` for root configuration. The architecture
-check rejects every parent-directory module import across source, demo, tests, e2e, API, and Vite code. Same-folder
-dependencies retain concise `./` imports.
-
-Primary ownership folders are:
-
-- `src/lib/timeline/core`, `date`, `time`, and `data`: public facade and foundation primitives.
-- `src/lib/timeline/infinite/scroll`: bounded date windows, visible position, settlement, navigation, and resource windows.
-- `src/lib/timeline/infinite/events`: loading, cache, indexing, overlap layout, and metrics.
-- `src/lib/timeline/infinite/anchors`: parent, late-data, and zoom visual-focus restoration.
-- `src/lib/timeline/infinite/interactions`: pointer, hit-testing, drag, draft, and wheel-zoom state.
-- `src/lib/timeline/infinite/rendering`: shared/orientation DOM layers, geometry, and styles.
-- `src/lib/timeline/infinite/views`: horizontal and vertical composition roots.
-- `demo/app`: application entrypoint, the four-card project home, and route ownership.
-- `demo/guide`: feature-owned public-API field guides and their recipe-sized live exhibits.
-- `demo/demos`: focused component demo shells for all four public products.
-- `demo/showcase`: application-only presets, dense stress data, and product-style interactions.
-
-[Responsibility domains](./domains/README.md) document the library ownership contracts and source map.
-[Runtime flows](./flows/README.md) document execution order. [`demo/guide/timeline`](../../demo/guide/timeline/README.md)
-documents the infinite-calendar field guide. Folder names are the source-level ownership signal; `check:architecture` enforces readable
-module/function sizes, prevents parent-directory imports, and keeps demo code outside the library. Library modules use
-`#quno-internal/*` when they cross responsibility folders rooted at `src/lib`; imports within the same folder
-retain `./` paths so nearby dependencies remain obvious.
-
-The root route owns a short project overview and links to four field guides. All guides use one warm editorial shell,
-hero, metadata row, numbered contents, Try it callouts, live public-entry examples, and collapsible Implementation
-recipes. `/guide/infinite-calendar` mounts later calendar exhibits only when they approach the viewport and keeps
-each exhibit mounted afterward. Every exhibit uses the same demo-owned full-screen shell, which places its existing
-mounted `QunoInfiniteCalendar` in a fixed viewport overlay; it does not invoke the browser Fullscreen API or move calendar state
-into the reusable library. Its system-design labs also expose two existing library boundaries without adding article
-state to the runtime: `interactionMode` switches pointer ownership between foreground events and the explicit
-background availability layer, and
-the public viewport-anchor handle carries visual focus from a controlled draft to its saved replacement or through
-overlap-lane recomputation. A CSS-native lab demonstrates that sticky days and resource names remain browser-positioned
-instead of entering high-frequency React scroll state. Product-control labs use the existing navigation handle,
-controlled settings, and scoped `className` styling. Date/time fields navigate immediately, adjacent-day controls call
-the same handle, and a progressive-precision lab changes only controlled zoom while the existing stable tick DOM reveals
-readable minute labels. `/guide/datepicker`, `/guide/date-input`, and `/guide/date-parser` own the other three product
-contracts. Every guide exposes All components and Demo links without adding a guide-specific library surface.
-
-## Async Event Loading
-
-```mermaid
-sequenceDiagram
-  participant V as Viewport
-  participant C as Range coordinator
-  participant A as Async API
-  participant I as Date/event index
-  participant R as React view
-
-  V->>C: visible and overscan date keys + prefetch policy
-  C-->>R: return current cache snapshot immediately
-  C->>C: expand warm window and split missing ranges
-  C->>A: loadEvents(missing range, calendarIds, signal)
-  Note over R,A: grid and interactions remain live
-  alt viewport, loader, selection, or version changed
-    C->>A: abort obsolete request
-    C->>C: reject stale generation responses
-  else request fails
-    C->>A: retry after 250 ms, then 1 s
-  else current response succeeds
-    C->>I: deduplicate and index affected date buckets
-    I->>I: protect warm-window dates and trim LRU to 120 dates
-    C->>R: transition to new snapshot
-  end
-```
-
-### Unloaded Date To Late Height Commit
-
-Navigation never waits for event data. The grid first paints compact rows for the requested date. If the accepted response later introduces dense overlaps, the calendar captures a grid-owned data-layout anchor, resizes only affected dates, and translates that anchor through the new row prefix extents before paint.
-
-```mermaid
-sequenceDiagram
-  actor User
-  participant Nav as Date/time navigation
-  participant View as Calendar viewport
-  participant API as Delayed API
-  participant Layout as Membership and overlap layout
-  participant Anchor as Data-layout anchor
-  participant Virtual as Date virtualizer
-
-  User->>Nav: scrollToDateTime({ date: D, time: T })
-  Nav->>View: paint D immediately at base row heights
-  Nav->>View: keep time T on the horizontal axis
-  View->>API: request visible/overscan range
-  Note over View,API: scrolling, zoom, hit-testing, draw, and drag remain live
-  API-->>Layout: accepted events arrive later
-  Layout->>Layout: prepare lanes and revised row/day metrics
-  View->>Anchor: capture header or {D, resource, offsetWithinRow}
-  Anchor->>Virtual: resize affected date items
-  Virtual-->>Anchor: revised date prefix positions
-  Anchor->>View: restore semantic slot before paint
-  View-->>User: events appear without taking DOM or visual focus
-```
-
-The resulting focus contract is explicit:
-
-| View state before response                   | Position preserved after response                                                  |
-| -------------------------------------------- | ---------------------------------------------------------------------------------- |
-| Exact `scrollToDate({ date: D })`            | D's date header; dense rows grow downward.                                         |
-| `scrollToDateTime({ date: D, time: T })`     | The same date policy vertically and time T horizontally.                           |
-| Viewport partway inside resource R on date D | `{ D, R, offsetWithinRow }`; growth above R is compensated.                        |
-| Anchored resource removed by another change  | Captured date-local fallback offset, clamped inside D.                             |
-| Vertical orientation receives dense overlaps | Date/time Y stays fixed; overlap changes column width rather than vertical height. |
-
-The anchor targets stable grid semantics, never a newly arriving event. The full request, failure, transaction, orientation, and invalidation subflows are in [Async Loading And Layout](./flows/async-loading-and-layout.md).
-
-Important invariants:
-
-- A refresh invalidates loaded-date knowledge, not the rendered cache, so delayed requests do not blank events.
-- Accepted date buckets record their calendar-id coverage. Narrowing to a covered subset and returning to the previous
-  selection reuse that snapshot without an API request or React cache commit.
-- Active-draft resource filtering retains the last settled warm window and adds the draft and virtual-window navigation
-  anchor dates explicitly. Transiently shorter days cannot widen prefetch merely because virtualization fits another
-  date in the viewport, while navigation to a new anchor still loads its destination.
-- Abort signals are advisory; generation checks also protect against loaders that ignore cancellation.
-- Event ids are deduplicated globally inside cached buckets.
-- Moves and visible commits use the event-id index to patch only source/destination buckets.
-- Appearance timers are independent per event.
-- Empty or failed requests do not change grid geometry.
-
-## Prepared Cell Pipeline
-
-Each revised date is indexed by calendar membership in one pass. Each date/calendar cell separates explicit background
-availability from foreground events of every kind and prepares both layers independently with the same deterministic
-heap-based `O(n log n)` algorithm.
-Unchanged bucket arrays reuse the complete prepared date model.
-
-```mermaid
-flowchart LR
-  Events["date events"] --> Membership["calendar membership index"]
-  Membership --> Cell["date/resource cell"]
-  Cell --> Availability["explicit background availability lanes"]
-  Cell --> Prepared["foreground event lanes"]
-  Availability --> Metrics["max layer depth"]
-  Prepared --> Metrics
-  Availability --> Horizontal["horizontal mini-lanes"]
-  Availability --> Vertical["vertical side-by-side lanes"]
-  Prepared --> Horizontal
-  Prepared --> Vertical
-  Prepared --> Hit["hover and hit geometry"]
-```
-
-Late data produces a bounded measurement feedback loop; it does not restart the whole calendar:
-
-```mermaid
-flowchart LR
-  Response["accepted date buckets"] --> Membership["membership index"]
-  Membership --> Lanes["prepared overlap lanes"]
-  Lanes --> RowMetrics["affected row heights"]
-  RowMetrics --> DayMetrics["affected date heights"]
-  DayMetrics --> Capture["capture visible semantic slot"]
-  Capture --> Resize["resize affected virtual dates"]
-  Resize --> Translate["translate date/resource/local offset"]
-  Translate --> Paint["paint event shells in stable viewport"]
-```
-
-Sizing and rendering reuse the same layered prepared cell. Resource size uses the larger foreground or background
-depth rather than adding them. Only events explicitly marked `renderLayer: "availability"` use the background lane;
-unmarked availability joins ordinary foreground events and can grow its row or column. Non-overlapping background
-availability fills one resource lane; overlapping background availability uses real lane rectangles behind foreground
-events. Horizontal and vertical views provide their own geometry adapters. Drafts and previews remain transient and
-never perturb committed layout.
-
-## Date And Resource Virtualization
-
-The date scrollbar represents a bounded month-before/month-after window. Only viewport dates plus five date sections
-of overscan on each side are mounted. Ordinary scrolling uses a 1.2-second idle deadline; reaching the absolute top or
-bottom uses a 240 ms edge deadline so the bounded range extends before the user waits at a hard stop. When either
-deadline settles, the top visible date becomes the next window anchor while its exact intra-day pixel offset is
-preserved. When `excludedWeekdays` changes, the calendar rebuilds the included-date sequence from the semantic top date
-instead of reusing the old raw scroll offset. Horizontal variable day measurements receive a settled second alignment
-after their date keys have been replaced. If a controlled draft is opening or closing during another structural
-change and its date is already in the virtual viewport, that date remains the structural focus until the parent
-event/slot anchor finishes the exact row correction. An offscreen draft does not replace the user's visible date.
-
-```mermaid
-stateDiagram-v2
-  [*] --> Centered
-  Centered --> Scrolling: scroll or scrollbar drag
-  Scrolling --> Waiting: scroll event or scrollend
-  Waiting --> Scrolling: more movement
-  Waiting --> Snapshot: idle deadline
-  Snapshot --> Deferred: pointer interaction active
-  Deferred --> Snapshot: interaction ends
-  Snapshot --> Recenter: capture date and intra-day offset
-  Recenter --> Centered: rebuild bounded window and restore offset
-```
-
-The cross axis has its own resource window:
-
-- Horizontal dates mount only intersecting calendar rows plus two rows of overscan on either side.
-- Vertical dates mount only intersecting columns plus two columns of overscan on either side.
-- Prefix extents preserve the full row/column spacer geometry; skipped resources never compact the layout.
-- Active horizontal viewport restores also pin their target date through resource resizing and draft closure. The pin participates in event loading and ends with the restore session; it does not widen ordinary overscan.
-- Active draft, drop-preview, and active viewport-restore target resources are pinned even when outside the ordinary cross-axis window. Event timestamps are mapped through the canonical local-date helper before choosing either a date or resource pin; raw UTC string prefixes never drive calendar membership.
-
-Async event metrics use a separate one-commit data-layout anchor; they do not replace the bounded virtual-window anchor. The concrete scroll-event, idle timer, pending target, window rebuild, and restore sequence is documented in [Virtual Scroll And Recenter](./flows/virtual-scroll-and-recenter.md).
-
-## Pointer And Zoom Runtime
-
-The viewport uses one Pointer Events pathway. Pointer ownership comes from the mounted grid's date and resource metadata, so a just-measured variable row cannot be mistaken for a neighbor when async data changes layout. Resource cells add local hover resolution, while the shared controller owns press, draw, drag, completion, rejection, callback failure, pointer cancellation, and Escape cancellation.
-
-Interaction callbacks are capabilities, not only completion notifications. Empty-grid drawing starts only when
-`onEventCreateRequest` or `onEventDraftRequest` exists. Persisted event dragging/activation starts only when
-`onEventMoveRequest` or `onEventActivate` exists, and controlled drafts are draggable only with
-`onActiveDraftMoveRequest`. Unsupported gestures stay idle rather than creating an interaction that cannot commit.
-
-```mermaid
-stateDiagram-v2
-  [*] --> Idle
-  Idle --> Pressing: pointer down in timeline grid
-  Pressing --> Drawing: empty grid movement
-  Pressing --> Dragging: event movement
-  Pressing --> Activating: click without drag
-  Drawing --> Committing: pointer up
-  Dragging --> Validating: pointer up
-  Validating --> Idle: accepted and cache patched
-  Validating --> Idle: rejected or callback throws
-  Committing --> Idle: created, external draft opened, or callback throws
-  Pressing --> Idle: pointercancel or Escape
-  Drawing --> Idle: pointercancel or Escape
-  Dragging --> Idle: pointercancel or Escape
-  Activating --> Idle
-```
-
-Hit-testing rejects sticky labels and headers. Multi-calendar hover remains local to one rendered resource instance; drag and preview status stays keyed by event id across instances.
-
-Pointer moves retain only the latest coordinates and perform hit-testing plus React preview publication once per
-animation frame. Pointer-up synchronously flushes its coordinates before validation or commit. Pointer cancellation,
-lost capture, Escape, and unmount discard queued work.
-
-Zoom stays controlled by `settings.zoom`. `Shift` + wheel requests `onZoomChange` in a microtask, keeps the first focused time node for a gesture burst, and begins scroll restoration at the following animation frame so the controlled parent update does not overlap React's active render work. Slider or other external horizontal zoom changes first preserve a visible current-time marker at its viewport position in a layout effect before paint. When the marker is outside the configured hours or viewport, a horizontally scrolled view preserves its grid-center time and the timeline origin preserves its left edge. The wheel path suppresses that generic correction and retains its pointer-specific anchor. Horizontal rendering may apply a viewport-fill zoom floor without mutating the parent-owned value.
-
-The showcase keeps the controlled projection value and displayed control value in separate narrow contexts. A gesture zoom request updates only the calendar wrapper immediately; the range thumb and numeric readout catch up once after the 300ms gesture tail. Direct slider input updates its thumb/readout immediately and coalesces calendar projection to the latest value once per animation frame. The route shell, settings sections, popup, and other demo controls do not render again. The calendar shell owns a stacking boundary but deliberately avoids broad paint containment around its changing scroll surface; its existing overflow clip still bounds visible content without encouraging mixed old/new raster tiles during rapid zoom. The zoom control and live stats panel own small local layout, paint, and compositor boundaries. The full control pane must not use paint containment: a changing child would otherwise invalidate the full-sidebar paint layer despite stable React and DOM identity. The static sidebar is isolated on a parent compositor layer, and its changing child layers rerasterize independently, so neither a calendar frame nor a settled zoom-output update clears and repaints the menu surface.
-
-The default showcase activity pane retains the six most recent parent/demo lifecycle messages instead of replacing the
-previous message. External-popup cancellation adds a second entry describing whether viewport scroll restoration was
-requested for the original event/drawn slot or skipped because no anchor was captured. This instrumentation remains
-demo-only and does not add a reusable calendar callback. A demo-owned observer coalesces viewport scroll bursts after
-180ms: recent wheel, touch, scroll-key, or scrollbar intent is reported as `Viewport scrolled`, while navigation,
-virtual-window recentering, and anchor corrections without recent manual intent are reported as
-`Viewport repositioned`.
-
-Time scales keep a stable five-minute DOM skeleton across every zoom level. Coarser zooms hide minor labels without removing their nodes or text, while a single horizontal or vertical percentage track absorbs the changing timeline extent. Crossing the fine-grid threshold therefore changes label visibility and grid cadence without inserting a burst of tick elements across the visible dates.
-
-### Zoom Stability Rules
-
-Zoom is a geometry update, not a calendar-content lifecycle. Changes in `settings.zoom` must follow these rules:
-
-- Never key the calendar, a date, a resource row or column, an event shell, or time ticks by zoom. Mounted semantic nodes must retain identity while their position and size styles change.
-- Keep controlled zoom state as close as possible to the calendar and its zoom input. Unrelated application chrome, settings, popups, and data controllers must not subscribe to it.
-- Do not write sidebar control DOM on every gesture frame. Keep wheel/touch projection immediate, then synchronize its thumb and readout once the gesture settles. Direct slider display stays immediate while its calendar projection is limited to the latest value once per animation frame.
-- Keep prepared membership, overlap, and resource metrics independent of zoom. An unchanged external `renderEvent` must not run again merely because its event shell moved or resized.
-- Keep tick cadence in the DOM independent of visual grid cadence. Hide labels with attributes/classes; do not add, remove, or replace label children at a zoom threshold.
-- Apply scroll-anchor correction in a layout effect before paint. Do not blank, fade, skeletonize, or remount the calendar during correction.
-- Accumulate raw mouse-wheel and touchpad zoom steps within a display frame, then perform one controlled projection and anchor restore using the first focused node. A newer external controlled value must cancel the queued wheel commit.
-- During a vertical day-height change, render the semantic top-date window from the new uniform base-day geometry until virtualizer measurements settle. Never expose a window selected from the new scroll offset and stale item sizes.
-- Isolate calendar stacking without applying broad paint containment to the changing scroll surface. Put frequently changing neighboring controls in the smallest practical paint boundary; never use a full menu or sidebar paint boundary for one changing value. Keep stable adjacent chrome on its own compositor layer when continuous calendar reprojection would otherwise share a raster surface with it.
-- Any zoom rendering change must update the Playwright continuity coverage with DOM-identity or child-list-mutation assertions plus geometry/anchor assertions. Screenshot comparison alone is not sufficient.
-
-## Render Layers
-
-```mermaid
-flowchart TB
-  Chrome["date, resource, time, and grid chrome"] --> Availability["availability layer"]
-  Availability --> Committed["prepared committed event layer"]
-  Committed --> Draft["controlled or drawn draft layer"]
-  Draft --> Preview["drop-preview layer"]
-  Preview --> Marker["current-time and sticky label layers"]
-```
-
-Layers share prepared geometry but have separate interaction rules. `EventShell` is memoized and owns position, z-index, state classes, CSS variables, and geometry registration. Its product-card child is memoized separately, so zoom can update shell coordinates without reinvoking the external renderer. Membership indexes, prepared lanes, row metrics, and column metrics likewise exclude zoom from their memo dependencies because zoom changes projection pixels rather than event relationships.
-
-## Viewport Anchoring
-
-Every mounted day, resource, and event instance registers with an instance-scoped geometry registry. Anchoring never searches the document with global selectors. Event unregisters carry the element they previously owned, so an old date instance unmounting cannot delete a replacement event that already registered under the same event/calendar key.
-The registry is owned by the component instance and is reclaimed with that instance; effect cleanup does not clear it,
-because React Strict Mode replays effects without replaying mounted callback refs.
-
-```mermaid
-sequenceDiagram
-  participant P as Parent flow
-  participant G as Geometry registry
-  participant S as Restore scheduler
-  participant V as Viewport
-
-  P->>G: capture event or date/resource/time target
-  G-->>P: viewport-relative snapshot
-  P->>P: change participants, draft, or saved data
-  P->>S: restore snapshot to target
-  S->>G: resolve current registered geometry
-  S->>V: one scheduled scroll correction
-  G-->>S: notify mount or layout changes
-  S->>V: correct while within deadline
-  V->>S: manual pointer, wheel, touch, or key intent
-  S->>S: cancel when requested
-```
-
-One mutation observer, one resize observer, registry notifications, and one animation-frame slot replace selector polling and timeout ladders. Restores that opt into `cancelOnManualScroll` cancel synchronously on pointer, wheel, touch, or scroll-key intent so a queued correction cannot consume the user's first movement. Navigation fallback remains available when a target is not mounted.
-
-Event focus is a transient coordinator above this primitive. It requests the complete controlled calendar selection,
-then tests the preferred participant instance against the content viewport after sticky headers and labels are
-excluded. A fully visible shell receives `status: "focused"` without scrolling; only a clipped or offscreen shell is
-restored or navigated into view. The focused key is `{ eventId, calendarId }`, so only one multi-calendar instance
-receives the status. Request ids are processed once; a newer request or manual input cancels older work.
-
-Anchor names describe different owners rather than interchangeable snapshots: parent viewport restore, active gesture, pending navigation, automatic data-layout correction, and idle virtual-window recenter. Higher-priority owners suppress lower-priority scroll writes. An active pointer gesture cancels an already pending idle deadline, whose callback also reads live ownership before changing the virtual window. See the [anchor taxonomy and priority diagram](./flows/README.md#anchor-taxonomy).
-
-Both wheel zoom orientations use a shared committed-layout coordinator, without delayed correction frames. Vertical
-zoom projects retained dates to uniform geometry and publishes date/resource windows before paint. See
-[Decision 113](./decisions.md#113---commit-vertical-zoom-geometry-and-focus-before-paint).
-
-## Styling And Packaging
-
-Native CSS sticky positioning owns date, resource, and time labels. The sticky time-scale stacking context sits above
-per-day header marker segments, so its opaque header and pin expose only the marker stem below the circle while sticky
-date/resource labels remain above both. Reusable CSS is split into base, horizontal, vertical, and event-shell ownership
-files.
-
-Package builds emit independent ESM/CommonJS artifacts and explicit stylesheet exports for the three UI primitives. Date Parser has no stylesheet. JavaScript does not inject CSS or access `document` during import, so ESM import and CommonJS `require` remain safe in Node/SSR environments. Library date parsing and labels use small local/`Intl` helpers, so `date-fns` is not a runtime dependency of consumers.
-
-`build:demo` and the function's `vercel-build` hook bundle the server query service into `build/demo-api/events.js`. The deployed handler reaches
-that server-only bundle through a native private package import; Vite and TypeScript resolve the same name to its
-source during development. This avoids relying on development aliases in Vercel's emitted Node function. The server
-bundle is excluded from the published calendar package and the browser's `dist-demo` assets. Atomic publication
-allows the site and function build steps to run concurrently.
+The public `QunoInfiniteCalendar` facade selects a horizontal or vertical projection of one viewport engine.
+Its API, optional stylesheet, consumer-owned cards/editors, and React/Preact contracts are unchanged.
+See [Decision 116](./decisions.md#116---one-mathematical-runtime-for-both-orientations) and the
+[milestone record](./runtime-rewrite.md) for the replacement and its verification.
+
+## Ownership
+
+| Boundary          | Source                          | Responsibility                                                                              |
+| ----------------- | ------------------------------- | ------------------------------------------------------------------------------------------- |
+| Public facade     | `core/QunoInfiniteCalendar.tsx` | Loading shell, orientation, public handle and participant focus                             |
+| Logical model     | `runtime/model`                 | Date sequence, prefix extents, projections/inverses, event targets and windows              |
+| Events            | `runtime/data`                  | Immutable date buckets, coverage, request generations and prepared collision layers         |
+| Viewport          | `runtime/viewport`              | One geometry revision, logical viewport and competing intent ownership                      |
+| Browser           | `runtime/browser`               | Native scroll/size/input observation and the only programmatic scroll writer                |
+| React             | `runtime/react`                 | Prop adaptation, committed snapshot rendering, public commands and mathematical hit testing |
+| Presentation      | `infinite/rendering`            | Reusable event shells, sticky chrome, scoped styles and consumer rendering                  |
+| Pointer lifecycle | `infinite/interactions`         | Frame-bounded drag/draw, threshold tracking, release, cancellation and callbacks            |
+
+Pure model/data code imports no React or DOM. Presentation cannot start requests or write scroll positions.
+The framework runtimes stay external. Virtualization is engine-owned and does not require TanStack.
+
+React's `RenderSnapshotReader` keeps its snapshot identity while geometry and visible/mounted identities remain
+unchanged. Every native scroll still updates the engine; commands and pointer queries read its live snapshot.
+The adapter receives a new React commit when mounted content or geometry changes. See [Decision 117](./decisions.md#117---separate-stable-layout-from-viewport-presentation).
+
+## Coordinate model
+
+Day identity is a timezone-free `IsoDate`; timestamps on events retain their existing local/offset interpretation.
+A finite month-before/month-after sequence represents the infinite date axis. Prefix extents give each day and
+resource a half-open interval. Binary searches produce visible dates plus five overscan dates per side and visible
+resources plus two overscan resources per side. One active anchor date and relevant draft/preview resources may be
+pinned. Render overscan does not determine network ranges.
+
+Prepared resource grids and prefix extents are independent of zoom-dependent rectangles. Horizontal zoom reuses
+row/date extents; vertical zoom reuses column extents. Resource rectangles are projected on demand for anchors and
+event lookup. Resource membership uses indexed lookup, and unchanged preparation retains the whole metric map.
+Weak caches retain date sequences and resource grids without linking previous geometry revisions.
+
+The same geometry supplies row/column placement, pointer-to-date/resource/minute conversion, event identity lookup,
+visibility and anchor restoration. Horizontal time is `label + gutter + minutes * scale`; vertical time is
+`day origin + header + gutter + minutes * scale`. Row heights and column minimum widths come from prepared independent
+foreground/background collision layers. Native sticky positioning and clipping remain CSS responsibilities.
+
+A semantic anchor identifies date, resource, time or event/participant, plus a viewport-relative point and affected
+axes. Collision-lane indexes are never anchor identities. Reprojection computes the content point under new geometry
+and subtracts the retained screen point, then clamps to actual content bounds. Row centering uses a resource fraction
+so delayed collision growth remains centered. Date-only restoration leaves the other axis alone.
+
+## Commit and intent model
+
+`CalendarEngine` publishes geometry, viewport and windows together. React renders that revision; `ViewportAdapter`
+commits it in a layout effect before paint. The adapter rejects obsolete revisions and observes browser clamping once.
+It never retries an old pixel position. Native scroll observations are frame-bounded and flushed before layout changes.
+
+Ownership priority is explicit restoration, gesture, navigation, automatic layout correction, then idle recentering.
+Equal-priority requests supersede older ones; cancellation IDs cannot cancel a later owner. Manual intent cancels
+eligible owners. Late network data captures the current semantic position at commit time and cannot navigate to an
+old request's date. Idle recentering rebuilds the date sequence around the current position, preserving its screen
+coordinate. Ordinary settlement waits 1,200 ms; a scrollbar edge uses 240 ms.
+
+Both wheel projections preserve the nearest time tick beneath the first pointer in a burst. External horizontal
+zoom preserves a visible current-time marker, otherwise the grid center or origin. External vertical zoom retains
+the visible fraction of the day board. Controlled requests are coalesced to one per frame; external values supersede
+queued wheel requests. Pending native scroll is flushed before the wheel claims ownership. External zoom retains
+its semantic anchor across successive values to avoid cumulative scroll rounding; movement, resize and navigation
+reset it. Time-label and fine-grid opacity follows zoom immediately (Decision 115).
+
+## Data and preparation
+
+`EventRepository` publishes immutable date arrays and indexes event IDs. Replacement deduplicates IDs; targeted edits
+preserve same-date order and do not manufacture unloaded destination buckets. LRU eviction has a hard 120-date bound.
+`Acquisition` tracks date/resource coverage independently of rendering. It keeps useful adjacent reads, cancels
+incompatible/distant requests, rejects ignored aborts and obsolete generations, and retries failures only after
+250 ms and 1,000 ms. Invalidations retain stale visible records while refreshes settle.
+
+The React loading boundary waits for settled viewport dates, then applies `eventPrefetchPolicy`. `loadCalendarIds`
+can retain coverage while displayed resources change. Draft editing retains warm dates and also loads newly visited
+dates. Synchronous `projectEvents` runs after persistence and before preparation, including empty rendered dates;
+preview titles/colors never leak into accepted persistent moves. Unchanged buckets and day geometry retain identity.
+
+Preparation assigns deterministic collision lanes once per relevant date/resource input. Zoom reuses preparation.
+Transient drafts remain separate from committed collision metrics. Event content retains React identity while its
+shell geometry changes; unchanged date sections do not repaint merely because native scroll pixels changed.
+
+## Consumer boundaries
+
+The public handle queues resource navigation and restoration until parent layout commits. It supports date/time and
+Today navigation, visible date queries, explicit anchors, targeted cache edits, draft release and event focus.
+Event capture records the visible participant instance; `requireVisible` cannot fall back to an unrelated slot.
+The DOM registry supplies mounted-instance visibility, while the engine supplies logical geometry.
+
+Pointer input uses `elementFromPoint` only to reject overlays/sticky chrome. Date/resource/time comes from the engine
+inverse. Captured pointers continue outside the grid; raw movement retains the drag threshold and release flushes the
+last coordinates synchronously. Accepted/rejected moves, external editor delegation, draft release motion, independent
+availability editing, and callback ownership retain their existing contracts.
+
+The demo HTTP query endpoint, deterministic annual fixture generator and browser session overrides remain outside the
+package. The five field guides continue to use public entry points, with heavy exhibits mounted lazily.
+
+Vertical time-axis presentation is memoized independently of the resource window. Horizontal resource scrolling
+therefore updates visible columns without rebuilding unchanged time labels.
+
+## Verification
+
+See [shared testing](../shared/testing.md), [runtime flows](./flows/README.md) and [responsibility domains](./domains/README.md).
+The replacement keeps the 50 KiB JavaScript/2 KiB CSS gzip budgets, DOM limits, compatibility fixtures and package guards.
+No runtime selector or alternate implementation is shipped.

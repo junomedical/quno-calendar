@@ -31,7 +31,7 @@ Architecture checks enforce object arguments and product dependency direction, i
 - Horizontal and vertical prepared-cell models retain referential identity across zoom-only settings changes.
 - Horizontal data-layout anchor translation preserves date-header focus, resource identity, and local row offset when earlier or anchored rows grow; missing resources use the clamped date fallback.
 - Date virtual-item resize compensation applies only to items fully above the viewport, leaving the visible date to projection-specific semantic anchoring.
-- Virtual scroll window behavior remains covered through existing date virtualization unit tests and Playwright scroll tests after extraction into `useScrollRuntime`.
+- Virtual windows, revisions, anchors and cancellation are covered in `tests/unit/lib/runtime` and public Playwright scroll, editor and zoom scenarios.
 - The architecture guard enforces readable production module and function sizes; TypeScript resolves all cross-domain imports.
 - Time-to-pixel conversion, vertical time-to-pixel conversion, zoom, and snap interval.
 - Event overlap lane layout, 50px compact row height for one or two lanes, stepped overlap growth from three lanes onward, at least 24px lane slots, and at least 20px visible resting event shells for dense groups.
@@ -204,7 +204,7 @@ Architecture checks enforce object arguments and product dependency direction, i
   horizontal labels match their specimen text without a redundant default prefix; vertical custom labels use one
   primary line.
 - The closing payload-size chapter leads with the verified gzip JavaScript, CSS, and combined package payloads, keeps
-  raw build sizes secondary, and explicitly excludes one external runtime plus two React peers from that package total.
+  raw build sizes secondary, and explicitly excludes the React peers from that package total.
 - The lane comparison proves local horizontal row growth, hover expansion, vertical projection, and dense-column width
   growth. Switching orientation aligns both projections to the same 13:00 collision cluster, which remains inside the
   calendar viewport.
@@ -386,7 +386,7 @@ At 1280×720 with 50 resources and 20,000 total events/year:
 - Rejected moves revert after drop.
 
 Clock-dependent default-demo scenarios set a fixed working-day morning in the browser while leaving timers running.
-The virtualizer item-key adapter must retain identity across ordinary renders; navigation, zoom, and dense-layout
+Committed date/resource identities must remain stable across ordinary renders; navigation, zoom, and dense-layout
 browser tests guard that boundary. Current budgets are 50 KiB gzip for Infinite Calendar, 12.5 KiB for Datepicker,
 and 10 KiB for Date Input.
 
@@ -430,3 +430,33 @@ Both selectors assert 16px/700 hour headings, normal text color, and rail fit on
 
 The packed React consumer also typechecks every product, including Timepicker, with legacy Node-style module
 resolution to verify `typesVersions` alongside the normal Bundler/`exports` resolution.
+
+## Infinite Calendar engine verification
+
+The runtime's pure model, immutable repository, acquisition races, preparation reuse, viewport ownership, public
+handle and controlled input are covered under `tests/unit/lib/runtime`. Public component tests import the feature
+entry point. The seeded `runtime-engine-stability` browser fixture combines scrolling, zoom, navigation, resource
+filtering, delayed responses and resizing in both orientations, asserting contiguous geometry, DOM identity and bounds.
+
+Repeat the horizontal/vertical zoom, create/cancel frame and seeded suites ten times for runtime changes. Use
+`QUNO_TEST_PORT` to give each browser run a fresh isolated server. Run focused WebKit and Firefox cases as well as the
+complete Chromium suite. A browser startup failure is an environment blocker, not a passing application test.
+
+On an otherwise idle machine, start `npm run dev -- --port 5189 --strictPort` and run
+`node scripts/profile-calendar-engine.mjs` (or set `QUNO_PROFILE_URL`). The 50-resource, 20,000-event/year fixture
+samples 120 scroll steps per orientation and rejects p95 scripting/style/layout at or above 10 ms, tasks above
+50 ms, excessive event nodes and excessive total DOM nodes. Run `npx vitest run tests/performance` separately from
+builds and browser suites; its 10x input scaling budget remains below 25x runtime. See the product
+[rewrite record](../infinite-calendar/runtime-rewrite.md) for the actual measured results and open environment gate.
+
+For a revision comparison, build the same dense fixture in production for both revisions and serve each build
+separately. Run `node scripts/profile-calendar-comparison.mjs` with `QUNO_BEFORE_URL`, `QUNO_AFTER_URL`, and optional
+`QUNO_COMPARE_ROUNDS` (default 3) and `QUNO_COMPARE_OUTPUT`. It alternates revision order, uses fresh pages for each
+workload, and records raw samples plus aggregated scroll/zoom CPU and cold/warm navigation timings. Do not run
+builds or suites concurrently. The [timing report](../infinite-calendar/performance-comparison.md) defines the
+measurement boundaries and records regressions as well as improvements.
+
+`runtime/renderWork.test.tsx` checks that live native movement can skip React rendering, navigation and pins still
+publish, zoom retains stable extents/preparation, changed hours invalidate geometry, and pending observations can
+be applied without a post-render DOM read. These work-count checks complement timing measurements and unchanged
+browser anchoring/geometry assertions.

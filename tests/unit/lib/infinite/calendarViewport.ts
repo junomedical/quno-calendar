@@ -1,10 +1,8 @@
-// JSDOM has no viewport layout. Component tests treat their render window as
-// visible; actual viewport intersections/settlement are covered independently
-// by useViewportLoadDates unit tests and the Chromium loading-window scenarios.
-import { vi } from "vitest";
-import type { useViewportLoadDates } from "#quno-internal/timeline/infinite/scroll/window/useViewportLoadDates";
+import { beforeEach, afterEach, vi } from "vitest";
 
-vi.mock("#quno-internal/timeline/infinite/scroll/window/useViewportLoadDates", () => ({
-  useViewportLoadDates: ({ renderItems, dateKeyForIndex }: Parameters<typeof useViewportLoadDates>[0]) =>
-    renderItems.map((item) => dateKeyForIndex({ index: item.index }))
-}));
+// JSDOM has no layout; browser geometry is covered by Playwright.
+beforeEach(() => {
+  vi.spyOn(HTMLElement.prototype, "clientWidth", "get").mockReturnValue(1000);
+  vi.spyOn(HTMLElement.prototype, "clientHeight", "get").mockReturnValue(800);
+});
+afterEach(() => vi.restoreAllMocks());
