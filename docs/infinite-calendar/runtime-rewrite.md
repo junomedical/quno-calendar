@@ -27,6 +27,24 @@ have descending priority. Manual input cancels eligible restores immediately.
 | M6 Stability and performance                | Measured; Firefox blocked      | Repeated Chromium/WebKit and dense profiling; see exact environment blocker below                |
 | M7 Cutover and cleanup                      | Implemented; Firefox gate open | Both orientations switched on this branch; 62 obsolete modules and TanStack removed              |
 
+## Immediate Shift-state follow-up
+
+Decision 124 replaces the gesture-mode latch with the user's selected behavior: Shift-wheel zooms, unshifted wheel
+scrolls immediately, and remaining inertia may switch modes. Shift keyup releases native overflow without discarding
+already collected zoom input. Ordinary wheel takeover cancels remaining zoom work; a missing-keyup fallback delivers
+the first delta once through the viewport adapter. No contact, direction or restart classifier ships.
+
+The earlier restart-detection experiment was discarded at the user's request. Keep the 0.20 step and scroll lock
+while Shift input is captured. The historical production comparison remains tied to `9add7ce`; this input-policy
+change has not been reprofiled. Firefox's previously recorded standalone startup blocker remains open.
+
+Verification on 2026-10-18: **565/565 unit tests** and **30/30 selected Chromium/WebKit tests** pass. The first
+integration run exposed an old vertical assertion that expected unshifted momentum to remain captured; it now checks
+zoom anchoring before ordinary scrolling and verifies immediate manual movement. Formatting, architecture/contracts,
+types, lint, Preact, demo build, package verification, size reporting and pack dry-run pass. JavaScript is
+**33,305 B gzip (32.52 KiB)**, +206 B versus `3fc9ba7`; CSS stays **2,018 B**. Firefox was not retried for this follow-up.
+Evidence is in `/tmp/quno-shift-immediate/`, including `final-browser.log`, `final-integration.log` and `unit.log`.
+
 ## Wheel gesture continuity follow-up
 
 Decision 123 keeps the initial native-scroll or zoom mode until 300 ms without wheel input. Releasing Shift during

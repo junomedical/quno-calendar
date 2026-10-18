@@ -41,6 +41,7 @@ function setup({ zoom = 1 } = {}) {
   const onZoomChange = vi.fn();
   const listeners = new Set<(snapshot: EngineSnapshot) => void>();
   const adapter = {
+    scrollWheel: vi.fn(),
     subscribeCommit: ({ listener }: { listener: (snapshot: EngineSnapshot) => void }) => {
       listeners.add(listener);
       return () => listeners.delete(listener);
@@ -81,54 +82,46 @@ describe("controlled wheel input", () => {
     await flush();
     expect(onZoomChange).not.toHaveBeenCalled();
   });
-  it("suppresses the momentum tail at a zoom limit, then restores normal scrolling", () => {
-    let now = 100;
-    vi.spyOn(performance, "now").mockImplementation(() => now);
-    const { wheel } = setup({ zoom: 8 });
-    expect(wheel()).toBe(false);
-    now = 350;
-    expect(wheel({ shiftKey: false })).toBe(false);
-    now = 651;
-    expect(wheel({ shiftKey: false })).toBe(true);
-  });
-  it.each([1, 8])("captures sustained unshifted momentum at zoom %s until input is quiet", async (zoom) => {
-    vi.useFakeTimers();
-    let now = 100;
-    vi.spyOn(performance, "now").mockImplementation(() => now);
-    const { wheel, flush, onZoomChange, element } = setup({ zoom });
-    expect(wheel()).toBe(false);
-    await flush();
-    for (let index = 0; index < 12; index++) {
-      now += 180;
-      vi.advanceTimersByTime(180);
-      const delta = -100 * 0.6 ** index;
-      expect(wheel({ shiftKey: false, deltaY: index % 2 ? delta : 0, deltaX: index % 2 ? 0 : delta })).toBe(false);
-      expect(element.style.overflow).toBe("hidden");
-    }
-    // Even a rejected zoom request expiring after one second cannot release continuing momentum.
-    expect(onZoomChange).toHaveBeenCalledTimes(zoom === 8 ? 0 : 1);
-    now += 301;
-    vi.advanceTimersByTime(301);
+  it("releases scrolling immediately on Shift keyup while completing collected zoom", async () => {
+    const { wheel, flush, onZoomChange, element, adapter } = setup();
+    wheel();
+    expect(element.style.overflow).toBe("hidden");
+    window.dispatchEvent(new KeyboardEvent("keyup", { key: "Shift", shiftKey: false }));
     expect(element.style.overflow).toBe("");
+    await flush();
+    expect(onZoomChange).toHaveBeenCalledExactlyOnceWith({ zoom: 1.2 });
     expect(wheel({ shiftKey: false })).toBe(true);
+    expect(adapter.scrollWheel).not.toHaveBeenCalled();
   });
-  it("keeps native scroll mode through Shift presses and viewport publications until a quiet gap", async () => {
-    let now = 100;
-    vi.spyOn(performance, "now").mockImplementation(() => now);
-    const { wheel, flush, onZoomChange, engine } = setup();
-    expect(wheel({ shiftKey: false })).toBe(true);
-    for (let index = 0; index < 12; index++) {
-      engine.cancel({ now, manual: true });
-      engine.observeScroll({ top: engine.read().viewport.top + 10, left: 0, now });
-      now += 180;
-      expect(wheel({ shiftKey: true, deltaY: -100 * 0.6 ** index })).toBe(true);
-      await flush();
-    }
+  it("delivers the first unshifted delta once when keyup is missing, then leaves scrolling native", async () => {
+    const { wheel, flush, onZoomChange, element, adapter } = setup();
+    wheel();
+    expect(wheel({ shiftKey: false, deltaY: -10 })).toBe(false);
+    expect(element.style.overflow).toBe("");
+    expect(adapter.scrollWheel).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ deltaY: -10 }));
+    expect(wheel({ shiftKey: false, deltaY: -8 })).toBe(true);
+    expect(adapter.scrollWheel).toHaveBeenCalledTimes(1);
+    await flush();
     expect(onZoomChange).not.toHaveBeenCalled();
-    now += 301;
+  });
+  it("switches from ordinary scrolling to zoom immediately when Shift is pressed", async () => {
+    const { wheel, flush, onZoomChange } = setup();
+    expect(wheel({ shiftKey: false })).toBe(true);
     expect(wheel()).toBe(false);
     await flush();
     expect(onZoomChange).toHaveBeenCalledExactlyOnceWith({ zoom: 1.2 });
+  });
+  it("releases zoom capture on window blur and removes global listeners on cleanup", () => {
+    const { wheel, element, engine, unmount } = setup();
+    wheel();
+    window.dispatchEvent(new Event("blur"));
+    expect(element.style.overflow).toBe("");
+    wheel();
+    unmount();
+    const cancel = vi.spyOn(engine, "cancel");
+    window.dispatchEvent(new Event("blur"));
+    window.dispatchEvent(new KeyboardEvent("keyup", { key: "Shift" }));
+    expect(cancel).not.toHaveBeenCalled();
   });
   it("starts a fresh pointer anchor after an expired gesture reaches the zoom limit", async () => {
     let now = 100;

@@ -114,6 +114,23 @@ describe("engine viewport transactions", () => {
     expect(cancel).toHaveBeenCalledTimes(1);
     vi.useRealTimers();
   });
+  it.each([
+    { deltaMode: 0, deltaX: 10, deltaY: 40, left: 10, top: 40 },
+    { deltaMode: 1, deltaX: 1, deltaY: 2, left: 16, top: 32 },
+    { deltaMode: 2, deltaX: 1, deltaY: 1, left: 800, top: 500 }
+  ])("delivers the unlocked wheel delta once in mode $deltaMode and observes its position", (input) => {
+    const engine = new CalendarEngine({ layout, viewport });
+    const element = document.createElement("div");
+    Object.defineProperties(element, { clientWidth: { value: 800 }, clientHeight: { value: 500 } });
+    const adapter = new ViewportAdapter(engine);
+    const detach = adapter.attach({ viewport: element });
+    engine.cancel({ now: 0, manual: true });
+    adapter.scrollWheel(input);
+    expect(element.scrollLeft).toBe(input.left);
+    expect(element.scrollTop).toBe(input.top);
+    expect(engine.read().viewport).toMatchObject({ left: input.left, top: input.top });
+    detach();
+  });
   it("ignores a browser commit from an older geometry revision", () => {
     const engine = new CalendarEngine({ layout, viewport });
     const element = document.createElement("div");

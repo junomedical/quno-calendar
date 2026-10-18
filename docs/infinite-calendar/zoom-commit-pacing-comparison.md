@@ -4,7 +4,7 @@ Measured 2026-10-18: candidate `9add7ce` against PR #44 head `d6ac965`. The cand
 next-animation-callback scheduling after DOM/scroll commit. Both builds retain the native-scroll lock and 0.30 step.
 [Raw samples and environment](./zoom-commit-pacing-results.json) are committed alongside this report.
 
-Decisions 122 and 123 subsequently change sensitivity to 0.20 and retain each gesture’s initial scroll or zoom mode until wheel input is quiet.
+Decisions 122–124 subsequently change sensitivity to 0.20 and input handling; the current behavior follows Shift immediately without momentum detection.
 The measurements below remain a record of the earlier 0.30 builds; these follow-ups have not been reprofiled.
 
 ## Results

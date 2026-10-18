@@ -1408,3 +1408,24 @@ Keep request lifetime separate from input lifetime: a rejected controlled zoom r
 after one second, but its timeout does not release continuing momentum. Test decaying unshifted input beyond one
 second in both axes, at zoom limits and with a rejected parent, then verify ordinary scrolling resumes after quiet.
 Also test Shift pressed during ongoing native scrolling in both orientations, followed by a fresh zoom gesture.
+
+## 124 - Follow the Current Shift State Immediately
+
+Date: 2026-10-18
+Status: Accepted; supersedes Decision 123's momentum capture and mode latch, and Decision 118's unshifted tail capture
+
+Use each wheel event's current Shift modifier to choose zoom or ordinary scrolling. Do not infer finger contact,
+inertia, direction changes or gesture restarts, and do not impose a quiet-period delay on mode changes. The user
+explicitly accepts remaining momentum changing modes when Shift is pressed or released. Discard the unshipped
+restart-detection experiment.
+
+Keep Decision 119's native-scroll suspension while handling Shift input, including zoom limits. Release overflow
+immediately on Shift keyup; already collected zoom intent may finish its normal commit-paced processing. The first
+unshifted wheel event cancels pending zoom intent and scrolls immediately. If keyup was missed and overflow was
+still hidden during hit testing, prevent that event's default action and deliver its delta once through the viewport
+adapter (pixels directly, lines at 16 pixels, pages at the viewport extent). Subsequent scrolling remains native.
+Release/cancel on window blur and remove global listeners on cleanup.
+
+Retain the 0.20 step, one outstanding controlled request and one-second request lifetime. The existing 300 ms idle
+unlock and anchor-continuity interval remain housekeeping only; neither prevents switching modes on input. Test
+immediate modifier transitions, zoom limits, missing keyup, one-time delta delivery and cleanup in both orientations.

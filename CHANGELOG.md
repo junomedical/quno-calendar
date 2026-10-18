@@ -4,6 +4,20 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+### Follow the current Shift state immediately - 2026-10-18
+
+- Remove momentum capture and gesture-mode latching. Shift-wheel zooms; unshifted wheel scrolls immediately,
+  accepting that remaining touchpad momentum can switch modes when Shift changes. Drop the restart-detection experiment.
+- Restore native scrolling on Shift keyup. Cancel pending zoom on ordinary wheel input or window blur. If keyup
+  was missed, deliver the first unshifted delta exactly once through the viewport adapter so hidden overflow does
+  not swallow it. Preserve commit pacing, the 0.20 step and native-scroll suspension during Shift zoom.
+
+- Verification: 565 unit tests and 30 selected Chromium/WebKit tests pass. Update the old vertical test's tail-capture
+  expectation to immediate ordinary scrolling. Formatting, architecture, types, lint, Preact, demo build, package,
+  size and pack checks pass. JavaScript is 33,305 B gzip (32.52 KiB), +206 B versus the prior gesture latch; CSS stays
+  2,018 B. Firefox retains the recorded standalone startup blocker: sandbox extension `Operation not permitted`,
+  SWGL framebuffer failure and 15-second timeout. No new Firefox retry or performance profile is claimed.
+
 ### Keep scroll and zoom gestures stable through Shift changes - 2026-10-18
 
 - Latch scroll or zoom mode until 300 ms without wheel input. Pressing Shift during native scrolling no longer

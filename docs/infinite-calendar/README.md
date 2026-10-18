@@ -129,22 +129,20 @@ Products own recurrence expansion; saves and filters still refresh through `even
 ## Bundle budget
 
 JavaScript is limited to 50 KiB gzip and the optional stylesheet to 2 KiB gzip. The current artifacts measure
-32.32 KiB and 1.97 KiB gzip respectively (Node 23.10.0, gzip level 9). See [Decision 100](./decisions.md#100---reconcile-the-infinite-calendar-budget-after-branch-integration).
+32.52 KiB and 1.97 KiB gzip respectively (Node 23.10.0, gzip level 9). See [Decision 100](./decisions.md#100---reconcile-the-infinite-calendar-budget-after-branch-integration).
 
 ## Zoom continuity
 
 Shift-wheel changes zoom by 0.20 per nonzero input sample in either orientation, between the earlier 0.15 and 0.30 steps.
 See [Decision 122](./decisions.md#122---use-an-intermediate-shift-wheel-zoom-step).
 
-With `onZoomChange`, wheel and trackpad gestures beginning with Shift cannot fall through into native scrolling, even at zoom limits.
+With `onZoomChange`, wheel and trackpad samples with Shift held cannot fall through into native scrolling, even at zoom limits.
 The viewport also suspends native momentum scrolling during the gesture, while programmatic zoom anchoring remains
 available. This prevents Chrome from showing blank grid/card patches during inertial touchpad zoom
 ([Decision 119](./decisions.md#119---suspend-native-momentum-scrolling-during-zoom)).
-Shift-touch movement suppresses panning. Unshifted momentum stays captured after Shift is released. Ordinary
-scrolling resumes after 300 ms without captured wheel input; every momentum sample renews that quiet period.
-Conversely, a gesture beginning without Shift stays in native scroll mode when Shift is pressed. After the quiet
-period, a new gesture can select zoom. See
-[Decision 123](./decisions.md#123---capture-momentum-until-wheel-input-is-quiet).
+Shift-touch movement suppresses panning. Shift keyup restores native scrolling immediately. The next wheel sample
+uses its current modifier state, even if it belongs to ongoing touchpad momentum. There is no gesture-mode latch,
+restart heuristic or quiet-period delay. See [Decision 124](./decisions.md#124---follow-the-current-shift-state-immediately).
 
 Wheel input accumulates while the parent accepts the previous request. The next request waits for DOM and scroll
 commit, then the next animation callback; delayed parents receive fewer callbacks without losing the accumulated

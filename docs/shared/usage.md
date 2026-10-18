@@ -1126,7 +1126,7 @@ Infinite Calendar consumers keep the same controlled zoom and renderer contracts
 scrolling independently from React presentation and reuses prepared layout during zoom; custom event content
 continues to receive current geometry and interaction state.
 
-For Infinite Calendar, supplying `onZoomChange` reserves wheel/trackpad gestures beginning with Shift even at the zoom limits. Each nonzero sample changes zoom by 0.20 in either orientation. Native momentum scrolling is suspended during the gesture while zoom anchoring remains active. Shift-touch movement also suppresses panning; unshifted momentum after key release remains captured until wheel input has been quiet for 300 ms. A gesture beginning without Shift stays in native scroll mode when Shift is pressed; a new gesture after the quiet period can zoom.
+For Infinite Calendar, supplying `onZoomChange` reserves wheel/trackpad samples with Shift held even at the zoom limits. Each nonzero sample changes zoom by 0.20 in either orientation. Native momentum scrolling is suspended while zoom input is captured. Shift keyup restores scrolling immediately; subsequent wheel input follows the current modifier state, so ongoing momentum may switch between scrolling and zoom. There is no gesture-lock delay or momentum detection. Shift-touch movement also suppresses panning.
 
 Shift-wheel callbacks are paced by the previous accepted DOM/scroll commit. A delayed controlled parent receives the
 latest accumulated target after that commit; no second request is issued while the first remains unacknowledged.

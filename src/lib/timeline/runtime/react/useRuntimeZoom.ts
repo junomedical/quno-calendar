@@ -13,7 +13,7 @@ export function useRuntimeZoom({
   onZoomChange
 }: {
   engine: CalendarEngine;
-  adapter: Pick<ViewportAdapter, "flush" | "subscribeCommit">;
+  adapter: Pick<ViewportAdapter, "flush" | "subscribeCommit" | "scrollWheel">;
   containerRef: RefObject<HTMLDivElement | null>;
   onZoomChange: CalendarInternalViewProps["onZoomChange"];
 }) {
@@ -24,32 +24,45 @@ export function useRuntimeZoom({
     const viewport = containerRef.current;
     if (!viewport || !enabled) return;
     const scrollLock = new ZoomScrollLock({ viewport });
-    let tail = 0;
-    let mode: "scroll" | "zoom" | null = null;
+    let lastZoom = -Infinity;
+    let active = false;
     const coordinator = new ZoomCommitCoordinator({
       engine,
       adapter,
       request: (input) => callback.current?.(input),
       cancel: () => {
-        // Native scrolling publishes viewport updates; those must not reset its input-mode latch.
-        if (mode === "zoom") {
-          tail = 0;
-          mode = null;
-        }
+        lastZoom = -Infinity;
+        active = false;
         scrollLock.release();
       }
     });
+    const release = () => {
+      if (active) engine.cancel({ now: performance.now(), manual: true });
+      else scrollLock.release();
+    };
+    const keyUp = (event: KeyboardEvent) => {
+      if (event.key === "Shift" && !event.shiftKey) scrollLock.release();
+    };
     const handle = (event: WheelEvent) => {
       if (!callback.current) return;
       const now = performance.now();
-      const continuing = now < tail && mode === "zoom";
-      if (now >= tail || mode === null) mode = event.shiftKey ? "zoom" : "scroll";
-      tail = now + 300;
-      if (mode === "scroll") return;
+      if (!event.shiftKey) {
+        const needsDelivery = scrollLock.isHeld();
+        release();
+        if (needsDelivery) {
+          // A missing keyup can leave overflow hidden during hit testing. Deliver this delta once.
+          event.preventDefault();
+          event.stopPropagation();
+          adapter.scrollWheel(event);
+        }
+        return;
+      }
+      const continuing = now - lastZoom < 300;
+      lastZoom = now;
+      active = true;
       event.preventDefault();
       event.stopPropagation();
       scrollLock.hold();
-      if (!event.shiftKey) return;
       coordinator.add({
         delta: event.deltaY || event.deltaX,
         continuing,
@@ -68,14 +81,19 @@ export function useRuntimeZoom({
       if (!callback.current || !event.shiftKey) return;
       event.preventDefault();
       event.stopPropagation();
-      mode = "zoom";
-      tail = performance.now() + 300;
+      active = true;
+      lastZoom = performance.now();
       scrollLock.hold();
     };
+    const ownerWindow = viewport.ownerDocument.defaultView;
+    ownerWindow?.addEventListener("keyup", keyUp);
+    ownerWindow?.addEventListener("blur", release);
     viewport.addEventListener("wheel", handle, { passive: false });
     viewport.addEventListener("touchmove", handleTouch, { passive: false });
     return () => {
       coordinator.dispose();
+      ownerWindow?.removeEventListener("keyup", keyUp);
+      ownerWindow?.removeEventListener("blur", release);
       viewport.removeEventListener("wheel", handle);
       viewport.removeEventListener("touchmove", handleTouch);
     };

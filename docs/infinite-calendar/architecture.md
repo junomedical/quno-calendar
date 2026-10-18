@@ -60,16 +60,17 @@ eligible owners. Late network data captures the current semantic position at com
 old request's date. Idle recentering rebuilds the date sequence around the current position, preserving its screen
 coordinate. Ordinary settlement waits 1,200 ms; a scrollbar edge uses 240 ms.
 
-`ZoomScrollLock` temporarily applies hidden overflow during captured Shift input and subsequent unshifted momentum.
-The wheel handler latches scroll or zoom mode from the first sample after 300 ms of quiet. Every sample renews that
-interval; modifier changes cannot convert an ongoing scroll stream into zoom. Native viewport publications preserve
-the scroll latch. Every captured zoom sample renews native-scroll suspension, including unshifted momentum. A
-rejected zoom request expires independently; its timeout cannot release an ongoing momentum stream (Decision 123).
+`ZoomScrollLock` temporarily applies hidden overflow during captured Shift input. The wheel handler reads the current
+Shift modifier on every sample (Decision 124), without momentum detection or a latched gesture mode. Shift keyup
+releases overflow immediately; the next unshifted sample cancels queued zoom and scrolls. If keyup was missed and
+overflow was still hidden during hit testing, the adapter delivers that first delta once with default action
+prevented. Further samples are native. Window blur cancels zoom, and cleanup removes the global listeners.
+The 300 ms idle unlock and anchor-continuity interval are housekeeping, not a delay before accepting ordinary input.
 This suspends Chrome's native momentum scrolling while `ViewportAdapter` retains programmatic anchor writes.
 The lock restores the original inline overflow declarations/priorities on settlement, observed takeover or unmount;
 it does not change render windows or add compositor layers. See Decision 119. Wheel takeover classification waits
 until the next task, after all native listeners can cancel the event. A microtask is insufficient because browsers
-can run one between capture and bubble listeners, incorrectly cancelling the captured momentum tail.
+can run one between capture and bubble listeners, incorrectly cancelling captured Shift input.
 
 Both wheel projections preserve the nearest time tick beneath the first pointer in a burst. External horizontal
 zoom preserves a visible current-time marker, otherwise the grid center or origin. External vertical zoom retains

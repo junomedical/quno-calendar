@@ -73,6 +73,15 @@ export class ViewportAdapter {
       this.engine.observeScroll({ top: viewport.scrollTop, left: viewport.scrollLeft, now: performance.now() });
   }
 
+  /** Deliver the first ordinary wheel delta if hidden overflow prevented native hit testing. */
+  scrollWheel({ deltaX, deltaY, deltaMode }: Pick<WheelEvent, "deltaX" | "deltaY" | "deltaMode">) {
+    const viewport = this.viewport;
+    if (!viewport) return;
+    viewport.scrollLeft += deltaX * (deltaMode === 1 ? 16 : deltaMode === 2 ? viewport.clientWidth : 1);
+    viewport.scrollTop += deltaY * (deltaMode === 1 ? 16 : deltaMode === 2 ? viewport.clientHeight : 1);
+    this.flush();
+  }
+
   detach() {
     if (this.frame !== null) cancelAnimationFrame(this.frame);
     if (this.idle !== null) clearTimeout(this.idle);
