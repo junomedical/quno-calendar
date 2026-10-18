@@ -133,6 +133,9 @@ JavaScript is limited to 50 KiB gzip and the optional stylesheet to 2 KiB gzip. 
 
 ## Zoom continuity
 
+Shift-wheel changes zoom by 0.30 per nonzero input sample in either orientation, twice the previous sensitivity.
+See [Decision 120](./decisions.md#120---increase-shift-wheel-zoom-sensitivity).
+
 With `onZoomChange`, Shift-wheel and trackpad input cannot fall through into native scrolling, even at zoom limits.
 The viewport also suspends native momentum scrolling during the gesture, while programmatic zoom anchoring remains
 available. This prevents Chrome from showing blank grid/card patches during inertial touchpad zoom

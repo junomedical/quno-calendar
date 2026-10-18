@@ -50,7 +50,7 @@ for (const vertical of [false, true]) {
             let zoom = 5.9;
             for (const direction of [1, -1, 1, -1]) {
               const before = geometry();
-              zoom = Number((zoom + direction * (mode === "wheel" ? 0.15 : 0.2)).toFixed(2));
+              zoom = Number((zoom + direction * (mode === "wheel" ? 0.3 : 0.2)).toFixed(2));
               if (mode === "wheel")
                 viewport.dispatchEvent(
                   new WheelEvent("wheel", {

@@ -27,6 +27,21 @@ have descending priority. Manual input cancels eligible restores immediately.
 | M6 Stability and performance                | Measured; Firefox blocked      | Repeated Chromium/WebKit and dense profiling; see exact environment blocker below                |
 | M7 Cutover and cleanup                      | Implemented; Firefox gate open | Both orientations switched on this branch; 62 obsolete modules and TanStack removed              |
 
+## Zoom sensitivity follow-up verification
+
+Decision 120 doubles each nonzero Shift-wheel sample from 0.15 to 0.30, retaining the native-scroll lock. Verification
+completed on 2026-10-18: all **549 unit tests** pass in a fresh single-worker run. The overnight Chromium run passed
+**213/219**; all six affected scenarios pass focused reruns. Two zoom expectations were updated, and the horizontal
+anchor assertion now accepts the exact half-pixel native-scroll rounding boundary. Four guide/editor scenarios pass
+unchanged on rerun. The overnight WebKit run passed **27/28**, with its navigation timeout passing on rerun. Both
+updated anchor scenarios additionally pass in Chromium and WebKit (**four tests**).
+
+Formatting, architecture/contracts, types, lint, demo build, packed package verification, Preact, React 19, size
+reporting and pack dry-run pass. JavaScript is **32,544 B gzip (31.78 KiB)**; CSS remains **2,018 B (1.97 KiB)**.
+Firefox's standalone startup blocker remains open. Evidence uses `sensitivity-*` logs in `/tmp/quno-runtime-rewrite/`;
+the final unit log is `sensitivity-unit-clean.log`. Earlier unit runs encountered load/suspension timeouts and a stale
+guide-size assertion, now corrected. The overnight browser runs are not claimed as uninterrupted full-suite passes.
+
 ## Inertial zoom follow-up verification
 
 Decision 119 temporarily suspends native scrolling during captured Shift-wheel/touch input while programmatic

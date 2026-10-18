@@ -4,6 +4,20 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+### Increase Shift-scroll zoom responsiveness - 2026-10-17
+
+- Double the Shift-wheel/trackpad zoom step from 0.15 to 0.30 in both orientations. Preserve pointer anchoring,
+  frame coalescing, zoom limits and the native-scroll suspension that prevents inertial white gaps.
+- Update controlled-wheel accumulation and browser zoom expectations for the increased sensitivity.
+- Verification on 2026-10-18: all 549 unit tests pass. The overnight Chromium run passed 213/219; all six affected
+  cases now pass focused reruns after updating two zoom expectations and accepting inclusive half-pixel native
+  scroll rounding. Four unrelated guide/editor failures pass unchanged on rerun. WebKit passed 27/28, with its
+  navigation timeout passing on rerun; both updated anchor scenarios also pass in Chromium and WebKit.
+- Formatting, architecture/contracts, types, lint, demo build, package verification, Preact, React 19, size reporting
+  and pack dry-run pass. JavaScript is 32,544 B gzip (31.78 KiB); CSS is unchanged at 2,018 B (1.97 KiB).
+- Firefox remains blocked at standalone startup with `sandbox_extension_issue_file_to_process ... Operation not permitted`
+  and `RenderCompositorSWGL failed mapping default framebuffer, no dt`, followed by timeout.
+
 ### Prevent blank patches during inertial touchpad zoom - 2026-10-17
 
 - Temporarily suspend native scrolling during captured Shift-wheel/touch gestures while preserving programmatic

@@ -1335,3 +1335,14 @@ checks assert the temporary computed overflow, unchanged native position at zoom
 Existing frame-by-frame tests assert pointer/time alignment and visible date geometry in both orientations. The user
 confirmed the physical-touchpad raster gaps disappeared with this lock; earlier compositor and input-sensitivity
 experiments were removed.
+
+## 120 - Increase Shift-Wheel Zoom Sensitivity
+
+Date: 2026-10-17
+Status: Accepted; supersedes only the original sensitivity retained in Decision 119
+
+Increase the fixed zoom step from 0.15 to 0.30 per nonzero Shift-wheel sample in both orientations. The same input
+sequence covers twice the zoom range, addressing the reported slow response after native momentum was suspended.
+Preserve the 0.5–8 limits, pointer anchoring, frame coalescing and controlled-parent accumulation. Retain Decision
+119's native-scroll lock and its 300 ms settling tail to prevent white patches. Slider and external zoom remain
+unchanged. Verify accumulated wheel requests, detail thresholds and per-frame geometry at the increased step.

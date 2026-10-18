@@ -65,7 +65,7 @@ export function useRuntimeZoom({
         0.5,
         Math.min(
           8,
-          Number(((requested ?? lastRequested ?? state.geometry.settings.zoom) + (delta < 0 ? 0.15 : -0.15)).toFixed(2))
+          Number(((requested ?? lastRequested ?? state.geometry.settings.zoom) + (delta < 0 ? 0.3 : -0.3)).toFixed(2))
         )
       );
       if (zoom === state.geometry.settings.zoom && requested === null) return;

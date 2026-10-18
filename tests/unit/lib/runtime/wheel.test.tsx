@@ -103,7 +103,7 @@ describe("controlled wheel input", () => {
     });
     expect(onZoomChange).not.toHaveBeenCalled();
     await flush();
-    expect(onZoomChange).toHaveBeenCalledExactlyOnceWith({ zoom: 1.45 });
+    expect(onZoomChange).toHaveBeenCalledExactlyOnceWith({ zoom: 1.9 });
   });
   it("accumulates while a controlled parent has not acknowledged the previous request", async () => {
     const { wheel, flush, onZoomChange } = setup();
@@ -111,7 +111,7 @@ describe("controlled wheel input", () => {
     await flush();
     act(() => wheel());
     await flush();
-    expect(onZoomChange.mock.calls.map(([request]) => request.zoom)).toEqual([1.15, 1.3]);
+    expect(onZoomChange.mock.calls.map(([request]) => request.zoom)).toEqual([1.3, 1.6]);
   });
   it("drops a queued wheel request when an external controlled value wins", async () => {
     const { wheel, flush, engine, layout, onZoomChange, element } = setup();
