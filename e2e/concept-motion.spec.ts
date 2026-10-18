@@ -49,13 +49,17 @@ for (const vertical of [false, true]) {
     page
   }) => {
     await scene(page, "Infinite scroll", vertical);
+    await page.getByRole("button", { name: "Try it", exact: true }).click();
+    await page.getByRole("button", { name: "Replay scene", exact: true }).click();
     const samples = await page.evaluate(async () => {
       const values: number[] = [];
-      let start: number | undefined;
-      while (start === undefined || performance.now() - start < 1800) {
-        if (document.querySelector('.concept-cursor[data-gesture="scroll"]')) start ??= performance.now();
+      let started = false;
+      while (document.querySelector(".concept")?.getAttribute("data-playing") === "true") {
+        const scrolling = !!document.querySelector('.concept-cursor[data-gesture="scroll"]');
+        if (started && !scrolling) break;
+        started ||= scrolling;
         const viewport = document.querySelector(".quno-calendar-viewport");
-        if (viewport && start !== undefined) values.push(viewport.scrollTop);
+        if (viewport && started) values.push(viewport.scrollTop);
         await new Promise(requestAnimationFrame);
       }
       return values;
