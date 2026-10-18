@@ -4,6 +4,8 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+- Merge verification: the first GitHub run passed 282/285 Chromium tests. The new horizontal scroll check sampled an already-running initial preview and observed 386 px against >400 px; it now explicitly replays and samples the complete first scroll gesture. All 18 repeated motion checks pass locally. Existing `external-cancel.spec.ts:172` saw two draft cards instead of three, and `participant-focus.spec.ts:40` timed out opening the editor for 20,000 events/year; all 11 tests in those two files pass unchanged locally. The final complete Chromium rerun passes all 285 tests. Formatting, types, and lint pass after the test correction.
+
 - Rebuilt concept navigation around viewport-sized scenario screens with JSON-authored explanations, a persistent horizontally swipeable title rail, and smooth section navigation. Fullscreen launches below the paragraphs and shows only the live demo/playback controls while preserving state. Mobile inline previews are inert; interaction is available only in fullscreen.
 - Navigation verification: all 626 unit tests and 285 Chromium tests pass, including native touch swipes, screen fit for every mobile scenario, smooth section positions, fullscreen state/focus restoration, mobile input exclusion, and existing playback outcomes. Formatting, architecture, types, lint, Preact compatibility, demo build, package verification, size reporting, and pack dry-run pass. The demo retains a non-blocking main-chunk warning (564.98 kB); package size limits pass.
 
