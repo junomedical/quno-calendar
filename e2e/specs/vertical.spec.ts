@@ -283,7 +283,7 @@ test("keeps the vertical current date anchored when zoom changes", async ({ page
   await page.mouse.wheel(0, -500);
   await page.mouse.wheel(0, -500);
   await page.keyboard.up("Shift");
-  await expect(page.getByTestId("zoom-value")).toHaveText("1.10");
+  await expect(page.getByTestId("zoom-value")).toHaveText("0.90");
   await expect.poll(async () => (await timelineNodeNearMouse())?.date ?? null).toBe(beforeGestureZoomIn?.date);
   await expect.poll(async () => (await timelineNodeNearMouse())?.minute ?? null).toBe(beforeGestureZoomIn?.minute);
   await expect
@@ -296,15 +296,13 @@ test("keeps the vertical current date anchored when zoom changes", async ({ page
   await page.mouse.wheel(0, 500);
   await page.mouse.wheel(0, 500);
   await page.keyboard.up("Shift");
-  await page.mouse.wheel(0, 500);
-  await page.waitForTimeout(100);
   await expect(page.getByTestId("zoom-value")).toHaveText("0.50");
   await expect.poll(async () => (await timelineNodeNearMouse())?.date ?? null).toBe(beforeGestureZoomOut?.date);
   await expect
     .poll(async () => Math.abs(((await timelineNodeNearMouse())?.screenY ?? 0) - (beforeGestureZoomOut?.screenY ?? 0)))
     .toBeLessThanOrEqual(6);
 
-  await page.waitForTimeout(500);
+  // Unshifted input scrolls immediately; it is no longer captured as a zoom momentum tail.
   const scrollTopBeforeManualWheel = await viewport.evaluate((element) => element.scrollTop);
   await page.mouse.wheel(0, 500);
   await page.waitForTimeout(100);

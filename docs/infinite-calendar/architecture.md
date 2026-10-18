@@ -60,15 +60,27 @@ eligible owners. Late network data captures the current semantic position at com
 old request's date. Idle recentering rebuilds the date sequence around the current position, preserving its screen
 coordinate. Ordinary settlement waits 1,200 ms; a scrollbar edge uses 240 ms.
 
-`ZoomScrollLock` temporarily applies hidden overflow during captured Shift input and its 300 ms settling tail.
+`ZoomScrollLock` temporarily applies hidden overflow during captured Shift input. The wheel handler reads the current
+Shift modifier on every sample (Decision 124), without momentum detection or a latched gesture mode. Shift keyup
+releases overflow immediately; the next unshifted sample cancels queued zoom and scrolls. If keyup was missed and
+overflow was still hidden during hit testing, the adapter delivers that first delta once with default action
+prevented. Further samples are native. Window blur cancels zoom, and cleanup removes the global listeners.
+The 300 ms idle unlock and anchor-continuity interval are housekeeping, not a delay before accepting ordinary input.
 This suspends Chrome's native momentum scrolling while `ViewportAdapter` retains programmatic anchor writes.
 The lock restores the original inline overflow declarations/priorities on settlement, observed takeover or unmount;
-it does not change render windows or add compositor layers. See Decision 119.
+it does not change render windows or add compositor layers. See Decision 119. Wheel takeover classification waits
+until the next task, after all native listeners can cancel the event. A microtask is insufficient because browsers
+can run one between capture and bubble listeners, incorrectly cancelling captured Shift input.
 
 Both wheel projections preserve the nearest time tick beneath the first pointer in a burst. External horizontal
 zoom preserves a visible current-time marker, otherwise the grid center or origin. External vertical zoom retains
-the visible fraction of the day board. Controlled requests are coalesced to one per frame; external values supersede
-queued wheel requests. Pending native scroll is flushed before the wheel claims ownership. External zoom retains
+the visible fraction of the day board. `ZoomCommitCoordinator` allows one unexpired controlled request at a time. It accumulates newer samples into one
+bounded target and waits for `ViewportAdapter.subscribeCommit` after current DOM geometry and scroll correction.
+A matching engine value alone does not acknowledge the request. The next accumulated target is scheduled on the next
+animation callback; this does not certify GPU presentation. External values and viewport takeovers cancel queued work.
+An unacknowledged request expires after one second without retry; fresh input uses the actual controlled value.
+The engine records each revision's reason so manual movement is distinguished from an adapter clamp observation.
+See Decision 121. Pending native scroll is flushed before the wheel claims ownership. External zoom retains
 its semantic anchor across successive values to avoid cumulative scroll rounding; movement, resize and navigation
 reset it. Time labels switch immediately at full opacity and grid cadence follows the zoom threshold (Decision 116).
 

@@ -27,6 +27,81 @@ have descending priority. Manual input cancels eligible restores immediately.
 | M6 Stability and performance                | Measured; Firefox blocked      | Repeated Chromium/WebKit and dense profiling; see exact environment blocker below                |
 | M7 Cutover and cleanup                      | Implemented; Firefox gate open | Both orientations switched on this branch; 62 obsolete modules and TanStack removed              |
 
+## Immediate Shift-state follow-up
+
+Decision 124 replaces the gesture-mode latch with the user's selected behavior: Shift-wheel zooms, unshifted wheel
+scrolls immediately, and remaining inertia may switch modes. Shift keyup releases native overflow without discarding
+already collected zoom input. Ordinary wheel takeover cancels remaining zoom work; a missing-keyup fallback delivers
+the first delta once through the viewport adapter. No contact, direction or restart classifier ships.
+
+The earlier restart-detection experiment was discarded at the user's request. Keep the 0.20 step and scroll lock
+while Shift input is captured. The historical production comparison remains tied to `9add7ce`; this input-policy
+change has not been reprofiled. Firefox's previously recorded standalone startup blocker remains open.
+
+Verification on 2026-10-18: **565/565 unit tests** and **30/30 selected Chromium/WebKit tests** pass. The first
+integration run exposed an old vertical assertion that expected unshifted momentum to remain captured; it now checks
+zoom anchoring before ordinary scrolling and verifies immediate manual movement. Formatting, architecture/contracts,
+types, lint, Preact, demo build, package verification, size reporting and pack dry-run pass. JavaScript is
+**33,305 B gzip (32.52 KiB)**, +206 B versus `3fc9ba7`; CSS stays **2,018 B**. Firefox was not retried for this follow-up.
+Evidence is in `/tmp/quno-shift-immediate/`, including `final-browser.log`, `final-integration.log` and `unit.log`.
+
+## Wheel gesture continuity follow-up
+
+Decision 123 keeps the initial native-scroll or zoom mode until 300 ms without wheel input. Releasing Shift during
+zoom keeps subsequent momentum captured, and pressing Shift during native scrolling cannot convert that stream
+into zoom. Every captured sample renews native-scroll suspension. A rejected request still expires after one second,
+but timeout does not release continuing input. The step remains 0.20.
+
+The affected user confirmed that renewing capture prevents scrolling after Shift release, then reported the reverse
+case (pressing Shift during scrolling). The symmetric mode latch passes automated Chromium/WebKit coverage; physical
+touchpad confirmation for that reverse case is pending. These follow-ups have not been reprofiled against #44.
+
+Verification on 2026-10-18: **562/562 unit tests** and **26/26 selected Chromium/WebKit tests** pass, covering both
+modifier transitions, sustained decaying momentum, limits, delayed/rejected parents, pointer anchoring and guide
+payload facts. Formatting, architecture/contracts, types, lint, Preact, demo build, package verification, size reporting
+and pack dry-run pass. JavaScript is **33,099 B gzip (32.32 KiB)**, +54 B from the preceding 0.20 build; CSS remains
+**2,018 B**. Firefox's previously recorded standalone startup blocker remains open; it was not retried for this
+follow-up. Evidence is in `/tmp/quno-zoom-momentum-tail/`, especially `latch-browser.log` and `final-*.log`.
+
+## Intermediate zoom sensitivity follow-up
+
+Decision 122 sets the current Shift-wheel step to 0.20 in both orientations. Commit pacing, native-scroll suspension,
+limits and anchoring retain their behavior. The 0.30 comparison below remains tied to candidate `9add7ce`; this
+sensitivity-only change has not been reprofiled.
+
+Verification on 2026-10-18: 559/559 unit tests pass. The selected Chromium/WebKit run passed 84/92; old step
+expectations and a delayed-parent probe below the horizontal effective-scale floor caused eight test failures.
+Corrected expectations and a fixture starting above that floor pass all 10 affected/rechecked cases, covering all
+92 selected scenarios across the runs. Formatting, architecture/contracts, types, lint, Preact, demo build,
+package verification, size reporting and pack dry-run pass. JavaScript is 33,045 B gzip (32.27 KiB), two bytes less
+than the 0.30 candidate; CSS stays 2,018 B. Evidence is in `/tmp/quno-zoom-step-020/`.
+
+## Commit-aware zoom follow-up
+
+Branch `fix/calendar-zoom-commit-pacing` starts at PR #44 head `d6ac965` and targets `main` separately. Decision 121
+adds one outstanding controlled request, adapter commit acknowledgment, next-frame scheduling and bounded timeout.
+The physical Chrome touchpad experiment reproduced white gaps with the lock disabled; the final build retains
+native-scroll suspension and removes the private experiment switch.
+
+The [matched production comparison](./zoom-commit-pacing-comparison.md) records all three rounds and raw samples.
+Responsive p95 CPU changed 4.885 → 5.238 ms horizontal (+7.2%) and 8.248 → 7.883 ms vertical (-4.4%). The final
+build passes the comparative 10% regression gate, absolute <10 ms CPU target, long-task and DOM/event budgets.
+Earlier unfinished-candidate measurements exceeded the vertical target; the committed report measures the final
+native-listener ordering fix. With a 180 ms parent delay, callbacks fall 64 → 16 per run, while p95 input-to-commit
+latency increases from 195.1 → 377.2 ms horizontal and 203.0 → 391.5 ms vertical. This is a work/latency tradeoff.
+The PR remains draft as requested. Firefox's standalone startup blocker remains open.
+
+Verification on 2026-10-18: **559/559 unit tests** and **37/37 focused WebKit zoom tests** pass. The full Chromium run
+passed **222/223**; `calendar-row-filter.spec.ts`'s pending-update navigation case briefly reported October 29 instead
+of October 22 after settling. It passes **3/3 unchanged focused reruns**. This is not an uninterrupted full-suite pass.
+All new delayed/rejected-parent and existing frame, anchor, continuity, limit and momentum-tail cases pass.
+Formatting, architecture/contracts, types, lint, packed package verification, Preact, React 19, demo build,
+size reporting and pack dry-run pass. JavaScript is **33,047 B gzip (32.27 KiB)**, +503 B versus `d6ac965`; CSS is
+unchanged at **2,018 B (1.97 KiB)**. Firefox's fresh standalone retry timed out after 15 seconds with
+`sandbox_extension_issue_file_to_process ... Operation not permitted` and
+`RenderCompositorSWGL failed mapping default framebuffer, no dt`; no Firefox application scenario ran.
+Evidence is in `/tmp/quno-zoom-pacing/final-*.log`, `firefox.log` and the committed matched-run JSON/report.
+
 ## Zoom sensitivity follow-up verification
 
 Decision 120 doubles each nonzero Shift-wheel sample from 0.15 to 0.30, retaining the native-scroll lock. Verification

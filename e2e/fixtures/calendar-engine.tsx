@@ -1,3 +1,4 @@
+import { useZoomProbe } from "./zoomProbe";
 import { useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import {
@@ -35,10 +36,11 @@ const loadEvents: LoadEvents = async ({ startDate, endDate, calendarIds }) => {
 
 function Fixture() {
   const ref = useRef<QunoInfiniteCalendarHandle>(null);
-  const [zoom, setZoom] = useState(1.5);
+  const [zoom, setZoom] = useState(() => Number(new URLSearchParams(location.search).get("zoomStart") ?? 1.5));
   const [compact, setCompact] = useState(false);
   const [version, setVersion] = useState(0);
   const view = (new URLSearchParams(location.search).get("view") ?? "infinite-horizontal") as CalendarView;
+  const onZoomChange = useZoomProbe({ view, setZoom });
   return (
     <>
       <button onClick={() => setCompact((value) => !value)}>Filter</button>
@@ -50,7 +52,7 @@ function Fixture() {
         type="range"
         min="0.5"
         max="8"
-        step="0.15"
+        step="0.01"
         value={zoom}
         onChange={(event) => setZoom(Number(event.target.value))}
       />
@@ -65,7 +67,7 @@ function Fixture() {
         eventVersion={version}
         loadEvents={loadEvents}
         settings={{ zoom, excludedWeekdays: [] }}
-        onZoomChange={({ zoom: next }) => setZoom(next)}
+        onZoomChange={onZoomChange}
         style={{ height: 600, width: "100%" }}
         renderEvent={({ event, style }) => <div style={style}>{event.title}</div>}
       />

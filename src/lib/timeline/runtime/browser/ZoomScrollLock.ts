@@ -8,6 +8,10 @@ export class ZoomScrollLock {
     this.viewport = viewport;
   }
 
+  isHeld() {
+    return this.previous !== null;
+  }
+
   hold() {
     if (!this.previous) {
       this.previous = ["overflow", "overflow-x", "overflow-y"].map((name) => ({

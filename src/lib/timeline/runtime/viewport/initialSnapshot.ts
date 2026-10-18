@@ -2,7 +2,9 @@ import { buildGeometry } from "#quno-internal/timeline/runtime/model/geometry";
 import { dateWindow, includedDate } from "#quno-internal/timeline/runtime/model/dates";
 import { clampViewport } from "#quno-internal/timeline/runtime/model/projection";
 import { renderWindow } from "#quno-internal/timeline/runtime/model/window";
-import type { Geometry } from "#quno-internal/timeline/runtime/model/types";
+import type { ViewportIntent } from "./ownership";
+import type { IsoDate } from "#quno-internal/shared/dateRangeModel";
+import type { Geometry, Viewport } from "#quno-internal/timeline/runtime/model/types";
 import type { EngineOptions, EngineSnapshot } from "./types";
 
 export function initialSnapshot({ layout, viewport }: EngineOptions): EngineSnapshot {
@@ -12,6 +14,7 @@ export function initialSnapshot({ layout, viewport }: EngineOptions): EngineSnap
   const position = clampViewport({ geometry, viewport: { ...viewport, top: initial } });
   return {
     revision: 0,
+    reason: "initial",
     geometry,
     viewport: position,
     owner: null,
@@ -39,4 +42,30 @@ export function layoutGeometry({ layout, viewport, previous }: EngineOptions & {
   });
   sequences.set(geometry, { anchor: layout.anchorDate, excluded, dates });
   return geometry;
+}
+
+export function pinnedWindow({
+  geometry,
+  viewport,
+  owner,
+  date,
+  pinned
+}: {
+  geometry: Geometry;
+  viewport: Viewport;
+  owner: ViewportIntent | null;
+  date?: IsoDate;
+  pinned: ReadonlyMap<IsoDate, readonly string[]>;
+}) {
+  const resources = new Map(pinned);
+  if (owner?.anchor.target.calendarId)
+    resources.set(owner.anchor.target.dateKey, [
+      ...new Set([...(resources.get(owner.anchor.target.dateKey) ?? []), owner.anchor.target.calendarId])
+    ]);
+  return renderWindow({
+    geometry,
+    viewport,
+    pinnedDate: owner?.anchor.target.dateKey ?? date,
+    pinnedResources: resources
+  });
 }

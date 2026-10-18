@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { defaultQunoInfiniteCalendarSettings as settings } from "@quno/calendar/infinite-calendar";
 import { CalendarEngine, type EngineLayout } from "#quno-internal/timeline/runtime/viewport/CalendarEngine";
 import { ViewportOwnership } from "#quno-internal/timeline/runtime/viewport/ownership";
@@ -90,18 +90,66 @@ describe("engine viewport transactions", () => {
     expect(state.geometry.dateIndex.has("2030-02-20")).toBe(true);
     expect(state.window.visibleDateKeys).toContain("2030-02-20");
   });
+  it("waits beyond listener microtasks before classifying uncaptured wheel intent", async () => {
+    vi.useFakeTimers();
+    const engine = new CalendarEngine({ layout, viewport });
+    const element = document.createElement("div");
+    Object.defineProperties(element, { clientWidth: { value: 800 }, clientHeight: { value: 500 } });
+    const adapter = new ViewportAdapter(engine);
+    const detach = adapter.attach({ viewport: element });
+    const cancel = vi.spyOn(engine, "cancel");
+    const captured = new WheelEvent("wheel", { deltaY: 100, cancelable: true });
+    element.dispatchEvent(captured);
+    queueMicrotask(() => captured.preventDefault());
+    await Promise.resolve();
+    expect(cancel).not.toHaveBeenCalled();
+    vi.runOnlyPendingTimers();
+    expect(cancel).not.toHaveBeenCalled();
+    element.dispatchEvent(new WheelEvent("wheel", { deltaY: 100, cancelable: true }));
+    vi.runOnlyPendingTimers();
+    expect(cancel).toHaveBeenCalledExactlyOnceWith({ now: expect.any(Number), manual: true });
+    element.dispatchEvent(new WheelEvent("wheel", { deltaY: 100, cancelable: true }));
+    detach();
+    vi.runOnlyPendingTimers();
+    expect(cancel).toHaveBeenCalledTimes(1);
+    vi.useRealTimers();
+  });
+  it.each([
+    { deltaMode: 0, deltaX: 10, deltaY: 40, left: 10, top: 40 },
+    { deltaMode: 1, deltaX: 1, deltaY: 2, left: 16, top: 32 },
+    { deltaMode: 2, deltaX: 1, deltaY: 1, left: 800, top: 500 }
+  ])("delivers the unlocked wheel delta once in mode $deltaMode and observes its position", (input) => {
+    const engine = new CalendarEngine({ layout, viewport });
+    const element = document.createElement("div");
+    Object.defineProperties(element, { clientWidth: { value: 800 }, clientHeight: { value: 500 } });
+    const adapter = new ViewportAdapter(engine);
+    const detach = adapter.attach({ viewport: element });
+    engine.cancel({ now: 0, manual: true });
+    adapter.scrollWheel(input);
+    expect(element.scrollLeft).toBe(input.left);
+    expect(element.scrollTop).toBe(input.top);
+    expect(engine.read().viewport).toMatchObject({ left: input.left, top: input.top });
+    detach();
+  });
   it("ignores a browser commit from an older geometry revision", () => {
     const engine = new CalendarEngine({ layout, viewport });
     const element = document.createElement("div");
     Object.defineProperties(element, { clientWidth: { value: 800 }, clientHeight: { value: 500 } });
     const adapter = new ViewportAdapter(engine);
     const detach = adapter.attach({ viewport: element });
+    const acknowledgments: number[] = [];
+    const unsubscribe = adapter.subscribeCommit({ listener: () => acknowledgments.push(element.scrollTop) });
     const stale = engine.read();
     engine.observeScroll({ top: 222, left: 0, now: 1 });
     adapter.commit({ snapshot: stale });
     expect(element.scrollTop).toBe(0);
+    expect(acknowledgments).toEqual([]);
     adapter.commit({ snapshot: engine.read() });
     expect(element.scrollTop).toBe(222);
+    expect(acknowledgments).toEqual([222]);
+    adapter.commit({ snapshot: engine.read() });
+    expect(acknowledgments).toEqual([222]);
+    unsubscribe();
     detach();
   });
 });

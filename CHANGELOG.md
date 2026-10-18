@@ -4,6 +4,68 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+### Follow the current Shift state immediately - 2026-10-18
+
+- Remove momentum capture and gesture-mode latching. Shift-wheel zooms; unshifted wheel scrolls immediately,
+  accepting that remaining touchpad momentum can switch modes when Shift changes. Drop the restart-detection experiment.
+- Restore native scrolling on Shift keyup. Cancel pending zoom on ordinary wheel input or window blur. If keyup
+  was missed, deliver the first unshifted delta exactly once through the viewport adapter so hidden overflow does
+  not swallow it. Preserve commit pacing, the 0.20 step and native-scroll suspension during Shift zoom.
+
+- Verification: 565 unit tests and 30 selected Chromium/WebKit tests pass. Update the old vertical test's tail-capture
+  expectation to immediate ordinary scrolling. Formatting, architecture, types, lint, Preact, demo build, package,
+  size and pack checks pass. JavaScript is 33,305 B gzip (32.52 KiB), +206 B versus the prior gesture latch; CSS stays
+  2,018 B. Firefox retains the recorded standalone startup blocker: sandbox extension `Operation not permitted`,
+  SWGL framebuffer failure and 15-second timeout. No new Firefox retry or performance profile is claimed.
+
+### Keep scroll and zoom gestures stable through Shift changes - 2026-10-18
+
+- Latch scroll or zoom mode until 300 ms without wheel input. Pressing Shift during native scrolling no longer
+  converts its momentum into zoom; a new gesture after quiet can zoom.
+- Renew the 300 ms quiet period and native-scroll lock for every captured unshifted wheel sample after Shift release.
+  Long touchpad inertia no longer outlives a timer anchored to the last Shift-wheel sample; it does not request zoom.
+- Keep the one-second controlled-request timeout separate from ongoing momentum capture. Ordinary scrolling resumes
+  after input is quiet, or on explicit viewport takeover. Preserve the 0.20 zoom step.
+
+- Verification: 562 unit tests and 26 selected Chromium/WebKit tests pass. Formatting, architecture, types, lint,
+  Preact, demo build, package verification, size and pack dry-run pass. JavaScript is 33,099 B gzip (32.32 KiB),
+  up 54 B from the preceding 0.20 build; CSS is unchanged at 2,018 B. Physical testing confirms the Shift-release
+  fix; the reverse transition has automated coverage and awaits physical confirmation. Firefox retains its recorded
+  standalone startup blocker: sandbox extension `Operation not permitted`, SWGL framebuffer failure and 15-second timeout.
+
+### Tune Shift-wheel zoom sensitivity - 2026-10-18
+
+- Set the Shift-wheel/trackpad increment to 0.20 in both orientations, between the earlier 0.15 and 0.30 steps.
+  Preserve commit pacing, pointer anchoring, limits and native-scroll suspension.
+- Update accumulation, delayed/rejected-parent and zoom-detail expectations. Earlier matched performance measurements
+  below describe commit `9add7ce` with a 0.30 step, not this sensitivity adjustment.
+- Verification: 559 unit tests pass. The selected Chromium/WebKit run passed 84/92; the eight failures used old
+  step expectations or a geometry probe below the horizontal effective-scale floor. After correcting those tests,
+  all 10 affected/rechecked cases pass. Formatting, architecture, types, lint, Preact, demo build, package verification,
+  size reporting and pack dry-run pass. JavaScript is 33,045 B gzip (32.27 KiB); CSS remains 2,018 B (1.97 KiB).
+
+### Coordinate zoom requests after commit - 2026-10-18
+
+- Accumulate Shift-wheel samples behind one unexpired controlled request. Wait for current DOM geometry and
+  scroll correction before scheduling the next target; retain the 0.30 step, pointer anchor and zoom limits.
+- Cancel pending intent on viewport/external takeover and teardown. Expire unacknowledged requests after one second
+  without retrying abandoned input. This acknowledges DOM/scroll commit, not GPU presentation.
+- Retain native-scroll suspension: the physical Chrome touchpad experiment reproduced rectangular gaps when the
+  lock was disabled despite commit-aware pacing. Remove the temporary query switch.
+- Defer ordinary-wheel takeover classification until native event dispatch finishes, preserving captured momentum
+  tails in browsers that checkpoint microtasks between listeners.
+- Add delayed/rejected-parent browser coverage, commit-order and timeout unit coverage, and matched production profiling.
+- Three matched production rounds against `d6ac965`: responsive p95 CPU +7.2% horizontal and -4.4% vertical,
+  at 5.238/7.883 ms. Comparative and absolute performance gates pass. Delayed-parent callbacks fall 64 → 16
+  per run, with p95 input-to-commit latency increasing to 377.2/391.5 ms. Keep the PR draft as requested.
+- JavaScript is 33,047 B gzip (32.27 KiB), up 503 B from `d6ac965`; CSS stays 2,018 B (1.97 KiB).
+- Verification: 559/559 unit tests and 37/37 focused WebKit zoom tests pass. Full Chromium passes 222/223;
+  the pending-update navigation case in `calendar-row-filter.spec.ts` fails its final settled-date assertion
+  (October 29 rather than October 22), then passes 3/3 unchanged focused reruns. No clean full-suite pass is claimed.
+  Formatting, architecture/contracts, types, lint, package verification, Preact, React 19, demo build, size and pack checks pass.
+- Firefox retry remains blocked at standalone startup: `sandbox_extension_issue_file_to_process ... Operation not permitted`
+  and `RenderCompositorSWGL failed mapping default framebuffer, no dt`, followed by a 15-second launch timeout.
+
 ### Increase Shift-scroll zoom responsiveness - 2026-10-17
 
 - Double the Shift-wheel/trackpad zoom step from 0.15 to 0.30 in both orientations. Preserve pointer anchoring,

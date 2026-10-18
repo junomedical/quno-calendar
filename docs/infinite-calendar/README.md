@@ -129,19 +129,26 @@ Products own recurrence expansion; saves and filters still refresh through `even
 ## Bundle budget
 
 JavaScript is limited to 50 KiB gzip and the optional stylesheet to 2 KiB gzip. The current artifacts measure
-31.78 KiB and 1.97 KiB gzip respectively (Node 23.10.0, gzip level 9). See [Decision 100](./decisions.md#100---reconcile-the-infinite-calendar-budget-after-branch-integration).
+32.52 KiB and 1.97 KiB gzip respectively (Node 23.10.0, gzip level 9). See [Decision 100](./decisions.md#100---reconcile-the-infinite-calendar-budget-after-branch-integration).
 
 ## Zoom continuity
 
-Shift-wheel changes zoom by 0.30 per nonzero input sample in either orientation, twice the previous sensitivity.
-See [Decision 120](./decisions.md#120---increase-shift-wheel-zoom-sensitivity).
+Shift-wheel changes zoom by 0.20 per nonzero input sample in either orientation, between the earlier 0.15 and 0.30 steps.
+See [Decision 122](./decisions.md#122---use-an-intermediate-shift-wheel-zoom-step).
 
-With `onZoomChange`, Shift-wheel and trackpad input cannot fall through into native scrolling, even at zoom limits.
+With `onZoomChange`, wheel and trackpad samples with Shift held cannot fall through into native scrolling, even at zoom limits.
 The viewport also suspends native momentum scrolling during the gesture, while programmatic zoom anchoring remains
 available. This prevents Chrome from showing blank grid/card patches during inertial touchpad zoom
 ([Decision 119](./decisions.md#119---suspend-native-momentum-scrolling-during-zoom)).
-Shift-touch movement suppresses panning. Ordinary scrolling resumes after the 300 ms momentum tail following Shift
-input. See [Decision 118](./decisions.md#118---capture-shift-input-even-when-zoom-cannot-change).
+Shift-touch movement suppresses panning. Shift keyup restores native scrolling immediately. The next wheel sample
+uses its current modifier state, even if it belongs to ongoing touchpad momentum. There is no gesture-mode latch,
+restart heuristic or quiet-period delay. See [Decision 124](./decisions.md#124---follow-the-current-shift-state-immediately).
+
+Wheel input accumulates while the parent accepts the previous request. The next request waits for DOM and scroll
+commit, then the next animation callback; delayed parents receive fewer callbacks without losing the accumulated
+zoom distance. Unacknowledged input expires after one second without retry. This is not a GPU-presentation signal.
+The physical-touchpad experiment still showed gaps without the native-scroll lock, so it remains enabled.
+See [Decision 121](./decisions.md#121---pace-wheel-requests-after-dom-and-scroll-commit).
 
 Both Shift-wheel orientations restore their first pointer-nearest time node in the controlled zoom layout commit before paint,
 using actual effective geometry. External zoom immediately takes over anchoring; delayed parents retain the old view

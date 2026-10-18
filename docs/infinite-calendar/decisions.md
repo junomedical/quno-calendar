@@ -1346,3 +1346,86 @@ sequence covers twice the zoom range, addressing the reported slow response afte
 Preserve the 0.5–8 limits, pointer anchoring, frame coalescing and controlled-parent accumulation. Retain Decision
 119's native-scroll lock and its 300 ms settling tail to prevent white patches. Slider and external zoom remain
 unchanged. Verify accumulated wheel requests, detail thresholds and per-frame geometry at the increased step.
+
+## 121 - Pace Wheel Requests After DOM and Scroll Commit
+
+Date: 2026-10-18
+Status: Accepted; refines Decisions 112, 113 and 120; retains Decision 119
+
+Keep at most one unexpired controlled Shift-wheel request outstanding. Accumulate every signed 0.30 sample into one
+clamped target, including reversals, while waiting for the parent. The adapter acknowledges only a current rendered
+revision after its programmatic scroll correction and clamp observation. A matching value in the logical engine
+alone is insufficient. Emit the next accumulated target on the next animation callback after acknowledgment, with
+no extra double-frame delay. Callbacks remain outside active React render/commit work.
+
+External zoom, navigation, restoration, native movement, resize, disabling zoom and unmount discard queued intent.
+A request unacknowledged for one second expires without retry; fresh input starts from the actual controlled value.
+Late accepted values remain parent-owned and do not revive abandoned accumulated work. No public request IDs or
+props are added; callback frequency can decrease for a delayed parent. Native observations and ordinary scrolling
+remain independent of this zoom-only coordinator. Cancellation/expiry clears stale wheel anchoring in the engine.
+
+This is DOM/scroll commit acknowledgment, not proof of paint, raster completion or GPU presentation. A temporary
+private query switch disabled the native-scroll lock for a physical Chrome touchpad test. The user reported that
+rectangular gaps returned with commit-aware pacing alone. Retain the lock and its existing 300 ms tail, and remove
+the experimental switch before publishing. Automated DOM geometry checks do not replace this physical-input result.
+Classify uncaptured wheel takeover in the next task, with one replaceable timer cleared on detach. Native browsers
+can checkpoint microtasks between listeners; classifying then can cancel the gesture and release the lock before
+the zoom handler reserves the momentum tail.
+
+Verify delayed, immediate and rejected parents, reversals, saturation, stale acknowledgments, external cancellation,
+timeout and teardown. Browser coverage samples anchor alignment, contiguous dates, event presence and overflow
+restoration. Compare matched production builds to PR #44 head `d6ac965`, including callbacks, observed DOM commits,
+input-to-commit latency and scripting/layout cost; record gate failures without claiming full acceptance.
+
+## 122 - Use an Intermediate Shift-Wheel Zoom Step
+
+Date: 2026-10-18
+Status: Accepted; supersedes the 0.30 sensitivity in Decisions 120 and 121
+
+Use a fixed 0.20 step per nonzero Shift-wheel sample in both orientations. This is one third less change per sample
+than 0.30 and one third more than the earlier 0.15, providing the requested middle sensitivity. Preserve Decision
+121's accumulated target and commit pacing, pointer anchoring, bounds, timeout and Decision 119's native-scroll lock.
+Slider and external controlled values keep their existing behavior. Update accumulation and delayed-parent browser
+expectations, and exercise zoom detail thresholds and frame geometry at the new step.
+
+## 123 - Capture Momentum Until Wheel Input Is Quiet
+
+Date: 2026-10-18
+Status: Accepted; refines the momentum-tail policy in Decisions 118, 119 and 121
+
+Choose native scroll or zoom mode from the first wheel sample after 300 ms of quiet, and retain that choice until
+input is quiet again. Pressing Shift during a scrolling gesture must not turn its momentum into zoom. Native scroll
+publications and manual-wheel classification must preserve that scroll-mode latch.
+
+After captured Shift-wheel input, retain the gesture through subsequent unshifted wheel samples. Each captured
+sample renews the 300 ms quiet period and native-scroll suspension, without requesting additional zoom. Releasing
+Shift or lifting fingers must not convert an ongoing momentum stream into ordinary scrolling. Restore ordinary
+scrolling after 300 ms without a captured sample. Browsers expose no portable wheel momentum-end signal, so this
+is a quiet-period heuristic; a new wheel gesture inside that interval is also captured. Explicit viewport takeover
+and unmount retain their existing cancellation behavior.
+
+Keep request lifetime separate from input lifetime: a rejected controlled zoom request still discards queued intent
+after one second, but its timeout does not release continuing momentum. Test decaying unshifted input beyond one
+second in both axes, at zoom limits and with a rejected parent, then verify ordinary scrolling resumes after quiet.
+Also test Shift pressed during ongoing native scrolling in both orientations, followed by a fresh zoom gesture.
+
+## 124 - Follow the Current Shift State Immediately
+
+Date: 2026-10-18
+Status: Accepted; supersedes Decision 123's momentum capture and mode latch, and Decision 118's unshifted tail capture
+
+Use each wheel event's current Shift modifier to choose zoom or ordinary scrolling. Do not infer finger contact,
+inertia, direction changes or gesture restarts, and do not impose a quiet-period delay on mode changes. The user
+explicitly accepts remaining momentum changing modes when Shift is pressed or released. Discard the unshipped
+restart-detection experiment.
+
+Keep Decision 119's native-scroll suspension while handling Shift input, including zoom limits. Release overflow
+immediately on Shift keyup; already collected zoom intent may finish its normal commit-paced processing. The first
+unshifted wheel event cancels pending zoom intent and scrolls immediately. If keyup was missed and overflow was
+still hidden during hit testing, prevent that event's default action and deliver its delta once through the viewport
+adapter (pixels directly, lines at 16 pixels, pages at the viewport extent). Subsequent scrolling remains native.
+Release/cancel on window blur and remove global listeners on cleanup.
+
+Retain the 0.20 step, one outstanding controlled request and one-second request lifetime. The existing 300 ms idle
+unlock and anchor-continuity interval remain housekeeping only; neither prevents switching modes on input. Test
+immediate modifier transitions, zoom limits, missing keyup, one-time delta delivery and cleanup in both orientations.

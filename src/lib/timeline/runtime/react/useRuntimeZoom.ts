@@ -3,8 +3,8 @@ import type { CalendarInternalViewProps } from "#quno-internal/timeline/core/int
 import type { CalendarEngine } from "#quno-internal/timeline/runtime/viewport/CalendarEngine";
 import { wheelAnchor } from "#quno-internal/timeline/runtime/viewport/zoomAnchor";
 import type { ViewportAdapter } from "#quno-internal/timeline/runtime/browser/ViewportAdapter";
-import type { SemanticAnchor } from "#quno-internal/timeline/runtime/model/types";
 import { ZoomScrollLock } from "#quno-internal/timeline/runtime/browser/ZoomScrollLock";
+import { ZoomCommitCoordinator } from "#quno-internal/timeline/runtime/browser/ZoomCommitCoordinator";
 
 export function useRuntimeZoom({
   engine,
@@ -13,113 +13,89 @@ export function useRuntimeZoom({
   onZoomChange
 }: {
   engine: CalendarEngine;
-  adapter?: Pick<ViewportAdapter, "flush">;
+  adapter: Pick<ViewportAdapter, "flush" | "subscribeCommit" | "scrollWheel">;
   containerRef: RefObject<HTMLDivElement | null>;
   onZoomChange: CalendarInternalViewProps["onZoomChange"];
 }) {
   const callback = useRef(onZoomChange);
   callback.current = onZoomChange;
+  const enabled = Boolean(onZoomChange);
   useEffect(() => {
     const viewport = containerRef.current;
-    if (!viewport) return;
+    if (!viewport || !enabled) return;
     const scrollLock = new ZoomScrollLock({ viewport });
-    let frame: number | null = null;
-    let anchor: SemanticAnchor | null = null;
-    let tail = 0;
-    let requested: number | null = null;
-    let lastRequested: number | null = null;
-    let observedZoom = engine.read().geometry.settings.zoom;
-    let requestedAt = 0;
-    let active = true;
+    let lastZoom = -Infinity;
+    let active = false;
+    const coordinator = new ZoomCommitCoordinator({
+      engine,
+      adapter,
+      request: (input) => callback.current?.(input),
+      cancel: () => {
+        lastZoom = -Infinity;
+        active = false;
+        scrollLock.release();
+      }
+    });
+    const release = () => {
+      if (active) engine.cancel({ now: performance.now(), manual: true });
+      else scrollLock.release();
+    };
+    const keyUp = (event: KeyboardEvent) => {
+      if (event.key === "Shift" && !event.shiftKey) scrollLock.release();
+    };
     const handle = (event: WheelEvent) => {
       if (!callback.current) return;
       const now = performance.now();
-      const state = engine.read();
-      if (state.geometry.settings.zoom !== observedZoom) {
-        observedZoom = state.geometry.settings.zoom;
-        if (observedZoom !== lastRequested) {
-          anchor = null;
-          tail = 0;
-          requested = null;
-          scrollLock.release();
-        }
-        lastRequested = null;
-      }
-      if (now - requestedAt > 1000) lastRequested = null;
       if (!event.shiftKey) {
-        if (now < tail) {
+        const needsDelivery = scrollLock.isHeld();
+        release();
+        if (needsDelivery) {
+          // A missing keyup can leave overflow hidden during hit testing. Deliver this delta once.
           event.preventDefault();
           event.stopPropagation();
+          adapter.scrollWheel(event);
         }
         return;
       }
-      const continuing = now < tail;
-      if (!continuing) anchor = null;
+      const continuing = now - lastZoom < 300;
+      lastZoom = now;
+      active = true;
       event.preventDefault();
       event.stopPropagation();
-      tail = now + 300;
       scrollLock.hold();
-      const delta = event.deltaY || event.deltaX;
-      if (!delta) return;
-      const zoom = Math.max(
-        0.5,
-        Math.min(
-          8,
-          Number(((requested ?? lastRequested ?? state.geometry.settings.zoom) + (delta < 0 ? 0.3 : -0.3)).toFixed(2))
-        )
-      );
-      if (zoom === state.geometry.settings.zoom && requested === null) return;
-      if (!anchor || !continuing) {
-        const box = viewport.getBoundingClientRect();
-        anchor = wheelAnchor({
-          geometry: state.geometry,
-          viewport: { ...state.viewport, top: viewport.scrollTop, left: viewport.scrollLeft },
-          pointer: { x: event.clientX - box.left, y: event.clientY - box.top }
-        });
-      }
-      if (!anchor) return;
-      requested = zoom;
-      if (frame !== null) return;
-      frame = requestAnimationFrame(() => {
-        frame = null;
-        const next = requested;
-        requested = null;
-        const captured = anchor;
-        queueMicrotask(() => {
-          if (!active || next === null || !captured) return;
-          const committedZoom = engine.read().geometry.settings.zoom;
-          if (committedZoom !== observedZoom && committedZoom !== lastRequested) {
-            observedZoom = committedZoom;
-            lastRequested = null;
-            anchor = null;
-            tail = 0;
-            scrollLock.release();
-            return;
-          }
-          observedZoom = committedZoom;
-          lastRequested = next;
-          requestedAt = performance.now();
-          adapter?.flush();
-          engine.expectZoom({ zoom: next, anchor: captured, now: performance.now() });
-          callback.current?.({ zoom: next });
-        });
+      coordinator.add({
+        delta: event.deltaY || event.deltaX,
+        continuing,
+        capture: () => {
+          const state = engine.read();
+          const box = viewport.getBoundingClientRect();
+          return wheelAnchor({
+            geometry: state.geometry,
+            viewport: { ...state.viewport, top: viewport.scrollTop, left: viewport.scrollLeft },
+            pointer: { x: event.clientX - box.left, y: event.clientY - box.top }
+          });
+        }
       });
     };
     const handleTouch = (event: TouchEvent) => {
       if (!callback.current || !event.shiftKey) return;
       event.preventDefault();
       event.stopPropagation();
-      tail = performance.now() + 300;
+      active = true;
+      lastZoom = performance.now();
       scrollLock.hold();
     };
+    const ownerWindow = viewport.ownerDocument.defaultView;
+    ownerWindow?.addEventListener("keyup", keyUp);
+    ownerWindow?.addEventListener("blur", release);
     viewport.addEventListener("wheel", handle, { passive: false });
     viewport.addEventListener("touchmove", handleTouch, { passive: false });
     return () => {
-      active = false;
-      scrollLock.release();
-      if (frame !== null) cancelAnimationFrame(frame);
+      coordinator.dispose();
+      ownerWindow?.removeEventListener("keyup", keyUp);
+      ownerWindow?.removeEventListener("blur", release);
       viewport.removeEventListener("wheel", handle);
       viewport.removeEventListener("touchmove", handleTouch);
     };
-  }, [adapter, containerRef, engine]);
+  }, [adapter, containerRef, enabled, engine]);
 }

@@ -7,8 +7,10 @@ export class ViewportAdapter {
   private pending: { top: number; left: number } | null = null;
   private frame: number | null = null;
   private idle: ReturnType<typeof setTimeout> | null = null;
+  private wheelIntent: ReturnType<typeof setTimeout> | null = null;
   private observer: ResizeObserver | null = null;
   private committedRevision = -1;
+  private commitListeners = new Set<(snapshot: EngineSnapshot) => void>();
 
   constructor(private readonly engine: CalendarEngine) {}
 
@@ -25,6 +27,11 @@ export class ViewportAdapter {
     this.observer.observe(viewport);
     this.onResize();
     return () => this.detach();
+  }
+
+  subscribeCommit({ listener }: { listener: (snapshot: EngineSnapshot) => void }) {
+    this.commitListeners.add(listener);
+    return () => this.commitListeners.delete(listener);
   }
 
   commit({ snapshot }: { snapshot: EngineSnapshot }) {
@@ -45,6 +52,7 @@ export class ViewportAdapter {
       now: performance.now(),
       manual: false
     });
+    for (const listener of this.commitListeners) listener(snapshot);
   }
 
   /** Native event positions were read before React's DOM mutations. */
@@ -65,9 +73,20 @@ export class ViewportAdapter {
       this.engine.observeScroll({ top: viewport.scrollTop, left: viewport.scrollLeft, now: performance.now() });
   }
 
+  /** Deliver the first ordinary wheel delta if hidden overflow prevented native hit testing. */
+  scrollWheel({ deltaX, deltaY, deltaMode }: Pick<WheelEvent, "deltaX" | "deltaY" | "deltaMode">) {
+    const viewport = this.viewport;
+    if (!viewport) return;
+    viewport.scrollLeft += deltaX * (deltaMode === 1 ? 16 : deltaMode === 2 ? viewport.clientWidth : 1);
+    viewport.scrollTop += deltaY * (deltaMode === 1 ? 16 : deltaMode === 2 ? viewport.clientHeight : 1);
+    this.flush();
+  }
+
   detach() {
     if (this.frame !== null) cancelAnimationFrame(this.frame);
     if (this.idle !== null) clearTimeout(this.idle);
+    if (this.wheelIntent !== null) clearTimeout(this.wheelIntent);
+    this.wheelIntent = null;
     this.frame = null;
     this.pending = null;
     this.idle = null;
@@ -106,10 +125,14 @@ export class ViewportAdapter {
   };
   private onIntent: EventListener = (event) => {
     if (event instanceof WheelEvent) {
-      if (!event.shiftKey)
-        queueMicrotask(() => {
+      if (!event.shiftKey) {
+        if (this.wheelIntent !== null) clearTimeout(this.wheelIntent);
+        // Native delivery can checkpoint microtasks between listeners. Wait until dispatch finishes.
+        this.wheelIntent = setTimeout(() => {
+          this.wheelIntent = null;
           if (!event.defaultPrevented) this.manualIntent();
-        });
+        }, 0);
+      }
       return;
     }
     if (event.type === "touchmove" && (event as TouchEvent).shiftKey) return;

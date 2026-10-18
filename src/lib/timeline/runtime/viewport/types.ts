@@ -5,6 +5,7 @@ import type { IntentKind, ViewportIntent } from "./ownership";
 export type EngineLayout = Omit<GeometryInput, "dates" | "viewportWidth"> & { anchorDate: IsoDate; nowMinute?: number };
 export type EngineSnapshot = Readonly<{
   revision: number;
+  reason: string;
   geometry: Geometry;
   viewport: Viewport;
   window: RenderWindow;
