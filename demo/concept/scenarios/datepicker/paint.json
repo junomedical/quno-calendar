@@ -1,0 +1,29 @@
+{
+  "id": "paint",
+  "label": "Paint a range",
+  "hint": "Drag from the 19th to the 23rd.",
+  "anchor": "paint",
+  "initial": {
+    "range": null,
+    "single": false
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 650
+    },
+    {
+      "action": "drag-dates",
+      "from": "2026-10-19",
+      "to": "2026-10-23"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    }
+  ],
+  "paragraphs": [
+    "Choose a date range with one continuous gesture. Press on the first day and drag across the calendar to include the days you need.",
+    "The highlighted range follows the pointer, and the result shows the selected dates as soon as you release."
+  ]
+}

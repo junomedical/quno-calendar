@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "startProduct": "infinite-calendar",
+  "context": {
+    "referenceDate": "2026-10-19",
+    "initialMonth": "2026-10-01",
+    "expectedRange": {
+      "start": "2026-01-01",
+      "end": "2027-12-31"
+    }
+  },
+  "products": ["infinite-calendar", "datepicker", "date-input", "timepicker", "date-parser"]
+}

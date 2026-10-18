@@ -1,0 +1,53 @@
+{
+  "id": "create",
+  "label": "Create an appointment",
+  "hint": "Draw a slot, enter a title, and save.",
+  "anchor": "drag-create",
+  "initial": {
+    "view": "preferred",
+    "theme": "light",
+    "density": 4,
+    "zoom": 1.3,
+    "overlap": false
+  },
+  "steps": [
+    {
+      "action": "find",
+      "target": "[data-event-id=\"2026-10-19-event-0\"]"
+    },
+    {
+      "action": "wait",
+      "ms": 900
+    },
+    {
+      "action": "draw-event",
+      "reference": "[data-event-id=\"2026-10-19-event-0\"]",
+      "grid": "[data-slot=\"calendar-cell\"][data-date=\"2026-10-19\"][data-calendar-id=\"person-0\"]",
+      "viewport": ".quno-calendar-viewport",
+      "startOffset": 0.5,
+      "endOffset": 1.5
+    },
+    {
+      "action": "type",
+      "target": "[data-action=\"event-title\"]",
+      "text": "Studio catch-up"
+    },
+    {
+      "action": "click",
+      "target": "[data-action=\"save\"]",
+      "caption": "Click Save appointment"
+    },
+    {
+      "action": "hover",
+      "target": "[data-event-id=\"concept-created-1\"]"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    }
+  ],
+  "paragraphs": [
+    "Turn an empty part of the schedule into an appointment. Press and drag across a time slot, add a title, and save the result.",
+    "The demonstration follows the whole interaction, from the held pointer and draft preview to the saved card."
+  ]
+}

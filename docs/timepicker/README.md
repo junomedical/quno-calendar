@@ -53,3 +53,12 @@ Consumers can theme the control without calendar styles.
 Datepicker's optional single-day time mode reuses the private slot renderer. Its date selection, view transitions,
 labels, existing classes, and callbacks remain unchanged. Standalone Timepicker imports no date picker, input,
 parser, virtualizer, date library, or timezone conversion. It has no typed-input validation flag or expected date range.
+
+The separate `/concept` playground includes this product and links back to its field guide. See [demo concept notes](../../demo/concept/README.md).
+
+The `/concept` scenes demonstrate minute selection and preservation of an existing value when cadence changes through live interaction playback with replay/reset and manual takeover.
+
+Each scenario’s initial values and action sequence live in its own `demo/concept/scenarios/timepicker/<scenario-id>.json`. The [product manifest](../../demo/concept/scenarios/timepicker.json) orders those scenario IDs; replay and reset restore the selected file’s values.
+
+Concept navigation keeps each demo with its title and one or two explanation paragraphs. Use the bottom title rail
+to scroll between scenarios; on mobile, open Full screen demo below the explanation to enable interaction.

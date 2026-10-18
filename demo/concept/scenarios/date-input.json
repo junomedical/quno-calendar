@@ -1,0 +1,14 @@
+{
+  "id": "date-input",
+  "label": "Date Input",
+  "title": "Type it your way.",
+  "description": "Familiar dates and natural phrases, in a field that feels native.",
+  "preview": ["natural"],
+  "explore": [
+    ["Ranges", "range-input"],
+    ["Parser options", "parser-configuration"],
+    ["Localization", "localization"],
+    ["Accessibility", "accessibility"]
+  ],
+  "scenarios": ["natural", "keyboard", "compose"]
+}

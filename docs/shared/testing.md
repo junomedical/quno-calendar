@@ -460,3 +460,26 @@ measurement boundaries and records regressions as well as improvements.
 publish, zoom retains stable extents/preparation, changed hours invalidate geometry, and pending observations can
 be applied without a post-render DOM read. These work-count checks complement timing measurements and unchanged
 browser anchoring/geometry assertions.
+
+The isolated `/concept` browser checks assert the gradient intro’s geometry and pointer layering, live calendar events, scenario state, documentation destinations, expanded-view positioning, Escape, mobile containment, and reduced-motion defaults.
+
+Concept Chromium coverage exercises all nineteen scenes through actual controls, checks intermediate hover/draft/typing states, exact committed values, orientation/theme/density combinations, manual gesture parity, takeover, reset/replay, and phone containment. Fixture tests verify exact per-day density and selected-resource filtering.
+
+Scenario validation tests reject malformed JSON, unsupported actions, duplicate IDs, invalid initial values, and broken preview references. The browser suite supplies an additional scene exclusively through JSON and verifies copy, links, initial state, preview execution, and reset; runner coverage checks declared order and abort before subsequent steps.
+
+Product-file checks verify independent edits to all five JSON files, manifest tab/startup ordering, and missing or
+mismatched files. Scenario-file checks independently edit all nineteen scenes, validate missing/mismatched files and duplicate references, and add a new JSON-only scene. The browser customization test replaces only Date Input’s natural-language scenario and verifies its initial state, actions, reset, and unchanged product copy/Calendar.
+
+Concept motion checks sample real event dimensions, slider-thumb/cursor alignment, and intermediate scroll positions in both orientations. They also verify that takeover stops zoom without a trailing frame. Unit checks cover frame timing, cancellation, easing, and exact scroll distance despite native pixel rounding.
+
+Concept overlap checks assert frame-by-frame unpressed movement through the real topmost hit element, each underlying lane becoming hovered, no press/release/click events or editor, and native-pointer takeover in both orientations.
+
+Concept card text checks cover 0.5, 1.3, 3, and 8 zoom in both orientations and minimum-zoom packed schedules. Assert
+single-line geometry, ellipsis, intact line height, containment, bounded hover expansion, visible details, and
+restored duration dimensions after pointer exit.
+
+Concept navigation coverage checks title, paragraphs, launch button, live preview, and bottom rail fit one viewport
+on desktop and small phones. Native touch gestures verify horizontal rail scrolling and vertical section navigation.
+Assert intermediate smooth-scroll positions, active title synchronization, inert mobile focus/input behavior, and
+fullscreen-only chrome with retained component state and restored launch-button focus. Mobile interaction scenarios
+explicitly enter fullscreen before replaying.

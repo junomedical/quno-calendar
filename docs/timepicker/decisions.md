@@ -44,3 +44,14 @@ larger and bold (16px/700), using normal text color beside 13px/550 minutes. Exi
   16px/700; Datepicker's independently scoped minute styles retain their existing weight.
 - Consequences: Standalone minute options use regular text in every state. Existing desktop/mobile Chromium checks
   assert computed weight alongside selection, geometry, sticky hour headings and keyboard behavior.
+
+## Separate demo configuration — 2026-10-18
+
+[QUNO-026](../shared/decisions.md#quno-026---give-each-product-demo-its-own-json-file) moves this product’s concept
+scenarios into its own JSON file. Component contracts and scenario behavior remain unchanged.
+
+[QUNO-027](../shared/decisions.md#quno-027---store-every-scenario-in-its-own-json-file) further separates every scenario
+into its own file; the product JSON retains only metadata and ordered references.
+
+[QUNO-028](../shared/decisions.md#quno-028---navigate-demo-screens-with-a-bottom-title-rail) records viewport-sized
+scenario sections, JSON explanations, explicit fullscreen, and inert mobile previews shared by the concept demos.

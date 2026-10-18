@@ -1,0 +1,38 @@
+{
+  "id": "phrase",
+  "label": "Resolve a phrase",
+  "hint": "See a phrase become a date or period.",
+  "anchor": "relative-dates",
+  "initial": {
+    "text": "",
+    "order": "dmy",
+    "clocks": false
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 650
+    },
+    {
+      "action": "type",
+      "target": "[data-action=\"phrase\"]",
+      "text": "next Friday"
+    },
+    {
+      "action": "wait",
+      "ms": 1300
+    },
+    {
+      "action": "type",
+      "target": "[data-action=\"phrase\"]",
+      "text": "next month"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    }
+  ],
+  "paragraphs": [
+    "See how a natural phrase becomes a date range. The parser shows the result and recognized parts as you type."
+  ]
+}

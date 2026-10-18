@@ -1,0 +1,14 @@
+{
+  "id": "date-parser",
+  "label": "Date Parser",
+  "title": "Words become dates.",
+  "description": "Explore the headless parser behind natural date entry.",
+  "preview": ["phrase"],
+  "explore": [
+    ["Expected period", "expected-period"],
+    ["Languages", "multiple-languages"],
+    ["Ranges", "range-parsing"],
+    ["Tokens", "tokenization"]
+  ],
+  "scenarios": ["phrase", "ambiguity", "overnight"]
+}

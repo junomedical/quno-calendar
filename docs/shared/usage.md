@@ -1132,3 +1132,19 @@ Shift-wheel callbacks are paced by the previous accepted DOM/scroll commit. A de
 latest accumulated target after that commit; no second request is issued while the first remains unacknowledged.
 After one second without acknowledgment, queued input is discarded until fresh wheel input. External values remain
 authoritative. No consumer-side forced React commit or paint acknowledgment is needed.
+
+## Explore the demo concept
+
+Run `npm run dev` and open `/concept`. Use the top product tabs, then choose a title in the bottom rail to scroll to its screen. Each scenario pairs the demo with a title and one or two explanatory paragraphs; Play tour runs a short sequence. Manual interaction pauses the tour. Each scenario links to its guide recipe. Full screen demo, below the paragraphs, shows only the demo and playback/exit controls; Escape exits. Mobile previews are inert until fullscreen opens.
+
+The concept playback uses Play tour, Replay scene, Try it, and Reset. Calendar creation draws a draft and saves through an external editor; edits and moves survive viewport loading until Reset. Each product exposes its own scenarios and guide anchors. The density recipe is available in `/guide/infinite-calendar#performance`.
+
+To author a concept scene, edit `demo/concept/scenarios/<product-id>/<scenario-id>.json`: set its copy, one or two `paragraphs`, docs anchor, initial state, and ordered actions, then reference its ID in the product manifest’s `scenarios` list and optionally `preview`. See [JSON authoring instructions](../../demo/concept/README.md#edit-scenarios-in-json). Existing action types require no player changes.
+
+Concept `scroll`, `scroll-to`, `scroll-day`, and `slider` steps declare `durationMs` and `easing` (`linear` or `ease-in-out`). The Zoom scene holds and drags the real zoom slider; the normal Shift-wheel interaction remains available in the playground. Target positioning also scrolls smoothly, and manual input cancels pending animation frames.
+
+In the concept overlap scene, move across the overlapping cards to reveal their details. The preview uses hover movement alone, and moving your own pointer over the calendar immediately stops automation.
+
+For compact card behavior, choose Quiet or Packed and lower Zoom to 0.5. Titles and clocks truncate on one line;
+cards shorter than 38 px show the title alone. Hover to restore the clock and details in an expanded card, then move
+away to return to the duration-sized card. Repeat in Vertical view; hover stays within the resource column.

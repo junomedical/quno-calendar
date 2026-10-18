@@ -1,0 +1,12 @@
+{
+  "id": "timepicker",
+  "label": "Timepicker",
+  "title": "A little time, well picked.",
+  "description": "Clear hours and considered minute choices. Choose a clock without choosing a date.",
+  "preview": ["time"],
+  "explore": [
+    ["Hours & cadence", "time-selection"],
+    ["Value ownership", "ownership"]
+  ],
+  "scenarios": ["time", "cadence"]
+}

@@ -1,0 +1,37 @@
+{
+  "id": "time",
+  "label": "Choose a time",
+  "hint": "Scroll through hours and choose a minute.",
+  "anchor": "time-selection",
+  "initial": {
+    "value": "09:00",
+    "cadence": 5,
+    "businessHours": true
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 650
+    },
+    {
+      "action": "scroll-to",
+      "target": "[data-slot=\"time-navigation\"]",
+      "destination": "[data-time=\"10:45\"]",
+      "caption": "Scroll to 10 o’clock",
+      "durationMs": 1500,
+      "easing": "ease-in-out"
+    },
+    {
+      "action": "click",
+      "target": "[data-time=\"10:45\"]",
+      "caption": "Choose 10:45"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    }
+  ],
+  "paragraphs": [
+    "Choose a time from a list with clear hour headings and minute choices. Scroll to the hour you want, then select a minute."
+  ]
+}

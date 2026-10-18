@@ -1,0 +1,34 @@
+{
+  "id": "overnight",
+  "label": "Cross midnight",
+  "hint": "See the end date advance with the clock.",
+  "anchor": "time-parsing",
+  "initial": {
+    "text": "",
+    "order": "dmy",
+    "clocks": true
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 650
+    },
+    {
+      "action": "type",
+      "target": "[data-action=\"phrase\"]",
+      "text": "tomorrow 23:00–01:00"
+    },
+    {
+      "action": "wait",
+      "ms": 1300
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    }
+  ],
+  "paragraphs": [
+    "Some appointments finish on the following day. Enable clock recognition and parse a time range that crosses midnight.",
+    "The result keeps the start and end dates paired with their own times, making the overnight interval explicit."
+  ]
+}

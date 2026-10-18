@@ -1,0 +1,50 @@
+{
+  "id": "compose",
+  "label": "Type, then pick",
+  "hint": "Refine the same range in the picker.",
+  "anchor": "picker-composition",
+  "initial": {
+    "range": null,
+    "selectionMode": "range",
+    "picker": true,
+    "label": "Travel period"
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 650
+    },
+    {
+      "action": "type",
+      "target": "[data-action=\"date-input\"]",
+      "text": "19 Oct 2026 - 23 Oct 2026"
+    },
+    {
+      "action": "key",
+      "target": "[data-action=\"date-input\"]",
+      "key": "Enter"
+    },
+    {
+      "action": "click",
+      "target": "[data-action=\"open-picker\"]",
+      "caption": "Open the picker"
+    },
+    {
+      "action": "drag-dates",
+      "from": "2026-10-23",
+      "to": "2026-10-25"
+    },
+    {
+      "action": "click",
+      "target": "[data-action=\"open-picker\"]",
+      "caption": "Close the picker"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    }
+  ],
+  "paragraphs": [
+    "Start with typed dates, then fine-tune the range in a calendar. Both controls share the same selection and keep each other up to date."
+  ]
+}

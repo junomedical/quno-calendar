@@ -1,0 +1,36 @@
+{
+  "id": "natural",
+  "label": "Type naturally",
+  "hint": "Type next Friday, then press Enter.",
+  "anchor": "controlled-state",
+  "initial": {
+    "range": null,
+    "selectionMode": "single",
+    "picker": false,
+    "label": "Appointment date"
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 650
+    },
+    {
+      "action": "type",
+      "target": "[data-action=\"date-input\"]",
+      "text": "next Friday"
+    },
+    {
+      "action": "key",
+      "target": "[data-action=\"date-input\"]",
+      "key": "Enter"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    }
+  ],
+  "paragraphs": [
+    "Enter a familiar phrase instead of reaching for a calendar. Type “next Friday” and press Enter to turn it into a clear, formatted date.",
+    "The field remains a native input, so you can select, replace, and edit its text as usual."
+  ]
+}

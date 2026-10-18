@@ -1,0 +1,31 @@
+{
+  "id": "range-move",
+  "label": "Move the range",
+  "hint": "Move seven days together into the next week.",
+  "anchor": "segment-drag",
+  "initial": {
+    "range": {
+      "start": "2026-10-19",
+      "end": "2026-10-25"
+    },
+    "single": false
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 650
+    },
+    {
+      "action": "drag-dates",
+      "from": "2026-10-21",
+      "to": "2026-10-28"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    }
+  ],
+  "paragraphs": [
+    "Move a whole date range to a different part of the month. Drag the selected band and keep the same number of days."
+  ]
+}

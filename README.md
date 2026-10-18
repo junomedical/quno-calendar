@@ -108,3 +108,14 @@ With Infinite Calendar zoom enabled, wheel samples with Shift held stay reserved
 Shift-wheel zoom accumulates 0.20 per nonzero sample and waits for each accepted DOM/scroll commit before issuing the next request.
 
 Wheel input follows the current Shift state immediately: hold Shift to zoom, release it to scroll. Remaining touchpad momentum may switch modes; there is no gesture-lock delay.
+
+The isolated demo approach experiment is available at `/concept`; see [concept notes](./demo/concept/README.md).
+
+The `/concept` experiment now demonstrates nineteen live interactions with replay, reset, manual takeover, smooth scroll/zoom demonstrations, and per-scene recipe links.
+
+The concept’s scenario copy, initial state, preview order, and playback steps are controlled by [individual scenario JSON files](./demo/concept/README.md#edit-scenarios-in-json).
+
+The concept overlap preview reveals covered appointments as the pointer moves, and real calendar hover takes over immediately. Cards use single-line text and expand on hover to reveal details at compact zoom levels.
+
+The concept now presents each scenario on one screen with its JSON-authored explanation, a persistent bottom title
+rail that scrolls between demos, and an explicit fullscreen button. Mobile previews become interactive only in fullscreen.

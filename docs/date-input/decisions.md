@@ -89,3 +89,14 @@ Nonempty lists retain their restrictions; disabled state, cadence, and existing 
 date/clock results with `start` and `end` objects containing `{ date, time }`. Date Input projects their dates into its
 existing `DateRange` and uses the start clock in single-day time mode. Controlled/uncontrolled values, commits,
 recognition, partial completion, keyboard edits, cadence validation, and public callbacks retain QDI-001–QDI-003 semantics.
+
+## Separate demo configuration — 2026-10-18
+
+[QUNO-026](../shared/decisions.md#quno-026---give-each-product-demo-its-own-json-file) moves this product’s concept
+scenarios into its own JSON file. Component contracts and scenario behavior remain unchanged.
+
+[QUNO-027](../shared/decisions.md#quno-027---store-every-scenario-in-its-own-json-file) further separates every scenario
+into its own file; the product JSON retains only metadata and ordered references.
+
+[QUNO-028](../shared/decisions.md#quno-028---navigate-demo-screens-with-a-bottom-title-rail) records viewport-sized
+scenario sections, JSON explanations, explicit fullscreen, and inert mobile previews shared by the concept demos.

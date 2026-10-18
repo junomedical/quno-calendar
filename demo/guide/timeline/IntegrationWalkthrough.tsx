@@ -24,6 +24,7 @@ import {
 } from "./ArticleProductDemos";
 import { DragCreateArticleDemo, PrefetchLoadingDemo, ReadOnlyArticleDemo } from "./ArticleRecipeDemos";
 import { EventProjectionDemo } from "./EventProjectionDemo";
+import { DensityDemo, densityRecipe } from "./DensityDemo";
 import { ReactStateDemo } from "./ReactStateDemo";
 import { FieldGuidePage } from "#quno-demo/guide/shared/FieldGuidePage";
 import { FieldGuideProduction } from "#quno-demo/guide/shared/FieldGuideProduction";
@@ -475,6 +476,16 @@ export function IntegrationWalkthrough({ embedded = false }: { embedded?: boolea
           Performance tests cover dense layout scaling, bounded DOM and cache sizes, frame-batched interaction work, and
           stable renderer identity. Product event renderers should keep their own card work equally disciplined.
         </Callout>
+        <Callout>
+          Try Quiet, Busy, and Packed to compare 4, 40, and 400 appointments per day across four people. Switch the view
+          and inspect a card. These are fixture counts, not frame-rate guarantees.
+        </Callout>
+        <CodeBlock code={densityRecipe} title="Generate a deterministic range at three event densities" />
+        <DemoBreakout>
+          <LazyArticleDemo label="event density comparison">
+            <DensityDemo />
+          </LazyArticleDemo>
+        </DemoBreakout>
       </ArticleSection>
 
       <ArticleSection id="css-native" number="04" title="Leverage the browser engine">

@@ -57,3 +57,5 @@ transition.
 
 The payload chapter reports the 0.6.3 Infinite Calendar artifacts: 32.52 KiB gzip JavaScript with a 50 KiB ceiling,
 and 1.97 KiB gzip optional CSS with a 2 KiB ceiling. The shared production profile supplies the same facts.
+
+The performance chapter includes a lazy Quiet/Busy/Packed playground with exact 4/40/400 events per day, view/theme controls, and a complete range-loader recipe.
