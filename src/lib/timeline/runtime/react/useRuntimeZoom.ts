@@ -25,30 +25,31 @@ export function useRuntimeZoom({
     if (!viewport || !enabled) return;
     const scrollLock = new ZoomScrollLock({ viewport });
     let tail = 0;
+    let mode: "scroll" | "zoom" | null = null;
     const coordinator = new ZoomCommitCoordinator({
       engine,
       adapter,
       request: (input) => callback.current?.(input),
       cancel: () => {
-        tail = 0;
+        // Native scrolling publishes viewport updates; those must not reset its input-mode latch.
+        if (mode === "zoom") {
+          tail = 0;
+          mode = null;
+        }
         scrollLock.release();
       }
     });
     const handle = (event: WheelEvent) => {
       if (!callback.current) return;
       const now = performance.now();
-      if (!event.shiftKey) {
-        if (now < tail) {
-          event.preventDefault();
-          event.stopPropagation();
-        }
-        return;
-      }
-      const continuing = now < tail;
+      const continuing = now < tail && mode === "zoom";
+      if (now >= tail || mode === null) mode = event.shiftKey ? "zoom" : "scroll";
+      tail = now + 300;
+      if (mode === "scroll") return;
       event.preventDefault();
       event.stopPropagation();
-      tail = now + 300;
       scrollLock.hold();
+      if (!event.shiftKey) return;
       coordinator.add({
         delta: event.deltaY || event.deltaX,
         continuing,
@@ -67,6 +68,7 @@ export function useRuntimeZoom({
       if (!callback.current || !event.shiftKey) return;
       event.preventDefault();
       event.stopPropagation();
+      mode = "zoom";
       tail = performance.now() + 300;
       scrollLock.hold();
     };

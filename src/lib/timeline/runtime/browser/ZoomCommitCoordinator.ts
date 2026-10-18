@@ -49,7 +49,7 @@ export class ZoomCommitCoordinator {
     this.reset();
   }
 
-  private reset() {
+  private reset({ releaseInput = true } = {}) {
     this.generation += 1;
     if (this.frame !== null) cancelAnimationFrame(this.frame);
     if (this.timeout !== null) clearTimeout(this.timeout);
@@ -57,7 +57,7 @@ export class ZoomCommitCoordinator {
     this.waiting = null;
     this.target = null;
     this.anchor = null;
-    this.options.cancel();
+    if (releaseInput) this.options.cancel();
   }
 
   private observe() {
@@ -104,7 +104,8 @@ export class ZoomCommitCoordinator {
     this.flushing = false;
     engine.expectZoom({ zoom, anchor: this.anchor, now: performance.now() });
     this.waiting = { zoom, revision: engine.read().revision };
-    this.timeout = setTimeout(() => this.reset(), 1000);
+    // Request expiry drops zoom intent; an active momentum stream still belongs to the input handler.
+    this.timeout = setTimeout(() => this.reset({ releaseInput: false }), 1000);
     request({ zoom });
   }
 }

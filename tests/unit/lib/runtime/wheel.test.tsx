@@ -88,8 +88,47 @@ describe("controlled wheel input", () => {
     expect(wheel()).toBe(false);
     now = 350;
     expect(wheel({ shiftKey: false })).toBe(false);
-    now = 401;
+    now = 651;
     expect(wheel({ shiftKey: false })).toBe(true);
+  });
+  it.each([1, 8])("captures sustained unshifted momentum at zoom %s until input is quiet", async (zoom) => {
+    vi.useFakeTimers();
+    let now = 100;
+    vi.spyOn(performance, "now").mockImplementation(() => now);
+    const { wheel, flush, onZoomChange, element } = setup({ zoom });
+    expect(wheel()).toBe(false);
+    await flush();
+    for (let index = 0; index < 12; index++) {
+      now += 180;
+      vi.advanceTimersByTime(180);
+      const delta = -100 * 0.6 ** index;
+      expect(wheel({ shiftKey: false, deltaY: index % 2 ? delta : 0, deltaX: index % 2 ? 0 : delta })).toBe(false);
+      expect(element.style.overflow).toBe("hidden");
+    }
+    // Even a rejected zoom request expiring after one second cannot release continuing momentum.
+    expect(onZoomChange).toHaveBeenCalledTimes(zoom === 8 ? 0 : 1);
+    now += 301;
+    vi.advanceTimersByTime(301);
+    expect(element.style.overflow).toBe("");
+    expect(wheel({ shiftKey: false })).toBe(true);
+  });
+  it("keeps native scroll mode through Shift presses and viewport publications until a quiet gap", async () => {
+    let now = 100;
+    vi.spyOn(performance, "now").mockImplementation(() => now);
+    const { wheel, flush, onZoomChange, engine } = setup();
+    expect(wheel({ shiftKey: false })).toBe(true);
+    for (let index = 0; index < 12; index++) {
+      engine.cancel({ now, manual: true });
+      engine.observeScroll({ top: engine.read().viewport.top + 10, left: 0, now });
+      now += 180;
+      expect(wheel({ shiftKey: true, deltaY: -100 * 0.6 ** index })).toBe(true);
+      await flush();
+    }
+    expect(onZoomChange).not.toHaveBeenCalled();
+    now += 301;
+    expect(wheel()).toBe(false);
+    await flush();
+    expect(onZoomChange).toHaveBeenCalledExactlyOnceWith({ zoom: 1.2 });
   });
   it("starts a fresh pointer anchor after an expired gesture reaches the zoom limit", async () => {
     let now = 100;

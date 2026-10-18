@@ -27,6 +27,24 @@ have descending priority. Manual input cancels eligible restores immediately.
 | M6 Stability and performance                | Measured; Firefox blocked      | Repeated Chromium/WebKit and dense profiling; see exact environment blocker below                |
 | M7 Cutover and cleanup                      | Implemented; Firefox gate open | Both orientations switched on this branch; 62 obsolete modules and TanStack removed              |
 
+## Wheel gesture continuity follow-up
+
+Decision 123 keeps the initial native-scroll or zoom mode until 300 ms without wheel input. Releasing Shift during
+zoom keeps subsequent momentum captured, and pressing Shift during native scrolling cannot convert that stream
+into zoom. Every captured sample renews native-scroll suspension. A rejected request still expires after one second,
+but timeout does not release continuing input. The step remains 0.20.
+
+The affected user confirmed that renewing capture prevents scrolling after Shift release, then reported the reverse
+case (pressing Shift during scrolling). The symmetric mode latch passes automated Chromium/WebKit coverage; physical
+touchpad confirmation for that reverse case is pending. These follow-ups have not been reprofiled against #44.
+
+Verification on 2026-10-18: **562/562 unit tests** and **26/26 selected Chromium/WebKit tests** pass, covering both
+modifier transitions, sustained decaying momentum, limits, delayed/rejected parents, pointer anchoring and guide
+payload facts. Formatting, architecture/contracts, types, lint, Preact, demo build, package verification, size reporting
+and pack dry-run pass. JavaScript is **33,099 B gzip (32.32 KiB)**, +54 B from the preceding 0.20 build; CSS remains
+**2,018 B**. Firefox's previously recorded standalone startup blocker remains open; it was not retried for this
+follow-up. Evidence is in `/tmp/quno-zoom-momentum-tail/`, especially `latch-browser.log` and `final-*.log`.
+
 ## Intermediate zoom sensitivity follow-up
 
 Decision 122 sets the current Shift-wheel step to 0.20 in both orientations. Commit pacing, native-scroll suspension,

@@ -60,7 +60,11 @@ eligible owners. Late network data captures the current semantic position at com
 old request's date. Idle recentering rebuilds the date sequence around the current position, preserving its screen
 coordinate. Ordinary settlement waits 1,200 ms; a scrollbar edge uses 240 ms.
 
-`ZoomScrollLock` temporarily applies hidden overflow during captured Shift input and its 300 ms settling tail.
+`ZoomScrollLock` temporarily applies hidden overflow during captured Shift input and subsequent unshifted momentum.
+The wheel handler latches scroll or zoom mode from the first sample after 300 ms of quiet. Every sample renews that
+interval; modifier changes cannot convert an ongoing scroll stream into zoom. Native viewport publications preserve
+the scroll latch. Every captured zoom sample renews native-scroll suspension, including unshifted momentum. A
+rejected zoom request expires independently; its timeout cannot release an ongoing momentum stream (Decision 123).
 This suspends Chrome's native momentum scrolling while `ViewportAdapter` retains programmatic anchor writes.
 The lock restores the original inline overflow declarations/priorities on settlement, observed takeover or unmount;
 it does not change render windows or add compositor layers. See Decision 119. Wheel takeover classification waits

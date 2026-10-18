@@ -1387,3 +1387,24 @@ than 0.30 and one third more than the earlier 0.15, providing the requested midd
 121's accumulated target and commit pacing, pointer anchoring, bounds, timeout and Decision 119's native-scroll lock.
 Slider and external controlled values keep their existing behavior. Update accumulation and delayed-parent browser
 expectations, and exercise zoom detail thresholds and frame geometry at the new step.
+
+## 123 - Capture Momentum Until Wheel Input Is Quiet
+
+Date: 2026-10-18
+Status: Accepted; refines the momentum-tail policy in Decisions 118, 119 and 121
+
+Choose native scroll or zoom mode from the first wheel sample after 300 ms of quiet, and retain that choice until
+input is quiet again. Pressing Shift during a scrolling gesture must not turn its momentum into zoom. Native scroll
+publications and manual-wheel classification must preserve that scroll-mode latch.
+
+After captured Shift-wheel input, retain the gesture through subsequent unshifted wheel samples. Each captured
+sample renews the 300 ms quiet period and native-scroll suspension, without requesting additional zoom. Releasing
+Shift or lifting fingers must not convert an ongoing momentum stream into ordinary scrolling. Restore ordinary
+scrolling after 300 ms without a captured sample. Browsers expose no portable wheel momentum-end signal, so this
+is a quiet-period heuristic; a new wheel gesture inside that interval is also captured. Explicit viewport takeover
+and unmount retain their existing cancellation behavior.
+
+Keep request lifetime separate from input lifetime: a rejected controlled zoom request still discards queued intent
+after one second, but its timeout does not release continuing momentum. Test decaying unshifted input beyond one
+second in both axes, at zoom limits and with a rejected parent, then verify ordinary scrolling resumes after quiet.
+Also test Shift pressed during ongoing native scrolling in both orientations, followed by a fresh zoom gesture.

@@ -104,3 +104,5 @@ viewport presentation subscriptions, reusable geometry and native observation or
 [Decision 121](./infinite-calendar/decisions.md#121---pace-wheel-requests-after-dom-and-scroll-commit) records commit-aware zoom pacing and the retained native-scroll lock.
 
 [Decision 122](./infinite-calendar/decisions.md#122---use-an-intermediate-shift-wheel-zoom-step) sets the current Shift-wheel step to 0.20.
+
+[Decision 123](./infinite-calendar/decisions.md#123---capture-momentum-until-wheel-input-is-quiet) keeps the initial scroll or zoom mode through modifier changes until wheel input is quiet.

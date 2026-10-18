@@ -103,6 +103,8 @@ Infinite Calendar uses one mathematical viewport engine for both orientations, w
 bounded date/resource windows. Native movement within an unchanged rendered window avoids React updates, while zoom
 reuses stable resource layout. See its [runtime architecture](docs/infinite-calendar/architecture.md).
 
-With Infinite Calendar zoom enabled, Shift-wheel stays reserved for zoom at both limits; it never falls through into scrolling.
+With Infinite Calendar zoom enabled, wheel gestures beginning with Shift stay reserved for zoom at both limits.
 
 Shift-wheel zoom accumulates 0.20 per nonzero sample and waits for each accepted DOM/scroll commit before issuing the next request.
+
+Wheel gestures keep their initial scroll or zoom mode until input has been quiet for 300 ms. Changing Shift mid-gesture cannot turn scrolling into zoom or release captured zoom momentum into scrolling.

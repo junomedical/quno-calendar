@@ -4,6 +4,21 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+### Keep scroll and zoom gestures stable through Shift changes - 2026-10-18
+
+- Latch scroll or zoom mode until 300 ms without wheel input. Pressing Shift during native scrolling no longer
+  converts its momentum into zoom; a new gesture after quiet can zoom.
+- Renew the 300 ms quiet period and native-scroll lock for every captured unshifted wheel sample after Shift release.
+  Long touchpad inertia no longer outlives a timer anchored to the last Shift-wheel sample; it does not request zoom.
+- Keep the one-second controlled-request timeout separate from ongoing momentum capture. Ordinary scrolling resumes
+  after input is quiet, or on explicit viewport takeover. Preserve the 0.20 zoom step.
+
+- Verification: 562 unit tests and 26 selected Chromium/WebKit tests pass. Formatting, architecture, types, lint,
+  Preact, demo build, package verification, size and pack dry-run pass. JavaScript is 33,099 B gzip (32.32 KiB),
+  up 54 B from the preceding 0.20 build; CSS is unchanged at 2,018 B. Physical testing confirms the Shift-release
+  fix; the reverse transition has automated coverage and awaits physical confirmation. Firefox retains its recorded
+  standalone startup blocker: sandbox extension `Operation not permitted`, SWGL framebuffer failure and 15-second timeout.
+
 ### Tune Shift-wheel zoom sensitivity - 2026-10-18
 
 - Set the Shift-wheel/trackpad increment to 0.20 in both orientations, between the earlier 0.15 and 0.30 steps.
