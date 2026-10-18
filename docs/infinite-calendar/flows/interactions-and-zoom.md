@@ -1,256 +1,42 @@
-# Interactions And Zoom
+# Pointer interactions and zoom
 
-Both orientations share one Pointer Events lifecycle. Projection-specific hit testing converts a mounted grid owner and pointer coordinate into the same `{ dateKey, calendarId, minute }` domain target. Product callbacks validate mutations; rendering layers show drafts and previews without changing committed layout.
+The React adapter uses the engine inverse to resolve date, resource and minute. DOM hit testing only rejects points
+outside the owning viewport or beneath sticky chrome/overlays. Grid geometry never comes from an independent DOM scan.
+The existing pointer lifecycle preserves capture, outside-grid continuation, Escape/cancel and synchronous release.
 
-## Pointer Routing
+## Draw, drag and edit
 
-```mermaid
-flowchart TD
-  Down["Pointer down inside viewport"] --> Event{"Closest target has event id?"}
-  Event -->|Yes| Eligibility{"Render layer matches interaction mode and active-draft rules?"}
-  Eligibility -->|No| Ignore["Leave state unchanged"]
-  Eligibility -->|Yes| EventHit["Resolve pointer minute from owned grid"]
-  EventHit --> CaptureEvent["Capture pointer and start drag candidate"]
-  Event -->|No| Grid{"Point belongs to timeline grid, not sticky chrome?"}
-  Grid -->|No| Ignore
-  Grid -->|Yes| DraftBlocked{"Controlled active draft present?"}
-  DraftBlocked -->|Yes| Ignore
-  DraftBlocked -->|No| EmptyHit["Resolve date, resource, and snapped minute"]
-  EmptyHit --> CaptureGrid["Capture pointer and start drawn draft"]
-```
+Drawing stays in its starting date/resource and snaps minutes to cadence. A zero-length range is cancelled. External
+draft callbacks retain the preview through handoff; direct create callbacks can return a saved record. Active drafts
+remain parent-owned and separate from committed collision metrics.
 
-The DOM grid is the ownership source. The virtualizer supplies mounted dates, but hit-testing does not recompute a resource from a possibly stale global height estimate.
+Dragging remembers movement beyond the four-pixel threshold even when the pointer leaves and returns. Moves coalesce to
+a display frame; release flushes final coordinates first. A click activates, a returned drag does nothing, an accepted
+move updates cached time/membership, and a rejected move leaves persistence unchanged. Foreground/background editing
+mode gates pointer ownership. Transient drafts and previews pin only their relevant resources.
 
-## Shared Interaction State
+Hover uses resting lane bounds to reach underlying events even when an expanded card overlaps them. Consumer renderer
+content retains identity when only shell geometry changes. Draft release and appearance use their existing independent
+motion/status lifecycles and respect reduced motion.
 
-```mermaid
-stateDiagram-v2
-  [*] --> Idle
-  Idle --> Drawing: empty grid pointer down
-  Idle --> DragCandidate: event pointer down
-  DragCandidate --> Dragging: pointer moves beyond click tolerance
-  DragCandidate --> Activating: pointer up without dragging
-  Dragging --> Validating: pointer up with a changed proposal
-  Dragging --> Idle: pointer up at original slot
-  Drawing --> Creating: pointer up with positive duration
-  Drawing --> Idle: zero duration or cancellation
-  Activating --> Idle: onEventActivate notified
-  Validating --> Idle: accepted and indexed cache patch applied
-  Validating --> Idle: rejected, callback absent, or callback throws
-  Creating --> ExternalDraft: onEventDraftRequest handoff
-  Creating --> AwaitingCreate: onEventCreateRequest promise
-  ExternalDraft --> Idle: local draft clears after one frame
-  AwaitingCreate --> Idle: created/local fallback patched into loaded cache
-  AwaitingCreate --> Idle: callback throws
-  DragCandidate --> Idle: pointercancel or Escape
-  Dragging --> Idle: pointercancel or Escape
-  Drawing --> Idle: pointercancel or Escape
-```
+## Controlled zoom
 
-`DragCandidate` is represented by drag state rather than a separate exported enum. Movement is remembered before
-frame coalescing, even within a snapped slot or outside the grid. A click activates the event. A drag returning to
-the same minute and resource clears its preview without calling either activation or the parent's move callback.
+Shift-wheel samples coalesce to one request per frame. The first pointer-nearest time tick remains the burst anchor.
+Only a parent-accepted zoom changes geometry; ignored requests expire, and a newer external value cancels a queued
+wheel request. With `onZoomChange`, capture Shift-wheel before checking whether zoom can change, including at the
+0.5/8 limits and for horizontal trackpad deltas. Shift-touch movement suppresses panning without requesting zoom.
+Gesture-tail capture suppresses momentum for 300 ms after the latest Shift input, including limit input; ordinary
+scrolling resumes after that tail. See Decision 118.
 
-## Drag And Drop Validation
+External horizontal zoom preserves a visible now marker, otherwise the visible grid center or its origin. External
+vertical zoom retains the day-board fraction at the viewport top. Both paths build final extents and rendering windows,
+then commit their anchor through the same adapter before paint. No multi-frame scroll retry loop remains.
 
-```mermaid
-sequenceDiagram
-  actor User
-  participant Hit as Projection hit tester
-  participant Drag as Drag controller
-  participant Layer as Preview layer
-  participant Parent as Product callback
-  participant Cache as Loaded event cache
+Wheel capture reads native position before claiming ownership. On acknowledgement of the same request, the layout
+phase consumes already captured native observations instead of reading the parent-mutated DOM again. External
+changes retain a full flush. Horizontal row/date extents and vertical column extents are reused when their inputs
+are unchanged; resource rectangles are projected on demand from those extents and the committed scale.
 
-  User->>Drag: Pointer down on event instance
-  Drag->>Hit: Resolve pointer minute and resource owner
-  Hit-->>Drag: Start hit + pointer offset
-  User->>Drag: Pointer move
-  Drag->>Hit: Resolve current hit
-  Hit-->>Drag: Date/resource/snapped minute
-  Drag->>Drag: Build clamped move proposal
-  Drag-->>Layer: Render drop preview; hide original shell
-  User->>Drag: Pointer up
-  Drag->>Parent: onEventMoveRequest(proposal)
-  alt Parent resolves false or throws
-    Parent-->>Drag: Reject
-    Drag->>Layer: Remove preview; reveal cached original
-  else Parent accepts
-    Parent-->>Drag: Accept
-    Drag->>Cache: Patch event through id index
-    Cache-->>Layer: Render committed destination
-  end
-```
-
-For a controlled active draft, proposals go to `onActiveDraftMoveRequest` and parent draft state remains authoritative. A normal cache move is not applied to that draft.
-
-## Drawn Creation Subflows
-
-```mermaid
-flowchart TD
-  Start["Empty-grid press creates local draft"] --> Move["Pointer movement updates same date/resource range"]
-  Move --> Finish{"Positive snapped duration on pointer up?"}
-  Finish -->|No| Clear["Clear local draft"]
-  Finish -->|Yes| External{"onEventDraftRequest supplied?"}
-  External -->|Yes| Notify["Notify parent synchronously"]
-  Notify --> Frame["Keep local shell for one handoff frame"]
-  Frame --> ParentDraft["Expected parent activeDraft becomes rendered source"]
-  External -->|No| Create{"onEventCreateRequest supplied?"}
-  Create -->|No| Clear
-  Create -->|Yes| Await["Await product create callback"]
-  Await --> Result{"Returned event?"}
-  Result -->|Yes| Patch["Patch returned event into loaded destination bucket"]
-  Result -->|No| Fallback["Create local committed fallback id"]
-  Fallback --> Patch
-  Await -->|Throws| Clear
-```
-
-The drawn shell is an overlay. It does not enter overlap lanes or grow row/column metrics while the pointer moves.
-
-## Multi-Calendar Semantics
-
-```mermaid
-flowchart LR
-  Event["One event with calendarIds"] --> Membership["Membership index"]
-  Membership --> A["Rendered instance in resource A"]
-  Membership --> B["Rendered instance in resource B"]
-  HoverA["Pointer over A"] --> Local["Only A receives hovered status"]
-  Drag["Drag event id"] --> Shared["Original/preview status keyed by event id"]
-  Shared --> A
-  Shared --> B
-```
-
-Hover answers “which instance is under the pointer?” Drag answers “which logical event is moving?” Keeping those identities separate avoids expanding every copy on hover while still showing one coherent move.
-
-## Hit-Testing Pipelines
-
-```mermaid
-flowchart TB
-  Point["clientX/clientY"] --> Element["document.elementFromPoint"]
-  Element --> Excluded{"Inside sticky label/header?"}
-  Excluded -->|Yes| None["No timeline hit"]
-  Excluded -->|No| Grid["Closest owned row/column grid"]
-  Grid --> Identity["Read mounted dateKey + calendarId + indexes"]
-  Identity --> Orientation{"Projection"}
-  Orientation -->|Horizontal| X["Scrolled X minus label/gutter -> minute"]
-  Orientation -->|Vertical| Y["Point Y within day/time grid -> minute"]
-  X --> Snap["Clamp and snap to settings.snapMinutes"]
-  Y --> Snap
-  Snap --> Hit["CalendarHit"]
-```
-
-## Controlled Zoom Contract
-
-The calendar never owns the canonical zoom value. A gesture calculates a requested value and calls `onZoomChange`; the parent writes it back through `settings.zoom`. Rendering may apply a local horizontal viewport-fill floor, but that floor does not emit a new parent value.
-
-### Slider Or External Horizontal Zoom
-
-```mermaid
-sequenceDiagram
-  actor User
-  participant Parent as Controlled settings owner
-  participant Anchor as External zoom anchor hook
-  participant View as Horizontal viewport
-  participant Render as Timeline projection
-
-  User->>Parent: Change zoom prop
-  Parent-->>Render: next settings.zoom
-  Anchor->>View: Read previous zoom and pre-commit scrollLeft snapshot
-  alt Current-time marker is visible
-    Anchor->>Anchor: Preserve marker viewport position
-  else View is at timeline origin
-    Anchor->>Anchor: Preserve left edge
-  else View has horizontal scroll
-    Anchor->>Anchor: Derive time at visible grid center
-  end
-  Render->>Render: Reproject ticks and event-shell coordinates
-  Anchor->>View: Correct scrollLeft in layout effect before paint
-  Note over Anchor,View: Zoom-out uses the snapshot if the narrower DOM already clamped live scrollLeft
-  Note over Render: Tick nodes/text, cache, memberships, lanes, row metrics, and unchanged product cards stay stable
-```
-
-### Shift + Wheel Gesture Burst
-
-Raw mouse-wheel and touchpad events can arrive several times inside one paint interval. The gesture controller accumulates every `0.15` zoom step, retains the first pointer-nearest anchor, and schedules one controlled request from the next animation frame. Both orientations restore their anchor in the resulting layout commit before paint, using actual effective settings. It waits for a delayed parent instead of applying predicted geometry or correcting across later frames. Vertical date-model changes retain wheel ownership through synchronous layout commits, then release it in a microtask without another scroll write. If another external controlled value commits first, the stale queued wheel value is discarded.
-
-The showcase keeps gesture projection separate from its sidebar display. Each committed wheel/touch frame reaches the controlled calendar immediately, but the native range thumb and numeric output synchronize only once after the 300ms gesture tail. Direct range input updates the thumb/readout immediately and coalesces calendar projection to the latest value once per animation frame. This prevents either input path from scheduling multiple calendar rasters inside one paint interval.
-
-```mermaid
-stateDiagram-v2
-  [*] --> Idle
-  Idle --> Anchored: Shift + wheel with non-zero delta
-  Anchored --> Anchored: additional wheel ticks reuse first focused node
-  Anchored --> Tail: Shift released while trackpad momentum continues
-  Tail --> Tail: trailing wheel captured without extending forever
-  Tail --> Idle: 300 ms tail expires
-  Anchored --> Idle: callback unavailable or gesture cancelled
-```
-
-```mermaid
-sequenceDiagram
-  actor User
-  participant Wheel as Orientation zoom hook
-  participant Parent as Controlled zoom owner
-  participant Render as Calendar render
-  participant View as Scroll viewport
-
-  User->>Wheel: First Shift + wheel tick
-  Wheel->>View: Find rendered time-grid node nearest pointer
-  Wheel->>Wheel: Save node minute/date and screen coordinate
-  Wheel->>Parent: onZoomChange(nextZoom)
-  Parent-->>Render: Commit settings.zoom
-  Render->>Render: Reproject time geometry
-  Wheel->>View: Restore saved node in layout effect before paint
-  opt Vertical date model changes in the same commit
-    Render->>Render: Project retained dates into final uniform geometry
-    Wheel->>View: Reapply anchor, publish date/resource windows before paint
-  end
-  User->>Wheel: More ticks in same burst
-  Wheel->>Wheel: Reuse first anchor; discard superseded work
-  Note over Wheel,View: Wheel commit owns correction; external prop changes immediately take over
-```
-
-Horizontal wheel zoom preserves a time node on X. A newer external controlled value cancels wheel ownership even during the momentum tail; the external anchor uses the current scroll snapshot after the last wheel commit. Vertical wheel zoom preserves a date/time node on Y, clamps it to configured timeline bounds, records the translated visible date offset, and prevents the subsequent idle recenter from restoring stale pixels.
-
-## Interaction And Zoom Invalidation Matrix
-
-| Trigger                         | Local updates                                                  | Remains stable                                               |
-| ------------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------ |
-| Row/column hover                | One rendered resource instance and shell status                | Cache, lanes, sibling multi-calendar instances               |
-| Draft pointer move              | Draft hit and overlay geometry                                 | Committed prepared cell and row/column metric                |
-| Drag pointer move               | Proposal and preview overlay                                   | Committed cache until parent accepts                         |
-| Accepted drop                   | Indexed old/new buckets and affected prepared cells            | Unrelated date/resource cells                                |
-| Rejected drop or callback throw | Preview cleared                                                | Original cached event and geometry                           |
-| Slider zoom                     | Projected coordinates, ticks, and scroll anchor                | Loader, cache, memberships, lanes, external renderer content |
-| Shift-wheel tick                | Controlled zoom request, gesture anchor, projected coordinates | First anchor target for the burst and prepared data          |
-| Normal wheel after gesture tail | Ordinary viewport scroll                                       | Zoom value                                                   |
-
-## Failure And Cancellation Rules
-
-| Condition                                              | Behavior                                                                                                         |
-| ------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
-| Pointer leaves calendar while captured                 | Window continuation handles move/up/cancel without duplicating events that already bubbled through the viewport. |
-| `pointercancel` or Escape                              | Clear drag and draft state, preview, hover, and selection lock.                                                  |
-| Move callback returns `false`                          | Treat as rejected; do not patch cache.                                                                           |
-| Move/create callback throws                            | Clear transient state; keep committed cache unchanged.                                                           |
-| Hit moves outside the starting draft date/resource     | Keep the active draft lifecycle but ignore invalid range expansion.                                              |
-| Zoom callback is absent                                | Do not consume Shift-wheel as a controlled zoom mutation.                                                        |
-| Older scheduled zoom restore runs after a newer tick   | Neither orientation schedules delayed restore frames; superseded controlled requests are discarded.              |
-| Immediate wheel momentum follows Shift release         | Capture it during the bounded gesture tail, then return control to normal scrolling.                             |
-| Manual scroll begins during an opted-in parent restore | Cancel the restore synchronously so correction cannot consume the first movement.                                |
-
-## Source Map
-
-- `src/lib/timeline/infinite/interactions/useTimelineInteractions.ts`: shared pointer routing and public render state.
-- `src/lib/timeline/infinite/interactions/drag/useTimelineDragInteraction.ts`: drag candidate, proposal, validation, and cache patch.
-- `src/lib/timeline/infinite/interactions/draft/useTimelineDraftInteraction.ts`: drawn range and internal/external create paths.
-- `src/lib/timeline/infinite/interactions/hit-testing/timelineHitTarget.ts`: mounted grid ownership.
-- `src/lib/timeline/infinite/interactions/hit-testing/useTimelineHitTesting.ts`: shared mounted-grid resolution with horizontal and vertical coordinate projections.
-- `src/lib/timeline/infinite/interactions/zoom/useCommittedWheelZoom.ts`: shared before-paint commit ownership and cancellation.
-- `src/lib/timeline/infinite/interactions/zoom/shiftWheelZoomUtils.ts`: shared gesture tail, frame coalescing, and captured wheel utilities.
-- `src/lib/timeline/infinite/interactions/zoom/useHorizontalShiftWheelZoom.ts`: pointer-nearest horizontal time anchor.
-- `src/lib/timeline/infinite/interactions/zoom/useVerticalShiftWheelZoom.ts`: date/time vertical anchor.
-- `src/lib/timeline/infinite/anchors/zoom/useHorizontalControlledZoomAnchor.ts`: slider/external visible-now-marker correction with center/origin fallback.
-
-The complete ownership map is in the [interactions domain](../domains/interactions.md) and
-[anchors domain](../domains/anchors.md).
+Labels switch immediately at full opacity and grid cadence follows scale (Decision 116); event and tick nodes remain stable.
+Tests sample every animation frame, compare event/tick positions, check layering and clipping, repeat reversals at low
+and high zoom, and verify delayed controlled acknowledgements and external takeover.

@@ -105,9 +105,6 @@
     "verify:package": "npm run build:lib && npm run check:bundle-size && node scripts/verify-package.mjs",
     "preview": "vite preview --host 127.0.0.1 --outDir dist-demo"
   },
-  "dependencies": {
-    "@tanstack/react-virtual": "^3.13.12"
-  },
   "peerDependencies": {
     "preact": ">=10.18.0",
     "react": ">=18.0.0",

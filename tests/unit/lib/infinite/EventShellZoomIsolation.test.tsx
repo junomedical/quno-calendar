@@ -8,7 +8,7 @@ import {
   type EventRendererProps,
   type LoadEvents,
   type QunoInfiniteCalendarSettings
-} from "#quno-internal/timeline";
+} from "@quno/calendar/infinite-calendar";
 
 const calendars = [{ id: "calendar-a", name: "Calendar A" }];
 const selectedCalendarIds = ["calendar-a"];

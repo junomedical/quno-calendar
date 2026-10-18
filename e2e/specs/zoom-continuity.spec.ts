@@ -69,7 +69,7 @@ test("coalesces a touchpad wheel burst into one anchored timeline projection", a
   expect(result.projectedWidths).toHaveLength(1);
   expect(result.sidebarMutations).toBe(0);
   expect(result.disconnectedSidebarNodes).toBe(0);
-  await expect(page.getByTestId("zoom-value")).toHaveText("2.40");
+  await expect(page.getByTestId("zoom-value")).toHaveText("3.60");
 });
 
 test("keeps horizontal slider zoom continuous without replacing rendered content", async ({ page }) => {

@@ -1,18 +1,18 @@
 import { forwardRef, useImperativeHandle, useRef } from "react";
-import { InfiniteTimelineView } from "#quno-internal/timeline/infinite/views/horizontal/HorizontalTimelineView";
-import { InfiniteVerticalTimelineView } from "#quno-internal/timeline/infinite/views/vertical/VerticalTimelineView";
+import { RuntimeView } from "#quno-internal/timeline/runtime/react/RuntimeView";
+
 import {
   defaultQunoInfiniteCalendarSettings,
   type QunoInfiniteCalendarHandle,
   type QunoInfiniteCalendarProps
-} from "./types";
-import type { CalendarViewHandle } from "./internalTypes";
-import { useCalendarFocusCoordinator } from "./useCalendarFocusCoordinator";
+} from "#quno-internal/timeline/core/types";
+import type { CalendarViewHandle } from "#quno-internal/timeline/core/internalTypes";
+import { useCalendarFocusCoordinator } from "#quno-internal/timeline/core/useCalendarFocusCoordinator";
 
 /**
  * Public calendar shell that selects a concrete view implementation.
  *
- * @see docs/infinite-calendar/architecture.md#public-surface
+ * @see docs/infinite-calendar/architecture.md#ownership
  */
 export const QunoInfiniteCalendar = forwardRef<QunoInfiniteCalendarHandle, QunoInfiniteCalendarProps>(
   function QunoInfiniteCalendar({ view = "infinite-horizontal", isLoading = false, loadingFallback, ...props }, ref) {
@@ -68,9 +68,9 @@ export const QunoInfiniteCalendar = forwardRef<QunoInfiniteCalendarHandle, QunoI
     };
     const calendar =
       view === "infinite-vertical" ? (
-        <InfiniteVerticalTimelineView ref={viewRef} {...internalProps} />
+        <RuntimeView key="vertical" orientation="vertical" ref={viewRef} {...internalProps} />
       ) : (
-        <InfiniteTimelineView ref={viewRef} {...internalProps} />
+        <RuntimeView key="horizontal" orientation="horizontal" ref={viewRef} {...internalProps} />
       );
     if (loadingFallback === undefined) {
       return calendar;

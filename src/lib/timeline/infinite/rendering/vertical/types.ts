@@ -9,7 +9,6 @@ import type {
   CalendarEvent,
   CalendarId,
   CalendarRow,
-  CalendarViewportAnchorTarget,
   EventRenderer,
   EventRenderStatus,
   QunoInfiniteCalendarCellCustomizer,
@@ -20,7 +19,6 @@ import type {
 import type { EventColumnLayoutItem, PreparedEventLayers } from "#quno-internal/timeline/infinite/events/layout/layout";
 import type { buildTimeTicks } from "#quno-internal/timeline/time/timelineTicks";
 import type { ViewportGeometryRegistration } from "#quno-internal/timeline/infinite/anchors/parent/viewportAnchorTypes";
-import type { ViewportMetricsStore } from "#quno-internal/timeline/infinite/scroll/resources/viewportMetricsStore";
 import type { CalendarFocusedEventTarget } from "#quno-internal/timeline/core/internalTypes";
 
 export type VerticalHoveredEvent = {
@@ -68,15 +66,12 @@ export type VerticalTimelineDayProps = CalendarDateLabelOptions & {
   eventInteractionEnabled: boolean;
   dragPreviewEvent: CalendarEvent | null;
   draftEvent: CalendarEvent | null;
-  activeRestoreTarget: CalendarViewportAnchorTarget | null;
   draftEventStatus: EventRenderStatus;
   draftEventIsDraggable: boolean;
   draftEventIsExiting: boolean;
   draftEventReleaseDurationMs?: number;
   renderEvent: EventRenderer;
   geometryRegistration: ViewportGeometryRegistration;
-  viewportMetricsStore: ViewportMetricsStore;
-  forceAllResources: boolean;
   eventsForColumn: (args: { dateKey: string; calendarId: CalendarId }) => CalendarEvent[];
   preparedCellForColumn: (args: { dateKey: string; calendarId: CalendarId }) => PreparedEventLayers;
   columnWidthForDateCalendar: (args: { dateKey: string; calendarId: CalendarId }) => number;

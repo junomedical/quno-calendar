@@ -531,7 +531,7 @@ entry points. When an input update changes only one endpoint, move the picker’
 when both endpoints change, fall back to the nearest off-screen endpoint. The independently imported date-input payload
 is currently 9.64 KiB gzip for JavaScript and 0.58 KiB gzip for its optional stylesheet. It uses the React 18+ peer,
 supports Preact 10.18+ through `preact/compat`, imports safely in SSR, and has no date-library runtime dependency. The
-combined package’s TanStack virtualizer dependency belongs to Infinite Calendar and is not imported by the
+Infinite Calendar engine has no external virtualizer dependency and is not imported by the
 date-input entry.
 
 For a compact range field, let `QunoDateInput` replace the picker’s selected-period summary and Clear action. Open a
@@ -690,7 +690,7 @@ resolve: {
 }
 ```
 
-Every JavaScript entry is available as ESM and CommonJS and can be imported in Node without `document`. Stylesheets are independent browser assets and remain readable rather than minified in the published `dist` directory. React, React DOM, Preact compatibility, and `@tanstack/react-virtual` stay outside the feature bundles.
+Every JavaScript entry is available as ESM and CommonJS and can be imported in Node without `document`. Stylesheets are independent browser assets and remain readable rather than minified in the published `dist` directory. React, React DOM and Preact compatibility stay outside the feature bundles. Infinite Calendar includes its own viewport engine.
 
 ## Drag And Create
 
@@ -1121,3 +1121,9 @@ prevents choosing or clearing. Use labels, `formatters.time({ time, locale })`, 
 `--quno-time-picker-*` tokens for consumer-owned presentation. No date or parser is required.
 
 Try `/guide/timepicker` and `/demo/timepicker`; see [the full contract](../timepicker/README.md).
+
+Infinite Calendar consumers keep the same controlled zoom and renderer contracts. The runtime tracks native
+scrolling independently from React presentation and reuses prepared layout during zoom; custom event content
+continues to receive current geometry and interaction state.
+
+For Infinite Calendar, supplying `onZoomChange` reserves Shift-wheel/trackpad input even at the zoom limits. Each nonzero sample changes zoom by 0.30 in either orientation. Native momentum scrolling is suspended during the gesture while zoom anchoring remains active. Shift-touch movement also suppresses panning; ordinary scrolling resumes after the 300 ms momentum tail.

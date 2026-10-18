@@ -4,6 +4,113 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+### Increase Shift-scroll zoom responsiveness - 2026-10-17
+
+- Double the Shift-wheel/trackpad zoom step from 0.15 to 0.30 in both orientations. Preserve pointer anchoring,
+  frame coalescing, zoom limits and the native-scroll suspension that prevents inertial white gaps.
+- Update controlled-wheel accumulation and browser zoom expectations for the increased sensitivity.
+- Verification on 2026-10-18: all 549 unit tests pass. The overnight Chromium run passed 213/219; all six affected
+  cases now pass focused reruns after updating two zoom expectations and accepting inclusive half-pixel native
+  scroll rounding. Four unrelated guide/editor failures pass unchanged on rerun. WebKit passed 27/28, with its
+  navigation timeout passing on rerun; both updated anchor scenarios also pass in Chromium and WebKit.
+- Formatting, architecture/contracts, types, lint, demo build, package verification, Preact, React 19, size reporting
+  and pack dry-run pass. JavaScript is 32,544 B gzip (31.78 KiB); CSS is unchanged at 2,018 B (1.97 KiB).
+- Firefox remains blocked at standalone startup with `sandbox_extension_issue_file_to_process ... Operation not permitted`
+  and `RenderCompositorSWGL failed mapping default framebuffer, no dt`, followed by timeout.
+
+### Prevent blank patches during inertial touchpad zoom - 2026-10-17
+
+- Temporarily suspend native scrolling during captured Shift-wheel/touch gestures while preserving programmatic
+  anchor positioning. Restore the viewport's original overflow declarations after the 300 ms settling tail,
+  on observed external takeover and on unmount.
+- The affected Chrome session confirms this removes the rectangular grid/card gaps during physical-touchpad inertia.
+  Preserve the original zoom sensitivity and render bounds; unsuccessful compositor/input-sensitivity experiments
+  were removed.
+- Add settling/style-restoration unit coverage and extend real-wheel Chromium/WebKit checks with computed overflow
+  assertions alongside native-position, resumed-scrolling and existing per-frame zoom geometry checks.
+- Verification: all 549 unit tests pass. The full Chromium run passes 218/219; its only failure used the old
+  31.53 KiB guide expectation while the displayed measurement was updated. The corrected guide assertion and
+  Shift-input tests pass all 10 focused Chromium/WebKit cases; 40 focused frame/input cases also pass.
+  Formatting, architecture/contracts, types, lint, package verification, Preact, React 19, demo build, size reporting
+  and pack dry-run pass. JavaScript is 32,543 B gzip (31.78 KiB), up 255 B; CSS remains 2,018 B (1.97 KiB).
+- Firefox remains blocked at standalone startup with `sandbox_extension_issue_file_to_process ... Operation not permitted`
+  and `RenderCompositorSWGL failed mapping default framebuffer, no dt`, followed by timeout.
+
+### Keep Shift input from scrolling at zoom limits - 2026-10-17
+
+- Capture Shift-wheel before zoom-limit and anchor checks in both orientations. Mouse-wheel and horizontal/diagonal
+  trackpad input stay reserved for zoom at 0.5/8 without redundant controlled requests.
+- Capture Shift-touch panning without requesting zoom or cancelling viewport ownership. Preserve ordinary input
+  when zoom is disabled and resume ordinary wheel scrolling after the existing 300 ms momentum tail.
+- Add seven unit cases and four real-wheel browser regressions checking unchanged native scroll coordinates at both
+  limits and resumed scrolling after Shift release.
+- Verification: 545 functional tests plus both isolated scaling tests pass; all four new real-wheel cases pass in
+  Chromium and WebKit. The full Chromium run passes 218/219 cases; the row-filter restoration case times out waiting
+  for `row-134` after expansion, then passes all five isolated repeats unchanged. All 20 focused WebKit cases pass.
+  Formatting, architecture/contracts, types, lint, package verification, Preact, React 19, demo build, size reporting
+  and pack dry-run pass. JavaScript is 32,288 B gzip (31.53 KiB); CSS remains 2,018 B (1.97 KiB).
+- Firefox remains blocked at standalone startup with `sandbox_extension_issue_file_to_process ... Operation not permitted`
+  and `RenderCompositorSWGL failed mapping default framebuffer, no dt`, followed by timeout.
+
+### Integrate current main for runtime PR - 2026-10-17
+
+- Merge main `edc6f38` and preserve its immediate full-opacity labels and 15/five-minute grid cadence in both new
+  renderers. Disambiguate the runtime branch's Decision 116 as `116-runtime`, retaining the original record in Git
+  and main's published Decision 116; Decision 117 retains its identifier.
+- Keep the external-editor drag regression's destination on the exposed calendar instead of under the popup.
+  The original destination hit the editor's date input; five focused repeats and the final full browser run pass.
+- Integrated verification: 538 functional unit tests plus both isolated scaling tests, all 215 Chromium scenarios,
+  and 24 focused WebKit scenarios pass. Formatting, architecture/contracts, types, lint, package verification,
+  Preact, React 19, demo build, size reporting and pack dry-run pass.
+- Integrated JavaScript is 32,224 B gzip (31.47 KiB), with CSS at 2,018 B (1.97 KiB). Prior performance comparisons
+  remain explicitly historical: they precede this main integration and were not rerun for the merged runtime.
+- Firefox remains blocked at standalone startup: `sandbox_extension_issue_file_to_process ... Operation not permitted`
+  and `RenderCompositorSWGL failed mapping default framebuffer, no dt`, followed by timeout. Firefox acceptance remains open.
+
+### Reuse viewport presentation and zoom layout - 2026-10-17
+
+- Keep live native position in the engine while React reuses its frame when geometry and visible/mounted identities
+  are unchanged. Memoize the horizontal time scale and cache date-label formatting.
+- Reuse indexed resource metrics, prepared maps, date sequences and stable axis extents during zoom; project resource
+  rectangles only when requested. Skip unneeded pin scans and repeated snapshot comparisons.
+- Consume captured native observations for acknowledged wheel zoom without a redundant post-render DOM read.
+  Discard observations superseded by a programmatic commit, and commit the current matching revision after pin-only
+  updates so editor, focus and navigation restoration remain correct.
+- Add seven focused work-count, projection and observation-order regressions. All 541 unit tests, 223 Chromium
+  scenarios, 200 repeated frame/seeded cases and 18 focused WebKit cases pass. Architecture/contracts, typechecking,
+  lint, formatting, package verification, Preact, React 19, demo build, size reporting and pack dry-run pass.
+- Three rotating production rounds compare main, the initial rewrite and the optimized runtime across 3,006 samples.
+  Horizontal scroll/zoom p95 CPU improves 20.0%/32.6% against the initial rewrite; scrolling is at main parity and
+  zoom is 17.6% below main. Vertical zoom meets the 10 ms target at 9.112 ms. Vertical scroll p95 rises from
+  3.534 to 4.179 ms despite a lower median; retain this profiling follow-up. Raw evidence and limitations are in
+  `docs/infinite-calendar/performance-comparison.md`.
+- JavaScript is 32,555 B gzip (31.79 KiB), 809 B above the initial rewrite and below the unchanged 50 KiB budget.
+  Optional CSS remains 1,996 B gzip. The guide's displayed payloads and assertions match the measured artifacts.
+- Firefox remains blocked at standalone browser startup with
+  `sandbox_extension_issue_file_to_process ... Operation not permitted` and
+  `RenderCompositorSWGL failed mapping default framebuffer, no dt`; complete cross-browser acceptance remains open.
+
+### Unified Infinite Calendar runtime - 2026-10-17
+
+- Rebuild both orientations around one mathematical viewport engine, immutable event repository and bounded date/resource windows.
+- Preserve semantic event/participant/time anchors through zoom, async loading, editor changes and recentering. One adapter owns programmatic scroll writes.
+- Preserve public API, styling, consumer rendering and controlled behavior. Remove the old runtime and unused TanStack dependency.
+- Add model, request-race, public-handle, controlled-input and seeded browser coverage, with a repeatable dense-calendar profiling fixture.
+- Compare production builds against main `3138b28` with three alternating rounds and 2,004 sampled operations.
+  Vertical scroll/zoom p95 CPU falls 28.5%/40.6%; cached navigation medians fall 56.7%/61.1% in horizontal/vertical.
+  Horizontal scroll/zoom p95 CPU rises 22.9%/26.0%; vertical zoom remains 10.299 ms against the 10 ms target.
+  Keep these performance follow-ups open. Record raw samples and host-contention limitations in `docs/infinite-calendar/performance-comparison.md`.
+- Infinite Calendar JavaScript is 31,746 B gzip, down 25.7% from 42,719 B; optional CSS remains 1,996 B gzip.
+- Verification: 532 functional tests and both isolated scaling checks pass, as do all 223 final Chromium scenarios,
+  200 sensitive repeats, 140 post-memoization zoom/seeded repeats, and 18 final focused WebKit scenarios. Formatting,
+  architecture/contracts, typechecking, lint, demo/package builds, Preact, React 19, size reporting and pack dry-run pass.
+  An earlier complete unit run passed 534 tests; the final combined run had one noisy mixed-layer scaling ratio
+  of 27.42 against 25, with both isolated performance checks passing unchanged. A row-filter setup timeout passed
+  five isolated repeats and final full runs; the final guide assertion was updated to the measured bundle size.
+- Firefox verification remains blocked before any application test: standalone browser launch times out after
+  `sandbox_extension_issue_file_to_process ... Operation not permitted` and
+  `RenderCompositorSWGL failed mapping default framebuffer, no dt`. Cross-browser acceptance remains open.
+
 ### Remove zoom transparency - 2026-10-17
 
 - Remove the zoom transparency feature, including opacity ramps, fade styles and the extra grid-detail layer.
