@@ -105,4 +105,4 @@ reuses stable resource layout. See its [runtime architecture](docs/infinite-cale
 
 With Infinite Calendar zoom enabled, Shift-wheel stays reserved for zoom at both limits; it never falls through into scrolling.
 
-Shift-wheel zoom waits for each accepted DOM/scroll commit before issuing the next accumulated request.
+Shift-wheel zoom accumulates 0.20 per nonzero sample and waits for each accepted DOM/scroll commit before issuing the next request.

@@ -35,7 +35,7 @@ export class ZoomCommitCoordinator {
       this.anchor = null;
     }
     const current = this.options.engine.read().geometry.settings.zoom;
-    const next = Math.max(0.5, Math.min(8, Number(((this.target ?? current) + (delta < 0 ? 0.3 : -0.3)).toFixed(2))));
+    const next = Math.max(0.5, Math.min(8, Number(((this.target ?? current) + (delta < 0 ? 0.2 : -0.2)).toFixed(2))));
     if (next === current && this.target === null) return;
     this.anchor ??= capture();
     if (!this.anchor) return;

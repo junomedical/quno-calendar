@@ -130,7 +130,7 @@ describe("controlled wheel input", () => {
     });
     expect(onZoomChange).not.toHaveBeenCalled();
     await flush();
-    expect(onZoomChange).toHaveBeenCalledExactlyOnceWith({ zoom: 1.9 });
+    expect(onZoomChange).toHaveBeenCalledExactlyOnceWith({ zoom: 1.6 });
   });
   it("accumulates without another request until the accepted value reaches DOM/scroll commit", async () => {
     const { wheel, flush, onZoomChange, accept, commit } = setup();
@@ -138,14 +138,14 @@ describe("controlled wheel input", () => {
     await flush();
     act(() => wheel());
     await flush();
-    expect(onZoomChange.mock.calls.map(([request]) => request.zoom)).toEqual([1.3]);
-    accept(1.3);
+    expect(onZoomChange.mock.calls.map(([request]) => request.zoom)).toEqual([1.2]);
+    accept(1.2);
     await flush();
     expect(onZoomChange).toHaveBeenCalledTimes(1);
     commit();
     expect(onZoomChange).toHaveBeenCalledTimes(1);
     await flush();
-    expect(onZoomChange.mock.calls.map(([request]) => request.zoom)).toEqual([1.3, 1.6]);
+    expect(onZoomChange.mock.calls.map(([request]) => request.zoom)).toEqual([1.2, 1.4]);
   });
   it("preserves reversals while waiting without queuing intermediate requests", async () => {
     const { wheel, flush, onZoomChange, accept, commit } = setup();
@@ -156,10 +156,10 @@ describe("controlled wheel input", () => {
     wheel({ deltaY: 100 });
     await flush();
     expect(onZoomChange).toHaveBeenCalledTimes(1);
-    accept(1.3);
+    accept(1.2);
     commit();
     await flush();
-    expect(onZoomChange.mock.calls.map(([request]) => request.zoom)).toEqual([1.3, 1]);
+    expect(onZoomChange.mock.calls.map(([request]) => request.zoom)).toEqual([1.2, 1]);
   });
   it("clamps the accumulated target and ignores stale commit acknowledgments", async () => {
     const { wheel, flush, onZoomChange, accept, commit, engine } = setup();
@@ -167,13 +167,13 @@ describe("controlled wheel input", () => {
     wheel();
     await flush();
     for (let index = 0; index < 40; index++) wheel();
-    accept(1.3);
+    accept(1.2);
     commit(stale);
     await flush();
     expect(onZoomChange).toHaveBeenCalledTimes(1);
     commit();
     await flush();
-    expect(onZoomChange.mock.calls.map(([request]) => request.zoom)).toEqual([1.3, 8]);
+    expect(onZoomChange.mock.calls.map(([request]) => request.zoom)).toEqual([1.2, 8]);
   });
   it("drops rejected input after one second and requires fresh input after a late commit", async () => {
     vi.useFakeTimers();
@@ -183,13 +183,13 @@ describe("controlled wheel input", () => {
     wheel();
     vi.advanceTimersByTime(1000);
     expect(element.style.overflow).toBe("");
-    accept(1.3);
+    accept(1.2);
     commit();
     await flush();
     expect(onZoomChange).toHaveBeenCalledTimes(1);
     wheel();
     await flush();
-    expect(onZoomChange.mock.calls.map(([request]) => request.zoom)).toEqual([1.3, 1.6]);
+    expect(onZoomChange.mock.calls.map(([request]) => request.zoom)).toEqual([1.2, 1.4]);
   });
   it.each([false, true])("cancels queued input on manual=%s takeover", async (manual) => {
     const { wheel, flush, onZoomChange, accept, commit, engine } = setup();
@@ -197,7 +197,7 @@ describe("controlled wheel input", () => {
     await flush();
     wheel();
     engine.cancel({ now: performance.now(), manual });
-    accept(1.3);
+    accept(1.2);
     commit();
     await flush();
     expect(onZoomChange).toHaveBeenCalledTimes(1);
@@ -213,7 +213,7 @@ describe("controlled wheel input", () => {
     expect(onZoomChange).toHaveBeenCalledTimes(1);
     wheel();
     await flush();
-    expect(onZoomChange.mock.calls.map(([request]) => request.zoom)).toEqual([1.3, 4.3]);
+    expect(onZoomChange.mock.calls.map(([request]) => request.zoom)).toEqual([1.2, 4.2]);
   });
   it("handles synchronous parent commits without waiting for a second acknowledgment", async () => {
     const { wheel, flush, onZoomChange, accept, commit } = setup();
@@ -225,14 +225,14 @@ describe("controlled wheel input", () => {
     await flush();
     wheel();
     await flush();
-    expect(onZoomChange.mock.calls.map(([request]) => request.zoom)).toEqual([1.3, 1.6]);
+    expect(onZoomChange.mock.calls.map(([request]) => request.zoom)).toEqual([1.2, 1.4]);
   });
   it("cancels the next animation callback when navigation takes over after commit", async () => {
     const { wheel, flush, onZoomChange, accept, commit, engine } = setup();
     wheel();
     await flush();
     wheel();
-    accept(1.3);
+    accept(1.2);
     commit();
     engine.cancel({ now: performance.now() });
     engine.position({
@@ -276,7 +276,7 @@ describe("controlled wheel input", () => {
     unmount();
     expect(element.style.overflow).toBe("");
     expect(vi.getTimerCount()).toBe(0);
-    accept(1.3);
+    accept(1.2);
     commit();
     await flush();
     expect(onZoomChange).toHaveBeenCalledTimes(1);

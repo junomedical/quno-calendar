@@ -4,6 +4,17 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+### Tune Shift-wheel zoom sensitivity - 2026-10-18
+
+- Set the Shift-wheel/trackpad increment to 0.20 in both orientations, between the earlier 0.15 and 0.30 steps.
+  Preserve commit pacing, pointer anchoring, limits and native-scroll suspension.
+- Update accumulation, delayed/rejected-parent and zoom-detail expectations. Earlier matched performance measurements
+  below describe commit `9add7ce` with a 0.30 step, not this sensitivity adjustment.
+- Verification: 559 unit tests pass. The selected Chromium/WebKit run passed 84/92; the eight failures used old
+  step expectations or a geometry probe below the horizontal effective-scale floor. After correcting those tests,
+  all 10 affected/rechecked cases pass. Formatting, architecture, types, lint, Preact, demo build, package verification,
+  size reporting and pack dry-run pass. JavaScript is 33,045 B gzip (32.27 KiB); CSS remains 2,018 B (1.97 KiB).
+
 ### Coordinate zoom requests after commit - 2026-10-18
 
 - Accumulate Shift-wheel samples behind one unexpired controlled request. Wait for current DOM geometry and

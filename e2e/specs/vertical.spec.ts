@@ -283,7 +283,7 @@ test("keeps the vertical current date anchored when zoom changes", async ({ page
   await page.mouse.wheel(0, -500);
   await page.mouse.wheel(0, -500);
   await page.keyboard.up("Shift");
-  await expect(page.getByTestId("zoom-value")).toHaveText("1.10");
+  await expect(page.getByTestId("zoom-value")).toHaveText("0.90");
   await expect.poll(async () => (await timelineNodeNearMouse())?.date ?? null).toBe(beforeGestureZoomIn?.date);
   await expect.poll(async () => (await timelineNodeNearMouse())?.minute ?? null).toBe(beforeGestureZoomIn?.minute);
   await expect

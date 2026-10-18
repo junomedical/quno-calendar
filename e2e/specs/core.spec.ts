@@ -120,12 +120,12 @@ test("renders, scrolls vertically, zooms, and changes dataset scale", async ({ p
   await page.mouse.wheel(0, -500);
   await page.keyboard.up("Shift");
   await expect(page.getByTestId("zoom-value")).not.toHaveText(afterButtonZoom ?? "");
-  await expect(page.getByTestId("zoom-value")).toHaveText("2.30");
+  await expect(page.getByTestId("zoom-value")).toHaveText("2.20");
   await expect.poll(async () => topVisibleDayState(page)).toEqual(visibleDayBeforeShiftWheel);
   await expect.poll(async () => (await timelineNodeNearPointer()).minute).toBe(anchoredNodeBeforeShiftWheel.minute);
   await expect
     .poll(async () => Math.abs((await timelineNodeNearPointer()).screenX - anchoredNodeBeforeShiftWheel.screenX))
-    // Native scroll offsets round the 0.30 zoom projection to the nearest pixel.
+    // Native scroll offsets round the fractional zoom projection to the nearest pixel.
     .toBeLessThanOrEqual(0.5);
   await expect
     .poll(async () => page.evaluate(() => ({ x: window.scrollX, y: window.scrollY })))

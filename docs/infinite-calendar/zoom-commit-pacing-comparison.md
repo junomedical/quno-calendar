@@ -1,8 +1,11 @@
 # Zoom commit pacing comparison
 
-Measured 2026-10-18 against PR #44 head `d6ac965`. The candidate adds one outstanding controlled zoom request and
+Measured 2026-10-18: candidate `9add7ce` against PR #44 head `d6ac965`. The candidate adds one outstanding controlled zoom request and
 next-animation-callback scheduling after DOM/scroll commit. Both builds retain the native-scroll lock and 0.30 step.
 [Raw samples and environment](./zoom-commit-pacing-results.json) are committed alongside this report.
+
+Decision 122 subsequently changes sensitivity to 0.20. The measurements below remain a record of the 0.30 builds;
+this sensitivity-only adjustment has not been reprofiled.
 
 ## Results
 
@@ -31,7 +34,7 @@ absolute CPU target pass in both views, as do the DOM/event and candidate long-t
 requested, with Firefox startup still blocked. This follow-up does not claim an overall responsiveness improvement
 for slow controlled parents.
 
-The final Infinite Calendar JavaScript is 137,195 B raw (133.98 KiB), 33,047 B gzip (32.27 KiB): +2,375 B raw and
+The measured candidate's Infinite Calendar JavaScript is 137,195 B raw (133.98 KiB), 33,047 B gzip (32.27 KiB): +2,375 B raw and
 +503 B gzip versus `d6ac965`. Optional CSS is unchanged at 10,709 B raw / 2,018 B gzip. Public props and imports are unchanged.
 
 ## Method and limitations
@@ -54,7 +57,7 @@ and ends at its matching DOM geometry observation.
 
 ## Reproduce
 
-1. Export baseline `d6ac965` into a separate directory and make dependencies available there. Copy the candidate's
+1. Export baseline `d6ac965` and candidate `9add7ce` into separate directories and make dependencies available there. Copy the candidate's
    `e2e/fixtures/calendar-engine.tsx` and `zoomProbe.ts` into that export so both builds use identical instrumentation.
 2. Run `scripts/build-zoom-pacing-fixture.mjs` for each root with `QUNO_FIXTURE_ROOT` and distinct
    `QUNO_FIXTURE_OUTPUT` directories. Serve those production directories on ports 5192 and 5193.

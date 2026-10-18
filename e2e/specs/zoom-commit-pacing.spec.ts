@@ -3,7 +3,8 @@ import type {} from "#quno-e2e/fixtures/zoomProbe";
 
 for (const view of ["infinite-horizontal", "infinite-vertical"]) {
   test(`${view} accumulates input until delayed geometry commits without blanking content`, async ({ page }) => {
-    await page.goto(`/e2e/fixtures/calendar-engine.html?view=${view}&zoomDelay=180`);
+    // Stay above the horizontal effective-scale floor so each accepted step changes observable geometry.
+    await page.goto(`/e2e/fixtures/calendar-engine.html?view=${view}&zoomDelay=180&zoomStart=3`);
     await expect(page.getByTestId("calendar-event").first()).toBeAttached();
     await page.waitForTimeout(200);
     const result = await page.evaluate(async (view) => {
@@ -72,7 +73,7 @@ for (const view of ["infinite-horizontal", "infinite-vertical"]) {
     expect(result.probe.maximumOutstanding).toBe(1);
     expect(result.probe.requests.length).toBeLessThanOrEqual(3);
     expect(result.probe.requests.every((request) => request.commitAt !== null)).toBe(true);
-    expect(result.scale).toBeCloseTo(3.9, 2);
+    expect(result.scale).toBeCloseTo(4.6, 2);
     expect(Math.max(...result.samples.map((sample) => sample.error))).toBeLessThanOrEqual(1);
     expect(Math.max(...result.samples.map((sample) => sample.gap))).toBeLessThanOrEqual(1);
     expect(Math.min(...result.samples.map((sample) => sample.events))).toBeGreaterThan(0);
@@ -97,6 +98,6 @@ for (const view of ["infinite-horizontal", "infinite-vertical"]) {
     await page.mouse.wheel(0, -100);
     await page.keyboard.up("Shift");
     await expect.poll(() => page.evaluate(() => window.zoomProbe.requests.length)).toBe(2);
-    expect(await page.evaluate(() => window.zoomProbe.requests[1].zoom)).toBe(1.8);
+    expect(await page.evaluate(() => window.zoomProbe.requests[1].zoom)).toBe(1.7);
   });
 }

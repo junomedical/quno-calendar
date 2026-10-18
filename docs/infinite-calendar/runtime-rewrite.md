@@ -27,6 +27,19 @@ have descending priority. Manual input cancels eligible restores immediately.
 | M6 Stability and performance                | Measured; Firefox blocked      | Repeated Chromium/WebKit and dense profiling; see exact environment blocker below                |
 | M7 Cutover and cleanup                      | Implemented; Firefox gate open | Both orientations switched on this branch; 62 obsolete modules and TanStack removed              |
 
+## Intermediate zoom sensitivity follow-up
+
+Decision 122 sets the current Shift-wheel step to 0.20 in both orientations. Commit pacing, native-scroll suspension,
+limits and anchoring retain their behavior. The 0.30 comparison below remains tied to candidate `9add7ce`; this
+sensitivity-only change has not been reprofiled.
+
+Verification on 2026-10-18: 559/559 unit tests pass. The selected Chromium/WebKit run passed 84/92; old step
+expectations and a delayed-parent probe below the horizontal effective-scale floor caused eight test failures.
+Corrected expectations and a fixture starting above that floor pass all 10 affected/rechecked cases, covering all
+92 selected scenarios across the runs. Formatting, architecture/contracts, types, lint, Preact, demo build,
+package verification, size reporting and pack dry-run pass. JavaScript is 33,045 B gzip (32.27 KiB), two bytes less
+than the 0.30 candidate; CSS stays 2,018 B. Evidence is in `/tmp/quno-zoom-step-020/`.
+
 ## Commit-aware zoom follow-up
 
 Branch `fix/calendar-zoom-commit-pacing` starts at PR #44 head `d6ac965` and targets `main` separately. Decision 121

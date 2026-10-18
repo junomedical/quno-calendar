@@ -855,6 +855,7 @@
     }
   ],
   "baselineRef": "d6ac96520d324d694dbe559f0fec60ee69b05a50",
+  "candidateRef": "9add7cee5ed1c0af1d88becfc0916ad5071e47c5",
   "candidateBranch": "fix/calendar-zoom-commit-pacing",
   "buildArtifactSha256": {
     "before": {

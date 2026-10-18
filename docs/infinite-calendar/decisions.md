@@ -1376,3 +1376,14 @@ Verify delayed, immediate and rejected parents, reversals, saturation, stale ack
 timeout and teardown. Browser coverage samples anchor alignment, contiguous dates, event presence and overflow
 restoration. Compare matched production builds to PR #44 head `d6ac965`, including callbacks, observed DOM commits,
 input-to-commit latency and scripting/layout cost; record gate failures without claiming full acceptance.
+
+## 122 - Use an Intermediate Shift-Wheel Zoom Step
+
+Date: 2026-10-18
+Status: Accepted; supersedes the 0.30 sensitivity in Decisions 120 and 121
+
+Use a fixed 0.20 step per nonzero Shift-wheel sample in both orientations. This is one third less change per sample
+than 0.30 and one third more than the earlier 0.15, providing the requested middle sensitivity. Preserve Decision
+121's accumulated target and commit pacing, pointer anchoring, bounds, timeout and Decision 119's native-scroll lock.
+Slider and external controlled values keep their existing behavior. Update accumulation and delayed-parent browser
+expectations, and exercise zoom detail thresholds and frame geometry at the new step.
