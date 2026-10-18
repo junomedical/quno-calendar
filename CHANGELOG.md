@@ -4,6 +4,28 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+### Coordinate zoom requests after commit - 2026-10-18
+
+- Accumulate Shift-wheel samples behind one unexpired controlled request. Wait for current DOM geometry and
+  scroll correction before scheduling the next target; retain the 0.30 step, pointer anchor and zoom limits.
+- Cancel pending intent on viewport/external takeover and teardown. Expire unacknowledged requests after one second
+  without retrying abandoned input. This acknowledges DOM/scroll commit, not GPU presentation.
+- Retain native-scroll suspension: the physical Chrome touchpad experiment reproduced rectangular gaps when the
+  lock was disabled despite commit-aware pacing. Remove the temporary query switch.
+- Defer ordinary-wheel takeover classification until native event dispatch finishes, preserving captured momentum
+  tails in browsers that checkpoint microtasks between listeners.
+- Add delayed/rejected-parent browser coverage, commit-order and timeout unit coverage, and matched production profiling.
+- Three matched production rounds against `d6ac965`: responsive p95 CPU +7.2% horizontal and -4.4% vertical,
+  at 5.238/7.883 ms. Comparative and absolute performance gates pass. Delayed-parent callbacks fall 64 → 16
+  per run, with p95 input-to-commit latency increasing to 377.2/391.5 ms. Keep the PR draft as requested.
+- JavaScript is 33,047 B gzip (32.27 KiB), up 503 B from `d6ac965`; CSS stays 2,018 B (1.97 KiB).
+- Verification: 559/559 unit tests and 37/37 focused WebKit zoom tests pass. Full Chromium passes 222/223;
+  the pending-update navigation case in `calendar-row-filter.spec.ts` fails its final settled-date assertion
+  (October 29 rather than October 22), then passes 3/3 unchanged focused reruns. No clean full-suite pass is claimed.
+  Formatting, architecture/contracts, types, lint, package verification, Preact, React 19, demo build, size and pack checks pass.
+- Firefox retry remains blocked at standalone startup: `sandbox_extension_issue_file_to_process ... Operation not permitted`
+  and `RenderCompositorSWGL failed mapping default framebuffer, no dt`, followed by a 15-second launch timeout.
+
 ### Increase Shift-scroll zoom responsiveness - 2026-10-17
 
 - Double the Shift-wheel/trackpad zoom step from 0.15 to 0.30 in both orientations. Preserve pointer anchoring,

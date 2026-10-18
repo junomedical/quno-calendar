@@ -1,10 +1,10 @@
 import type { IsoDate } from "#quno-internal/shared/dateRangeModel";
 import { captureLayoutAnchor } from "#quno-internal/timeline/runtime/model/anchors";
 import { clampViewport, restoreAnchor } from "#quno-internal/timeline/runtime/model/projection";
-import { renderWindow, samePins } from "#quno-internal/timeline/runtime/model/window";
+import { samePins } from "#quno-internal/timeline/runtime/model/window";
 import type { Geometry, SemanticAnchor, Viewport } from "#quno-internal/timeline/runtime/model/types";
 import { ViewportOwnership, type IntentKind } from "./ownership";
-import { initialSnapshot, layoutGeometry } from "./initialSnapshot";
+import { initialSnapshot, layoutGeometry, pinnedWindow } from "./initialSnapshot";
 import { externalZoomAnchor } from "./zoomAnchor";
 
 import type { EngineLayout, EngineSnapshot, EngineTrace, EngineOptions } from "./types";
@@ -35,6 +35,7 @@ export class CalendarEngine {
   };
 
   updateLayout({ layout, now }: { layout: EngineLayout; now: number }) {
+    if (this.wheel && this.ownership.active({ now })?.id !== this.wheel.id) this.wheel = null;
     const zoomChanged = layout.settings.zoom !== this.layout.settings.zoom;
     const wheel = this.wheel;
     if (zoomChanged && wheel && wheel.zoom !== layout.settings.zoom) {
@@ -88,10 +89,11 @@ export class CalendarEngine {
     const { viewport, geometry } = this.snapshot;
     if (Math.abs(top - viewport.top) < 0.01 && Math.abs(left - viewport.left) < 0.01) return;
     if (manual) {
+      this.wheel = null;
       this.ownership.manual();
       this.zoomAnchor = null;
     }
-    this.publish({ geometry, viewport: { ...viewport, top, left }, now, reason: "scroll" });
+    this.publish({ geometry, viewport: { ...viewport, top, left }, now, reason: manual ? "scroll" : "clamp" });
   }
 
   position({
@@ -132,6 +134,7 @@ export class CalendarEngine {
   }
 
   cancel({ now, manual = false }: { now: number; manual?: boolean }) {
+    this.wheel = null;
     this.zoomAnchor = null;
     if (manual) this.ownership.manual();
     else this.ownership.cancel();
@@ -189,18 +192,13 @@ export class CalendarEngine {
     reason: string;
   }) {
     const owner = this.ownership.active({ now });
-    const pinnedDate = owner?.anchor.target.dateKey ?? this.pinnedDate;
-    const resources = new Map(this.pinnedResources);
-    if (owner?.anchor.target.calendarId)
-      resources.set(owner.anchor.target.dateKey, [
-        ...new Set([...(resources.get(owner.anchor.target.dateKey) ?? []), owner.anchor.target.calendarId])
-      ]);
     this.snapshot = Object.freeze({
       revision: this.snapshot.revision + 1,
+      reason,
       geometry,
       viewport,
       owner,
-      window: renderWindow({ geometry, viewport, pinnedDate, pinnedResources: resources })
+      window: pinnedWindow({ geometry, viewport, owner, date: this.pinnedDate, pinned: this.pinnedResources })
     });
     this.trace?.({
       revision: this.snapshot.revision,

@@ -104,3 +104,5 @@ bounded date/resource windows. Native movement within an unchanged rendered wind
 reuses stable resource layout. See its [runtime architecture](docs/infinite-calendar/architecture.md).
 
 With Infinite Calendar zoom enabled, Shift-wheel stays reserved for zoom at both limits; it never falls through into scrolling.
+
+Shift-wheel zoom waits for each accepted DOM/scroll commit before issuing the next accumulated request.

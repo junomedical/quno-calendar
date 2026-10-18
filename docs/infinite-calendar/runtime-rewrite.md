@@ -27,6 +27,32 @@ have descending priority. Manual input cancels eligible restores immediately.
 | M6 Stability and performance                | Measured; Firefox blocked      | Repeated Chromium/WebKit and dense profiling; see exact environment blocker below                |
 | M7 Cutover and cleanup                      | Implemented; Firefox gate open | Both orientations switched on this branch; 62 obsolete modules and TanStack removed              |
 
+## Commit-aware zoom follow-up
+
+Branch `fix/calendar-zoom-commit-pacing` starts at PR #44 head `d6ac965` and targets `main` separately. Decision 121
+adds one outstanding controlled request, adapter commit acknowledgment, next-frame scheduling and bounded timeout.
+The physical Chrome touchpad experiment reproduced white gaps with the lock disabled; the final build retains
+native-scroll suspension and removes the private experiment switch.
+
+The [matched production comparison](./zoom-commit-pacing-comparison.md) records all three rounds and raw samples.
+Responsive p95 CPU changed 4.885 → 5.238 ms horizontal (+7.2%) and 8.248 → 7.883 ms vertical (-4.4%). The final
+build passes the comparative 10% regression gate, absolute <10 ms CPU target, long-task and DOM/event budgets.
+Earlier unfinished-candidate measurements exceeded the vertical target; the committed report measures the final
+native-listener ordering fix. With a 180 ms parent delay, callbacks fall 64 → 16 per run, while p95 input-to-commit
+latency increases from 195.1 → 377.2 ms horizontal and 203.0 → 391.5 ms vertical. This is a work/latency tradeoff.
+The PR remains draft as requested. Firefox's standalone startup blocker remains open.
+
+Verification on 2026-10-18: **559/559 unit tests** and **37/37 focused WebKit zoom tests** pass. The full Chromium run
+passed **222/223**; `calendar-row-filter.spec.ts`'s pending-update navigation case briefly reported October 29 instead
+of October 22 after settling. It passes **3/3 unchanged focused reruns**. This is not an uninterrupted full-suite pass.
+All new delayed/rejected-parent and existing frame, anchor, continuity, limit and momentum-tail cases pass.
+Formatting, architecture/contracts, types, lint, packed package verification, Preact, React 19, demo build,
+size reporting and pack dry-run pass. JavaScript is **33,047 B gzip (32.27 KiB)**, +503 B versus `d6ac965`; CSS is
+unchanged at **2,018 B (1.97 KiB)**. Firefox's fresh standalone retry timed out after 15 seconds with
+`sandbox_extension_issue_file_to_process ... Operation not permitted` and
+`RenderCompositorSWGL failed mapping default framebuffer, no dt`; no Firefox application scenario ran.
+Evidence is in `/tmp/quno-zoom-pacing/final-*.log`, `firefox.log` and the committed matched-run JSON/report.
+
 ## Zoom sensitivity follow-up verification
 
 Decision 120 doubles each nonzero Shift-wheel sample from 0.15 to 0.30, retaining the native-scroll lock. Verification

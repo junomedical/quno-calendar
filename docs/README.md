@@ -100,3 +100,5 @@ combined package.
 viewport presentation subscriptions, reusable geometry and native observation ordering.
 
 [Decision 118](./infinite-calendar/decisions.md#118---capture-shift-input-even-when-zoom-cannot-change) keeps Shift input captured at zoom limits and preserves ordinary scrolling after the momentum tail.
+
+[Decision 121](./infinite-calendar/decisions.md#121---pace-wheel-requests-after-dom-and-scroll-commit) records commit-aware zoom pacing and the retained native-scroll lock.

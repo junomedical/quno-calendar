@@ -1346,3 +1346,33 @@ sequence covers twice the zoom range, addressing the reported slow response afte
 Preserve the 0.5–8 limits, pointer anchoring, frame coalescing and controlled-parent accumulation. Retain Decision
 119's native-scroll lock and its 300 ms settling tail to prevent white patches. Slider and external zoom remain
 unchanged. Verify accumulated wheel requests, detail thresholds and per-frame geometry at the increased step.
+
+## 121 - Pace Wheel Requests After DOM and Scroll Commit
+
+Date: 2026-10-18
+Status: Accepted; refines Decisions 112, 113 and 120; retains Decision 119
+
+Keep at most one unexpired controlled Shift-wheel request outstanding. Accumulate every signed 0.30 sample into one
+clamped target, including reversals, while waiting for the parent. The adapter acknowledges only a current rendered
+revision after its programmatic scroll correction and clamp observation. A matching value in the logical engine
+alone is insufficient. Emit the next accumulated target on the next animation callback after acknowledgment, with
+no extra double-frame delay. Callbacks remain outside active React render/commit work.
+
+External zoom, navigation, restoration, native movement, resize, disabling zoom and unmount discard queued intent.
+A request unacknowledged for one second expires without retry; fresh input starts from the actual controlled value.
+Late accepted values remain parent-owned and do not revive abandoned accumulated work. No public request IDs or
+props are added; callback frequency can decrease for a delayed parent. Native observations and ordinary scrolling
+remain independent of this zoom-only coordinator. Cancellation/expiry clears stale wheel anchoring in the engine.
+
+This is DOM/scroll commit acknowledgment, not proof of paint, raster completion or GPU presentation. A temporary
+private query switch disabled the native-scroll lock for a physical Chrome touchpad test. The user reported that
+rectangular gaps returned with commit-aware pacing alone. Retain the lock and its existing 300 ms tail, and remove
+the experimental switch before publishing. Automated DOM geometry checks do not replace this physical-input result.
+Classify uncaptured wheel takeover in the next task, with one replaceable timer cleared on detach. Native browsers
+can checkpoint microtasks between listeners; classifying then can cancel the gesture and release the lock before
+the zoom handler reserves the momentum tail.
+
+Verify delayed, immediate and rejected parents, reversals, saturation, stale acknowledgments, external cancellation,
+timeout and teardown. Browser coverage samples anchor alignment, contiguous dates, event presence and overflow
+restoration. Compare matched production builds to PR #44 head `d6ac965`, including callbacks, observed DOM commits,
+input-to-commit latency and scripting/layout cost; record gate failures without claiming full acceptance.
