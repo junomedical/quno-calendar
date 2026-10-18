@@ -79,3 +79,12 @@ Times on whole multi-day calendar phrases, seconds, timezones, offsets, dotted m
 are unsupported. Date Input and Datepicker can compose one date and one clock with `timeMode` in single-day mode;
 see the [date-time recipe](../shared/usage.md#single-day-date-and-time). The headless parser continues to support
 intraday and overnight ranges independently of the single-clock UI.
+
+The separate `/concept` playground includes this product and links back to its field guide. See [demo concept notes](../../demo/concept/README.md).
+
+The `/concept` scenes demonstrate relative phrases, date-order ambiguity, and overnight clock ranges through live interaction playback with replay/reset and manual takeover.
+
+Each scenario’s initial values and action sequence live in its own `demo/concept/scenarios/date-parser/<scenario-id>.json`. The [product manifest](../../demo/concept/scenarios/date-parser.json) orders those scenario IDs; replay and reset restore the selected file’s values.
+
+Concept navigation keeps each demo with its title and one or two explanation paragraphs. Use the bottom title rail
+to scroll between scenarios; on mobile, open Full screen demo below the explanation to enable interaction.

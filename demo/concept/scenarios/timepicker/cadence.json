@@ -1,0 +1,52 @@
+{
+  "id": "cadence",
+  "label": "Keep an existing time",
+  "hint": "Changing cadence preserves your selected time.",
+  "anchor": "ownership",
+  "initial": {
+    "value": "10:35",
+    "cadence": 5,
+    "businessHours": true
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 650
+    },
+    {
+      "action": "click",
+      "target": "[data-action=\"cadence-15\"]",
+      "caption": "Choose 15-minute cadence"
+    },
+    {
+      "action": "cue",
+      "caption": "10:35 is preserved",
+      "gesture": "hover"
+    },
+    {
+      "action": "wait",
+      "ms": 1400
+    },
+    {
+      "action": "scroll-to",
+      "target": "[data-slot=\"time-navigation\"]",
+      "destination": "[data-time=\"10:45\"]",
+      "caption": "Scroll to 10 o’clock",
+      "durationMs": 1500,
+      "easing": "ease-in-out"
+    },
+    {
+      "action": "click",
+      "target": "[data-time=\"10:45\"]",
+      "caption": "Choose 10:45"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    }
+  ],
+  "paragraphs": [
+    "Offer regular time slots without silently changing an existing value. Switch the minute cadence and see how the available choices change.",
+    "An existing time stays visible even when it falls between the new slots, until you choose a replacement."
+  ]
+}

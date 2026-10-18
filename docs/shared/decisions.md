@@ -317,3 +317,54 @@ New decisions continue after QUNO-021. The legacy TypeScript mapping also covers
 [QDPR-007](../date-parser/decisions.md#qdpr-007---return-paired-date-and-clock-endpoints) owns the parser-only public
 result change to paired `{ date, time }` endpoints. Date Input and public demo compositions project endpoint dates
 into the existing shared `DateRange`; the independent UI value/callback shapes under QUNO-015 remain unchanged.
+
+## QUNO-022 - Isolate the live demo approach experiment
+
+- Date: 2026-10-18
+- Status: Accepted for the demo experiment
+- Decision: Keep `/concept` in `demo/concept`, with the live calendar immediately mounted under a partial gradient introduction, five product tabs, guide links, expanded playground mode, and selectable calendar scenarios. An illustrative pointer accompanies real public navigation and zoom settings. Canvas interaction pauses the tour; reduced-motion visitors start paused.
+- Consequences: Existing home, focused demos, and guides retain their routes. Fixtures are local and deterministic. No package API or product behavior changes. Browser checks cover geometry, layering, state, links, and mobile fit.
+
+## QUNO-023 - Demonstrate live interactions with cancellable scenario playback
+
+- Date: 2026-10-18
+- Status: Accepted; supersedes the illustrative-only playback in QUNO-022
+- Decision: Give `/concept` nineteen named scenes across five products. Calendar includes scroll, anchored zoom, overlap, horizontal/vertical views, themes, event density, drawing/saving, and rescheduling. A rounded notched pointer operates actual demo controls and component interaction handlers, including intermediate hover, press, drag, typing, and commit feedback. Scope synthetic pointer-capture adaptation to the demo and restore it on cancellation.
+- Consequences: Replay and Reset remount deterministic scene state; Try it preserves the current usable result. Trusted input/focus and hidden tabs cancel pending work. Reduced motion starts paused, and previews end once. Product modules mount on selection. Fixtures and all playback remain in `demo/concept`; no shipped API changes. The density field-guide chapter adds a lazy live exhibit and copyable recipe. Browser checks assert scene outcomes, manual parity, takeover, geometry, themes, and mobile fit.
+
+## QUNO-024 - Author demo scenarios as JSON
+
+- Date: 2026-10-18
+- Status: Accepted; refines QUNO-023's scenario ownership
+- Decision: Keep product copy, scenario order, recipe anchors, expanded presentation, initial component state, preview sequences, and playback steps in `demo/concept/scenarios.json`. Validate the versioned document and references before use. One typed interpreter dispatches reusable actions; neither playback nor initial component configuration branches on scene identifiers.
+- Consequences: Adding or changing a scene using existing actions requires only JSON edits. Product components retain public-entry-point wiring and the actor retains geometry-aware interaction mechanics, cancellation, and shared cursor pacing. Replay/Reset use JSON initial state. Unknown actions, fields, invalid values, duplicate IDs, or missing preview references fail explicitly. Adding a new interaction primitive requires a typed adapter and validation. Browser coverage injects a new JSON-only scene to prove the boundary. No public package changes.
+
+## QUNO-025 - Animate demo scroll and controlled zoom
+
+- Date: 2026-10-18
+- Status: Accepted; refines QUNO-023 playback and QUNO-024 action data
+- Decision: Use cancellable animation-frame interpolation for demo motion. Scroll and slider steps declare duration and easing in JSON. Demonstrate zoom by visibly pressing and dragging a real range control through intermediate native input events, instead of showing five discrete synthetic wheel increments. Keep manual Shift-wheel behavior available and unchanged. Animate target positioning as well as explicit scroll steps.
+- Consequences: The calendar's actual controlled geometry changes every frame; shared scroll interpolation preserves requested travel despite integer pixel rounding. Cursor/pressed state follows the slider thumb. Manual takeover, hidden tabs, scene changes, and unmount cancel pending frames. Reduced-motion visitors start idle and may explicitly play demonstrations. Frame-sampled browser checks cover both orientations and cancellation; unit checks cover timing and exact travel. Changes are demo-only.
+
+## QUNO-026 - Give each product demo its own JSON file
+
+- Date: 2026-10-18
+- Status: Accepted; supersedes QUNO-024's single-file storage while retaining its JSON authoring and playback contracts
+- Decision: Store each product's copy, preview order, guide links, initial state, and scenario steps in its own `demo/concept/scenarios/<product-id>.json`. A small `demo.json` manifest owns schema version, tab order, startup product, and shared reference dates. The source registry assembles the catalog in manifest order and verifies each file's product ID before applying existing strict scenario validation.
+- Consequences: Changing one demo needs only its own JSON file. Remove the old combined scenario document. Preserve all nineteen scenes, shared playback, motion timing, replay/reset, and public component contracts. Tests verify independent edits to every file, manifest ordering, mismatched/missing files, and live JSON-only customization without changing another demo.
+
+## QUNO-027 - Store every scenario in its own JSON file
+
+- Date: 2026-10-18
+- Status: Accepted; supersedes QUNO-026's product-level scenario grouping following clarification of the requested granularity
+- Decision: Store all nineteen scenes independently at `demo/concept/scenarios/<product-id>/<scenario-id>.json`. Each file owns its label, hint, guide anchor, initial state, expanded preference, and action sequence. Product manifests retain product copy, explore links, and ordered scenario/preview IDs. Shared startup and dates remain in `demo.json`.
+- Consequences: Discover scene files automatically and resolve them in manifest order, validating filename/ID agreement and all existing contracts. Adding a supported scene requires only its JSON file and a manifest reference. Tests cover independent changes to every scene, new JSON-only scenes, missing/mismatched files, duplicate references, and browser customization of exactly one scene. Playback and public component behavior remain unchanged.
+
+## QUNO-028 - Navigate demo screens with a bottom title rail
+
+- Date: 2026-10-18
+- Status: Accepted; refines QUNO-022/QUNO-023 presentation and QUNO-027 scenario data
+- Decision: Keep product tabs above vertically scrollable, viewport-sized scenario sections. Each section shows its scenario title, one or two JSON-authored explanation paragraphs, and working demo. A persistent bottom rail lists scenario titles and supports horizontal touch scrolling; choosing a title scrolls to the matching section before playback begins. Manual section scrolling selects the nearest scene paused. Mount only the active working component.
+- Fullscreen: Launch explicitly with the button below the paragraphs. Show only the working demo and playback/exit controls, preserve mounted state, and restore launch-button focus on exit. Remove automatic expanded-mode flags from scenes. Desktop inline interaction remains enabled; the first scene plays once, with multi-scene tours started explicitly.
+- Mobile: At widths up to 850 px, make inline previews inert and pause simulations. Touch scrolls the page or title rail; interaction and replay are available only in fullscreen. Leaving fullscreen retains the current result in an inert preview. Reduced motion disables animated section navigation.
+- Verification: Assert viewport containment, paragraph/button placement, real scroll positions and intermediate frames, title selection, touch swipes, inert input/focus behavior, fullscreen chrome/state/focus, resize handling, and existing scene outcomes. No package API or runtime changes.

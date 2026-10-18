@@ -1429,3 +1429,46 @@ Release/cancel on window blur and remove global listeners on cleanup.
 Retain the 0.20 step, one outstanding controlled request and one-second request lifetime. The existing 300 ms idle
 unlock and anchor-continuity interval remain housekeeping only; neither prevents switching modes on input. Test
 immediate modifier transitions, zoom limits, missing keyup, one-time delta delivery and cleanup in both orientations.
+
+## 125 - Reveal Overlap Lanes During Demo Pointer Movement
+
+Date: 2026-10-18
+Status: Accepted; refines QUNO-023's Calendar demonstration without changing library hover contracts
+
+The concept overlap preview routes unpressed pointer movement through the browser's actual topmost element on each
+animation frame. Existing row/column hit testing resolves the original overlap lane beneath an expanded card.
+Do not directly select a covered event, wait until cursor arrival to trigger hover, or dispatch a click/press to
+reveal it. Keep scenario destinations in JSON. Moving a real pointer over the calendar cancels playback before the
+same event reaches the component, so manual hover immediately controls the revealed appointment.
+
+Browser coverage checks continuous movement, browser hit targets, underlying-lane handoff, no press/click/editor,
+and real-pointer takeover in both orientations. This change is confined to the demo actor; public component
+interaction and rendering behavior remain unchanged.
+
+## 126 - Keep Concept Card Text Legible Across Zoom Levels
+
+Date: 2026-10-18
+Status: Accepted; refines the concept's consumer-owned event presentation
+
+Keep every concept card text row on one line with ellipsis and no flex shrinking. Put the appointment title first.
+Below 38 px of available event height, use a compact title row and hide the secondary clock row; hovering restores
+the clock and appointment details through the calendar's existing expanded geometry. Never wrap clocks or squeeze
+text rows into partial-height fragments as zoom or overlap density changes.
+
+Give hovered concept shells a 240 px minimum target width, bounded by the existing hover allowance, while preserving
+events already wider than that target. Vertical hover remains bounded by its resource column. Keep duration geometry,
+underlying-lane hit testing, and public package styles unchanged; these rules belong only to the concept renderer.
+
+Browser tests check line height, no wrapping, ellipsis, containment, hover width, revealed details, and restored
+dimensions at 0.5, 1.3, 3, and 8 zoom in both orientations, plus the packed 400-event fixture at minimum zoom.
+
+## Separate demo configuration — 2026-10-18
+
+[QUNO-026](../shared/decisions.md#quno-026---give-each-product-demo-its-own-json-file) moves this product’s concept
+scenarios into its own JSON file. Component contracts and scenario behavior remain unchanged.
+
+[QUNO-027](../shared/decisions.md#quno-027---store-every-scenario-in-its-own-json-file) further separates every scenario
+into its own file; the product JSON retains only metadata and ordered references.
+
+[QUNO-028](../shared/decisions.md#quno-028---navigate-demo-screens-with-a-bottom-title-rail) records viewport-sized
+scenario sections, JSON explanations, explicit fullscreen, and inert mobile previews shared by the concept demos.

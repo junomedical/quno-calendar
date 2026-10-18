@@ -1,0 +1,38 @@
+{
+  "id": "ambiguity",
+  "label": "Resolve ambiguity",
+  "hint": "Compare DMY and MDY for the same text.",
+  "anchor": "preferred-date-order",
+  "initial": {
+    "text": "03/04/2026",
+    "order": "dmy",
+    "clocks": false
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 650
+    },
+    {
+      "action": "click",
+      "target": "[data-action=\"mdy\"]",
+      "caption": "Read month / day / year"
+    },
+    {
+      "action": "wait",
+      "ms": 900
+    },
+    {
+      "action": "click",
+      "target": "[data-action=\"dmy\"]",
+      "caption": "Read day / month / year"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    }
+  ],
+  "paragraphs": [
+    "A numeric date can mean different things in different places. Switch the preferred day/month order and compare the result for the same input."
+  ]
+}

@@ -187,3 +187,20 @@ Parent editors can restore a date-only target after Cancel or Save. Use the open
 displayed at the Save click for success. A bounded restore keeps that date through deferred draft measurements and
 returning rows. Date-only restores leave horizontal scrolling unchanged and yield to manual navigation. Availability,
 blocker and appointment outcome policy remains in the consumer.
+
+The separate `/concept` playground includes this product and links back to its field guide. See [demo concept notes](../../demo/concept/README.md).
+
+The `/concept` scenes demonstrate scroll, zoom, overlaps, orientation, theming, density, creation, and rescheduling through live interaction playback with replay/reset and manual takeover.
+
+Each scenario’s initial values and action sequence live in its own `demo/concept/scenarios/infinite-calendar/<scenario-id>.json`. The [product manifest](../../demo/concept/scenarios/infinite-calendar.json) orders those scenario IDs; replay and reset restore the selected file’s values.
+
+The concept Zoom scene animates a visible range control through actual controlled geometry; scroll scenes ease through real viewport positions. JSON owns their duration and easing, with immediate cancellation on manual takeover. Library wheel behavior is unchanged.
+
+Hovering across the concept overlap fixture reveals each underlying appointment without opening the editor. Playback uses unpressed movement through actual browser hit targets; real pointer movement immediately takes over.
+
+Concept cards keep titles and clocks on separate unwrapped lines with ellipsis. Very short cards prioritize the title;
+hover restores the clock and details, targeting 240 px width within the available row/column space. Try the quiet and
+packed presets at minimum zoom in both orientations. These are consumer-owned styles; see [Decision 126](./decisions.md#126---keep-concept-card-text-legible-across-zoom-levels).
+
+Concept navigation keeps each demo with its title and one or two explanation paragraphs. Use the bottom title rail
+to scroll between scenarios; on mobile, open Full screen demo below the explanation to enable interaction.

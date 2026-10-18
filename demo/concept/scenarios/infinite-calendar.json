@@ -1,0 +1,15 @@
+{
+  "id": "infinite-calendar",
+  "label": "Calendar",
+  "title": "Make room for every day.",
+  "description": "An infinite canvas for busy schedules. Scroll through time, bring the details closer, and let every event find its place.",
+  "preview": ["scroll", "zoom", "overlap"],
+  "explore": [
+    ["Availability", "availability"],
+    ["Loading", "late-loading"],
+    ["Event cards", "event-cards"],
+    ["Navigation", "date-time-navigation"],
+    ["Localization", "date-localization"]
+  ],
+  "scenarios": ["scroll", "zoom", "overlap", "views", "theme", "density", "create", "move"]
+}

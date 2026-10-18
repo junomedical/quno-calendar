@@ -1,0 +1,31 @@
+{
+  "id": "resize",
+  "label": "Adjust the end",
+  "hint": "Extend the range to the 25th.",
+  "anchor": "paint",
+  "initial": {
+    "range": {
+      "start": "2026-10-19",
+      "end": "2026-10-23"
+    },
+    "single": false
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 650
+    },
+    {
+      "action": "drag-dates",
+      "from": "2026-10-23",
+      "to": "2026-10-25"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    }
+  ],
+  "paragraphs": [
+    "Adjust a selected range without starting over. Drag its endpoint to extend or shorten the selection while the other end stays in place."
+  ]
+}

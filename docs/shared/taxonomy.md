@@ -217,3 +217,17 @@ Date Input’s `forceCadence` is an opt-in typed-clock restriction that applies 
 ## Standalone time surface
 
 `QunoTimePicker` owns the clock summary (`selection-summary`), Clear (`clear-button`), hour/minute scroller (`time-navigation`), sticky hour rail (`hour-heading`), and selected minute (`minute-option`, `aria-pressed`, `data-time`). Standalone classes and tokens use `quno-time-picker-*` and `--quno-time-picker-*`; Datepicker retains its existing names.
+
+The demo **scenario** is a named, replayable playground configuration linked to a field-guide recipe. The concept’s simulated pointer accompanies actual control and component interactions.
+
+A concept **scene** is the repeatable state and action sequence behind a named scenario. **Replay** restores and runs it; **Reset** restores it without playback; **Try it** cancels playback and preserves the useful current result. Event **density** counts appointments per day across the listed resources, separately from visual compactness.
+
+A **scenario document** is the versioned JSON containing product copy, ordered scenes, initial values, preview references, and playback steps. A **step** invokes a supported action with data; an **action adapter** performs the interaction without knowing the scene ID.
+
+A **scenario file** owns one scene’s copy, initial state, and actions. A **product manifest** owns product copy,
+explore links, and ordered scene/preview IDs. The **demo manifest** owns shared dates, schema version, product order,
+and startup selection. These files assemble into the validated scenario document.
+
+A **demo screen** is one viewport-sized scenario section with its explanation and preview. The **title rail** is
+the horizontally scrollable bottom navigation between screens. A mobile **preview** is inert; **fullscreen** enables
+the working demo and playback controls while hiding product and scenario navigation.

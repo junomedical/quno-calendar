@@ -4,6 +4,45 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+- Rebuilt concept navigation around viewport-sized scenario screens with JSON-authored explanations, a persistent horizontally swipeable title rail, and smooth section navigation. Fullscreen launches below the paragraphs and shows only the live demo/playback controls while preserving state. Mobile inline previews are inert; interaction is available only in fullscreen.
+- Navigation verification: all 626 unit tests and 285 Chromium tests pass, including native touch swipes, screen fit for every mobile scenario, smooth section positions, fullscreen state/focus restoration, mobile input exclusion, and existing playback outcomes. Formatting, architecture, types, lint, Preact compatibility, demo build, package verification, size reporting, and pack dry-run pass. The demo retains a non-blocking main-chunk warning (564.98 kB); package size limits pass.
+
+- Separated all nineteen concept scenarios into individual JSON files. Product manifests now hold only product metadata and ordered scenario/preview IDs; scene discovery is automatic, so adding a supported scenario needs no TypeScript registry edit.
+- Per-scenario verification: all 624 unit tests pass. Chromium passed 276/277, including every concept check; `e2e/specs/calendar-row-filter.spec.ts:95` timed out waiting for the -12 px row offset in “Load earlier and owners” and passed unchanged in isolation. Formatting, architecture, types, lint, Preact compatibility, demo build, package verification, size reporting, and pack dry-run pass. The demo retains a non-blocking main-chunk warning (557.79 kB); package size limits pass.
+
+- Split concept scenarios into five independent product JSON files, with a small shared manifest for startup, tab order, version, and reference dates. Preserved all nineteen scenes and existing validation/playback; file IDs and cross-file assembly are checked before use.
+- Separate-JSON verification: all 600 unit tests and 277 Chromium tests pass, including independent file edits, manifest ordering, missing/mismatched files, and live Date Input customization without changing Calendar. Formatting, architecture, types, lint, Preact compatibility, demo build, package verification, size reporting, and pack dry-run pass. The demo retains a non-blocking main-chunk warning (555.45 kB); package size limits pass.
+
+- Kept concept appointment titles, clocks, and hover details on single unwrapped lines with ellipsis and intact line heights. Short cards prioritize the title; hover restores details and targets a 240 px width within the calendar's existing bounds.
+- Card-text verification: all 590 unit tests and 277 Chromium tests pass, including zoom-level text geometry, minimum-zoom packed cards, hover expansion, and restored dimensions in both orientations. Formatting, architecture, types, lint, Preact compatibility, demo build, package verification, size reporting, and pack dry-run pass. The demo retains its non-blocking 556.07 kB main-chunk warning; package size limits pass.
+
+- Made concept overlap previews reveal underlying appointments continuously as the unpressed pointer crosses their lanes, using actual browser hit targets. Real mouse movement over the calendar takes over immediately; hover playback emits no press or click and does not open an editor.
+- Hover-demo verification: all 590 unit tests pass. Chromium passed 272/273, including all concept checks and four new tests for unpressed movement, covered-lane reveal, and real-pointer takeover in both orientations. `e2e/specs/external-cancel.spec.ts:537` observed one event request against an expected zero; it passed unchanged in isolation. Formatting, architecture, types, lint, Preact compatibility, demo build, package verification, size reporting, and pack dry-run pass. The demo retains a non-blocking main-chunk warning (556.07 kB); package size limits pass.
+
+- Animated concept scrolling and target reveals with cancellable eased frame updates. The zoom demonstration now holds and drags a live slider through continuous calendar geometry. Scroll/slider duration and easing remain JSON-controlled; manual takeover stops motion immediately.
+- Animated-demo verification: all 590 unit tests and 269 Chromium tests pass, including frame-sampled zoom/scroll geometry and cancellation in both orientations. The first browser run passed 267/269: the new cancellation probe incorrectly queried a virtualized-out appointment (corrected), and `calendar-row-filter.spec.ts:95` timed out waiting for a -12 px offset in “Load earlier” (passed unchanged in the final full rerun). Formatting, architecture, types, lint, Preact, demo build, package verification, size reporting, and pack dry-run pass. The demo retains a non-blocking 555.54 kB main-chunk warning; package size limits pass.
+
+- Moved concept scenarios into versioned, validated JSON controlling product copy, docs links, initial state, preview order, and playback actions. Replaced scene-specific playback branches with one shared interpreter; adding a scene with existing interactions requires only a JSON edit.
+- JSON-scenario verification: all 585 unit tests pass with one worker and all 263 Chromium tests pass, including a new JSON-only scene and reset check. The initial concurrent unit run passed 584/585: `tests/performance/layoutScaling.test.ts:61` measured 25.1253× against a <25× limit; its isolated rerun and the complete single-worker suite passed. Formatting, architecture, types, lint, Preact, demo build, package verification, size reporting, and pack dry-run pass. The demo retains a non-blocking main-chunk warning (554.13 kB); package size limits pass.
+
+- Implemented nineteen live `/concept` scenarios with actual control interactions, cancellable pointer/keyboard playback, replay/reset, manual takeover, one-pass previews, expanded mode, lazy product stages, and a shared density guide exhibit/recipe. Calendar demos now include views, themes, 4/40/400-event density, real drawing/saving, and rescheduling.
+- Live-scenario verification: all 569 unit tests and 262 Chromium tests pass, including 35 concept checks for interaction outcomes, cursor geometry, mobile layouts, both calendar orientations, cancellation, and replay. Formatting, architecture, types, lint, Preact compatibility, demo build, package verification, size reporting, and pack dry-run pass. The demo build emits a non-blocking 541.34 kB main-chunk warning; package size limits pass and library assets are unchanged.
+
+- Softened the concept cursor’s triangular outline with small curves at the tip, outer corners, and tail notch; retained its compact size and non-interactive overlay.
+- Rounded-cursor verification: concept geometry checks pass. Full runs passed 564/565 unit tests and 229/230 Chromium tests. `tests/performance/layoutScaling.test.ts:61` measured 39.25× against a <25× limit; `e2e/specs/participant-focus.spec.ts:40` (20,000 events/year) timed out waiting for the external editor. Both passed isolated reruns. Formatting, architecture, types, lint, Preact, demo build, package verification, size reporting, and pack dry-run pass.
+
+- Specified interaction choreography for every Calendar simulation: visible control clicks, scrolling, Shift-wheel zoom, hover, held drags, typing, and saving, with intermediate feedback and manual-interaction parity. Planning documentation only.
+
+- Expanded the demo plan with first-class horizontal/vertical view, theming, and event-density scenarios, including shared-content comparisons and combined playground controls. Planning documentation only.
+
+- Rethought the demo concept plan around distinct visible outcomes: three Calendar preview scenes, two opt-in editing scenes, focused product scenarios, and target-aware cancellable playback. This revision changes planning documentation only.
+
+- Planned the concept’s main tours and advanced scenarios across all five products; refined its simulated pointer to a triangle with a small tail notch.
+- Follow-up verification: all 230 Chromium tests and 565 unit tests pass, including pointer fill/notch and input-pass-through checks. Formatting, architecture, types, lint, Preact, demo build, package verification, size reporting, and pack dry-run pass.
+
+- Added an isolated `/concept` demo approach with an immediately visible live calendar, gradient introduction, five product tabs, scenario pointer tour, guide recipe links, and expanded playground.
+- Demo concept verification: Chromium full run passed 228/229; existing `calendar-row-filter.spec.ts:141` (navigation during a pending update) expected `2026-10-15` but received `2026-10-08`. The isolated rerun passed. All three concept checks passed separately; the full-suite run retains this intermittent verification caveat.
+
 ### Follow the current Shift state immediately - 2026-10-18
 
 - Remove momentum capture and gesture-mode latching. Shift-wheel zooms; unshifted wheel scrolls immediately,

@@ -14,6 +14,7 @@ import { Demo1 } from "#quno-demo/showcase/demo1/Demo1";
 import { Demo2 } from "#quno-demo/showcase/demo2/Demo2";
 import { Demo3 } from "#quno-demo/showcase/demo3/Demo3";
 import type { DemoRoute } from "#quno-demo/showcase/types";
+import { DemoConcept } from "#quno-demo/concept/DemoConcept";
 import { ProjectHome } from "./ProjectHome";
 import "./App.css";
 
@@ -59,6 +60,7 @@ export function App() {
     return <IntegrationWalkthrough />;
   }
 
+  if (routePath === "/concept") return <DemoConcept />;
   if (routePath === "/") return <ProjectHome />;
   if (routePath === "/guide/datepicker") return <DatePickerStory />;
   if (routePath === "/guide/date-input") return <DateInputFieldGuide />;

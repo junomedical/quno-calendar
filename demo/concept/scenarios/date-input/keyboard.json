@@ -1,0 +1,44 @@
+{
+  "id": "keyboard",
+  "label": "Edit with the keyboard",
+  "hint": "Place the caret in the day and press ↑.",
+  "anchor": "keyboard-controls",
+  "initial": {
+    "range": {
+      "start": "2026-10-19",
+      "end": "2026-10-19"
+    },
+    "selectionMode": "single",
+    "picker": false,
+    "label": "Appointment date"
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 650
+    },
+    {
+      "action": "aim",
+      "target": "[data-action=\"date-input\"]",
+      "caption": "Place the caret in the day"
+    },
+    {
+      "action": "key",
+      "target": "[data-action=\"date-input\"]",
+      "key": "ArrowUp",
+      "caret": 1
+    },
+    {
+      "action": "key",
+      "target": "[data-action=\"date-input\"]",
+      "key": "Enter"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    }
+  ],
+  "paragraphs": [
+    "Make a small date adjustment directly from the keyboard. Put the caret on a date part and use the arrow keys to change it."
+  ]
+}

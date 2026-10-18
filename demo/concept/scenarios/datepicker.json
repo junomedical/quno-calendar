@@ -1,0 +1,14 @@
+{
+  "id": "datepicker",
+  "label": "Datepicker",
+  "title": "Good dates start here.",
+  "description": "Pick a day. Paint a range. Move your plans with a gesture.",
+  "preview": ["paint", "resize", "range-move"],
+  "explore": [
+    ["Month navigation", "quick-jump"],
+    ["Hidden week", "hidden-row"],
+    ["Week starts", "week-starts"],
+    ["Date + time", "date-time"]
+  ],
+  "scenarios": ["paint", "resize", "range-move"]
+}

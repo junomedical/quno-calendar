@@ -1,0 +1,395 @@
+/* The concept stays scoped; package styles remain consumer owned. */
+.concept-hero {
+  height: 640px;
+  min-height: 540px;
+}
+.concept-canvas {
+  left: 30%;
+}
+.concept-stage {
+  height: 100%;
+}
+.concept-intro {
+  width: 44%;
+  padding: 36px 8% 55px 4%;
+  background: linear-gradient(90deg, #eee8f8 0%, #eee8f8f5 64%, #eee8f800 100%);
+}
+.concept-intro h1 {
+  font-size: clamp(40px, 4vw, 62px);
+}
+.concept-calendar-workspace {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  color: #302b42;
+  background: #fff;
+}
+.concept-calendar-workspace > .concept-calendar {
+  flex: 1;
+  min-height: 0;
+}
+.concept-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  padding: 12px 15px;
+  background: var(--quno-calendar-header-surface, #faf8fc);
+  border-bottom: 1px solid var(--quno-calendar-cell-border, #e6deee);
+}
+.concept fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+.concept legend {
+  font-size: 10px;
+  opacity: 0.7;
+  margin-bottom: 4px;
+}
+.concept-controls button,
+.concept-choice button,
+.concept-product-card > button,
+.concept-editor button {
+  border: 1px solid #b8a7c8;
+  background: transparent;
+  border-radius: 6px;
+  color: inherit;
+  font-size: 11px;
+  padding: 6px 8px;
+  margin: 0 3px 2px 0;
+}
+.concept-controls button[aria-pressed="true"],
+.concept-choice button[aria-pressed="true"] {
+  background: #71548e;
+  color: #fff;
+  border-color: #71548e;
+}
+.concept-result {
+  display: block;
+  padding: 12px 16px;
+  background: var(--quno-calendar-header-surface, #f4eff8);
+  color: inherit;
+  font-size: 12px;
+  line-height: 1.6;
+  border-top: 1px solid var(--quno-calendar-cell-border, #e6deee);
+}
+.concept-result strong {
+  display: block;
+  font-weight: 550;
+}
+.concept-event {
+  background: var(--event-accent-muted);
+  border-left: 3px solid var(--event-accent);
+  color: var(--quno-calendar-text, #302b42);
+  padding: 4px 8px;
+  min-width: 0;
+  min-height: 0;
+  line-height: 14px;
+}
+.concept-event > * {
+  flex: 0 0 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.concept-event > strong {
+  order: -1;
+}
+.concept-event > span {
+  display: block;
+  font-size: 10px;
+}
+.concept-calendar .is-hovered .concept-event {
+  box-shadow: 0 3px 12px #302b4222;
+  background: var(--quno-calendar-label-surface, #fcfaff);
+}
+.concept-calendar .quno-calendar-event-shell.is-hovered {
+  min-width: max(var(--event-width), min(240px, var(--event-hover-width)));
+}
+@container calendar-event (height < 38px) {
+  .concept-event {
+    padding-block: 2px;
+    line-height: 12px;
+  }
+  .concept-event > small {
+    display: none;
+  }
+}
+.concept-calendar-workspace[data-theme="dark"] {
+  color: #f1e9f8;
+  --quno-calendar-surface: #252332;
+  --quno-calendar-header-surface: #302b42;
+  --quno-calendar-label-surface: #343044;
+  --quno-calendar-alternate-surface: #2b2839;
+  --quno-calendar-cell-border: #484057;
+  --quno-calendar-text: #f1e9f8;
+  --quno-calendar-text-secondary: #d3c5e3;
+  --quno-calendar-now-accent: #ffafca;
+}
+.concept-calendar-workspace[data-theme="brand"] {
+  color: #193e3b;
+  --quno-calendar-surface: #f2faf6;
+  --quno-calendar-header-surface: #d8eee3;
+  --quno-calendar-label-surface: #e6f5ed;
+  --quno-calendar-alternate-surface: #e7f2eb;
+  --quno-calendar-cell-border: #b3cdc0;
+  --quno-calendar-text: #193e3b;
+  --quno-calendar-text-secondary: #386858;
+  --quno-calendar-now-accent: #c57745;
+}
+.concept-calendar-workspace[data-theme="brand"] .concept-event {
+  --event-accent: #538b70;
+}
+.concept-calendar-workspace[data-theme="dark"] .concept-event {
+  --event-accent: #c6a3ed;
+}
+.concept-calendar-workspace button:focus-visible {
+  outline-color: var(--quno-calendar-now-accent, #71548e);
+}
+.concept-editor {
+  position: absolute;
+  z-index: 500;
+  top: 16px;
+  right: 20px;
+  width: min(310px, calc(100% - 40px));
+  padding: 20px;
+  display: grid;
+  gap: 14px;
+  background: var(--quno-calendar-surface, #fff);
+  color: inherit;
+  box-shadow: 0 10px 45px #302b4240;
+  border: 1px solid #b8a7c8;
+  border-radius: 12px;
+  font-size: 12px;
+}
+.concept-editor label {
+  display: grid;
+  gap: 6px;
+}
+.concept-editor input,
+.concept-product-card input:not([type="checkbox"]) {
+  width: 100%;
+  font: inherit;
+  color: #302b42;
+  background: #fff;
+  padding: 10px;
+  border: 1px solid #b8a7c8;
+  border-radius: 6px;
+}
+.concept-statusbar {
+  display: flex;
+  gap: 16px;
+  padding: 12px 4%;
+  align-items: center;
+  border-bottom: 1px solid #e7e0ee;
+  font-size: 12px;
+  color: #79618d;
+  min-height: 50px;
+}
+.concept-statusbar button {
+  margin-left: auto;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 0;
+  background: #ede6f5;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 11px;
+  color: #302b42;
+}
+.concept-playback-controls {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.concept-explore {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding-top: 24px;
+  font-size: 11px;
+  color: #79618d;
+}
+.concept-explore > span {
+  color: #95869f;
+}
+.concept-product-stage {
+  padding: 24px;
+  place-items: center;
+  overflow: auto;
+}
+.concept-product-stage > .concept-product-card {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  width: min(410px, 100%);
+  border: 1px solid #e7e0ee;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 8px 35px #302b4208;
+}
+.concept-product-card small {
+  color: #887a95;
+  font-size: 11px;
+}
+.concept-product-card label {
+  font-size: 12px;
+}
+.concept-product-card input[type="checkbox"] {
+  width: auto;
+  padding: 0;
+}
+.concept-product-card .quno-time-picker-time-navigation {
+  max-height: 300px;
+}
+.concept-product-card summary {
+  cursor: pointer;
+  font-size: 12px;
+}
+.concept-cursor {
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  animation: none;
+  transition: none;
+  pointer-events: none;
+}
+.concept-cursor[hidden] {
+  display: none;
+}
+.concept-cursor span {
+  max-width: 190px;
+  white-space: normal;
+  width: max-content;
+  box-shadow: 0 2px 8px #302b4220;
+}
+.concept-cursor[data-edge="left"] span {
+  transform: translateX(-100%);
+  margin-left: 0;
+}
+.concept-cursor::before {
+  content: "";
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  left: -8px;
+  top: -8px;
+  border-radius: 50%;
+  border: 2px solid #9d76c4;
+  opacity: 0;
+}
+.concept-cursor[data-gesture="press"]::before,
+.concept-cursor[data-gesture="release"]::before {
+  opacity: 0.8;
+  animation: concept-click 400ms ease-out;
+}
+.concept-cursor[data-gesture="drag"]::before {
+  opacity: 0.65;
+  background: #b89dd366;
+}
+.concept-cursor[data-gesture="scroll"] span::before {
+  content: "↕ ";
+}
+@keyframes concept-click {
+  from {
+    transform: scale(0.5);
+  }
+  to {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+}
+.concept--fullscreen .concept-canvas {
+  left: 0;
+}
+.concept--fullscreen .concept-hero {
+  height: calc(100dvh - 340px);
+  min-height: 450px;
+}
+@media (max-width: 850px) {
+  .concept-hero {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    min-height: 0;
+  }
+  .concept-intro {
+    position: relative;
+    order: -1;
+    width: 100%;
+    padding: 25px 6%;
+    background: linear-gradient(135deg, #eee8f8, #f8f5fc);
+  }
+  .concept-intro h1 {
+    font-size: 36px;
+    margin: 12px 0;
+    max-width: none;
+  }
+  .concept-intro p {
+    max-width: 450px;
+    margin-bottom: 12px;
+  }
+  .concept-canvas {
+    position: relative;
+    inset: auto;
+    height: 550px;
+    min-width: 0;
+  }
+  .concept-scenarios-heading {
+    align-items: flex-start;
+    gap: 20px;
+  }
+  .concept-playback-controls {
+    gap: 10px;
+    justify-content: flex-end;
+  }
+  .concept-statusbar {
+    flex-wrap: wrap;
+  }
+  .concept-product-stage {
+    padding: 12px;
+  }
+  .concept--fullscreen .concept-hero {
+    height: auto;
+    min-height: 0;
+  }
+  .concept--fullscreen .concept-canvas {
+    height: 65dvh;
+    min-height: 470px;
+  }
+  .concept-controls {
+    gap: 6px;
+    padding: 8px;
+  }
+  .concept-controls button {
+    padding: 5px;
+    font-size: 10px;
+  }
+  .concept-cursor span {
+    max-width: 140px;
+    font-size: 10px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .concept-cursor::before {
+    animation: none !important;
+  }
+}
+
+.concept [data-demo-pressed="true"] {
+  box-shadow: inset 0 0 0 2px #a282c2;
+  transform: translateY(1px);
+}
+
+.concept-controls input[type="range"] {
+  width: 100px;
+  height: 27px;
+  margin: 0 5px;
+  vertical-align: middle;
+  accent-color: #765995;
+  cursor: ew-resize;
+}

@@ -97,3 +97,22 @@ that server-only bundle through a native private package import; Vite and TypeSc
 source during development. This avoids relying on development aliases in Vercel's emitted Node function. The server
 bundle is excluded from the published calendar package and the browser's `dist-demo` assets. Atomic publication
 allows the site and function build steps to run concurrently.
+
+The isolated `demo/concept` experiment composes public product entry points with deterministic local range fixtures; it changes no package runtime boundaries. `/concept` is owned by demo routing.
+
+Concept playback is a demo-only adapter around public components and DOM interactions. A cancellable actor handles live controls, pointer/key events, and scroll geometry. No library internals are imported for behavior. Non-calendar product stages are loaded lazily and only the active stage mounts.
+
+Each concept scenario owns one `demo/concept/scenarios/<product-id>/<scenario-id>.json` file with copy, initial state,
+and actions. Product JSON manifests own product copy, explore links, and ordered scene/preview IDs. `demo.json` owns
+version, startup product, tab order, and shared dates. Vite discovers scene files automatically; the validated catalog
+resolves manifest references and checks filename/ID agreement. Scene IDs never select imperative playback branches.
+Product adapters own component wiring, while the actor owns interaction mechanics and cancellation.
+
+Concept presentation uses one vertical section scroller between the product header and horizontal title rail.
+`useScenarioScroll` settles navigation before activating a scene; `ConceptScreens` mounts only the active component.
+`useDemoPresentation` owns responsive/fullscreen state and focus restoration. Mobile inline canvases use native
+`inert` plus pointer exclusion, with playback disabled. Fullscreen changes layout without remounting the current demo.
+
+Concept motion uses cancellable `requestAnimationFrame` interpolation in the demo adapter. Slider playback sends native input events into the public controlled zoom path; scrolling applies integer cumulative deltas so rounding does not shorten travel. Target reveals share the same cancellable scroll primitive. No CSS scaling or package-runtime animation layer is involved.
+
+Calendar concept hover playback uses browser hit testing for every unpressed pointer frame. The normal row/column resolver selects covered lanes beneath expanded cards; the actor never selects events directly or sends a click to reveal details.

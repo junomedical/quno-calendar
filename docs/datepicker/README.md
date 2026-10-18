@@ -74,3 +74,12 @@ button typography. Picker cadence/hour settings constrain offered choices; a com
 valid typed clocks by default and can enforce those settings with its own `forceCadence` prop.
 
 For clock selection without a date calendar, use the separate [Quno/Timepicker](../timepicker/README.md). Both features share the internal slot renderer while keeping independent public props and styles.
+
+The separate `/concept` playground includes this product and links back to its field guide. See [demo concept notes](../../demo/concept/README.md).
+
+The `/concept` scenes demonstrate range painting, endpoint resizing, and duration-preserving movement through live interaction playback with replay/reset and manual takeover.
+
+Each scenario’s initial values and action sequence live in its own `demo/concept/scenarios/datepicker/<scenario-id>.json`. The [product manifest](../../demo/concept/scenarios/datepicker.json) orders those scenario IDs; replay and reset restore the selected file’s values.
+
+Concept navigation keeps each demo with its title and one or two explanation paragraphs. Use the bottom title rail
+to scroll between scenarios; on mobile, open Full screen demo below the explanation to enable interaction.

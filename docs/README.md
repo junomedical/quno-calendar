@@ -106,3 +106,20 @@ viewport presentation subscriptions, reusable geometry and native observation or
 [Decision 122](./infinite-calendar/decisions.md#122---use-an-intermediate-shift-wheel-zoom-step) sets the current Shift-wheel step to 0.20.
 
 [Decision 124](./infinite-calendar/decisions.md#124---follow-the-current-shift-state-immediately) replaces Decision 123’s gesture lock with immediate current-Shift behavior, accepting momentum switching modes.
+
+## Demo approach experiment
+
+`/concept` offers a live five-product playground with a partial gradient intro, guided calendar scenarios, per-scenario recipe links, and an expanded demo view. Existing guides remain the documentation destinations.
+
+The `/concept` scenario catalog now covers nineteen live interactions, including view switching, themes, and 4/40/400-event density comparisons. The Infinite Calendar performance chapter includes the same live density exhibit and a copyable fixture recipe.
+
+The concept’s scenario copy, initial state, preview order, and playback steps are controlled by [individual scenario JSON files](../demo/concept/README.md#edit-scenarios-in-json).
+
+The concept zoom demo drags a real slider continuously; scroll and zoom timing/easing are editable in its scenario JSON.
+
+The concept overlap preview demonstrates movement-only hover through expanded cards; see [Infinite Calendar Decision 125](./infinite-calendar/decisions.md#125---reveal-overlap-lanes-during-demo-pointer-movement).
+
+Concept card text stays on single lines across zoom levels, with bounded hover expansion for details; see [Decision 126](./infinite-calendar/decisions.md#126---keep-concept-card-text-legible-across-zoom-levels).
+
+The concept now presents each scenario on one screen with its JSON-authored explanation, a persistent bottom title
+rail that scrolls between demos, and an explicit fullscreen button. Mobile previews become interactive only in fullscreen.

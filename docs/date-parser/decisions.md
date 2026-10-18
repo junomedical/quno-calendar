@@ -130,3 +130,14 @@ ceiling is 7 KiB; the earlier UI integration note's unchanged 6 KiB refers to it
   into its existing `DateRange` and reads the start clock without changing its public callbacks or keyboard behavior.
   UI date/clock models, shared contracts, dependency direction, and the 7 KiB parser ceiling remain unchanged.
   The [migration guide](../shared/migration.md#unreleased-paired-parser-endpoints) documents the public break.
+
+## Separate demo configuration — 2026-10-18
+
+[QUNO-026](../shared/decisions.md#quno-026---give-each-product-demo-its-own-json-file) moves this product’s concept
+scenarios into its own JSON file. Component contracts and scenario behavior remain unchanged.
+
+[QUNO-027](../shared/decisions.md#quno-027---store-every-scenario-in-its-own-json-file) further separates every scenario
+into its own file; the product JSON retains only metadata and ordered references.
+
+[QUNO-028](../shared/decisions.md#quno-028---navigate-demo-screens-with-a-bottom-title-rail) records viewport-sized
+scenario sections, JSON explanations, explicit fullscreen, and inert mobile previews shared by the concept demos.

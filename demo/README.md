@@ -23,3 +23,12 @@ flowchart LR
 | [`showcase`](./showcase) | Dense timeline data, product-like controls, and visual variants         | Stress and exploratory testing |
 
 The demo may use development dependencies and mock transports. Library code must never import from `demo/`.
+
+The separate [`concept`](./concept/README.md) folder owns the `/concept` demo approach experiment: immediate live canvas, partial gradient intro, product switcher, scenario tour, documentation links, and expanded playground.
+
+Concept scenarios now replay live pointer and keyboard interactions, with deterministic fixtures and cancellation on takeover. The Infinite Calendar guide reuses its density playground through a lazy exhibit.
+
+The concept’s scenario copy, initial state, preview order, and playback steps are controlled by [individual scenario JSON files](./concept/README.md#edit-scenarios-in-json).
+
+The concept now presents each scenario on one screen with its JSON-authored explanation, a persistent bottom title
+rail that scrolls between demos, and an explicit fullscreen button. Mobile previews become interactive only in fullscreen.
