@@ -4,13 +4,15 @@ import type { CalendarEvent, EventPrefetchPolicy, LoadEvents, ProjectEvents } fr
 import { useRuntimeData } from "#quno-internal/timeline/runtime/react/useRuntimeData";
 import { projectBuckets } from "#quno-internal/timeline/runtime/data/Preparation";
 
+const fixedWeek: EventPrefetchPolicy = () => ({ beforeDays: 7, afterDays: 7 });
+
 // Preserve the existing behavior assertions while supplying the new React boundary's inputs.
 export function useDataHarness({
   loadEvents,
   selectedIds,
   visibleDateKeys,
   eventVersion,
-  eventPrefetchPolicy,
+  eventPrefetchPolicy = fixedWeek,
   activeDraftDateKey,
   activeDraftLoadAnchorDateKey
 }: {

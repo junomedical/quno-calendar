@@ -22,12 +22,22 @@ rows unmount. Customize the alternate color with `--quno-calendar-alternate-surf
 - [Decisions](./decisions.md)
 - [Shared usage recipes](../shared/usage.md)
 
-Event requests use dates intersecting the committed viewport after a 100 ms settling delay. Rendering overscan and
-offscreen restore pins do not widen that window. Prefetch remains configurable; return zero before/after days for
-viewport-only reads. Optional `loadCalendarIds` separates API read coverage from `selectedCalendarIds`, so hiding rows,
+Event requests use the committed viewport plus its configured prefetch buffer after a 100 ms settling delay.
+The default is `{ beforeScreens: 1, afterScreens: 1 }`. A screen is the usable viewport height along the date axis,
+excluding the sticky header. Coverage follows actual date heights, row density, zoom, viewport resizing and excluded
+weekdays, within the bounded date model. Every positive screen distance also keeps at least the immediately adjacent
+included day warm on that side, even if only a tenth of the current day is visible. Fractional screen distances are supported. Return zero screens for
+viewport-only reads; explicit `{ beforeDays, afterDays }` policies remain supported. Rendering overscan and
+offscreen restore pins do not determine the screen buffer. Optional `loadCalendarIds` separates API read coverage from `selectedCalendarIds`, so hiding rows,
 including every row, can reuse an all-calendar read. Without it, read coverage follows the displayed selection.
 An adjacent in-flight edge date may finish through a layout correction; genuinely distant requests are cancelled.
 The focused demo passes its base calendar selection as read coverage while draft participants control displayed rows.
+
+Try the guide's preloading chapter: jump to the prefetched consultation, wait for loading to finish, then choose
+Back to starting date. Change Prefetch distance to 0, 0.5, 1, 2 or 3 screens on each side without clearing the cache.
+Cached cards appear immediately; returning reuses the earlier coverage. The status remains
+loading until every concurrent read settles, including failed or cancelled reads. Demo tracking is separate from
+the calendar's request scheduling. See [Decision 128](./decisions.md#128---demonstrate-concurrent-loading-and-verify-visible-stability).
 
 Showcase HTTP requests send `{ startDate, endDate, calendarIds, eventsPerYear }` to `/api/demo-events`.
 The server generates deterministic fixtures for the requested years and returns only matching date/resource records.
@@ -129,7 +139,7 @@ Products own recurrence expansion; saves and filters still refresh through `even
 ## Bundle budget
 
 JavaScript is limited to 50 KiB gzip and the optional stylesheet to 2 KiB gzip. The current artifacts measure
-32.52 KiB and 1.97 KiB gzip respectively (Node 23.10.0, gzip level 9). See [Decision 100](./decisions.md#100---reconcile-the-infinite-calendar-budget-after-branch-integration).
+32.92 KiB and 1.97 KiB gzip respectively (Node 23.10.0, gzip level 9). See [Decision 100](./decisions.md#100---reconcile-the-infinite-calendar-budget-after-branch-integration).
 
 ## Zoom continuity
 

@@ -255,10 +255,11 @@ const availabilitySnippet = `const [interactionMode, setInteractionMode] =
   }
 />`;
 
-const prefetchSnippet = `const eventPrefetchPolicy = () => ({
-  beforeDays: 3,
-  afterDays: 8
-});
+const prefetchSnippet = `const [prefetchScreens, setPrefetchScreens] = useState(1);
+const eventPrefetchPolicy = useCallback(() => ({
+  beforeScreens: prefetchScreens,
+  afterScreens: prefetchScreens
+}), [prefetchScreens]);
 
 <QunoInfiniteCalendar
   {...calendarProps}
@@ -837,9 +838,10 @@ export function IntegrationWalkthrough({ embedded = false }: { embedded?: boolea
           and backend capacity.
         </p>
         <p>
-          A bounded warm window loads likely destination dates before they enter the viewport. The calendar deduplicates
-          loaded and in-flight ranges, aborts obsolete requests when possible, and rejects stale responses. Nearby
-          navigation feels immediate while request and memory costs remain predictable.
+          A buffer measured in screens loads dates before they enter the viewport. One screen means the usable viewport
+          height along the date axis, so the buffer adapts to row density, zoom and window size. The calendar
+          deduplicates loaded and in-flight ranges, aborts obsolete requests when possible, and rejects stale responses.
+          Nearby navigation feels immediate while request and memory costs remain predictable.
         </p>
         <p>
           The focused demo sends startDate, endDate, calendarIds and dataset size to its HTTP endpoint. The server
@@ -848,9 +850,13 @@ export function IntegrationWalkthrough({ embedded = false }: { embedded?: boolea
         </p>
         <CodeBlock code={prefetchSnippet} title="Preload nearby dates with a bounded policy" />
         <Callout>
-          The loaded-events strip shows every event returned into the warm cache, including the July 13 consultation,
+          The loaded-events strip shows every event returned into the warm cache, including the July 9 consultation,
           before that date is visible. Then jump to the prefetched date: the same consultation appears immediately in
-          the calendar while the request counter may advance only for dates beyond the new viewport.
+          the calendar while the request counter may advance only for missing dates around the new viewport. Wait until
+          loading finishes, then choose Back to starting date to reuse the earlier cache. The loading message stays
+          active until every concurrent request finishes. Change Prefetch distance to adjust the screens kept warm on
+          each side. Any positive distance keeps at least the next and previous included day warm, even when a dense day
+          fills several screens; zero loads the visible viewport only. Existing cached data is retained.
         </Callout>
         <DemoBreakout>
           <LazyArticleDemo label="event preloading example">
@@ -1006,7 +1012,7 @@ export function IntegrationWalkthrough({ embedded = false }: { embedded?: boolea
 
       <ArticleSection id="package-footprint" number="26" title="Ship Infinite Calendar independently">
         <p>
-          Infinite Calendar JavaScript is 32.52 KiB gzip. Its optional stylesheet is a separate 1.97 KiB gzip import;
+          Infinite Calendar JavaScript is 32.92 KiB gzip. Its optional stylesheet is a separate 1.97 KiB gzip import;
           neither number includes React or React DOM supplied by the application.
         </p>
         <p>

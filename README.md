@@ -36,6 +36,7 @@ import { parseDateInput, tokenizeDateInput } from "@quno/calendar/date-parser";
   Date-only anchors preserve the displayed day through editor completion without moving horizontal time/resource scrolling.
   Event loading uses settled viewport dates independently of rendering overscan. Optional `loadCalendarIds` keeps
   read coverage stable when consumers hide rows; it defaults to the displayed selection.
+  Prefetch distance defaults to one screen on each side, with at least one adjacent day per enabled side, and is configurable through `eventPrefetchPolicy`.
   Both zoom orientations commit time geometry, virtual windows and their wheel anchor before paint.
   Time labels and grid cadence switch immediately at their readable zoom thresholds.
   Alternating resource shading stays consistent as rows enter or leave the viewport.
@@ -82,6 +83,9 @@ Start with the [documentation index](./docs/README.md). Shared records cover [us
 [taxonomy](./docs/shared/taxonomy.md), [testing](./docs/shared/testing.md), and
 [cross-product decisions](./docs/shared/decisions.md). Each product directory owns its own overview and decision log.
 Release history remains in the [changelog](./CHANGELOG.md).
+
+The Infinite Calendar preloading chapter demonstrates cached navigation in both directions and keeps its loading
+status active until all concurrent reads finish.
 
 ## Development
 

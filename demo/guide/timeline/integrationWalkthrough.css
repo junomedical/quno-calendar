@@ -389,8 +389,17 @@
 .article-focus-controls,
 .article-prefetch-controls {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 7px;
+}
+
+.article-prefetch-controls label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
 }
 
 .article-prefetch-range {

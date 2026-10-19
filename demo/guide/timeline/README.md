@@ -48,6 +48,16 @@ calendar imports the public `@quno/calendar/infinite-calendar` entrypoint.
 The prefetch loading exhibit supplies its selected resource ID before calendar metadata arrives. The loading fallback
 waits for a matching resource before the hidden timeline mounts and requests events.
 
+The prefetch exhibit shares pending-request tracking with the showcase HTTP loader while retaining local fixtures.
+Its loading message stays active until all reads settle. Jump to the prefetched date, then use Back to starting date
+after loading finishes to verify reuse of the earlier cache. Tests assert immediate cached cards, no redundant
+return reads, and contained control geometry.
+
+Prefetch distance is consumer-owned state: choose 0, 0.5, 1, 2 or 3 usable viewport heights on each side. The policy
+updates without clearing cached events. The fixture's July 9 consultation demonstrates immediate cached navigation.
+Every positive distance also warms at least one adjacent included day per side, so very tall days still preload
+their neighbors. Zero disables adjacent prefetch on that side.
+
 Each chapter leads with a concrete outcome and the problem it solves. Behavior and implementation follow only after
 that context, and control instructions remain in callouts beside the relevant live example.
 
@@ -55,7 +65,7 @@ Every live calendar expands through a shared viewport overlay rather than the br
 the same React calendar instance mounted, so its visible date, intra-date offset, and loaded event cache survive the
 transition.
 
-The payload chapter reports the 0.6.3 Infinite Calendar artifacts: 32.52 KiB gzip JavaScript with a 50 KiB ceiling,
+The payload chapter reports the 0.6.3 Infinite Calendar artifacts: 32.92 KiB gzip JavaScript with a 50 KiB ceiling,
 and 1.97 KiB gzip optional CSS with a 2 KiB ceiling. The shared production profile supplies the same facts.
 
 The performance chapter includes a lazy Quiet/Busy/Packed playground with exact 4/40/400 events per day, view/theme controls, and a complete range-loader recipe.

@@ -291,22 +291,31 @@ const loadEvents: LoadEvents = async ({ startDate, endDate, calendarIds, signal 
 
 Keep `loadEvents` referentially stable with `useCallback` when it closes over application state. Change `eventVersion` only for broad persisted-data invalidation; accepted moves and individual saves can use the calendar's targeted cache patches. Obsolete and out-of-order responses are ignored even if an API client does not honor `signal`. Failed visible requests retry after 250 ms and 1 second, then become eligible again on a later invalidation or visibility change.
 
-By default, the loader keeps seven calendar days warm before the first rendered date and seven after the last rendered date. It only requests dates that are neither loaded nor already in flight. When missing dates sit on both sides of an already-loaded window, they are sent as separate ranges rather than refetching the cached middle.
+By default, the loader keeps one screen warm on either side of the usable viewport. A screen is the viewport height
+minus its sticky day header, measured along the date axis using actual date geometry. Row density, zoom, excluded
+weekdays and viewport size determine how many dates fit. It only requests dates that are neither loaded nor already
+in flight. Missing ranges on either side of a cached window load separately without refetching the cached middle.
+Each positive screen distance keeps at least one adjacent included day warm on that side, even if its pixel buffer
+fits entirely inside the visible day. Excluded weekdays are skipped. Setting a side to zero disables that minimum.
 
 Replace the policy when a product has a different latency or navigation profile:
 
 ```tsx
 import type { EventPrefetchPolicy } from "@quno/calendar/infinite-calendar";
+import { useCallback, useState } from "react";
 
-const eventPrefetchPolicy: EventPrefetchPolicy = ({ visibleDateKeys, selectedCalendarIds }) => {
-  const navigationBuffer = selectedCalendarIds.length > 20 ? 2 : Math.ceil(visibleDateKeys.length / 2);
-  return { beforeDays: navigationBuffer, afterDays: navigationBuffer * 2 };
-};
+const [prefetchScreens, setPrefetchScreens] = useState(1);
+const eventPrefetchPolicy = useCallback<EventPrefetchPolicy>(
+  () => ({ beforeScreens: prefetchScreens, afterScreens: prefetchScreens }),
+  [prefetchScreens]
+);
 
 <QunoInfiniteCalendar {...calendarProps} eventPrefetchPolicy={eventPrefetchPolicy} />;
 ```
 
-Return `{ beforeDays: 0, afterDays: 0 }` to load only rendered dates. Keep a custom policy referentially stable when possible; changing it recalculates the desired warm window but does not invalidate dates that are already fresh.
+Return `{ beforeScreens: 0, afterScreens: 0 }` to load only visible dates. Fractional distances such as `0.5` work.
+Keep the callback stable with `useCallback`; changing the distance recalculates coverage without invalidating fresh
+dates. Explicit `{ beforeDays: 7, afterDays: 7 }` retains a fixed calendar-week buffer when a product needs it.
 
 When navigation reaches a date before its events load, the date/resource grid is already real and interactive. Late events are added without receiving browser focus. In the horizontal view:
 
@@ -330,7 +339,29 @@ Repository example: the preloading and late-data chapters in
 [`ArticleRecipeDemos.tsx`](../../demo/guide/timeline/ArticleRecipeDemos.tsx) and
 [`ArticleDemos.tsx`](../../demo/guide/timeline/ArticleDemos.tsx). The preloading exhibit also lists
 successful loader results outside the calendar, making warm events visible before their dates enter the rendered
-window.
+window. Jump to the prefetched date, wait until loading finishes, then choose **Back to starting date** to verify
+the earlier cache is reused. A new warm window can request missing edges while its cached cards appear immediately.
+
+For an external loading indicator, count every in-flight call rather than tracking only the latest request:
+
+```tsx
+const [pendingReads, setPendingReads] = useState(0);
+const loadEvents = useCallback<LoadEvents>(
+  async (request) => {
+    setPendingReads((count) => count + 1);
+    try {
+      return await api.loadEvents(request);
+    } finally {
+      setPendingReads((count) => count - 1);
+    }
+  },
+  [api]
+);
+const isFetching = pendingReads > 0;
+```
+
+Forward the complete request, including its abort signal, and let errors propagate to the calendar's retry handling.
+The demo's shared tracker follows this pattern for both fixed guide fixtures and HTTP queries.
 
 The repository demo starts with an instant response from its `POST /api/demo-events` mock endpoint so its normal
 interaction path does not introduce a delayed full event-card paint after a quick create/cancel flow. Its **API delay**
@@ -377,7 +408,7 @@ persistence. Try navigating to another month in Network tools, editing an appoin
 
 ### Read coverage while hiding calendar rows
 
-When the endpoint returns all owners, pass their IDs as `loadCalendarIds` while `selectedCalendarIds` controls displayed rows. Hidden or empty rows then reuse the same read coverage. Omit this prop for loaders scoped to selected calendars. `eventPrefetchPolicy={() => ({ beforeDays: 0, afterDays: 0 })}` limits new reads to settled viewport dates. Render overscan remains available for smooth scrolling and does not expand this request window.
+When the endpoint returns all owners, pass their IDs as `loadCalendarIds` while `selectedCalendarIds` controls displayed rows. Hidden or empty rows then reuse the same read coverage. Omit this prop for loaders scoped to selected calendars. `eventPrefetchPolicy={() => ({ beforeScreens: 0, afterScreens: 0 })}` limits new reads to settled viewport dates. Render overscan remains available for smooth scrolling and does not expand this request window.
 
 ## Vertical Planner
 

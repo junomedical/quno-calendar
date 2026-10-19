@@ -2,6 +2,19 @@
 
 Version `0.6.0` presents Infinite Calendar, Datepicker, Date Input, and Date Parser as independent package surfaces. There are no legacy JavaScript exports or wrapper packages.
 
+## Unreleased: screen-based event prefetch
+
+Infinite Calendar's default changes from seven calendar days on each side to one usable viewport height on each
+side. Configure distance with `eventPrefetchPolicy={() => ({ beforeScreens: 1, afterScreens: 1 })}`; fractions and zero
+are supported. The same screen count adapts to row density, zoom, excluded weekdays and viewport size.
+Each positive side also includes at least one adjacent included day. Zero retains viewport-only coverage on that
+side, even when the opposite side has a positive buffer. This covers very tall days with only a small portion visible.
+
+Existing `{ beforeDays, afterDays }` policies retain their behavior. To preserve the former default explicitly, use
+`eventPrefetchPolicy={() => ({ beforeDays: 7, afterDays: 7 })}`. `EventPrefetchWindow` now accepts either pair; narrow
+with `"beforeScreens" in window` before reading its screen fields, or `"beforeDays" in window` for day fields.
+Changes to the policy preserve fresh cached dates. Request date/resource shapes and public entrypoints are unchanged.
+
 ## Unreleased: remove zoom transparency
 
 Infinite Calendar time labels and grid cadence switch immediately at the original zoom thresholds. The transparency-specific

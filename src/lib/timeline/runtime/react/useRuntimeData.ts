@@ -17,11 +17,13 @@ import { requestClock } from "#quno-internal/timeline/runtime/browser/requestClo
 export function useRuntimeData({
   props,
   visibleDates,
-  anchorDate
+  anchorDate,
+  prefetchedDates
 }: {
   props: CalendarInternalViewProps;
   visibleDates: readonly IsoDate[];
   anchorDate: IsoDate;
+  prefetchedDates?: readonly IsoDate[];
 }) {
   const [acquisition] = useState(() => new Acquisition());
   const [buckets, setBuckets] = useState(acquisition.repository.read);
@@ -29,19 +31,19 @@ export function useRuntimeData({
   const appearance = useAppearingEvents({ requestedEventIds: props.appearingEventIds });
   const appearanceRef = useRef(appearance);
   appearanceRef.current = appearance;
-  const visibleKey = JSON.stringify(visibleDates);
+  const calendarIds = props.loadCalendarIds ?? props.selectedCalendarIds;
+  const policy = props.eventPrefetchPolicy ?? defaultEventPrefetchPolicy;
+  const visibleKey = JSON.stringify(prefetchedDates ?? loadDates({ visibleDates, calendarIds, policy }));
   useEffect(() => {
     const timer = setTimeout(() => setSettledDates(JSON.parse(visibleKey) as IsoDate[]), 100);
     return () => clearTimeout(timer);
   }, [visibleKey]);
-  const calendarIds = props.loadCalendarIds ?? props.selectedCalendarIds;
   const calendarKey = JSON.stringify(calendarIds);
   const ids = useMemo(() => JSON.parse(calendarKey) as string[], [calendarKey]);
-  const policy = props.eventPrefetchPolicy ?? defaultEventPrefetchPolicy;
   const draftDate = props.activeDraft ? (eventDateKey(props.activeDraft.event) as IsoDate) : undefined;
   const retainedDates = useRef<readonly IsoDate[]>(settledDates);
   const dates = useMemo(() => {
-    const next = loadDates({ visibleDates: settledDates, calendarIds: ids, policy });
+    const next = settledDates;
     if (!draftDate) {
       retainedDates.current = next;
       return next;

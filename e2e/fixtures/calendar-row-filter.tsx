@@ -10,6 +10,8 @@ import "@quno/calendar/infinite-calendar/styles.css";
 const calendars = Array.from({ length: 135 }, (_, index) => ({ id: `row-${index}`, name: `Row ${index}` }));
 const allIds = calendars.map(({ id }) => id);
 const settings = { excludedWeekdays: [], rowHeight: 58, dayHeaderHeight: 42 };
+// This fixture deliberately refreshes earlier dates after owner expansion hides them.
+const fixedWeek = () => ({ beforeDays: 7, afterDays: 7 });
 
 function Fixture() {
   const ref = useRef<QunoInfiniteCalendarHandle>(null);
@@ -90,6 +92,7 @@ function Fixture() {
         initialDateKey="2026-10-08"
         loadEvents={loadEvents}
         eventVersion={version}
+        eventPrefetchPolicy={fixedWeek}
         style={{ height: 600, width: 1000 }}
         renderEvent={({ event, style }) => <div style={style}>{event.title}</div>}
       />

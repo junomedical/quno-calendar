@@ -1490,3 +1490,61 @@ contracts are unchanged. Verify fixed bounds during scroll, retained DOM/data id
 geometry, label widths, playback outcomes, and mobile/fullscreen behavior.
 
 [QUNO-029](../shared/decisions.md#quno-029---preserve-scenario-text-layout-during-scrolling) keeps complete concept explanation layouts mounted and reserves playback/status space, preventing text jumps during scrolling and activation.
+
+## 128 - Demonstrate Concurrent Loading And Verify Visible Stability
+
+Date: 2026-10-19
+Status: Accepted; refines Decision 043's preloading exhibit and Decision 116-runtime's verification
+
+Share demo-only pending-request tracking between the HTTP showcase loader and the fixed-fixture preloading guide.
+Increment for each invocation and decrement in `finally`; only zero pending reads means idle. A newer response must
+not hide an older pending read. Preserve request arguments, abort signals, results, errors and stable loader identities.
+Keep the guide's deterministic fixtures and delay. Add Back to starting date so readers can verify cached navigation
+after the destination's missing ranges settle. No public package or runtime scheduling changes.
+
+Measure participant-edit and save stability using the same semantic date and viewport-relative day/card positions.
+Bounded-window recentering may translate internal `scrollTop` without moving those positions. Keep focus, lane state,
+horizontal-scroll and late-mutation checks. Verify overlapping completion order and failures/aborts in unit tests;
+browser coverage checks immediate cached cards, return-request counts and control containment.
+
+## 129 - Configure Prefetch Distance In Screens
+
+Date: 2026-10-19
+Status: Accepted; supersedes Decision 051's seven-day default and refines Decision 107's viewport loading boundary
+
+Default to one screen before and one after the usable viewport. `eventPrefetchPolicy` may return
+`{ beforeScreens, afterScreens }` with nonnegative fractional distances; a screen is viewport height minus the sticky
+day-header height, measured along the date axis in either orientation. Resolve coverage against actual logical date
+extents, including dense rows, vertical zoom and excluded weekdays. Do not approximate screens by visible-date counts.
+Clamp coverage to the bounded date sequence; existing idle recentering extends that sequence. Normalize negative or
+nonfinite values to zero. Preserve explicit `{ beforeDays, afterDays }` policies and their calendar-day semantics.
+
+Subscribe acquisition planning to the live engine independently of React's rendered-window publication. A buffer edge
+can change while the same date remains visible. Only changed requested-date keys publish React state and restart the
+100 ms settling gate. Resizes, layout changes and policy updates recalculate coverage; accepted and pending dates
+remain deduplicated. Drafts retain earlier coverage and their draft/anchor dates; screen padding comes from the actual
+viewport rather than offscreen pins. Keep the 120-date cache bound and stale-response guards.
+
+Expose Prefetch distance as a guide control backed by consumer-owned state and a stable policy callback. Offer
+0, 0.5, 1, 2 and 3 screens per side; zero disables new adjacent reads and narrowing preserves fresh cached data.
+Use July 9 for the deterministic cached-navigation example. Unit tests cover exact pixel boundaries, fractional
+distances, density, vertical zoom, excluded weekdays and live-engine subscription/cleanup. Browser tests compare
+requested coverage against measured date heights, change distance live, and check desktop/phone control containment.
+
+## 130 - Keep An Adjacent Day Warm For Every Enabled Screen Buffer
+
+Date: 2026-10-19
+Status: Accepted; refines Decision 129's screen coverage with a minimum adjacent-day guarantee
+
+For each positive screen distance, union the pixel-based buffer with the immediately adjacent included date outside
+the visible date window on that side. Dense calendars can show only a tenth of one day; they must still warm the next
+day when forward prefetch is enabled, and the previous day when backward prefetch is enabled. Larger pixel windows
+may cover more dates. Use the included date sequence so weekends or other excluded weekdays are skipped; stop at the
+bounded model's available edges and let the existing idle recenter extend the model.
+
+Apply the floor independently to each side, including positive fractional distances. Zero, negative and nonfinite
+values retain the zero-distance opt-out; explicit calendar-day policies remain unchanged. Preserve loaded/pending
+deduplication and the existing cache bound. The guide explains the floor alongside its existing distance control.
+Unit coverage checks a tenth-day viewport, asymmetric/zero/invalid distances, excluded weekends and bounded edges.
+Chromium checks 135-calendar geometry with less than a tenth-day visible, both adjacent dates in the first read,
+and cached coverage while scrolling within that same date.

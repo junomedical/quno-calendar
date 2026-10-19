@@ -7,6 +7,7 @@
 | `runtime/data/requests.ts`                      | Prefetch normalization and contiguous request groups                                         |
 | `runtime/data/Preparation.ts`                   | Resource membership, draft-source suppression, cached collision metrics and local projection |
 | `runtime/react/useRuntimeData.ts`               | Settled viewport loading, public mutation callbacks and appearance status                    |
+| `runtime/react/useViewportPrefetch.ts`          | Live engine subscription and configurable screen-distance acquisition window                 |
 | `infinite/events/layout`                        | Tested interval clipping, deterministic lane assignment and layer-specific metrics           |
 | `infinite/events/loading/useAppearingEvents.ts` | Independent appearance timers and one-time consumption of requested IDs                      |
 
