@@ -84,3 +84,6 @@ Single-date fields keep native draft text without offering range completion and 
 
 Works with datepicker hides the duplicate picker selection header through the public class override, leaving the
 input as the range summary and retaining normal calendar navigation and selection.
+
+The concept canvas follows the computer's light/dark setting while this product and the explainer retain their
+existing light presentation on bright panels; see [QUNO-037](../shared/decisions.md#quno-037---follow-system-appearance-around-light-demo-panels).

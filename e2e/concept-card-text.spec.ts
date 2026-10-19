@@ -37,7 +37,9 @@ async function openCalendar(page: Page, vertical: boolean) {
 }
 
 async function setZoom(page: Page, zoom: string) {
-  await page.locator('[data-action="zoom"]').fill(zoom);
+  const slider = page.locator('[data-action="zoom"]');
+  zoom = String(Math.max(Number(await slider.getAttribute("min")), Number(zoom)));
+  await slider.fill(zoom);
   await expect(page.locator(".concept-calendar-workspace")).toHaveAttribute("data-zoom", zoom);
   // Controlled zoom commits its projection in the following layout frame.
   await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));

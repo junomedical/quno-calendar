@@ -92,3 +92,6 @@ selection mode, with no extra mode switch, hint or result below it. See QDP-131â
 
 Shared time choices preserve visible option positions during selection and reveal external offscreen choices only
 as needed; opening still reveals the selected hour. See shared QUNO-036.
+
+The concept canvas follows the computer's light/dark setting while this product and the explainer retain their
+existing light presentation on bright panels; see [QUNO-037](../shared/decisions.md#quno-037---follow-system-appearance-around-light-demo-panels).

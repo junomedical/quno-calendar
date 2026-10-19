@@ -499,3 +499,16 @@ retain their finite scenes and short tours.
 - Consequences: Both standalone Timepicker and Datepicker use one private reveal hook with semantic hour-list
   dependencies. Native pointer/keyboard selection keeps geometry and focus stable, while external offscreen values,
   changed hour availability and reopening retain selected-slot reveal. No public names or styles change.
+
+## QUNO-037 — Follow System Appearance Around Light Demo Panels
+
+- Date: 2026-10-19
+- Status: Accepted; extends QUNO-032's shared concept presentation
+- Decision: Follow prefers-color-scheme at first render and on live preference changes for the concept shell and
+  surrounding product canvas. Keep the floating explainer and non-calendar working controls in their existing light
+  style, with bright panels and an explicit light color-scheme. Never recolor their parser tokens, selected dates
+  or native input presentation. Calendar's system-default palette is defined in its own decision record.
+- Consequences: A demo-owned media-query hook subscribes with cleanup. Appearance changes update in place without
+  restarting playback, selection, editors or the mounted product. Scope all CSS to /concept; package styles and
+  other routes retain their contracts. Verify both themes, live changes, bright surfaces and unchanged explainer
+  colors on desktop, phone and fullscreen.

@@ -83,7 +83,7 @@ There is no date/count status row or Saved/Moved corner message. Ordinary schedu
 working day, regular one-hour durations, 32 additional varied titles and 2× zoom. Density presets project 4/40/400
 appointments from the same data. Compact titles and clocks stay on one line; hover reveals bounded details.
 
-Scroll loops advance 900 px over one second with two-second pauses. Zoom quickly moves 8 → 0.5, explores 900 px, then
+Scroll loops advance 900 px over one second with two-second pauses. Zoom quickly moves 8 → the effective minimum, explores 900 px, then
 returns to 8 and scrolls back. Orientation changes include next-day pans and return to the initial day. Themes end
 in Light. Density ends in Quiet/horizontal. Reschedule moves three different appointments forward, then back in
 reverse order. Overlap hovers each underlying lane, moves outside all three and holds every card closed for 1500 ms.
@@ -171,3 +171,17 @@ Guide footers contain only Previous and Next, with no counter or duplicate title
 (or current product) action opens contents and matches the 34 px collapse control. Calendar docks omit small labels,
 retain accessible group names and match the fullscreen control’s 40 px height. Controlled drafts use the public
 active-draft move callback; their editor follows dragging, Save commits the new slot and Cancel discards it.
+
+## Appearance and zoom bounds
+
+The shell and surrounding canvas follow the system color scheme on mount and live changes. Keep the explainer and
+Datepicker, Date Input, Timepicker and Date Parser controls in their original light styles on bright panels. Ordinary
+Calendar scene JSON uses theme: system; Theming retains its explicit Light cycle. Theme updates retain mounted state.
+
+useCalendarZoom shares configured hours/label geometry with the calendar and observes viewport width. Horizontal
+minimum fills the visible time axis, rounded up to 0.01 and bounded below by 0.5; vertical minimum is 0.5, maximum 8.
+Slider playback reads those bounds. Native buttons disable at each limit, and out-of-range wheel requests release
+pending intent so reversing remains responsive. No package or other route styles change.
+
+Dark Calendar creation drafts use a dark green surface and light dashed border, keeping light title/clock text
+readable. Light drafts retain their existing fill, and saved glints and cancellation fades remain in place.

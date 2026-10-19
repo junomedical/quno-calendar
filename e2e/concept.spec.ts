@@ -93,7 +93,8 @@ test("scroll and zoom playback change live geometry, with a rounded non-intercep
   await finished(page);
   await expect(page.locator(".concept-calendar-workspace")).not.toHaveAttribute("data-visible-date", "2026-10-19");
   await play(page, "Zoom");
-  await expect(page.locator(".concept-calendar-workspace")).toHaveAttribute("data-zoom", "0.5");
+  const minimum = (await page.getByRole("slider", { name: "Zoom level" }).getAttribute("min"))!;
+  await expect(page.locator(".concept-calendar-workspace")).toHaveAttribute("data-zoom", minimum);
   const before = await page.locator('[data-event-id="2026-10-19-event-0"]').boundingBox();
   await finished(page);
   expect(Number(await page.locator(".concept-calendar-workspace").getAttribute("data-zoom"))).toBe(8);

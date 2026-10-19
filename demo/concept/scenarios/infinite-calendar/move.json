@@ -5,7 +5,7 @@
   "anchor": "drag-create",
   "initial": {
     "view": "preferred",
-    "theme": "light",
+    "theme": "system",
     "density": 22,
     "zoom": 2,
     "controls": []

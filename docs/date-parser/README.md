@@ -106,3 +106,6 @@ Resolve ambiguity compares 03/04/2026 with 04/13/2026 by typing, then restores t
 The concept introduction opens with `12/01 10:00` already recognized, with clock support enabled, and remains idle
 until a chapter is chosen. Resolve a phrase cycles six examples: next Friday, tomorrow 10:30, past 3 days,
 22 July 1980, an explicit October range and next month. Each completed phrase holds for 1700 ms (QDPR-012).
+
+The concept canvas follows the computer's light/dark setting while this product and the explainer retain their
+existing light presentation on bright panels; see [QUNO-037](../shared/decisions.md#quno-037---follow-system-appearance-around-light-demo-panels).

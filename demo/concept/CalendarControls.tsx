@@ -8,6 +8,7 @@ export function CalendarControls({
   density,
   setDensity,
   zoom,
+  zoomRange,
   setZoom
 }: {
   controls: readonly string[];
@@ -18,6 +19,7 @@ export function CalendarControls({
   density: number;
   setDensity: (density: number) => void;
   zoom: number;
+  zoomRange: { minimum: number; maximum: number };
   setZoom: (zoom: number) => void;
 }) {
   if (!controls.length) return null;
@@ -62,20 +64,28 @@ export function CalendarControls({
       )}
       {controls.includes("zoom") && (
         <fieldset aria-label="Zoom controls">
-          <button aria-label="Zoom out" onClick={() => setZoom(Math.max(0.5, zoom - 0.2))}>
+          <button
+            aria-label="Zoom out"
+            disabled={zoom <= zoomRange.minimum}
+            onClick={() => setZoom(Math.max(zoomRange.minimum, Number((zoom - 0.2).toFixed(2))))}
+          >
             −
           </button>
           <input
             type="range"
             data-action="zoom"
             aria-label="Zoom level"
-            min="0.5"
-            max="8"
+            min={zoomRange.minimum}
+            max={zoomRange.maximum}
             step="0.01"
             value={zoom}
             onChange={(event) => setZoom(Number(event.target.value))}
           />
-          <button aria-label="Zoom in" onClick={() => setZoom(Math.min(8, zoom + 0.2))}>
+          <button
+            aria-label="Zoom in"
+            disabled={zoom >= zoomRange.maximum}
+            onClick={() => setZoom(Math.min(zoomRange.maximum, Number((zoom + 0.2).toFixed(2))))}
+          >
             +
           </button>
         </fieldset>

@@ -70,3 +70,6 @@ independent from date selection; see QTP-004.
 
 Standalone concept chapters show cadence choices below the clock, without a second Selected time output or
 business-hours checkbox. Authored scene hours remain in effect. See QTP-005.
+
+The concept canvas follows the computer's light/dark setting while this product and the explainer retain their
+existing light presentation on bright panels; see [QUNO-037](../shared/decisions.md#quno-037---follow-system-appearance-around-light-demo-panels).

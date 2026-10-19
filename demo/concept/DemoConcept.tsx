@@ -6,12 +6,15 @@ import { ConceptTour } from "./ConceptTour";
 import { catalog, previews, scenarioDocument } from "./scenarioCatalog";
 import { usePlayback, type Session } from "./usePlayback";
 import { useDemoPresentation } from "./useDemoPresentation";
+import { useSystemTheme } from "./useSystemTheme";
 import "./concept.css";
 import "./playground.css";
 import "./navigation.css";
 import "./calendarPresentation.css";
 import "./fullscreenTour.css";
+import "./conceptTheme.css";
 export function DemoConcept() {
+  const theme = useSystemTheme();
   const [session, setSession] = useState<Session>(() => ({
     product: scenarioDocument.startProduct,
     scene: previews[scenarioDocument.startProduct][0],
@@ -48,6 +51,7 @@ export function DemoConcept() {
     <main
       className={`concept ${fullscreen ? "concept--fullscreen" : ""} concept--guided`}
       data-product={session.product}
+      data-theme={theme}
       data-playing={actions.playing}
       data-scene={session.scene}
     >

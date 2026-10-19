@@ -5,7 +5,7 @@
   "anchor": "infinite-view",
   "initial": {
     "view": "preferred",
-    "theme": "light",
+    "theme": "system",
     "density": 22,
     "zoom": 2,
     "controls": []

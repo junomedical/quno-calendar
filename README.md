@@ -130,3 +130,6 @@ The Date Parser concept opens with `12/01 10:00` already resolved. Its phrase ch
 
 Time choices keep a visible selected minute under the pointer instead of scrolling its hour to the top. Initial
 opening and external offscreen selections retain automatic reveal.
+
+Concept backgrounds follow the computer's light/dark preference, while explainers and non-calendar controls stay
+light on bright panels. Calendar defaults follow the system palette, and demo zoom limits track its viewport.

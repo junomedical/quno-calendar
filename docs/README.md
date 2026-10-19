@@ -146,3 +146,7 @@ Date Parser’s ready date/time introduction and six-example phrase chapter are 
 
 Concept guide footers now contain only Previous/Next with contextual contents actions (QUNO-035). Calendar creation
 drafts support movement before Save, and compact control docks match fullscreen height (Infinite Calendar 149).
+
+Concept system appearance and preserved light control panels are recorded in
+[QUNO-037](./shared/decisions.md#quno-037---follow-system-appearance-around-light-demo-panels); Calendar Decision 151
+aligns its default palette and responsive zoom controls.

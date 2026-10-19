@@ -243,3 +243,8 @@ A **caption** is optional authoring metadata; no label appears under the rounded
 counts appointments across all resources per day; ordinary scenes use 22, while Quiet/Busy/Packed use 4/40/400.
 **Draft focus** selects only the edited doctor while retaining all-doctor read coverage. **Glint** is a saved-card
 highlight; **cancellation fade** is the public draft-release animation, both presented by demo-owned styling.
+
+The concept demo's **effective zoom range** uses the viewport-fill floor as its horizontal slider minimum (rounded
+up to 0.01), 0.5 vertically, and 8 at the maximum. This is consumer-owned demo behavior; the library's viewport-fill
+zoom floor above remains a rendering contract. **System appearance** means the current prefers-color-scheme value,
+not the Calendar Theming chapter's explicit palette selection.

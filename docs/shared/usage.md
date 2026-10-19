@@ -1188,7 +1188,7 @@ horizontal/vertical, theming, event density, creation and rescheduling. JSON sel
 control, placed immediately left of fullscreen along the same bottom edge. No date/count or corner Saved/Moved
 message appears. Ordinary schedules use 22 varied hour-long appointments at 2× zoom; density offers 4/40/400.
 
-Scroll advances 900 px in one second, pauses two seconds and continues downward. Zoom moves 8 → 0.5, explores, then returns
+Scroll advances 900 px in one second, pauses two seconds and continues downward. Zoom moves 8 → the viewport-fitting minimum (at least 0.5), explores, then returns
 to 8 and scrolls back. The explanation highlights Shift + scroll as a tag. Orientation switches also pan to the next
 day. Theme ends in Light, density ends in Quiet/horizontal, rescheduling moves three appointments out and back, and
 overlap moves outside all three cards for a closed hold. Creation checkpoints bound automatic edits per cycle.
@@ -1244,3 +1244,8 @@ keep only the controls. In creation, drag the active draft to update its editor,
 
 Selecting a visible time option keeps the list in place. The shared Timepicker/Datepicker renderer reveals its
 initial hour and later offscreen values, while equivalent enabled-hour arrays do not reset manually chosen scroll.
+
+The concept shell and canvas follow live system appearance. The explainer and non-calendar controls retain their
+light styles on bright panels. Calendar defaults to the system palette except for its explicit Theming chapter.
+Zoom controls use the calendar's viewport-fitting horizontal minimum (0.5 vertically) and maximum 8, updating on
+resize and orientation changes. These choices belong to the demo; consumer styles and public defaults are unchanged.
