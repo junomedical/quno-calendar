@@ -67,8 +67,9 @@ for (const vertical of [false, true]) {
     await scene(page, "Infinite scroll", vertical);
     await pauseCalendarScene(page);
     await restartCalendarScene(page);
-    const samples = await page.evaluate(async () => {
+    const { values: samples, times } = await page.evaluate(async () => {
       const values: number[] = [];
+      const times: number[] = [];
       let started = false;
       const deadline = performance.now() + 5000;
       while (
@@ -81,10 +82,13 @@ for (const vertical of [false, true]) {
         // The date stays mounted while offscreen resource cells may mount after travel has begun.
         // Measure visible travel: the infinite viewport may rebase its internal scroll offset.
         const reference = document.querySelector('[data-testid="calendar-day"][data-date="2026-10-20"]');
-        if (reference && started) values.push(-reference.getBoundingClientRect().top);
+        if (reference && started) {
+          values.push(-reference.getBoundingClientRect().top);
+          times.push(performance.now());
+        }
         await new Promise(requestAnimationFrame);
       }
-      return values;
+      return { values, times };
     });
     expect(new Set(samples).size).toBeGreaterThan(25);
     expect(samples.at(-1)! - samples[0]).toBeGreaterThanOrEqual(800);
@@ -97,6 +101,13 @@ for (const vertical of [false, true]) {
       )
     ).toBe(true);
     expect(Math.max(...samples.slice(1).map((value, i) => Math.abs(value - samples[i])))).toBeLessThan(100);
+    let heldSince = 0;
+    let longestHold = 0;
+    for (let index = 1; index < samples.length; index++) {
+      if (Math.abs(samples[index] - samples[index - 1]) > 1) heldSince = index;
+      else longestHold = Math.max(longestHold, times[index] - times[heldSince]);
+    }
+    expect(longestHold).toBeGreaterThanOrEqual(1900);
   });
 }
 test("manual takeover stops interpolated zoom without a trailing animation", async ({ page }) => {

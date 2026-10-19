@@ -83,7 +83,7 @@ There is no date/count status row or Saved/Moved corner message. Ordinary schedu
 working day, regular one-hour durations, 32 additional varied titles and 2× zoom. Density presets project 4/40/400
 appointments from the same data. Compact titles and clocks stay on one line; hover reveals bounded details.
 
-Scroll loops advance 900 px over one second with 350 ms pauses. Zoom quickly moves 8 → 0.5, explores 900 px, then
+Scroll loops advance 900 px over one second with two-second pauses. Zoom quickly moves 8 → 0.5, explores 900 px, then
 returns to 8 and scrolls back. Orientation changes include next-day pans and return to the initial day. Themes end
 in Light. Density ends in Quiet/horizontal. Reschedule moves three different appointments forward, then back in
 reverse order. Overlap hovers each underlying lane, moves outside all three and holds every card closed for 1500 ms.

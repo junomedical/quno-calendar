@@ -213,3 +213,6 @@ load IDs and public slot anchors, then restores the normal selection on Save/Can
 Concept creation drafts can be dragged before saving: the editor follows their time, Save commits the moved slot
 and Cancel discards it. Compact view, density, theme and zoom controls omit small labels and sit in a 40 px dock
 matching fullscreen. See Decision 149.
+
+The Infinite scroll concept advances 900 px over one second, then holds for two seconds before the next step.
+The same pacing applies in both orientations and remains interruptible by deliberate manual input.
