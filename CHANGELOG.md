@@ -4,6 +4,41 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+- Keep at least one adjacent included day warm on every enabled side of screen prefetch. A viewport showing only
+  a tenth of a dense day still preloads its next/previous included dates. Preserve per-side zero opt-outs, fractional
+  screen distances, larger pixel buffers, excluded weekdays, bounded date edges and explicit day-based policies.
+- Adjacent-day verification: all 639 unit tests pass; the 135-calendar browser regression requests both neighbors
+  with less than a tenth-day visible and reuses those reads while scrolling within the date. Formatting,
+  architecture, types, lint, Preact, demo build, package verification, size reporting and pack dry-run pass.
+  JavaScript is 33,710 B gzip (32.92 KiB), +68 B; CSS stays 2,018 B. The demo retains its non-blocking 568.82 kB
+  main-chunk warning. Full Chromium passed 291/293: the horizontal concept scroll measured 400 px against >400
+  because its resource-cell reference mounted after scrolling began; sampling the mounted date section preserves
+  the threshold and passes both orientations. `calendar-row-filter.spec.ts:45` expected October 15 but received
+  October 8 during setup and passed isolated. The affected-file rerun passed 19/20; `calendar-row-filter.spec.ts:95`
+  timed out awaiting the pre-update -12 px offset and also passed isolated. Row-filter timing remains an intermittent
+  full-suite verification caveat; its fixture uses the unchanged explicit calendar-day policy.
+
+- Changed Infinite Calendar's default event prefetch from seven calendar days to one screen on each side of the
+  viewport. Configure fractional or zero distances with `beforeScreens`/`afterScreens`; explicit day policies remain
+  supported. Coverage follows actual date geometry, density, zoom and viewport size. Added a live Prefetch distance
+  guide control and geometry-based regression coverage. See the screen-prefetch migration note.
+- Screen-prefetch verification: all 636 unit tests pass. The first full Chromium run passed 286/293; seven checks
+  assumed the former week buffer or retained the previous bundle-size value. After explicitly scoping the late-data
+  fixture's week buffer, waiting for the visited date before zoom sampling, scrolling Thursday's row into view, and
+  updating the payload assertion, all seven checks and all 61 tests in their affected files pass. Formatting,
+  architecture, types, lint, Preact compatibility, demo build, package verification, size reporting, and pack dry-run
+  pass. Infinite Calendar JavaScript is 33,642 B gzip (32.85 KiB), +337 B; CSS stays 2,018 B. The demo retains its
+  non-blocking main-chunk warning (568.52 kB); package size limits pass.
+
+- Improved the preloading guide with shared concurrent-request tracking and Back to starting date. Loading remains
+  active until every read settles, including failures and aborts. Added cached-return and control-geometry coverage;
+  participant-edit and save checks now measure visible date/card stability through compensated recentering.
+- Prefetch-guide verification: all 631 unit tests and 292 Chromium tests pass, including out-of-order request
+  completion, failures/aborts, immediate cached navigation, return-request counts, 1280/390 px control containment,
+  and participant-edit/save geometry. Formatting, architecture, types, lint, Preact compatibility, demo build,
+  package verification, size reporting, and pack dry-run pass. Library assets are unchanged. The demo retains its
+  non-blocking main-chunk warning (566.85 kB); package size limits pass.
+
 - Removed abbreviated concept text placeholders: complete titles, paragraphs, and actions now remain mounted with consistent layout through scrolling and activation. Inactive sections are inert. Playback reserves its pause/status space so starting or stopping a demo cannot shift centered copy.
 - Text-stability verification: all 628 unit tests and 292 Chromium tests pass. New frame-sampled checks retain heading nodes, font sizes, and text/action bounds through scrolling, activation, playback, and pause at 1440, 950, and 390 px. Formatting, architecture, types, lint, Preact compatibility, demo build, package verification, size reporting, and pack dry-run pass. The demo retains a non-blocking main-chunk warning (566.51 kB); package size limits pass.
 

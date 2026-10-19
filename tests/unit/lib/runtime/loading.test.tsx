@@ -38,7 +38,7 @@ afterEach(() => {
 });
 
 describe("useDataHarness", () => {
-  it("prefetches one week around visible dates and renders without awaiting the API", async () => {
+  it("preserves an explicit week policy and renders without awaiting the API", async () => {
     const response = deferred<CalendarEvent[]>();
     const loadEvents = vi.fn<LoadEvents>(() => response.promise);
 

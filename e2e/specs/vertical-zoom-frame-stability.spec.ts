@@ -15,6 +15,31 @@ for (const initialZoom of [0.5, 3, 8]) {
         await setDemoZoom(page, initialZoom);
         await goToWorkday(page, "2026-10-07");
         await waitForDemoEvents(page);
+        await page.locator(".quno-calendar-viewport").evaluate((viewport, initialZoom) => {
+          const day = viewport.querySelector<HTMLElement>('[data-testid="calendar-day"][data-date="2026-10-08"]')!;
+          viewport.scrollTop +=
+            day.getBoundingClientRect().top +
+            50 +
+            240 * initialZoom -
+            viewport.getBoundingClientRect().top -
+            (initialZoom === 0.5 ? 90 : 300);
+        }, initialZoom);
+        // Screen prefetch need not cover the following date at high zoom. Acquire it before sampling zoom frames.
+        await expect
+          .poll(() =>
+            page.locator(".quno-calendar-viewport").evaluate((viewport) => {
+              const box = viewport.getBoundingClientRect();
+              return [
+                ...viewport.querySelectorAll<HTMLElement>('[data-date="2026-10-08"] [data-testid="calendar-event"]')
+              ].some((node) => {
+                const rect = node.getBoundingClientRect();
+                return (
+                  rect.top > box.top + 80 && rect.bottom < box.bottom && rect.left > box.left && rect.right < box.right
+                );
+              });
+            })
+          )
+          .toBe(true);
         const result = await page.evaluate(
           async ({ mode, initialZoom }) => {
             const viewport = document.querySelector<HTMLElement>(".quno-calendar-viewport")!;
@@ -22,8 +47,6 @@ for (const initialZoom of [0.5, 3, 8]) {
             const board = day.querySelector<HTMLElement>('[data-testid="vertical-day-board"]')!;
             const box = viewport.getBoundingClientRect();
             const inset = 50; // 42px day header plus the 8px timeline gutter.
-            viewport.scrollTop +=
-              day.getBoundingClientRect().top + inset + 240 * initialZoom - box.top - (initialZoom === 0.5 ? 90 : 300);
             await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
             const initialHeight = board.getBoundingClientRect().height - 16;
             const initialDayTop = day.getBoundingClientRect().top;

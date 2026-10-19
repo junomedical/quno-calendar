@@ -9,6 +9,65 @@ const topDate = (page: Page) =>
     )?.dataset.date;
   });
 
+test("screen buffers follow actual day height and grow only for the configured distance", async ({ page }) => {
+  await page.goto("/e2e/fixtures/calendar-viewport-loading.html?screens");
+  await expect(page.getByTestId("request-count")).toHaveText("1");
+  await page.waitForTimeout(600);
+  const first = JSON.parse((await page.getByTestId("requests").textContent())!);
+  expect(first[0]).toMatchObject({ startDate: "2026-10-14", endDate: "2026-10-16" });
+  const fraction = await page
+    .locator(".quno-calendar-viewport")
+    .evaluate(
+      (viewport) =>
+        viewport.clientHeight /
+        viewport.querySelector<HTMLElement>('[data-date="2026-10-15"].quno-calendar-day')!.getBoundingClientRect()
+          .height
+    );
+  expect(fraction).toBeLessThan(0.1);
+  await page.locator(".quno-calendar-viewport").evaluate((viewport) => {
+    viewport.scrollTop += 3000;
+  });
+  await page.waitForTimeout(350);
+  await expect(page.getByTestId("request-count")).toHaveText("1");
+  await page.getByRole("button", { name: "October 15", exact: true }).click();
+  await page.getByRole("button", { name: "Compact", exact: true }).click();
+  const checkCoverage = async (screens: number) => {
+    await expect
+      .poll(() =>
+        page.locator(".quno-calendar-viewport").evaluate((viewport, screens) => {
+          const reference = viewport.querySelector<HTMLElement>('[data-date="2026-10-15"].quno-calendar-day')!;
+          const box = reference.getBoundingClientRect();
+          const bounds = viewport.getBoundingClientRect();
+          const height = viewport.clientHeight - 42;
+          const first = Math.floor((bounds.top + 42 - height * screens - box.top) / box.height);
+          const last = Math.ceil((bounds.top + viewport.clientHeight + height * screens - box.top) / box.height) - 1;
+          const requests: Array<{ startDate: string; endDate: string }> = JSON.parse(
+            document.querySelector('[data-testid="requests"]')!.textContent!
+          );
+          const dates = Array.from({ length: last - first + 1 }, (_, index) => {
+            const date = new Date("2026-10-15T00:00:00Z");
+            date.setUTCDate(date.getUTCDate() + first + index);
+            return date.toISOString().slice(0, 10);
+          });
+          return dates.every((date) =>
+            requests.some((request) => request.startDate <= date && request.endDate >= date)
+          );
+        }, screens)
+      )
+      .toBe(true);
+  };
+  await checkCoverage(1);
+  await page.waitForTimeout(600);
+  const compactCount = await page.getByTestId("request-count").textContent();
+  await page.getByLabel("Prefetch screens").selectOption("0");
+  await page.waitForTimeout(250);
+  await expect(page.getByTestId("request-count")).toHaveText(compactCount!);
+  await page.getByLabel("Prefetch screens").selectOption("2");
+  await checkCoverage(2);
+  expect(Number(await page.getByTestId("request-count").textContent())).toBeGreaterThan(Number(compactCount));
+  expect(await topDate(page)).toBe("2026-10-15");
+});
+
 test("hidden and empty row selections read the real viewport without aborting for owner changes", async ({ page }) => {
   await page.goto("/e2e/fixtures/calendar-viewport-loading.html");
   await expect(page.getByTestId("request-count")).toHaveText("1");

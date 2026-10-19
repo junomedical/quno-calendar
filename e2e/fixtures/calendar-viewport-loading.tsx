@@ -1,8 +1,9 @@
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import {
   QunoInfiniteCalendar,
   type LoadEvents,
+  type EventPrefetchPolicy,
   type QunoInfiniteCalendarHandle
 } from "@quno/calendar/infinite-calendar";
 import "@quno/calendar/infinite-calendar/styles.css";
@@ -11,10 +12,16 @@ const calendars = Array.from({ length: 135 }, (_, index) => ({ id: `row-${index}
 const allIds = calendars.map(({ id }) => id);
 const viewportOnly = () => ({ beforeDays: 0, afterDays: 0 });
 const dense = new URLSearchParams(window.location.search).has("dense");
+const screens = new URLSearchParams(window.location.search).has("screens");
 
 function Fixture() {
   const ref = useRef<QunoInfiniteCalendarHandle>(null);
   const [selected, setSelected] = useState(allIds);
+  const [distance, setDistance] = useState(1);
+  const screenPolicy = useCallback<EventPrefetchPolicy>(
+    () => ({ beforeScreens: distance, afterScreens: distance }),
+    [distance]
+  );
   const [requests, setRequests] = useState<
     Array<{ startDate: string; endDate: string; visible: string[]; ids: number }>
   >([]);
@@ -69,6 +76,18 @@ function Fixture() {
       <button onClick={() => setSelected(allIds.slice(0, 115))}>Staff rows</button>
       <button onClick={() => setSelected(allIds.slice(115))}>Room rows</button>
       <button onClick={() => setSelected([])}>No rows</button>
+      {screens ? (
+        <label>
+          Prefetch screens
+          <select value={distance} onChange={(event) => setDistance(Number(event.target.value))}>
+            {[0, 1, 2].map((value) => (
+              <option key={value} value={value}>
+                {value}
+              </option>
+            ))}
+          </select>
+        </label>
+      ) : null}
       <output data-testid="request-count">{requests.length}</output>
       <output data-testid="abort-count">{aborted}</output>
       <QunoInfiniteCalendar
@@ -76,7 +95,7 @@ function Fixture() {
         calendars={calendars}
         selectedCalendarIds={selected}
         loadCalendarIds={allIds}
-        eventPrefetchPolicy={viewportOnly}
+        eventPrefetchPolicy={screens ? screenPolicy : viewportOnly}
         loadEvents={loadEvents}
         initialDateKey="2026-10-15"
         settings={{ excludedWeekdays: [], rowHeight: 58, dayHeaderHeight: 42 }}

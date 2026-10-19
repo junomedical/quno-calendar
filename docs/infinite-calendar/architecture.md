@@ -92,7 +92,12 @@ preserve same-date order and do not manufacture unloaded destination buckets. LR
 incompatible/distant requests, rejects ignored aborts and obsolete generations, and retries failures only after
 250 ms and 1,000 ms. Invalidations retain stale visible records while refreshes settle.
 
-The React loading boundary waits for settled viewport dates, then applies `eventPrefetchPolicy`. `loadCalendarIds`
+`useViewportPrefetch` subscribes to the live engine and applies `eventPrefetchPolicy` against its logical date extents.
+The default buffer extends one usable viewport height on either side; explicit day policies remain available.
+Each positive side includes at least the immediately adjacent included date, even when the pixel window stays
+inside one tall day. Zero disables that side's adjacent-day minimum.
+Changed requested-date keys settle for 100 ms before acquisition. Buffer-only changes are observed even when the
+visible date and React rendering window remain unchanged. `loadCalendarIds`
 can retain coverage while displayed resources change. Draft editing retains warm dates and also loads newly visited
 dates. Synchronous `projectEvents` runs after persistence and before preparation, including empty rendered dates;
 preview titles/colors never leak into accepted persistent moves. Unchanged buckets and day geometry retain identity.

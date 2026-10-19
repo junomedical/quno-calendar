@@ -45,6 +45,14 @@ coordinates horizontal editor measurements, restoration and virtual windows so d
 moves showcase fixture generation and date/resource filtering to the HTTP endpoint. The
 [copyable request](./shared/usage.md#demo-range-query-endpoint) includes dates, calendars and dataset size.
 
+[Decision 128](./infinite-calendar/decisions.md#128---demonstrate-concurrent-loading-and-verify-visible-stability)
+keeps the preloading guide's status accurate across concurrent reads and verifies stability through visible date/card geometry.
+
+[Decision 129](./infinite-calendar/decisions.md#129---configure-prefetch-distance-in-screens)
+defines screen-based prefetch distance, its live guide control, and compatibility with explicit day-based policies.
+[Decision 130](./infinite-calendar/decisions.md#130---keep-an-adjacent-day-warm-for-every-enabled-screen-buffer)
+adds a one-included-day minimum per enabled side, including when only a fraction of a dense day is visible.
+
 The current responsiveness work is recorded in
 [QUNO-013](./shared/decisions.md#quno-013---bound-high-frequency-work-to-display-frames), with Infinite Calendar's
 multilane background availability geometry in [Decision 091](./infinite-calendar/decisions.md#091---availability-has-independent-collision-lanes),

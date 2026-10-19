@@ -1,7 +1,10 @@
 # Loading and late layout
 
 1. The engine computes visible date keys independently of rendered overscan. Empty calendars render geometry immediately.
-2. `useRuntimeData` settles viewport dates for 100 ms, applies the consumer prefetch policy and requests missing coverage.
+2. `useViewportPrefetch` projects the configured screen distance onto the live engine's date extents, independently of
+   render overscan. One screen is viewport height minus the sticky header. Explicit day policies remain supported.
+   A positive screen distance includes at least the immediately adjacent included day on its side; zero disables it.
+   `useRuntimeData` settles changed requested-date keys for 100 ms and requests missing coverage.
    `loadCalendarIds` defaults to the displayed selection; broader coverage can survive row filtering.
 3. `Acquisition` groups contiguous missing dates and tags requests with an ID, generation and abort signal. Useful adjacent
    reads survive small range changes; incompatible resource or distant requests are cancelled.

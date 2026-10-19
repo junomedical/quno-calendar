@@ -7,7 +7,8 @@ async function sampleSettledDraft(page: Page, selector: string, durationMs: numb
       const viewport = document.querySelector<HTMLElement>(".quno-calendar-viewport")!;
       const start = performance.now();
       const positions: number[] = [];
-      const scrollPositions: number[] = [];
+      const datePositions: number[] = [];
+      const dateKeys = new Set<string>();
       let lateMutations = 0;
       const observer = new MutationObserver((records) => {
         if (performance.now() - start > 3200) lateMutations += records.length;
@@ -22,13 +23,18 @@ async function sampleSettledDraft(page: Page, selector: string, durationMs: numb
         await new Promise(requestAnimationFrame);
         const card = document.querySelector(selector);
         if (!card) throw new Error("Surviving draft instance disappeared");
-        positions.push(card.getBoundingClientRect().top);
-        scrollPositions.push(viewport.scrollTop);
+        const viewportTop = viewport.getBoundingClientRect().top;
+        positions.push(card.getBoundingClientRect().top - viewportTop);
+        const day = card.closest<HTMLElement>('[data-testid="calendar-day"]');
+        if (!day?.dataset.date) throw new Error("Surviving draft lost its date");
+        datePositions.push(day.getBoundingClientRect().top - viewportTop);
+        dateKeys.add(day.dataset.date);
       }
       observer.disconnect();
       return {
         cardMovement: Math.max(...positions) - Math.min(...positions),
-        scrollMovement: Math.max(...scrollPositions) - Math.min(...scrollPositions),
+        dateMovement: Math.max(...datePositions) - Math.min(...datePositions),
+        dateKeys: [...dateKeys],
         lateMutations
       };
     },
@@ -119,7 +125,9 @@ for (const density of ["100", "20000"]) {
     }
     const stability = await sampleSettledDraft(page, survivor, density === "20000" ? 8000 : 3200);
     expect(stability.cardMovement).toBeLessThanOrEqual(2);
-    expect(stability.scrollMovement).toBeLessThanOrEqual(2);
+    // Recentring may translate scrollTop while preserving the visible date and resource.
+    expect(stability.dateMovement).toBeLessThanOrEqual(2);
+    expect(stability.dateKeys).toEqual(["2026-07-06"]);
     expect(stability.lateMutations).toBe(0);
     expect(browserErrors).toEqual([]);
     const after = await viewportRelativeEventBox(page, survivor);

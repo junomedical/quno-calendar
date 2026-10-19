@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Locator, type Page } from "@playwright/test";
 
 async function revealLazyArticleDemo(page: Page, label: string, testId: string) {
   const lazyRoot = page.locator(`.article-lazy-demo[data-demo-label="${label}"]`);
@@ -343,7 +343,7 @@ test("editorial CSS-native exhibit keeps stable chrome browser-positioned", asyn
 
 test("all five guides separate exact payloads from runtime contracts", async ({ page }) => {
   const guides = [
-    ["infinite-calendar", "32.52 KiB gzip", "1.97 KiB gzip", "@quno/calendar/infinite-calendar"],
+    ["infinite-calendar", "32.92 KiB gzip", "1.97 KiB gzip", "@quno/calendar/infinite-calendar"],
     ["datepicker", "12.46 KiB gzip", "3.36 KiB gzip", "@quno/calendar/datepicker"],
     ["date-input", "9.64 KiB gzip", "0.58 KiB gzip", "@quno/calendar/date-input"],
     ["timepicker", "1.59 KiB gzip", "0.78 KiB gzip", "@quno/calendar/timepicker"],
@@ -1282,7 +1282,7 @@ test("editorial prefetch exhibit reveals a warm event before the next delayed ra
   const prefetchedLoadedEvent = loadedEvents.locator('[data-loaded-event-id="article-prefetched-event"]');
   await expect(prefetchedLoadedEvent).toBeVisible();
   await expect(prefetchedLoadedEvent).toContainText("Prefetched consultation");
-  await expect(prefetchedLoadedEvent).toContainText("2026-07-13 · 09:30–10:30");
+  await expect(prefetchedLoadedEvent).toContainText("2026-07-09 · 09:30–10:30");
   const [loadedEventsBox, calendarFrameBox] = await Promise.all([
     loadedEvents.boundingBox(),
     demo.locator(".article-calendar-frame").boundingBox()
@@ -1300,7 +1300,42 @@ test("editorial prefetch exhibit reveals a warm event before the next delayed ra
   await expect(demo.locator('[data-testid="calendar-event"][data-event-id="article-prefetched-event"]')).toBeVisible({
     timeout: 500
   });
-  await expect(page.getByTestId("article-prefetch-count")).toContainText("request");
+  await expect(demo.getByText("Loading a warm window; the existing grid remains interactive")).toBeVisible();
+  await expect(demo.getByText("Warm window accepted and cached")).toBeVisible();
+  const settledCount = await demo.getByTestId("article-prefetch-count").textContent();
+  await demo.getByRole("button", { name: "Back to starting date" }).click();
+  await expect(demo.locator('[data-testid="calendar-event"][data-event-id="consultation-a"]')).toBeVisible({
+    timeout: 500
+  });
+  await page.waitForTimeout(1000);
+  await expect(demo.getByTestId("article-prefetch-count")).toHaveText(settledCount!);
+  const distance = demo.getByLabel("Prefetch distance");
+  await distance.selectOption("0");
+  await page.waitForTimeout(250);
+  await expect(demo.getByTestId("article-prefetch-count")).toHaveText(settledCount!);
+  await distance.selectOption("3");
+  await expect(demo.getByText("Loading a warm window; the existing grid remains interactive")).toBeVisible();
+  await expect(demo.getByText("Warm window accepted and cached")).toBeVisible();
+  expect(Number((await demo.getByTestId("article-prefetch-count").textContent())!.split(" ")[0])).toBeGreaterThan(
+    Number(settledCount!.split(" ")[0])
+  );
+  for (const width of [1280, 390]) {
+    await page.setViewportSize({ width, height: 844 });
+    const controlsFit = await demo.locator(".article-prefetch-controls").evaluate((controls) => {
+      const bounds = controls.getBoundingClientRect();
+      const demoBounds = controls.closest('[data-testid="article-prefetch-demo"]')!.getBoundingClientRect();
+      return [...controls.querySelectorAll("button, select")].every((button) => {
+        const box = button.getBoundingClientRect();
+        return (
+          box.left >= Math.max(0, bounds.left, demoBounds.left) &&
+          box.right <= Math.min(document.documentElement.clientWidth, bounds.right, demoBounds.right) &&
+          box.top >= bounds.top &&
+          box.bottom <= bounds.bottom
+        );
+      });
+    });
+    expect(controlsFit, `navigation controls fit at ${width}px`).toBe(true);
+  }
 });
 
 test("editorial stability lab retains stale events and row focus during delayed dense loading", async ({ page }) => {
@@ -1497,6 +1532,10 @@ test("editorial creation demo narrows to one doctor lane without adding an overl
   await expect(demo.getByText("Available", { exact: true }).first()).toBeVisible();
   await expect(demo.getByText("Tuesday review")).toBeInViewport();
   await expect(demo.getByText("Wednesday treatment")).toBeInViewport();
+  // Thursday's header can be visible while its resource row is still below the viewport.
+  await demo.locator(".quno-calendar-viewport").evaluate((viewport) => {
+    viewport.scrollTop += 100;
+  });
   await expect(demo.getByText("Thursday procedure")).toBeInViewport();
   await expect(demo.getByText("Post-op clinic")).toHaveCount(0);
   const visibleCardLines = await demo
@@ -1528,23 +1567,32 @@ test("editorial event focus preserves a visible card through save and lane chang
   const demo = await revealLazyArticleDemo(page, "visual focus lane-change example", "article-event-focus-demo");
   await expect(demo.getByTestId("draft-event")).toBeVisible();
   const viewport = demo.locator(".quno-calendar-viewport");
-  const beforeSaveScroll = await viewport.evaluate((element) => ({
-    left: element.scrollLeft,
-    top: element.scrollTop
-  }));
+  const visiblePosition = (card: Locator) =>
+    card.evaluate((element) => {
+      const viewport = element.closest(".quno-calendar-viewport")!;
+      const day = element.closest<HTMLElement>('[data-testid="calendar-day"]')!;
+      const top = viewport.getBoundingClientRect().top;
+      return {
+        date: day.dataset.date,
+        dateTop: day.getBoundingClientRect().top - top,
+        cardTop: element.getBoundingClientRect().top - top,
+        left: viewport.scrollLeft
+      };
+    });
+  const beforeSave = await visiblePosition(demo.getByTestId("draft-event"));
   await demo.getByRole("button", { name: "Save draft" }).click();
 
   const saved = demo.locator('[data-event-id="article-focus-event"]');
   await expect(saved).toBeVisible();
   await expect(saved).toHaveAttribute("data-status", "focused");
   await expect
-    .poll(() =>
-      viewport.evaluate((element) => ({
-        left: element.scrollLeft,
-        top: element.scrollTop
-      }))
-    )
-    .toEqual(beforeSaveScroll);
+    .poll(async () => {
+      const position = await visiblePosition(saved);
+      expect(position.date).toBe(beforeSave.date);
+      expect(position.left).toBe(beforeSave.left);
+      return Math.max(Math.abs(position.dateTop - beforeSave.dateTop), Math.abs(position.cardTop - beforeSave.cardTop));
+    })
+    .toBeLessThanOrEqual(2);
 
   const beforeCollisionsScroll = await viewport.evaluate((element) => ({
     left: element.scrollLeft,

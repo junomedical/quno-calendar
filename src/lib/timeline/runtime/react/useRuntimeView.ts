@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ForwardedRef } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ForwardedRef } from "react";
 import { todayIso, type IsoDate } from "#quno-internal/shared/dateRangeModel";
 import type { CalendarInternalViewProps, CalendarViewHandle } from "#quno-internal/timeline/core/internalTypes";
 import { mergeQunoInfiniteCalendarSettings } from "#quno-internal/timeline/infinite/views/shared/mergeQunoInfiniteCalendarSettings";
@@ -11,6 +11,8 @@ import type { Orientation } from "#quno-internal/timeline/runtime/model/types";
 import { captureLayoutAnchor } from "#quno-internal/timeline/runtime/model/anchors";
 import { eventCalendarIds } from "#quno-internal/timeline/data/calendarEvents";
 import { eventDateKey } from "#quno-internal/timeline/infinite/events/eventDateKey";
+import { defaultEventPrefetchPolicy } from "#quno-internal/timeline/data/eventPrefetch";
+import { useViewportPrefetch } from "./useViewportPrefetch";
 import { useEngine } from "./useEngine";
 import { useRuntimeData } from "./useRuntimeData";
 import { useRuntimeHandle } from "./useRuntimeHandle";
@@ -35,6 +37,11 @@ export function useRuntimeView({
   const now = props.now ?? new Date();
   const nowMinute = now.getHours() * 60 + now.getMinutes();
   const [visibleDates, setVisibleDates] = useState<readonly IsoDate[]>([initial]);
+  const [prefetchedDates, setPrefetchedDates] = useState<readonly IsoDate[]>([]);
+  const updatePrefetchedDates = useCallback(
+    ({ dates }: { dates: readonly IsoDate[] }) => setPrefetchedDates(dates),
+    []
+  );
   const [renderDates, setRenderDates] = useState<readonly IsoDate[]>([initial]);
   const settingsKey = JSON.stringify(props.settings ?? {});
   const settings = useMemo(() => mergeQunoInfiniteCalendarSettings(JSON.parse(settingsKey)), [settingsKey]);
@@ -47,7 +54,7 @@ export function useRuntimeView({
     selectedCalendars,
     activeDraft: props.activeDraft
   });
-  const data = useRuntimeData({ props, visibleDates, anchorDate: initial });
+  const data = useRuntimeData({ props, visibleDates, anchorDate: initial, prefetchedDates });
   const [preparation] = useState(() => new Preparation());
   const projected = useMemo(
     () =>
@@ -83,6 +90,12 @@ export function useRuntimeView({
   );
   const runtime = useEngine({ layout });
   const { engine, snapshot, containerRef } = runtime;
+  useViewportPrefetch({
+    engine,
+    calendarIds: props.loadCalendarIds ?? props.selectedCalendarIds,
+    policy: props.eventPrefetchPolicy ?? defaultEventPrefetchPolicy,
+    onChange: updatePrefetchedDates
+  });
   useRuntimeZoom({ engine, adapter: runtime.adapter, containerRef, onZoomChange: props.onZoomChange });
   const visibleKey = JSON.stringify(snapshot.window.visibleDateKeys);
   const renderKey = JSON.stringify(snapshot.window.dateIndexes.map((index) => snapshot.geometry.dates[index].dateKey));

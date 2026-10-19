@@ -48,7 +48,20 @@ Architecture checks enforce object arguments and product dependency direction, i
 - Availability editing mode switches pointer activity from appointments to availability blocks.
 - Generated appointments stay inside the primary calendar's generated availability window.
 - Async range loading de-duplicates committed events by id when a range response includes already-loaded dates, so reloads do not add overlap lanes or grow rows.
-- Async range loading defaults to seven calendar days before and after the rendered dates, honors caller-provided prefetch policies, requests only missing dates, splits missing regions around loaded gaps, preserves stale buckets during delayed refresh, passes an abort signal, rejects obsolete generations and out-of-order responses, retries only at 250ms and 1s, protects the active warm window during 120-date LRU eviction, and applies targeted move/commit patches through the event-id index.
+- Async range loading defaults to one usable screen before and after the viewport, honors fractional/zero screens
+  and explicit calendar-day policies, and derives coverage from actual date extents. Tests vary row density,
+  vertical zoom, viewport height and excluded weekdays, and cross a buffer edge without changing the visible date.
+  Positive screen distances include at least the adjacent included date on each enabled side; regressions cover
+  tenth-day viewports, asymmetric and zero/invalid distances, weekend skipping and bounded edges. The 135-calendar
+  browser fixture checks both adjacent dates are requested before scrolling through the middle of the same day.
+  Concept scroll travel uses the mounted date section rather than a resource cell that may be virtualized until
+  motion has already begun; retain the existing intermediate-frame, travel-distance and frame-step thresholds.
+  Browser coverage checks measured screen distances and live policy changes without refetching fresh cached dates.
+  The late-layout fixture explicitly uses a week buffer to refresh earlier dates after owner expansion hides them.
+  Vertical frame tests first reveal and await the sampled date's appointment; high zoom no longer assumes tomorrow
+  is already cached. The creation guide test scrolls Thursday's resource row into view before requiring its card.
+  Loading requests only missing dates, splits around loaded gaps, preserves stale buckets during refresh, forwards
+  abort signals, rejects obsolete responses, retries at 250ms/1s, and retains the 120-date cache bound.
 - Multi-calendar event membership and move application.
 - Active edit drafts replace their source event id while create drafts do not remove loaded events; draft overlays do not add overlap lanes, row-height growth, or vertical column-width growth.
 - Newly committed visible events receive `status="appearing"` briefly after save/create, and the default demo card renders a 70px hard-edged diagonal white glint over that appearing status with a 485ms sweep.
@@ -210,9 +223,15 @@ Architecture checks enforce object arguments and product dependency direction, i
   calendar viewport.
 - The horizontal-row hover chapter moves vertically between original overlap-lane hit regions even while the first
   hovered card is expanded over its neighbors.
-- The preloading lab exposes its requested warm range and every event returned into the warm cache. The July 13
+- The preloading lab exposes its requested warm range and every event returned into the warm cache. The July 9
   consultation appears in the loaded-events strip while its calendar shell is still unmounted, then renders immediately
-  after navigation before the next delayed range request can settle.
+  after navigation before the next delayed range request can settle. Returning after the destination settles must
+  reuse the starting cache without another read, and both navigation buttons must fit inside their controls.
+  Shared demo loader unit tests complete the newest of two reads first and verify loading remains active until the
+  older read settles; rejected/aborted reads preserve their errors and release their pending count.
+- Participant-edit and save stability checks compare semantic date identity and viewport-relative day/card geometry
+  rather than absolute `scrollTop`, which can change during compensated recentering. Keep existing focus, lane,
+  horizontal-scroll and late-mutation assertions.
 - The stability lab retains stale events during its delayed refresh, preserves the visible room/local-row point as an
   earlier row grows, and reveals/focuses the shared participant calendar. Repeating the room focus action leaves both
   scroll axes untouched once the local event instance is fully inside the uncovered viewport. Narrow two-lane event shells hide

@@ -116,11 +116,10 @@ export type LoadEventsArgs = {
 /** Async event loader used by calendar views. */
 export type LoadEvents = (args: LoadEventsArgs) => Promise<CalendarEvent[]>;
 
-/** Date buffer requested around the current rendered event window. */
-export type EventPrefetchWindow = {
-  beforeDays: number;
-  afterDays: number;
-};
+/** Buffer around the usable viewport; positive screen distances include at least one adjacent included day. */
+export type EventPrefetchWindow =
+  | { beforeScreens: number; afterScreens: number }
+  | { beforeDays: number; afterDays: number };
 
 /** Inputs available to a caller-defined event prefetch policy. */
 export type EventPrefetchContext = {
@@ -128,7 +127,7 @@ export type EventPrefetchContext = {
   selectedCalendarIds: readonly CalendarId[];
 };
 
-/** Selects how many adjacent days the event loader keeps warm. */
+/** Selects the adjacent viewport-distance or calendar-day buffer kept warm. */
 export type EventPrefetchPolicy = (context: EventPrefetchContext) => EventPrefetchWindow;
 
 /** Parent-validation payload for a proposed event move. */

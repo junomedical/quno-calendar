@@ -13,6 +13,7 @@ import {
 } from "@quno/calendar/infinite-calendar";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
+import { usePendingEventLoader } from "#quno-demo/showcase/hooks/usePendingEventLoader";
 import { CalendarDemoShell } from "./ArticleDemos";
 import {
   abortableDelay,
@@ -238,7 +239,7 @@ export function DragCreateArticleDemo() {
   );
 }
 
-const prefetchedDate = "2026-07-13";
+const prefetchedDate = "2026-07-09";
 const preloadEvents: CalendarEvent[] = [
   ...articleEvents,
   {
@@ -252,10 +253,14 @@ const preloadEvents: CalendarEvent[] = [
     kind: "appointment"
   }
 ];
-const articlePrefetchPolicy: EventPrefetchPolicy = () => ({ beforeDays: 3, afterDays: 8 });
 
 export function PrefetchLoadingDemo() {
   const calendarRef = useRef<QunoInfiniteCalendarHandle>(null);
+  const [prefetchScreens, setPrefetchScreens] = useState(1);
+  const eventPrefetchPolicy = useCallback<EventPrefetchPolicy>(
+    () => ({ beforeScreens: prefetchScreens, afterScreens: prefetchScreens }),
+    [prefetchScreens]
+  );
   const [contextReady, setContextReady] = useState(false);
   const [initialLoaded, setInitialLoaded] = useState(false);
   useEffect(() => {
@@ -272,23 +277,15 @@ export function PrefetchLoadingDemo() {
       });
     }
   }, [initialLoaded]);
-  const latestRequestRef = useRef(0);
   const [requestCount, setRequestCount] = useState(0);
   const [range, setRange] = useState("Waiting for the first range");
-  const [status, setStatus] = useState("Calendar chrome is available before the event API");
   const [loadedEvents, setLoadedEvents] = useState<CalendarEvent[]>([]);
 
-  const loadEvents = useCallback<LoadEvents>(async (request) => {
-    latestRequestRef.current += 1;
-    const requestId = latestRequestRef.current;
+  const loadPreloadEvents = useCallback<LoadEvents>(async (request) => {
     setRequestCount((current) => current + 1);
     setRange(`${request.startDate} → ${request.endDate}`);
-    setStatus("Loading a warm window; the existing grid remains interactive");
     await abortableDelay(700, request.signal);
     if (request.signal?.aborted) return [];
-    if (requestId === latestRequestRef.current) {
-      setStatus("Warm window accepted and cached");
-    }
     const events = filterEvents(preloadEvents, request);
     setInitialLoaded(true);
     setLoadedEvents((current) => {
@@ -298,6 +295,12 @@ export function PrefetchLoadingDemo() {
     });
     return events;
   }, []);
+  const { loadEvents, isLoading: isFetching } = usePendingEventLoader({ loadEvents: loadPreloadEvents });
+  const status = isFetching
+    ? "Loading a warm window; the existing grid remains interactive"
+    : initialLoaded
+      ? "Warm window accepted and cached"
+      : "Calendar chrome is available before the event API";
 
   return (
     <CalendarDemoShell
@@ -305,18 +308,34 @@ export function PrefetchLoadingDemo() {
       note={status}
       tools={
         <div className="article-prefetch-controls">
+          <label>
+            Prefetch distance
+            <select value={prefetchScreens} onChange={(event) => setPrefetchScreens(Number(event.target.value))}>
+              {[0, 0.5, 1, 2, 3].map((screens) => (
+                <option value={screens} key={screens}>
+                  {screens} {screens === 1 ? "screen" : "screens"} each side
+                </option>
+              ))}
+            </select>
+          </label>
           <span className="article-toolbar-badge" data-testid="article-prefetch-count">
             {requestCount} {requestCount === 1 ? "request" : "requests"}
           </span>
           <button
             className="article-button article-button--primary"
             onClick={() => {
-              setStatus("Navigating into the already requested warm window");
               calendarRef.current?.scrollToDateTime({ date: prefetchedDate, time: "09:30" });
             }}
             type="button"
           >
             Jump to prefetched date
+          </button>
+          <button
+            className="article-button"
+            onClick={() => calendarRef.current?.scrollToDateTime({ date: articleDateKey, time: "09:30" })}
+            type="button"
+          >
+            Back to starting date
           </button>
         </div>
       }
@@ -375,7 +394,7 @@ export function PrefetchLoadingDemo() {
               ))}
             </div>
           }
-          eventPrefetchPolicy={articlePrefetchPolicy}
+          eventPrefetchPolicy={eventPrefetchPolicy}
           renderEvent={ArticleEventCard}
           initialDateKey={articleDateKey}
           loadEvents={loadEvents}

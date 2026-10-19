@@ -63,10 +63,9 @@ for (const vertical of [false, true]) {
         const scrolling = !!document.querySelector('.concept-cursor[data-gesture="scroll"]');
         if (started && !scrolling) break;
         started ||= scrolling;
+        // The date stays mounted while offscreen resource cells may mount after travel has begun.
         // Measure visible travel: the infinite viewport may rebase its internal scroll offset.
-        const reference = document.querySelector(
-          '[data-slot="calendar-cell"][data-date="2026-10-20"][data-calendar-id="person-0"]'
-        );
+        const reference = document.querySelector('[data-testid="calendar-day"][data-date="2026-10-20"]');
         if (reference && started) values.push(-reference.getBoundingClientRect().top);
         await new Promise(requestAnimationFrame);
       }
