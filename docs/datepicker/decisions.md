@@ -1148,3 +1148,5 @@ into its own file; the product JSON retains only metadata and ordered references
 
 [QUNO-028](../shared/decisions.md#quno-028---navigate-demo-screens-with-a-bottom-title-rail) records viewport-sized
 scenario sections, JSON explanations, explicit fullscreen, and inert mobile previews shared by the concept demos.
+
+[QUNO-029](../shared/decisions.md#quno-029---preserve-scenario-text-layout-during-scrolling) keeps complete concept explanation layouts mounted and reserves playback/status space, preventing text jumps during scrolling and activation.

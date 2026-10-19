@@ -231,3 +231,5 @@ and startup selection. These files assemble into the validated scenario document
 A **demo screen** is one viewport-sized scenario section with its explanation and preview. The **title rail** is
 the horizontally scrollable bottom navigation between screens. A mobile **preview** is inert; **fullscreen** enables
 the working demo and playback controls while hiding product and scenario navigation.
+
+The Calendar **fixed canvas** stays outside the explanation scroller. Its **scenario control dock** shows only JSON-selected controls at the bottom right. Calendar Replay/Reset restores view settings and navigation while retaining the shared session schedule and edits.

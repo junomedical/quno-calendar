@@ -1,6 +1,7 @@
 import { ConceptCalendar } from "#quno-demo/concept/ConceptCalendar";
 import "#quno-demo/concept/concept.css";
 import "#quno-demo/concept/playground.css";
+import "#quno-demo/concept/calendarPresentation.css";
 export function DensityDemo() {
   return (
     <div className="concept" data-testid="density-guide-demo" style={{ height: 560, minHeight: 0 }}>

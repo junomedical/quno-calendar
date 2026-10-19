@@ -6,9 +6,9 @@
   "initial": {
     "view": "preferred",
     "theme": "light",
-    "density": 4,
+    "density": 6,
     "zoom": 1.3,
-    "overlap": false
+    "controls": []
   },
   "steps": [
     {

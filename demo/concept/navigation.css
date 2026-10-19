@@ -91,23 +91,9 @@
   font-size: 10px;
   line-height: 1.5;
 }
-.concept-screen-placeholder {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 6%;
-  background: linear-gradient(110deg, #eee8f8, #f9f8fc);
-}
-.concept-screen-placeholder h2 {
-  font-size: 38px;
-  font-weight: 500;
-  letter-spacing: -1px;
-}
-.concept-screen-placeholder p {
-  max-width: 400px;
-  color: #766b82;
-  line-height: 1.7;
+.concept-intro .concept-statusbar {
+  flex: 0 0 55px;
+  height: 55px;
 }
 .concept-scenarios {
   min-width: 0;

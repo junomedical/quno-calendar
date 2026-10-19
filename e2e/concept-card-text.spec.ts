@@ -1,11 +1,15 @@
+import { calendarInitial } from "#quno-e2e/concept-helpers";
 import { test, expect, type Locator, type Page } from "@playwright/test";
 test.describe.configure({ mode: "parallel" });
 
 async function openCalendar(page: Page, vertical: boolean) {
   await page.emulateMedia({ reducedMotion: "reduce" });
+  await calendarInitial(page, {
+    view: vertical ? "infinite-vertical" : "infinite-horizontal",
+    controls: ["zoom", "density"]
+  });
   await page.goto("/concept");
   await page.getByRole("button", { name: "Full screen demo", exact: true }).click();
-  if (vertical) await page.locator('[data-action="vertical"]').click();
 }
 
 async function setZoom(page: Page, zoom: string) {

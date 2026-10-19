@@ -88,3 +88,5 @@ Each scenario’s initial values and action sequence live in its own `demo/conce
 
 Concept navigation keeps each demo with its title and one or two explanation paragraphs. Use the bottom title rail
 to scroll between scenarios; on mobile, open Full screen demo below the explanation to enable interaction.
+
+Concept explanation sections retain their full text layout while scrolling; activation and playback do not replace or recenter the copy.

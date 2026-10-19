@@ -1,3 +1,4 @@
+import { calendarInitial } from "#quno-e2e/concept-helpers";
 import { test, expect, type Page } from "@playwright/test";
 test.describe.configure({ mode: "parallel" });
 async function open(page: Page, product = "Calendar") {
@@ -21,23 +22,28 @@ async function play(page: Page, label: string) {
 }
 async function finished(page: Page) {
   await expect(page.locator(".concept")).toHaveAttribute("data-playing", "false", { timeout: 20000 });
-  await expect(page.locator(".concept-statusbar")).not.toContainText("demonstration paused");
+  await expect(
+    page.locator('.concept-screen[data-active="true"] .concept-statusbar, .concept-fullscreen-dock .concept-statusbar')
+  ).not.toContainText("demonstration paused");
 }
 test("concept keeps the live calendar, gradient, and documentation visible", async ({ page }) => {
   await open(page);
   await expect(page.locator(".concept-event").first()).toBeVisible();
-  const hero = await page.locator(".concept-hero").boundingBox();
-  const intro = await page.locator(".concept-intro").boundingBox();
+  const hero = await page.locator(".concept-content").boundingBox();
+  const intro = await page.locator('.concept-screen[data-active="true"] .concept-intro').boundingBox();
   expect(intro!.width).toBeLessThan(hero!.width * 0.6);
-  await expect(page.locator(".concept-intro")).toHaveCSS("pointer-events", "none");
-  await expect(page.locator(".concept-intro")).toHaveCSS("background-image", /linear-gradient/);
+  await expect(page.locator('.concept-screen[data-active="true"] .concept-intro')).toHaveCSS("pointer-events", "none");
+  await expect(page.locator('.concept-screen[data-active="true"] .concept-intro')).toHaveCSS(
+    "background-image",
+    /linear-gradient/
+  );
   await expect(page.locator(".concept-scenario")).toHaveCount(8);
   await expect(page.locator(".concept-cursor")).toBeHidden();
   await page.getByRole("button", { name: "Full screen demo", exact: true }).click();
-  await expect(page.locator(".concept-intro")).toHaveCount(0);
+  await expect(page.locator('.concept-screen[data-active="true"] .concept-intro')).toHaveCount(0);
   await expect(page.locator(".concept--fullscreen")).toHaveCSS("position", "fixed");
   await page.keyboard.press("Escape");
-  await expect(page.locator(".concept-intro")).toBeVisible();
+  await expect(page.locator('.concept-screen[data-active="true"] .concept-intro')).toBeVisible();
 });
 test("scroll and zoom playback change live geometry, with a rounded non-intercepting cursor", async ({ page }) => {
   await open(page);
@@ -54,7 +60,7 @@ test("scroll and zoom playback change live geometry, with a rounded non-intercep
   });
   expect(shape).toEqual({ filled: true, notch: true, rounded: true, events: "none" });
   await finished(page);
-  await expect(page.locator(".concept-result")).not.toContainText("2026-10-19");
+  await expect(page.locator(".concept-calendar-workspace")).not.toHaveAttribute("data-visible-date", "2026-10-19");
   await play(page, "Zoom");
   const before = await page.locator('[data-event-id="2026-10-19-event-0"]').boundingBox();
   await finished(page);
@@ -76,7 +82,7 @@ test("overlap playback targets each real hover lane", async ({ page }) => {
   }
   await finished(page);
 });
-test("view, theme and density scenes operate controls and can be combined", async ({ page }) => {
+test("view, theme and density scenes expose only their relevant controls", async ({ page }) => {
   test.setTimeout(60000);
   await open(page);
   await play(page, "Horizontal / vertical");
@@ -90,14 +96,11 @@ test("view, theme and density scenes operate controls and can be combined", asyn
   await finished(page);
   await play(page, "Event density");
   await finished(page);
-  await expect(page.locator(".concept-result")).toContainText("400 events / day");
-  await page.locator('[data-action="vertical"]').click();
-  await page.locator('[data-action="dark"]').click();
-  await expect(page.locator(".concept-calendar-workspace")).toHaveAttribute("data-view", "infinite-vertical");
   await expect(page.locator(".concept-calendar-workspace")).toHaveAttribute("data-density", "400");
-  await expect(page.locator(".quno-calendar-shell")).toHaveCSS("background-color", "rgb(37, 35, 50)");
+  await expect(page.locator(".concept-controls fieldset")).toHaveCount(1);
+  await expect(page.locator('[data-action="vertical"], [data-action="dark"], [data-action="zoom"]')).toHaveCount(0);
 });
-test("creation shows a held draft, typing, save, and reset; rescheduling changes the resource", async ({ page }) => {
+test("creation and rescheduling preserve session appointments through view resets", async ({ page }) => {
   test.setTimeout(45000);
   await open(page);
   await play(page, "Create an appointment");
@@ -106,13 +109,17 @@ test("creation shows a held draft, typing, save, and reset; rescheduling changes
   await expect(page.getByRole("form", { name: "Appointment editor" })).toBeVisible();
   await finished(page);
   await expect(page.locator('[data-event-id="concept-created-1"]')).toContainText("Studio catch-up");
-  await expect(page.locator(".concept-result")).toContainText("11:30");
+  await expect(page.locator(".concept-calendar-message")).toContainText("11:30");
   await page.getByRole("button", { name: "Reset", exact: true }).click();
-  await expect(page.locator('[data-event-id="concept-created-1"]')).toHaveCount(0);
+  await expect(page.locator('[data-event-id="concept-created-1"]')).toHaveCount(1);
+  await play(page, "Create an appointment");
+  await finished(page);
+  await expect(page.locator('[data-event-id="concept-created-2"] [data-action="created-event"]')).toHaveCount(1);
+  await expect(page.locator('[data-event-id="concept-created-1"]')).toHaveCount(1);
   await play(page, "Reschedule");
   await finished(page);
   await expect(page.locator('[data-event-id="2026-10-19-event-0"]')).toHaveAttribute("data-calendar-id", "person-1");
-  await expect(page.locator(".concept-result")).toContainText("Moved Design review");
+  await expect(page.locator(".concept-calendar-message")).toContainText("Moved Design review");
 });
 const outcomes = [
   ["Datepicker", "Paint a range", "2026-10-19 → 2026-10-23 · 5 days"],
@@ -222,7 +229,7 @@ test("density guide has a lazy interactive exhibit and copyable recipe", async (
   await section.locator('[data-demo-label="event density comparison"]').scrollIntoViewIfNeeded();
   await expect(section.getByTestId("density-guide-demo")).toBeVisible();
   await section.locator('[data-action="density-40"]').click();
-  await expect(section.locator(".concept-result")).toContainText("40 events / day");
+  await expect(section.locator(".concept-calendar-workspace")).toHaveAttribute("data-density", "40");
   await expect(
     section.getByText("Implementation · Generate a deterministic range at three event densities", { exact: true })
   ).toBeVisible();
@@ -235,22 +242,25 @@ for (const scene of ["Horizontal / vertical", "Theming", "Event density", "Creat
     await finished(page);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
     if (scene === "Create an appointment")
-      await expect(page.locator(".concept-result")).toContainText("Saved Studio catch-up");
-    if (scene === "Reschedule") await expect(page.locator(".concept-result")).toContainText("Moved Design review");
+      await expect(page.locator(".concept-calendar-message")).toContainText("Saved Studio catch-up");
+    if (scene === "Reschedule")
+      await expect(page.locator(".concept-calendar-message")).toContainText("Moved Design review");
   });
 
 for (const scene of ["Infinite scroll", "Zoom", "Overlapping events", "Create an appointment", "Reschedule"])
   test(`vertical playback: ${scene}`, async ({ page }) => {
+    await calendarInitial(page, { view: "infinite-vertical" });
     await open(page);
     await page.getByRole("button", { name: "Full screen demo", exact: true }).click();
-    await page.locator('[data-action="vertical"]').click();
     await play(page, scene);
     await finished(page);
     await expect(page.locator(".concept-calendar-workspace")).toHaveAttribute("data-view", "infinite-vertical");
-    if (scene === "Infinite scroll") await expect(page.locator(".concept-result")).not.toContainText("2026-10-19");
+    if (scene === "Infinite scroll")
+      await expect(page.locator(".concept-calendar-workspace")).not.toHaveAttribute("data-visible-date", "2026-10-19");
     if (scene === "Create an appointment")
-      await expect(page.locator(".concept-result")).toContainText("Saved Studio catch-up");
-    if (scene === "Reschedule") await expect(page.locator(".concept-result")).toContainText("Moved Design review");
+      await expect(page.locator(".concept-calendar-message")).toContainText("Saved Studio catch-up");
+    if (scene === "Reschedule")
+      await expect(page.locator(".concept-calendar-message")).toContainText("Moved Design review");
   });
 for (const [product, scene, result] of [
   ["Date Input", "Type, then pick", "2026-10-19 → 2026-10-25"],
@@ -290,7 +300,7 @@ test("one scenario JSON controls its copy, initial state and actions independent
   await expect(page.getByRole("heading", { name: "Infinite scroll" })).toBeVisible();
   await page.getByRole("button", { name: "Date Input", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Follow JSON" })).toBeVisible();
-  const custom = page.locator(".concept-intro");
+  const custom = page.locator('.concept-screen[data-active="true"] .concept-intro');
   await expect(custom).toContainText("A single scenario from data.");
   await expect(custom.getByRole("link")).toHaveAttribute("href", "/guide/date-input#keyboard-controls");
   await expect(page.getByLabel("JSON appointment")).toHaveValue("5 November 2026");

@@ -204,3 +204,7 @@ packed presets at minimum zoom in both orientations. These are consumer-owned st
 
 Concept navigation keeps each demo with its title and one or two explanation paragraphs. Use the bottom title rail
 to scroll between scenarios; on mobile, open Full screen demo below the explanation to enable interaction.
+
+The Calendar concept now keeps one fixed calendar and shared session dataset across scenarios, with a 70% wider date/time label column, JSON-selected controls in its bottom-right corner, and no bottom date/count stats row. Scenario changes reset the view while retaining appointments and edits. See [concept notes](../../demo/concept/README.md).
+
+Concept explanation sections retain their full text layout while scrolling; activation and playback do not replace or recenter the copy.

@@ -8,7 +8,7 @@ export type InitialByProduct = {
     theme: string;
     density: number;
     zoom: number;
-    overlap: boolean;
+    controls: ("view" | "theme" | "density" | "zoom")[];
   };
   datepicker: { range: DateRange | null; single: boolean };
   "date-input": { range: DateRange | null; selectionMode: DateSelectionMode; picker: boolean; label: string };

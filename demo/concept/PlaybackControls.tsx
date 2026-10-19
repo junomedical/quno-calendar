@@ -10,7 +10,9 @@ export function PlaybackControls({ playing, preview, replay, stop, reset }: Play
     <div className="concept-playback-controls">
       <button onClick={preview}>Play tour</button>
       <button onClick={replay}>Replay scene</button>
-      {playing && <button onClick={stop}>Pause tour</button>}
+      <button onClick={stop} disabled={!playing} style={{ visibility: playing ? "visible" : "hidden" }}>
+        Pause tour
+      </button>
       <button onClick={stop}>Try it</button>
       <button onClick={reset}>Reset</button>
     </div>

@@ -8,7 +8,7 @@
     "theme": "light",
     "density": 6,
     "zoom": 1.3,
-    "overlap": true
+    "controls": []
   },
   "steps": [
     {

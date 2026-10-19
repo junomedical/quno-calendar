@@ -1,9 +1,7 @@
 import type { CalendarView } from "@quno/calendar/infinite-calendar";
 import type { RefObject } from "react";
 import { ConceptIntro } from "./ConceptIntro";
-import { ConceptCalendar } from "./ConceptCalendar";
-import { ConceptProducts } from "./ConceptProducts";
-import { PlaybackCursor } from "./PlaybackCursor";
+import { ConceptCanvas } from "./ConceptCanvas";
 import { catalog } from "./scenarioCatalog";
 import type { Product } from "./scenarioTypes";
 import type { Session } from "./usePlayback";
@@ -35,7 +33,6 @@ export function ConceptScreens({
 }) {
   return (
     <>
-      {" "}
       {catalog[session.product].map((scenario) => {
         const active = scenario.id === session.scene;
         return (
@@ -46,46 +43,21 @@ export function ConceptScreens({
             data-active={active}
             aria-label={`${scenario.label} demo`}
             aria-hidden={!active || undefined}
+            {...(!active ? { inert: "" } : {})}
           >
-            {active ? (
-              <>
-                <div
-                  className="concept-canvas"
-                  ref={canvas}
-                  {...(locked ? { inert: "" } : {})}
-                  aria-hidden={locked || undefined}
-                >
-                  <div className="concept-stage" key={`${session.product}:${session.scene}:${session.revision}`}>
-                    {session.product === "infinite-calendar" ? (
-                      <ConceptCalendar
-                        scenario={session.scene}
-                        initialView={preferredView}
-                        onViewChange={setPreferredView}
-                      />
-                    ) : (
-                      <ConceptProducts product={session.product} scenario={session.scene} />
-                    )}
-                  </div>
-                  <PlaybackCursor />
-                </div>
-                {!fullscreen && (
-                  <ConceptIntro
-                    product={product}
-                    scenario={scenario}
-                    actions={actions}
-                    open={open}
-                    button={button}
-                    locked={locked}
-                    feedback={feedback}
-                  />
-                )}
-              </>
-            ) : (
-              <div className="concept-screen-placeholder">
-                <span className="concept-eyebrow">QUNO / {product.label}</span>
-                <h2>{scenario.label}</h2>
-                <p>{scenario.paragraphs[0]}</p>
-              </div>
+            {active && session.product !== "infinite-calendar" && (
+              <ConceptCanvas {...{ session, canvas, preferredView, setPreferredView, locked }} />
+            )}
+            {!fullscreen && (
+              <ConceptIntro
+                product={product}
+                scenario={scenario}
+                actions={{ ...actions, playing: active && actions.playing }}
+                open={open}
+                button={active ? button : undefined}
+                locked={locked}
+                feedback={active ? feedback : ""}
+              />
             )}
           </section>
         );

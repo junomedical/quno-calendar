@@ -15,6 +15,12 @@ describe("JSON controlled demonstration scenarios", () => {
   });
   it.each([
     [
+      "unsupported calendar control",
+      (value: ReturnType<typeof copy>) => {
+        value.products[0].scenarios[0].initial.controls = ["everything"];
+      }
+    ],
+    [
       "missing explainer",
       (value: ReturnType<typeof copy>) => {
         value.products[0].scenarios[0].paragraphs = [];

@@ -1,11 +1,14 @@
+import { calendarInitial } from "#quno-e2e/concept-helpers";
 import { test, expect, type Page } from "@playwright/test";
 test.describe.configure({ mode: "parallel" });
 const ids = ["event-0", "overlap-1", "overlap-2"].map((id) => `2026-10-19-${id}`);
 async function openOverlap(page: Page, vertical: boolean) {
   await page.emulateMedia({ reducedMotion: "reduce" });
+  if (vertical) await calendarInitial(page, { view: "infinite-vertical" });
   await page.goto("/concept");
-  if (vertical) await page.locator('[data-action="vertical"]').click();
   await page.locator(".concept-scenario button").filter({ hasText: "Overlapping events" }).click();
+  await expect(page.locator(".concept")).toHaveAttribute("data-scene", "overlap");
+  await expect(page.locator(".concept")).toHaveAttribute("data-playing", "true");
   await expect(page.locator(`[data-event-id="${ids[2]}"]`)).toBeVisible();
 }
 for (const vertical of [false, true]) {
@@ -47,7 +50,11 @@ for (const vertical of [false, true]) {
     expect(result.gestures).not.toEqual(expect.arrayContaining(["press"]));
     expect(result.gestures).not.toEqual(expect.arrayContaining(["release"]));
     await expect(page.locator(".concept-cursor")).toBeHidden();
-    await expect(page.locator(".concept-statusbar")).not.toContainText("demonstration paused");
+    await expect(
+      page.locator(
+        '.concept-screen[data-active="true"] .concept-statusbar, .concept-fullscreen-dock .concept-statusbar'
+      )
+    ).not.toContainText("demonstration paused");
     await expect(page.locator('[data-action="event-title"]')).toHaveCount(0);
   });
   test(`real hover takes over and reaches appointments beneath expanded cards in ${vertical ? "vertical" : "horizontal"} view`, async ({
