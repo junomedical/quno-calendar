@@ -1,0 +1,50 @@
+{
+  "id": "single",
+  "label": "Single day",
+  "hint": "Choose one date at a time.",
+  "anchor": "single-day",
+  "initial": {
+    "range": {
+      "start": "2026-10-19",
+      "end": "2026-10-19"
+    },
+    "single": true
+  },
+  "paragraphs": [
+    "Sometimes a range is unnecessary. Single-day mode keeps the same calendar and navigation, but each click simply chooses one date.",
+    "There is no second step: selecting another day replaces the previous one."
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 650
+    },
+    {
+      "action": "click",
+      "target": "[data-slot=\"day\"][data-date=\"2026-10-21\"]",
+      "caption": "Choose Wednesday"
+    },
+    {
+      "action": "wait",
+      "ms": 1200
+    },
+    {
+      "action": "click",
+      "target": "[data-slot=\"day\"][data-date=\"2026-10-24\"]",
+      "caption": "Choose Saturday"
+    },
+    {
+      "action": "wait",
+      "ms": 1200
+    },
+    {
+      "action": "click",
+      "target": "[data-slot=\"day\"][data-date=\"2026-10-19\"]",
+      "caption": "Return to Monday"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    }
+  ]
+}

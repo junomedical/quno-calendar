@@ -1166,20 +1166,81 @@ authoritative. No consumer-side forced React commit or paint acknowledgment is n
 
 ## Explore the demo concept
 
-Run `npm run dev` and open `/concept`. Use the top product tabs, then choose a title in the bottom rail to scroll to its screen. Each scenario pairs the demo with a title and one or two explanatory paragraphs; Play tour runs a short sequence. Manual interaction pauses the tour. Each scenario links to its guide recipe. Full screen demo, below the paragraphs, shows only the demo and playback/exit controls; Escape exits. Mobile previews are inert until fullscreen opens.
+Run `npm run dev` and open `/concept`. Choose a product using the top tabs. Its floating guide starts with an
+introduction; Next opens its first chapter. The contextual contents button opens every title inside that same guide. Choose a chapter
+or use the footer arrows. The live demo starts automatically unless reduced motion is enabled and loops without
+advancing navigation. Revisit a chapter to restart it. Click, drag, wheel, keyboard input, focus entering a working
+control, or hiding the tab pauses playback and preserves the result. Mere pointer overlap does not pause it.
 
-The concept playback uses Play tour, Replay scene, Try it, and Reset. Calendar creation draws a draft and saves through an external editor; edits and moves survive viewport loading, scenario changes, Replay, and Reset for the current Calendar session. Each product exposes its own scenarios and guide anchors. The density recipe is available in `/guide/infinite-calendar#performance`.
+Drag the guide from its title, paragraphs or empty space. Buttons and links retain their usual actions. The chevron
+collapses it to its title and expand button at the same width. Its left-bottom anchor stays in place as height
+changes. Focus the guide and use arrows, Shift-arrows for larger steps, or Home to restore the bottom-left default,
+24 px from each edge. On narrow Calendar scenes with controls, extra clearance keeps the footer reachable.
 
-To author a concept scene, edit `demo/concept/scenarios/<product-id>/<scenario-id>.json`: set its copy, one or two `paragraphs`, docs anchor, initial state, and ordered actions, then reference its ID in the product manifest’s `scenarios` list and optionally `preview`. See [JSON authoring instructions](../../demo/concept/README.md#edit-scenarios-in-json). Existing action types require no player changes.
+The bottom-right icon toggles fullscreen; Escape exits and restores focus to it. Escape from contents first returns
+to the explanation. Fullscreen changes layout without remounting the working component. Other products sit right
+of the guide on wide screens and in a scrollable region above it on phones. All previews remain interactive.
 
-Concept `scroll`, `scroll-to`, `scroll-day`, and `slider` steps declare `durationMs` and `easing` (`linear` or `ease-in-out`). The Zoom scene holds and drags the real zoom slider; the normal Shift-wheel interaction remains available in the playground. Target positioning also scrolls smoothly, and manual input cancels pending animation frames.
+### Calendar chapters
 
-In the concept overlap scene, move across the overlapping cards to reveal their details. The preview uses hover movement alone, and moving your own pointer over the calendar immediately stops automation.
+Calendar introduces the author's rationale before eight chapters: infinite scroll, zoom, overlapping events,
+horizontal/vertical, theming, event density, creation and rescheduling. JSON selects only the relevant compact
+control, placed immediately left of fullscreen along the same bottom edge. No date/count or corner Saved/Moved
+message appears. Ordinary schedules use 22 varied hour-long appointments at 2× zoom; density offers 4/40/400.
 
-For compact card behavior, open Event density and choose Quiet or Packed; Shift-wheel can adjust zoom without a separate slider. Titles and clocks truncate on one line;
-cards shorter than 38 px show the title alone. Hover to restore the clock and details in an expanded card, then move
-away to return to the duration-sized card. Repeat in Vertical view; hover stays within the resource column.
+Scroll advances 900 px in one second, pauses 350 ms and continues downward. Zoom moves 8 → 0.5, explores, then returns
+to 8 and scrolls back. The explanation highlights Shift + scroll as a tag. Orientation switches also pan to the next
+day. Theme ends in Light, density ends in Quiet/horizontal, rescheduling moves three appointments out and back, and
+overlap moves outside all three cards for a closed hold. Creation checkpoints bound automatic edits per cycle.
 
-Calendar keeps its viewport fixed while scenario explanations scroll. Its JSON `initial.controls` array selects only the bottom-right control needed for that scene (`view`, `theme`, `density`, or `zoom`); `[]` hides the dock. The date/time label width is 238 px (167 px vertically), and there is no bottom date/count stats row.
+Creation can set `initial.focusDraft: true`. Its controlled draft selects only that doctor's calendar ID while
+`loadCalendarIds` retains all doctors. Save and Cancel restore selection with public viewport anchors. Drafts retain
+creation/drag chrome, saved cards glint, and cancellation releases the draft with a fade. Saving/settled feedback is
+consumer-owned presentation, not a new public status.
 
-Scenario explanations retain their complete layout while scrolling. Starting or pausing playback keeps the text and action positions stable; inactive sections cannot take focus until selected.
+### Other products
+
+Datepicker's seven chapters are Paint a range, Adjust the end, Move the range, Guess the intent, Access months,
+Switch to start/end and Single day. Intent clicks one date three times: extend the range, choose the other endpoint,
+then keep only that day. Month access opens the heading, scrolls back to July 1980 and selects 22 July as one day.
+Its 8840 ms year scroll is twice its previous duration. Its single-day configuration is independent from range-focused chapters.
+Paint alternates two ranges; Adjust extends then restores its endpoint; Move goes forward a week then back after a
+pause. These scenes loop without clearing the picker. Intent hovering reveals the next interpretation before another click. Endpoint shortcuts visit
+both ends without changing the range. Single-day mode belongs to its scene; no extra mode switch, hint or result
+is shown below the picker.
+
+Date Input uses today's date for relative phrases and a rolling expected period. Natural typing cycles through
+“tomorrow”, “yesterday”, “22 July 1980” and “next Friday”. It holds each phrase for 1.2 seconds before Enter, then
+shows the formatted result for 1.7 seconds. Keyboard editing steps the day down three times and the month up three times. Read the formatted result in
+the field itself. Its reference-date label and raw recognition output are omitted. Timepicker keeps minutes smaller
+than hour headings and top aligned. Date Parser remains an inspectable workbench with its fixed reference context.
+
+### Edit scenarios in JSON
+
+Edit `demo/concept/scenarios/<product-id>/<scenario-id>.json`: set `label`, `paragraphs`, `anchor`, `initial` and ordered
+`steps`, then reference its ID in the product manifest's `scenarios` array. Calendar allows three paragraphs; other
+products allow two. Existing action types need no player changes. Calendar and Datepicker `loop: "continue"` preserve authored
+cycles without resetting the component; other scenes restore their initial configuration between passes. See the
+[authoring instructions](../../demo/concept/README.md#edit-scenarios-in-json). No public API migration is required.
+
+In `/concept`, Works with datepicker uses the focused composition recipe above: focusing the input opens the picker,
+internal selection keeps it open, and outside focus or pointer interaction closes it. Natural typing accepts ranges;
+range completion is offered only in range mode.
+
+The Timepicker concept includes the single-day Datepicker time-mode flow above, returning from minute selection to
+days and retaining both values. Date Parser’s concept renders tokenizeDateInput tokens before parseDateInput
+endpoints with the same recognizeTime option, so changing a phrase shows both its parts and result.
+
+The Date Parser concept keeps preferred order and clock recognition in scene JSON. Its visible workbench shows the
+phrase, reference, tokens and resolved endpoints without configuration controls or a structured-result disclosure.
+
+Date Parser’s introduction holds `12/01 10:00` already recognized. Choose Resolve a phrase to start its six examples,
+including a clock, rolling duration, written date and explicit range. Scene `chapterOnly: true` preserves the ready
+initial control during introduction arrival/restoration; other products retain their existing behavior.
+
+The guide footer has only Previous and Next. Use All calendar demos (or the current product label) above the title
+to open contents. Its 34 px height matches collapse. Calendar scene docks are 40 px high, matching fullscreen, and
+keep only the controls. In creation, drag the active draft to update its editor, then Save or Cancel normally.
+
+Selecting a visible time option keeps the list in place. The shared Timepicker/Datepicker renderer reveals its
+initial hour and later offscreen values, while equivalent enabled-hour arrays do not reset manually chosen scroll.

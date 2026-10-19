@@ -1,0 +1,46 @@
+{
+  "id": "months",
+  "label": "Access months",
+  "hint": "Scroll through the years and choose 22 July 1980.",
+  "anchor": "quick-jump",
+  "initial": {
+    "range": null,
+    "single": true
+  },
+  "paragraphs": [
+    "Reaching a distant date should not require clicking through every month along the way.",
+    "I combined month and year navigation into one scrollable view. Open the month heading, scroll through the years, and choose a month directly—even when you need to reach a birth date decades earlier."
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 650
+    },
+    {
+      "action": "click",
+      "target": "[data-slot=\"month-heading-button\"]",
+      "caption": "Open months and years"
+    },
+    {
+      "action": "scroll-year",
+      "target": "[data-slot=\"month-navigation\"]",
+      "year": 1980,
+      "durationMs": 8840,
+      "easing": "ease-in-out"
+    },
+    {
+      "action": "click",
+      "target": "[data-slot=\"month-option\"][data-month=\"1980-07\"]",
+      "caption": "Choose July 1980"
+    },
+    {
+      "action": "click",
+      "target": "[data-slot=\"day\"][data-date=\"1980-07-22\"]",
+      "caption": "Choose 22 July 1980"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    }
+  ]
+}

@@ -258,18 +258,13 @@
   transition: none;
   pointer-events: none;
 }
+.concept-cursor svg {
+  overflow: visible;
+  transform: rotate(-15deg);
+  transform-origin: 3px 3px;
+}
 .concept-cursor[hidden] {
   display: none;
-}
-.concept-cursor span {
-  max-width: 190px;
-  white-space: normal;
-  width: max-content;
-  box-shadow: 0 2px 8px #302b4220;
-}
-.concept-cursor[data-edge="left"] span {
-  transform: translateX(-100%);
-  margin-left: 0;
 }
 .concept-cursor::before {
   content: "";
@@ -290,9 +285,6 @@
 .concept-cursor[data-gesture="drag"]::before {
   opacity: 0.65;
   background: #b89dd366;
-}
-.concept-cursor[data-gesture="scroll"] span::before {
-  content: "↕ ";
 }
 @keyframes concept-click {
   from {
@@ -369,10 +361,6 @@
     padding: 5px;
     font-size: 10px;
   }
-  .concept-cursor span {
-    max-width: 140px;
-    font-size: 10px;
-  }
 }
 @media (prefers-reduced-motion: reduce) {
   .concept-cursor::before {
@@ -392,4 +380,81 @@
   vertical-align: middle;
   accent-color: #765995;
   cursor: ew-resize;
+}
+
+.concept-gesture-tag {
+  display: inline-block;
+  border: 1px solid #d8cce7;
+  border-radius: 6px;
+  padding: 1px 6px;
+  font: inherit;
+  font-size: 0.9em;
+  white-space: nowrap;
+  background: #eee7f7;
+  color: #5d417a;
+}
+.concept--guided .concept-product-stage {
+  padding: 24px 24px 24px 50%;
+  grid-auto-rows: max-content;
+  align-content: safe center;
+}
+.concept-product-stage > .concept-product-mount {
+  width: min(410px, 100%);
+  padding: 0;
+  display: block;
+}
+.concept-product-mount > .concept-product-card {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  width: 100%;
+  border: 1px solid #e7e0ee;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 8px 35px #302b4208;
+}
+.concept .quno-time-picker-minute-option {
+  font-size: 13px;
+  font-weight: 400;
+  align-self: start;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 4px;
+  line-height: 20px;
+}
+.concept .quno-time-picker-minute-options {
+  align-self: start;
+  align-content: start;
+}
+.concept .quno-time-picker-hour-group h3 {
+  font-size: 16px;
+  line-height: 20px;
+  place-items: start center;
+  padding-top: 4px;
+}
+
+@media (min-width: 720px) and (max-width: 1100px) {
+  .concept-tour-content:not([data-calendar]) > .concept-tour-guide {
+    width: 40%;
+  }
+}
+@media (max-width: 719px) {
+  .concept-tour-content:not([data-calendar]) > .concept-tour-guide {
+    width: calc(100% - 88px);
+    max-height: 55%;
+  }
+  .concept-tour-content:not([data-calendar]) .concept-product-stage {
+    height: max(80px, calc(100% - var(--concept-guide-height, 240px) - 48px));
+    padding: 12px 24px 12px 36px;
+    justify-items: end;
+  }
+  .concept-tour-content[data-calendar="true"]:has(.concept-controls) > .concept-tour-guide {
+    margin-bottom: 48px;
+    max-height: calc(100% - 96px);
+  }
+}
+
+.concept-input-picker-summary {
+  display: none;
 }

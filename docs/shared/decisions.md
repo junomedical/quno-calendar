@@ -375,3 +375,127 @@ into the existing shared `DateRange`; the independent UI value/callback shapes u
 - Status: Accepted; refines QUNO-028's section presentation
 - Decision: Keep the complete title, explanation paragraphs, docs/fullscreen actions, and playback area mounted in every scenario section. Use the same component and styles before and after activation. Remove the abbreviated placeholder with different heading typography, paragraph count, and centering. Inactive sections remain inert and hidden from assistive navigation; only the active launch button owns the focus-restoration ref.
 - Consequences: Activation changes interaction availability and playback state without replacing text nodes. Reserve the Pause button's layout space and a fixed status area so starting/stopping playback does not recenter the copy. Heavy non-calendar demos still mount only when active; the Calendar canvas remains persistent. Browser tests sample relative text/action geometry throughout native scrolling and activation, plus playback/pause at desktop, narrow-desktop, and mobile widths.
+
+## Calendar fullscreen presentation update — 2026-10-19
+
+[Infinite Calendar Decision 131](../infinite-calendar/decisions.md#131---guide-fullscreen-calendar-scenes-with-a-floating-card)
+supersedes QUNO-028's fullscreen chrome for Calendar only, adding a floating scene guide, See demo, previous/next
+navigation, and top-navigation Back. QUNO-029's stable inline explanation layouts and other products remain unchanged.
+
+## Calendar default presentation update — 2026-10-19
+
+[Infinite Calendar Decision 132](../infinite-calendar/decisions.md#132---open-the-calendar-with-a-movable-guide-and-inline-contents)
+supersedes Decision 131 and Calendar's scenario-page presentation under QUNO-028/QUNO-029. Calendar now opens full-width
+with a movable/collapsible information panel, inline contents, bottom arrows, corner fullscreen, and automatic playback
+with reduced-motion/manual-takeover guards. Other products retain their accepted presentation.
+
+## Calendar introduction update — 2026-10-19
+
+[Infinite Calendar Decision 133](../infinite-calendar/decisions.md#133---introduce-the-calendar-demo-before-its-chapters)
+adds a dedicated introduction as the Calendar floating guide's first presentation page, before its existing scenes.
+Background autoplay, the shared scene catalog, and other product presentations retain their accepted contracts.
+
+## Calendar panel navigation update — 2026-10-19
+
+[Infinite Calendar Decision 134](../infinite-calendar/decisions.md#134---keep-calendar-navigation-in-the-floating-guide-footer)
+moves Calendar's previous/next controls into the floating panel footer, including its collapsed state. The calendar
+uses the recovered viewport space. Other products retain their title rails.
+
+## Calendar chapter playback update — 2026-10-19
+
+[Infinite Calendar Decision 135](../infinite-calendar/decisions.md#135---start-calendar-chapters-without-hiding-their-explanation)
+keeps chapter text expanded and starts its demo on arrival, removing the Calendar playback toolbar. Other products
+retain their accepted playback controls.
+
+## Calendar looping update — 2026-10-19
+
+[Infinite Calendar Decision 136](../infinite-calendar/decisions.md#136---loop-the-selected-calendar-scenario-without-advancing-navigation)
+keeps Calendar playback on the chosen chapter in a loop. Infinite scroll moves continuously downward. Other products
+retain their finite scenes and short tours.
+
+## Calendar motion pacing update — 2026-10-19
+
+[Infinite Calendar Decision 137](../infinite-calendar/decisions.md#137---make-calendar-scroll-and-zoom-loops-lively) replaces steady scrolling with 900 px steps and short pauses, and zooms between both extrema with exploratory scrolls.
+
+## Calendar pointer intent update — 2026-10-19
+
+[Infinite Calendar Decision 138](../infinite-calendar/decisions.md#138---require-deliberate-pointer-input-to-take-over-playback) replaces hover takeover with deliberate pointerdown takeover. Other cancellation inputs and products retain their accepted behavior.
+
+## Calendar orientation playback update — 2026-10-19
+
+[Infinite Calendar Decision 139](../infinite-calendar/decisions.md#139---demonstrate-next-day-scrolling-after-each-orientation-switch) adds next-day pans after both view switches using existing JSON actions.
+
+## QUNO-030 - Keep The Shared Demo Cursor Simple
+
+- Date: 2026-10-19
+- Status: Accepted; refines QUNO-023's shared cursor presentation and removes its text annotations
+- Decision: Round the notched cursor's corners more visibly and rotate its SVG 15 degrees counterclockwise around the existing 3 px tip anchor. Do not show a caption, sign, or key/scroll label beneath the cursor in any product demo. Keep the pointer movement, click pulse, held-drag cue, actual interactions, and cancellation behavior. Existing JSON caption fields remain valid authoring metadata but are not rendered.
+- Consequences: Remove caption markup, text mutation, and caption-specific styles/positioning. Keep SVG overflow visible so rotation is not clipped and leave the outer cursor's position untransformed so it stays aligned to controls. Browser coverage checks rounded/notched fill geometry, computed rotation, non-interception, absent caption nodes, and slider alignment. No public product contracts change.
+
+## QUNO-031 - Round Both Layers Of The Demo Pointer
+
+- Date: 2026-10-19
+- Status: Accepted; refines QUNO-030's corner rendering
+- Decision: Render the notched pointer body and white outline with thick, round-joined SVG strokes. Both visible contours must have rounded tips and corners at the actual demo size. Retain the 15-degree counterclockwise rotation, tip anchor, absent captions, non-interception and existing gestures.
+- Consequences: Browser checks assert round joins and stroke coverage at the rounded tip as well as notched fill geometry and computed rotation. This shared demo-only asset changes no product contracts.
+
+## QUNO-032 - Share The Floating Guide Across All Concept Products
+
+- Date: 2026-10-19
+- Status: Accepted; supersedes QUNO-028 and QUNO-029's section/rail, inert-preview and toolbar presentation
+- Decision: Use a live full-window canvas with one movable, collapsible guide for all five products. Put introductions,
+  All demos contents and previous/next navigation inside it. Chapters autoplay and loop in place unless reduced motion
+  is enabled. Deliberate pointerdown, wheel, keyboard, focus and hidden tabs cancel playback; hover alone does not.
+  Fullscreen sits at bottom right, with Calendar scene controls immediately left on the same bottom edge. Keep the
+  guide 24 px from bottom left by default and store left/bottom offsets so height changes grow upward; preserve its
+  width and 34 px toggle through collapse. Clamp to bounds and reserve clearance for narrow Calendar control docks.
+  Non-calendar elements sit right of the explanation on wide screens and in a clipped scrollable area above it on
+  phones. Introductions add presentation pages without synthetic scenes; only the active lazy product mounts.
+- Consequences: Share ConceptTour, FloatingGuide, DemoContents and DemoNavigation. Remove obsolete section/rail,
+  launch/fullscreen dock and toolbar modules. Non-calendar loops reset their active stage; Calendar retains its
+  session and authored closed cycles. Verify geometry, hit targets, clipping, disclosure, keyboard/touch dragging,
+  focus, loops and takeover across desktop/phone/landscape. All changes are demo-owned; no public migration.
+
+## QUNO-033 — Keep Synchronous Demo Focus Handoffs Internal
+
+- Date: 2026-10-19
+- Status: Accepted; refines QUNO-032's deliberate-takeover contract
+- Decision: Mark synchronous scripted pointerdown, pointerup and click dispatch as internal to playback. This includes
+  any native focus handoff performed by the working component during those handlers, such as a day opening its time
+  choices. Clear the marker immediately after dispatch; pauses and asynchronous movement remain interruptible.
+- Consequences: Date/time composition can loop without treating its own focus changes as manual activity. Real
+  pointer, wheel and keyboard input between actions still cancels pending work. Keep this behavior in the demo actor;
+  package component focus, interaction and accessibility contracts remain unchanged.
+
+## QUNO-034 — Allow A Ready Introduction Before Chapter Playback
+
+- Date: 2026-10-19
+- Status: Accepted; extends QUNO-032's chapter-arrival playback
+- Decision: Add optional scene JSON chapterOnly. When the product introduction reuses that scene, preserve its initial
+  working control and keep playback idle. Choosing the chapter starts its authored steps normally; returning to the
+  introduction restores the ready value. Omitted metadata retains existing introduction autoplay behavior.
+- Consequences: Check the introduction state through the shared tour container in the playback hook, without branching
+  on product or scene IDs. The Date Parser opts in to show a recognized date/time immediately. Preserve reduced motion,
+  loop cancellation and manual interaction. No public package API change.
+
+## QUNO-035 — Keep Guide Navigation Direct And Contextual
+
+- Date: 2026-10-19
+- Status: Accepted; refines QUNO-032's floating-guide navigation
+- Decision: Keep only Previous and Next in the guide footer, removing its counter/current-demo button. Use contextual
+  top actions such as All calendar demos or All date parser demos to open contents. Match their 34 px height to the
+  collapse/expand button. Retain contents titles, ordered chapter choices and existing previous/next behavior.
+- Consequences: Reuse the existing product contents label for the action. Verify two footer buttons, absent counter,
+  contextual names, equal button heights and contents/navigation/collapse across desktop, phone and landscape.
+  Component/package contracts and the guide's bottom-left anchor remain unchanged.
+
+## QUNO-036 — Preserve Visible Time Choices Through Selection
+
+- Date: 2026-10-19
+- Status: Accepted; refines QUNO-017's shared time-slot renderer
+- Decision: Reveal the initially selected hour when time choices mount. Afterward, leave an already visible selected
+  option in place; only scroll the minimum needed to reveal an offscreen option or its available hour heading.
+  Equivalent enabled-hour arrays must not restart reveal work on unrelated parent renders.
+- Consequences: Both standalone Timepicker and Datepicker use one private reveal hook with semantic hour-list
+  dependencies. Native pointer/keyboard selection keeps geometry and focus stable, while external offscreen values,
+  changed hour availability and reopening retain selected-slot reveal. No public names or styles change.

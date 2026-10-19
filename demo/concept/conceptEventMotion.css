@@ -1,0 +1,42 @@
+.concept-event {
+  position: relative;
+  overflow: hidden;
+}
+.concept-event[data-state="new"] {
+  background: #e3f5e9;
+  border: 1px dashed #538b70;
+  border-left-width: 3px;
+}
+.concept-event[data-state="dragging"] {
+  opacity: 0.5;
+}
+.concept-event[data-state="drop-preview"] {
+  box-shadow:
+    0 10px 24px #302b4233,
+    0 0 0 2px #538b7055;
+}
+.concept-event[data-state="appearing"]::before {
+  content: "";
+  position: absolute;
+  top: -35%;
+  bottom: -35%;
+  left: -70px;
+  width: 70px;
+  background: linear-gradient(90deg, transparent, #ffffffef, transparent);
+  pointer-events: none;
+  transform: skewX(-24deg);
+  animation: concept-event-glint 485ms ease-in forwards;
+}
+@keyframes concept-event-glint {
+  from {
+    left: -70px;
+  }
+  to {
+    left: calc(100% + 70px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .concept-event[data-state="appearing"]::before {
+    animation-duration: 1ms;
+  }
+}

@@ -198,23 +198,18 @@ displayed at the Save click for success. A bounded restore keeps that date throu
 returning rows. Date-only restores leave horizontal scrolling unchanged and yield to manual navigation. Availability,
 blocker and appointment outcome policy remains in the consumer.
 
-The separate `/concept` playground includes this product and links back to its field guide. See [demo concept notes](../../demo/concept/README.md).
+## Concept playground
 
-The `/concept` scenes demonstrate scroll, zoom, overlaps, orientation, theming, density, creation, and rescheduling through live interaction playback with replay/reset and manual takeover.
+The `/concept` playground uses the shared floating guide, autoplay loops, live phone stage and bottom-right fullscreen
+presentation recorded in [QUNO-032](../shared/decisions.md#quno-032---share-the-floating-guide-across-all-concept-products).
 
-Each scenario’s initial values and action sequence live in its own `demo/concept/scenarios/infinite-calendar/<scenario-id>.json`. The [product manifest](../../demo/concept/scenarios/infinite-calendar.json) orders those scenario IDs; replay and reset restore the selected file’s values.
+Its Calendar introduction precedes eight chapters. A stable canvas retains cached appointments and session edits.
+Scene controls sit immediately left of fullscreen along the same bottom edge. The guide starts 24 px from bottom
+left and grows upward on resize. Zoom highlights Shift + scroll as a tag. Overlap leaves every card closed between
+cycles. Saved cards glint; Cancel fades the active draft. Creation selects only the edited doctor while retaining all
+load IDs and public slot anchors, then restores the normal selection on Save/Cancel. See Decisions 147–148 and
+[concept notes](../../demo/concept/README.md) for the full choreography.
 
-The concept Zoom scene animates a visible range control through actual controlled geometry; scroll scenes ease through real viewport positions. JSON owns their duration and easing, with immediate cancellation on manual takeover. Library wheel behavior is unchanged.
-
-Hovering across the concept overlap fixture reveals each underlying appointment without opening the editor. Playback uses unpressed movement through actual browser hit targets; real pointer movement immediately takes over.
-
-Concept cards keep titles and clocks on separate unwrapped lines with ellipsis. Very short cards prioritize the title;
-hover restores the clock and details, targeting 240 px width within the available row/column space. Try the quiet and
-packed presets at minimum zoom in both orientations. These are consumer-owned styles; see [Decision 126](./decisions.md#126---keep-concept-card-text-legible-across-zoom-levels).
-
-Concept navigation keeps each demo with its title and one or two explanation paragraphs. Use the bottom title rail
-to scroll between scenarios; on mobile, open Full screen demo below the explanation to enable interaction.
-
-The Calendar concept now keeps one fixed calendar and shared session dataset across scenarios, with a 70% wider date/time label column, JSON-selected controls in its bottom-right corner, and no bottom date/count stats row. Scenario changes reset the view while retaining appointments and edits. See [concept notes](../../demo/concept/README.md).
-
-Concept explanation sections retain their full text layout while scrolling; activation and playback do not replace or recenter the copy.
+Concept creation drafts can be dragged before saving: the editor follows their time, Save commits the moved slot
+and Cancel discards it. Compact view, density, theme and zoom controls omit small labels and sit in a 40 px dock
+matching fullscreen. See Decision 149.

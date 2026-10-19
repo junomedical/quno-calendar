@@ -133,7 +133,7 @@ export function useDateInputState(props: QunoDateInputProps) {
     if (composing.current) return;
     const result = parse({ text });
     startTransition(() => setRecognition(recognitionOf(result)));
-    if (result.status === "partial-range" && text.length >= draft.length) {
+    if (selectionMode === "range" && result.status === "partial-range" && text.length >= draft.length) {
       const formatted = `${format({ value: { start: result.start.date, end: result.end.date } })} – `;
       element.value = formatted;
       element.setSelectionRange(formatted.length, formatted.length);

@@ -6,8 +6,8 @@
   "initial": {
     "view": "preferred",
     "theme": "light",
-    "density": 6,
-    "zoom": 1.3,
+    "density": 22,
+    "zoom": 2,
     "controls": []
   },
   "steps": [
@@ -27,16 +27,73 @@
       "timeOffset": 30
     },
     {
+      "action": "wait",
+      "ms": 350
+    },
+    {
+      "action": "move-event",
+      "reference": "[data-event-id=\"2026-10-19-event-1\"]",
+      "grid": "[data-slot=\"calendar-cell\"][data-date=\"2026-10-19\"][data-calendar-id=\"person-2\"]",
+      "viewport": ".quno-calendar-viewport",
+      "timeOffset": 30
+    },
+    {
+      "action": "wait",
+      "ms": 350
+    },
+    {
+      "action": "move-event",
+      "reference": "[data-event-id=\"2026-10-19-event-2\"]",
+      "grid": "[data-slot=\"calendar-cell\"][data-date=\"2026-10-19\"][data-calendar-id=\"person-3\"]",
+      "viewport": ".quno-calendar-viewport",
+      "timeOffset": 30
+    },
+    {
+      "action": "wait",
+      "ms": 350
+    },
+    {
+      "action": "move-event",
+      "reference": "[data-event-id=\"2026-10-19-event-2\"]",
+      "grid": "[data-slot=\"calendar-cell\"][data-date=\"2026-10-19\"][data-calendar-id=\"person-2\"]",
+      "viewport": ".quno-calendar-viewport",
+      "timeOffset": -30
+    },
+    {
+      "action": "wait",
+      "ms": 350
+    },
+    {
+      "action": "move-event",
+      "reference": "[data-event-id=\"2026-10-19-event-1\"]",
+      "grid": "[data-slot=\"calendar-cell\"][data-date=\"2026-10-19\"][data-calendar-id=\"person-1\"]",
+      "viewport": ".quno-calendar-viewport",
+      "timeOffset": -30
+    },
+    {
+      "action": "wait",
+      "ms": 350
+    },
+    {
+      "action": "move-event",
+      "reference": "[data-event-id=\"2026-10-19-event-0\"]",
+      "grid": "[data-slot=\"calendar-cell\"][data-date=\"2026-10-19\"][data-calendar-id=\"person-0\"]",
+      "viewport": ".quno-calendar-viewport",
+      "timeOffset": -30
+    },
+    {
+      "action": "wait",
+      "ms": 350
+    },
+    {
       "action": "hover",
       "target": "[data-event-id=\"2026-10-19-event-0\"]"
     },
     {
       "action": "wait",
-      "ms": 1500
+      "ms": 600
     }
   ],
-  "paragraphs": [
-    "Plans change. Pick up an appointment and move it to another time or person, with a preview showing where it will land.",
-    "Watch the pointer hold, drag, and release the card. The saved appointment follows its new position in the schedule."
-  ]
+  "paragraphs": ["Rescheduling an appointment or moving it to another doctor is as simple as drag and drop."],
+  "loop": "continue"
 }

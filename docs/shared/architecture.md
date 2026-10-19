@@ -98,23 +98,42 @@ source during development. This avoids relying on development aliases in Vercel'
 bundle is excluded from the published calendar package and the browser's `dist-demo` assets. Atomic publication
 allows the site and function build steps to run concurrently.
 
-The isolated `demo/concept` experiment composes public product entry points with deterministic local range fixtures; it changes no package runtime boundaries. `/concept` is owned by demo routing.
+The isolated `demo/concept` experiment composes public product entry points with demo-owned fixtures and DOM
+interaction playback. Product manifests order the 23 scene JSON files; `demo.json` owns startup order and shared
+fixture context. Validation checks IDs, references, initial values and typed actions. Date Input derives its reference
+from today rather than the fixed fixture context; Date Parser keeps its inspectable reference date.
 
-Concept playback is a demo-only adapter around public components and DOM interactions. A cancellable actor handles live controls, pointer/key events, and scroll geometry. No library internals are imported for behavior. Non-calendar product stages are loaded lazily and only the active stage mounts.
+`ConceptTour` composes the stable `ConceptCanvas`, bottom-right fullscreen button and `FloatingGuide` for every
+product. `DemoContents` and `DemoNavigation` include a presentation introduction before manifest chapters; Calendar's
+introduction lives in `calendarIntroduction.json`, Datepicker’s in `datepickerIntroduction.json`, and others use product metadata. The footer sits outside the guide's
+scrollable text body and disappears on collapse. No title rail, section scroller, playback toolbar or inert mobile
+preview remains. `useDemoPresentation` owns fullscreen/focus restoration without remounting the live component.
 
-Each concept scenario owns one `demo/concept/scenarios/<product-id>/<scenario-id>.json` file with copy, initial state,
-and actions. Product JSON manifests own product copy, explore links, and ordered scene/preview IDs. `demo.json` owns
-version, startup product, tab order, and shared dates. Vite discovers scene files automatically; the validated catalog
-resolves manifest references and checks filename/ID agreement. Scene IDs never select imperative playback branches.
-Product adapters own component wiring, while the actor owns interaction mechanics and cancellation.
+`useFloatingGuide` stores left/bottom offsets, bounds frame-limited captured pointer dragging, handles keyboard
+positioning, and measures guide height for the narrow non-calendar stage. Resizing text grows upward from the same
+bottom edge. CSS places other products right of the explanation or in a clipped scrollable area above it on phones.
+Calendar's compact scenario controls sit immediately left of fullscreen; narrow scenes reserve footer clearance.
 
-Concept presentation uses one vertical section scroller between the product header and horizontal title rail.
-`useScenarioScroll` settles navigation before activating a scene; `ConceptScreens` mounts the active non-calendar component. Calendar’s `ConceptCanvas` is a stable sibling of the section scroller, retaining the public calendar instance and cached source events. Scenario changes reset presentation and navigation; density is a `projectEvents` subset and local edits remain in the session.
-`useDemoPresentation` owns responsive/fullscreen state and focus restoration. Mobile inline canvases use native
-`inert` plus pointer exclusion, with playback disabled. Fullscreen changes layout without remounting the current demo.
+`usePlayback` repeats only the selected scene under one AbortController. Deliberate trusted pointerdown, wheel,
+keyboard, focus and tab visibility cancel pending actions; synthetic synchronous focus is marked internal. Hover
+alone never cancels playback. The actor uses public component controls and browser hit testing, not library internals.
+Day-cell clicks commit on pointerup, so playback does not dispatch an additional keyboard-style click afterward.
+`ConceptProducts` resets only its active lazy product mount on the scoped loop event. Datepicker’s authored
+continuous loops skip that event and retain the same picker. Its synthetic day-hover marker mirrors preview chrome
+in demo-owned CSS because untrusted events cannot set native `:hover`. Calendar stays mounted and
+restores a session checkpoint only when needed; naturally closed sequences use `loop: "continue"`.
 
-Concept motion uses cancellable `requestAnimationFrame` interpolation in the demo adapter. Slider playback sends native input events into the public controlled zoom path; scrolling applies integer cumulative deltas so rounding does not shorten travel. Target reveals share the same cancellable scroll primitive. No CSS scaling or package-runtime animation layer is involved.
+Motion uses cancellable animation frames, integer cumulative scroll deltas and real controlled slider input.
+Datepicker’s `scroll-year` action uses measured year height and the loaded year span to animate to an offscreen
+virtual year. Step checks live in `scenarioStepChecks`, separate from document/product validation. The
+rounded 15° cursor never intercepts input or renders captions. `playbackSurface` temporarily excludes the guide
+only during synchronous synthetic hit testing; real input still operates it normally. Hover uses unpressed pointer
+frames through topmost hit targets and closes before other actions, including the overlap chapter's closed hold.
 
-Calendar concept hover playback uses browser hit testing for every unpressed pointer frame. The normal row/column resolver selects covered lanes beneath expanded cards; the actor never selects events directly or sends a click to reveal details.
+Calendar retains one cached fixture source and session edits across chapters, projecting density through
+`projectEvents`. Draft focus changes displayed doctors while all IDs remain in load coverage; public viewport anchors
+retain the edited slot. Demo-owned CSS presents drafted/dragged cards and saved glints; public draft release supplies
+Cancel fading. Timepicker minute typography changes are scoped to `/concept`. No shipped runtime boundaries change.
 
-`ConceptScreens` retains every full `ConceptIntro` instead of swapping placeholders at activation. Inactive sections are inert, only the active launch button receives the restoration ref, and playback/status space is reserved to avoid recentering. This lightweight copy persistence does not eagerly mount inactive product demos.
+Timepicker owns the shared private time-option renderer and selection-reveal hook. Initial mounting reveals the
+selected hour; later updates use minimal reveal only for offscreen options and normalized hour-list dependencies.

@@ -1,4 +1,9 @@
-import { calendarInitial } from "#quno-e2e/concept-helpers";
+import {
+  pauseCalendarScene,
+  restartCalendarScene,
+  calendarInitial,
+  selectCalendarScene
+} from "#quno-e2e/concept-helpers";
 import { test, expect, type Page } from "@playwright/test";
 test.describe.configure({ mode: "parallel" });
 async function scene(page: Page, name: string, vertical = false) {
@@ -6,7 +11,7 @@ async function scene(page: Page, name: string, vertical = false) {
   if (vertical) await calendarInitial(page, { view: "infinite-vertical" });
   await page.goto("/concept");
   await expect(page.locator('[data-ready="true"]')).toBeVisible();
-  await page.locator(".concept-scenario button").filter({ hasText: name }).click();
+  await selectCalendarScene(page, name);
   await expect(page.locator(".concept")).toHaveAttribute("data-playing", "true");
 }
 for (const vertical of [false, true]) {
@@ -17,9 +22,12 @@ for (const vertical of [false, true]) {
     await expect(page.locator('.concept-cursor[data-gesture="drag"]')).toBeVisible();
     const samples = await page.evaluate(async (vertical) => {
       const result: { zoom: number; size: number; pointer: number; thumb: number }[] = [];
-      while (document.querySelector(".concept")?.getAttribute("data-playing") === "true") {
+      while (
+        document.querySelector(".concept")?.getAttribute("data-playing") === "true" &&
+        document.querySelector(".concept-canvas")?.getAttribute("data-playback-cycle") === "0"
+      ) {
         const workspace = document.querySelector<HTMLElement>(".concept-calendar-workspace")!;
-        const event = workspace.querySelector('[data-event-id="2026-10-19-event-0"]')?.getBoundingClientRect();
+        const event = workspace.querySelector('[data-event-id$="-event-0"]')?.getBoundingClientRect();
         const input = workspace.querySelector<HTMLInputElement>('[data-action="zoom"]')!;
         const slider = input.getBoundingClientRect();
         const pointer = document.querySelector<HTMLElement>(".concept-cursor")!;
@@ -40,13 +48,16 @@ for (const vertical of [false, true]) {
     }, vertical);
     expect(new Set(samples.map((item) => item.zoom)).size).toBeGreaterThan(20);
     expect(new Set(samples.map((item) => item.size)).size).toBeGreaterThan(20);
-    expect(samples.at(-1)!.size).toBeGreaterThan(samples[0].size * 1.4);
+    expect(Math.max(...samples.map((item) => item.size))).toBeGreaterThan(
+      Math.min(...samples.map((item) => item.size)) * 3
+    );
     expect(Math.max(...samples.map((item) => Math.abs(item.pointer - item.thumb)))).toBeLessThan(2);
-    expect(samples.every((item, i) => !i || item.zoom >= samples[i - 1].zoom)).toBe(true);
-    await expect(page.locator(".concept-calendar-workspace")).toHaveAttribute("data-zoom", "2.3");
+    expect(samples.some((item, i) => i > 0 && item.zoom < samples[i - 1].zoom)).toBe(true);
+    expect(samples.some((item, i) => i > 0 && item.zoom > samples[i - 1].zoom)).toBe(true);
+    await expect(page.locator(".concept-calendar-workspace")).toHaveAttribute("data-zoom", "8");
     await expect(
       page.locator(
-        '.concept-screen[data-active="true"] .concept-statusbar, .concept-fullscreen-dock .concept-statusbar'
+        '.concept-screen[data-active="true"] .concept-statusbar, .concept-fullscreen-dock .concept-statusbar, .concept-tour-status'
       )
     ).not.toContainText("demonstration paused");
   });
@@ -54,12 +65,16 @@ for (const vertical of [false, true]) {
     page
   }) => {
     await scene(page, "Infinite scroll", vertical);
-    await page.getByRole("button", { name: "Try it", exact: true }).click();
-    await page.getByRole("button", { name: "Replay scene", exact: true }).click();
+    await pauseCalendarScene(page);
+    await restartCalendarScene(page);
     const samples = await page.evaluate(async () => {
       const values: number[] = [];
       let started = false;
-      while (document.querySelector(".concept")?.getAttribute("data-playing") === "true") {
+      const deadline = performance.now() + 5000;
+      while (
+        document.querySelector(".concept")?.getAttribute("data-playing") === "true" &&
+        performance.now() < deadline
+      ) {
         const scrolling = !!document.querySelector('.concept-cursor[data-gesture="scroll"]');
         if (started && !scrolling) break;
         started ||= scrolling;
@@ -72,17 +87,29 @@ for (const vertical of [false, true]) {
       return values;
     });
     expect(new Set(samples).size).toBeGreaterThan(25);
-    expect(samples.at(-1)! - samples[0]).toBeGreaterThan(400);
+    expect(samples.at(-1)! - samples[0]).toBeGreaterThanOrEqual(800);
+    expect(
+      samples.some(
+        (value, index) =>
+          index >= 8 &&
+          value - samples[0] >= 800 &&
+          samples.slice(index - 8, index + 1).every((position) => Math.abs(position - value) <= 1)
+      )
+    ).toBe(true);
     expect(Math.max(...samples.slice(1).map((value, i) => Math.abs(value - samples[i])))).toBeLessThan(100);
   });
 }
 test("manual takeover stops interpolated zoom without a trailing animation", async ({ page }) => {
   await scene(page, "Zoom");
   const workspace = page.locator(".concept-calendar-workspace");
-  await expect.poll(async () => Number(await workspace.getAttribute("data-zoom"))).toBeGreaterThan(1.5);
-  await page.getByRole("button", { name: "Try it", exact: true }).click();
+  await page.waitForFunction(() => {
+    const zoom = Number(document.querySelector(".concept-calendar-workspace")?.getAttribute("data-zoom"));
+    return zoom < 7 && zoom > 1;
+  });
+  await pauseCalendarScene(page);
   const stopped = Number(await workspace.getAttribute("data-zoom"));
-  expect(stopped).toBeLessThan(2.3);
+  expect(stopped).toBeGreaterThan(0.5);
+  expect(stopped).toBeLessThan(8);
   await page.waitForTimeout(800);
   await expect(workspace).toHaveAttribute("data-zoom", String(stopped));
   await expect(page.locator(".concept")).toHaveAttribute("data-playing", "false");
@@ -98,7 +125,7 @@ test("manual takeover stops eased scrolling at the current position", async ({ p
     (start) => document.querySelector(".quno-calendar-viewport")!.scrollTop > start + 60,
     start
   );
-  await page.getByRole("button", { name: "Try it", exact: true }).click();
+  await pauseCalendarScene(page);
   expect((await viewport.evaluate((element) => element.scrollTop)) - start).toBeLessThan(400);
   const stopped = await viewport.evaluate((element) => {
     const bounds = element.getBoundingClientRect();

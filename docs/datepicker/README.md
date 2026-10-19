@@ -75,13 +75,20 @@ valid typed clocks by default and can enforce those settings with its own `force
 
 For clock selection without a date calendar, use the separate [Quno/Timepicker](../timepicker/README.md). Both features share the internal slot renderer while keeping independent public props and styles.
 
-The separate `/concept` playground includes this product and links back to its field guide. See [demo concept notes](../../demo/concept/README.md).
+## Concept playground
 
-The `/concept` scenes demonstrate range painting, endpoint resizing, and duration-preserving movement through live interaction playback with replay/reset and manual takeover.
+The `/concept` playground uses the shared floating guide, autoplay loops, live phone stage and bottom-right fullscreen
+presentation recorded in [QUNO-032](../shared/decisions.md#quno-032---share-the-floating-guide-across-all-concept-products).
 
-Each scenario’s initial values and action sequence live in its own `demo/concept/scenarios/datepicker/<scenario-id>.json`. The [product manifest](../../demo/concept/scenarios/datepicker.json) orders those scenario IDs; replay and reset restore the selected file’s values.
+The Datepicker has seven ordered chapters: Paint a range, Adjust the end, Move the range, Guess the intent,
+Access months, Switch to start/end and Single day. Intent cycles an expansion, the other endpoint, then one day.
+The introduction and chapter copy explain the author’s reasoning in the same first-person style as Calendar.
+Access months scrolls from October 2026 back to July 1980 over 8840 ms and selects the 22nd in single-day mode. Paint alternates two ranges, Adjust restores
+its endpoint, and Move returns after a pause; each repeats without clearing or remounting. Intent hovers to reveal
+the next selection before a second or third click. Endpoint shortcuts
+retain the existing range. The demo shows only the picker; scene JSON chooses
+selection mode, with no extra mode switch, hint or result below it. See QDP-131–133 and
+[concept notes](../../demo/concept/README.md).
 
-Concept navigation keeps each demo with its title and one or two explanation paragraphs. Use the bottom title rail
-to scroll between scenarios; on mobile, open Full screen demo below the explanation to enable interaction.
-
-Concept explanation sections retain their full text layout while scrolling; activation and playback do not replace or recenter the copy.
+Shared time choices preserve visible option positions during selection and reveal external offscreen choices only
+as needed; opening still reveals the selected hour. See shared QUNO-036.

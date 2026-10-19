@@ -1,8 +1,9 @@
 import type { PlaybackActor } from "./PlaybackActor";
 import type { PlaybackStep } from "./scenarioTypes";
-import { reveal } from "./playbackScroll";
+import { reveal, scrollBy } from "./playbackScroll";
 import { playSlider } from "./playbackSlider";
 import { center } from "./playbackMotion";
+import { scrollYear } from "./playbackYear";
 import { creationTarget, isVertical, moveTarget } from "./calendarTargets";
 
 async function wheel(actor: PlaybackActor, step: Extract<PlaybackStep, { action: "wheel" }>) {
@@ -58,6 +59,20 @@ async function runStep(actor: PlaybackActor, step: PlaybackStep) {
       return actor.key(step.target, step.key, step.caret);
     case "scroll":
       return actor.scroll(step.target, step.amount, step.caption, step.durationMs, step.easing);
+    case "scroll-year":
+      return scrollYear(actor, step);
+    case "scroll-loop": {
+      const target = await actor.find(step.target);
+      const bounds = target.getBoundingClientRect();
+      await actor.move({ x: bounds.left + bounds.width * 0.72, y: bounds.top + 160 }, "Scroll through the schedule");
+      actor.cue("Scroll through the schedule", "scroll");
+      while (!actor.signal.aborted) {
+        await scrollBy(actor.signal, target, 0, step.amount, step.durationMs, step.easing);
+        await actor.wait(step.pauseMs);
+      }
+      actor.signal.throwIfAborted();
+      return;
+    }
     case "scroll-to": {
       const target = await actor.find(step.destination);
       const scroller = await actor.find(step.target);

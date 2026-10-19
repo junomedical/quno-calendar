@@ -1,25 +1,22 @@
 import type { CalendarView } from "@quno/calendar/infinite-calendar";
 import { useCallback, useRef, useState } from "react";
-import { Minimize2 } from "lucide-react";
 import { ConceptCanvas } from "./ConceptCanvas";
-import { ConceptScreens } from "./ConceptScreens";
 import { ConceptHeader } from "./ConceptHeader";
-import { PlaybackControls } from "./PlaybackControls";
-import { ScenarioRail } from "./ScenarioRail";
-import { catalog, previews, products, scenarioDocument } from "./scenarioCatalog";
+import { ConceptTour } from "./ConceptTour";
+import { catalog, previews, scenarioDocument } from "./scenarioCatalog";
 import { usePlayback, type Session } from "./usePlayback";
-import { useScenarioScroll } from "./useScenarioScroll";
 import { useDemoPresentation } from "./useDemoPresentation";
 import "./concept.css";
 import "./playground.css";
 import "./navigation.css";
 import "./calendarPresentation.css";
+import "./fullscreenTour.css";
 export function DemoConcept() {
   const [session, setSession] = useState<Session>(() => ({
     product: scenarioDocument.startProduct,
     scene: previews[scenarioDocument.startProduct][0],
     revision: 0,
-    mode: window.matchMedia("(prefers-reduced-motion: reduce), (max-width: 850px)").matches ? "idle" : "scene"
+    mode: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "idle" : "scene"
   }));
   const [preferredView, setPreferredView] = useState<CalendarView>("infinite-horizontal");
   const canvas = useRef<HTMLDivElement>(null);
@@ -28,39 +25,29 @@ export function DemoConcept() {
     []
   );
   const presentation = useDemoPresentation(stop);
-  const { mobile, fullscreen } = presentation;
-  const locked = mobile && !fullscreen;
+  const { fullscreen } = presentation;
+  const locked = false;
   const activate = useCallback(
     (scene: string, mode: Session["mode"]) => {
       setSession((value) => ({ ...value, scene, mode: locked ? "idle" : mode, revision: value.revision + 1 }));
     },
     [locked]
   );
-  const navigation = useScenarioScroll(session.product, session.scene, fullscreen, activate);
-  const { navigate } = navigation;
-  const finish = useCallback(() => {
-    const scenes = previews[session.product];
-    const next = scenes[scenes.indexOf(session.scene) + 1];
-    if (session.mode === "preview" && next) navigate(next, "preview");
-    else stop();
-  }, [session.product, session.scene, session.mode, navigate, stop]);
+  const finish = stop;
   const feedback = usePlayback(canvas, session, finish, stop, !locked);
-  const product = products.find((item) => item.id === session.product)!;
   const current = catalog[session.product].find((item) => item.id === session.scene)!;
   const select = (scene: string, mode: Session["mode"] = "scene") => {
     stop();
-    navigation.navigate(scene, mode);
+    activate(scene, mode);
   };
   const actions = {
     playing: session.mode !== "idle",
-    stop,
-    replay: () => select(session.scene),
-    reset: () => activate(session.scene, "idle"),
-    preview: () => select(previews[session.product][0], "preview")
+    stop
   };
   return (
     <main
-      className={`concept ${fullscreen ? "concept--fullscreen" : ""}`}
+      className={`concept ${fullscreen ? "concept--fullscreen" : ""} concept--guided`}
+      data-product={session.product}
       data-playing={actions.playing}
       data-scene={session.scene}
     >
@@ -73,43 +60,28 @@ export function DemoConcept() {
               product: id,
               scene: catalog[id][0].id,
               revision: value.revision + 1,
-              mode: "idle"
+              mode: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "idle" : "scene"
             }));
           }}
         />
       )}
-      <div className="concept-content" data-calendar={session.product === "infinite-calendar"}>
-        {session.product === "infinite-calendar" && (
-          <ConceptCanvas {...{ session, canvas, preferredView, setPreferredView, locked }} />
-        )}
-        <div
-          className="concept-pages"
-          ref={navigation.pages}
-          onScroll={navigation.onScroll}
-          onWheelCapture={navigation.interrupt}
-          onTouchStartCapture={navigation.interrupt}
-        >
-          <ConceptScreens
-            {...{ session, product, canvas, preferredView, setPreferredView, fullscreen, locked, actions, feedback }}
-            open={presentation.open}
-            button={presentation.openButton}
-          />
-        </div>
-      </div>
-      {fullscreen ? (
-        <div className="concept-fullscreen-dock">
-          <span className="concept-statusbar" aria-live="polite">
-            {feedback || current.label}
-          </span>
-          <PlaybackControls {...actions} />
-          <button ref={presentation.closeButton} onClick={presentation.close}>
-            <Minimize2 size={15} />
-            Exit full screen
-          </button>
-        </div>
-      ) : (
-        <ScenarioRail product={session.product} scene={session.scene} select={select} />
-      )}
+      <ConceptTour
+        key={session.product}
+        product={session.product}
+        scenario={current}
+        actions={actions}
+        select={(scene) =>
+          select(scene, window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "idle" : "scene")
+        }
+        close={presentation.close}
+        fullscreen={fullscreen}
+        open={presentation.open}
+        openButton={presentation.openButton}
+        closeButton={presentation.closeButton}
+        feedback={feedback}
+      >
+        <ConceptCanvas {...{ session, canvas, preferredView, setPreferredView, locked }} />
+      </ConceptTour>
     </main>
   );
 }

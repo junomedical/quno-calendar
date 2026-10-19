@@ -12,7 +12,7 @@ export function useDemoPresentation(stop: () => void) {
       stop();
     };
     const escape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
+      if (event.key === "Escape" && !event.defaultPrevented) {
         stop();
         setFullscreen(false);
       }

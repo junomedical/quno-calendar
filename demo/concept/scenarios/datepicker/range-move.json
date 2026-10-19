@@ -23,9 +23,20 @@
     {
       "action": "wait",
       "ms": 1700
+    },
+    {
+      "action": "drag-dates",
+      "from": "2026-10-28",
+      "to": "2026-10-21"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
     }
   ],
   "paragraphs": [
-    "Move a whole date range to a different part of the month. Drag the selected band and keep the same number of days."
-  ]
+    "When choosing travel dates or comparing statistics, a common question is: “What about another week?”",
+    "Instead of selecting everything again, grab the middle of the selected range and move it elsewhere. Its duration stays the same."
+  ],
+  "loop": "continue"
 }

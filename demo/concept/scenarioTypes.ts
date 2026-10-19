@@ -8,11 +8,12 @@ export type InitialByProduct = {
     theme: string;
     density: number;
     zoom: number;
+    focusDraft?: boolean;
     controls: ("view" | "theme" | "density" | "zoom")[];
   };
   datepicker: { range: DateRange | null; single: boolean };
   "date-input": { range: DateRange | null; selectionMode: DateSelectionMode; picker: boolean; label: string };
-  timepicker: { value: string | null; cadence: MinuteCadence; businessHours: boolean };
+  timepicker: { value: string | null; cadence: MinuteCadence; businessHours: boolean; date?: IsoDate };
   "date-parser": { text: string; order: "dmy" | "mdy"; clocks: boolean };
 };
 export type ProductId = keyof InitialByProduct;
@@ -25,6 +26,8 @@ export type PlaybackStep =
   | { action: "type"; target: string; text: string }
   | { action: "key"; target: string; key: string; caret?: number }
   | ({ action: "scroll"; target: string; amount: number; caption?: string } & Motion)
+  | ({ action: "scroll-year"; target: string; year: number } & Motion)
+  | ({ action: "scroll-loop"; target: string; amount: number; pauseMs: number } & Motion)
   | ({ action: "scroll-to"; target: string; destination: string; caption: string } & Motion)
   | ({ action: "scroll-day"; target: string; cell: string; horizontalAmount: number; verticalOffset: number } & Motion)
   | ({ action: "slider"; target: string; value: number; caption: string } & Motion)
@@ -49,6 +52,8 @@ export type Scenario<P extends ProductId = ProductId> = {
   anchor: string;
   initial: InitialByProduct[P];
   steps: PlaybackStep[];
+  loop?: "continue";
+  chapterOnly?: boolean;
 };
 export type Product<P extends ProductId = ProductId> = {
   id: P;

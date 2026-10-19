@@ -64,13 +64,23 @@ Try `/demo/date-time` and the live date-time chapter, or copy the
 
 `minuteCadence` also accepts 20-minute steps for forced validation and clock arrow edits. Picker row sizes follow the [shared cadence table](../timepicker/README.md#value-and-settings).
 
-The separate `/concept` playground includes this product and links back to its field guide. See [demo concept notes](../../demo/concept/README.md).
+## Concept playground
 
-The `/concept` scenes demonstrate natural entry, caret-based keyboard edits, and picker composition through live interaction playback with replay/reset and manual takeover.
+The `/concept` playground uses the shared floating guide, autoplay loops, live phone stage and bottom-right fullscreen
+presentation recorded in [QUNO-032](../shared/decisions.md#quno-032---share-the-floating-guide-across-all-concept-products).
 
-Each scenario’s initial values and action sequence live in its own `demo/concept/scenarios/date-input/<scenario-id>.json`. The [product manifest](../../demo/concept/scenarios/date-input.json) orders those scenario IDs; replay and reset restore the selected file’s values.
+Its first-person introduction leads into Format guessing, Type naturally, Edit with keyboard and Works with
+datepicker. Format guessing writes out numeric interpretations; natural typing supports ranges. The composed picker
+opens on field focus, shares typed/selected ranges, follows the edited endpoint month and closes on outside focus or
+pointer interaction without a separate toggle. Relative phrases
+use today's reference date and a rolling twelve-month expected period on either side. Natural typing cycles through
+“tomorrow”, “yesterday”, “22 July 1980” and “next Friday”, holding each complete phrase for 1200 ms before Enter and
+each formatted result for 1700 ms. Other authored Enter actions retain 300 ms; keyboard editing steps days down
+three times and months up three times. The field itself shows the formatted
+result, without a reference label or raw result output. See QDI-004–005 and [concept notes](../../demo/concept/README.md).
 
-Concept navigation keeps each demo with its title and one or two explanation paragraphs. Use the bottom title rail
-to scroll between scenarios; on mobile, open Full screen demo below the explanation to enable interaction.
+Range-mode fields complete a recognized start and trailing dash while allowing the next endpoint to be typed.
+Single-date fields keep native draft text without offering range completion and reject multi-day commits. See QDI-006–007.
 
-Concept explanation sections retain their full text layout while scrolling; activation and playback do not replace or recenter the copy.
+Works with datepicker hides the duplicate picker selection header through the public class override, leaving the
+input as the range summary and retaining normal calendar navigation and selection.

@@ -8,12 +8,57 @@ const copy = () => JSON.parse(JSON.stringify(data));
 describe("JSON controlled demonstration scenarios", () => {
   it("loads the authored document and resolves every preview scene", () => {
     const document = parseScenarioDocument(copy());
-    expect(document.products.flatMap((product) => product.scenarios)).toHaveLength(19);
+    expect(document.products.flatMap((product) => product.scenarios)).toHaveLength(25);
     for (const product of document.products) {
       expect(product.preview.every((id) => product.scenarios.some((scene) => scene.id === id))).toBe(true);
     }
   });
   it.each([
+    [
+      "invalid scroll year",
+      (value: ReturnType<typeof copy>) => {
+        const scene = value.products[1].scenarios.find((scene: { id: string }) => scene.id === "months");
+        scene.steps.find((step: { action: string }) => step.action === "scroll-year").year = 1980.5;
+      }
+    ],
+    [
+      "year scrolling outside Datepicker",
+      (value: ReturnType<typeof copy>) => {
+        value.products[0].scenarios[0].steps = [
+          {
+            action: "scroll-year",
+            target: "[data-slot=month-navigation]",
+            year: 1980,
+            durationMs: 2600,
+            easing: "ease-in-out"
+          }
+        ];
+      }
+    ],
+    [
+      "invalid draft focus flag",
+      (value: ReturnType<typeof copy>) => {
+        value.products[0].scenarios[0].initial.focusDraft = "yes";
+      }
+    ],
+    [
+      "third explainer paragraph outside Calendar",
+      (value: ReturnType<typeof copy>) => {
+        value.products[1].scenarios[0].paragraphs = ["One", "Two", "Three"];
+      }
+    ],
+    [
+      "unsupported loop mode",
+      (value: ReturnType<typeof copy>) => {
+        value.products[0].scenarios[0].loop = "jump";
+      }
+    ],
+    [
+      "loop mode outside Calendar and Datepicker",
+      (value: ReturnType<typeof copy>) => {
+        value.products[2].scenarios[0].loop = "continue";
+      }
+    ],
     [
       "unsupported calendar control",
       (value: ReturnType<typeof copy>) => {
@@ -29,7 +74,7 @@ describe("JSON controlled demonstration scenarios", () => {
     [
       "too many explainer paragraphs",
       (value: ReturnType<typeof copy>) => {
-        value.products[0].scenarios[0].paragraphs = ["One", "Two", "Three"];
+        value.products[0].scenarios[0].paragraphs = ["One", "Two", "Three", "Four"];
       }
     ],
     [

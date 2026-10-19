@@ -57,3 +57,45 @@ into its own file; the product JSON retains only metadata and ordered references
 scenario sections, JSON explanations, explicit fullscreen, and inert mobile previews shared by the concept demos.
 
 [QUNO-029](../shared/decisions.md#quno-029---preserve-scenario-text-layout-during-scrolling) keeps complete concept explanation layouts mounted and reserves playback/status space, preventing text jumps during scrolling and activation.
+
+## QTP-003 - Align Concept Minutes Beside The Hour Heading
+
+- Date: 2026-10-19
+- Status: Accepted; adopts shared QUNO-032 and preserves QTP-002's public typography
+- Decision: The concept uses 13 px/400 minutes beside 16 px/700 hours, aligned at the top. Scope these adjustments
+  to the concept so its generic button rules cannot erase the hierarchy. Both time chapters use the floating guide.
+- Consequences: Assert computed font sizes/weights and matching hour/first-minute top geometry. Package styles and
+  selection contracts remain unchanged.
+
+## QTP-004 - Demonstrate Shared Date And Time Selection In The Concept
+
+- Date: 2026-10-19
+- Status: Accepted; extends QTP-003's concept catalog
+- Decision: Add Works with datepicker after the standalone Timepicker chapters. Use the public Datepicker's single-day
+  time mode to demonstrate the shared time choices: select October 21 at 10:45, October 24 at 14:30, then restore
+  October 19 at 09:00. Day selection opens time choices; minute selection returns to days. Keep prominent hours and
+  smaller, regular-weight minutes. The authored date is optional scene configuration, not a Timepicker API setting.
+- Consequences: Keep the standalone Timepicker entry independent from calendars. Scope playback's internal marker
+  to synchronous synthetic pointer/click handlers under shared QUNO-033 so the component's focus handoff does not pause itself; real input
+  between actions still interrupts. Verify every date/clock pair, return to days, manual selection and phone layout.
+
+## QTP-005 - Keep Standalone Concept Controls Below The Clock
+
+- Date: 2026-10-19
+- Status: Accepted; refines QTP-003's standalone concept presentation
+- Decision: Remove the duplicate Selected time output and business-hours checkbox. Keep the component's own summary,
+  move cadence choices below the clock and retain authored enabled hours as scene configuration.
+- Consequences: Assert absent duplicate output/toggle and cadence geometry below the component. Existing value
+  preservation, minute selection, hour scrolling and the composed date/time chapter retain their behavior.
+
+## QTP-006 - Keep A Chosen Visible Minute Under The Pointer
+
+- Date: 2026-10-19
+- Status: Accepted; refines QTP-001's selected-slot reveal through shared QUNO-036
+- Context: Selecting a visible minute repositioned its entire hour at the scroller's top. New array instances from
+  controlled consumers could repeat that correction even without a meaningful hour-list change.
+- Decision: Keep visible selections stationary, reveal offscreen selections only as needed and compare enabled hours
+  by their normalized values. Preserve initial selected-hour reveal, controlled/uncontrolled values and native focus.
+- Consequences: Test pointer hit targets, unchanged option geometry/scroll offset, keyboard activation, uncontrolled
+  selection, equivalent-array rerenders and existing external-value reveal on desktop/phone. The shared hook also
+  serves Datepicker without adding a calendar dependency to standalone Timepicker.

@@ -1,13 +1,13 @@
 {
   "id": "zoom",
   "label": "Zoom",
-  "hint": "Drag the zoom control to reveal more detail.",
+  "hint": "Zoom out, explore the schedule, then zoom in for detail.",
   "anchor": "zoom",
   "initial": {
     "view": "preferred",
     "theme": "light",
-    "density": 6,
-    "zoom": 1.3,
+    "density": 22,
+    "zoom": 8,
     "controls": ["zoom"]
   },
   "steps": [
@@ -17,28 +17,52 @@
     },
     {
       "action": "wait",
-      "ms": 900
+      "ms": 350
     },
     {
       "action": "slider",
       "target": "[data-action=\"zoom\"]",
-      "value": 2.3,
-      "caption": "Drag to zoom · reveal the detail",
-      "durationMs": 1800,
+      "value": 0.5,
+      "caption": "Zoom out · see the whole schedule",
+      "durationMs": 700,
       "easing": "ease-in-out"
     },
     {
-      "action": "cue",
-      "caption": "Release · inspect the detail",
-      "gesture": "hover"
+      "action": "scroll",
+      "target": ".quno-calendar-viewport",
+      "amount": 900,
+      "caption": "Explore the wider view",
+      "durationMs": 1000,
+      "easing": "ease-in-out"
     },
     {
       "action": "wait",
-      "ms": 1500
+      "ms": 350
+    },
+    {
+      "action": "slider",
+      "target": "[data-action=\"zoom\"]",
+      "value": 8,
+      "caption": "Zoom in · reveal the details",
+      "durationMs": 700,
+      "easing": "ease-in-out"
+    },
+    {
+      "action": "scroll",
+      "target": ".quno-calendar-viewport",
+      "amount": -900,
+      "caption": "Explore the detail",
+      "durationMs": 1000,
+      "easing": "ease-in-out"
+    },
+    {
+      "action": "wait",
+      "ms": 600
     }
   ],
   "paragraphs": [
-    "Pull back to see more of the day, or zoom in to make room for the details. Appointments and time labels follow the same continuous scale.",
-    "The demo drags the zoom control smoothly. Try the slider or hold Shift while scrolling to find your preferred view."
-  ]
+    "Another concept I consider essential is zoom. You can move quickly into the calendar to see more event details and information.",
+    "Use [shift-scroll], or a separate zoom control, to change the level of detail."
+  ],
+  "loop": "continue"
 }

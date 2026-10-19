@@ -1,11 +1,11 @@
 {
   "id": "natural",
   "label": "Type naturally",
-  "hint": "Type next Friday, then press Enter.",
+  "hint": "Try relative phrases and written dates, pausing before Enter.",
   "anchor": "controlled-state",
   "initial": {
     "range": null,
-    "selectionMode": "single",
+    "selectionMode": "range",
     "picker": false,
     "label": "Appointment date"
   },
@@ -17,7 +17,65 @@
     {
       "action": "type",
       "target": "[data-action=\"date-input\"]",
+      "text": "tomorrow"
+    },
+    {
+      "action": "wait",
+      "ms": 1200
+    },
+    {
+      "action": "key",
+      "target": "[data-action=\"date-input\"]",
+      "key": "Enter"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "type",
+      "target": "[data-action=\"date-input\"]",
+      "text": "yesterday"
+    },
+    {
+      "action": "wait",
+      "ms": 1200
+    },
+    {
+      "action": "key",
+      "target": "[data-action=\"date-input\"]",
+      "key": "Enter"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "type",
+      "target": "[data-action=\"date-input\"]",
+      "text": "22 July 1980"
+    },
+    {
+      "action": "wait",
+      "ms": 1200
+    },
+    {
+      "action": "key",
+      "target": "[data-action=\"date-input\"]",
+      "key": "Enter"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "type",
+      "target": "[data-action=\"date-input\"]",
       "text": "next Friday"
+    },
+    {
+      "action": "wait",
+      "ms": 1200
     },
     {
       "action": "key",
@@ -30,7 +88,7 @@
     }
   ],
   "paragraphs": [
-    "Enter a familiar phrase instead of reaching for a calendar. Type “next Friday” and press Enter to turn it into a clear, formatted date.",
-    "The field remains a native input, so you can select, replace, and edit its text as usual."
+    "For relative dates and ranges, I added a tokenizer that understands familiar words such as “last”, “past” and “next”. You can type what you mean instead of translating it into a date format first.",
+    "Not every combination is supported, but common phrases work smoothly. The same field accepts a single date or a range, then writes out the result so you can check it."
   ]
 }

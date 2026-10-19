@@ -1,0 +1,37 @@
+.concept-parser-tokens h2 {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.concept-parser-tokens ol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.concept-parser-tokens li {
+  display: grid;
+  gap: 3px;
+  padding: 7px 10px;
+  background: #f5f0fa;
+  border: 1px solid #e4ddec;
+  border-radius: 8px;
+}
+.concept-parser-tokens code {
+  font-size: 13px;
+}
+.concept-parser-tokens p {
+  margin: 0;
+  font-size: 12px;
+}
+
+.concept-parser-tokens li[data-known="true"] {
+  background: #ecf8ef;
+  border-color: #a8d7b6;
+  color: #215d37;
+}
+.concept-parser-tokens li[data-known="true"] small {
+  color: #397449;
+}

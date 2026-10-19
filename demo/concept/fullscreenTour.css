@@ -1,0 +1,179 @@
+.concept.concept--guided {
+  grid-template-rows: 88px minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
+}
+.concept--fullscreen.concept--guided {
+  grid-template-rows: minmax(0, 1fr);
+}
+.concept-tour-content {
+  isolation: isolate;
+}
+.concept--guided .concept-tour-content > .concept-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+.concept-tour-guide button,
+.concept-tour-fullscreen,
+.concept-tour-back,
+.concept-tour-pagination button,
+.concept-tour-contents button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1px solid #e4ddec;
+  border-radius: 8px;
+  color: #49365e;
+  background: #fff;
+  font-size: 12px;
+}
+.concept-tour-guide button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.concept-tour-fullscreen {
+  position: absolute;
+  z-index: 3;
+  bottom: 16px;
+  height: 40px;
+  box-shadow: 0 4px 16px #302b421a;
+}
+.concept-tour-fullscreen {
+  right: 16px;
+  width: 40px;
+}
+
+.concept-tour-guide {
+  position: absolute;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  width: min(420px, calc(100% - 48px));
+  max-height: calc(100% - 48px);
+  overflow: hidden;
+  padding: 20px;
+  border: 1px solid #e4ddec;
+  border-radius: 20px;
+  background: #f9f6fff5;
+  box-shadow: 0 16px 56px #302b4226;
+  backdrop-filter: blur(16px);
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+}
+.concept-tour-guide-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.concept-tour-guide .concept-tour-toggle {
+  align-self: start;
+  width: 34px;
+  height: 34px;
+  padding: 6px;
+  flex-shrink: 0;
+}
+.concept-tour-body {
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+.concept-tour-guide h1 {
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+  font-size: clamp(26px, 3vw, 38px);
+  font-weight: 500;
+  line-height: 1.12;
+  letter-spacing: -1px;
+}
+.concept-tour-guide a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+}
+.concept-tour-status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+@media (max-width: 850px) {
+  .concept.concept--guided {
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+  .concept.concept--fullscreen.concept--guided {
+    grid-template-rows: minmax(0, 1fr);
+  }
+  .concept-tour-guide {
+    width: min(420px, calc(100% - 88px));
+    padding: 16px;
+    border-radius: 16px;
+  }
+}
+
+.concept-tour-guide:focus-visible {
+  outline: 3px solid #8d71b9;
+  outline-offset: -3px;
+}
+.concept-tour-guide-top {
+  margin-bottom: 16px;
+}
+.concept-tour-guide[data-collapsed="true"] .concept-tour-guide-top {
+  margin-bottom: 0;
+}
+.concept-tour-guide[data-collapsed="true"] h1 {
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  letter-spacing: 0;
+}
+.concept-tour-guide:active {
+  cursor: grabbing;
+}
+.concept-tour-guide button,
+.concept-tour-guide a {
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.concept-tour-guide-top {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+.concept-tour-guide .concept-tour-back {
+  grid-column: 1;
+  grid-row: 1;
+  justify-self: start;
+  padding: 6px 8px;
+  height: 34px;
+}
+.concept-tour-guide .concept-tour-toggle {
+  grid-column: 2;
+  grid-row: 1;
+}
+.concept-tour-guide h1 {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  margin-top: 12px;
+}
+.concept-tour-guide[data-collapsed="true"] .concept-tour-guide-top {
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 4px;
+}
+.concept-tour-guide[data-collapsed="true"] h1 {
+  grid-column: 1;
+  grid-row: 1;
+  margin: 0;
+}
+.concept-tour-guide[data-collapsed="true"] .concept-tour-toggle {
+  grid-column: 2;
+}

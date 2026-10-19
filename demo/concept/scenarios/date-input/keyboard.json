@@ -1,7 +1,7 @@
 {
   "id": "keyboard",
-  "label": "Edit with the keyboard",
-  "hint": "Place the caret in the day and press ↑.",
+  "label": "Edit with keyboard",
+  "hint": "Step the day down, then move the month forward.",
   "anchor": "keyboard-controls",
   "initial": {
     "range": {
@@ -25,8 +25,51 @@
     {
       "action": "key",
       "target": "[data-action=\"date-input\"]",
-      "key": "ArrowUp",
+      "key": "ArrowDown",
       "caret": 1
+    },
+    {
+      "action": "key",
+      "target": "[data-action=\"date-input\"]",
+      "key": "ArrowDown",
+      "caret": 1
+    },
+    {
+      "action": "key",
+      "target": "[data-action=\"date-input\"]",
+      "key": "ArrowDown",
+      "caret": 1
+    },
+    {
+      "action": "wait",
+      "ms": 750
+    },
+    {
+      "action": "aim",
+      "target": "[data-action=\"date-input\"]",
+      "caption": "Place the caret in the month"
+    },
+    {
+      "action": "key",
+      "target": "[data-action=\"date-input\"]",
+      "key": "ArrowUp",
+      "caret": 4
+    },
+    {
+      "action": "key",
+      "target": "[data-action=\"date-input\"]",
+      "key": "ArrowUp",
+      "caret": 4
+    },
+    {
+      "action": "key",
+      "target": "[data-action=\"date-input\"]",
+      "key": "ArrowUp",
+      "caret": 4
+    },
+    {
+      "action": "wait",
+      "ms": 300
     },
     {
       "action": "key",
@@ -39,6 +82,7 @@
     }
   ],
   "paragraphs": [
-    "Make a small date adjustment directly from the keyboard. Put the caret on a date part and use the arrow keys to change it."
+    "Place the caret in a day, month or year and use the up and down arrows to change that part of the date. The field keeps ordinary text selection and keyboard editing.",
+    "The edits follow the calendar: stepping back from the first day of a month takes you into the previous month, rather than leaving you with an impossible date."
   ]
 }

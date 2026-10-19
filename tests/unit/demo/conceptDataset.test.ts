@@ -12,7 +12,7 @@ it("keeps appointment objects stable across range loads and density projections"
   const later = await load({ ...request, endDate: "2026-10-20" });
   expect(first).toHaveLength(400);
   for (const event of first) expect(later.find((item) => item.id === event.id)).toBe(event);
-  for (const density of [4, 6, 40, 400]) {
+  for (const density of [4, 6, 22, 40, 400]) {
     const selection = first.filter((event) => inDensity(event, density));
     expect(selection).toHaveLength(density);
     expect(selection.filter((event) => event.id.includes("-overlap-"))).toHaveLength(2);

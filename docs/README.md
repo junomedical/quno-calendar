@@ -115,23 +115,34 @@ viewport presentation subscriptions, reusable geometry and native observation or
 
 [Decision 124](./infinite-calendar/decisions.md#124---follow-the-current-shift-state-immediately) replaces Decision 123’s gesture lock with immediate current-Shift behavior, accepting momentum switching modes.
 
-## Demo approach experiment
+## Concept playground
 
-`/concept` offers a live five-product playground with a partial gradient intro, guided calendar scenarios, per-scenario recipe links, and an expanded demo view. Existing guides remain the documentation destinations.
+`/concept` presents all five products with the same live canvas and floating guide. The guide contains an introduction,
+All demos contents, chapter explanation, recipe link and previous/next footer. Chapters autoplay and repeat until
+manual takeover; reduced motion starts paused. Fullscreen sits at bottom right, with scene controls immediately left.
+The guide starts 24 px from bottom left and grows upward. Non-calendar products sit to its right on wide screens;
+phones keep them in a scrollable area above it. See [QUNO-032](./shared/decisions.md#quno-032---share-the-floating-guide-across-all-concept-products).
 
-The `/concept` scenario catalog now covers nineteen live interactions, including view switching, themes, and 4/40/400-event density comparisons. The Infinite Calendar performance chapter includes the same live density exhibit and a copyable fixture recipe.
+The [23 JSON scenarios](../demo/concept/README.md#edit-scenarios-in-json) include seven Datepicker interactions: paint,
+adjust, move, intent guessing, month access, start/end shortcuts and single-day selection. Datepicker’s introduction
+and chapters explain the author’s rationale; month access scrolls back to July 1980 and selects the 22nd. Date Input uses today's
+reference date and four natural-typing examples, waiting 1.2 seconds before each Enter. Its keyboard demo steps days down and months up. Timepicker minutes are smaller than
+hours and align at the top. Calendar overlap playback holds all cards closed between cycles; Save glints and Cancel
+fades the draft. Existing field guides remain the destinations for live public-contract recipes.
 
-The concept’s scenario copy, initial state, preview order, and playback steps are controlled by [individual scenario JSON files](../demo/concept/README.md#edit-scenarios-in-json).
+Date Input concept chapters now explain format guessing, flexible range typing, caret edits and a focus-open picker
+composition. See [QDI-006–007](./date-input/decisions.md). Datepicker’s distant-year scroll lasts 8840 ms; see
+[QDP-134](./datepicker/decisions.md#qdp-134--double-distant-year-scroll-duration).
 
-The concept zoom demo drags a real slider continuously; scroll and zoom timing/easing are editable in its scenario JSON.
+Timepicker’s [QTP-004](./timepicker/decisions.md#qtp-004---demonstrate-shared-date-and-time-selection-in-the-concept)
+adds a date/time concept chapter; Date Parser’s [QDPR-008](./date-parser/decisions.md#qdpr-008---expose-tokens-beside-resolved-concept-dates)
+makes tokens and resolved endpoints visible together.
 
-The concept overlap preview demonstrates movement-only hover through expanded cards; see [Infinite Calendar Decision 125](./infinite-calendar/decisions.md#125---reveal-overlap-lanes-during-demo-pointer-movement).
+Date Parser’s concept workbench contains only its phrase, reference, semantic tokens and resolved endpoints;
+chapter JSON owns parsing options. See [QDPR-011](./date-parser/decisions.md#qdpr-011---keep-concept-resolution-free-of-extra-controls).
 
-Concept card text stays on single lines across zoom levels, with bounded hover expansion for details; see [Decision 126](./infinite-calendar/decisions.md#126---keep-concept-card-text-legible-across-zoom-levels).
+Date Parser’s ready date/time introduction and six-example phrase chapter are recorded in
+[QDPR-012](./date-parser/decisions.md#qdpr-012---open-with-a-ready-date-and-time-and-expand-phrase-examples).
 
-The concept now presents each scenario on one screen with its JSON-authored explanation, a persistent bottom title
-rail that scrolls between demos, and an explicit fullscreen button. Mobile previews become interactive only in fullscreen.
-
-The Calendar concept now keeps one fixed calendar and shared session dataset across scenarios, with a 70% wider date/time label column, JSON-selected controls in its bottom-right corner, and no bottom date/count stats row. Scenario changes reset the view while retaining appointments and edits. See [concept notes](../demo/concept/README.md).
-
-Concept explanations retain consistent typography, spacing, and mounted text through scrolling and scenario activation.
+Concept guide footers now contain only Previous/Next with contextual contents actions (QUNO-035). Calendar creation
+drafts support movement before Save, and compact control docks match fullscreen height (Infinite Calendar 149).

@@ -46,21 +46,25 @@ export function animate(signal: AbortSignal, duration: number, frame: (progress:
   });
 }
 export function pointer(target: EventTarget, type: string, point: Point, held = false) {
-  target.dispatchEvent(
-    new PointerEvent(type, {
-      bubbles: true,
-      cancelable: true,
-      pointerId: 741,
-      pointerType: "mouse",
-      isPrimary: true,
-      clientX: point.x,
-      clientY: point.y,
-      button: type === "pointermove" ? -1 : 0,
-      buttons: held ? 1 : 0
-    })
-  );
+  const dispatch = () =>
+    target.dispatchEvent(
+      new PointerEvent(type, {
+        bubbles: true,
+        cancelable: true,
+        pointerId: 741,
+        pointerType: "mouse",
+        isPrimary: true,
+        clientX: point.x,
+        clientY: point.y,
+        button: type === "pointermove" ? -1 : 0,
+        buttons: held ? 1 : 0
+      })
+    );
+  if (target instanceof Element) onPlaybackSurface(target, dispatch);
+  else dispatch();
 }
 export function center(element: Element): Point {
   const rect = element.getBoundingClientRect();
   return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
 }
+import { onPlaybackSurface } from "./playbackSurface";

@@ -80,13 +80,29 @@ are unsupported. Date Input and Datepicker can compose one date and one clock wi
 see the [date-time recipe](../shared/usage.md#single-day-date-and-time). The headless parser continues to support
 intraday and overnight ranges independently of the single-clock UI.
 
-The separate `/concept` playground includes this product and links back to its field guide. See [demo concept notes](../../demo/concept/README.md).
+## Concept playground
 
-The `/concept` scenes demonstrate relative phrases, date-order ambiguity, and overnight clock ranges through live interaction playback with replay/reset and manual takeover.
+The `/concept` playground uses the shared floating guide, autoplay loops, live phone stage and bottom-right fullscreen
+presentation recorded in [QUNO-032](../shared/decisions.md#quno-032---share-the-floating-guide-across-all-concept-products).
 
-Each scenario’s initial values and action sequence live in its own `demo/concept/scenarios/date-parser/<scenario-id>.json`. The [product manifest](../../demo/concept/scenarios/date-parser.json) orders those scenario IDs; replay and reset restore the selected file’s values.
+Its live workbench demonstrates relative phrases, date-order ambiguity and overnight clock ranges. The fixed
+reference date, semantic tokens and readable endpoint results remain inspectable. Only the presentation
+and playback repetition change; the parser remains headless. See [concept notes](../../demo/concept/README.md).
 
-Concept navigation keeps each demo with its title and one or two explanation paragraphs. Use the bottom title rail
-to scroll between scenarios; on mobile, open Full screen demo below the explanation to enable interaction.
+The concept workbench shows raw tokens and their public types beneath the phrase, followed immediately by the
+resolved endpoints. There are no extra preferences or structured-result controls. Scene JSON configures the
+preferred date order and clock recognition; Cross midnight enables clocks. Tokenization uses
+the same clock-recognition option as parsing; whitespace-only token chips are omitted. See QDPR-008.
 
-Concept explanation sections retain their full text layout while scrolling; activation and playback do not replace or recenter the copy.
+Parser token chips show known English vocabulary in green, with month-name, weekday, relative and duration-unit
+labels. Unknown words remain neutral. The same consumer-owned lexicon supplies the parser and chip meanings; raw
+lexical types remain inspectable. A recognized word does not guarantee that the complete phrase is valid.
+
+Concept semantic labels distinguish a colon as a time separator and numeric 61–9999 values as years, unless they
+belong to a duration count or clock parts. Smaller/out-of-range values retain their neutral number label (QDPR-010).
+
+Resolve ambiguity compares 03/04/2026 with 04/13/2026 by typing, then restores the first phrase. See QDPR-011.
+
+The concept introduction opens with `12/01 10:00` already recognized, with clock support enabled, and remains idle
+until a chapter is chosen. Resolve a phrase cycles six examples: next Friday, tomorrow 10:30, past 3 days,
+22 July 1980, an explicit October range and next month. Each completed phrase holds for 1700 ms (QDPR-012).

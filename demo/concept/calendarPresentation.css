@@ -25,27 +25,12 @@
 .concept-calendar-workspace > .concept-controls {
   position: absolute;
   z-index: 50;
-  right: 16px;
+  right: 64px;
   bottom: 16px;
-  max-width: calc(100% - 32px);
+  max-width: calc(100% - 80px);
   border: 1px solid var(--quno-calendar-cell-border, #e6deee);
   border-radius: 12px;
   box-shadow: 0 4px 20px #302b421a;
-}
-.concept-calendar-message {
-  position: absolute;
-  left: 16px;
-  bottom: 16px;
-  z-index: 49;
-  max-width: calc(100% - 32px);
-  padding: 8px 12px;
-  border-radius: 8px;
-  font-size: 11px;
-  background: var(--quno-calendar-header-surface, #faf8fc);
-  pointer-events: none;
-}
-.concept-calendar-message:empty {
-  display: none;
 }
 .concept--fullscreen .concept-content[data-calendar="true"] > .concept-pages {
   visibility: hidden;
@@ -68,8 +53,28 @@
     inset: 0;
   }
   .concept-calendar-workspace > .concept-controls {
-    right: 8px;
-    bottom: 8px;
-    max-width: calc(100% - 16px);
+    right: 64px;
+    bottom: 16px;
+    max-width: calc(100% - 80px);
   }
+}
+
+.concept-calendar-workspace > .concept-controls {
+  padding: 4px 8px;
+  gap: 6px;
+}
+.concept-calendar-workspace .concept-controls legend {
+  font-size: 9px;
+  margin-bottom: 2px;
+}
+.concept-calendar-workspace .concept-controls button {
+  padding: 4px 6px;
+  line-height: 14px;
+  margin-bottom: 0;
+}
+
+.concept-calendar-workspace > .concept-controls {
+  height: 40px;
+  align-items: center;
+  flex-wrap: nowrap;
 }
