@@ -24,7 +24,7 @@
       "target": ".quno-calendar-viewport",
       "amount": 900,
       "durationMs": 1000,
-      "pauseMs": 350,
+      "pauseMs": 2000,
       "easing": "ease-in-out"
     }
   ],

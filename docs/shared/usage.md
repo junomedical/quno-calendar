@@ -1188,7 +1188,7 @@ horizontal/vertical, theming, event density, creation and rescheduling. JSON sel
 control, placed immediately left of fullscreen along the same bottom edge. No date/count or corner Saved/Moved
 message appears. Ordinary schedules use 22 varied hour-long appointments at 2× zoom; density offers 4/40/400.
 
-Scroll advances 900 px in one second, pauses 350 ms and continues downward. Zoom moves 8 → 0.5, explores, then returns
+Scroll advances 900 px in one second, pauses two seconds and continues downward. Zoom moves 8 → 0.5, explores, then returns
 to 8 and scrolls back. The explanation highlights Shift + scroll as a tag. Orientation switches also pan to the next
 day. Theme ends in Light, density ends in Quiet/horizontal, rescheduling moves three appointments out and back, and
 overlap moves outside all three cards for a closed hold. Creation checkpoints bound automatic edits per cycle.

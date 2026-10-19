@@ -1864,3 +1864,13 @@ Remove the small labels above view, density, theme and zoom controls, retaining 
 existing buttons/slider. Keep every scene-control dock 40 px high, centered and aligned with the fullscreen control.
 Verify live draft/editor clock changes, actual card movement, preserved titles and Save/Cancel in both orientations;
 assert label absence, equal dock/fullscreen height and hit targets at desktop/phone widths. No public API changes.
+
+## 150 - Pause Two Seconds Between Infinite Scroll Steps
+
+Date: 2026-10-19
+Status: Accepted; supersedes only Decision 137's Infinite scroll pause duration
+
+Set the Infinite scroll scene's pauseMs to 2000, retaining its 900 px, one-second movement, easing, indefinite
+continuation and manual takeover. Both orientations share this scene configuration. Verify an observed stationary
+hold of at least 1900 ms between movements, allowing frame-sampling tolerance. Other scenes retain their pacing.
+No public product contracts change.

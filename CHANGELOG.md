@@ -4,6 +4,11 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+- Increased the Infinite scroll concept pause between its 900 px steps from 350 ms to two seconds in both orientations.
+  All 655 unit tests, focused loop/motion checks and repeated timing checks in both orientations pass. Formatting,
+  architecture, types, lint, Preact, demo build, package verification, size reporting and pack dry-run pass. The demo's
+  existing 588.15 kB chunk warning and previously recorded full-run calendar verification caveats remain unchanged.
+
 - Verification for stable time selection and concept updates: all 655 unit tests pass. The full Chromium run passed
   377/380 checks: one older control test expected the removed legends; its updated accessible-group assertions and
   all four checks in that file pass. Two existing calendar checks failed intermittently under six-worker load:
