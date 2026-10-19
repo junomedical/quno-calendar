@@ -1,39 +1,29 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
   QunoInfiniteCalendar,
-  applyEventMove,
-  type CalendarEvent,
   type CalendarView,
-  type EventRendererProps,
-  type QunoInfiniteCalendarHandle,
-  type LoadEvents,
-  type ProjectEvents
+  type QunoInfiniteCalendarHandle
 } from "@quno/calendar/infinite-calendar";
 import "@quno/calendar/infinite-calendar/styles.css";
-import { calendars, date, fixtureEvents } from "./calendarFixtures";
-import { CalendarEditor, eventClock, eventDate } from "./CalendarEditor";
+import { calendars, date } from "./calendarFixtures";
+import { CalendarEditor } from "./CalendarEditor";
 import { useCalendarReadout } from "./useCalendarReadout";
+import { useCalendarData } from "./useCalendarData";
+import { useCalendarEdits } from "./useCalendarEdits";
 import { CalendarControls } from "./CalendarControls";
 import { getScenario } from "./scenarioCatalog";
-function EventCard({ event, style, laneCount, status }: EventRendererProps) {
-  return (
-    <article className="concept-event" style={style} data-lanes={laneCount} data-state={status}>
-      <small>
-        {eventClock(event.start)} — {eventClock(event.end)}
-      </small>
-      <strong>{event.title}</strong>
-      {status === "hovered" && (
-        <span>Studio appointment · {laneCount > 1 ? `${laneCount} concurrent events` : "Drag to reschedule"}</span>
-      )}
-    </article>
-  );
-}
 type ConceptCalendarProps = {
   scenario: string;
+  revision?: number;
   initialView?: CalendarView;
   onViewChange?: (view: CalendarView) => void;
 };
-export function ConceptCalendar({ scenario, initialView = "infinite-horizontal", onViewChange }: ConceptCalendarProps) {
+export function ConceptCalendar({
+  scenario,
+  revision = 0,
+  initialView = "infinite-horizontal",
+  onViewChange
+}: ConceptCalendarProps) {
   const initial = getScenario("infinite-calendar", scenario).initial;
   const ref = useRef<QunoInfiniteCalendarHandle>(null);
   const root = useRef<HTMLDivElement>(null);
@@ -43,42 +33,29 @@ export function ConceptCalendar({ scenario, initialView = "infinite-horizontal",
   const [theme, setTheme] = useState(initial.theme);
   const [density, setDensity] = useState(initial.density);
   const [zoom, setZoom] = useState(initial.zoom);
-  const [changes, setChanges] = useState<Record<string, CalendarEvent>>({});
-  const sequence = useRef(0);
-  const [editing, setEditing] = useState(false);
-  const [draft, setDraft] = useState<CalendarEvent | null>(null);
-  const [message, setMessage] = useState("");
-  const overlap = initial.overlap;
-  const loadEvents = useCallback<LoadEvents>(
-    (request) => Promise.resolve(fixtureEvents(request, density, overlap)),
-    [density, overlap]
+  const { loadEvents, projectEvents, setChanges } = useCalendarData(density);
+  const { draft, editing, setDraft, message, save, reset, renderEvent, ...eventHandlers } = useCalendarEdits(
+    ref,
+    setChanges
   );
-  const projectEvents = useCallback<ProjectEvents>(
-    ({ events, startDate, endDate, calendarIds }) => [
-      ...events.filter((event) => !changes[event.id]),
-      ...Object.values(changes).filter(
-        (event) =>
-          eventDate(event.start) >= startDate &&
-          eventDate(event.start) <= endDate &&
-          calendarIds.includes(event.calendarId)
-      )
-    ],
-    [changes]
-  );
+  useLayoutEffect(() => {
+    navigationDate.current = date;
+    setView((current) => (initial.view === "preferred" ? current : initial.view));
+    setTheme(initial.theme);
+    setDensity(initial.density);
+    setZoom(initial.zoom);
+    reset();
+  }, [initial, revision, reset]);
   const settings = useMemo(
-    () => ({ startHour: 8, endHour: 19, zoom, rowHeight: 76, labelWidth: 140, verticalColumnMinWidth: 185 }),
+    () => ({ startHour: 8, endHour: 19, zoom, rowHeight: 76, labelWidth: 238, verticalColumnMinWidth: 185 }),
     [zoom]
   );
   useEffect(() => {
-    ref.current?.scrollToDateTime({ date: navigationDate.current, time: "10:00", calendarId: "person-0" });
-  }, [view]);
-  const save = () => {
-    if (!draft?.title.trim()) return;
-    setChanges((current) => ({ ...current, [draft.id]: draft }));
-    ref.current?.commitVisibleEvent({ event: draft });
-    setMessage(`Saved ${draft.title} · ${eventClock(draft.start)}`);
-    setDraft(null);
-  };
+    const frame = requestAnimationFrame(() => {
+      ref.current?.scrollToDateTime({ date: navigationDate.current, time: "10:00", calendarId: "person-0" });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [view, scenario, revision]);
   return (
     <div
       ref={root}
@@ -88,8 +65,10 @@ export function ConceptCalendar({ scenario, initialView = "infinite-horizontal",
       data-view={view}
       data-density={density}
       data-zoom={zoom}
+      data-visible-date={visibleDate}
     >
       <CalendarControls
+        controls={initial.controls}
         {...{ view, theme, setTheme, density, setDensity, zoom, setZoom }}
         setView={(next) => {
           navigationDate.current = ref.current?.getVisibleDateKeys()[0] ?? date;
@@ -107,9 +86,8 @@ export function ConceptCalendar({ scenario, initialView = "infinite-horizontal",
           now={new Date(`${date}T10:30:00`)}
           view={view}
           loadEvents={loadEvents}
-          eventVersion={density}
           projectEvents={projectEvents}
-          renderEvent={EventCard}
+          renderEvent={renderEvent}
           settings={settings}
           onZoomChange={({ zoom: value }) => setZoom(value)}
           activeDraft={
@@ -117,32 +95,14 @@ export function ConceptCalendar({ scenario, initialView = "infinite-horizontal",
               ? { mode: editing ? "edit" : "create", event: draft, sourceEventId: editing ? draft.id : undefined }
               : null
           }
-          onEventDraftRequest={(request) => {
-            setEditing(false);
-            setDraft({ ...request, id: `concept-created-${++sequence.current}`, title: "", color: "#9b7cc6" });
-          }}
-          onEventActivate={({ event }) => {
-            setEditing(true);
-            setDraft(event);
-          }}
-          onEventMoveRequest={(request) => {
-            const event = applyEventMove({ event: request.event, request });
-            setChanges((current) => ({ ...current, [event.id]: event }));
-            setMessage(
-              `Moved ${event.title} · ${eventClock(event.start)} · ${calendars.find((item) => item.id === event.calendarId)?.name}`
-            );
-            return true;
-          }}
+          {...eventHandlers}
         />
         {draft && (
           <CalendarEditor draft={draft} editing={editing} update={setDraft} save={save} cancel={() => setDraft(null)} />
         )}
       </div>
-      <output className="concept-result" aria-live="polite">
-        {visibleDate}
-        {message ? ` · ${message}` : ""}
-        {` · ${density} events / day`}
-        {overlap ? " · 3 concurrent appointments" : ""}
+      <output className="concept-calendar-message" aria-live="polite">
+        {message}
       </output>
     </div>
   );

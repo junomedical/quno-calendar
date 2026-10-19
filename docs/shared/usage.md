@@ -1137,7 +1137,7 @@ authoritative. No consumer-side forced React commit or paint acknowledgment is n
 
 Run `npm run dev` and open `/concept`. Use the top product tabs, then choose a title in the bottom rail to scroll to its screen. Each scenario pairs the demo with a title and one or two explanatory paragraphs; Play tour runs a short sequence. Manual interaction pauses the tour. Each scenario links to its guide recipe. Full screen demo, below the paragraphs, shows only the demo and playback/exit controls; Escape exits. Mobile previews are inert until fullscreen opens.
 
-The concept playback uses Play tour, Replay scene, Try it, and Reset. Calendar creation draws a draft and saves through an external editor; edits and moves survive viewport loading until Reset. Each product exposes its own scenarios and guide anchors. The density recipe is available in `/guide/infinite-calendar#performance`.
+The concept playback uses Play tour, Replay scene, Try it, and Reset. Calendar creation draws a draft and saves through an external editor; edits and moves survive viewport loading, scenario changes, Replay, and Reset for the current Calendar session. Each product exposes its own scenarios and guide anchors. The density recipe is available in `/guide/infinite-calendar#performance`.
 
 To author a concept scene, edit `demo/concept/scenarios/<product-id>/<scenario-id>.json`: set its copy, one or two `paragraphs`, docs anchor, initial state, and ordered actions, then reference its ID in the product manifest’s `scenarios` list and optionally `preview`. See [JSON authoring instructions](../../demo/concept/README.md#edit-scenarios-in-json). Existing action types require no player changes.
 
@@ -1145,6 +1145,10 @@ Concept `scroll`, `scroll-to`, `scroll-day`, and `slider` steps declare `duratio
 
 In the concept overlap scene, move across the overlapping cards to reveal their details. The preview uses hover movement alone, and moving your own pointer over the calendar immediately stops automation.
 
-For compact card behavior, choose Quiet or Packed and lower Zoom to 0.5. Titles and clocks truncate on one line;
+For compact card behavior, open Event density and choose Quiet or Packed; Shift-wheel can adjust zoom without a separate slider. Titles and clocks truncate on one line;
 cards shorter than 38 px show the title alone. Hover to restore the clock and details in an expanded card, then move
 away to return to the duration-sized card. Repeat in Vertical view; hover stays within the resource column.
+
+Calendar keeps its viewport fixed while scenario explanations scroll. Its JSON `initial.controls` array selects only the bottom-right control needed for that scene (`view`, `theme`, `density`, or `zoom`); `[]` hides the dock. The date/time label width is 238 px (167 px vertically), and there is no bottom date/count stats row.
+
+Scenario explanations retain their complete layout while scrolling. Starting or pausing playback keeps the text and action positions stable; inactive sections cannot take focus until selected.

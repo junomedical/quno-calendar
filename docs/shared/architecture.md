@@ -109,10 +109,12 @@ resolves manifest references and checks filename/ID agreement. Scene IDs never s
 Product adapters own component wiring, while the actor owns interaction mechanics and cancellation.
 
 Concept presentation uses one vertical section scroller between the product header and horizontal title rail.
-`useScenarioScroll` settles navigation before activating a scene; `ConceptScreens` mounts only the active component.
+`useScenarioScroll` settles navigation before activating a scene; `ConceptScreens` mounts the active non-calendar component. Calendar’s `ConceptCanvas` is a stable sibling of the section scroller, retaining the public calendar instance and cached source events. Scenario changes reset presentation and navigation; density is a `projectEvents` subset and local edits remain in the session.
 `useDemoPresentation` owns responsive/fullscreen state and focus restoration. Mobile inline canvases use native
 `inert` plus pointer exclusion, with playback disabled. Fullscreen changes layout without remounting the current demo.
 
 Concept motion uses cancellable `requestAnimationFrame` interpolation in the demo adapter. Slider playback sends native input events into the public controlled zoom path; scrolling applies integer cumulative deltas so rounding does not shorten travel. Target reveals share the same cancellable scroll primitive. No CSS scaling or package-runtime animation layer is involved.
 
 Calendar concept hover playback uses browser hit testing for every unpressed pointer frame. The normal row/column resolver selects covered lanes beneath expanded cards; the actor never selects events directly or sends a click to reveal details.
+
+`ConceptScreens` retains every full `ConceptIntro` instead of swapping placeholders at activation. Inactive sections are inert, only the active launch button receives the restoration ref, and playback/status space is reserved to avoid recentering. This lightweight copy persistence does not eagerly mount inactive product demos.

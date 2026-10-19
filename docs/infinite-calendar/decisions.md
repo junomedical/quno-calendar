@@ -1472,3 +1472,21 @@ into its own file; the product JSON retains only metadata and ordered references
 
 [QUNO-028](../shared/decisions.md#quno-028---navigate-demo-screens-with-a-bottom-title-rail) records viewport-sized
 scenario sections, JSON explanations, explicit fullscreen, and inert mobile previews shared by the concept demos.
+
+## 127 - Keep the Concept Calendar Fixed Across Scenarios
+
+Date: 2026-10-19
+Status: Accepted; refines the Calendar presentation in QUNO-028 and supersedes its per-scene calendar mounting
+
+Keep the calendar canvas outside the scrolling explanation sections, retaining one public component instance and
+shared cached appointment source. Scenario changes and Replay/Reset restore JSON presentation settings and starting
+date/time without deleting session edits. Density projects 4/40/400-event subsets of that source; all other authored
+scenes show the same six appointments per day, including the overlap. Remove the old per-scene `overlap` flag.
+
+Give labels 70% more space (`labelWidth: 238`, vertical time pane 167 px). Remove the top controls and bottom date/count
+stats. Only `initial.controls` declared by the current scenario appear in a bottom-right dock; no controls are shown
+for scroll, overlap, create, or move. Fullscreen retains state, and mobile inline previews remain inert. Package
+contracts are unchanged. Verify fixed bounds during scroll, retained DOM/data identities, saved edits, control
+geometry, label widths, playback outcomes, and mobile/fullscreen behavior.
+
+[QUNO-029](../shared/decisions.md#quno-029---preserve-scenario-text-layout-during-scrolling) keeps complete concept explanation layouts mounted and reserves playback/status space, preventing text jumps during scrolling and activation.

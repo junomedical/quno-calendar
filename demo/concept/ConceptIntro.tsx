@@ -15,7 +15,7 @@ export function ConceptIntro({
   scenario: Scenario;
   actions: PlaybackActions;
   open: () => void;
-  button: RefObject<HTMLButtonElement>;
+  button?: RefObject<HTMLButtonElement>;
   locked: boolean;
   feedback: string;
 }) {

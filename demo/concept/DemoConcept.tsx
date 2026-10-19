@@ -1,6 +1,7 @@
 import type { CalendarView } from "@quno/calendar/infinite-calendar";
 import { useCallback, useRef, useState } from "react";
 import { Minimize2 } from "lucide-react";
+import { ConceptCanvas } from "./ConceptCanvas";
 import { ConceptScreens } from "./ConceptScreens";
 import { ConceptHeader } from "./ConceptHeader";
 import { PlaybackControls } from "./PlaybackControls";
@@ -12,6 +13,7 @@ import { useDemoPresentation } from "./useDemoPresentation";
 import "./concept.css";
 import "./playground.css";
 import "./navigation.css";
+import "./calendarPresentation.css";
 export function DemoConcept() {
   const [session, setSession] = useState<Session>(() => ({
     product: scenarioDocument.startProduct,
@@ -76,18 +78,23 @@ export function DemoConcept() {
           }}
         />
       )}
-      <div
-        className="concept-pages"
-        ref={navigation.pages}
-        onScroll={navigation.onScroll}
-        onWheelCapture={navigation.interrupt}
-        onTouchStartCapture={navigation.interrupt}
-      >
-        <ConceptScreens
-          {...{ session, product, canvas, preferredView, setPreferredView, fullscreen, locked, actions, feedback }}
-          open={presentation.open}
-          button={presentation.openButton}
-        />
+      <div className="concept-content" data-calendar={session.product === "infinite-calendar"}>
+        {session.product === "infinite-calendar" && (
+          <ConceptCanvas {...{ session, canvas, preferredView, setPreferredView, locked }} />
+        )}
+        <div
+          className="concept-pages"
+          ref={navigation.pages}
+          onScroll={navigation.onScroll}
+          onWheelCapture={navigation.interrupt}
+          onTouchStartCapture={navigation.interrupt}
+        >
+          <ConceptScreens
+            {...{ session, product, canvas, preferredView, setPreferredView, fullscreen, locked, actions, feedback }}
+            open={presentation.open}
+            button={presentation.openButton}
+          />
+        </div>
       </div>
       {fullscreen ? (
         <div className="concept-fullscreen-dock">

@@ -368,3 +368,10 @@ into the existing shared `DateRange`; the independent UI value/callback shapes u
 - Fullscreen: Launch explicitly with the button below the paragraphs. Show only the working demo and playback/exit controls, preserve mounted state, and restore launch-button focus on exit. Remove automatic expanded-mode flags from scenes. Desktop inline interaction remains enabled; the first scene plays once, with multi-scene tours started explicitly.
 - Mobile: At widths up to 850 px, make inline previews inert and pause simulations. Touch scrolls the page or title rail; interaction and replay are available only in fullscreen. Leaving fullscreen retains the current result in an inert preview. Reduced motion disables animated section navigation.
 - Verification: Assert viewport containment, paragraph/button placement, real scroll positions and intermediate frames, title selection, touch swipes, inert input/focus behavior, fullscreen chrome/state/focus, resize handling, and existing scene outcomes. No package API or runtime changes.
+
+## QUNO-029 - Preserve Scenario Text Layout During Scrolling
+
+- Date: 2026-10-19
+- Status: Accepted; refines QUNO-028's section presentation
+- Decision: Keep the complete title, explanation paragraphs, docs/fullscreen actions, and playback area mounted in every scenario section. Use the same component and styles before and after activation. Remove the abbreviated placeholder with different heading typography, paragraph count, and centering. Inactive sections remain inert and hidden from assistive navigation; only the active launch button owns the focus-restoration ref.
+- Consequences: Activation changes interaction availability and playback state without replacing text nodes. Reserve the Pause button's layout space and a fixed status area so starting/stopping playback does not recenter the copy. Heavy non-calendar demos still mount only when active; the Calendar canvas remains persistent. Browser tests sample relative text/action geometry throughout native scrolling and activation, plus playback/pause at desktop, narrow-desktop, and mobile widths.

@@ -3,7 +3,7 @@
 Open `/concept` with `npm run dev`. Each of the 19 scenarios has a viewport-sized section containing its title,
 one or two explanatory paragraphs, and a live demo. Product tabs stay at the top. A horizontally swipeable title
 rail stays at the bottom; choosing a title scrolls vertically to its section. Scrolling between sections selects
-the nearest demo after settling. Only the active section mounts its working component.
+the nearest demo after settling. Every section keeps its full title, paragraphs, and actions mounted with identical typography and spacing before and after activation; inactive sections are inert. Calendar stays mounted in a fixed layer beside the scrolling explanations. Other products mount only the active section’s working component.
 
 The Full screen demo button sits below the explanation beside the recipe link. Fullscreen shows only the working
 demo and compact playback/exit controls. Entering and leaving preserves the mounted component’s state and returns
@@ -11,7 +11,7 @@ focus to the launch button. Escape stops playback and exits. Scenarios never ope
 
 Desktop demos remain interactive inline. The initial scene plays once unless reduced motion is enabled; Play tour
 explicitly runs the product’s preview sequence and scrolls between its sections. Title selection replays that scene;
-manual section scrolling opens it paused. Replay and Reset restore scene state; Try it preserves the current result.
+manual section scrolling opens it paused. Replay and Reset restore presentation settings and navigation; Calendar keeps the shared schedule and session edits. Other products restore scene state. Try it preserves the current result.
 Pointer, wheel, keyboard, focus, and real calendar hover stop playback; hidden tabs cancel pending work.
 
 At widths up to 850 px, inline previews are inert, cannot take focus, and do not play simulations. Touch gestures
@@ -84,7 +84,7 @@ visible held drag, so the calendar's controlled geometry changes continuously. T
 Shared movement/press pacing belongs to the actor. Reduced motion starts idle; explicitly playing a scene opts into
 its demonstration motion. Any manual input or hidden tab cancels the next frame immediately.
 
-Initial settings differ by product: Calendar view/theme/density/zoom/overlap; picker range/single-day mode; input
+Initial settings differ by product: Calendar view/theme/density/zoom/controls; picker range/single-day mode; input
 range/selection mode/picker/label; time value/cadence/business hours; parser text/date order/clock recognition.
 Calendar view `preferred` preserves the visitor's chosen orientation. Explicit views override it for that scene.
 Replay and Reset use the same JSON initial settings. No executable code belongs in JSON; a new interaction primitive
@@ -108,13 +108,12 @@ Other products have their own smaller scenario list.
 
 ### Calendar: explore, understand, then act
 
-Use one recognizable appointment schedule with named people, rooms, and appointments. Avoid generating the same
-three overlapping cards in every row and every day. Each scene starts with the minimum data needed to explain it.
+Use one recognizable appointment schedule with named people and appointments. Keep the overlap on one person’s row so the other resources remain easy to compare. Scenes share a cached deterministic schedule and use six appointments per day, including the same three-way overlap. Density projects 4/40/400-event subsets without replacing the source appointments.
 
 | Shortcut              | Starting scene and simulated action                                                                                                                                                                                                                    | Visible payoff / visitor instruction                                                                                                                               | Recipe                                                                                                     |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
 | Horizontal / vertical | Begin with the same named appointment and resources in horizontal view. Point at the view control, switch to vertical, and briefly highlight that appointment in its new position.                                                                     | See how the same schedule works in both layouts. Preserve the selected date and keep the reference appointment visible. “Switch the view.”                         | `/guide/infinite-calendar#horizontal-first`; supporting `/guide/infinite-calendar#calendar-cell-styling`   |
-| Infinite scroll       | Start on a legible, moderately busy day. Move continuously across a day boundary, settle on the next day, then continue. Keep a visible date readout.                                                                                                  | The schedule continues without paging. “Scroll to the next day.”                                                                                                   | `/guide/infinite-calendar#infinite-view`                                                                   |
+| Infinite scroll       | Start on a legible, moderately busy day. Move continuously across a day boundary, settle on the next day, then continue. Use the calendar’s date labels as the readout.                                                                                | The schedule continues without paging. “Scroll to the next day.”                                                                                                   | `/guide/infinite-calendar#infinite-view`                                                                   |
 | Zoom                  | Begin with a broad schedule containing a short appointment. Press the visible zoom slider and drag it continuously from 1.3× to 2.3×, then release.                                                                                                    | The appointment and time divisions gain readable detail through continuous controlled zoom. “Drag to zoom”; Shift-wheel remains available manually.                | `/guide/infinite-calendar#zoom`                                                                            |
 | Event density         | Keep date, resources, zoom, and theme fixed. Change a deterministic fixture from Quiet (4) to Busy (40) to Packed (400) events per day, then scroll through the packed schedule. Preserve a few named appointments at every level.                     | Inspect how the calendar lays out and navigates increasing event counts. Show the actual events/day and resource count. “Try a busier schedule.”                   | `/guide/infinite-calendar#performance`; includes the live density exhibit and its copyable fixture recipe. |
 | Overlapping events    | Start with three appointments at the same time for one person, already laid out in separate lanes. Move between their cards to reveal compact details.                                                                                                 | Every appointment is reachable despite the shared time. “Hover each appointment.” Keep overlap geometry visible before hover.                                      | `/guide/infinite-calendar#overlap-lanes`; supporting `/guide/infinite-calendar#hover-reveal`               |
@@ -125,11 +124,10 @@ three overlapping cards in every row and every day. Each scene starts with the m
 The automatic preview plays Infinite scroll → Zoom → Overlapping events once, around 20–25 seconds total, and
 stops with Try it available. It must not loop endlessly or open an editor while a visitor reads the introduction.
 Horizontal / vertical, Event density, Theming, Create, and Reschedule run when selected. Selecting a scenario prepares its starting state and plays its demonstration;
-Try it stops automation and leaves a useful working state. Replay restores that scene's fixture before playing again.
+Try it stops automation and leaves a useful working state. Replay resets the calendar view before playing again; appointments and edits remain in the shared session dataset.
 
 Horizontal / vertical, Theming, and Event density are dedicated demonstrations with their own shortcuts and docs
-links. Their controls also remain available for manual experimentation in the expanded playground. Let visitors
-combine vertical view, a dark theme, and packed data. The demonstrations introduce one change at a time so its
+links. Only the control declared by the current scenario’s `initial.controls` appears, in the bottom-right corner of the calendar. Empty control lists show no dock. The view carries forward where the next scene uses `preferred`. The demonstrations introduce one change at a time so its
 effect is clear. Exercise scrolling, zoom, overlaps, creation, and movement in both orientations where supported.
 
 Event density means the number of appointments in the schedule. Keep event-count controls separate from visual
@@ -278,3 +276,17 @@ column. These styles stay in `playground.css`; calendar duration geometry and pu
 Navigation coverage checks screen containment, title-to-section scroll positions, intermediate smooth-scroll frames,
 native touch swipes in both directions, inert mobile inputs, fullscreen state/focus restoration, and all existing
 scenario outcomes. Scenario explanations and ordering remain JSON-controlled.
+
+## Persistent calendar presentation
+
+The calendar’s 238 px label column is 70% wider than its former 140 px setting; the vertical time pane follows the
+component’s existing 70% width ratio (167 px). The working calendar sits outside the explanation scroller, so title
+navigation moves only text. A stable calendar instance owns the cached fixture source and local edits across scenes;
+view, theme, density, zoom, draft state, and starting date/time reset from each scenario. Fullscreen preserves both
+the live viewport and data. The bottom date/count stats row is removed; saved/moved confirmations remain contextual.
+
+Calendar `initial.controls` accepts `view`, `theme`, `density`, and `zoom`. The authored scenes expose only their own
+control, while scroll, overlap, create, and move use `[]`. The existing `overlap` initial flag is removed: all Calendar
+scenes use the same source dataset. Density projects a subset before layout, so changing it does not reload fixtures.
+
+Text sections never swap a compact placeholder for the full explanation. Playback reserves its pause-button slot and a fixed status area, preventing centered copy from moving when playback starts or stops.

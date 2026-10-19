@@ -1,10 +1,11 @@
+import { calendarInitial } from "#quno-e2e/concept-helpers";
 import { test, expect, type Page } from "@playwright/test";
 test.describe.configure({ mode: "parallel" });
 async function scene(page: Page, name: string, vertical = false) {
   await page.emulateMedia({ reducedMotion: "reduce" });
+  if (vertical) await calendarInitial(page, { view: "infinite-vertical" });
   await page.goto("/concept");
   await expect(page.locator('[data-ready="true"]')).toBeVisible();
-  if (vertical) await page.locator('[data-action="vertical"]').click();
   await page.locator(".concept-scenario button").filter({ hasText: name }).click();
   await expect(page.locator(".concept")).toHaveAttribute("data-playing", "true");
 }
@@ -43,7 +44,11 @@ for (const vertical of [false, true]) {
     expect(Math.max(...samples.map((item) => Math.abs(item.pointer - item.thumb)))).toBeLessThan(2);
     expect(samples.every((item, i) => !i || item.zoom >= samples[i - 1].zoom)).toBe(true);
     await expect(page.locator(".concept-calendar-workspace")).toHaveAttribute("data-zoom", "2.3");
-    await expect(page.locator(".concept-statusbar")).not.toContainText("demonstration paused");
+    await expect(
+      page.locator(
+        '.concept-screen[data-active="true"] .concept-statusbar, .concept-fullscreen-dock .concept-statusbar'
+      )
+    ).not.toContainText("demonstration paused");
   });
   test(`demo scroll shows continuous intermediate positions in ${vertical ? "vertical" : "horizontal"} view`, async ({
     page
@@ -58,8 +63,11 @@ for (const vertical of [false, true]) {
         const scrolling = !!document.querySelector('.concept-cursor[data-gesture="scroll"]');
         if (started && !scrolling) break;
         started ||= scrolling;
-        const viewport = document.querySelector(".quno-calendar-viewport");
-        if (viewport && started) values.push(viewport.scrollTop);
+        // Measure visible travel: the infinite viewport may rebase its internal scroll offset.
+        const reference = document.querySelector(
+          '[data-slot="calendar-cell"][data-date="2026-10-20"][data-calendar-id="person-0"]'
+        );
+        if (reference && started) values.push(-reference.getBoundingClientRect().top);
         await new Promise(requestAnimationFrame);
       }
       return values;

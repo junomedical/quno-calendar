@@ -32,3 +32,7 @@ The concept’s scenario copy, initial state, preview order, and playback steps 
 
 The concept now presents each scenario on one screen with its JSON-authored explanation, a persistent bottom title
 rail that scrolls between demos, and an explicit fullscreen button. Mobile previews become interactive only in fullscreen.
+
+The Calendar concept now keeps one fixed calendar and shared session dataset across scenarios, with a 70% wider date/time label column, JSON-selected controls in its bottom-right corner, and no bottom date/count stats row. Scenario changes reset the view while retaining appointments and edits. See [concept notes](./concept/README.md).
+
+Concept explanations retain consistent typography, spacing, and mounted text through scrolling and scenario activation.

@@ -463,7 +463,7 @@ browser anchoring/geometry assertions.
 
 The isolated `/concept` browser checks assert the gradient intro’s geometry and pointer layering, live calendar events, scenario state, documentation destinations, expanded-view positioning, Escape, mobile containment, and reduced-motion defaults.
 
-Concept Chromium coverage exercises all nineteen scenes through actual controls, checks intermediate hover/draft/typing states, exact committed values, orientation/theme/density combinations, manual gesture parity, takeover, reset/replay, and phone containment. Fixture tests verify exact per-day density and selected-resource filtering.
+Concept Chromium coverage exercises all nineteen scenes through actual controls, checks intermediate hover/draft/typing states, exact committed values, scenario-specific orientation/theme/density controls, manual gesture parity, takeover, reset/replay, and phone containment. Fixture tests verify exact per-day density and selected-resource filtering.
 
 Scenario validation tests reject malformed JSON, unsupported actions, duplicate IDs, invalid initial values, and broken preview references. The browser suite supplies an additional scene exclusively through JSON and verifies copy, links, initial state, preview execution, and reset; runner coverage checks declared order and abort before subsequent steps.
 
@@ -483,3 +483,7 @@ on desktop and small phones. Native touch gestures verify horizontal rail scroll
 Assert intermediate smooth-scroll positions, active title synchronization, inert mobile focus/input behavior, and
 fullscreen-only chrome with retained component state and restored launch-button focus. Mobile interaction scenarios
 explicitly enter fullscreen before replaying.
+
+Persistent-calendar checks sample viewport bounds during section scrolling, retain the same DOM viewport, compare appointments across scenarios, verify the 238/167 px label geometry, and assert each JSON-selected control sits at the bottom right. Dataset tests retain source object identities across range loads and density subsets; editing checks preserve saved appointments through Reset.
+
+Text stability checks retain the heading DOM node and sample heading, paragraph, and action bounds relative to their section on every frame through scrolling and activation. Check identical font sizes and geometry at 1440, 950, and 390 px, and verify playback/pause cannot recenter the active heading.

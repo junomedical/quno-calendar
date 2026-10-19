@@ -27,11 +27,11 @@ for (const size of [
   test(`title, explanation, demo and bottom rail fit one screen at ${size.width}×${size.height}`, async ({ page }) => {
     await page.setViewportSize(size);
     await open(page);
-    const intro = (await page.locator(".concept-intro").boundingBox())!;
+    const intro = (await page.locator('.concept-screen[data-active="true"] .concept-intro').boundingBox())!;
     const canvas = (await page.locator(".concept-canvas").boundingBox())!;
     const rail = (await page.locator(".concept-scenarios").boundingBox())!;
     const button = (await page.getByRole("button", { name: "Full screen demo", exact: true }).boundingBox())!;
-    const paragraphs = page.locator(".concept-explanation p");
+    const paragraphs = page.locator('.concept-screen[data-active="true"] .concept-explanation p');
     expect(await paragraphs.count()).toBeGreaterThanOrEqual(1);
     expect(await paragraphs.count()).toBeLessThanOrEqual(2);
     const lastParagraph = (await paragraphs.last().boundingBox())!;
@@ -57,16 +57,22 @@ test("scenario titles scroll the page through intermediate positions and update 
     return values;
   });
   expect(new Set(samples).size).toBeGreaterThan(4);
-  await expect(page.locator(".concept-intro h1")).toHaveText("Zoom");
+  await expect(page.locator('.concept-screen[data-active="true"] .concept-intro h1')).toHaveText("Zoom");
   const pages = page.locator(".concept-pages");
   expect(await pages.evaluate((el) => Math.abs(el.scrollTop - el.clientHeight))).toBeLessThan(2);
   await page.getByRole("button", { name: "Try it", exact: true }).click();
   await pages.evaluate((el) => el.scrollTo({ top: el.clientHeight * 2, behavior: "instant" }));
-  await expect(page.locator(".concept-intro h1")).toHaveText("Overlapping events");
+  await expect(page.locator('.concept-screen[data-active="true"] .concept-intro h1')).toHaveText("Overlapping events");
   await expect(page.locator('.concept-scenario button[aria-current="step"]')).toContainText("Overlapping events");
 });
 test("fullscreen shows only the live demo and interaction controls, preserving state on exit", async ({ page }) => {
   await open(page);
+  await page.locator(".concept-scenario button").filter({ hasText: "Theming" }).click();
+  await expect(page.locator(".concept-scenario button").filter({ hasText: "Theming" })).toHaveAttribute(
+    "aria-pressed",
+    "true"
+  );
+  await page.getByRole("button", { name: "Try it", exact: true }).click();
   await page.locator('[data-action="dark"]').click();
   await page.getByRole("button", { name: "Full screen demo", exact: true }).click();
   await expect(page.locator(".concept-nav, .concept-intro, .concept-scenarios")).toHaveCount(0);
@@ -76,10 +82,9 @@ test("fullscreen shows only the live demo and interaction controls, preserving s
   expect(canvas.y).toBe(0);
   expect(canvas.width).toBe(page.viewportSize()!.width);
   expect(canvas.height).toBeGreaterThan(page.viewportSize()!.height * 0.8);
-  await page.locator('[data-action="vertical"]').click();
   await page.keyboard.press("Escape");
   await expect(page.locator(".concept-calendar-workspace")).toHaveAttribute("data-theme", "dark");
-  await expect(page.locator(".concept-calendar-workspace")).toHaveAttribute("data-view", "infinite-vertical");
+  await expect(page.locator(".concept-calendar-workspace")).toHaveAttribute("data-view", "infinite-horizontal");
   await expect(page.getByRole("button", { name: "Full screen demo", exact: true })).toBeFocused();
 });
 test("mobile rail swipes horizontally and preview swipes navigate between demos", async ({ page }) => {

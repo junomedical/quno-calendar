@@ -23,7 +23,7 @@ const initial: Record<ProductId, Check> = {
     theme: oneOf("light", "dark", "brand"),
     density: between(4, 400, true),
     zoom: between(0.5, 8),
-    overlap: boolean
+    controls: array(oneOf("view", "theme", "density", "zoom"))
   }),
   datepicker: object({ range: nullable(range), single: boolean }),
   "date-input": object({
