@@ -4,6 +4,215 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+- Verification for stable time selection and concept updates: all 655 unit tests pass. The full Chromium run passed
+  377/380 checks: one older control test expected the removed legends; its updated accessible-group assertions and
+  all four checks in that file pass. Two existing calendar checks failed intermittently under six-worker load:
+  `e2e/specs/calendar-row-filter.spec.ts:20` changed October 15 to October 22 after compaction, and
+  `e2e/specs/participant-focus.spec.ts:46` did not open the external draft at 20,000 events/year. All nine checks
+  across those two files pass with one worker. These full-run failures remain verification caveats; timeline library
+  sources were not changed. Formatting, architecture, types, lint, Preact compatibility, demo build, package
+  verification, size reporting and pack dry-run pass. The demo retains a non-blocking 588.15 kB main-chunk warning.
+
+- Fixed shared Timepicker/Datepicker time-option reveal jumping the selected hour to the top on every selection.
+  Visible choices now retain their position; offscreen choices reveal only as needed, and equivalent enabled-hour
+  arrays no longer reset scrolling. Initial selected-hour reveal and controlled/uncontrolled behavior remain intact.
+  The shared reveal adds 96 gzip bytes to Datepicker; its JavaScript ceiling is now 12.75 KiB (measured 12,858 bytes).
+
+- Enabled dragging controlled concept drafts before Save. The editor follows the moved time and retains its title;
+  Save commits the moved slot and Cancel discards it. Removed small view/density/theme/zoom labels while preserving
+  accessible groups, and matched all control docks to fullscreen’s 40 px height.
+- Simplified floating-guide footers to Previous/Next without a counter or duplicate title. Contextual contents actions
+  such as All calendar demos now match the collapse control’s 34 px height.
+
+- Date Parser now opens with 12/01 10:00 already typed and resolved. Optional scene chapterOnly metadata keeps the
+  ready introduction idle while chapter arrival starts playback. Resolve a phrase now cycles six varied examples,
+  including a clock, rolling duration, written date and explicit range, with readable 1700 ms result holds.
+
+- Parser cleanup verification: all 654 unit tests and all 370 Chromium checks pass, including desktop/phone control
+  absence, visible tokens/endpoints, typed ambiguity fallback and overnight recognition. Formatting, architecture,
+  types, lint, Preact compatibility, demo build, package verification, size reporting and pack dry-run pass.
+  No verification blocker remains. Shipped library sources/sizes are unchanged by this cleanup; the demo retains
+  its non-blocking 587.61 kB main-chunk warning.
+
+- Removed Structured result/copy, clock-recognition and date-order controls from the Date Parser concept. Kept live
+  tokens and resolved dates; scene JSON owns parsing options. Ambiguity now compares numeric inputs by typing rather
+  than clicking removed controls, and Cross midnight retains clock recognition.
+
+- Concept verification: all 654 unit tests pass. The full Chromium run passed 363/368 checks; four Timepicker checks
+  in an already-running worker still expected the removed output/old placeholder while these edits arrived. All four
+  pass with the updated native-summary assertions on a fresh run, and the focused desktop/phone semantic-token,
+  separator/year-boundary, composition and layout checks pass. The existing Load later case at
+  `e2e/specs/calendar-row-filter.spec.ts:80` timed out after 5000 ms; all seven checks in that file pass when rerun
+  with one worker. Keep that intermittent full-run timing failure as a verification caveat; calendar runtime sources
+  were not changed. Formatting, architecture, types, lint, Preact, demo build, package verification, size reporting
+  and pack dry-run pass. The demo retains a non-blocking 587.42 kB main-chunk warning; shipped size limits pass.
+
+- Parser token labels now identify colon time separators and 61–9999 numeric years, with duration-count and clock
+  context preserved. Public token types and parser behavior remain unchanged.
+
+- Marked known parser vocabulary green with semantic labels for relative words, weekdays, month names and units;
+  unknown words stay neutral. Kept raw token types inspectable and shared the displayed lexicon with parsing.
+- Simplified standalone Timepicker chapters: cadence follows the clock; removed duplicate Selected time output and
+  the business-hours toggle while retaining authored hour configuration.
+
+- Added a Timepicker Works with datepicker chapter that chooses days and times in one control and restores its
+  starting pair. Synthetic click focus handoffs stay inside playback, while deliberate user actions still pause it.
+- Date Parser now displays live token text/types and resolved endpoints directly below its input, before preferences.
+
+- Applied Date Input conceptual copy and added Format guessing. Renamed the composition Works with datepicker,
+  opening it on field focus without a toggle and synchronizing typed months and picker selections. Hide its duplicate
+  picker summary, leaving the selected range in the input. Natural typing
+  now supports ranges; single-date fields no longer offer automatic range-prefix completion.
+- Doubled Access months scrolling to 1980 from 4420 to 8840 ms, preserving the same selection and cancellation.
+
+- Natural-input verification: all 650 unit tests and the focused desktop/phone example, submission-delay and takeover
+  checks pass. The full Chromium run passed 357 of 358 checks; the existing pending-update navigation case at
+  `e2e/specs/calendar-row-filter.spec.ts:141` briefly reported October 29 instead of October 22. All seven checks in
+  that file, including the failed case, passed when rerun with one worker. This intermittent full-run failure remains
+  a verification caveat; calendar runtime sources were not changed. Formatting, architecture, types, lint, Preact,
+  demo build, package verification, size reporting and pack dry-run pass. The demo retains its non-blocking 583.34 kB
+  main-chunk warning; shipped bundle sizes are unchanged.
+
+- Expanded Type naturally to four examples: tomorrow, yesterday, 22 July 1980 and next Friday. Each complete phrase
+  stays visible for 1200 ms before Enter, followed by a 1700 ms hold on its formatted result. Relative dates still
+  use today, and manual interaction interrupts the sequence.
+
+- Datepicker copy/choreography verification: all 358 Chromium checks and all 650 unit tests pass. Formatting,
+  architecture, types, lint, Preact compatibility, demo build, package verification, size reporting and pack dry-run
+  pass. A concurrent browser/build run caused the existing layout-scaling timing ratio to measure 51.36 against its
+  25× ceiling; the full unit suite passed after those jobs finished. No blocker remains. Library sources/bundle sizes
+  are unchanged; the demo retains its non-blocking 582.72 kB main-chunk warning.
+
+- Made Datepicker painting alternate two ranges, endpoint adjustment return to its original end, and range movement
+  return after a pause, all without clearing or remounting between cycles. Intent now simulates hover to show the
+  upcoming interpretation. Slowed the year scroll to 4420 ms (1.7× its previous duration).
+
+- Applied the approved Datepicker introduction and seven conceptual chapter descriptions. Access months now scrolls
+  back to July 1980 and selects 22 July in single-day mode, using measured virtual-year geometry and cancellable motion.
+  Step validation is separated from product/document validation; existing scenes and recipes retain their identities.
+
+- Shared concept verification: all 648 unit tests and all 350 Chromium checks pass, plus focused bottom-anchor and
+  keyboard-proof checks. Formatting, architecture, types, lint, Preact compatibility, demo build, package verification,
+  size reporting and pack dry-run pass. Shipped library sources and bundle sizes are unchanged. The demo retains its
+  non-blocking 580.92 kB main-chunk warning; no verification blockers remain.
+
+- Unified all five concept products around a draggable/collapsible floating guide and live canvas, with introductions,
+  contents and footer navigation. Anchored resizing at bottom left, restored a 24 px bottom inset, moved fullscreen to
+  bottom right and scene controls immediately left. Other products sit right of the guide or above it on phones.
+- Added four Datepicker scenes for seven ordered interactions, removing the extra mode switch, below-picker hint and
+  raw result. Date Input uses today, omits its reference/output, waits 300 ms before Enter and shows repeated day-down,
+  month-up edits. Timepicker minutes are smaller and top aligned. Calendar closes overlap cards between cycles,
+  tags Shift-scroll and retains saved glint/cancellation fading.
+
+- Concept copy/focused-editing verification: all 644 unit tests and all 326 Chromium checks pass, including selected
+  doctor filtering, draft visibility, save/cancel restoration, both orientations, phone loops and long-copy geometry.
+  Formatting, architecture, types, lint, Preact compatibility, demo build, package verification, size reporting and
+  pack dry-run pass. Library bundles remain unchanged. The demo retains its non-blocking 580.28 kB main-chunk warning.
+
+- Replaced Calendar concept copy with the author's design rationale across the introduction and eight chapters.
+  Renamed the introduction Calendar and allowed three paragraphs for Calendar scenes. Creation now focuses only
+  the edited doctor, retaining load coverage and session data; save/cancel restore participants with slot anchoring.
+
+- Final concept verification: all 642 unit tests and the full 321-check Chromium suite pass. After the final panel
+  placement/disclosure refinements, all 93 concept browser checks and the focused contents-toggle geometry check
+  pass. Formatting, architecture, types, lint, Preact compatibility, demo build, package verification, size reporting
+  and pack dry-run pass. Library bundles remain unchanged. The demo retains its non-blocking 579.86 kB main-chunk warning.
+
+- Placed the explainer at bottom left by default and made Home restore that corner. Collapse/expand retains the
+  button’s 34 px size and position, together with the panel width.
+
+- Simplified the collapsed Calendar floater to its title and expand button, retaining its responsive width.
+  All demos, chapter navigation and explanations return when expanded.
+
+- Left-aligned Calendar contents titles with consistent number columns, and removed Back from the Calendar demos
+  contents screen. Chapters and introduction retain All demos.
+
+- Kept the collapsed Calendar floater at its expanded responsive width for readable titles. Renamed its contents
+  action to All demos and retained the label when collapsed.
+
+- Removed the concept calendar’s corner Saved/Moved confirmation. Appointment changes show their own result.
+  Rescheduling reveals each source clear of sticky labels before dragging on narrow screens.
+
+- Closed Calendar demo loops through visible actions: Theming ends in Light, density returns to Quiet, and view/zoom
+  sequences return to their starting position without a reset flash. Reschedule moves three different appointments
+  and then moves them back in reverse order before repeating. Manual takeover preserves the current result.
+- Fixed Event density inheriting vertical orientation and leaving an appointment preview expanded after the virtual
+  pointer moves away to scroll. Rounded both the cursor body and its white outline with round-joined strokes.
+
+- Rounded the shared demo cursor, tilted it 15° counterclockwise around its tip, and removed the text sign beneath
+  it across all products. Movement, click pulses, held-drag cues, and control alignment remain.
+- Filled ordinary Calendar demos with 22 appointments across morning and afternoon, including 32 varied additional
+  titles across the shared fixture. Preserved reference appointments, canonical overlaps, IDs and the creation gap.
+  Raised ordinary/density zoom to 2× and lengthened generated regular appointments to one hour for readable titles;
+  Quiet/Busy/Packed retain their exact 4/40/400 counts.
+
+- Added next-day scrolling after each Horizontal / vertical demo switch: vertical advances into October 20, then
+  horizontal advances into October 21. The same calendar, loop, expanded guide and manual takeover remain active.
+
+- Kept Calendar animation running through mouse movement and hover. Click or drag starts manual takeover; wheel,
+  keyboard, focus and hidden-tab cancellation remain. Native overlap hover stays usable after deliberate takeover.
+
+- Made Calendar demo loops livelier: downward scrolling advances 900 px per one-second eased step with a 350 ms
+  pause. Zoom quickly travels from maximum 8 to minimum 0.5, scrolls through the wide view, zooms back in, then
+  explores the detail. Both remain on the selected chapter, keep expanded text, and yield immediately to manual input.
+- Calendar loop/pacing verification: all 639 unit tests pass. The full 309-check Chromium run passed before the
+  final pacing adjustment; all 12 affected motion/loop regressions and all 20 final presentation/motion checks pass
+  afterward, including 800+ px travel, pauses, both zoom directions, expanded text, footer navigation, bounded creation,
+  looping, and manual cancellation. Formatting, architecture, types, lint, Preact compatibility, demo build, package
+  verification, size reporting, and pack dry-run pass. Library bundles remain unchanged. The demo retains its
+  non-blocking 576.95 kB main-chunk warning.
+
+- Looped Calendar playback on the selected scenario without advancing chapter navigation. Infinite scroll now moves
+  continuously downward without pauses or date resets. Other chapters repeat from a session checkpoint, bounding
+  automatic creations while retaining pre-run edits. Manual input stops future cycles and preserves the current
+  result. Expanded guide text remains usable; synthetic Calendar gestures exclude only the information overlay
+  during synchronous hit testing, restoring native pointer behavior immediately.
+
+- Kept Calendar descriptions expanded during Previous/Next and contents navigation. Each reached chapter starts its
+  demo automatically, with reduced-motion and manual-interruption guards. Removed Play tour, Replay scene, Try it,
+  Reset, and Pause from the Calendar floater; revisiting a chapter runs it again while retaining appointments.
+
+- Moved Calendar Previous/Next navigation into the floating guide's bottom footer, including a compact collapsed
+  state. Navigation moves with the panel and stays outside its scrollable explanation/contents. Removed the separate
+  bottom bar so the calendar fills the remaining viewport in normal and fullscreen views.
+
+- Added a dedicated About this demo page as the Calendar floater's first screen. It explains the live schedule and
+  chapter sequence while the calendar starts in the background. Next enters the first chapter; Previous and contents
+  return to the introduction. Recipes and playback controls remain on chapter pages; navigation counts nine pages
+  without changing the eight-scene catalog or remounting the calendar.
+- Introduction verification: all 639 unit tests and all 306 Chromium tests pass, including introduction navigation,
+  inline contents, autoplay, persistent calendar identity, and responsive guide geometry. Formatting, architecture,
+  types, lint, Preact compatibility, demo build, package verification, size reporting, and pack dry-run pass.
+  Library bundles remain unchanged. The demo retains its non-blocking 575.86 kB main-chunk warning.
+
+- Made Calendar's full-width floating-guide layout the default, including interactive mobile use. Added a corner
+  fullscreen toggle, bottom previous/next navigation, and Back plus all demo titles inside the floating panel.
+  The entire panel drags with mouse/touch except its buttons/links; chevrons collapse/restore it and keyboard movement
+  remains available. Removed the dotted handle, top playback controls, See demo, and interaction/idle instructions.
+  Scenes autoplay on entry/navigation with reduced-motion and manual-takeover guards. Calendar state and edits survive.
+- Default-guide verification: all 639 unit tests and all 13 final interface checks pass, covering five viewport sizes,
+  whole-body and touch dragging, resize clamping, collapse/restore, inline contents, bottom navigation, fullscreen,
+  autoplay and manual takeover. Both orientation hover checks pass. Formatting, architecture, types, lint, Preact,
+  demo build, package verification, size reporting, and pack dry-run pass. Library bundles remain unchanged.
+  The complete Chromium run passed 302/305: the initial autoplay probe clicked Collapse after automatic collapse
+  (corrected to Expand; the final 13-check rerun passes), `calendar-row-filter.spec.ts:28` settled on October 22
+  instead of October 15, and `calendar-viewport-loading.spec.ts:17` observed September's initial request instead of
+  the expected October range. Both unchanged loading checks pass in an isolated single-worker rerun; full-suite
+  loading timing remains a caveat. The demo retains its non-blocking 574.60 kB main-chunk warning.
+
+- Added a floating scene guide to the Calendar fullscreen concept, with JSON-authored title/description,
+  previous/next demo arrows, and See demo to hide the guide and start playback. Top navigation keeps Back,
+  playback, scene navigation, and Show description available. Manual input immediately takes over; Back/Escape
+  preserve the mounted calendar and edits and restore the selected inline section and launch focus.
+- Fullscreen-guide verification: all 639 unit tests and all nine new fullscreen browser checks pass, including
+  desktop, phone and landscape containment/layering, stable calendar bounds/identity, scene navigation, manual
+  takeover, Back/Escape, and focus restoration. Formatting, architecture, types, lint, Preact compatibility, demo build,
+  package verification, size reporting, and pack dry-run pass. The full Chromium run passed 300/302: unchanged
+  `e2e/concept-motion.spec.ts:75` sampled exactly 400 px against >400, and unchanged
+  `e2e/specs/calendar-row-filter.spec.ts:152` settled on October 29 instead of October 22 after a pending update.
+  Both pass in an isolated single-worker rerun; these timing-sensitive checks remain a full-suite caveat.
+  Library assets and size budgets are unchanged. The demo retains its non-blocking main-chunk warning (571.69 kB).
+
 - Keep at least one adjacent included day warm on every enabled side of screen prefetch. A viewport showing only
   a tenth of a dense day still preloads its next/previous included dates. Preserve per-side zero opt-outs, fractional
   screen distances, larger pixel buffers, excluded weekdays, bounded date edges and explicit day-based policies.

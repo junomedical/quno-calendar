@@ -219,18 +219,27 @@ Date Input’s `forceCadence` is an opt-in typed-clock restriction that applies 
 
 `QunoTimePicker` owns the clock summary (`selection-summary`), Clear (`clear-button`), hour/minute scroller (`time-navigation`), sticky hour rail (`hour-heading`), and selected minute (`minute-option`, `aria-pressed`, `data-time`). Standalone classes and tokens use `quno-time-picker-*` and `--quno-time-picker-*`; Datepicker retains its existing names.
 
-The demo **scenario** is a named, replayable playground configuration linked to a field-guide recipe. The concept’s simulated pointer accompanies actual control and component interactions.
+A concept **scenario** or **scene** is one named configuration, action sequence and field-guide recipe. Its
+**scenario file** owns JSON copy, initial values and steps. A **product manifest** orders scenes and owns product
+metadata; the **demo manifest** owns startup order and shared fixture context. An **action adapter** implements one
+typed interaction without branching on scene IDs.
 
-A concept **scene** is the repeatable state and action sequence behind a named scenario. **Replay** restores and runs it; **Reset** restores it without playback; **Try it** cancels playback and preserves the useful current result. Event **density** counts appointments per day across the listed resources, separately from visual compactness.
+The **live canvas** fills the available demo window. Its **floating guide** contains an introduction, All demos
+contents, explanation and previous/next footer. **Collapse** retains only the title and expand button at the same
+width. A **left-bottom anchor** retains left and bottom offsets while content height changes. The **fullscreen
+control** sits at bottom right; Calendar's **scenario control dock** appears immediately to its left. Non-calendar
+**product stages** sit right of the guide on wide screens, above it in a scrollable region on phones.
 
-A **scenario document** is the versioned JSON containing product copy, ordered scenes, initial values, preview references, and playback steps. A **step** invokes a supported action with data; an **action adapter** performs the interaction without knowing the scene ID.
+A **presentation introduction** precedes scene chapters without adding a playback scene. A **cycle** is one pass
+of the selected scene's actions and hold. A **loop** repeats that scene without changing navigation. **Continuous
+scroll** moves downward without resetting dates. **Takeover** is deliberate manual interaction cancelling playback.
+Revisiting a chapter restores its initial state and starts it again unless reduced motion is enabled.
 
-A **scenario file** owns one scene’s copy, initial state, and actions. A **product manifest** owns product copy,
-explore links, and ordered scene/preview IDs. The **demo manifest** owns shared dates, schema version, product order,
-and startup selection. These files assemble into the validated scenario document.
+Datepicker’s **synthetic hover marker** mirrors the native hover preview only during demo playback; it does not
+change the committed selection. Its **continuous loop** retains the same picker while authored actions alternate
+ranges or return the endpoint/range to its starting value.
 
-A **demo screen** is one viewport-sized scenario section with its explanation and preview. The **title rail** is
-the horizontally scrollable bottom navigation between screens. A mobile **preview** is inert; **fullscreen** enables
-the working demo and playback controls while hiding product and scenario navigation.
-
-The Calendar **fixed canvas** stays outside the explanation scroller. Its **scenario control dock** shows only JSON-selected controls at the bottom right. Calendar Replay/Reset restores view settings and navigation while retaining the shared session schedule and edits.
+A **caption** is optional authoring metadata; no label appears under the rounded, 15° cursor. Calendar **density**
+counts appointments across all resources per day; ordinary scenes use 22, while Quiet/Busy/Packed use 4/40/400.
+**Draft focus** selects only the edited doctor while retaining all-doctor read coverage. **Glint** is a saved-card
+highlight; **cancellation fade** is the public draft-release animation, both presented by demo-owned styling.

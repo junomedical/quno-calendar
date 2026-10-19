@@ -1,0 +1,100 @@
+{
+  "id": "calendar",
+  "label": "Works with datepicker",
+  "hint": "Choose a day, then a time in the same calendar.",
+  "anchor": "production",
+  "initial": {
+    "date": "2026-10-19",
+    "value": "09:00",
+    "cadence": 15,
+    "businessHours": true
+  },
+  "paragraphs": [
+    "Sometimes a time needs a date as well. The same hour and minute choices fit inside the datepicker, so the two selections can share one compact control.",
+    "Choose a day to open the time choices. Select a minute to return to the calendar, keeping the date and time together. You can choose another day and adjust its time without leaving the control."
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 650
+    },
+    {
+      "action": "click",
+      "target": "[data-slot=\"grid\"] [data-date=\"2026-10-21\"]",
+      "caption": "Choose a day"
+    },
+    {
+      "action": "scroll-to",
+      "target": "[data-slot=\"time-navigation\"]",
+      "destination": "[data-time=\"10:45\"]",
+      "caption": "Find a time",
+      "durationMs": 1000,
+      "easing": "ease-in-out"
+    },
+    {
+      "action": "wait",
+      "ms": 700
+    },
+    {
+      "action": "click",
+      "target": "[data-time=\"10:45\"]",
+      "caption": "Choose 10:45"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "click",
+      "target": "[data-slot=\"grid\"] [data-date=\"2026-10-24\"]",
+      "caption": "Choose a day"
+    },
+    {
+      "action": "scroll-to",
+      "target": "[data-slot=\"time-navigation\"]",
+      "destination": "[data-time=\"14:30\"]",
+      "caption": "Find a time",
+      "durationMs": 1000,
+      "easing": "ease-in-out"
+    },
+    {
+      "action": "wait",
+      "ms": 700
+    },
+    {
+      "action": "click",
+      "target": "[data-time=\"14:30\"]",
+      "caption": "Choose 14:30"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "click",
+      "target": "[data-slot=\"grid\"] [data-date=\"2026-10-19\"]",
+      "caption": "Choose a day"
+    },
+    {
+      "action": "scroll-to",
+      "target": "[data-slot=\"time-navigation\"]",
+      "destination": "[data-time=\"09:00\"]",
+      "caption": "Find a time",
+      "durationMs": 1000,
+      "easing": "ease-in-out"
+    },
+    {
+      "action": "wait",
+      "ms": 700
+    },
+    {
+      "action": "click",
+      "target": "[data-time=\"09:00\"]",
+      "caption": "Choose 09:00"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    }
+  ]
+}

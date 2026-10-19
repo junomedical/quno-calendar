@@ -260,16 +260,6 @@
   pointer-events: none;
   animation: concept-point 6.5s ease-in-out both;
 }
-.concept-cursor span {
-  display: block;
-  margin: 0 0 0 20px;
-  background: #49365e;
-  color: white;
-  padding: 8px 12px;
-  white-space: nowrap;
-  border-radius: 5px;
-  font-size: 11px;
-}
 @keyframes concept-point {
   0% {
     transform: translate(60px, 60px);

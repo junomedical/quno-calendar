@@ -1,12 +1,12 @@
 {
   "id": "phrase",
   "label": "Resolve a phrase",
-  "hint": "See a phrase become a date or period.",
+  "hint": "Watch familiar phrases, durations and ranges resolve as they are typed.",
   "anchor": "relative-dates",
   "initial": {
-    "text": "",
+    "text": "12/01 10:00",
     "order": "dmy",
-    "clocks": false
+    "clocks": true
   },
   "steps": [
     {
@@ -20,7 +20,43 @@
     },
     {
       "action": "wait",
-      "ms": 1300
+      "ms": 1700
+    },
+    {
+      "action": "type",
+      "target": "[data-action=\"phrase\"]",
+      "text": "tomorrow 10:30"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "type",
+      "target": "[data-action=\"phrase\"]",
+      "text": "past 3 days"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "type",
+      "target": "[data-action=\"phrase\"]",
+      "text": "22 July 1980"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "type",
+      "target": "[data-action=\"phrase\"]",
+      "text": "12 Oct 2026 - 16 Oct 2026"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
     },
     {
       "action": "type",
@@ -33,6 +69,7 @@
     }
   ],
   "paragraphs": [
-    "See how a natural phrase becomes a date range. The parser shows the result and recognized parts as you type."
-  ]
+    "Try weekdays, dates with times, rolling periods, written dates and ranges. Each example shows its token meanings and resolved dates as you type."
+  ],
+  "chapterOnly": true
 }

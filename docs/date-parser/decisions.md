@@ -143,3 +143,66 @@ into its own file; the product JSON retains only metadata and ordered references
 scenario sections, JSON explanations, explicit fullscreen, and inert mobile previews shared by the concept demos.
 
 [QUNO-029](../shared/decisions.md#quno-029---preserve-scenario-text-layout-during-scrolling) keeps complete concept explanation layouts mounted and reserves playback/status space, preventing text jumps during scrolling and activation.
+
+## Shared floating presentation — 2026-10-19
+
+[QUNO-032](../shared/decisions.md#quno-032---share-the-floating-guide-across-all-concept-products) replaces the concept's
+section rail and fullscreen launch with the shared floating guide and looping live workbench. Keep the fixed reference
+date, readable endpoints and optional structured result; no headless parser contract changes.
+
+## QDPR-008 - Expose Tokens Beside Resolved Concept Dates
+
+- Date: 2026-10-19
+- Status: Accepted; extends the shared floating presentation
+- Decision: Show live token chips with their raw text and public token type immediately below the phrase/reference,
+  followed by resolved start/end dates and clocks. Keep preferences and the optional structured result afterward so
+  resolution is visible before configuration. Omit whitespace-only tokens from the visual list without altering data.
+- Consequences: Consume public tokenizeDateInput with the same clock option as parseDateInput. Verify phrase changes,
+  token types, overnight clocks, output ordering and visibility on desktop/phone. Parser grammar and public APIs remain
+  unchanged.
+
+## QDPR-009 - Distinguish Known Vocabulary And Semantic Roles In Token Chips
+
+- Date: 2026-10-19
+- Status: Accepted; supersedes QDPR-008's visible generic word label
+- Decision: Color known token vocabulary green and label month names, weekdays, relative words/days and day/week/
+  month/year units by meaning. Keep unknown words neutral and explicitly labeled. Preserve the public lexical type
+  in the token's data attribute and tooltip. Time connectors are known only when clock recognition is enabled.
+- Consequences: Supply the demo's explicit English aliases to the public parser through its existing lexicon setting,
+  and derive chip meanings from that same consumer configuration. A known word does not imply the whole phrase is
+  valid; the resolved output remains authoritative. No public token shape or grammar changes. Browser checks cover
+  role labels, green styling, unknown vocabulary, dates and clocks.
+
+## QDPR-010 - Label Time Separators And Unambiguous Numeric Years
+
+- Date: 2026-10-19
+- Status: Accepted; extends QDPR-009's demo semantic labels
+- Decision: Label a colon as a time separator even when clock recognition is disabled. Label numeric values from
+  61 through 9999 as years when they are not a duration count or adjacent to a clock separator. Leave smaller or
+  out-of-range numbers neutral because their date role may be ambiguous. Keep the raw public token type intact.
+- Consequences: Verify 60/61 and 9999/10000 boundaries, 1980, colon-separated time parts and a 61-day duration.
+  These labels explain the demo input; parser recognition, ranking and tokenization APIs retain their contracts.
+
+## QDPR-011 - Keep Concept Resolution Free Of Extra Controls
+
+- Date: 2026-10-19
+- Status: Accepted; supersedes QDPR-008's preferences and structured-result presentation
+- Decision: Remove Structured result, its copy action, the clock-recognition checkbox and date-order controls from
+  the concept workbench. Keep the phrase, reference date, semantic tokens and resolved endpoints. Scene JSON owns
+  preferred order and clock recognition; Cross midnight retains clock support. Resolve ambiguity now types a date
+  whose month/day reading is forced by 13, then returns to the ambiguous date under the authored preferred order.
+- Consequences: Playback never targets removed controls. Verify both ambiguity results, absent controls, visible
+  tokens/endpoints and overnight resolution on desktop/phone. Public APIs and full field-guide configuration stay
+  unchanged.
+
+## QDPR-012 - Open With A Ready Date And Time And Expand Phrase Examples
+
+- Date: 2026-10-19
+- Status: Accepted; extends QDPR-011 and adopts shared QUNO-034
+- Decision: Initialize the first concept scene with 12/01 10:00, DMY order and clock recognition enabled. Its product
+  introduction stays on that already-resolved input through chapterOnly; choosing Resolve a phrase starts playback.
+  Cycle next Friday, tomorrow 10:30, past 3 days, 22 July 1980, 12 Oct 2026 - 16 Oct 2026 and next month, holding each
+  completed example for 1700 ms. Repeat the same chapter and restore the ready initial value between passes.
+- Consequences: Show tokens and paired date/clock results immediately, with the existing fixed reference and expected
+  range. Verify idle introduction/restoration, editable ready value, six actual results, repeated playback, manual
+  takeover and desktop/phone visibility. Keep public parser contracts and other product introductions unchanged.

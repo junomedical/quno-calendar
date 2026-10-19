@@ -1,4 +1,4 @@
-import { scrollBy } from "./playbackScroll";
+import { reveal, scrollBy } from "./playbackScroll";
 import { center, type Point } from "./playbackMotion";
 import type { PlaybackActor } from "./PlaybackActor";
 import type { PlaybackStep } from "./scenarioTypes";
@@ -33,9 +33,20 @@ export async function creationTarget(
       };
 }
 export async function moveTarget(actor: PlaybackActor, step: Extract<PlaybackStep, { action: "move-event" }>) {
+  actor.leaveHover();
   const event = await actor.find(step.reference);
+  await reveal(actor.signal, event);
+  await actor.wait(100);
   const grid = await actor.find(step.grid);
-  const viewport = (await actor.find(step.viewport)).getBoundingClientRect();
+  const scroller = await actor.find(step.viewport);
+  const viewport = scroller.getBoundingClientRect();
+  if (!isVertical(actor)) {
+    const labelWidth = actor.root.querySelector('[data-slot="calendar-cell-label"]')!.getBoundingClientRect().width;
+    const margin = Math.abs(step.timeOffset) + 8;
+    const x = center(event).x;
+    const visibleX = Math.max(viewport.left + labelWidth + margin, Math.min(viewport.right - margin, x));
+    if (x !== visibleX) await scrollBy(actor.signal, scroller, x - visibleX, 0, 360);
+  }
   const start = center(event);
   const target = center(grid);
   return {

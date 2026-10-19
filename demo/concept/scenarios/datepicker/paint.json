@@ -14,6 +14,15 @@
     },
     {
       "action": "drag-dates",
+      "from": "2026-10-12",
+      "to": "2026-10-16"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "drag-dates",
       "from": "2026-10-19",
       "to": "2026-10-23"
     },
@@ -23,7 +32,7 @@
     }
   ],
   "paragraphs": [
-    "Choose a date range with one continuous gesture. Press on the first day and drag across the calendar to include the days you need.",
-    "The highlighted range follows the pointer, and the result shows the selected dates as soon as you release."
-  ]
+    "Selecting a range should be a simple gesture. Press on the first date and swipe across the days you want to include. The selection follows your movement."
+  ],
+  "loop": "continue"
 }

@@ -13,6 +13,14 @@ export class PlaybackActor {
     this.hoverPointer = new PlaybackHover(root);
     signal.addEventListener("abort", () => this.clear(), { once: true });
   }
+  private interact(perform: () => void) {
+    this.internal = true;
+    try {
+      perform();
+    } finally {
+      this.internal = false;
+    }
+  }
   wait(ms = 400) {
     return pause(this.signal, ms);
   }
@@ -25,9 +33,8 @@ export class PlaybackActor {
     }
     throw new Error(`The demonstration target is unavailable: ${selector}`);
   }
-  cue(text: string, gesture = "move") {
+  cue(_text: string, gesture = "move") {
     this.cursor.dataset.gesture = gesture;
-    this.cursor.querySelector("span")!.textContent = text;
     this.cursor.hidden = false;
   }
   place(point: Point) {
@@ -35,9 +42,12 @@ export class PlaybackActor {
     const rect = this.root.getBoundingClientRect();
     this.cursor.style.left = `${point.x - rect.left - 3}px`;
     this.cursor.style.top = `${point.y - rect.top - 3}px`;
-    this.cursor.dataset.edge = point.x > rect.right - 170 ? "left" : "right";
+  }
+  leaveHover() {
+    this.hoverPointer.clear();
   }
   async move(point: Point, caption: string, held = false, target?: HTMLElement, hover = false) {
+    if (!hover) this.leaveHover();
     this.cue(caption, held ? "drag" : "move");
     const start = this.position.x ? this.position : { x: point.x + 30, y: point.y + 40 };
     await animate(this.signal, 450, (progress) => {
@@ -61,11 +71,14 @@ export class PlaybackActor {
     this.cue(caption, "press");
     target.dataset.demoPressed = "true";
     try {
-      pointer(target, "pointerdown", this.position, true);
+      this.interact(() => pointer(target, "pointerdown", this.position, true));
       await this.wait(180);
       this.signal.throwIfAborted();
-      pointer(target, "pointerup", this.position);
-      target.click();
+      this.interact(() => {
+        pointer(target, "pointerup", this.position);
+        // Day cells commit on pointerup; a second click would change intent again.
+        if (target.dataset.slot !== "day") target.click();
+      });
       this.cue(caption, "release");
     } finally {
       delete target.dataset.demoPressed;

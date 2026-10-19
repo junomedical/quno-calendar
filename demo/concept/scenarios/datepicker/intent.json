@@ -1,0 +1,58 @@
+{
+  "id": "intent",
+  "label": "Guess the intent",
+  "hint": "Click the same date to change its role.",
+  "anchor": "wrong-guess",
+  "initial": {
+    "range": {
+      "start": "2026-10-19",
+      "end": "2026-10-23"
+    },
+    "single": false
+  },
+  "paragraphs": [
+    "A click can mean several things: adjust an endpoint, choose a different interval, or start again with one day.",
+    "The datepicker first guesses that you want to extend or shorten the range. Click the same date again to use the other endpoint instead. A third click keeps only that day selected."
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 650
+    },
+    {
+      "action": "click",
+      "target": "[data-slot=\"day\"][data-date=\"2026-10-27\"]",
+      "caption": "Extend the end"
+    },
+    {
+      "action": "hover",
+      "target": "[data-slot=\"day\"][data-date=\"2026-10-27\"]"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "click",
+      "target": "[data-slot=\"day\"][data-date=\"2026-10-27\"]",
+      "caption": "Change the guess"
+    },
+    {
+      "action": "hover",
+      "target": "[data-slot=\"day\"][data-date=\"2026-10-27\"]"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "click",
+      "target": "[data-slot=\"day\"][data-date=\"2026-10-27\"]",
+      "caption": "Keep just this day"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    }
+  ]
+}

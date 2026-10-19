@@ -1,6 +1,6 @@
 {
   "id": "compose",
-  "label": "Type, then pick",
+  "label": "Works with datepicker",
   "hint": "Refine the same range in the picker.",
   "anchor": "picker-composition",
   "initial": {
@@ -20,14 +20,13 @@
       "text": "19 Oct 2026 - 23 Oct 2026"
     },
     {
+      "action": "wait",
+      "ms": 300
+    },
+    {
       "action": "key",
       "target": "[data-action=\"date-input\"]",
       "key": "Enter"
-    },
-    {
-      "action": "click",
-      "target": "[data-action=\"open-picker\"]",
-      "caption": "Open the picker"
     },
     {
       "action": "drag-dates",
@@ -35,16 +34,12 @@
       "to": "2026-10-25"
     },
     {
-      "action": "click",
-      "target": "[data-action=\"open-picker\"]",
-      "caption": "Close the picker"
-    },
-    {
       "action": "wait",
       "ms": 1700
     }
   ],
   "paragraphs": [
-    "Start with typed dates, then fine-tune the range in a calendar. Both controls share the same selection and keep each other up to date."
+    "I created this input to work seamlessly with the datepicker. Focus the field to open the calendar, type a range, or adjust it directly in the picker.",
+    "Both controls share the same value. Changes in either direction stay in sync, so you can switch between typing and selecting without starting over."
   ]
 }

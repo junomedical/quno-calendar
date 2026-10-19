@@ -6,7 +6,8 @@
   "preview": ["time"],
   "explore": [
     ["Hours & cadence", "time-selection"],
-    ["Value ownership", "ownership"]
+    ["Value ownership", "ownership"],
+    ["Date and time", "production"]
   ],
-  "scenarios": ["time", "cadence"]
+  "scenarios": ["time", "cadence", "calendar"]
 }

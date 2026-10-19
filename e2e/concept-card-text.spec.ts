@@ -1,6 +1,29 @@
-import { calendarInitial } from "#quno-e2e/concept-helpers";
+import { calendarInitial, selectCalendarScene } from "#quno-e2e/concept-helpers";
 import { test, expect, type Locator, type Page } from "@playwright/test";
 test.describe.configure({ mode: "parallel" });
+
+test("default and density demos give varied daytime titles room at the authored zoom", async ({ page }, info) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/concept");
+  const workspace = page.locator(".concept-calendar-workspace");
+  await expect(workspace).toHaveAttribute("data-density", "22");
+  await expect(workspace).toHaveAttribute("data-zoom", "2");
+  const appointment = page.locator('[data-event-id="2026-10-19-event-8"]');
+  await expect(appointment.locator("strong")).toHaveText("Sprint review");
+  expect((await appointment.boundingBox())!.width).toBeGreaterThanOrEqual(118);
+  await page.screenshot({ path: info.outputPath("busier-calendar.png") });
+  await selectCalendarScene(page, "Event density", false);
+  for (const density of [40, 400]) {
+    await page.locator(`[data-action="density-${density}"]`).click();
+    await expect(workspace).toHaveAttribute("data-density", String(density));
+    await expect(workspace).toHaveAttribute("data-zoom", "2");
+    expect((await appointment.boundingBox())!.width).toBeGreaterThanOrEqual(118);
+    const lines = await textGeometry(appointment.locator(".concept-event"));
+    const title = lines.find((line) => line.tag === "STRONG")!;
+    expect(title.visible && title.inside && title.fits && title.nowrap).toBe(true);
+  }
+});
 
 async function openCalendar(page: Page, vertical: boolean) {
   await page.emulateMedia({ reducedMotion: "reduce" });
@@ -9,7 +32,8 @@ async function openCalendar(page: Page, vertical: boolean) {
     controls: ["zoom", "density"]
   });
   await page.goto("/concept");
-  await page.getByRole("button", { name: "Full screen demo", exact: true }).click();
+  await page.getByRole("button", { name: "Full screen calendar", exact: true }).click();
+  await page.getByRole("button", { name: "Collapse description", exact: true }).click();
 }
 
 async function setZoom(page: Page, zoom: string) {

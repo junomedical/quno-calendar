@@ -243,12 +243,12 @@
     min-height: 0;
     width: 100%;
   }
-  .concept:not(.concept--fullscreen) .concept-canvas {
+  .concept:not(.concept--fullscreen):not(.concept--guided) .concept-canvas {
     pointer-events: none;
     overflow: hidden;
   }
-  .concept:not(.concept--fullscreen) .concept-controls,
-  .concept:not(.concept--fullscreen) .concept-calendar-workspace > .concept-result {
+  .concept:not(.concept--fullscreen):not(.concept--guided) .concept-controls,
+  .concept:not(.concept--fullscreen):not(.concept--guided) .concept-calendar-workspace > .concept-result {
     display: none;
   }
   .concept-scenarios {

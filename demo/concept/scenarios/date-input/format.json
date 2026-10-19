@@ -1,0 +1,76 @@
+{
+  "id": "format",
+  "label": "Format guessing",
+  "hint": "Type different date formats and see them become readable dates.",
+  "anchor": "parser-configuration",
+  "initial": {
+    "range": null,
+    "selectionMode": "single",
+    "picker": false,
+    "label": "Appointment date"
+  },
+  "paragraphs": [
+    "A date like 01/01/2021 is easy to understand. With 01/12/12, each number could play a different role. I start with a preferred date order, then consider which numbers and month names can actually form a valid date.",
+    "The result appears in the same field, written out clearly—such as “1 January 2021”—so you can check what was understood and keep editing it."
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 650
+    },
+    {
+      "action": "type",
+      "target": "[data-action=\"date-input\"]",
+      "text": "01/01/2021"
+    },
+    {
+      "action": "wait",
+      "ms": 1200
+    },
+    {
+      "action": "key",
+      "target": "[data-action=\"date-input\"]",
+      "key": "Enter"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "type",
+      "target": "[data-action=\"date-input\"]",
+      "text": "01/12/12"
+    },
+    {
+      "action": "wait",
+      "ms": 1200
+    },
+    {
+      "action": "key",
+      "target": "[data-action=\"date-input\"]",
+      "key": "Enter"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "type",
+      "target": "[data-action=\"date-input\"]",
+      "text": "12/31/2021"
+    },
+    {
+      "action": "wait",
+      "ms": 1200
+    },
+    {
+      "action": "key",
+      "target": "[data-action=\"date-input\"]",
+      "key": "Enter"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    }
+  ]
+}

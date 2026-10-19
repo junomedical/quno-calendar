@@ -24,15 +24,9 @@ flowchart LR
 
 The demo may use development dependencies and mock transports. Library code must never import from `demo/`.
 
-The separate [`concept`](./concept/README.md) folder owns the `/concept` demo approach experiment: immediate live canvas, partial gradient intro, product switcher, scenario tour, documentation links, and expanded playground.
-
-Concept scenarios now replay live pointer and keyboard interactions, with deterministic fixtures and cancellation on takeover. The Infinite Calendar guide reuses its density playground through a lazy exhibit.
-
-The concept’s scenario copy, initial state, preview order, and playback steps are controlled by [individual scenario JSON files](./concept/README.md#edit-scenarios-in-json).
-
-The concept now presents each scenario on one screen with its JSON-authored explanation, a persistent bottom title
-rail that scrolls between demos, and an explicit fullscreen button. Mobile previews become interactive only in fullscreen.
-
-The Calendar concept now keeps one fixed calendar and shared session dataset across scenarios, with a 70% wider date/time label column, JSON-selected controls in its bottom-right corner, and no bottom date/count stats row. Scenario changes reset the view while retaining appointments and edits. See [concept notes](./concept/README.md).
-
-Concept explanations retain consistent typography, spacing, and mounted text through scrolling and scenario activation.
+The separate [`concept`](./concept/README.md) folder owns `/concept`: all five products share a live full-window
+canvas and draggable, collapsible guide with introduction, All demos contents and previous/next footer. Chapters
+start automatically and loop with reduced-motion and manual-takeover guards. Fullscreen sits at bottom right,
+with Calendar scene controls immediately left. The guide starts 24 px from bottom left and grows upward.
+Non-calendar demos sit to its right on wide screens and above it on phones. Calendar session edits survive chapter
+and fullscreen navigation. All scenario copy, initial state and actions live in individual JSON files.

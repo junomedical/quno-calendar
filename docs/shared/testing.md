@@ -394,7 +394,7 @@ At 1280×720 with 50 resources and 20,000 total events/year:
 - Calendar DOM stays below 5,000 horizontal nodes and 6,500 vertical nodes, with at most 1,000 committed event shells.
 - Pointer work is animation-frame bounded and does not rerender unrelated external event cards.
 - p95 scripting plus layout remains below 10ms, no task exceeds 50ms, and a 10× layout benchmark input stays below 25× runtime.
-- JavaScript gzip ceilings are 2 KiB for shared helpers, 50 KiB for Infinite Calendar, 12.5 KiB for Datepicker,
+- JavaScript gzip ceilings are 2 KiB for shared helpers, 50 KiB for Infinite Calendar, 12.75 KiB for Datepicker,
   10 KiB for Date Input, and 7 KiB for Date Parser. Optional CSS keeps its independent feature ceilings.
 
 ## Manual Checks
@@ -406,7 +406,7 @@ At 1280×720 with 50 resources and 20,000 total events/year:
 
 Clock-dependent default-demo scenarios set a fixed working-day morning in the browser while leaving timers running.
 Committed date/resource identities must remain stable across ordinary renders; navigation, zoom, and dense-layout
-browser tests guard that boundary. Current budgets are 50 KiB gzip for Infinite Calendar, 12.5 KiB for Datepicker,
+browser tests guard that boundary. Current budgets are 50 KiB gzip for Infinite Calendar, 12.75 KiB for Datepicker,
 and 10 KiB for Date Input.
 
 ## Optional clock verification
@@ -480,29 +480,49 @@ publish, zoom retains stable extents/preparation, changed hours invalidate geome
 be applied without a post-render DOM read. These work-count checks complement timing measurements and unchanged
 browser anchoring/geometry assertions.
 
-The isolated `/concept` browser checks assert the gradient intro’s geometry and pointer layering, live calendar events, scenario state, documentation destinations, expanded-view positioning, Escape, mobile containment, and reduced-motion defaults.
+The isolated `/concept` Chromium suite exercises all 23 authored scenes through live controls. Shared presentation
+checks cover all five products at desktop, phone and landscape sizes: live canvas, introduction/contents/footer,
+collapse width and 34 px toggle size, whole-body pointer/touch/keyboard dragging, left-bottom anchoring, clipping,
+fullscreen retention/focus and unobstructed hit targets. Other products must sit right of the guide on wide screens
+or in a scrollable region above it on phones. Calendar controls share the fullscreen bottom edge and sit 8 px left.
 
-Concept Chromium coverage exercises all nineteen scenes through actual controls, checks intermediate hover/draft/typing states, exact committed values, scenario-specific orientation/theme/density controls, manual gesture parity, takeover, reset/replay, and phone containment. Fixture tests verify exact per-day density and selected-resource filtering.
+JSON tests discover every scene independently, validate malformed values/actions and manifest references, edit each
+file without affecting others, and add a new scene through JSON alone. Browser customization verifies copy, recipe,
+initial value, actions and revisiting. Chapter arrival starts loops; reduced motion is idle. Manual takeover and
+hidden tabs cancel all pending work, never advance navigation, and preserve the current result.
 
-Scenario validation tests reject malformed JSON, unsupported actions, duplicate IDs, invalid initial values, and broken preview references. The browser suite supplies an additional scene exclusively through JSON and verifies copy, links, initial state, preview execution, and reset; runner coverage checks declared order and abort before subsequent steps.
+Calendar coverage samples real scroll travel and stationary pauses, zoom extrema and event geometry, next-day pans
+after both orientations, theme/density cycles, three-appointment rescheduling round trips, session continuity and
+bounded creation. Hover coverage follows topmost browser hit targets through all underlying lanes, asserts no clicks,
+and requires a cursor-outside/all-closed hold. Native hover remains usable after explicit takeover. Card checks assert
+single-line titles, ellipsis, readable dimensions and bounded expansion across zoom/orientation/density. Creation
+checks selected doctor IDs, retained load coverage, Save/Cancel restoration, saved glint animation and exiting fade.
+The Shift-scroll tag and rounded/notched 15° cursor receive computed-style/geometry checks, not screenshots alone.
 
-Product-file checks verify independent edits to all five JSON files, manifest tab/startup ordering, and missing or
-mismatched files. Scenario-file checks independently edit all nineteen scenes, validate missing/mismatched files and duplicate references, and add a new JSON-only scene. The browser customization test replaces only Date Input’s natural-language scenario and verifies its initial state, actions, reset, and unchanged product copy/Calendar.
+Datepicker checks all seven chapter titles/order, three intent interpretations with manual parity, month/year
+browsing back to July 1980 and selection of the 22nd, interruption during the long year scroll, endpoint navigation
+without changing selection, and single-day replacement on desktop/phone.
+Datepicker loop checks require both selections or outward/return gestures over two cycles, the same mounted picker,
+retained committed values after takeover, and no active drag. Intent checks assert the upcoming range and computed
+preview border during simulated hover. Year-scroll samples assert a roughly 8840 ms animated journey.
+Its extra switch, hint and raw result must be absent. Date Input checks all four natural phrases and their formatted
+results, a 1200 ms minimum pre-Enter pause for each, relative dates under two different browser dates (including a
+year boundary), desktop/phone containment, no fixed reference/output, and every intermediate
+day-down/month-up value. Timepicker checks smaller, regular-weight minutes with top-aligned hour/minute geometry.
+Screenshots accompany these assertions for visual review; they do not replace them.
 
-Concept motion checks sample real event dimensions, slider-thumb/cursor alignment, and intermediate scroll positions in both orientations. They also verify that takeover stops zoom without a trailing frame. Unit checks cover frame timing, cancellation, easing, and exact scroll distance despite native pixel rounding.
+Date Input concept coverage checks numeric format interpretations, native single/range dash typing, focus-open
+picker composition, dismissal on outside focus/pointer, bidirectional changes and responsive separation.
 
-Concept overlap checks assert frame-by-frame unpressed movement through the real topmost hit element, each underlying lane becoming hovered, no press/release/click events or editor, and native-pointer takeover in both orientations.
+Timepicker concept tests observe three composed date/clock pairs, day/time view transitions and manual selection.
+Parser concept tests assert raw token text/types, date and overnight clock results, ordering and viewport visibility.
 
-Concept card text checks cover 0.5, 1.3, 3, and 8 zoom in both orientations and minimum-zoom packed schedules. Assert
-single-line geometry, ellipsis, intact line height, containment, bounded hover expansion, visible details, and
-restored duration dimensions after pointer exit.
+Date Parser introduction checks assert its prefilled date/time, resolved clock, idle playback, manual editing and
+restoration on desktop/phone. Phrase checks observe six complete results and a repeated cycle without navigation.
 
-Concept navigation coverage checks title, paragraphs, launch button, live preview, and bottom rail fit one viewport
-on desktop and small phones. Native touch gestures verify horizontal rail scrolling and vertical section navigation.
-Assert intermediate smooth-scroll positions, active title synchronization, inert mobile focus/input behavior, and
-fullscreen-only chrome with retained component state and restored launch-button focus. Mobile interaction scenarios
-explicitly enter fullscreen before replaying.
+Concept browser checks verify contextual contents actions and matching collapse heights, two footer buttons without
+a counter, 40 px docks aligned with fullscreen, and draft movement/editor updates before Save/Cancel in both views.
 
-Persistent-calendar checks sample viewport bounds during section scrolling, retain the same DOM viewport, compare appointments across scenarios, verify the 238/167 px label geometry, and assert each JSON-selected control sits at the bottom right. Dataset tests retain source object identities across range loads and density subsets; editing checks preserve saved appointments through Reset.
-
-Text stability checks retain the heading DOM node and sample heading, paragraph, and action bounds relative to their section on every frame through scrolling and activation. Check identical font sizes and geometry at 1440, 950, and 390 px, and verify playback/pause cannot recenter the active heading.
+Time-choice stability checks assert native pointer hit targets and unchanged option geometry/scroll after pointer
+and keyboard selection, plus uncontrolled state and equivalent-hour rerenders. External offscreen reveal remains
+covered by the Timepicker and Datepicker date/time suites.

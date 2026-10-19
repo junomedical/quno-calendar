@@ -1150,3 +1150,66 @@ into its own file; the product JSON retains only metadata and ordered references
 scenario sections, JSON explanations, explicit fullscreen, and inert mobile previews shared by the concept demos.
 
 [QUNO-029](../shared/decisions.md#quno-029---preserve-scenario-text-layout-during-scrolling) keeps complete concept explanation layouts mounted and reserves playback/status space, preventing text jumps during scrolling and activation.
+
+## QDP-131 — Present Seven Focused Concept Interactions
+
+- Date: 2026-10-19
+- Status: Accepted; adopts shared QUNO-032
+- Decision: Order the concept chapters Paint a range, Adjust the end, Move the range, Guess the intent, Access months,
+  Switch to start/end and Single day. The intent scene clicks one date to expand, clicks again to choose the other
+  endpoint and again to retain only that day. Demonstrate month/year access and offscreen endpoint shortcuts without
+  losing selection. Selection mode comes from scene JSON; omit the extra checkbox, below-picker hint and raw result.
+- Consequences: Add four JSON scenes using existing actions. A day-cell pointerup already commits, so synthetic clicks
+  must not also invoke keyboard activation. Verify all intermediate values, manual parity, month/endpoint retention,
+  order and phone interaction. No package behavior or API change.
+
+## QDP-132 — Explain The Datepicker Rationale And Reach A Birth Date
+
+- Date: 2026-10-19
+- Status: Accepted; refines QDP-131's copy and supersedes its month-access range-preservation demonstration
+- Decision: Apply the approved first-person introduction and seven chapter descriptions, matching the Calendar's
+  conceptual tone. Give Datepicker its own introduction JSON. Access months now starts without a selection, scrolls
+  from October 2026 back to 1980, opens July and selects 22 July in single-day mode. Preserve the seven chapter IDs,
+  ordering and recipes; range-preserving start/end navigation remains a separate chapter.
+- Consequences: Add a demo-only typed scroll-year action using measured year height and the loaded first year so
+  the virtual target need not already be mounted. Keep the scroll cancellable through the existing actor, with
+  initial-state restoration between loops. Separate action checks from document validation. Verify visible year
+  travel, final month and single-day selection, desktop/phone copy geometry and deliberate takeover before selection.
+  No public component or stylesheet changes.
+
+## QDP-133 — Cycle Direct Gestures And Preview The Next Intent
+
+- Date: 2026-10-19
+- Status: Accepted; refines QDP-131 and QDP-132's choreography and year-scroll pacing
+- Decision: Paint alternates two ranges. Adjust extends its endpoint and then restores it after a pause. Move shifts
+  the range a week later and then moves it back after a pause. Repeat all three with `loop: "continue"`, preserving
+  the mounted picker and its selection instead of resetting to blank. Hover the intent date after the first and
+  second clicks so the next range/single-day preview is visible. Slow the 1980 year scroll from 2600 to 4420 ms (1.7×).
+- Consequences: Accept continuous loop metadata for Datepicker as well as Calendar. Mirror synthetic day hover in
+  demo-scoped preview CSS, since untrusted pointer events cannot set native :hover; clear it on departure/takeover.
+  Assert two gesture cycles, retained mount/values, upcoming preview geometry/styles, slower year travel and manual
+  interruption. Native component behavior and public styling remain unchanged.
+
+## QDP-134 — Double Distant-Year Scroll Duration
+
+- Date: 2026-10-19
+- Status: Accepted; supersedes only QDP-133's year-scroll duration
+- Decision: Scroll to 1980 over 8840 ms, twice the previous 4420 ms, retaining the same distance, easing, July 22
+  selection and manual interruption behavior.
+- Consequences: Assert observed scroll duration on desktop and phone; other gesture pacing remains unchanged.
+
+## Shared time-choice stability — 2026-10-19
+
+[QUNO-036](../shared/decisions.md#quno-036---preserve-visible-time-choices-through-selection) preserves visible time
+option geometry during selection and ignores equivalent enabled-hour arrays. Initial opening and external offscreen
+selection retain reveal behavior. Datepicker's return-to-days, selected clock and stable title focus remain unchanged.
+
+## QDP-135 — Budget The Shared Stable Time Reveal
+
+- Date: 2026-10-19
+- Status: Accepted; supersedes only QDP-128's Datepicker JavaScript ceiling
+- Decision: Keep QUNO-036's shared time-choice stability in the Datepicker build. Raise its JavaScript gzip ceiling
+  from 12.5 to 12.75 KiB; the measured artifact is 12,858 bytes, 96 bytes above the previous implementation.
+- Consequences: Retain the existing CSS and all other product ceilings. The small shared reveal cost preserves
+  selected-slot visibility without moving a visible choice away from the pointer. Package verification enforces
+  the updated ceiling.

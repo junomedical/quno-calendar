@@ -113,17 +113,20 @@ Shift-wheel zoom accumulates 0.20 per nonzero sample and waits for each accepted
 
 Wheel input follows the current Shift state immediately: hold Shift to zoom, release it to scroll. Remaining touchpad momentum may switch modes; there is no gesture-lock delay.
 
-The isolated demo approach experiment is available at `/concept`; see [concept notes](./demo/concept/README.md).
+The isolated `/concept` playground presents all five products in a live full-window canvas with a draggable,
+collapsible guide. The contextual contents button opens the contents; previous/next navigation stays inside the guide. Chapters autoplay
+and loop unless reduced motion is enabled, and deliberate interaction pauses playback. The guide starts 24 px from
+the bottom left and resizes upward from that corner. Fullscreen sits at bottom right, beside scene-specific controls.
+Other products sit to the right of the explanation on wide screens and above it on phones. Datepicker has seven
+chapters with first-person explanations, including an 8840 ms scroll to 22 July 1980; Date Input explains format
+guessing, opens its composed picker on focus and demonstrates natural typing
+with four varied examples and a readable pause before Enter, plus repeated day/month keyboard edits.
+See [concept notes](./demo/concept/README.md) for JSON authoring, choreography and verification.
 
-The `/concept` experiment now demonstrates nineteen live interactions with replay, reset, manual takeover, smooth scroll/zoom demonstrations, and per-scene recipe links.
+Timepicker’s concept chapters also show date-and-time selection inside Datepicker. The parser workbench exposes
+live token chips and resolved endpoints beneath the phrase, with chapter configuration kept in JSON.
 
-The concept’s scenario copy, initial state, preview order, and playback steps are controlled by [individual scenario JSON files](./demo/concept/README.md#edit-scenarios-in-json).
+The Date Parser concept opens with `12/01 10:00` already resolved. Its phrase chapter demonstrates six varied inputs.
 
-The concept overlap preview reveals covered appointments as the pointer moves, and real calendar hover takes over immediately. Cards use single-line text and expand on hover to reveal details at compact zoom levels.
-
-The concept now presents each scenario on one screen with its JSON-authored explanation, a persistent bottom title
-rail that scrolls between demos, and an explicit fullscreen button. Mobile previews become interactive only in fullscreen.
-
-The Calendar concept now keeps one fixed calendar and shared session dataset across scenarios, with a 70% wider date/time label column, JSON-selected controls in its bottom-right corner, and no bottom date/count stats row. Scenario changes reset the view while retaining appointments and edits. See [concept notes](./demo/concept/README.md).
-
-Concept explanations retain consistent typography, spacing, and mounted text through scrolling and scenario activation.
+Time choices keep a visible selected minute under the pointer instead of scrolling its hour to the top. Initial
+opening and external offscreen selections retain automatic reveal.

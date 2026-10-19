@@ -6,8 +6,8 @@
   "initial": {
     "view": "preferred",
     "theme": "light",
-    "density": 6,
-    "zoom": 1.3,
+    "density": 22,
+    "zoom": 2,
     "controls": ["theme"]
   },
   "steps": [
@@ -40,10 +40,20 @@
     {
       "action": "wait",
       "ms": 1500
+    },
+    {
+      "action": "click",
+      "target": "[data-action=\"light\"]",
+      "caption": "Return to Light"
+    },
+    {
+      "action": "wait",
+      "ms": 700
     }
   ],
   "paragraphs": [
-    "Make the calendar feel at home in your product. Colors, surfaces, and event accents can change together without changing the schedule.",
-    "Compare the light, dark, and branded themes, including the details revealed when an appointment is hovered."
-  ]
+    "Using a calendar across different projects can mean a lot of styling and overrides. This approach provides default CSS theme tokens that you can override for your project.",
+    "Events use containers you provide. Their content can respond to CSS container queries and adapt its appearance to the available space."
+  ],
+  "loop": "continue"
 }

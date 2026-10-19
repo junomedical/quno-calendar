@@ -1548,3 +1548,319 @@ deduplication and the existing cache bound. The guide explains the floor alongsi
 Unit coverage checks a tenth-day viewport, asymmetric/zero/invalid distances, excluded weekends and bounded edges.
 Chromium checks 135-calendar geometry with less than a tenth-day visible, both adjacent dates in the first read,
 and cached coverage while scrolling within that same date.
+
+## 131 - Guide Fullscreen Calendar Scenes With A Floating Card
+
+Date: 2026-10-19
+Status: Accepted; supersedes Calendar's fullscreen-only-demo chrome in QUNO-028 and retains Decision 127's stable canvas
+
+Open the Calendar fullscreen demo with a floating card above the full-width live calendar. Reuse the scene's JSON
+title, explanation paragraphs, recipe anchor, and manifest order. Previous/next arrows select the adjacent scene
+paused and show its description; disable the corresponding arrow at each end. See demo dismisses the card and
+replays the selected scene. Replay and Play tour also dismiss it. Keep scene arrows and Show description available
+in the top navigation while the card is hidden. Reopening the description pauses playback without resetting the
+current view. The card has no backdrop, so the exposed calendar remains interactive.
+
+Place Back in the top navigation; Back and Escape stop playback, exit fullscreen, restore the selected inline
+section, and focus its launch button. Preserve the mounted calendar, dataset, and session edits. Continue immediate
+manual takeover for pointer/hover, wheel, keyboard and focus, with no automatic resumption. Keep the top navigation's
+height stable when dismissing the card, allow the card to scroll on short displays, and retain mobile fullscreen
+interaction. Other products keep their existing fullscreen presentation. No package API or runtime changes.
+
+Browser coverage asserts card containment and hit-test layering, full-width calendar bounds and retained DOM identity,
+unchanged viewport bounds when dismissing the card, scene order/boundaries, playback and manual interruptions,
+recipe links, top Back, Escape, and launch focus/section restoration across desktop, phone, and landscape sizes.
+
+## 132 - Open The Calendar With A Movable Guide And Inline Contents
+
+Date: 2026-10-19
+Status: Accepted; supersedes Calendar presentation in Decision 131 and QUNO-028/QUNO-029, retaining Decision 127's mounted calendar and shared edits
+
+Make the full-width Calendar and floating information panel the default `/concept` Calendar view on desktop and
+mobile. Keep the product header until the calendar's top-right fullscreen icon hides it; the same corner icon or
+Escape exits fullscreen and restores launch focus. Keep previous/next navigation in a persistent bottom bar.
+The floating panel owns Back and the complete table of contents, using the product manifest's titles and order.
+Choosing a title returns to its explanation; Escape leaves contents before exiting fullscreen. Other products retain
+scenario pages, title rails, and inert mobile previews.
+
+Start the selected Calendar scene automatically on entry and scene navigation, except for reduced-motion visitors,
+who start paused. Manual input stops playback without automatic resumption. Keep playback actions inside the panel,
+with no separate top playback row, See demo action, interaction instruction, or Explore at your own pace status.
+Replay and subsequent scene changes collapse the explanation to keep the working calendar visible; restoring it pauses the scene.
+
+Drag the entire panel, including its title, paragraphs and empty space, with mouse or touch. Buttons and links keep
+their normal actions and never begin a drag. Remove the dotted handle. Keep an explicit collapse/expand icon, retain
+position through collapse/fullscreen, clamp it after content/viewport changes, and frame-bound drag updates. Focused
+panel arrow keys move it by 20 px (50 with Shift); Home returns to the initial corner. Cancellation and unmount clear
+queued motion. Keep the same calendar and session edits throughout. No public library contracts change.
+
+Browser checks cover default/mobile geometry, card layering, corner fullscreen/focus, whole-body and touch dragging,
+clamping and resizing, keyboard positioning, collapse/restore, inline contents and all titles, bottom navigation,
+autoplay/reduced motion, manual takeover, and existing scene outcomes in both orientations.
+
+## 133 - Introduce The Calendar Demo Before Its Chapters
+
+Date: 2026-10-19
+Status: Accepted; refines Decision 132's initial floating-panel content
+
+Open the floating panel on a dedicated About this demo page explaining the live calendar, what the chapters
+show, and how the guide relates to the working calendar. Keep this copy in `demo/concept/calendarIntroduction.json`.
+The introduction contains descriptive paragraphs without a chapter recipe or playback toolbar. The first Calendar
+scene continues its automatic background playback, subject to the existing reduced-motion and takeover guards.
+
+Treat the introduction as the first presentation page before the manifest's eight scene chapters. Include it first
+in bottom navigation and contents, with Previous disabled only on the introduction. Next opens Infinite scroll;
+Previous from that chapter returns to the introduction. Contents can select either the introduction or any chapter.
+Retain the same calendar and panel position through these transitions, collapse/restore and fullscreen. The scene
+catalog and public package API remain unchanged. Geometry/state browser checks cover initial copy, contents order,
+round-trip navigation, chapter-only controls, autoplay, fullscreen and retained calendar DOM identity.
+
+## 134 - Keep Calendar Navigation In The Floating Guide Footer
+
+Date: 2026-10-19
+Status: Accepted; supersedes Decision 132's window-bottom bar and refines Decision 133's presentation navigation
+
+Place Previous, page count/title, and Next at the bottom of the floating panel. They move with the panel and remain
+visible when its description is collapsed, using compact arrows and a count. Keep navigation outside the scrollable
+body so short displays retain reachable controls while explanations or contents scroll. Back and contents stay in
+the panel. Remove the separate window footer and let the stable calendar fill the remaining viewport, including
+fullscreen. Preserve introduction ordering, scene autoplay/takeover, position clamping, and calendar/session identity.
+
+Browser checks assert footer containment and hit-test visibility at desktop, phone and landscape sizes, expanded
+and collapsed states, dragging/resizing and fullscreen; they also verify full-height calendar geometry and existing
+chapter/introduction navigation. No library contracts change.
+
+## 135 - Start Calendar Chapters Without Hiding Their Explanation
+
+Date: 2026-10-19
+Status: Accepted; supersedes Decision 132's automatic collapse and chapter playback toolbar
+
+Keep the Calendar explanation expanded when Previous, Next, or contents reaches a chapter. Start that chapter's
+scene immediately from its authored initial state, respecting reduced motion and manual takeover. Remove Play tour,
+Replay scene, Try it, Reset, and Pause controls from the Calendar guide. Revisiting a chapter runs it again; only
+the explicit chevron collapses the text. Keep Decision 134's panel-footer navigation, introduction ordering, panel
+position, mounted calendar, and session edits. Other products retain their playback controls.
+
+Verify forward/back/contents arrival starts the scene with visible explanatory text, no toolbar, reduced-motion idle
+behavior, manual interruption, retained edits, and existing real demo outcomes. Move the expanded guide clear of
+vertical hover lanes when testing pointer hit targets, using its supported keyboard positioning.
+
+## 136 - Loop The Selected Calendar Scenario Without Advancing Navigation
+
+Date: 2026-10-19
+Status: Accepted; refines Decision 135 and supersedes Calendar's finite scene completion in QUNO-023
+
+Repeat the selected Calendar scenario until manual takeover, explicit navigation, product change, hidden tab, or
+unmount cancels it. Automatic playback never selects another chapter or clicks Previous/Next. Ordinary authored
+calendar interactions remain unchanged. Infinite scroll uses a dedicated JSON `scroll-loop` action with a positive
+pixels-per-second speed: keep moving downward with linear frame-bounded deltas, without pauses or jumping back to
+the starting date. Throttle the visible-date readout during continuous motion instead of waiting for scroll silence.
+
+Other Calendar scenes repeat their authored steps with a short result hold. Restore presentation/navigation and a
+checkpoint of pre-run session changes between cycles so creation does not accumulate unbounded automatic events or
+block the next empty-slot gesture. Manual takeover keeps the currently displayed result and prevents future resets.
+Changing chapters retains current session edits. A new selection starts its cycle observation at zero; completed
+cycles are exposed only as demo-local data for browser checks. Other products retain finite playback and tour order.
+
+Keep the informational panel expanded. Synthetic Calendar gestures temporarily exclude this panel from hit testing
+only during their synchronous dispatch, restoring pointer styles before returning; native input still targets the
+panel normally. This demo-only presentation adapter refines Decision 125's browser hit testing by excluding the
+information overlay while retaining actual calendar card/lane ordering. It changes no library hit testing or public
+contracts. Verify restored pointer styles, expanded-guide phone creation, vertical hover/move/create outcomes,
+multiple cycles without chapter advancement, bounded automatic data, continuous forward dates, and cancellation
+without delayed reset/resume.
+
+## 137 - Make Calendar Scroll And Zoom Loops Lively
+
+Date: 2026-10-19
+Status: Accepted; supersedes Decision 136's steady scroll speed without pauses
+
+Keep the selected chapter looping without navigation. Scroll down by 900 px in a one-second eased step, pause for
+350 ms, then continue to later dates without resetting. Author amount, duration, easing and pause in `scroll-loop`
+JSON; require at least 800 px per step. Retain cancellation during both movement and pauses.
+
+Start Zoom at its maximum 8 scale. Animate out to minimum 0.5 in 700 ms, scroll 900 px through the wider schedule,
+animate back to 8 in 700 ms, and scroll back through the detailed view. Use one-second pans and brief result holds.
+Repeat that chapter with expanded text and the existing checkpoint/takeover rules. The same date axis scrolls
+downward in both calendar orientations. Keep these choices in scenario JSON rather than branching on scene IDs.
+Verify both zoom directions and extrema, live event/slider geometry, at least 800 px of animated travel with a
+visible pause, forward dates across multiple steps, chapter persistence, and immediate manual cancellation.
+
+## 138 - Require Deliberate Pointer Input To Take Over Playback
+
+Date: 2026-10-19
+Status: Accepted; supersedes Decision 125's real-pointer hover takeover and refines Decisions 136–137's interruption rules
+
+Unpressed pointer movement and hovering over the Calendar must not cancel its demonstration or loop. Cancel on
+trusted pointerdown, so a click or the start of a drag takes over immediately. Keep wheel, keyboard, focus and hidden
+tab cancellation, explicit guide actions, navigation, and reduced-motion behavior. Native hover remains usable once
+the visitor has deliberately paused playback. Remove the Calendar pointermove cancellation listener and its cleanup.
+
+Verify repeated mouse movement over the live calendar leaves the cursor and playback running in both orientations;
+a subsequent click or drag stops immediately and does not resume. Retain covered-lane native hover checks after
+explicit takeover and synthetic overlap playback geometry/hit ordering. No public library contracts change.
+
+## 139 - Demonstrate Next-Day Scrolling After Each Orientation Switch
+
+Date: 2026-10-19
+Status: Accepted; refines Decision 137's orientation comparison chapter
+
+In Horizontal / vertical, switch to vertical, reveal the reference appointment and scroll into the next day. Switch
+back to horizontal, reveal that next day's appointment, and scroll into the following day. Keep both transitions
+and pans in the scene JSON using existing actions, without changing the calendar instance or chapter navigation.
+Measure vertical travel from the calendar cell and use the authored horizontal next-day distance. Preserve looping,
+expanded guide text, session edits, deliberate pointer takeover and other cancellation guards. Verify October 20
+after the vertical pan and October 21 after the horizontal pan at desktop and phone widths, retaining the viewport
+node and live playback. No public contracts change.
+
+Decision 139 verification clarification: switching orientation replaces the inner viewport as designed by the
+public component. Retain and verify the calendar workspace/canvas identity across this transition, superseding the
+inner-viewport-node assertion above; scene and fullscreen navigation within one orientation retain their viewport.
+
+## 140 - Fill The Demo Day With Varied Readable Appointments
+
+Date: 2026-10-19
+Status: Accepted; supersedes Decision 127's six-appointment default and refines Decision 126's title presentation
+
+Use 22 appointments per day for ordinary concept scenes: five regular appointments per person plus the two
+canonical overlaps on Maya's morning reference appointment. Spread additional appointments across morning, lunch,
+afternoon and late afternoon within 08:00–19:00. Use 32 varied concise additional titles, shared by density subsets
+and all Calendar scenes. Keep reference IDs, the first four morning appointments, the three-way overlap and Maya's
+11:30–12:30 creation gap stable. Preserve the cached source, session edits, and exact 4/40/400 density choices.
+
+Set ordinary and density scene zoom to 2, leaving Zoom's intentional 8-to-0.5 demonstration. Lengthen generated
+regular appointments from 35 to 60 minutes; the original hour-long anchors and 75-minute canonical overlaps retain
+their duration. This gives horizontal cards about 120 px at the authored zoom, while existing truncation and hover
+remain available for crowded or narrow cases. Synthetic playback and native interaction still use the same data.
+
+Verify working-hour coverage, per-person distribution, varied titles, hour-long geometry, stable IDs, creation gap,
+density counts, cached identities, unclipped single-line titles at 2x in Busy/Packed, both orientations and existing
+creation/move/view playback. Shared cursor styling is owned by QUNO-030. No library contracts change.
+
+## 141 - Close Authored Scene Cycles Before Repeating
+
+Date: 2026-10-19
+Status: Accepted; refines Decisions 136–140's loop boundaries
+
+Allow Calendar scenes to declare `loop: "continue"` when their authored actions close the cycle. Keep the pointer and
+live state through the boundary rather than restoring a checkpoint. Theming explicitly ends with Light; density
+scrolls back and selects Quiet; orientation comparison returns to October 19; zoom returns to its initial scale
+and position. Reschedule moves three distinct appointments to the next person and later time, then returns all
+three in reverse order before repeating. Preserve cancellation and pre-existing session edits. Creation retains
+checkpoint restoration to bound automatic events. Other products keep finite playback.
+
+Start Event density explicitly in horizontal mode regardless of the previously selected orientation. Clear the
+synthetic hover when the pointer starts a non-hover action, so an expanded appointment closes as the cursor leaves
+for scrolling, controls or dragging. Retain continuous hit-tested movement between explicit hover targets.
+
+Browser checks cover the explicit final Light click, density orientation after a vertical scene, closed previews
+during scrolling, three forward and three return moves in both orientations, return clocks, repeat progression,
+and manual takeover without a delayed reset. No public package contracts change.
+
+## 142 - Keep Calendar Changes Visible In Their Appointments
+
+Date: 2026-10-19
+Status: Accepted; supersedes Decision 127's contextual saved/moved confirmation
+
+Remove the corner Saved/Moved status box from the concept calendar. The live appointment's title, time and resource
+show creation and rescheduling results directly. Remove the unused message state and styling, and assert those
+appointment results in browser checks. Before synthetic rescheduling, bring the source into the usable time area,
+accounting for sticky participant labels and the drag offset on narrow screens. Verify all three appointments
+return to their original clocks and people on phone, horizontal and vertical layouts, with no corner message.
+No public product contracts change.
+
+## 143 - Retain Floating Guide Width When Collapsed
+
+Date: 2026-10-19
+Status: Accepted; refines Decisions 132–135's collapsed presentation
+
+Keep the floating guide's expanded width when its body is collapsed, including responsive widths and fullscreen.
+Only reduce its height and padding; retain a readable chapter title and the contents action. Rename the chapter
+and introduction contents button to All demos in both visible text and accessible name, including collapsed state.
+The contents view still offers Back to return to its introduction or chapter. Keep footer navigation, drag position,
+viewport clamping and session identity. Browser checks compare expanded/collapsed widths and title clipping across
+desktop, phone and landscape sizes, and exercise All demos navigation. No public product contracts change.
+
+## 144 - Use A Direct Contents Header And Left-Aligned Titles
+
+Date: 2026-10-19
+Status: Accepted; supersedes Decision 143's return button within contents
+
+The Calendar demos contents screen has its title and collapse control without a Back button. Chapter and
+introduction views retain All demos. Selecting a title, footer navigation or Escape leaves contents using the
+existing behavior. Align every contents button at the left, using a fixed-width numeric marker so all demo names
+share one start edge. Give contents alignment precedence over generic guide-button centering. Browser checks
+assert the absent back control, computed alignment and shared title geometry, alongside responsive panel checks.
+No public product contracts change.
+
+## 145 - Show Only The Title And Expand Control When Collapsed
+
+Date: 2026-10-19
+Status: Accepted; supersedes Decision 134's collapsed footer and refines Decision 143's retained width
+
+Keep the collapsed guide's responsive width, chapter name and expand control. Hide its All demos action, footer
+navigation, recipe, explanation and contents list. Expanding restores those controls and the selected presentation
+without resetting the calendar. Retain dragging and viewport clamping. Browser checks assert exactly one visible
+button, no rendered contents action or footer, unchanged width, readable title and hit-testable expansion across
+desktop, phone and landscape layouts. No public product contracts change.
+
+## 146 - Start The Guide At Bottom Left And Keep Its Toggle Steady
+
+Date: 2026-10-19
+Status: Accepted; refines Decisions 132, 143 and 145's placement and disclosure geometry
+
+Initially measure the expanded guide and place it at the bottom left with a 24 px inset, clamped to the existing
+12 px minimum on constrained displays. Home returns it to that corner. Later disclosure and navigation retain its
+position subject to viewport clamping; dragging remains available. Collapsing changes content and height while
+preserving panel width, top padding and the toggle's 34 px size and screen position. Keep only title and expand
+control when collapsed. Browser checks compare toggle rectangles exactly through disclosure, assert the initial
+bottom inset at five sizes, and retain drag, resize, fullscreen, contents and native-hover coverage.
+No public product contracts change.
+
+## 147 - Explain The Calendar Concepts And Focus The Edited Doctor
+
+Date: 2026-10-19
+Status: Accepted; refines Decisions 133, 140 and 146's editorial content and creation demonstration
+
+Rename the introductory presentation page Calendar. Use the author's first-person rationale for focus, scrolling,
+zoom, underlying overlap hover, equivalent orientations, theming, density, creation and rescheduling. Keep each
+chapter's existing identity, order, actions and recipe. Allow one to three paragraphs for Calendar JSON while
+other products retain one or two. Saving/settled feedback describes consumer-owned presentation, not new native
+EventRenderStatus values or a simulated server integration.
+
+Declare `initial.focusDraft: true` on creation. While its controlled create/edit draft is open, display only the
+selected doctor's row or column. Keep all four `loadCalendarIds` stable and retain the shared cache and session
+edits. Capture the edited slot before opening/closing and restore it after the committed layout; Save and Cancel
+restore the normal participant selection, while chapter/reset cancellation clears the draft. Other scenes retain
+normal participant selection. Verify actual selected doctor IDs, visible drafts, date continuity, saved cards,
+Cancel, both orientations, phone playback, repeated creation and responsive long-copy geometry. No public API changes.
+
+## 148 - Anchor The Guide Below Its Content And Close Overlap Playback
+
+Date: 2026-10-19
+Status: Accepted; refines Decisions 125, 146 and 147, and adopts shared QUNO-032
+
+Keep the explainer's left-bottom corner fixed as text, contents and disclosure change height. This supersedes
+Decision 146's absolute toggle screen-position requirement: the toggle remains 34 px, at the same horizontal position
+and padding, while the panel grows upward. Default bottom inset is 24 px. Put fullscreen at bottom right and compact
+scenario controls immediately to its left; narrow dock scenes reserve footer clearance.
+
+Render the Zoom explanation's Shift-scroll gesture as a keyboard tag. After hovering the three overlap cards, move
+the demo cursor to the day label and hold all cards closed for 1500 ms. Preserve draft/drag chrome, show the existing
+appearing state with a saved-card glint, and release cancelled drafts with the public 420 ms fade-out. No corner
+confirmation message or new event status is introduced. Verify anchor geometry, unobstructed controls, outside-cursor
+closed holds, computed glint/fade animation and reduced motion. Public Calendar contracts remain unchanged.
+
+## 149 - Move Concept Drafts Before Saving And Simplify Control Chrome
+
+Date: 2026-10-19
+Status: Accepted; extends Decisions 147–148's concept interactions and control placement
+
+Wire the public onActiveDraftMoveRequest callback in the concept editor. Cancel any previous anchor restoration,
+apply the move only to the matching controlled draft and retain its current title/metadata. Save commits the moved
+slot; Cancel discards it. Moving a draft never writes the saved-event overlay before Save.
+
+Remove the small labels above view, density, theme and zoom controls, retaining accessible group names and the
+existing buttons/slider. Keep every scene-control dock 40 px high, centered and aligned with the fullscreen control.
+Verify live draft/editor clock changes, actual card movement, preserved titles and Save/Cancel in both orientations;
+assert label absence, equal dock/fullscreen height and hit targets at desktop/phone widths. No public API changes.

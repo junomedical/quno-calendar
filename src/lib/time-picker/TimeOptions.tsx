@@ -1,7 +1,9 @@
-import { useLayoutEffect, useRef } from "react";
+import { useRef } from "react";
 import { classNames as cx } from "#quno-internal/shared/classNames";
 import type { TimeSelectionOptions } from "#quno-internal/shared/clockTime";
 import type { QunoTimePickerClassNames, QunoTimePickerFormatters } from "./timePickerTypes";
+
+import { useTimeSelectionReveal } from "./useTimeSelectionReveal";
 
 type Config = {
   locale: string;
@@ -33,18 +35,7 @@ export function TimeOptions({
   );
   const columns = clock.minuteCadence === 5 ? 6 : clock.minuteCadence < 10 ? 5 : minutes.length;
   const { labels, classNames, formatters, locale } = config;
-  useLayoutEffect(() => {
-    const container = scroller.current;
-    const selected = container?.querySelector<HTMLElement>(`[data-hour="${Number(clock.time?.slice(0, 2))}"]`);
-    if (container && selected) {
-      container.scrollTop = selected.offsetTop;
-      const option = selected.querySelector<HTMLElement>('[aria-pressed="true"]');
-      if (option) {
-        const overflow = option.getBoundingClientRect().bottom - container.getBoundingClientRect().bottom;
-        if (overflow > 0) container.scrollTop += overflow + 12;
-      }
-    }
-  }, [clock.time, clock.minuteCadence, clock.enabledHours]);
+  useTimeSelectionReveal({ scroller, time: clock.time, minuteCadence: clock.minuteCadence, hoursKey: hours.join(",") });
   return (
     <div
       ref={scroller}

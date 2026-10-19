@@ -3,12 +3,12 @@
   "label": "Date Input",
   "title": "Type it your way.",
   "description": "Familiar dates and natural phrases, in a field that feels native.",
-  "preview": ["natural"],
+  "preview": ["format"],
   "explore": [
     ["Ranges", "range-input"],
     ["Parser options", "parser-configuration"],
     ["Localization", "localization"],
     ["Accessibility", "accessibility"]
   ],
-  "scenarios": ["natural", "keyboard", "compose"]
+  "scenarios": ["format", "natural", "keyboard", "compose"]
 }

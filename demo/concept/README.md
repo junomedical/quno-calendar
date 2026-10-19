@@ -1,292 +1,173 @@
-# Demo concept
+# Interactive concept playground
 
-Open `/concept` with `npm run dev`. Each of the 19 scenarios has a viewport-sized section containing its title,
-one or two explanatory paragraphs, and a live demo. Product tabs stay at the top. A horizontally swipeable title
-rail stays at the bottom; choosing a title scrolls vertically to its section. Scrolling between sections selects
-the nearest demo after settling. Every section keeps its full title, paragraphs, and actions mounted with identical typography and spacing before and after activation; inactive sections are inert. Calendar stays mounted in a fixed layer beside the scrolling explanations. Other products mount only the active section’s working component.
+`/concept` is an isolated demo application using public `@quno/calendar/*` entry points. All five products share a
+live full-window canvas and a floating information guide. Existing focused demos and field guides retain their routes.
 
-The Full screen demo button sits below the explanation beside the recipe link. Fullscreen shows only the working
-demo and compact playback/exit controls. Entering and leaving preserves the mounted component’s state and returns
-focus to the launch button. Escape stops playback and exits. Scenarios never open fullscreen automatically.
+## Presentation and interaction
 
-Desktop demos remain interactive inline. The initial scene plays once unless reduced motion is enabled; Play tour
-explicitly runs the product’s preview sequence and scrolls between its sections. Title selection replays that scene;
-manual section scrolling opens it paused. Replay and Reset restore presentation settings and navigation; Calendar keeps the shared schedule and session edits. Other products restore scene state. Try it preserves the current result.
-Pointer, wheel, keyboard, focus, and real calendar hover stop playback; hidden tabs cancel pending work.
+The guide begins with a product introduction. The contextual contents button opens a left-aligned contents list inside the guide;
+previous/next navigation stays in its footer. Contents has no back action. Collapsing retains only the title and
+34 px expand button at the same responsive width. Drag the whole guide except buttons and links, or focus it and
+use arrows, Shift-arrows, and Home. The default left/bottom inset is 24 px, clamped on constrained displays.
+Height changes grow upward from the retained left-bottom corner. Fullscreen/viewport changes clamp without
+remounting the working component. The fullscreen button sits 16 px from bottom right; scene controls sit 8 px left
+of it on the same bottom edge. Narrow Calendar chapters reserve clearance when their dock is present.
 
-At widths up to 850 px, inline previews are inert, cannot take focus, and do not play simulations. Touch gestures
-navigate the page or the title rail. Open fullscreen to interact or use replay controls. Leaving fullscreen restores
-the inert preview while retaining its current state. Reduced motion uses immediate section navigation.
+Non-calendar products sit right of the guide on wider screens. Below 720 px they use a scrollable region above it;
+the guide reserves the fullscreen button's corner. This keeps the interactive control visible when copy is expanded.
+There are no separate scenario pages, bottom title rail, launch buttons, inert previews or playback toolbar.
 
-The slightly rounded triangular cursor has a small tail notch. Playback operates actual buttons and input fields,
-dispatches demo-scoped pointer/key events through the component handlers, and scrolls the real viewport. Synthetic
-drag capture is adapted only on the participating demo elements and restored on completion or cancellation.
-No library internals or production runtime changes are needed. The event renderer formats timestamp clocks locally. The chosen orientation carries into other Calendar scenes and replay; the view-comparison scene explicitly demonstrates both orientations.
-
-Each scenario has its own JSON file under `scenarios/<product-id>/<scenario-id>.json`, containing its label, hint,
-guide anchor, one or two `paragraphs`, initial state, and playback steps. Product manifests in `scenarios/` contain
-product copy, explore links, and ordered scenario/preview IDs. `demo.json` contains startup, tab order, schema version,
-and shared dates. `scenarioSources.ts` discovers scene files automatically; validation checks file IDs and references
-before assembling the catalog.
-
-`PlaybackActor.ts` implements reusable interactions; `PlaybackHover.ts` routes unpressed movement through browser hit
-targets; `playbackSteps.ts` interprets actions without branching on scene IDs. Product modules load lazily, with Calendar
-mounted immediately. Fixtures, playback cancellation, and the shared density exhibit retain their existing behavior.
+Chapter arrival starts playback unless reduced motion is enabled. Every chapter loops in place without clicking
+chapter navigation. Revisiting restarts it. Manual pointerdown, wheel, keyboard, focus entering a working control,
+hiding the tab, product changes and unmount cancel pending actions. Hover alone does not pause. Synthetic synchronous
+focus is marked internal so real component navigation can run without cancelling its own script.
 
 ## Edit scenarios in JSON
 
-| Demo        | Product manifest                                             | Example scenario file                                |
-| ----------- | ------------------------------------------------------------ | ---------------------------------------------------- |
-| Calendar    | [infinite-calendar.json](./scenarios/infinite-calendar.json) | [zoom.json](./scenarios/infinite-calendar/zoom.json) |
-| Datepicker  | [datepicker.json](./scenarios/datepicker.json)               | [paint.json](./scenarios/datepicker/paint.json)      |
-| Date Input  | [date-input.json](./scenarios/date-input.json)               | [natural.json](./scenarios/date-input/natural.json)  |
-| Timepicker  | [timepicker.json](./scenarios/timepicker.json)               | [time.json](./scenarios/timepicker/time.json)        |
-| Date Parser | [date-parser.json](./scenarios/date-parser.json)             | [phrase.json](./scenarios/date-parser/phrase.json)   |
+- `demo.json` owns schema version, product order, startup selection and shared fixture dates.
+- `scenarios/<product-id>.json` owns product metadata, explore links and ordered scene/preview IDs.
+- `scenarios/<product-id>/<scenario-id>.json` owns one scene's `id`, `label`, `hint`, `anchor`, `paragraphs`, `initial`
+  and ordered `steps`. Calendar allows one to three paragraphs; other products allow one or two.
+  Optional `chapterOnly: true` keeps the reused introduction on its ready initial value until the chapter is chosen.
+- `calendarIntroduction.json`, `datepickerIntroduction.json` and `dateInputIntroduction.json` own their product introductions. The other
+  introductions use product descriptions.
 
-Edit a scenario’s file to change its copy, initial values, docs anchor, or actions. Its `id` must match its filename.
-To add a scenario, create a new JSON file in the product folder, add its ID to the product manifest’s `scenarios`
-array, and optionally include it in `preview`. Those arrays define order; filenames do not. No TypeScript registry
-edit is needed for new scenarios using existing actions. Missing files, mismatched IDs, duplicate references, and
-invalid actions fail validation before playback. Existing scenes can share an ID across different products.
+Vite discovers scene files automatically. Add a file and reference its ID in the manifest; existing actions need no
+player edits. Validation checks filenames, IDs, references, initial contracts and typed action fields. Captions remain
+authoring metadata. `[shift-scroll]` in explanation text renders as a Shift + scroll keyboard tag.
 
-Edit [demo.json](./demo.json) only for shared reference dates, tab order, startup product, or schema version.
-Date selectors and explicit typed dates in steps must agree with its `context`. Each scenario declares `id`, `label`,
-`hint`, `paragraphs` (one or two nonempty strings), `anchor`, `initial`, and `steps`. Its `anchor` names a
-section in the product’s field guide. The old combined `scenarios.json` remains removed.
+Supported actions are `wait`, `find`, `aim`, `click`, `hover`, `cue`, `type`, `key`, `scroll`, `scroll-loop`, `scroll-to`,
+`scroll-day`, `scroll-year`, `slider`, `wheel`, `drag-dates`, `draw-event` and `move-event`. Animated scroll/slider actions specify
+`durationMs` and `easing` (`linear` or `ease-in-out`). `key` optionally sets the caret. Calendar-only scroll-loop,
+scroll-day, creation and movement actions use public controls and actual viewport/event geometry. Never branch
+playback behavior on scene IDs or use recipe navigation as a simulation action.
 
-For example, a Date Input scene can be added entirely as data:
+## Scene catalog
 
-```json
-{
-  "id": "tomorrow",
-  "label": "Plan tomorrow",
-  "hint": "Enter tomorrow and commit the date.",
-  "paragraphs": ["Type a relative date in the native field, then press Enter to commit it."],
-  "anchor": "controlled-state",
-  "initial": { "range": null, "selectionMode": "single", "picker": false, "label": "Appointment date" },
-  "steps": [
-    { "action": "type", "target": "[data-action=\"date-input\"]", "text": "tomorrow" },
-    { "action": "key", "target": "[data-action=\"date-input\"]", "key": "Enter" },
-    { "action": "wait", "ms": 1200 }
-  ]
-}
-```
+There are 25 action scenes and five introductory presentation pages. Calendar has nine presentation pages,
+Datepicker eight, Date Input five, Timepicker four and Date Parser four.
 
-Supported actions are `find`, `wait`, `aim`, `click`, `hover`, `cue`, `type`, `key`, `scroll`, `scroll-to`, `scroll-day`,
-`wheel`, `slider`, `drag-dates`, `draw-event`, and `move-event`. See `scenarioTypes.ts` for their fields and the existing JSON
-for complete examples. Targets are CSS selectors scoped to the active canvas. Waits and wheel intervals are in
-milliseconds; scroll amounts and move offsets are pixels. `scroll-to` centers its destination in the scroll area;
-`scroll-day` adapts its distance to orientation. `draw-event` offsets are multiples of the reference appointment's
-duration; `move-event` points to the destination resource grid. Scroll actions and `slider` require `durationMs` and `easing` (`linear` or `ease-in-out`). The default
-scrolls take 1500 ms; the zoom slider takes 1800 ms. Playback uses cancellable animation frames, easing both ends
-and preserving exact scroll distance across pixel rounding. `slider` dispatches native input events throughout a
-visible held drag, so the calendar's controlled geometry changes continuously. Target reveals also scroll smoothly.
-Shared movement/press pacing belongs to the actor. Reduced motion starts idle; explicitly playing a scene opts into
-its demonstration motion. Any manual input or hidden tab cancels the next frame immediately.
+| Product     | Scene                 | Recipe                                      |
+| ----------- | --------------------- | ------------------------------------------- |
+| Calendar    | Infinite scroll       | `/guide/infinite-calendar#infinite-view`    |
+| Calendar    | Zoom                  | `/guide/infinite-calendar#zoom`             |
+| Calendar    | Overlapping events    | `/guide/infinite-calendar#overlap-lanes`    |
+| Calendar    | Horizontal / vertical | `/guide/infinite-calendar#horizontal-first` |
+| Calendar    | Theming               | `/guide/infinite-calendar#styling`          |
+| Calendar    | Event density         | `/guide/infinite-calendar#performance`      |
+| Calendar    | Create an appointment | `/guide/infinite-calendar#drag-create`      |
+| Calendar    | Reschedule            | `/guide/infinite-calendar#drag-create`      |
+| Datepicker  | Paint a range         | `/guide/datepicker#paint`                   |
+| Datepicker  | Adjust the end        | `/guide/datepicker#paint`                   |
+| Datepicker  | Move the range        | `/guide/datepicker#segment-drag`            |
+| Datepicker  | Guess the intent      | `/guide/datepicker#wrong-guess`             |
+| Datepicker  | Access months         | `/guide/datepicker#quick-jump`              |
+| Datepicker  | Switch to start/end   | `/guide/datepicker#shortcuts`               |
+| Datepicker  | Single day            | `/guide/datepicker#single-day`              |
+| Date Input  | Format guessing       | `/guide/date-input#parser-configuration`    |
+| Date Input  | Type naturally        | `/guide/date-input#controlled-state`        |
+| Date Input  | Edit with keyboard    | `/guide/date-input#keyboard-controls`       |
+| Date Input  | Works with datepicker | `/guide/date-input#picker-composition`      |
+| Timepicker  | Choose a time         | `/guide/timepicker#time-selection`          |
+| Timepicker  | Keep an existing time | `/guide/timepicker#ownership`               |
+| Timepicker  | Works with datepicker | `/guide/timepicker#production`              |
+| Date Parser | Resolve a phrase      | `/guide/date-parser#relative-dates`         |
+| Date Parser | Resolve ambiguity     | `/guide/date-parser#preferred-date-order`   |
+| Date Parser | Cross midnight        | `/guide/date-parser#time-parsing`           |
 
-Initial settings differ by product: Calendar view/theme/density/zoom/controls; picker range/single-day mode; input
-range/selection mode/picker/label; time value/cadence/business hours; parser text/date order/clock recognition.
-Calendar view `preferred` preserves the visitor's chosen orientation. Explicit views override it for that scene.
-Replay and Reset use the same JSON initial settings. No executable code belongs in JSON; a new interaction primitive
-requires an explicit typed adapter. Invalid fields, actions, values, IDs, or preview references fail validation with
-an actionable path. The existing 19 scenes remain the default content.
+## Calendar choreography
 
-## Implemented scenario design
+One stable Calendar instance owns a cached fixture source and session edits across chapters and fullscreen. Initial
+view/theme/density/zoom and starting navigation reset per chapter. The label pane is 238 px (167 px vertically).
+There is no date/count status row or Saved/Moved corner message. Ordinary schedules have 22 appointments across the
+working day, regular one-hour durations, 32 additional varied titles and 2× zoom. Density presets project 4/40/400
+appointments from the same data. Compact titles and clocks stay on one line; hover reveals bounded details.
 
-The following tables describe the implemented scenes and the presentation contract they follow.
+Scroll loops advance 900 px over one second with 350 ms pauses. Zoom quickly moves 8 → 0.5, explores 900 px, then
+returns to 8 and scrolls back. Orientation changes include next-day pans and return to the initial day. Themes end
+in Light. Density ends in Quiet/horizontal. Reschedule moves three different appointments forward, then back in
+reverse order. Overlap hovers each underlying lane, moves outside all three and holds every card closed for 1500 ms.
+Closed scenes declare `loop: "continue"`; creation restores its pre-run session checkpoint to bound automatic edits.
 
-### What makes a scenario
+Creation's `initial.focusDraft: true` selects only the edited doctor while keeping all four `loadCalendarIds` stable.
+Public viewport anchors retain the edited slot through Save/Cancel; both restore the normal participant selection.
+Drafted and dragged cards keep their chrome, saving triggers an appearing glint, and Cancel releases a fading draft.
+Saving/settled feedback in the explanation remains consumer-owned, with no invented public event status.
 
-Each scenario answers one question with a visible before → action → after. Its short label names a recognizable
-capability; its instruction describes something the visitor can try. Use a deliberate fixture that makes the result
-obvious. End on that result long enough to inspect it, then offer Replay, Try it, and the matching docs recipe.
+## Datepicker and Date Input choreography
 
-Infinite scroll, Zoom, and Overlapping events form a short Calendar preview. Editing scenarios are selected explicitly. All scenarios
-remain individually accessible; visitors never need to wait for the tour to reach one. Calendar has eight first-class
-shortcuts: six exploration scenarios and two editing scenarios. Use a compact wrapping rail on narrow screens.
-Other products have their own smaller scenario list.
+Paint alternates October 12–16 and 19–23. Adjust extends the end from the 23rd to the 25th, pauses and restores it.
+Move shifts the range forward one week, pauses and moves it back. All three use `loop: "continue"` to retain the
+mounted picker and avoid a blank reset. Other Datepicker scenes retain initial-state restoration between passes.
+Intent playback hovers after each of its first two clicks so the next interpretation appears before clicking again.
+`PlaybackHover` emits mouse transitions and mirrors a day hover marker for demo-scoped preview CSS, since synthetic
+pointer events cannot set native `:hover`. Manual takeover clears that marker; the public picker styles are unchanged.
 
-### Calendar: explore, understand, then act
+Datepicker presents only the component: no single-day checkbox, hint underneath or raw result output. Selection mode
+comes from scene JSON. Guess the intent clicks October 27 three times, extending October 19–23 to 19–27, changing
+the other endpoint to 23–27, then keeping only October 27. Day pointerup already commits; the actor must not send an
+additional keyboard-style click. Access months uses single-day mode, scrolls from October 2026 to 1980, chooses July
+and selects 22 July 1980. The year scroll lasts 8840 ms, twice its previous duration. Its typed `scroll-year` action measures a mounted year group and derives the scroll distance
+from the navigator’s first loaded year rather than assuming a pixel height. The target year must be in its loaded span.
+Start/end shortcuts visit September and November without changing the range, then return to October. Single day
+chooses several dates before returning to its initial date.
 
-Use one recognizable appointment schedule with named people and appointments. Keep the overlap on one person’s row so the other resources remain easy to compare. Scenes share a cached deterministic schedule and use six appointments per day, including the same three-way overlap. Density projects 4/40/400-event subsets without replacing the source appointments.
+Date Input begins with first-person copy and Format guessing, which normalizes numeric dates using the preferred
+order and valid alternatives. Type naturally enables ranges, including native typing after a dash. Works with
+datepicker opens on field focus, keeps internal gestures open, follows typed endpoint months and closes on outside
+focus or pointer interaction, without a toggle button.
 
-| Shortcut              | Starting scene and simulated action                                                                                                                                                                                                                    | Visible payoff / visitor instruction                                                                                                                               | Recipe                                                                                                     |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
-| Horizontal / vertical | Begin with the same named appointment and resources in horizontal view. Point at the view control, switch to vertical, and briefly highlight that appointment in its new position.                                                                     | See how the same schedule works in both layouts. Preserve the selected date and keep the reference appointment visible. “Switch the view.”                         | `/guide/infinite-calendar#horizontal-first`; supporting `/guide/infinite-calendar#calendar-cell-styling`   |
-| Infinite scroll       | Start on a legible, moderately busy day. Move continuously across a day boundary, settle on the next day, then continue. Use the calendar’s date labels as the readout.                                                                                | The schedule continues without paging. “Scroll to the next day.”                                                                                                   | `/guide/infinite-calendar#infinite-view`                                                                   |
-| Zoom                  | Begin with a broad schedule containing a short appointment. Press the visible zoom slider and drag it continuously from 1.3× to 2.3×, then release.                                                                                                    | The appointment and time divisions gain readable detail through continuous controlled zoom. “Drag to zoom”; Shift-wheel remains available manually.                | `/guide/infinite-calendar#zoom`                                                                            |
-| Event density         | Keep date, resources, zoom, and theme fixed. Change a deterministic fixture from Quiet (4) to Busy (40) to Packed (400) events per day, then scroll through the packed schedule. Preserve a few named appointments at every level.                     | Inspect how the calendar lays out and navigates increasing event counts. Show the actual events/day and resource count. “Try a busier schedule.”                   | `/guide/infinite-calendar#performance`; includes the live density exhibit and its copyable fixture recipe. |
-| Overlapping events    | Start with three appointments at the same time for one person, already laid out in separate lanes. Move between their cards to reveal compact details.                                                                                                 | Every appointment is reachable despite the shared time. “Hover each appointment.” Keep overlap geometry visible before hover.                                      | `/guide/infinite-calendar#overlap-lanes`; supporting `/guide/infinite-calendar#hover-reveal`               |
-| Theming               | Keep the same appointments, orientation, density, and geometry. Switch between Light, Dark, and a distinct branded palette using the visible theme control. Restyle headers, resource labels, grid, event cards, selection, and focus states together. | Show that the whole calendar can fit a product's visual language while retaining the same interaction and content. “Choose a theme.”                               | `/guide/infinite-calendar#styling`; supporting `/guide/infinite-calendar#event-cards`                      |
-| Create an appointment | Start with a clearly empty slot. Point, press, drag, and release. Show the external draft editor, enter a short title, and save.                                                                                                                       | A real saved appointment occupies the drawn interval. “Drag an empty slot.” Use fullscreen for more space while editing; on mobile it is required for interaction. | `/guide/infinite-calendar#drag-create`                                                                     |
-| Reschedule            | Start with one named appointment and an obvious empty destination on another person's row. Drag the appointment, show its snapped preview, release, and hold the final state.                                                                          | Its time/person changes without losing its identity. “Drag the appointment to another person.”                                                                     | `/guide/infinite-calendar#drag-create`                                                                     |
+Date Input omits the fixed reference date and raw result. The public input uses today's reference date and a rolling
+expected period of twelve months either side. Natural typing cycles through tomorrow, yesterday, 22 July 1980 and
+next Friday, waiting 1200 ms before each Enter and holding each formatted result for 1700 ms. Other authored Enter
+actions retain 300 ms pauses. Keyboard editing
+steps October 19 → 18 → 17 → 16, then November → December → January, before committing. The field itself shows the
+formatted result. Parser keeps a fixed visible reference, semantic tokens and resolved endpoints as its teaching UI.
+Timepicker uses 13 px regular minutes beside 16 px bold hours, top aligned in the concept's scoped styles.
 
-The automatic preview plays Infinite scroll → Zoom → Overlapping events once, around 20–25 seconds total, and
-stops with Try it available. It must not loop endlessly or open an editor while a visitor reads the introduction.
-Horizontal / vertical, Event density, Theming, Create, and Reschedule run when selected. Selecting a scenario prepares its starting state and plays its demonstration;
-Try it stops automation and leaves a useful working state. Replay resets the calendar view before playing again; appointments and edits remain in the shared session dataset.
+## Ownership and verification
 
-Horizontal / vertical, Theming, and Event density are dedicated demonstrations with their own shortcuts and docs
-links. Only the control declared by the current scenario’s `initial.controls` appears, in the bottom-right corner of the calendar. Empty control lists show no dock. The view carries forward where the next scene uses `preferred`. The demonstrations introduce one change at a time so its
-effect is clear. Exercise scrolling, zoom, overlaps, creation, and movement in both orientations where supported.
+`ConceptTour`, `FloatingGuide`, `DemoContents` and `DemoNavigation` own presentation. `useFloatingGuide` stores
+left/bottom offsets and publishes guide height for phone layout. `ConceptProducts` mounts only the active lazy
+product and resets it on a scoped loop event. `usePlayback` owns repetition and cancellation; `PlaybackActor` and
+typed action adapters drive actual controls. `playbackSurface` excludes the guide only during synchronous synthetic
+hit testing, restoring native input immediately. The rounded, round-joined notched cursor rotates 15° CCW at its tip,
+never intercepts input and renders no caption.
 
-Event density means the number of appointments in the schedule. Keep event-count controls separate from visual
-compactness settings such as row height or card padding. Keep the overlap scene small enough to inspect each lane;
-the density scene shows many events across multiple resources. Report fixture counts honestly, and do not infer
-frame-rate guarantees from a simulated cursor. Theme switching must not quietly change event counts or zoom.
+Browser coverage asserts geometry, layering, clipping, hit targets, bottom anchoring through disclosure and contents,
+responsive separation, fullscreen state/focus, chapter looping, cancellation, intermediate interaction states and
+manual parity. It checks every intent result, month/endpoint preservation, today's relative dates under multiple
+browser clocks, the pre-Enter pause, repeated keyboard values, minute typography, saved glint and cancellation fade.
+Fixture/schema tests verify exact counts, bounded data, stable anchors and independent JSON customization.
+Run all repository checks listed in `AGENTS.md` before handoff. The only package behavior adjustment is range-prefix completion being limited to range-mode fields (QDI-007);
+public contracts remain unchanged.
 
-### Datepicker: direct manipulation
+Works with datepicker hides the duplicate picker selection header through the public class override, leaving the
+input as the range summary and retaining normal calendar navigation and selection.
 
-| Shortcut       | Demonstration and payoff                                                                                                                   | Recipe                           |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------- |
-| Paint a range  | Drag from the 19th to the 23rd; show the provisional band, then committed endpoints on release. Hold a small “19–23 Oct · 5 days” summary. | `/guide/datepicker#paint`        |
-| Adjust the end | Start with that range and drag its end to the 25th; the start remains fixed and duration becomes seven days.                               | `/guide/datepicker#paint`        |
-| Move the range | Drag the selected band one week later; both endpoints move and the seven-day duration remains visible.                                     | `/guide/datepicker#segment-drag` |
+Timepicker’s Works with datepicker chapter uses public single-day time mode, selecting October 21/10:45,
+October 24/14:30 and October 19/09:00 so the loop returns to its start. Synthetic click handlers scope automatic
+focus as internal; deliberate user input between actions still pauses playback. Parser shows token chips and resolved
+endpoints directly beneath the phrase, keeping the actual recognition visible on desktop and phones.
 
-These form a coherent three-step preview using the same selection. Selecting any step directly restores its own
-starting range. Single-day mode and month/year navigation stay available as playground controls. The composed
-Date Input example below owns the fuller typed-date-to-picker story.
+Parser token chips show known English vocabulary in green, with month-name, weekday, relative and duration-unit
+labels. Unknown words remain neutral. The same consumer-owned lexicon supplies the parser and chip meanings; raw
+lexical types remain inspectable. A recognized word does not guarantee that the complete phrase is valid.
 
-### Date Input: fast entry, precise correction
+Standalone Timepicker places cadence below the control and omits its duplicate result and business-hours switch.
 
-| Shortcut               | Demonstration and payoff                                                                                                                                          | Recipe                                                                             |
-| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| Type naturally         | Type “next Friday”, show the text while editing, press Enter, and show the committed date beside the field. Display the fixed reference date used by the example. | `/guide/date-input#controlled-state`                                               |
-| Edit with the keyboard | Start with a formatted date, place the caret in its day, and show ↑ then Enter. Only the intended date part changes; show focus/caret and the pressed keys.       | `/guide/date-input#keyboard-controls`                                              |
-| Type, then pick        | Enter a range, open the composed picker, extend its end, and close it. The same value updates in both places.                                                     | `/guide/date-input#picker-composition`; supporting `/guide/date-input#range-input` |
+Parser chip labels also identify colon time separators and numeric years from 61–9999, preserving count/clock
+context and neutral ambiguous numbers. This enriches demo presentation without changing the public token objects.
 
-Preview only Type naturally automatically. The keyboard and composed examples start on selection. This avoids a
-long typing animation and keeps the field available quickly. Invalid input, partial ranges, and clear/reset remain
-manual examples in the guide until they warrant a distinct user-facing story.
+Date Parser has no Structured result, date-order controls or clock checkbox. JSON retains each chapter’s parsing
+configuration. Ambiguity types 04/13/2026 and returns to 03/04/2026; Cross midnight retains clock recognition.
 
-### Timepicker: two useful demonstrations
+Date Parser opens with `12/01 10:00` already typed and recognized, using clock-enabled parsing. Its first scene
+opts into `chapterOnly`, so introduction arrival/restoration leaves the ready control idle and editable. Choosing
+Resolve a phrase cycles next Friday, tomorrow 10:30, past 3 days, 22 July 1980, 12 Oct 2026 - 16 Oct 2026 and
+next month, holding each complete example for 1700 ms. Loop reset restores the ready date/time before repeating.
 
-| Shortcut              | Demonstration and payoff                                                                                                                                                           | Recipe                             |
-| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
-| Choose a time         | Scroll from one hour to another at a fine cadence, keeping the sticky hour visible, then choose a minute. Show the selected HH:mm value.                                           | `/guide/timepicker#time-selection` |
-| Keep an existing time | Begin with 10:35 at five-minute cadence, then switch to fifteen-minute cadence. The summary stays 10:35 although that minute is not offered; explicitly choosing 10:45 changes it. | `/guide/timepicker#ownership`      |
-
-Preview Choose a time automatically. Keep an existing time is an opt-in behavior explanation. Cadence and enabled
-hours are visible controls. Be explicit that they control offered choices and do not round an existing value.
-Do not imply that this standalone control determines appointment availability or performs booking validation.
-
-### Date Parser: make interpretation inspectable
-
-Use a small sentence-to-result workbench. Show readable start/end dates and clocks first, with copyable structured
-output available below. The UI belongs to the demo; the package product remains headless.
-
-| Shortcut          | Demonstration and payoff                                                                                                               | Recipe                                    |
-| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
-| Resolve a phrase  | Parse “next Friday” beside a fixed, visible reference date. Replace it with “next month” to show a period with two endpoints.          | `/guide/date-parser#relative-dates`       |
-| Resolve ambiguity | Keep “03/04/2026” unchanged while switching DMY ↔ MDY. Highlight the result changing between 3 April and 4 March.                      | `/guide/date-parser#preferred-date-order` |
-| Cross midnight    | With clock recognition enabled, parse “tomorrow 23:00–01:00”. Show the end on the following day, with each date paired with its clock. | `/guide/date-parser#time-parsing`         |
-
-Preview Resolve a phrase automatically. Other scenes start on selection. Expected-period ranking, multilingual
-recognition, tokenization, and invalid results remain directly linked guide topics rather than additional tour stops.
-
-### Keep deeper exploration within reach
-
-Use a compact Explore more area with links to existing live guide chapters, separate from the scene shortcuts:
-
-- Calendar: availability, asynchronous loading, event rendering, date navigation, localization, and deeper performance details. View orientation, theming, and event density have primary scenario shortcuts above.
-- Datepicker: quick month/year navigation, hidden-week dragging, week starts, and optional time selection.
-- Date Input: range entry, parser configuration, localization, accessibility, and native editing details.
-- Timepicker: enabled hours, cadence, clearing, disabled state, and controlled/uncontrolled recipes.
-- Date Parser: expected period, language configuration, range normalization, and token inspection.
-
-Resource filtering, rejected moves, editor cancellation, and additional stress cases remain in the existing focused
-demos and verification coverage. The primary Event density scene provides the visible busy-schedule comparison. Add a new scenario only when it teaches a distinct interaction with an obvious outcome.
-Do not turn every prop, edge case, or test into a presentation scene. All docs links must target an actual chapter
-with its live exhibit and copyable recipe; fill a documentation gap before promoting a new shortcut.
-
-### Interaction choreography
-
-The simulation teaches how to operate the live component. Each scenario must show the input that causes the
-result: approach the target, perform the gesture, show its immediate feedback, then hold the resulting state.
-Selecting a scenario only sets up playback; it must not skip straight to the final configuration.
-
-| Scenario              | Visible interaction sequence                                                                                                                                                                                                  |
-| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Horizontal / vertical | Move to the Vertical button → show press and release → the button becomes selected and the calendar rearranges → move to the recognizable appointment and hover it → click Horizontal to compare.                             |
-| Infinite scroll       | Move into the scrollable grid → show a small wheel/trackpad cue while the actual viewport scrolls continuously → cross a date boundary → stop the cue and hold the new date. The cursor stays over the grid during scrolling. |
-| Zoom                  | Move to the zoom slider → press its thumb → hold and drag while actual calendar geometry interpolates → release → hold the readable appointment.                                                                              |
-| Event density         | Move to the density control → click Busy → wait for the appointments to settle → click Packed → scroll and hover an appointment in the dense schedule. Keep the chosen preset and actual count visible.                       |
-| Overlapping events    | Move onto the first overlapping card → dwell until its hover detail appears → move to the next card → the previous hover clears and the new target responds. The highlighted card must match the pointer location.            |
-| Theming               | Move to the theme control → click Dark → wait for the whole calendar to restyle → hover an event to show its themed interaction state → click the branded theme and repeat.                                                   |
-| Create an appointment | Move to an empty slot → press and hold → drag through the intended interval while its draft preview follows → release → click the title field → type the name visibly → move to Save and click → hold the saved card.         |
-| Reschedule            | Move onto the appointment → press and hold → drag across time/resource boundaries while its snapped preview follows → release over the destination → hold the committed placement.                                            |
-
-Use the same pattern for the other products: visibly drag picker endpoints and bands, place the input caret and
-show typing/keys, scroll the time list and click a minute, or click parser settings while the same input remains
-visible. Keep real controls accessible after playback so the visitor can repeat precisely what they watched.
-
-A click pulse appears on press/release, a held-pointer cue lasts for the complete drag, and key/scroll cues last
-only while that input is active. Use short action captions such as “Drag to 11:30” or “Click Dark”, alongside the
-persistent scenario name. Avoid trails and decorative pointer wandering. Allow a brief pause over the target
-before acting, and two or three seconds on the outcome; pace by completed interactions rather than timer ticks.
-
-Playback must use the live control's interaction logic and produce its real intermediate states: pressed controls,
-selection, draft previews, hover details, text edits, and commit feedback. Where the simulated pointer needs a demo
-adapter, keep that adapter scoped to the demo and verify parity with manual interaction. Moving a visual cursor
-does not itself activate browser hover, focus, scrolling, or drag behavior; each illustrated interaction needs an
-explicit working implementation. The cursor tip must remain aligned with the target as layout and scroll change.
-
-### Playback and presentation rules
-
-1. Establish the starting state for about a second, perform one legible action, then hold the result for two or three
-   seconds. Creation and editing may take longer. Advance when the action and resulting layout finish; avoid a
-   fixed interval that changes scenes mid-action.
-2. Move the slightly rounded, notched triangular pointer to the actual target. Use a click pulse for press/release and a held state for
-   drags; use key badges for keyboard input. The cursor and label must stay inside the exposed canvas and must not
-   intercept input or obscure the result. The gradient introduction remains over part of the calendar.
-3. Drive live behavior and visible geometry. Infinite scroll must visibly scroll instead of jumping to a date;
-   zoom must show an anchored scale change; overlap needs its own purposeful fixture. A moving pointer beside an
-   unrelated state update is insufficient. Manual use and playback must produce equivalent results.
-4. Stop immediately on visitor pointer-down, wheel, or keyboard interaction, including focus entering the working
-   control. Real calendar hover takes over from the preview. Product changes and hidden tabs cancel pending actions;
-   returning does not silently resume. Reduced motion starts with a static, usable scene and explicit Play.
-5. Replay restores scene data, viewport, selection, editor state, and pointer before starting. Try it preserves the
-   useful current result. Reset restores the scene without playing. Product switching must not leave timers or
-   delayed actions that affect the next product.
-6. Keep the demo and playback/Exit controls reachable in fullscreen. Recipe links stay under the inline explanation.
-   Mobile previews sit below the intro and remain inert; only fullscreen enables interaction. Keep the title rail at the viewport bottom.
-7. Announce meaningful scene/result changes without narrating every animation frame. Keep focus stable; the
-   illustrative cursor never takes keyboard focus. Load only the active product and mount secondary exhibits lazily.
-
-### Verification
-
-Accept a scene only when its start and outcome are distinguishable, the shown interaction causes that outcome,
-and the visitor can take over without a pending script changing their work. Assert intermediate states as well as
-the final result: control press/selection, held drag and preview before release, hover detail under the cursor,
-and text edits before commit. Compare playback outcomes with the equivalent manual gesture. Browser checks must verify
-real scroll/date progression, zoom anchors, overlap separation, saved/moved event state, emitted values, pointer
-alignment, clipping, cancellation, reset/replay, keyboard focus, reduced motion, and narrow-screen fit as applicable.
-For the added scenarios, verify the reference appointment and date survive orientation changes, theme styles reach
-headers/grid/cards/focus states without changing the data, and each density preset reports its actual fixture count
-with bounded rendering and accessible event geometry. Run these checks in both orientations.
-Use screenshots for visual review alongside those assertions. The original drifting-pointer prototype has been replaced by interaction-driven playback.
-
-Overlap `hover` steps dispatch pointer movement on every animation frame, using the browser hit target and `buttons: 0`. The row/column hover resolver selects the appointment beneath the pointer, even when another expanded card covers it. These steps never dispatch press, release, or click events, and never open the editor.
-
-Card text rows never wrap or shrink vertically. The title comes first, with an ellipsized clock below when height
-allows. Below 38 px, a compact title row replaces the two-row layout. Hover reveals the clock and details, targeting
-240 px width within the existing hover allowance and preserving wider events. Vertical hover uses the full resource
-column. These styles stay in `playground.css`; calendar duration geometry and public styles are unchanged.
-
-Navigation coverage checks screen containment, title-to-section scroll positions, intermediate smooth-scroll frames,
-native touch swipes in both directions, inert mobile inputs, fullscreen state/focus restoration, and all existing
-scenario outcomes. Scenario explanations and ordering remain JSON-controlled.
-
-## Persistent calendar presentation
-
-The calendar’s 238 px label column is 70% wider than its former 140 px setting; the vertical time pane follows the
-component’s existing 70% width ratio (167 px). The working calendar sits outside the explanation scroller, so title
-navigation moves only text. A stable calendar instance owns the cached fixture source and local edits across scenes;
-view, theme, density, zoom, draft state, and starting date/time reset from each scenario. Fullscreen preserves both
-the live viewport and data. The bottom date/count stats row is removed; saved/moved confirmations remain contextual.
-
-Calendar `initial.controls` accepts `view`, `theme`, `density`, and `zoom`. The authored scenes expose only their own
-control, while scroll, overlap, create, and move use `[]`. The existing `overlap` initial flag is removed: all Calendar
-scenes use the same source dataset. Density projects a subset before layout, so changing it does not reload fixtures.
-
-Text sections never swap a compact placeholder for the full explanation. Playback reserves its pause-button slot and a fixed status area, preventing centered copy from moving when playback starts or stops.
+Guide footers contain only Previous and Next, with no counter or duplicate title. The contextual All calendar demos
+(or current product) action opens contents and matches the 34 px collapse control. Calendar docks omit small labels,
+retain accessible group names and match the fullscreen control’s 40 px height. Controlled drafts use the public
+active-draft move callback; their editor follows dragging, Save commits the new slot and Cancel discards it.

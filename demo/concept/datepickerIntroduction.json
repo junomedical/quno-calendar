@@ -1,0 +1,7 @@
+{
+  "title": "Datepicker",
+  "paragraphs": [
+    "Working on the calendar led me to look for a datepicker that would fit the same approach. Many datepickers make simple changes feel complicated: separate inputs, an expected order of selection, slow month navigation, and awkward movement between the beginning and end of a range.",
+    "I wanted these interactions to feel more direct, with fewer steps between an intention and its result."
+  ]
+}

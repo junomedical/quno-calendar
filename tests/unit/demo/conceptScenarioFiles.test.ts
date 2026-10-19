@@ -46,10 +46,10 @@ describe("separate product scenario files", () => {
 });
 
 describe("one JSON file per scenario", () => {
-  it("discovers exactly the nineteen referenced scenario files", () => {
+  it("discovers exactly the twenty-five referenced scenario files", () => {
     const references = Object.values(files).flatMap((product) => product.scenarios.map((id) => `${product.id}/${id}`));
     expect(Object.keys(sceneFiles).sort()).toEqual(references.sort());
-    expect(references).toHaveLength(19);
+    expect(references).toHaveLength(25);
   });
   it.each(Object.keys(sceneFiles))("edits only %s", (path) => {
     const edited = { ...sceneFiles, [path]: { ...(sceneFiles[path] as Scenario), hint: "Independent scenario" } };

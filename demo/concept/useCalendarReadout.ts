@@ -6,8 +6,11 @@ export function useCalendarReadout(root: RefObject<HTMLDivElement>, handle: RefO
   useEffect(() => {
     let timer = 0;
     const update = () => {
-      clearTimeout(timer);
-      timer = window.setTimeout(() => setVisibleDate(handle.current?.getVisibleDateKeys()[0] ?? date), 100);
+      if (timer) return;
+      timer = window.setTimeout(() => {
+        timer = 0;
+        setVisibleDate(handle.current?.getVisibleDateKeys()[0] ?? date);
+      }, 100);
     };
     const node = root.current;
     node?.addEventListener("scroll", update, true);

@@ -1,0 +1,12 @@
+/* Synthetic pointer events cannot set :hover. Mirror the public preview's chrome in this demo only. */
+.concept
+  .quno-date-picker-grid:has([data-cycle-trigger="true"][data-demo-hover="true"])
+  [data-cycle-preview="true"]::after {
+  position: absolute;
+  z-index: 2;
+  inset: 4px var(--quno-cycle-preview-right, 0) 4px var(--quno-cycle-preview-left, 0);
+  border-top: 1px solid var(--quno-date-picker-cycle-preview, var(--quno-date-picker-cycle-preview-default));
+  border-bottom: 1px solid var(--quno-date-picker-cycle-preview, var(--quno-date-picker-cycle-preview-default));
+  content: "";
+  pointer-events: none;
+}

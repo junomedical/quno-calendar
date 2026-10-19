@@ -6,8 +6,8 @@
   "initial": {
     "view": "preferred",
     "theme": "light",
-    "density": 6,
-    "zoom": 1.3,
+    "density": 22,
+    "zoom": 2,
     "controls": []
   },
   "steps": [
@@ -34,10 +34,20 @@
     {
       "action": "wait",
       "ms": 1500
+    },
+    {
+      "action": "aim",
+      "target": "[data-date=\"2026-10-19\"] [data-slot=\"calendar-day-label\"]",
+      "caption": "Move away to close appointment details"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
     }
   ],
   "paragraphs": [
-    "A busy schedule does not have to hide what is underneath. Overlapping appointments keep their own lanes, with more detail available on hover.",
-    "Follow the pointer across three concurrent appointments. Each card opens as the pointer reaches its lane—no click required."
-  ]
+    "A full calendar can contain several overlapping events. To keep each accessible, cards shrink to fit their lanes and expand on hover for a quick glance.",
+    "An expanded card can cover others underneath. I treat those as “underlying” events: the pointer reveals the event whose original card occupies that position, even when another event’s hover content covers it."
+  ],
+  "loop": "continue"
 }

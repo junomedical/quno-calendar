@@ -12,6 +12,7 @@ import { useCalendarData } from "./useCalendarData";
 import { useCalendarEdits } from "./useCalendarEdits";
 import { CalendarControls } from "./CalendarControls";
 import { getScenario } from "./scenarioCatalog";
+const calendarIds = calendars.map((item) => item.id);
 type ConceptCalendarProps = {
   scenario: string;
   revision?: number;
@@ -33,19 +34,33 @@ export function ConceptCalendar({
   const [theme, setTheme] = useState(initial.theme);
   const [density, setDensity] = useState(initial.density);
   const [zoom, setZoom] = useState(initial.zoom);
-  const { loadEvents, projectEvents, setChanges } = useCalendarData(density);
-  const { draft, editing, setDraft, message, save, reset, renderEvent, ...eventHandlers } = useCalendarEdits(
+  const { loadEvents, projectEvents, setChanges, checkpoint } = useCalendarData(density);
+  const { draft, editing, setDraft, save, cancel, reset, renderEvent, ...eventHandlers } = useCalendarEdits(
     ref,
-    setChanges
+    setChanges,
+    initial.focusDraft
   );
   useLayoutEffect(() => {
+    const restore = checkpoint();
+    const repeat = () => {
+      restore();
+      setTheme(initial.theme);
+      setDensity(initial.density);
+      setZoom(initial.zoom);
+      setView((current) => (initial.view === "preferred" ? current : initial.view));
+      reset();
+      ref.current?.scrollToDateTime({ date, time: "10:00", calendarId: "person-0" });
+    };
+    const node = root.current;
+    node?.addEventListener("concept-loop", repeat);
     navigationDate.current = date;
     setView((current) => (initial.view === "preferred" ? current : initial.view));
     setTheme(initial.theme);
     setDensity(initial.density);
     setZoom(initial.zoom);
     reset();
-  }, [initial, revision, reset]);
+    return () => node?.removeEventListener("concept-loop", repeat);
+  }, [initial, revision, reset, checkpoint]);
   const settings = useMemo(
     () => ({ startHour: 8, endHour: 19, zoom, rowHeight: 76, labelWidth: 238, verticalColumnMinWidth: 185 }),
     [zoom]
@@ -81,7 +96,8 @@ export function ConceptCalendar({
           ref={ref}
           ariaLabel="Interactive concept calendar"
           calendars={calendars}
-          selectedCalendarIds={calendars.map((item) => item.id)}
+          selectedCalendarIds={draft && initial.focusDraft ? [draft.calendarId] : calendarIds}
+          loadCalendarIds={calendarIds}
           initialDateKey={date}
           now={new Date(`${date}T10:30:00`)}
           view={view}
@@ -97,13 +113,8 @@ export function ConceptCalendar({
           }
           {...eventHandlers}
         />
-        {draft && (
-          <CalendarEditor draft={draft} editing={editing} update={setDraft} save={save} cancel={() => setDraft(null)} />
-        )}
+        {draft && <CalendarEditor draft={draft} editing={editing} update={setDraft} save={save} cancel={cancel} />}
       </div>
-      <output className="concept-calendar-message" aria-live="polite">
-        {message}
-      </output>
     </div>
   );
 }

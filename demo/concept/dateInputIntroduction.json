@@ -1,0 +1,7 @@
+{
+  "title": "Date Input",
+  "paragraphs": [
+    "Some people are happy selecting dates in a calendar, but I didn’t want to stop there. The datepicker needed an input companion. Date fields often force a rigid format that gets in the way of ordinary typing, or leave you guessing which date order they expect.",
+    "I already had a foundation: a contact form I built earlier accepted almost anything that looked like a date and turned it into a readable value you could still edit. I brought that approach here, keeping the field native while making recognition more flexible."
+  ]
+}

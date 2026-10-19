@@ -23,9 +23,20 @@
     {
       "action": "wait",
       "ms": 1700
+    },
+    {
+      "action": "drag-dates",
+      "from": "2026-10-25",
+      "to": "2026-10-23"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
     }
   ],
   "paragraphs": [
-    "Adjust a selected range without starting over. Drag its endpoint to extend or shorten the selection while the other end stays in place."
-  ]
+    "Once a range is selected, changing its start or end should feel just as direct.",
+    "Dragging an endpoint makes the intention clear: that end moves while the other stays in place. Clicking another date works too, with a few ways to correct the datepicker’s interpretation."
+  ],
+  "loop": "continue"
 }

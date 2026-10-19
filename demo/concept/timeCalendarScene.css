@@ -1,0 +1,9 @@
+.concept-time-calendar [data-slot="minute-option"] {
+  font-size: 13px;
+  font-weight: 400;
+  align-self: start;
+}
+.concept-time-calendar [data-slot="hour-heading"] {
+  font-size: 16px;
+  font-weight: 700;
+}

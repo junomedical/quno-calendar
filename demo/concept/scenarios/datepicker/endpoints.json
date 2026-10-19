@@ -1,0 +1,50 @@
+{
+  "id": "endpoints",
+  "label": "Switch to start/end",
+  "hint": "Jump to an offscreen endpoint without changing the range.",
+  "anchor": "shortcuts",
+  "initial": {
+    "range": {
+      "start": "2026-09-19",
+      "end": "2026-11-23"
+    },
+    "single": false
+  },
+  "paragraphs": [
+    "With a long range, its beginning and end can be months apart. Finding either should not mean navigating through all the dates between them.",
+    "When an endpoint is outside the visible month, a shortcut brings it back into view. You can move between both ends without changing the selection."
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 650
+    },
+    {
+      "action": "click",
+      "target": "[data-slot=\"pill\"][data-endpoint=\"start\"]:not(:disabled)",
+      "caption": "Go to the start"
+    },
+    {
+      "action": "wait",
+      "ms": 1300
+    },
+    {
+      "action": "click",
+      "target": "[data-slot=\"pill\"][data-endpoint=\"end\"]:not(:disabled)",
+      "caption": "Go to the end"
+    },
+    {
+      "action": "wait",
+      "ms": 1300
+    },
+    {
+      "action": "click",
+      "target": "[data-slot=\"previous-button\"]",
+      "caption": "Return to the middle month"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    }
+  ]
+}

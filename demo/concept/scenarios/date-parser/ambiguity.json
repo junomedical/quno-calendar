@@ -1,7 +1,7 @@
 {
   "id": "ambiguity",
   "label": "Resolve ambiguity",
-  "hint": "Compare DMY and MDY for the same text.",
+  "hint": "See the preferred order and a date with only one valid month.",
   "anchor": "preferred-date-order",
   "initial": {
     "text": "03/04/2026",
@@ -11,21 +11,21 @@
   "steps": [
     {
       "action": "wait",
-      "ms": 650
+      "ms": 1600
     },
     {
-      "action": "click",
-      "target": "[data-action=\"mdy\"]",
-      "caption": "Read month / day / year"
+      "action": "type",
+      "target": "[data-action=\"phrase\"]",
+      "text": "04/13/2026"
     },
     {
       "action": "wait",
-      "ms": 900
+      "ms": 1600
     },
     {
-      "action": "click",
-      "target": "[data-action=\"dmy\"]",
-      "caption": "Read day / month / year"
+      "action": "type",
+      "target": "[data-action=\"phrase\"]",
+      "text": "03/04/2026"
     },
     {
       "action": "wait",
@@ -33,6 +33,7 @@
     }
   ],
   "paragraphs": [
-    "A numeric date can mean different things in different places. Switch the preferred day/month order and compare the result for the same input."
+    "A numeric date can mean different things in different places. The parser starts with a preferred date order, then checks which readings can form a valid date.",
+    "Here, 03/04/2026 means 3 April. In 04/13/2026, 13 cannot be a month, so the parser recognizes 13 April instead. The written result lets you check what was understood."
   ]
 }

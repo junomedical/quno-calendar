@@ -1,5 +1,6 @@
 import type { EventRendererProps } from "@quno/calendar/infinite-calendar";
 import { eventClock } from "./CalendarEditor";
+import "./conceptEventMotion.css";
 export function ConceptEvent({ event, style, laneCount, status, latest }: EventRendererProps & { latest: boolean }) {
   return (
     <article

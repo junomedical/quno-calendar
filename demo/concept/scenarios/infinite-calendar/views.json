@@ -6,8 +6,8 @@
   "initial": {
     "view": "infinite-horizontal",
     "theme": "light",
-    "density": 6,
-    "zoom": 1.3,
+    "density": 22,
+    "zoom": 2,
     "controls": ["view"]
   },
   "steps": [
@@ -29,9 +29,47 @@
       "target": "[data-event-id=\"2026-10-19-event-0\"]"
     },
     {
+      "action": "scroll-day",
+      "target": ".quno-calendar-viewport",
+      "cell": "[data-slot=\"calendar-cell\"][data-date=\"2026-10-19\"][data-calendar-id=\"person-0\"]",
+      "horizontalAmount": 800,
+      "verticalOffset": 100,
+      "durationMs": 1000,
+      "easing": "ease-in-out"
+    },
+    {
+      "action": "wait",
+      "ms": 350
+    },
+    {
       "action": "click",
       "target": "[data-action=\"horizontal\"]",
       "caption": "Click Horizontal"
+    },
+    {
+      "action": "hover",
+      "target": "[data-event-id=\"2026-10-20-event-0\"]"
+    },
+    {
+      "action": "scroll-day",
+      "target": ".quno-calendar-viewport",
+      "cell": "[data-slot=\"calendar-cell\"][data-date=\"2026-10-20\"][data-calendar-id=\"person-0\"]",
+      "horizontalAmount": 800,
+      "verticalOffset": 100,
+      "durationMs": 1000,
+      "easing": "ease-in-out"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "scroll",
+      "target": ".quno-calendar-viewport",
+      "amount": -800,
+      "caption": "Return through the schedule",
+      "durationMs": 1000,
+      "easing": "ease-in-out"
     },
     {
       "action": "hover",
@@ -39,11 +77,12 @@
     },
     {
       "action": "wait",
-      "ms": 1500
+      "ms": 600
     }
   ],
   "paragraphs": [
-    "The same appointments can run across a horizontal timeline or down a vertical day view. Choose the direction that fits the way you plan.",
-    "Watch the calendar change orientation while keeping the appointment in view, then compare both layouts yourself."
-  ]
+    "People have strong habits, so I added a more traditional infinite view in which both days and time run vertically.",
+    "Both orientations support the same interactions. Choose the horizontal timeline or the vertical view without changing the way you navigate, create, or move appointments."
+  ],
+  "loop": "continue"
 }

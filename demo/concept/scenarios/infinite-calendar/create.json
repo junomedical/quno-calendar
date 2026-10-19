@@ -6,9 +6,10 @@
   "initial": {
     "view": "preferred",
     "theme": "light",
-    "density": 6,
-    "zoom": 1.3,
-    "controls": []
+    "density": 22,
+    "zoom": 2,
+    "controls": [],
+    "focusDraft": true
   },
   "steps": [
     {
@@ -47,7 +48,8 @@
     }
   ],
   "paragraphs": [
-    "Turn an empty part of the schedule into an appointment. Press and drag across a time slot, add a title, and save the result.",
-    "The demonstration follows the whole interaction, from the held pointer and draft preview to the saved card."
+    "Appointments can be created with an external control or by drawing time directly on the timeline.",
+    "The calendar shows the appointment while it is being edited. It can keep only the selected doctor in view, making it easier to find that person’s next available time.",
+    "The application can also show when an appointment is being saved and when it has settled, so the server can give feedback to the user."
   ]
 }

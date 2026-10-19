@@ -24,8 +24,7 @@ export function CalendarControls({
   return (
     <div className="concept-controls">
       {controls.includes("view") && (
-        <fieldset>
-          <legend>View</legend>
+        <fieldset aria-label="Calendar view">
           {["horizontal", "vertical"].map((value) => (
             <button
               key={value}
@@ -39,8 +38,7 @@ export function CalendarControls({
         </fieldset>
       )}
       {controls.includes("theme") && (
-        <fieldset>
-          <legend>Theme</legend>
+        <fieldset aria-label="Calendar theme">
           {["light", "dark", "brand"].map((value) => (
             <button key={value} data-action={value} aria-pressed={theme === value} onClick={() => setTheme(value)}>
               {value === "brand" ? "Branded" : value === "light" ? "Light" : "Dark"}
@@ -49,8 +47,7 @@ export function CalendarControls({
         </fieldset>
       )}
       {controls.includes("density") && (
-        <fieldset>
-          <legend>Events / day · 4 people</legend>
+        <fieldset aria-label="Event density">
           {[4, 40, 400].map((value, i) => (
             <button
               key={value}
@@ -64,8 +61,7 @@ export function CalendarControls({
         </fieldset>
       )}
       {controls.includes("zoom") && (
-        <fieldset>
-          <legend>Zoom · {zoom.toFixed(1)}×</legend>
+        <fieldset aria-label="Zoom controls">
           <button aria-label="Zoom out" onClick={() => setZoom(Math.max(0.5, zoom - 0.2))}>
             −
           </button>
