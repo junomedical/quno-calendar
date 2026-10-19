@@ -5,7 +5,7 @@
   "anchor": "horizontal-first",
   "initial": {
     "view": "infinite-horizontal",
-    "theme": "light",
+    "theme": "system",
     "density": 22,
     "zoom": 2,
     "controls": ["view"]

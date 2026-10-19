@@ -526,3 +526,11 @@ a counter, 40 px docks aligned with fullscreen, and draft movement/editor update
 Time-choice stability checks assert native pointer hit targets and unchanged option geometry/scroll after pointer
 and keyboard selection, plus uncontrolled state and equivalent-hour rerenders. External offscreen reveal remains
 covered by the Timepicker and Datepicker date/time suites.
+
+Concept theme/zoom coverage emulates both color schemes and live changes, asserting computed canvas/panel colors,
+light native control schemes, retained mounts and fullscreen state. Native slider Home/End, disabled boundary
+buttons, wheel reversal, resize and both orientations verify that demo bounds match actual rendering geometry.
+
+Creation draft contrast tests measure actual computed title/clock colors against draft, saved and hovered card
+backgrounds, requiring at least 4.5:1 in both themes and orientations. Light product panels and explainer styles
+remain separate assertions from the OS-dependent canvas.

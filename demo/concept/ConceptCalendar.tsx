@@ -12,6 +12,8 @@ import { useCalendarData } from "./useCalendarData";
 import { useCalendarEdits } from "./useCalendarEdits";
 import { CalendarControls } from "./CalendarControls";
 import { getScenario } from "./scenarioCatalog";
+import { useSystemTheme } from "./useSystemTheme";
+import { conceptCalendarSettings, useCalendarZoom } from "./useCalendarZoom";
 const calendarIds = calendars.map((item) => item.id);
 type ConceptCalendarProps = {
   scenario: string;
@@ -31,9 +33,11 @@ export function ConceptCalendar({
   const navigationDate = useRef(date);
   const visibleDate = useCalendarReadout(root, ref);
   const [view, setView] = useState<CalendarView>(initial.view === "preferred" ? initialView : initial.view);
-  const [theme, setTheme] = useState(initial.theme);
+  const systemTheme = useSystemTheme();
+  const [themePreference, setTheme] = useState(initial.theme);
+  const theme = themePreference === "system" ? systemTheme : themePreference;
   const [density, setDensity] = useState(initial.density);
-  const [zoom, setZoom] = useState(initial.zoom);
+  const { zoom, setZoom, minimum, maximum } = useCalendarZoom(root, view, initial.zoom);
   const { loadEvents, projectEvents, setChanges, checkpoint } = useCalendarData(density);
   const { draft, editing, setDraft, save, cancel, reset, renderEvent, ...eventHandlers } = useCalendarEdits(
     ref,
@@ -60,11 +64,8 @@ export function ConceptCalendar({
     setZoom(initial.zoom);
     reset();
     return () => node?.removeEventListener("concept-loop", repeat);
-  }, [initial, revision, reset, checkpoint]);
-  const settings = useMemo(
-    () => ({ startHour: 8, endHour: 19, zoom, rowHeight: 76, labelWidth: 238, verticalColumnMinWidth: 185 }),
-    [zoom]
-  );
+  }, [initial, revision, reset, checkpoint, setZoom]);
+  const settings = useMemo(() => ({ ...conceptCalendarSettings, zoom }), [zoom]);
   useEffect(() => {
     const frame = requestAnimationFrame(() => {
       ref.current?.scrollToDateTime({ date: navigationDate.current, time: "10:00", calendarId: "person-0" });
@@ -84,6 +85,7 @@ export function ConceptCalendar({
     >
       <CalendarControls
         controls={initial.controls}
+        zoomRange={{ minimum, maximum }}
         {...{ view, theme, setTheme, density, setDensity, zoom, setZoom }}
         setView={(next) => {
           navigationDate.current = ref.current?.getVisibleDateKeys()[0] ?? date;
@@ -105,7 +107,10 @@ export function ConceptCalendar({
           projectEvents={projectEvents}
           renderEvent={renderEvent}
           settings={settings}
-          onZoomChange={({ zoom: value }) => setZoom(value)}
+          onZoomChange={({ zoom: value }) => {
+            if (value < minimum || value > maximum) ref.current?.cancelViewportAnchorRestore();
+            setZoom(value);
+          }}
           activeDraft={
             draft
               ? { mode: editing ? "edit" : "create", event: draft, sourceEventId: editing ? draft.id : undefined }

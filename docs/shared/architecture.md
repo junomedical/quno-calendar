@@ -137,3 +137,7 @@ Cancel fading. Timepicker minute typography changes are scoped to `/concept`. No
 
 Timepicker owns the shared private time-option renderer and selection-reveal hook. Initial mounting reveals the
 selected hour; later updates use minimal reveal only for offscreen options and normalized hour-list dependencies.
+
+Concept appearance is demo-owned: useSystemTheme listens for OS changes, while scoped CSS keeps explainers and
+non-calendar controls light. Calendar resolves system scene defaults separately from explicit palettes. Its private
+useCalendarZoom observes viewport width and shares settings with the renderer; it imports no private library modules.

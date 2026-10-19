@@ -22,7 +22,7 @@ const initial: Record<ProductId, Check> = {
   "infinite-calendar": object(
     {
       view: oneOf("preferred", "infinite-horizontal", "infinite-vertical"),
-      theme: oneOf("light", "dark", "brand"),
+      theme: oneOf("system", "light", "dark", "brand"),
       density: between(4, 400, true),
       zoom: between(0.5, 8),
       controls: array(oneOf("view", "theme", "density", "zoom"))

@@ -5,7 +5,7 @@
   "anchor": "performance",
   "initial": {
     "view": "infinite-horizontal",
-    "theme": "light",
+    "theme": "system",
     "density": 4,
     "zoom": 2,
     "controls": ["density"]

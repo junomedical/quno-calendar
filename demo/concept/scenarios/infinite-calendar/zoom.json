@@ -5,7 +5,7 @@
   "anchor": "zoom",
   "initial": {
     "view": "preferred",
-    "theme": "light",
+    "theme": "system",
     "density": 22,
     "zoom": 8,
     "controls": ["zoom"]

@@ -1,0 +1,53 @@
+.concept {
+  color-scheme: light;
+  --concept-canvas: #fff;
+  --concept-chrome: #f9f8fc;
+  --concept-text: #302b42;
+  --concept-muted: #756d82;
+  --concept-border: #e4ddec;
+  --concept-selected: #393046;
+  --concept-on-selected: #fff;
+  color: var(--concept-text);
+  background: var(--concept-chrome);
+}
+.concept[data-theme="dark"] {
+  color-scheme: dark;
+  --concept-canvas: #1d1b26;
+  --concept-chrome: #211f2b;
+  --concept-text: #f1e9f8;
+  --concept-muted: #c2b5d0;
+  --concept-border: #51465f;
+  --concept-selected: #f1e9f8;
+  --concept-on-selected: #211f2b;
+}
+.concept .concept-content,
+.concept .concept-canvas {
+  background: var(--concept-canvas);
+}
+.concept .concept-nav,
+.concept .concept-nav nav {
+  border-color: var(--concept-border);
+}
+.concept .concept-nav nav button {
+  color: var(--concept-muted);
+}
+.concept .concept-nav nav button[aria-pressed="true"] {
+  color: var(--concept-on-selected);
+  background: var(--concept-selected);
+}
+.concept .concept-tour-guide,
+.concept .concept-product-card {
+  color-scheme: light;
+  color: #302b42;
+}
+.concept-calendar-workspace {
+  color-scheme: light;
+  background: var(--quno-calendar-surface, #fff);
+}
+.concept-calendar-workspace[data-theme="dark"] {
+  color-scheme: dark;
+}
+.concept .concept-controls button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}

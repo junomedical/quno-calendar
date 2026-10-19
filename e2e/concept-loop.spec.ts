@@ -85,9 +85,10 @@ test("zoom repeats on the same chapter with expanded text and stops on manual in
   await page.goto("/concept");
   await selectCalendarScene(page, "Zoom");
   const schedule = page.locator(".concept-calendar-workspace");
-  await expect(schedule).toHaveAttribute("data-zoom", "0.5", { timeout: 15000 });
+  const minimum = (await page.getByRole("slider", { name: "Zoom level" }).getAttribute("min"))!;
+  await expect(schedule).toHaveAttribute("data-zoom", minimum, { timeout: 15000 });
   await expect(schedule).toHaveAttribute("data-zoom", "8", { timeout: 10000 });
-  await expect(schedule).toHaveAttribute("data-zoom", "0.5", { timeout: 15000 });
+  await expect(schedule).toHaveAttribute("data-zoom", minimum, { timeout: 15000 });
   await expect(page.locator(".concept")).toHaveAttribute("data-scene", "zoom");
   await expect(page.locator(".concept")).toHaveAttribute("data-playing", "true");
   await expect(page.locator(".concept-tour-guide")).toHaveAttribute("data-collapsed", "false");

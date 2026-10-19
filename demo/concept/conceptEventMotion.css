@@ -7,6 +7,10 @@
   border: 1px dashed #538b70;
   border-left-width: 3px;
 }
+.concept-calendar-workspace[data-theme="dark"] .concept-event[data-state="new"] {
+  background: #213e35;
+  border-color: #87cfaa;
+}
 .concept-event[data-state="dragging"] {
   opacity: 0.5;
 }

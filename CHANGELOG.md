@@ -4,6 +4,20 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+- System-theme/zoom/contrast verification: all 655 unit tests and 163 concept Chromium checks are verified. The broad
+  concept run passed 111 checks before its reused test server closed; all 48 remaining checks pass on a dedicated
+  server, and four additional light/dark draft contrast checks pass. Formatting, architecture, types, lint, Preact,
+  demo build, package verification, size reporting and pack dry-run pass. No new verification blocker remains.
+  Library artifacts retain their previous sizes; the demo has a non-blocking 589.26 kB main-chunk warning.
+
+- Fixed dark-mode creation drafts using a pale fill behind light text. The dark Calendar palette now supplies a dark
+  green draft surface and light dashed border; light drafts and saved/cancelled animations retain their styling.
+
+- Concept shell/canvas now follow live system light/dark appearance. Ordinary Calendar chapters use that default;
+  explicit theme choices and the Theming cycle stay authored. Explainers and other product controls retain their
+  existing light styles on bright panels. Demo zoom controls now use the viewport-fitting minimum, update on resize
+  and orientation changes, disable boundary buttons and preserve wheel reversal at the minimum.
+
 - Increased the Infinite scroll concept pause between its 900 px steps from 350 ms to two seconds in both orientations.
   All 655 unit tests, focused loop/motion checks and repeated timing checks in both orientations pass. Formatting,
   architecture, types, lint, Preact, demo build, package verification, size reporting and pack dry-run pass. The demo's

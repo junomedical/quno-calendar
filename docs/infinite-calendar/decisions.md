@@ -1874,3 +1874,30 @@ Set the Infinite scroll scene's pauseMs to 2000, retaining its 900 px, one-secon
 continuation and manual takeover. Both orientations share this scene configuration. Verify an observed stationary
 hold of at least 1900 ms between movements, allowing frame-sampling tolerance. Other scenes retain their pacing.
 No public product contracts change.
+
+## 151 - Follow System Appearance And Match The Demo's Effective Zoom Range
+
+Date: 2026-10-19
+Status: Accepted; refines Decisions 137 and 149 and adopts shared QUNO-037
+
+Use initial.theme: system for ordinary Calendar scenes, resolving the computer's current light/dark preference
+on mount and when it changes. Explicit Light, Dark and Branded scene/manual choices remain explicit. The Theming
+chapter retains its Light → Dark → Branded → Light cycle. Changing chapters restores the authored preference.
+
+Share the demo's hours and label geometry between its calendar settings and zoom controls. Observe the actual
+viewport width and use max(0.5, available time width / displayed minutes), rounded upward to the next 0.01, as the
+horizontal minimum; vertical minimum stays 0.5, maximum stays 8. Clamp rendered zoom to that range and disable
+boundary buttons. Slider playback reads these native bounds. Cancel an out-of-range wheel request through the
+public handle so the next reversed gesture need not wait for an unaccepted zoom commit. Resize/orientation changes
+update limits without remounting or clearing edits. Verify native slider endpoints, wheel reversal at the minimum,
+resize and orientation behavior, visible theme surfaces and live OS changes. No public API or library style change.
+
+## 152 - Keep Creation Draft Text Legible In Dark Mode
+
+Date: 2026-10-19
+Status: Accepted; refines Decisions 148 and 151's demo-owned event presentation
+
+In the dark Calendar palette, replace the creation draft's pale green fill with dark green and a light green dashed
+border. Retain the light palette's original draft style, the regular themed event text, saved glint and Cancel fade.
+This prevents light text disappearing on the draft's formerly fixed light background. Verify at least 4.5:1 title
+and clock contrast for new, saved and hovered cards in both orientations and both palettes. No library styles change.

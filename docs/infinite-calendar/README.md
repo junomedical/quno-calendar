@@ -216,3 +216,11 @@ matching fullscreen. See Decision 149.
 
 The Infinite scroll concept advances 900 px over one second, then holds for two seconds before the next step.
 The same pacing applies in both orientations and remains interruptible by deliberate manual input.
+
+Ordinary concept scenes follow the system light/dark preference, including live changes. The Theming chapter keeps
+its explicit palette cycle. The demo zoom slider starts at the viewport-fitting minimum in horizontal mode (at least
+0.5), or 0.5 vertically, and ends at 8. Limits update on resize and disabled end buttons prevent ineffective travel.
+See Decision 151.
+
+Dark concept creation drafts use a dark green fill with a light dashed border, keeping their title and clock legible;
+light drafts and saved/cancellation animations retain their existing styling (Decision 152).
