@@ -13,6 +13,7 @@ export function ConceptTour({
   actions,
   select,
   fullscreen,
+  mobile,
   open,
   close,
   openButton,
@@ -25,6 +26,7 @@ export function ConceptTour({
   actions: PlaybackActions;
   select: (scene: string) => void;
   fullscreen: boolean;
+  mobile: boolean;
   open: () => void;
   close: () => void;
   openButton: RefObject<HTMLButtonElement>;
@@ -76,19 +78,22 @@ export function ConceptTour({
             contents,
             setContents
           }}
+          mobile={mobile}
+          fullscreenControl={
+            <button
+              ref={fullscreen ? closeButton : openButton}
+              className="concept-tour-fullscreen"
+              onClick={fullscreen ? close : open}
+              aria-label={fullscreen ? "Exit full screen" : `Full screen ${introduction.title.toLowerCase()}`}
+              title={fullscreen ? "Exit full screen" : `Full screen ${introduction.title.toLowerCase()}`}
+            >
+              {fullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
+            </button>
+          }
           select={choose}
         >
           <DemoNavigation product={product} scene={scenario.id} {...{ intro, choose, introduce }} />
         </FloatingGuide>
-        <button
-          ref={fullscreen ? closeButton : openButton}
-          className="concept-tour-fullscreen"
-          onClick={fullscreen ? close : open}
-          aria-label={fullscreen ? "Exit full screen" : `Full screen ${introduction.title.toLowerCase()}`}
-          title={fullscreen ? "Exit full screen" : `Full screen ${introduction.title.toLowerCase()}`}
-        >
-          {fullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
-        </button>
         <span className="concept-tour-status" role="status">
           {feedback}
         </span>

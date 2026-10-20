@@ -82,9 +82,15 @@ intraday and overnight ranges independently of the single-clock UI.
 
 ## Concept playground
 
-The `/concept` playground uses the shared floating guide, autoplay loops, live phone stage and bottom-right fullscreen
-presentation recorded in [QUNO-032](../shared/decisions.md#quno-032---share-the-floating-guide-across-all-concept-products).
+The `/concept` playground uses the shared guide, autoplay loops and live phone stage from
+[QUNO-032](../shared/decisions.md#quno-032---share-the-floating-guide-across-all-concept-products). Mobile presents the
+explainer as a bottom drawer with chevron taps and header swipes; fullscreen sits beside the chevron in both layouts
+([QUNO-038](../shared/decisions.md#quno-038--use-a-mobile-explainer-drawer-with-adjacent-fullscreen)). The drawer
+overlays the full mobile canvas without reserving space or shifting the working product when collapsed
+([QUNO-039](../shared/decisions.md#quno-039--overlay-the-full-mobile-canvas-with-the-explainer-drawer)).
 
+The top tab is **Parser** and its introduction is **Date parser**. The explanation introduces text tokenization
+followed by interpretation as meaningful dates, describing this responsibility within the library.
 Its live workbench demonstrates relative phrases, date-order ambiguity and overnight clock ranges. The fixed
 reference date, semantic tokens and readable endpoint results remain inspectable. Only the presentation
 and playback repetition change; the parser remains headless. See [concept notes](../../demo/concept/README.md).
@@ -101,7 +107,9 @@ lexical types remain inspectable. A recognized word does not guarantee that the 
 Concept semantic labels distinguish a colon as a time separator and numeric 61–9999 values as years, unless they
 belong to a duration count or clock parts. Smaller/out-of-range values retain their neutral number label (QDPR-010).
 
-Resolve ambiguity compares 03/04/2026 with 04/13/2026 by typing, then restores the first phrase. See QDPR-011.
+Resolve ambiguity cycles `10-11-12`, `01/02` and `feb 11 80`, then restores the first phrase. With the fixed
+day-first configuration and reference date, these resolve to `2012-11-10`, `2027-02-01` and `1980-02-11`. Each complete
+example holds for 1700 ms, exposing numeric order, missing-year inference and abbreviated-year interpretation. See QDPR-014.
 
 The concept introduction opens with `12/01 10:00` already recognized, with clock support enabled, and remains idle
 until a chapter is chosen. Resolve a phrase cycles six examples: next Friday, tomorrow 10:30, past 3 days,

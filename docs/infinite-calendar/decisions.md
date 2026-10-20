@@ -1901,3 +1901,42 @@ In the dark Calendar palette, replace the creation draft's pale green fill with 
 border. Retain the light palette's original draft style, the regular themed event text, saved glint and Cancel fade.
 This prevents light text disappearing on the draft's formerly fixed light background. Verify at least 4.5:1 title
 and clock contrast for new, saved and hovered cards in both orientations and both palettes. No library styles change.
+
+## Shared mobile explainer drawer — 2026-10-20
+
+[QUNO-038](../shared/decisions.md#quno-038--use-a-mobile-explainer-drawer-with-adjacent-fullscreen) supersedes the shared
+concept's mobile floating positioning and corner fullscreen placement. The drawer, chevron/fullscreen group and
+responsive dock clearance belong to the demo; this product's public behavior and styles retain their contracts.
+
+## 153 - Give Mobile Calendar Labels Thirty Percent Of The Viewport
+
+Date: 2026-10-20
+Status: Accepted; supersedes Decision 127's fixed horizontal label width on mobile and refines Decision 151
+
+At concept widths up to 850 px, set the horizontal calendar's public labelWidth to 30% of its measured viewport
+width. Share that value with the viewport-fitting zoom calculation so sticky names, dates, grid projection and
+pointer targets use the same geometry. Recalculate on resize/fullscreen without remounting the calendar.
+
+Scope mobile horizontal name text to 12 px (25% below 16 px) and date labels to 9.6 px (40% below 16 px). Desktop
+retains its 238 px labels and original typography; vertical view retains its separate 167 px time pane and headers.
+Verify width/font ratios, real grid alignment, fullscreen, the 850/851 px boundary, zoom limits and retained mounts.
+These settings and styles belong to the concept demo; public defaults and other routes remain unchanged.
+
+## 154 - Return The Orientation Tour To A Measured Day Heading
+
+Date: 2026-10-20
+Status: Accepted; refines Decision 139's return choreography for Decision 153's responsive label geometry
+
+Replace the orientation tour's fixed -800 px return with a scroll to the starting day's non-sticky header band,
+aligned to the viewport start. That day remains available in date overscan even when its first participant and
+reference appointment have been virtualized away. Reveal the actual appointment only after its day is back.
+
+Use the shared scroll-to action's optional start alignment, retaining center as the default for existing time
+scenes. Keep the authored one-second motion, subsequent hover and loop hold. Verify both orientations complete
+next-day pans and return to October 19 on desktop/phone, including repeated cycles. No library runtime changes.
+
+## Shared mobile drawer overlay — 2026-10-20
+
+[QUNO-039](../shared/decisions.md#quno-039--overlay-the-full-mobile-canvas-with-the-explainer-drawer) removes reserved
+mobile stage space: the shared explainer overlays the full canvas without disclosure-driven product movement.
+This updates demo presentation only; public component contracts and desktop layout remain unchanged.

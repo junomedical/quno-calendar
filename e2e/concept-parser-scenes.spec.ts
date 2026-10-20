@@ -14,7 +14,12 @@ for (const width of [1440, 390]) {
     await page.setViewportSize({ width, height: 900 });
     await page.emulateMedia({ reducedMotion: "no-preference" });
     await page.goto("/concept");
-    await page.getByRole("button", { name: "Date Parser", exact: true }).click();
+    await page.getByRole("button", { name: "Parser", exact: true }).click();
+    const guide = page.locator(".concept-tour-guide");
+    await expect(guide.locator("h1")).toHaveText("Date parser");
+    await expect(guide.locator(".concept-explanation")).toHaveText(
+      "To support natural language processing, text first needs to be tokenized, then connected into meaningful dates. This part of the library is responsible for that process."
+    );
     const field = page.locator('[data-action="phrase"]');
     const result = page.getByRole("status", { name: "Resolved dates" });
     await expect(field).toHaveValue("12/01 10:00");
@@ -43,7 +48,7 @@ for (const width of [1440, 390]) {
     await page.setViewportSize({ width, height: 900 });
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/concept");
-    await page.getByRole("button", { name: "Date Parser", exact: true }).click();
+    await page.getByRole("button", { name: "Parser", exact: true }).click();
     await selectCalendarScene(page, "Resolve a phrase");
     const field = page.locator('[data-action="phrase"]');
     const result = page.getByRole("status", { name: "Resolved dates" });

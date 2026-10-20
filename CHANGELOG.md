@@ -4,6 +4,57 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+- Ambiguity demo verification: all 655 unit tests and all 401 Chromium checks pass, including all three short-date
+  interpretations, repeated playback and manual editing on desktop/phone. The initial concurrent unit run exceeded
+  the dense-layout timing ratio (27.61 versus a limit of 25); its isolated recheck and the full unit rerun pass.
+  Formatting, architecture, types, lint, Preact compatibility, demo build, package verification, size reporting and
+  pack dry-run pass. Library sizes are unchanged; the demo retains its non-blocking 592.05 kB main-chunk warning.
+  No current verification blocker remains.
+
+- Resolve ambiguity now cycles `10-11-12`, `01/02` and `feb 11 80`, with readable pauses and explanations of numeric
+  order, missing years and abbreviated years. The scene uses existing parser behavior and restores its first example.
+
+- Parser copy verification: all 655 unit tests and 70 affected Chromium checks pass. Formatting, architecture,
+  types, lint, Preact compatibility, demo build, package verification, size reporting and pack dry-run pass.
+  Library sizes are unchanged; the demo retains its non-blocking 591.86 kB main-chunk warning. No new blocker remains.
+
+- Renamed the concept’s top Date Parser tab to Parser. Its Date parser introduction now explains text tokenization
+  and interpretation as meaningful dates. Product IDs, public imports, routes and the ready parser example retain
+  their existing contracts; optional manifest tabLabel keeps the short menu name separate from the introduction.
+
+- Overlay verification: all 655 unit tests and all 401 Chromium checks pass, including full-height stage geometry,
+  real drawer overlap and stable product placement through disclosure/contents/fullscreen on phone and landscape.
+  The prior concurrent loading-test caveat did not recur. Formatting, architecture, types, lint, Preact compatibility,
+  demo build, package verification, size reporting and pack dry-run pass. No current verification blocker remains.
+  Library sizes are unchanged; the demo retains its non-blocking 591.69 kB main-chunk warning.
+
+- Removed the mobile concept drawer's reserved product-stage space. The drawer now overlays the full-height demo
+  canvas, with fixed content placement through collapse, expansion and contents. Native scrolling, fullscreen,
+  drawer gestures and desktop layout remain intact.
+
+- Mobile label verification: all 655 unit tests pass. The full Chromium run passed 395/398 checks before the
+  orientation-return fix. Both affected phone tour checks now pass; eight repeated orientation/shared-time checks
+  and four final label/zoom/phone-tour/loading checks pass. One unrelated full-run caveat remains:
+  `e2e/specs/calendar-row-filter.spec.ts:95` timed out waiting for offset -12 in Load later under four workers;
+  the same check passes with one worker. No library sources changed. Formatting, architecture, types, lint, Preact,
+  demo build, package verification, size reporting and pack dry-run pass. Library sizes are unchanged; the demo
+  retains its non-blocking 591.69 kB main-chunk warning.
+
+- Mobile horizontal concept calendars now give the names column 30% of the viewport, reduce names by 25% and date
+  labels by 40%. Responsive geometry and zoom limits update together through resize/fullscreen; desktop typography,
+  238 px desktop labels and the separate vertical time pane retain their existing dimensions. The orientation tour
+  now returns to the starting day’s measured header before revealing its virtualized appointment.
+
+- Drawer verification: all 655 unit tests and the full 395-check Chromium run pass. All 37 focused drawer/layout
+  checks also pass after the swipe-settling fix, including one additional frame-continuity check. Formatting,
+  architecture, types, lint, Preact compatibility, demo build, package verification, size reporting and pack dry-run
+  pass. No verification blocker remains; library sizes are unchanged. The demo retains its non-blocking main-chunk
+  warning (591.41 kB).
+
+- The concept explainer becomes a bottom drawer on mobile, with chevron taps, header swipes, independent contents
+  scrolling and reduced-motion support. Fullscreen now sits beside the chevron on mobile and desktop, including
+  collapsed guides. Calendar scene controls clear the mobile drawer and remain at bottom right on desktop.
+
 - System-theme/zoom/contrast verification: all 655 unit tests and 163 concept Chromium checks are verified. The broad
   concept run passed 111 checks before its reused test server closed; all 48 remaining checks pass on a dedicated
   server, and four additional light/dark draft contrast checks pass. Formatting, architecture, types, lint, Preact,

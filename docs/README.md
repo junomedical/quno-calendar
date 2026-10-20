@@ -119,9 +119,9 @@ viewport presentation subscriptions, reusable geometry and native observation or
 
 `/concept` presents all five products with the same live canvas and floating guide. The guide contains an introduction,
 All demos contents, chapter explanation, recipe link and previous/next footer. Chapters autoplay and repeat until
-manual takeover; reduced motion starts paused. Fullscreen sits at bottom right, with scene controls immediately left.
-The guide starts 24 px from bottom left and grows upward. Non-calendar products sit to its right on wide screens;
-phones keep them in a scrollable area above it. See [QUNO-032](./shared/decisions.md#quno-032---share-the-floating-guide-across-all-concept-products).
+manual takeover; reduced motion starts paused. Fullscreen sits beside the chevron, including when collapsed.
+The guide starts 24 px from bottom left on desktop; mobile uses a bottom drawer with tap/swipe collapse and expansion. Non-calendar products sit to its right on wide screens;
+phones keep a full-height product canvas behind the drawer, without reserved space. See [QUNO-032](./shared/decisions.md#quno-032---share-the-floating-guide-across-all-concept-products).
 
 The [23 JSON scenarios](../demo/concept/README.md#edit-scenarios-in-json) include seven Datepicker interactions: paint,
 adjust, move, intent guessing, month access, start/end shortcuts and single-day selection. Datepicker’s introduction
@@ -145,8 +145,22 @@ Date Parser’s ready date/time introduction and six-example phrase chapter are 
 [QDPR-012](./date-parser/decisions.md#qdpr-012---open-with-a-ready-date-and-time-and-expand-phrase-examples).
 
 Concept guide footers now contain only Previous/Next with contextual contents actions (QUNO-035). Calendar creation
-drafts support movement before Save, and compact control docks match fullscreen height (Infinite Calendar 149).
+drafts support movement before Save (Infinite Calendar 149). Mobile drawer and adjacent fullscreen behavior are
+recorded in [QUNO-038](./shared/decisions.md#quno-038--use-a-mobile-explainer-drawer-with-adjacent-fullscreen).
 
 Concept system appearance and preserved light control panels are recorded in
 [QUNO-037](./shared/decisions.md#quno-037---follow-system-appearance-around-light-demo-panels); Calendar Decision 151
 aligns its default palette and responsive zoom controls.
+
+[Calendar Decision 153](./infinite-calendar/decisions.md#153---give-mobile-calendar-labels-thirty-percent-of-the-viewport)
+sets the mobile concept names column to 30% of the viewport, with 25% smaller names and 40% smaller date labels.
+
+[QUNO-039](./shared/decisions.md#quno-039--overlay-the-full-mobile-canvas-with-the-explainer-drawer) makes the mobile
+explainer overlay the full product canvas without a spacer or disclosure-driven content movement.
+
+The concept’s top menu uses **Parser**, while its introduction is titled **Date parser** and explains tokenization
+followed by date interpretation. Product IDs, package imports and guide routes retain `date-parser`; see
+[QDPR-013](./date-parser/decisions.md#qdpr-013---introduce-the-parser-with-tokenization-and-date-interpretation).
+
+The Parser concept’s Resolve ambiguity chapter demonstrates numeric order and inferred years with `10-11-12`,
+`01/02` and `feb 11 80`; see [QDPR-014](./date-parser/decisions.md#qdpr-014---demonstrate-ambiguous-short-dates-and-year-inference).

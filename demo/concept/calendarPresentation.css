@@ -25,9 +25,9 @@
 .concept-calendar-workspace > .concept-controls {
   position: absolute;
   z-index: 50;
-  right: 64px;
+  right: 16px;
   bottom: 16px;
-  max-width: calc(100% - 80px);
+  max-width: calc(100% - 32px);
   border: 1px solid var(--quno-calendar-cell-border, #e6deee);
   border-radius: 12px;
   box-shadow: 0 4px 20px #302b421a;
@@ -37,6 +37,12 @@
   pointer-events: none;
 }
 @media (max-width: 850px) {
+  .concept-calendar-workspace[data-view="infinite-horizontal"] .quno-calendar-row-label {
+    font-size: 12px;
+  }
+  .concept-calendar-workspace[data-view="infinite-horizontal"] .quno-calendar-date-label {
+    font-size: 9.6px;
+  }
   .concept-content[data-calendar="true"] > .concept-pages {
     width: 100%;
   }
@@ -53,9 +59,9 @@
     inset: 0;
   }
   .concept-calendar-workspace > .concept-controls {
-    right: 64px;
-    bottom: 16px;
-    max-width: calc(100% - 80px);
+    right: 12px;
+    bottom: calc(var(--concept-guide-height, 80px) + 12px);
+    max-width: calc(100% - 24px);
   }
 }
 

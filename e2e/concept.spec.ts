@@ -1,6 +1,7 @@
 import { expectProductResult } from "#quno-e2e/concept-product-results";
 import {
   pauseCalendarScene,
+  productTabLabel,
   restartCalendarScene,
   calendarInitial,
   selectCalendarScene
@@ -11,7 +12,7 @@ async function open(page: Page, product = "Calendar") {
   await page.clock.setFixedTime(new Date("2026-10-19T12:00:00"));
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/concept");
-  if (product !== "Calendar") await page.getByRole("button", { name: product, exact: true }).click();
+  if (product !== "Calendar") await page.getByRole("button", { name: productTabLabel(product), exact: true }).click();
   await expect(page.locator('[data-ready="true"]')).toBeVisible();
 }
 async function play(page: Page, label: string) {
@@ -169,7 +170,7 @@ const outcomes = [
   ["Timepicker", "Choose a time", "10:45"],
   ["Timepicker", "Keep an existing time", "10:45"],
   ["Date Parser", "Resolve a phrase", "2026-11-01"],
-  ["Date Parser", "Resolve ambiguity", "2026-04-03"],
+  ["Date Parser", "Resolve ambiguity", "2012-11-10"],
   ["Date Parser", "Cross midnight", "2026-10-21 01:00"]
 ];
 for (const [product, scene, result] of outcomes)
@@ -221,7 +222,7 @@ test("phone layout exposes the working control and fits all products", async ({ 
   const canvas = await page.locator(".concept-canvas").boundingBox();
   expect(canvas!.y).toBeLessThan(600);
   for (const product of ["Calendar", "Datepicker", "Date Input", "Timepicker", "Date Parser"]) {
-    await page.getByRole("button", { name: product, exact: true }).click();
+    await page.getByRole("button", { name: productTabLabel(product), exact: true }).click();
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
     await expect(page.locator(".concept-cursor")).toBeHidden();
   }

@@ -434,24 +434,17 @@
   padding-top: 4px;
 }
 
-@media (min-width: 720px) and (max-width: 1100px) {
+@media (min-width: 851px) and (max-width: 1100px) {
   .concept-tour-content:not([data-calendar]) > .concept-tour-guide {
     width: 40%;
   }
 }
-@media (max-width: 719px) {
-  .concept-tour-content:not([data-calendar]) > .concept-tour-guide {
-    width: calc(100% - 88px);
-    max-height: 55%;
-  }
+@media (max-width: 850px) {
   .concept-tour-content:not([data-calendar]) .concept-product-stage {
-    height: max(80px, calc(100% - var(--concept-guide-height, 240px) - 48px));
-    padding: 12px 24px 12px 36px;
-    justify-items: end;
-  }
-  .concept-tour-content[data-calendar="true"]:has(.concept-controls) > .concept-tour-guide {
-    margin-bottom: 48px;
-    max-height: calc(100% - 96px);
+    height: 100%;
+    padding: 12px 24px;
+    justify-items: center;
+    align-content: start;
   }
 }
 

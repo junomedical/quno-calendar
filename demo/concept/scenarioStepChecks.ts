@@ -31,13 +31,16 @@ const steps: Record<PlaybackStep["action"], Check> = {
     pauseMs: between(0, 2000),
     ...motion
   }),
-  "scroll-to": object({
-    action: oneOf("scroll-to"),
-    target: nonempty,
-    destination: nonempty,
-    caption: nonempty,
-    ...motion
-  }),
+  "scroll-to": object(
+    {
+      action: oneOf("scroll-to"),
+      target: nonempty,
+      destination: nonempty,
+      caption: nonempty,
+      ...motion
+    },
+    { align: oneOf("start", "center") }
+  ),
   "scroll-day": object({
     action: oneOf("scroll-day"),
     target: nonempty,

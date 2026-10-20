@@ -57,8 +57,12 @@ parser, virtualizer, date library, or timezone conversion. It has no typed-input
 
 ## Concept playground
 
-The `/concept` playground uses the shared floating guide, autoplay loops, live phone stage and bottom-right fullscreen
-presentation recorded in [QUNO-032](../shared/decisions.md#quno-032---share-the-floating-guide-across-all-concept-products).
+The `/concept` playground uses the shared guide, autoplay loops and live phone stage from
+[QUNO-032](../shared/decisions.md#quno-032---share-the-floating-guide-across-all-concept-products). Mobile presents the
+explainer as a bottom drawer with chevron taps and header swipes; fullscreen sits beside the chevron in both layouts
+([QUNO-038](../shared/decisions.md#quno-038--use-a-mobile-explainer-drawer-with-adjacent-fullscreen)). The drawer
+overlays the full mobile canvas without reserving space or shifting the working product when collapsed
+([QUNO-039](../shared/decisions.md#quno-039--overlay-the-full-mobile-canvas-with-the-explainer-drawer)).
 
 Its chapters cover minute selection and preservation of a value when cadence changes. The concept keeps minutes
 13 px/400 beside 16 px/700 hours and aligns both at the top. These are scoped demo styles; package styles and

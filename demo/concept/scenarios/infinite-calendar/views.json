@@ -64,9 +64,10 @@
       "ms": 1500
     },
     {
-      "action": "scroll",
+      "action": "scroll-to",
       "target": ".quno-calendar-viewport",
-      "amount": -800,
+      "destination": "[data-slot=\"calendar-day-header\"][data-date=\"2026-10-19\"]",
+      "align": "start",
       "caption": "Return through the schedule",
       "durationMs": 1000,
       "easing": "ease-in-out"

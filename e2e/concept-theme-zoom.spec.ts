@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { selectCalendarScene } from "#quno-e2e/concept-helpers";
+import { selectCalendarScene, productTabLabel } from "#quno-e2e/concept-helpers";
 test.describe.configure({ mode: "parallel" });
 
 for (const width of [390, 1440]) {
@@ -34,7 +34,7 @@ for (const width of [390, 1440]) {
     await page.emulateMedia({ colorScheme: "dark", reducedMotion: "reduce" });
     await page.goto("/concept");
     for (const product of ["Datepicker", "Date Input", "Timepicker", "Date Parser"]) {
-      await page.getByRole("button", { name: product, exact: true }).click();
+      await page.getByRole("button", { name: productTabLabel(product), exact: true }).click();
       const card = page.locator(".concept-product-card");
       await expect(card).toBeVisible();
       await expect(page.locator(".concept-content")).toHaveCSS("background-color", "rgb(29, 27, 38)");
@@ -70,9 +70,10 @@ for (const width of [390, 1440, 1800])
     const slider = page.getByRole("slider", { name: "Zoom level" });
     const calendar = page.locator(".concept-calendar-workspace");
     const viewport = page.locator(".quno-calendar-viewport");
-    const fit = await viewport.evaluate((node) =>
-      Math.max(0.5, Math.ceil(((node.clientWidth - 238 - 8) / 660) * 100) / 100)
-    );
+    const fit = await viewport.evaluate((node) => {
+      const labels = node.querySelector(".quno-calendar-left-label")!.getBoundingClientRect().width;
+      return Math.max(0.5, Math.ceil(((node.clientWidth - labels - 8) / 660) * 100) / 100);
+    });
     await expect(slider).toHaveAttribute("min", String(fit));
     await expect(slider).toHaveAttribute("max", "8");
     await slider.press("Home");

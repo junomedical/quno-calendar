@@ -1172,25 +1172,33 @@ or use the footer arrows. The live demo starts automatically unless reduced moti
 advancing navigation. Revisit a chapter to restart it. Click, drag, wheel, keyboard input, focus entering a working
 control, or hiding the tab pauses playback and preserves the result. Mere pointer overlap does not pause it.
 
-Drag the guide from its title, paragraphs or empty space. Buttons and links retain their usual actions. The chevron
-collapses it to its title and expand button at the same width. Its left-bottom anchor stays in place as height
-changes. Focus the guide and use arrows, Shift-arrows for larger steps, or Home to restore the bottom-left default,
-24 px from each edge. On narrow Calendar scenes with controls, extra clearance keeps the footer reachable.
+On desktop, drag the guide from its title, paragraphs or empty space. Focus it and use arrows, Shift-arrows for
+larger steps, or Home to restore the bottom-left default, 24 px from each edge. Buttons and links retain their usual actions.
 
-The bottom-right icon toggles fullscreen; Escape exits and restores focus to it. Escape from contents first returns
-to the explanation. Fullscreen changes layout without remounting the working component. Other products sit right
-of the guide on wide screens and in a scrollable region above it on phones. All previews remain interactive.
+At widths up to 850 px the explainer is a bottom drawer. Tap its downward chevron or swipe down from the header or
+chevron to collapse; tap the upward chevron or swipe up to reopen. Short/cancelled swipes retain its state, and the
+text/contents scroll independently. Reduced motion removes the drawer transition. The collapsed title, chevron and
+fullscreen control remain reachable, with 44 px mobile touch targets and safe-area padding.
+
+Fullscreen sits immediately left of the chevron on mobile and desktop; Escape exits and restores focus to it.
+Escape from contents first returns to the explanation. Fullscreen changes layout without remounting the working
+component. Other products sit right of the guide on wide screens. On mobile their scrollable stages fill the
+canvas behind the drawer, with no reserved spacer or resizing when the explainer changes. Collapse it to reveal
+covered controls. Calendar scene controls stay at bottom right on desktop and clear the drawer above it on mobile.
 
 ### Calendar chapters
 
 Calendar introduces the author's rationale before eight chapters: infinite scroll, zoom, overlapping events,
 horizontal/vertical, theming, event density, creation and rescheduling. JSON selects only the relevant compact
-control, placed immediately left of fullscreen along the same bottom edge. No date/count or corner Saved/Moved
-message appears. Ordinary schedules use 22 varied hour-long appointments at 2× zoom; density offers 4/40/400.
+control in a separate dock at bottom right on desktop and above the mobile drawer. No date/count or corner Saved/Moved
+message appears. Mobile horizontal names use 30% of the measured calendar viewport, with 12 px names and 9.6 px
+date labels; desktop keeps 238 px labels. Zoom and grid geometry share the responsive width. Ordinary schedules use
+22 varied hour-long appointments at 2× zoom; density offers 4/40/400.
 
 Scroll advances 900 px in one second, pauses two seconds and continues downward. Zoom moves 8 → the viewport-fitting minimum (at least 0.5), explores, then returns
 to 8 and scrolls back. The explanation highlights Shift + scroll as a tag. Orientation switches also pan to the next
-day. Theme ends in Light, density ends in Quiet/horizontal, rescheduling moves three appointments out and back, and
+day, then return to the measured starting-day heading before revealing its appointment. Theme ends in Light, density
+ends in Quiet/horizontal, rescheduling moves three appointments out and back, and
 overlap moves outside all three cards for a closed hold. Creation checkpoints bound automatic edits per cycle.
 
 Creation can set `initial.focusDraft: true`. Its controlled draft selects only that doctor's calendar ID while
@@ -1234,12 +1242,14 @@ endpoints with the same recognizeTime option, so changing a phrase shows both it
 The Date Parser concept keeps preferred order and clock recognition in scene JSON. Its visible workbench shows the
 phrase, reference, tokens and resolved endpoints without configuration controls or a structured-result disclosure.
 
-Date Parser’s introduction holds `12/01 10:00` already recognized. Choose Resolve a phrase to start its six examples,
-including a clock, rolling duration, written date and explicit range. Scene `chapterOnly: true` preserves the ready
+Choose **Parser** in the top menu. Its **Date parser** introduction explains how text is tokenized and connected
+into meaningful dates, and holds `12/01 10:00` already recognized. Choose Resolve a phrase to start its six examples,
+including a clock, rolling duration, written date and explicit range. Resolve ambiguity cycles `10-11-12`, `01/02`
+and `feb 11 80` to show date-order and year inference. Scene `chapterOnly: true` preserves the ready
 initial control during introduction arrival/restoration; other products retain their existing behavior.
 
 The guide footer has only Previous and Next. Use All calendar demos (or the current product label) above the title
-to open contents. Its 34 px height matches collapse. Calendar scene docks are 40 px high, matching fullscreen, and
+to open contents. Its height matches collapse (34 px desktop, 44 px mobile). Calendar scene docks are 40 px high and
 keep only the controls. In creation, drag the active draft to update its editor, then Save or Cancel normally.
 
 Selecting a visible time option keeps the list in place. The shared Timepicker/Datepicker renderer reveals its

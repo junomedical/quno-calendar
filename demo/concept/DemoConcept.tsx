@@ -12,6 +12,7 @@ import "./playground.css";
 import "./navigation.css";
 import "./calendarPresentation.css";
 import "./fullscreenTour.css";
+import "./guideDrawer.css";
 import "./conceptTheme.css";
 export function DemoConcept() {
   const theme = useSystemTheme();
@@ -79,6 +80,7 @@ export function DemoConcept() {
         }
         close={presentation.close}
         fullscreen={fullscreen}
+        mobile={presentation.mobile}
         open={presentation.open}
         openButton={presentation.openButton}
         closeButton={presentation.closeButton}

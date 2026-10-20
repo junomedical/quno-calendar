@@ -88,7 +88,7 @@ for (const width of [1440, 390])
       await pauseCalendarScene(page);
       const guide = (await page.locator(".concept-tour-guide").boundingBox())!;
       const stage = (await page.locator(".concept-product-stage").boundingBox())!;
-      if (width === 390) expect(stage.y + stage.height).toBeLessThan(guide.y);
+      if (width === 390) expect(stage.y + stage.height).toBeGreaterThan(guide.y);
       await page.screenshot({ path: info.outputPath("datepicker-birth-date.png") });
     });
     test(`manual takeover during year scrolling prevents a late birthday selection at ${width}px`, async ({ page }) => {

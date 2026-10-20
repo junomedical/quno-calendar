@@ -206,3 +206,38 @@ date, readable endpoints and optional structured result; no headless parser cont
 - Consequences: Show tokens and paired date/clock results immediately, with the existing fixed reference and expected
   range. Verify idle introduction/restoration, editable ready value, six actual results, repeated playback, manual
   takeover and desktop/phone visibility. Keep public parser contracts and other product introductions unchanged.
+
+## Shared mobile explainer drawer — 2026-10-20
+
+[QUNO-038](../shared/decisions.md#quno-038--use-a-mobile-explainer-drawer-with-adjacent-fullscreen) supersedes the shared
+concept's mobile floating positioning and corner fullscreen placement. The drawer, chevron/fullscreen group and
+responsive dock clearance belong to the demo; this product's public behavior and styles retain their contracts.
+
+## Shared mobile drawer overlay — 2026-10-20
+
+[QUNO-039](../shared/decisions.md#quno-039--overlay-the-full-mobile-canvas-with-the-explainer-drawer) removes reserved
+mobile stage space: the shared explainer overlays the full canvas without disclosure-driven product movement.
+This updates demo presentation only; public component contracts and desktop layout remain unchanged.
+
+## QDPR-013 - Introduce The Parser With Tokenization And Date Interpretation
+
+- Date: 2026-10-20
+- Status: Accepted; refines QDPR-012's concept introduction copy and menu label
+- Decision: Use Parser for the top product tab and Date parser for its introduction heading. Explain that natural
+  language processing first tokenizes text and then connects it into meaningful dates, identifying this as the
+  library domain's responsibility. Keep that copy and the optional short tabLabel in the product manifest; other
+  products fall back to their existing label.
+- Consequences: Preserve the ready date/time example, chapters, contextual contents, fullscreen naming and parsing
+  behavior. Product IDs, public names/imports and routes retain date-parser. Browser checks verify the short tab,
+  introduction copy and responsive navigation on desktop/phone; no public API migration is needed.
+
+## QDPR-014 - Demonstrate Ambiguous Short Dates And Year Inference
+
+- Date: 2026-10-20
+- Status: Accepted; supersedes QDPR-011's ambiguity examples
+- Decision: Cycle 10-11-12, 01/02 and feb 11 80 in Resolve ambiguity, then restore the first phrase. Keep the
+  fixed reference date, expected period and day-first order, with a 1700 ms pause on each complete example. Explain
+  numeric ordering, omitted-year inference and abbreviated-year interpretation through their written results.
+- Consequences: The public parser resolves 2012-11-10, 2027-02-01 and 1980-02-11 respectively. Verify both endpoints,
+  repeated playback, visible tokens/results and manual takeover on desktop/phone. Keep this change in authored scene
+  JSON and documentation; parser grammar, ranking, configuration and public contracts remain unchanged.

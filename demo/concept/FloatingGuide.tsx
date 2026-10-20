@@ -6,6 +6,7 @@ import type { ProductId, Scenario } from "./scenarioTypes";
 import { useFloatingGuide } from "./useFloatingGuide";
 import { contentsLabel, type Introduction } from "./tourContent";
 import { ConceptParagraphs } from "./ConceptParagraphs";
+import { useGuideDrawer } from "./useGuideDrawer";
 export function FloatingGuide({
   product,
   introduction,
@@ -19,6 +20,8 @@ export function FloatingGuide({
   contents,
   setContents,
   select,
+  mobile,
+  fullscreenControl,
   children
 }: {
   product: ProductId;
@@ -33,10 +36,17 @@ export function FloatingGuide({
   contents: boolean;
   setContents: (value: boolean) => void;
   select: (scene: string) => void;
+  mobile: boolean;
+  fullscreenControl: ReactNode;
   children: ReactNode;
 }) {
   const title = contents ? `${introduction.title} demos` : intro ? introduction.title : scenario.label;
-  const floating = useFloatingGuide(container, actions.stop);
+  const floating = useFloatingGuide(container, actions.stop, mobile);
+  const toggle = () => {
+    actions.stop();
+    setCollapsed(!collapsed);
+  };
+  const drawer = useGuideDrawer({ card: floating.card, mobile, collapsed, toggle, stop: actions.stop });
   useLayoutEffect(() => {
     if (contents) floating.card.current?.focus({ preventScroll: true });
   }, [contents, floating.card]);
@@ -45,6 +55,7 @@ export function FloatingGuide({
       ref={floating.card}
       className="concept-tour-guide"
       data-collapsed={collapsed}
+      data-drawer={mobile}
       tabIndex={0}
       style={{ left: floating.position.left, bottom: floating.position.bottom }}
       aria-label={`${title} guide`}
@@ -58,7 +69,7 @@ export function FloatingGuide({
         } else floating.handle.onKeyDown(event);
       }}
     >
-      <div className="concept-tour-guide-top">
+      <div className="concept-tour-guide-top" {...drawer}>
         {!contents && !collapsed && (
           <button
             className="concept-tour-back"
@@ -74,19 +85,19 @@ export function FloatingGuide({
           </button>
         )}
         <h1>{title}</h1>
-        <button
-          className="concept-tour-toggle"
-          aria-label={collapsed ? "Expand description" : "Collapse description"}
-          title={collapsed ? "Expand description" : "Collapse description"}
-          aria-expanded={!collapsed}
-          aria-controls="concept-tour-body"
-          onClick={() => {
-            actions.stop();
-            setCollapsed(!collapsed);
-          }}
-        >
-          {collapsed ? <ChevronDown size={18} /> : <ChevronUp size={18} />}
-        </button>
+        <div className="concept-tour-guide-actions">
+          {fullscreenControl}
+          <button
+            className="concept-tour-toggle"
+            aria-label={collapsed ? "Expand description" : "Collapse description"}
+            title={collapsed ? "Expand description" : "Collapse description"}
+            aria-expanded={!collapsed}
+            aria-controls="concept-tour-body"
+            onClick={toggle}
+          >
+            {collapsed ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+          </button>
+        </div>
       </div>
       <div id="concept-tour-body" className="concept-tour-body" hidden={collapsed}>
         {contents ? (

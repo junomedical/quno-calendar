@@ -6,15 +6,22 @@ live full-window canvas and a floating information guide. Existing focused demos
 ## Presentation and interaction
 
 The guide begins with a product introduction. The contextual contents button opens a left-aligned contents list inside the guide;
-previous/next navigation stays in its footer. Contents has no back action. Collapsing retains only the title and
-34 px expand button at the same responsive width. Drag the whole guide except buttons and links, or focus it and
-use arrows, Shift-arrows, and Home. The default left/bottom inset is 24 px, clamped on constrained displays.
-Height changes grow upward from the retained left-bottom corner. Fullscreen/viewport changes clamp without
-remounting the working component. The fullscreen button sits 16 px from bottom right; scene controls sit 8 px left
-of it on the same bottom edge. Narrow Calendar chapters reserve clearance when their dock is present.
+previous/next navigation stays in its footer. Contents has no back action. Collapsing retains the title, fullscreen
+and chevron at the same responsive width. Fullscreen sits immediately left of the chevron in every state, including
+contents and fullscreen. Escape exits fullscreen and restores focus; from contents it first returns to the explanation.
 
-Non-calendar products sit right of the guide on wider screens. Below 720 px they use a scrollable region above it;
-the guide reserves the fullscreen button's corner. This keeps the interactive control visible when copy is expanded.
+Above 850 px, drag the whole guide except buttons and links, or focus it and use arrows, Shift-arrows, and Home.
+Its default left/bottom inset is 24 px, clamped on constrained displays; height changes grow upward from that corner.
+At 850 px and below, the guide becomes a full-width bottom drawer with safe-area padding. Tap its downward chevron
+or swipe down more than 48 px from the header/chevron to collapse it; tap the upward chevron or swipe up to reopen.
+Short and cancelled drags leave its state unchanged. Text and contents scroll natively without dragging the drawer.
+Height changes animate over 240 ms unless reduced motion is enabled. Desktop controls are 34 px; mobile controls
+have 44 px touch targets. Fullscreen/viewport changes preserve the working component and desktop guide position.
+
+Non-calendar products sit right of the guide on wider screens. On mobile their top-aligned, scrollable stages fill
+the entire canvas behind the drawer. No height is subtracted or space reserved for the explainer; collapse, contents
+and explanation changes leave product position/size unchanged. Collapse the drawer to reveal covered controls.
+Calendar scene controls sit at bottom right on desktop and above the drawer on mobile, clearing its current height.
 There are no separate scenario pages, bottom title rail, launch buttons, inert previews or playback toolbar.
 
 Chapter arrival starts playback unless reduced motion is enabled. Every chapter loops in place without clicking
@@ -25,7 +32,9 @@ focus is marked internal so real component navigation can run without cancelling
 ## Edit scenarios in JSON
 
 - `demo.json` owns schema version, product order, startup selection and shared fixture dates.
-- `scenarios/<product-id>.json` owns product metadata, explore links and ordered scene/preview IDs.
+- `scenarios/<product-id>.json` owns product metadata, explore links and ordered scene/preview IDs. Optional
+  `tabLabel` shortens only the top menu; `label` and `description` retain the full introduction. Parser uses the short
+  tab with a Date parser heading and explains tokenization followed by meaningful date interpretation.
 - `scenarios/<product-id>/<scenario-id>.json` owns one scene's `id`, `label`, `hint`, `anchor`, `paragraphs`, `initial`
   and ordered `steps`. Calendar allows one to three paragraphs; other products allow one or two.
   Optional `chapterOnly: true` keeps the reused introduction on its ready initial value until the chapter is chosen.
@@ -38,7 +47,8 @@ authoring metadata. `[shift-scroll]` in explanation text renders as a Shift + sc
 
 Supported actions are `wait`, `find`, `aim`, `click`, `hover`, `cue`, `type`, `key`, `scroll`, `scroll-loop`, `scroll-to`,
 `scroll-day`, `scroll-year`, `slider`, `wheel`, `drag-dates`, `draw-event` and `move-event`. Animated scroll/slider actions specify
-`durationMs` and `easing` (`linear` or `ease-in-out`). `key` optionally sets the caret. Calendar-only scroll-loop,
+`durationMs` and `easing` (`linear` or `ease-in-out`). `scroll-to` defaults to center alignment and accepts
+`align: "start"` for a measured return to a day heading. `key` optionally sets the caret. Calendar-only scroll-loop,
 scroll-day, creation and movement actions use public controls and actual viewport/event geometry. Never branch
 playback behavior on scene IDs or use recipe navigation as a simulation action.
 
@@ -78,13 +88,16 @@ Datepicker eight, Date Input five, Timepicker four and Date Parser four.
 ## Calendar choreography
 
 One stable Calendar instance owns a cached fixture source and session edits across chapters and fullscreen. Initial
-view/theme/density/zoom and starting navigation reset per chapter. The label pane is 238 px (167 px vertically).
+view/theme/density/zoom and starting navigation reset per chapter. Desktop uses a 238 px label pane (167 px vertically).
+At widths up to 850 px, horizontal names use 30% of the measured viewport; names shrink from 16 to 12 px and dates
+from 16 to 9.6 px. Real calendar geometry and the zoom floor share that width through resize and fullscreen.
 There is no date/count status row or Saved/Moved corner message. Ordinary schedules have 22 appointments across the
 working day, regular one-hour durations, 32 additional varied titles and 2× zoom. Density presets project 4/40/400
 appointments from the same data. Compact titles and clocks stay on one line; hover reveals bounded details.
 
 Scroll loops advance 900 px over one second with two-second pauses. Zoom quickly moves 8 → the effective minimum, explores 900 px, then
-returns to 8 and scrolls back. Orientation changes include next-day pans and return to the initial day. Themes end
+returns to 8 and scrolls back. Orientation changes include next-day pans and return to the initial day’s measured header, so an offscreen first
+appointment is mounted before its final hover. Themes end
 in Light. Density ends in Quiet/horizontal. Reschedule moves three different appointments forward, then back in
 reverse order. Overlap hovers each underlying lane, moves outside all three and holds every card closed for 1500 ms.
 Closed scenes declare `loop: "continue"`; creation restores its pre-run session checkpoint to bound automatic edits.
@@ -128,8 +141,8 @@ Timepicker uses 13 px regular minutes beside 16 px bold hours, top aligned in th
 ## Ownership and verification
 
 `ConceptTour`, `FloatingGuide`, `DemoContents` and `DemoNavigation` own presentation. `useFloatingGuide` stores
-left/bottom offsets and publishes guide height for phone layout. `ConceptProducts` mounts only the active lazy
-product and resets it on a scoped loop event. `usePlayback` owns repetition and cancellation; `PlaybackActor` and
+left/bottom offsets and publishes guide height for the phone Calendar control dock. `ConceptProducts` mounts only the active lazy
+product and resets it on a scoped loop event. `useGuideDrawer` owns mobile height motion and header gestures; `usePlayback` owns repetition and cancellation; `PlaybackActor` and
 typed action adapters drive actual controls. `playbackSurface` excludes the guide only during synchronous synthetic
 hit testing, restoring native input immediately. The rounded, round-joined notched cursor rotates 15° CCW at its tip,
 never intercepts input and renders no caption.
@@ -160,7 +173,8 @@ Parser chip labels also identify colon time separators and numeric years from 61
 context and neutral ambiguous numbers. This enriches demo presentation without changing the public token objects.
 
 Date Parser has no Structured result, date-order controls or clock checkbox. JSON retains each chapter’s parsing
-configuration. Ambiguity types 04/13/2026 and returns to 03/04/2026; Cross midnight retains clock recognition.
+configuration. Ambiguity cycles 10-11-12, 01/02 and feb 11 80, holding each for 1700 ms before restoring 10-11-12.
+Its day-first configuration resolves 2012-11-10, 2027-02-01 and 1980-02-11; Cross midnight retains clock recognition.
 
 Date Parser opens with `12/01 10:00` already typed and recognized, using clock-enabled parsing. Its first scene
 opts into `chapterOnly`, so introduction arrival/restoration leaves the ready control idle and editable. Choosing
@@ -168,8 +182,8 @@ Resolve a phrase cycles next Friday, tomorrow 10:30, past 3 days, 22 July 1980, 
 next month, holding each complete example for 1700 ms. Loop reset restores the ready date/time before repeating.
 
 Guide footers contain only Previous and Next, with no counter or duplicate title. The contextual All calendar demos
-(or current product) action opens contents and matches the 34 px collapse control. Calendar docks omit small labels,
-retain accessible group names and match the fullscreen control’s 40 px height. Controlled drafts use the public
+(or current product) action opens contents and matches collapse height: 34 px desktop, 44 px mobile. Calendar docks
+omit small labels, retain accessible group names and keep their independent 40 px height. Controlled drafts use the public
 active-draft move callback; their editor follows dragging, Save commits the new slot and Cancel discards it.
 
 ## Appearance and zoom bounds

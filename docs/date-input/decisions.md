@@ -157,3 +157,15 @@ scenario sections, JSON explanations, explicit fullscreen, and inert mobile prev
 - Consequences: The calendar follows the input without a second summary card. Assert hidden header state and the
   resulting input-to-month spacing on desktop and phone. Standalone pickers and public component defaults retain
   their summaries.
+
+## Shared mobile explainer drawer — 2026-10-20
+
+[QUNO-038](../shared/decisions.md#quno-038--use-a-mobile-explainer-drawer-with-adjacent-fullscreen) supersedes the shared
+concept's mobile floating positioning and corner fullscreen placement. The drawer, chevron/fullscreen group and
+responsive dock clearance belong to the demo; this product's public behavior and styles retain their contracts.
+
+## Shared mobile drawer overlay — 2026-10-20
+
+[QUNO-039](../shared/decisions.md#quno-039--overlay-the-full-mobile-canvas-with-the-explainer-drawer) removes reserved
+mobile stage space: the shared explainer overlays the full canvas without disclosure-driven product movement.
+This updates demo presentation only; public component contracts and desktop layout remain unchanged.

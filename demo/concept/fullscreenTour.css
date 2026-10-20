@@ -36,15 +36,7 @@
   cursor: default;
 }
 .concept-tour-fullscreen {
-  position: absolute;
-  z-index: 3;
-  bottom: 16px;
-  height: 40px;
-  box-shadow: 0 4px 16px #302b421a;
-}
-.concept-tour-fullscreen {
-  right: 16px;
-  width: 40px;
+  flex-shrink: 0;
 }
 
 .concept-tour-guide {
@@ -71,7 +63,8 @@
   gap: 8px;
   flex-shrink: 0;
 }
-.concept-tour-guide .concept-tour-toggle {
+.concept-tour-guide .concept-tour-toggle,
+.concept-tour-guide .concept-tour-fullscreen {
   align-self: start;
   width: 34px;
   height: 34px;
@@ -149,16 +142,19 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
 }
+.concept-tour-guide-actions {
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  gap: 8px;
+  align-self: start;
+}
 .concept-tour-guide .concept-tour-back {
   grid-column: 1;
   grid-row: 1;
   justify-self: start;
   padding: 6px 8px;
   height: 34px;
-}
-.concept-tour-guide .concept-tour-toggle {
-  grid-column: 2;
-  grid-row: 1;
 }
 .concept-tour-guide h1 {
   grid-column: 1 / -1;
@@ -173,7 +169,4 @@
   grid-column: 1;
   grid-row: 1;
   margin: 0;
-}
-.concept-tour-guide[data-collapsed="true"] .concept-tour-toggle {
-  grid-column: 2;
 }

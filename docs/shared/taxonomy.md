@@ -221,14 +221,15 @@ Date Input’s `forceCadence` is an opt-in typed-clock restriction that applies 
 
 A concept **scenario** or **scene** is one named configuration, action sequence and field-guide recipe. Its
 **scenario file** owns JSON copy, initial values and steps. A **product manifest** orders scenes and owns product
-metadata; the **demo manifest** owns startup order and shared fixture context. An **action adapter** implements one
+metadata; its optional **tab label** shortens only top navigation. The **demo manifest** owns startup order and shared fixture context. An **action adapter** implements one
 typed interaction without branching on scene IDs.
 
 The **live canvas** fills the available demo window. Its **floating guide** contains an introduction, All demos
-contents, explanation and previous/next footer. **Collapse** retains only the title and expand button at the same
-width. A **left-bottom anchor** retains left and bottom offsets while content height changes. The **fullscreen
-control** sits at bottom right; Calendar's **scenario control dock** appears immediately to its left. Non-calendar
-**product stages** sit right of the guide on wide screens, above it in a scrollable region on phones.
+contents, explanation and previous/next footer. **Collapse** retains the title, fullscreen and expand button at the same
+width. A mobile **explainer drawer** attaches that guide to the bottom edge and supports header swipes or chevron taps. A **left-bottom anchor** retains left and bottom offsets while content height changes. The **fullscreen
+control** sits beside the chevron; Calendar's **scenario control dock** sits at bottom right on desktop and above the mobile drawer. Non-calendar
+**product stages** sit right of the guide on wide screens and fill a scrollable canvas behind the mobile drawer.
+A drawer **overlay** reserves no content spacer and does not resize the stage on disclosure.
 
 A **presentation introduction** precedes scene chapters without adding a playback scene. A **cycle** is one pass
 of the selected scene's actions and hold. A **loop** repeats that scene without changing navigation. **Continuous
@@ -245,6 +246,7 @@ counts appointments across all resources per day; ordinary scenes use 22, while 
 highlight; **cancellation fade** is the public draft-release animation, both presented by demo-owned styling.
 
 The concept demo's **effective zoom range** uses the viewport-fill floor as its horizontal slider minimum (rounded
-up to 0.01), 0.5 vertically, and 8 at the maximum. This is consumer-owned demo behavior; the library's viewport-fill
+up to 0.01), 0.5 vertically, and 8 at the maximum. Its **mobile names column** uses 30% of the measured horizontal
+viewport; the calendar geometry and zoom floor share that same label width. This is consumer-owned demo behavior; the library's viewport-fill
 zoom floor above remains a rendering contract. **System appearance** means the current prefers-color-scheme value,
 not the Calendar Theming chapter's explicit palette selection.

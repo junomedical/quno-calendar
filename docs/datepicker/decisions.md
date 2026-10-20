@@ -1213,3 +1213,15 @@ selection retain reveal behavior. Datepicker's return-to-days, selected clock an
 - Consequences: Retain the existing CSS and all other product ceilings. The small shared reveal cost preserves
   selected-slot visibility without moving a visible choice away from the pointer. Package verification enforces
   the updated ceiling.
+
+## Shared mobile explainer drawer — 2026-10-20
+
+[QUNO-038](../shared/decisions.md#quno-038--use-a-mobile-explainer-drawer-with-adjacent-fullscreen) supersedes the shared
+concept's mobile floating positioning and corner fullscreen placement. The drawer, chevron/fullscreen group and
+responsive dock clearance belong to the demo; this product's public behavior and styles retain their contracts.
+
+## Shared mobile drawer overlay — 2026-10-20
+
+[QUNO-039](../shared/decisions.md#quno-039--overlay-the-full-mobile-canvas-with-the-explainer-drawer) removes reserved
+mobile stage space: the shared explainer overlays the full canvas without disclosure-driven product movement.
+This updates demo presentation only; public component contracts and desktop layout remain unchanged.

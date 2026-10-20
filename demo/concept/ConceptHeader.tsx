@@ -8,9 +8,9 @@ export function ConceptHeader({ product, change }: { product: ProductId; change:
         quno<span>®</span>
       </a>
       <nav aria-label="Products">
-        {products.map(({ id, label }) => (
+        {products.map(({ id, label, tabLabel }) => (
           <button key={id} aria-pressed={id === product} onClick={() => change(id as ProductId)}>
-            {label}
+            {tabLabel ?? label}
           </button>
         ))}
       </nav>

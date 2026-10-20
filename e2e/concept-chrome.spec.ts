@@ -16,7 +16,9 @@ test("Zoom explains Shift-scroll with a keyboard tag", async ({ page }) => {
 });
 
 for (const width of [1440, 390])
-  test(`scenario controls sit directly left of fullscreen at ${width}px`, async ({ page }) => {
+  test(`scenario controls stay clear of the guide and its adjacent fullscreen/chevron at ${width}px`, async ({
+    page
+  }) => {
     await page.setViewportSize({ width, height: 900 });
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/concept");
@@ -25,10 +27,13 @@ for (const width of [1440, 390])
       await expect(page.locator(".concept-controls legend")).toHaveCount(0);
       const dock = (await page.locator(".concept-controls").boundingBox())!;
       const full = (await page.locator(".concept-tour-fullscreen").boundingBox())!;
-      expect(dock.height).toBe(full.height);
       expect(dock.height).toBe(40);
-      expect(full.x - dock.x - dock.width).toBeCloseTo(8, 0);
-      expect(dock.y + dock.height).toBeCloseTo(full.y + full.height, 0);
+      const guide = (await page.locator(".concept-tour-guide").boundingBox())!;
+      const chevron = (await page.locator(".concept-tour-toggle").boundingBox())!;
+      expect(chevron.x - full.x - full.width).toBe(8);
+      expect(full.y).toBe(chevron.y);
+      if (width <= 850) expect(dock.y + dock.height).toBeLessThanOrEqual(guide.y - 12);
+      else expect(dock.x).toBeGreaterThan(guide.x + guide.width);
       for (const selector of [
         ".concept-tour-fullscreen",
         ".concept-controls button",
