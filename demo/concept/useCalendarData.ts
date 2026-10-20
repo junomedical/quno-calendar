@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import type { CalendarEvent, ProjectEvents } from "@quno/calendar/infinite-calendar";
-import { createCalendarDataset, inDensity } from "./calendarDataset";
+import { createCalendarDataset } from "./calendarDataset";
 import { eventDate } from "./CalendarEditor";
 export function useCalendarData(density: number) {
   const [changes, setChanges] = useState<Record<string, CalendarEvent>>({});
@@ -10,10 +10,12 @@ export function useCalendarData(density: number) {
     const snapshot = latest.current;
     return () => setChanges(snapshot);
   }, []);
-  const loadEvents = useMemo(createCalendarDataset, []);
+  const { loadEvents, readEvents } = useMemo(createCalendarDataset, []);
   const projectEvents = useCallback<ProjectEvents>(
-    ({ events, startDate, endDate, calendarIds }) => [
-      ...events.filter((event) => !changes[event.id] && inDensity(event, density)),
+    ({ startDate, endDate, calendarIds }) => [
+      ...readEvents({ startDate, endDate, calendarIds: [...calendarIds] }, density).filter(
+        (event) => !changes[event.id]
+      ),
       ...Object.values(changes).filter(
         (event) =>
           eventDate(event.start) >= startDate &&
@@ -21,7 +23,7 @@ export function useCalendarData(density: number) {
           calendarIds.includes(event.calendarId)
       )
     ],
-    [changes, density]
+    [changes, density, readEvents]
   );
   return { loadEvents, projectEvents, setChanges, checkpoint };
 }

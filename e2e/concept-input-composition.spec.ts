@@ -19,7 +19,10 @@ for (const width of [1440, 390])
       const guide = (await page.locator(".concept-tour-guide").boundingBox())!;
       const card = (await page.locator(".concept-product-card").boundingBox())!;
       if (width === 1440) expect(card.x).toBeGreaterThan(guide.x + guide.width);
-      else expect(card.y + card.height).toBeLessThan(guide.y);
+      else {
+        const stage = (await page.locator(".concept-product-stage").boundingBox())!;
+        expect(stage.y + stage.height).toBeGreaterThan(guide.y);
+      }
     });
     test(`focused picker shares typed and selected ranges at ${width}px`, async ({ page }, info) => {
       await selectCalendarScene(page, "Works with datepicker");
@@ -44,7 +47,7 @@ for (const width of [1440, 390])
       const stage = (await page.locator(".concept-product-stage").boundingBox())!;
       const card = (await page.locator(".concept-product-card").boundingBox())!;
       if (width === 1440) expect(card.x).toBeGreaterThan(guide.x + guide.width);
-      else expect(stage.y + stage.height).toBeLessThan(guide.y);
+      else expect(stage.y + stage.height).toBeGreaterThan(guide.y);
       await page.screenshot({ path: info.outputPath("date-input-with-picker.png") });
       await page.getByRole("button", { name: /^All .+ demos$/ }).click();
       await expect(picker).toHaveCount(0);

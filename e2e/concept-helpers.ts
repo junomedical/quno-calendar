@@ -3,6 +3,8 @@ import { basename, resolve } from "node:path";
 import type { Page } from "@playwright/test";
 import type { InitialByProduct } from "#quno-demo/concept/scenarioTypes";
 
+export const productTabLabel = (product: string) => (product === "Date Parser" ? "Parser" : product);
+
 // Exercise the supported JSON configuration without exposing unrelated controls in the UI.
 export async function calendarInitial(page: Page, initial: Partial<InitialByProduct["infinite-calendar"]>) {
   await page.route("**/demo/concept/scenarios/infinite-calendar/*.json*", async (route) => {

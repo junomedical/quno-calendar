@@ -28,7 +28,9 @@ The adapter receives a new React commit when mounted content or geometry changes
 ## Coordinate model
 
 Day identity is a timezone-free `IsoDate`; timestamps on events retain their existing local/offset interpretation.
-A finite month-before/month-after sequence represents the infinite date axis. Prefix extents give each day and
+A finite month-before/month-after sequence represents the infinite date axis by default. Optional
+settings.dateWindowRadius instead counts included dates on each side; the sequence cache keys that setting alongside
+the anchor and excluded weekdays. Prefix extents give each day and
 resource a half-open interval. Binary searches produce visible dates plus five overscan dates per side and visible
 resources plus two overscan resources per side. One active anchor date and relevant draft/preview resources may be
 pinned. Render overscan does not determine network ranges.

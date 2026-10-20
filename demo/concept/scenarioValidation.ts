@@ -23,7 +23,7 @@ const initial: Record<ProductId, Check> = {
     {
       view: oneOf("preferred", "infinite-horizontal", "infinite-vertical"),
       theme: oneOf("system", "light", "dark", "brand"),
-      density: between(4, 400, true),
+      density: between(4, 60, true),
       zoom: between(0.5, 8),
       controls: array(oneOf("view", "theme", "density", "zoom"))
     },
@@ -53,36 +53,39 @@ const link: Check = (value, path) => {
 const product: Check = (value, path) => {
   const id = (value as { id?: unknown } | null)?.id;
   oneOf(...ids)(id, `${path}.id`);
-  object({
-    id: oneOf(...ids),
-    label: nonempty,
-    title: nonempty,
-    description: nonempty,
-    preview: array(nonempty, 1),
-    explore: array(link),
-    scenarios: array(
-      object(
-        {
-          id: nonempty,
-          label: nonempty,
-          hint: nonempty,
-          paragraphs: (value, path) => {
-            array(nonempty, 1)(value, path);
-            requireValue(
-              (value as unknown[]).length <= (id === "infinite-calendar" ? 3 : 2),
-              path,
-              "up to three Calendar paragraphs or two for other products"
-            );
+  object(
+    {
+      id: oneOf(...ids),
+      label: nonempty,
+      title: nonempty,
+      description: nonempty,
+      preview: array(nonempty, 1),
+      explore: array(link),
+      scenarios: array(
+        object(
+          {
+            id: nonempty,
+            label: nonempty,
+            hint: nonempty,
+            paragraphs: (value, path) => {
+              array(nonempty, 1)(value, path);
+              requireValue(
+                (value as unknown[]).length <= (id === "infinite-calendar" ? 3 : 2),
+                path,
+                "up to three Calendar paragraphs or two for other products"
+              );
+            },
+            anchor: nonempty,
+            initial: initial[id as ProductId],
+            steps: array(step, 1)
           },
-          anchor: nonempty,
-          initial: initial[id as ProductId],
-          steps: array(step, 1)
-        },
-        { loop: oneOf("continue"), chapterOnly: boolean }
-      ),
-      1
-    )
-  })(value, path);
+          { loop: oneOf("continue"), chapterOnly: boolean }
+        ),
+        1
+      )
+    },
+    { tabLabel: nonempty }
+  )(value, path);
 };
 export function parseScenarioDocument(value: unknown): ScenarioDocument {
   object({

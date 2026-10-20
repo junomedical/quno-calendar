@@ -163,7 +163,7 @@ Architecture checks enforce object arguments and product dependency direction, i
 - Chapter 01 explains why complex business scheduling needs a dedicated calendar before introducing horizontal time,
   vertically stacked resources, and the familiar vertical mouse-wheel or touchpad axis.
 - The performance chapter presents the four-to-hundreds-of-events use case and 60–120fps scrolling target without
-  implying a universal device guarantee. Its 4/40/400 density cards share one row at article width and stack at the
+  implying a universal device guarantee. Its 4/20/60 density cards share one row at article width and stack at the
   mobile breakpoint; algorithmic performance remains covered by the scaling test and explicit budgets below.
 - The CSS-native chapter verifies computed `position: sticky` ownership for day, date, and resource labels, then checks
   that date and resource X geometry remains fixed during horizontal timeline scrolling without synchronized React
@@ -482,9 +482,9 @@ browser anchoring/geometry assertions.
 
 The isolated `/concept` Chromium suite exercises all 23 authored scenes through live controls. Shared presentation
 checks cover all five products at desktop, phone and landscape sizes: live canvas, introduction/contents/footer,
-collapse width and 34 px toggle size, whole-body pointer/touch/keyboard dragging, left-bottom anchoring, clipping,
+collapse width and adjacent fullscreen/chevron geometry, desktop pointer/keyboard dragging, mobile drawer anchoring, clipping,
 fullscreen retention/focus and unobstructed hit targets. Other products must sit right of the guide on wide screens
-or in a scrollable region above it on phones. Calendar controls share the fullscreen bottom edge and sit 8 px left.
+or fill the canvas behind the mobile drawer without a reserved gap. Calendar controls clear the drawer on mobile and stay at bottom right on desktop.
 
 JSON tests discover every scene independently, validate malformed values/actions and manifest references, edit each
 file without affecting others, and add a new scene through JSON alone. Browser customization verifies copy, recipe,
@@ -519,9 +519,11 @@ Parser concept tests assert raw token text/types, date and overnight clock resul
 
 Date Parser introduction checks assert its prefilled date/time, resolved clock, idle playback, manual editing and
 restoration on desktop/phone. Phrase checks observe six complete results and a repeated cycle without navigation.
+Ambiguity checks observe 10-11-12, 01/02 and feb 11 80 with both resolved endpoints, visible tokens/results, a repeated
+cycle and manual takeover on desktop/phone.
 
 Concept browser checks verify contextual contents actions and matching collapse heights, two footer buttons without
-a counter, 40 px docks aligned with fullscreen, and draft movement/editor updates before Save/Cancel in both views.
+a counter, 40 px docks clear of the explainer, and draft movement/editor updates before Save/Cancel in both views.
 
 Time-choice stability checks assert native pointer hit targets and unchanged option geometry/scroll after pointer
 and keyboard selection, plus uncontrolled state and equivalent-hour rerenders. External offscreen reveal remains
@@ -534,3 +536,38 @@ buttons, wheel reversal, resize and both orientations verify that demo bounds ma
 Creation draft contrast tests measure actual computed title/clock colors against draft, saved and hovered card
 backgrounds, requiring at least 4.5:1 in both themes and orientations. Light product panels and explainer styles
 remain separate assertions from the OS-dependent canvas.
+
+Mobile drawer checks use native Chromium touch input for down/up header and chevron swipes, short/cancelled gestures,
+independent contents scrolling and unchanged calendar scroll/mount. Frame samples assert a fixed bottom edge and
+intermediate collapse heights with ordinary motion, monotonic downward settling from a dragged position, immediate
+settling with reduced motion, and reachable 44 px controls. Desktop/phone/landscape checks cover all five products, fullscreen focus/retention and desktop drag recovery.
+
+Mobile Calendar label checks measure 30% width and 0.75/0.6 name/date font ratios, actual grid alignment, fullscreen
+and retained viewport identity at 375, 390, 844 and 850 px. Crossing back to 851 px restores desktop geometry and
+typography. Zoom-floor and orientation checks retain the independent 167 px vertical time pane.
+
+Orientation-tour regressions require the first complete desktop/phone loop to return to its starting date without
+waiting for an unmounted appointment. Shared scroll-to checks retain centered time choices alongside the new
+start-aligned day-header return.
+
+Mobile overlay checks cover all four non-calendar products at 375×667, 390×844 and 844×390. Product stages match
+the full canvas height and retain their card geometry through collapse, expansion and contents. Fullscreen changes
+only available canvas dimensions. Datepicker extends beneath the drawer and real hit testing resolves the covered
+point to the drawer. Screenshots supplement these geometry, layering and retained-mount assertions.
+
+Parser introduction checks require the short Parser top tab, Date parser heading and tokenization/date-interpretation
+explanation on desktop and phone, alongside the existing ready value, token/result visibility and navigation.
+
+Mobile drawer playback checks cover all five products with trusted taps, native header/chevron swipes, short/cancelled
+gestures and Enter/Space disclosure. They require unchanged canvas identity, continued cycle progression and retained
+playing state; manual canvas interaction still pauses and subsequent disclosure cannot resume it. Contents, fullscreen
+and desktop guide collapse/drag retain cancellation. Touch helpers await actual drawer animation completion before
+measuring the next gesture's target.
+
+Calendar date-window tests cover the existing month default, explicit included-date radii, excluded weekdays,
+leap days, normalization, live settings changes and semantic continuity. Browser checks require 15-date demo scroll
+extents, idle/autoplay scrollbar recentering and unchanged date offsets on desktop/phone. The performance exhibit
+must fill its 560 px wrapper with reachable controls at every density. Demo dataset tests distinguish the 22-event
+persistent baseline from the stable 60-event source used for density projection, and leave unrequested dates empty.
+Seeded density tests require exact 4/20/60 totals, equal per-resource counts, all four time bands, working-hour bounds,
+stable identities and repeatable but date-varying starts. Browser checks verify every preset’s actual per-day counts.

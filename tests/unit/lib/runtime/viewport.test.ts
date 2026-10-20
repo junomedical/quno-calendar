@@ -24,6 +24,30 @@ const anchor: SemanticAnchor = {
 };
 
 describe("viewport ownership", () => {
+  it("rebuilds a changed date-window radius and recenters without shifting visible content", () => {
+    const engine = new CalendarEngine({ layout, viewport });
+    const before = engine.read();
+    engine.updateLayout({ layout: { ...layout, settings: { ...settings, dateWindowRadius: 7 } }, now: 0 });
+    const smaller = engine.read();
+    expect(smaller.geometry.dates).toHaveLength(15);
+    expect(smaller.window.visibleDateKeys).toEqual(before.window.visibleDateKeys);
+    engine.observeScroll({ top: smaller.viewport.top + 600, left: 0, now: 1 });
+    const scrolled = engine.read();
+    const visible = scrolled.window.visibleDateKeys[0];
+    const y = projectPoint({ geometry: scrolled.geometry, target: { dateKey: visible } })!.y - scrolled.viewport.top;
+    engine.settle({ now: 2000 });
+    const settled = engine.read();
+    expect(settled.geometry.dates).toHaveLength(15);
+    expect(settled.window.visibleDateKeys).toEqual(scrolled.window.visibleDateKeys);
+    expect(
+      projectPoint({ geometry: settled.geometry, target: { dateKey: visible } })!.y - settled.viewport.top
+    ).toBeCloseTo(y, 8);
+    expect(settled.viewport.top / (settled.geometry.height - settled.viewport.height)).toBeGreaterThan(0.4);
+    expect(settled.viewport.top / (settled.geometry.height - settled.viewport.height)).toBeLessThan(0.65);
+    engine.updateLayout({ layout, now: 3000 });
+    expect(engine.read().geometry.dates.length).toBeGreaterThan(50);
+    expect(engine.read().window.visibleDateKeys).toEqual(settled.window.visibleDateKeys);
+  });
   it("orders intent, supersedes equal owners and ignores obsolete cancellation", () => {
     const ownership = new ViewportOwnership();
     const restore = ownership.claim({ kind: "restore", anchor, now: 0, duration: 100 })!;

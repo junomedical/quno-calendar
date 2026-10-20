@@ -65,7 +65,7 @@ for (const [today, results, width] of [
     const guide = (await page.locator(".concept-tour-guide").boundingBox())!;
     const stage = (await page.locator(".concept-product-stage").boundingBox())!;
     const card = (await page.locator(".concept-product-card").boundingBox())!;
-    if (width === 390) expect(stage.y + stage.height).toBeLessThan(guide.y);
+    if (width === 390) expect(stage.y + stage.height).toBeGreaterThan(guide.y);
     else expect(card.x).toBeGreaterThan(guide.x + guide.width);
     await page.screenshot({ path: info.outputPath("natural-examples.png") });
     await field.fill("tomorrow");

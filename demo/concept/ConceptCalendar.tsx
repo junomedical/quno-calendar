@@ -37,7 +37,7 @@ export function ConceptCalendar({
   const [themePreference, setTheme] = useState(initial.theme);
   const theme = themePreference === "system" ? systemTheme : themePreference;
   const [density, setDensity] = useState(initial.density);
-  const { zoom, setZoom, minimum, maximum } = useCalendarZoom(root, view, initial.zoom);
+  const { zoom, setZoom, minimum, maximum, labelWidth } = useCalendarZoom(root, view, initial.zoom);
   const { loadEvents, projectEvents, setChanges, checkpoint } = useCalendarData(density);
   const { draft, editing, setDraft, save, cancel, reset, renderEvent, ...eventHandlers } = useCalendarEdits(
     ref,
@@ -65,7 +65,7 @@ export function ConceptCalendar({
     reset();
     return () => node?.removeEventListener("concept-loop", repeat);
   }, [initial, revision, reset, checkpoint, setZoom]);
-  const settings = useMemo(() => ({ ...conceptCalendarSettings, zoom }), [zoom]);
+  const settings = useMemo(() => ({ ...conceptCalendarSettings, labelWidth, zoom }), [labelWidth, zoom]);
   useEffect(() => {
     const frame = requestAnimationFrame(() => {
       ref.current?.scrollToDateTime({ date: navigationDate.current, time: "10:00", calendarId: "person-0" });

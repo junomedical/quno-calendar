@@ -78,7 +78,9 @@ async function runStep(actor: PlaybackActor, step: PlaybackStep) {
       const scroller = await actor.find(step.target);
       return actor.scroll(
         step.target,
-        center(target).y - center(scroller).y,
+        step.align === "start"
+          ? target.getBoundingClientRect().top - scroller.getBoundingClientRect().top
+          : center(target).y - center(scroller).y,
         step.caption,
         step.durationMs,
         step.easing

@@ -50,7 +50,7 @@ export function CalendarControls({
       )}
       {controls.includes("density") && (
         <fieldset aria-label="Event density">
-          {[4, 40, 400].map((value, i) => (
+          {[4, 20, 60].map((value, i) => (
             <button
               key={value}
               data-action={`density-${value}`}

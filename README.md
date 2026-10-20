@@ -116,8 +116,12 @@ Wheel input follows the current Shift state immediately: hold Shift to zoom, rel
 The isolated `/concept` playground presents all five products in a live full-window canvas with a draggable,
 collapsible guide. The contextual contents button opens the contents; previous/next navigation stays inside the guide. Chapters autoplay
 and loop unless reduced motion is enabled, and deliberate interaction pauses playback. The guide starts 24 px from
-the bottom left and resizes upward from that corner. Fullscreen sits at bottom right, beside scene-specific controls.
-Other products sit to the right of the explanation on wide screens and above it on phones. Datepicker has seven
+the bottom left on desktop. On mobile it becomes a bottom drawer: tap its chevron or swipe its header down to collapse,
+and swipe up or tap to expand. Mobile drawer taps and swipes keep the current demo playing. Fullscreen sits beside
+the chevron in both layouts.
+Calendar demos keep seven included dates on either side through optional `settings.dateWindowRadius`, while the
+library retains its month-based default. Mobile Calendar names use 30% of the viewport, with smaller name/date text. Other products sit to the right of the
+explanation on wide screens; on phones, the drawer overlays their full-height canvas without reserving space. Datepicker has seven
 chapters with first-person explanations, including an 8840 ms scroll to 22 July 1980; Date Input explains format
 guessing, opens its composed picker on focus and demonstrates natural typing
 with four varied examples and a readable pause before Enter, plus repeated day/month keyboard edits.
@@ -126,7 +130,8 @@ See [concept notes](./demo/concept/README.md) for JSON authoring, choreography a
 Timepicker’s concept chapters also show date-and-time selection inside Datepicker. The parser workbench exposes
 live token chips and resolved endpoints beneath the phrase, with chapter configuration kept in JSON.
 
-The Date Parser concept opens with `12/01 10:00` already resolved. Its phrase chapter demonstrates six varied inputs.
+The concept’s **Parser** tab introduces tokenization and date interpretation under **Date parser**, with
+`12/01 10:00` already resolved. Its phrase chapter demonstrates six varied inputs; Resolve ambiguity interprets `10-11-12`, `01/02` and `feb 11 80`.
 
 Time choices keep a visible selected minute under the pointer instead of scrolling its hour to the top. Initial
 opening and external offscreen selections retain automatic reveal.

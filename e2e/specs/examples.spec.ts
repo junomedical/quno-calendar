@@ -289,7 +289,7 @@ test("editorial performance range explains the busy-schedule use case and respon
   const range = page.getByTestId("article-performance-range");
   const cards = range.locator("article");
   await expect(cards).toHaveCount(3);
-  await expect(cards.locator("strong")).toHaveText(["4", "40", "400"]);
+  await expect(cards.locator("strong")).toHaveText(["4", "20", "60"]);
   const desktopBoxes = await cards.evaluateAll((elements) =>
     elements.map((element) => {
       const box = element.getBoundingClientRect();
@@ -343,7 +343,7 @@ test("editorial CSS-native exhibit keeps stable chrome browser-positioned", asyn
 
 test("all five guides separate exact payloads from runtime contracts", async ({ page }) => {
   const guides = [
-    ["infinite-calendar", "32.92 KiB gzip", "1.97 KiB gzip", "@quno/calendar/infinite-calendar"],
+    ["infinite-calendar", "33.07 KiB gzip", "1.97 KiB gzip", "@quno/calendar/infinite-calendar"],
     ["datepicker", "12.46 KiB gzip", "3.36 KiB gzip", "@quno/calendar/datepicker"],
     ["date-input", "9.64 KiB gzip", "0.58 KiB gzip", "@quno/calendar/date-input"],
     ["timepicker", "1.59 KiB gzip", "0.78 KiB gzip", "@quno/calendar/timepicker"],

@@ -1,4 +1,4 @@
-import { selectCalendarScene } from "#quno-e2e/concept-helpers";
+import { selectCalendarScene, productTabLabel } from "#quno-e2e/concept-helpers";
 import { expect, test } from "@playwright/test";
 test.describe.configure({ mode: "parallel" });
 const products = [
@@ -19,10 +19,10 @@ for (const [product, chapter, count] of products)
       await page.setViewportSize(size);
       await page.emulateMedia({ reducedMotion: "reduce" });
       await page.goto("/concept");
-      await page.getByRole("button", { name: product, exact: true }).click();
+      await page.getByRole("button", { name: productTabLabel(product), exact: true }).click();
       const guide = page.locator(".concept-tour-guide");
       const canvas = page.locator(".concept-canvas");
-      await expect(guide.locator("h1")).toHaveText(product);
+      await expect(guide.locator("h1")).toHaveText(product === "Date Parser" ? "Date parser" : product);
       await expect(canvas).not.toHaveAttribute("inert", "");
       await expect(page.locator(".concept-pages, .concept-scenarios, .concept-playback-controls")).toHaveCount(0);
       expect((await canvas.boundingBox())!.width).toBe(size.width);
@@ -45,24 +45,25 @@ for (const [product, chapter, count] of products)
       const expanded = (await guide.boundingBox())!;
       const stage = (await page.locator(".concept-product-stage").boundingBox())!;
       const cardBox = (await card.boundingBox())!;
-      expect(size.height - expanded.y - expanded.height).toBeCloseTo(24, 0);
-      if (size.width >= 720) {
+      expect(size.height - expanded.y - expanded.height).toBeCloseTo(size.width <= 850 ? 0 : 24, 0);
+      if (size.width > 850) {
         expect(cardBox.x).toBeGreaterThan(expanded.x + expanded.width + 12);
         expect(cardBox.x + cardBox.width / 2).toBeGreaterThan(size.width / 2);
       } else {
-        expect(stage.y + stage.height).toBeLessThanOrEqual(expanded.y - 12);
+        expect(stage.y + stage.height).toBeGreaterThan(expanded.y);
       }
       await page.getByRole("button", { name: "Collapse description", exact: true }).click();
       const collapsed = (await guide.boundingBox())!;
       expect(collapsed.x).toBe(expanded.x);
       expect(collapsed.width).toBe(expanded.width);
       expect(collapsed.y + collapsed.height).toBeCloseTo(expanded.y + expanded.height, 3);
-      await expect(guide.getByRole("button")).toHaveCount(1);
+      await expect(guide.getByRole("button")).toHaveCount(2);
       await page.getByRole("button", { name: "Expand description", exact: true }).click();
       const full = page.getByRole("button", { name: `Full screen ${product.toLowerCase()}`, exact: true });
       const bounds = (await full.boundingBox())!;
-      expect(size.width - bounds.x - bounds.width).toBe(16);
-      expect(size.height - bounds.y - bounds.height).toBe(16);
+      const chevron = (await collapse.boundingBox())!;
+      expect(chevron.x - bounds.x - bounds.width).toBe(8);
+      expect(bounds.y).toBe(chevron.y);
       await full.click();
       await expect(page.locator(".concept--fullscreen")).toBeVisible();
       await page.keyboard.press("Escape");

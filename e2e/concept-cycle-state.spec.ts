@@ -12,7 +12,7 @@ test("density opens horizontally after leaving a vertical scene and clears hover
   await expect(page.locator(".concept-calendar-workspace")).toHaveAttribute("data-view", "infinite-vertical");
   await selectCalendarScene(page, "Event density");
   await expect(page.locator(".concept-calendar-workspace")).toHaveAttribute("data-view", "infinite-horizontal");
-  const event = page.locator('[data-event-id="2026-10-19-event-0"]');
+  const event = page.locator('[data-event-id="2026-10-19-density-0"]');
   await expect(event).toHaveAttribute("data-status", "hovered", { timeout: 12000 });
   await expect(page.locator('.concept-cursor[data-gesture="scroll"]')).toBeVisible();
   await expect(page.locator('.concept-calendar [data-status="hovered"]')).toHaveCount(0);

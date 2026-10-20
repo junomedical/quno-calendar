@@ -1,8 +1,9 @@
 {
   "id": "date-parser",
-  "label": "Date Parser",
+  "label": "Date parser",
+  "tabLabel": "Parser",
   "title": "Words become dates.",
-  "description": "Explore the headless parser behind natural date entry.",
+  "description": "To support natural language processing, text first needs to be tokenized, then connected into meaningful dates. This part of the library is responsible for that process.",
   "preview": ["phrase"],
   "explore": [
     ["Expected period", "expected-period"],

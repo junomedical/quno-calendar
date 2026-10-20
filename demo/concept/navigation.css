@@ -247,8 +247,10 @@
     pointer-events: none;
     overflow: hidden;
   }
-  .concept:not(.concept--fullscreen):not(.concept--guided) .concept-controls,
-  .concept:not(.concept--fullscreen):not(.concept--guided) .concept-calendar-workspace > .concept-result {
+  .concept:not(.concept--fullscreen):not(.concept--guided):not(.concept--embedded) .concept-controls,
+  .concept:not(.concept--fullscreen):not(.concept--guided):not(.concept--embedded)
+    .concept-calendar-workspace
+    > .concept-result {
     display: none;
   }
   .concept-scenarios {

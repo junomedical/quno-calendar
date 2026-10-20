@@ -66,8 +66,14 @@ Try `/demo/date-time` and the live date-time chapter, or copy the
 
 ## Concept playground
 
-The `/concept` playground uses the shared floating guide, autoplay loops, live phone stage and bottom-right fullscreen
-presentation recorded in [QUNO-032](../shared/decisions.md#quno-032---share-the-floating-guide-across-all-concept-products).
+The `/concept` playground uses the shared guide, autoplay loops and live phone stage from
+[QUNO-032](../shared/decisions.md#quno-032---share-the-floating-guide-across-all-concept-products). Mobile presents the
+explainer as a bottom drawer with chevron taps and header swipes; fullscreen sits beside the chevron in both layouts
+([QUNO-038](../shared/decisions.md#quno-038--use-a-mobile-explainer-drawer-with-adjacent-fullscreen)). The drawer
+overlays the full mobile canvas without reserving space or shifting the working product when collapsed
+([QUNO-039](../shared/decisions.md#quno-039--overlay-the-full-mobile-canvas-with-the-explainer-drawer)).
+Mobile chevron disclosure and header swipes preserve the current playback state
+([QUNO-040](../shared/decisions.md#quno-040---keep-mobile-drawer-disclosure-independent-of-playback)).
 
 Its first-person introduction leads into Format guessing, Type naturally, Edit with keyboard and Works with
 datepicker. Format guessing writes out numeric interpretations; natural typing supports ranges. The composed picker

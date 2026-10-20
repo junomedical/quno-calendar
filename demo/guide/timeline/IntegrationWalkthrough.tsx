@@ -25,6 +25,7 @@ import {
 import { DragCreateArticleDemo, PrefetchLoadingDemo, ReadOnlyArticleDemo } from "./ArticleRecipeDemos";
 import { EventProjectionDemo } from "./EventProjectionDemo";
 import { DensityDemo, densityRecipe } from "./DensityDemo";
+import { calendarWindowRecipe } from "./calendarWindowRecipe";
 import { ReactStateDemo } from "./ReactStateDemo";
 import { FieldGuidePage } from "#quno-demo/guide/shared/FieldGuidePage";
 import { FieldGuideProduction } from "#quno-demo/guide/shared/FieldGuideProduction";
@@ -434,6 +435,12 @@ export function IntegrationWalkthrough({ embedded = false }: { embedded?: boolea
           “scrolled” to “repositioned” when the bounded window settles, while every new visible date stays populated.
           Closing the overlay returns to this exact article position; the calendar itself never remounts.
         </Callout>
+        <p>
+          This demo keeps seven included dates on either side of the current date. After you stop scrolling, the
+          scrollbar returns near the middle while the dates stay in place. Omit dateWindowRadius to keep the default
+          month-before/month-after window.
+        </p>
+        <CodeBlock code={calendarWindowRecipe} title="Use a smaller date window" />
         <DemoBreakout>
           <InfiniteCalendarDemo />
         </DemoBreakout>
@@ -463,12 +470,12 @@ export function IntegrationWalkthrough({ embedded = false }: { embedded?: boolea
             <p>Quiet schedules keep the same lightweight path.</p>
           </article>
           <article>
-            <strong>40</strong>
+            <strong>20</strong>
             <span>events / day</span>
             <p>Indexed cells avoid repeated overlap scans.</p>
           </article>
           <article>
-            <strong>400</strong>
+            <strong>60</strong>
             <span>events / day</span>
             <p>Virtualization bounds the work to what can be seen.</p>
           </article>
@@ -478,7 +485,7 @@ export function IntegrationWalkthrough({ embedded = false }: { embedded?: boolea
           stable renderer identity. Product event renderers should keep their own card work equally disciplined.
         </Callout>
         <Callout>
-          Try Quiet, Busy, and Packed to compare 4, 40, and 400 appointments per day across four people. Switch the view
+          Try Quiet, Busy, and Packed to compare 4, 20, and 60 appointments per day across four people. Switch the view
           and inspect a card. These are fixture counts, not frame-rate guarantees.
         </Callout>
         <CodeBlock code={densityRecipe} title="Generate a deterministic range at three event densities" />
@@ -1012,7 +1019,7 @@ export function IntegrationWalkthrough({ embedded = false }: { embedded?: boolea
 
       <ArticleSection id="package-footprint" number="26" title="Ship Infinite Calendar independently">
         <p>
-          Infinite Calendar JavaScript is 32.92 KiB gzip. Its optional stylesheet is a separate 1.97 KiB gzip import;
+          Infinite Calendar JavaScript is 33.07 KiB gzip. Its optional stylesheet is a separate 1.97 KiB gzip import;
           neither number includes React or React DOM supplied by the application.
         </p>
         <p>

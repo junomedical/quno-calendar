@@ -27,13 +27,29 @@ function offsetMonth({ date, amount }: { date: IsoDate; amount: number }): IsoDa
 /** Date-only arithmetic is independent of local DST and event timestamp interpretation. */
 export function dateWindow({
   anchor,
-  excludedWeekdays
+  excludedWeekdays,
+  radius
 }: {
   anchor: IsoDate;
   excludedWeekdays: readonly number[];
+  radius?: number;
 }): readonly IsoDate[] {
   const normalized = includedDate({ date: anchor, excludedWeekdays });
   if (!normalized) return [];
+  if (radius !== undefined && Number.isFinite(radius)) {
+    const count = Math.max(1, Math.trunc(radius));
+    const dates = [normalized];
+    for (const direction of [-1, 1]) {
+      let date = normalized;
+      for (let index = 0; index < count; index++) {
+        do date = addDays({ date, amount: direction });
+        while (excludedWeekdays.includes(fromIsoDate({ value: date }).getUTCDay()));
+        if (direction < 0) dates.unshift(date);
+        else dates.push(date);
+      }
+    }
+    return dates;
+  }
   const first = includedDate({ date: offsetMonth({ date: normalized, amount: -1 }), excludedWeekdays })!;
   const last = includedDate({ date: offsetMonth({ date: normalized, amount: 1 }), excludedWeekdays })!;
   const dates: IsoDate[] = [];

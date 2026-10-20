@@ -24,23 +24,29 @@ export function initialSnapshot({ layout, viewport }: EngineOptions): EngineSnap
 
 const sequences = new WeakMap<
   Geometry,
-  { anchor: EngineOptions["layout"]["anchorDate"]; excluded: string; dates: ReturnType<typeof dateWindow> }
+  {
+    anchor: EngineOptions["layout"]["anchorDate"];
+    excluded: string;
+    radius?: number;
+    dates: ReturnType<typeof dateWindow>;
+  }
 >();
 
 export function layoutGeometry({ layout, viewport, previous }: EngineOptions & { previous?: Geometry }): Geometry {
   const old = previous ? sequences.get(previous) : undefined;
   const excluded = JSON.stringify(layout.settings.excludedWeekdays);
+  const radius = layout.settings.dateWindowRadius;
   const dates =
-    old?.anchor === layout.anchorDate && old.excluded === excluded
+    old?.anchor === layout.anchorDate && old.excluded === excluded && old.radius === radius
       ? old.dates
-      : dateWindow({ anchor: layout.anchorDate, excludedWeekdays: layout.settings.excludedWeekdays });
+      : dateWindow({ anchor: layout.anchorDate, excludedWeekdays: layout.settings.excludedWeekdays, radius });
   const geometry = buildGeometry({
     ...layout,
     previous,
     dates,
     viewportWidth: viewport.width
   });
-  sequences.set(geometry, { anchor: layout.anchorDate, excluded, dates });
+  sequences.set(geometry, { anchor: layout.anchorDate, excluded, radius, dates });
   return geometry;
 }
 

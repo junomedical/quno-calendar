@@ -512,3 +512,45 @@ retain their finite scenes and short tours.
   restarting playback, selection, editors or the mounted product. Scope all CSS to /concept; package styles and
   other routes retain their contracts. Verify both themes, live changes, bright surfaces and unchanged explainer
   colors on desktop, phone and fullscreen.
+
+## QUNO-038 — Use A Mobile Explainer Drawer With Adjacent Fullscreen
+
+- Date: 2026-10-20
+- Status: Accepted; supersedes QUNO-032's mobile floating placement and corner fullscreen, and refines QUNO-035
+- Decision: At widths up to 850 px, attach the shared explainer to the bottom edge as a full-width drawer with
+  safe-area padding. Its downward chevron collapses; the upward chevron expands. Header/chevron swipes over 48 px
+  perform the matching action, while short/cancelled gestures retain state and text/contents scroll natively. Animate
+  drawer height over 240 ms unless reduced motion is enabled. Put fullscreen immediately left of the chevron on both
+  desktop and mobile, retaining both controls and the title when collapsed. Use 44 px mobile targets and retain
+  desktop's 34 px controls and draggable bottom-left guide. Keep Calendar docks at bottom right on desktop and above
+  the drawer on mobile using its measured height.
+- Consequences: Preserve contents/navigation, component mounts, calendar scroll, desktop position across breakpoints
+  and fullscreen focus restoration. Verify native touch, cancellation, body scrolling, frame geometry/reduced motion,
+  control hit targets and phone/landscape layouts for every product. Shared presentation remains in demo/concept;
+  public exports, package styles and other guide routes do not change.
+
+## QUNO-039 — Overlay The Full Mobile Canvas With The Explainer Drawer
+
+- Date: 2026-10-20
+- Status: Accepted; supersedes QUNO-032's mobile product-stage clearance and refines QUNO-038
+- Decision: Keep each non-calendar product stage at the full canvas height on mobile, top aligned with fixed
+  padding. The bottom explainer drawer overlays that content; never subtract its measured height, reserve a gap,
+  or move/resize the working product when its explanation, contents or collapsed state changes. Keep native product
+  scrolling, drawer gestures, adjacent fullscreen and the existing desktop composition. Calendar already fills its
+  canvas and retains its floating control dock's clearance without adding a layout spacer.
+- Consequences: Covered content remains behind the drawer. Collapse the drawer to reveal more of the working demo.
+  Verify full canvas/stage geometry, stable card placement through disclosure/contents/fullscreen, retained mounts
+  and actual top-layer hit testing at overlapping Datepicker coordinates on phone and landscape. Scope the change
+  to demo CSS; public component layouts and styles remain unchanged.
+
+## QUNO-040 - Keep Mobile Drawer Disclosure Independent Of Playback
+
+- Date: 2026-10-20
+- Status: Accepted; refines QUNO-032's manual takeover and QUNO-038's drawer gestures
+- Decision: Mobile header/chevron gestures and chevron disclosure change only presentation. Preserve the running
+  scene and actor through down/up swipes, short/cancelled drags, taps and Enter/Space activation with their associated
+  focus. Leave already paused scenes paused. Keep contents, fullscreen, working controls, desktop guide interaction,
+  ordinary keyboard/wheel takeover and hidden-tab cancellation unchanged.
+- Consequences: Remove explicit mobile drawer stop calls and filter only presentation events in the shared playback
+  listener. Verify all five products with native input, continuing cycle progression, retained canvas identity and
+  paused-state preservation. This behavior belongs to demo/concept; public package contracts remain unchanged.

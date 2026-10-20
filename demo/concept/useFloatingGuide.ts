@@ -10,7 +10,7 @@ import {
 type Point = { x: number; y: number };
 type Position = { left: number; bottom: number };
 const home: Position = { left: 24, bottom: 24 };
-export function useFloatingGuide(container: RefObject<HTMLDivElement>, stop: () => void) {
+export function useFloatingGuide(container: RefObject<HTMLDivElement>, stop: () => void, mobile = false) {
   const card = useRef<HTMLElement>(null);
   const [position, setPosition] = useState<Position>(home);
   const current = useRef(position);
@@ -23,7 +23,8 @@ export function useFloatingGuide(container: RefObject<HTMLDivElement>, stop: () 
       const element = card.current;
       if (!parent || !element) return;
       const bottomMargin = parseFloat(getComputedStyle(element).marginBottom) || 0;
-      parent.style.setProperty("--concept-guide-height", `${element.offsetHeight}px`);
+      parent.style.setProperty("--concept-guide-height", `${element.getBoundingClientRect().height}px`);
+      if (mobile) return;
       const next = {
         left: Math.max(12, Math.min(point.left, parent.clientWidth - element.offsetWidth - 12)),
         bottom: Math.max(12, Math.min(point.bottom, parent.clientHeight - element.offsetHeight - bottomMargin - 12))
@@ -31,7 +32,7 @@ export function useFloatingGuide(container: RefObject<HTMLDivElement>, stop: () 
       current.current = next;
       setPosition((value) => (value.left === next.left && value.bottom === next.bottom ? value : next));
     },
-    [container]
+    [container, mobile]
   );
   useLayoutEffect(() => {
     let observingParent = false;
@@ -63,7 +64,8 @@ export function useFloatingGuide(container: RefObject<HTMLDivElement>, stop: () 
     position,
     handle: {
       onPointerDown: (event: PointerEvent<HTMLElement>) => {
-        if (event.button !== 0 || (event.target as Element).closest("button, a, input, select, textarea")) return;
+        if (mobile || event.button !== 0 || (event.target as Element).closest("button, a, input, select, textarea"))
+          return;
         event.preventDefault();
         event.currentTarget.focus({ preventScroll: true });
         stop();
@@ -91,7 +93,7 @@ export function useFloatingGuide(container: RefObject<HTMLDivElement>, stop: () 
       onPointerCancel: finish,
       onLostPointerCapture: finish,
       onKeyDown: (event: KeyboardEvent<HTMLElement>) => {
-        if (event.target !== event.currentTarget) return;
+        if (mobile || event.target !== event.currentTarget) return;
         const direction = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[event.key];
         if (!direction && event.key !== "Home") return;
         event.preventDefault();

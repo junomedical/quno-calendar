@@ -10,21 +10,23 @@ async function contained(page: Page) {
   await expect
     .poll(async () => {
       const box = (await page.locator(".concept-tour-guide").boundingBox())!;
+      const inset = (page.viewportSize()?.width ?? 0) <= 850 ? 0 : 11;
       const parent = (await page.locator(".concept-canvas").boundingBox())!;
       return (
-        box.x >= parent.x + 11 &&
+        box.x >= parent.x + inset &&
         box.y >= parent.y + 11 &&
-        box.x + box.width <= parent.x + parent.width - 11 &&
-        box.y + box.height <= parent.y + parent.height - 11
+        box.x + box.width <= parent.x + parent.width - inset &&
+        box.y + box.height <= parent.y + parent.height - inset
       );
     })
     .toBe(true);
   const guide = (await page.locator(".concept-tour-guide").boundingBox())!;
   const canvas = (await page.locator(".concept-canvas").boundingBox())!;
-  expect(guide.x).toBeGreaterThanOrEqual(canvas.x + 11);
+  const inset = (page.viewportSize()?.width ?? 0) <= 850 ? 0 : 11;
+  expect(guide.x).toBeGreaterThanOrEqual(canvas.x + inset);
   expect(guide.y).toBeGreaterThanOrEqual(canvas.y + 11);
-  expect(guide.x + guide.width).toBeLessThanOrEqual(canvas.x + canvas.width - 11);
-  expect(guide.y + guide.height).toBeLessThanOrEqual(canvas.y + canvas.height - 11);
+  expect(guide.x + guide.width).toBeLessThanOrEqual(canvas.x + canvas.width - inset);
+  expect(guide.y + guide.height).toBeLessThanOrEqual(canvas.y + canvas.height - inset);
   const navigation = page.locator(".concept-tour-guide > .concept-tour-pagination");
   if ((await page.locator(".concept-tour-guide").getAttribute("data-collapsed")) === "true") {
     await expect(navigation).toHaveCount(0);
@@ -84,7 +86,9 @@ for (const size of [
       })
     ).toBe(true);
     const expanded = (await guide.boundingBox())!;
-    expect(Math.abs(bounds.y + bounds.height - expanded.y - expanded.height - 24)).toBeLessThanOrEqual(1);
+    expect(
+      Math.abs(bounds.y + bounds.height - expanded.y - expanded.height - (size.width <= 850 ? 0 : 24))
+    ).toBeLessThanOrEqual(1);
     const toggle = (await page.getByRole("button", { name: "Collapse description", exact: true }).boundingBox())!;
     if (size.width === 1440) await page.screenshot({ path: info.outputPath("calendar-default.png") });
     await page.getByRole("button", { name: "Collapse description", exact: true }).click();
@@ -97,7 +101,7 @@ for (const size of [
     expect(expandedToggle.height).toBe(toggle.height);
     expect(expandedToggle.x).toBe(toggle.x);
     expect(collapsed.y + collapsed.height).toBeCloseTo(expanded.y + expanded.height, 4);
-    await expect(guide.getByRole("button")).toHaveCount(1);
+    await expect(guide.getByRole("button")).toHaveCount(2);
     await expect(guide.getByRole("button", { name: "Expand description", exact: true })).toBeVisible();
     await expect(guide.locator(".concept-tour-back, .concept-tour-pagination")).toHaveCount(0);
     expect(await guide.locator("h1").evaluate((title) => title.scrollWidth <= title.clientWidth)).toBe(true);
@@ -106,9 +110,10 @@ for (const size of [
     expect(await canvas.boundingBox()).toEqual(bounds);
     await page.getByRole("button", { name: "Expand description", exact: true }).click();
     await expect(page.locator(".concept-tour-body")).toBeVisible();
-    const corner = (await page.getByRole("button", { name: "Full screen calendar", exact: true }).boundingBox())!;
-    expect(bounds.x + bounds.width - corner.x - corner.width).toBe(16);
-    expect(bounds.y + bounds.height - corner.y - corner.height).toBe(16);
+    const full = (await page.getByRole("button", { name: "Full screen calendar", exact: true }).boundingBox())!;
+    const chevron = (await page.getByRole("button", { name: "Collapse description", exact: true }).boundingBox())!;
+    expect(chevron.x - full.x - full.width).toBe(8);
+    expect(full.y).toBe(chevron.y);
     await page.getByRole("button", { name: "Full screen calendar", exact: true }).click();
     await expect(page.getByRole("button", { name: "Exit full screen" })).toBeFocused();
     await expect(page.locator(".concept-nav")).toHaveCount(0);
@@ -163,7 +168,7 @@ test("guide drags, clamps to calendar bounds, retains position through collapse 
   await contained(page);
   expect(await viewport!.evaluate((el) => el === document.querySelector(".quno-calendar-viewport"))).toBe(true);
 });
-test("touch drag moves the collapsed guide without scrolling the calendar", async ({ page }) => {
+test("touch swipe opens the collapsed bottom drawer without scrolling the calendar", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await open(page);
   await page.getByRole("button", { name: "Collapse description", exact: true }).click();
@@ -183,7 +188,10 @@ test("touch drag moves the collapsed guide without scrolling the calendar", asyn
     });
   await client.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
   await client.detach();
-  expect((await page.locator(".concept-tour-guide").boundingBox())!.y).toBeCloseTo(before.y - 100, 0);
+  await expect(page.locator(".concept-tour-guide")).toHaveAttribute("data-collapsed", "false");
+  const after = (await page.locator(".concept-tour-guide").boundingBox())!;
+  expect(after.y).toBeLessThan(before.y);
+  expect(after.y + after.height).toBe(844);
   expect(await canvas.evaluate((el) => el.scrollTop)).toBe(top);
 });
 test("scene arrows keep the description expanded; theme and viewport identity survive fullscreen", async ({ page }) => {
@@ -246,7 +254,7 @@ test("All demos and the table of contents stay inside the draggable guide", asyn
   const afterToggle = (await guide.getByRole("button", { name: "Expand description", exact: true }).boundingBox())!;
   expect(afterToggle.width).toBe(toggle!.width);
   expect(afterToggle.height).toBe(toggle!.height);
-  await expect(guide.getByRole("button")).toHaveCount(1);
+  await expect(guide.getByRole("button")).toHaveCount(2);
   await guide.getByRole("button", { name: "Expand description", exact: true }).click();
   const labels = await toc.getByRole("button").evaluateAll((buttons) =>
     buttons.map((button) => {
@@ -274,7 +282,7 @@ test("All demos and the table of contents stay inside the draggable guide", asyn
   await page.keyboard.press("Escape");
   await expect(page.locator(".concept--fullscreen")).toHaveCount(0);
   await page.getByRole("button", { name: "Collapse description", exact: true }).click();
-  await expect(guide.getByRole("button")).toHaveCount(1);
+  await expect(guide.getByRole("button")).toHaveCount(2);
   await page.getByRole("button", { name: "Expand description", exact: true }).click();
   await guide.getByRole("button", { name: /^All .+ demos$/ }).click();
   await expect(toc).toBeVisible();

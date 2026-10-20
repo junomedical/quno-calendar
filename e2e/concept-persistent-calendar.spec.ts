@@ -45,7 +45,7 @@ test("each scenario exposes only its JSON-selected control in the calendar botto
     await expect(controls.locator("legend")).toHaveCount(0);
     const box = (await controls.boundingBox())!;
     const calendar = (await page.locator(".concept-calendar").boundingBox())!;
-    expect(calendar.x + calendar.width - box.x - box.width).toBeCloseTo(64, 0);
+    expect(calendar.x + calendar.width - box.x - box.width).toBeCloseTo(16, 0);
     expect(calendar.y + calendar.height - box.y - box.height).toBeCloseTo(16, 0);
   }
 });

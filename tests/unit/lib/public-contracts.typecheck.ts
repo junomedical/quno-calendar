@@ -28,6 +28,8 @@ import type { DateInputFormatter } from "@quno/calendar/date-parser";
 
 /** Compiled with the consumer surface; never executed by the runtime tests. */
 export function checkPublicContracts(handle: QunoInfiniteCalendarHandle, event: CalendarEvent) {
+  const compactWindow: QunoInfiniteCalendarProps["settings"] = { dateWindowRadius: 7 };
+  void compactWindow;
   const eventBase: CalendarEventBase = {
     id: event.id,
     calendarId: event.calendarId,

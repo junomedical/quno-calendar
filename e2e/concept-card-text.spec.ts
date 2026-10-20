@@ -14,12 +14,13 @@ test("default and density demos give varied daytime titles room at the authored 
   expect((await appointment.boundingBox())!.width).toBeGreaterThanOrEqual(118);
   await page.screenshot({ path: info.outputPath("busier-calendar.png") });
   await selectCalendarScene(page, "Event density", false);
-  for (const density of [40, 400]) {
+  const densityAppointment = page.locator('[data-event-id="2026-10-19-density-8"]');
+  for (const density of [20, 60]) {
     await page.locator(`[data-action="density-${density}"]`).click();
     await expect(workspace).toHaveAttribute("data-density", String(density));
     await expect(workspace).toHaveAttribute("data-zoom", "2");
-    expect((await appointment.boundingBox())!.width).toBeGreaterThanOrEqual(118);
-    const lines = await textGeometry(appointment.locator(".concept-event"));
+    expect((await densityAppointment.boundingBox())!.width).toBeGreaterThanOrEqual(118);
+    const lines = await textGeometry(densityAppointment.locator(".concept-event"));
     const title = lines.find((line) => line.tag === "STRONG")!;
     expect(title.visible && title.inside && title.fits && title.nowrap).toBe(true);
   }
@@ -104,9 +105,9 @@ for (const vertical of [false, true]) {
 
   test(`packed ${view} cards keep a readable title at minimum zoom`, async ({ page }) => {
     await openCalendar(page, vertical);
-    await page.locator('[data-action="density-400"]').click();
+    await page.locator('[data-action="density-60"]').click();
     await setZoom(page, "0.5");
-    const event = page.locator('[data-event-id="2026-10-19-event-4"]');
+    const event = page.locator('[data-event-id="2026-10-19-density-4"]');
     await expect(event).toBeAttached();
     await event.scrollIntoViewIfNeeded();
     const card = event.locator(".concept-event");

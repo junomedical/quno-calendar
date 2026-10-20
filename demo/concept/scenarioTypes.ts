@@ -28,7 +28,7 @@ export type PlaybackStep =
   | ({ action: "scroll"; target: string; amount: number; caption?: string } & Motion)
   | ({ action: "scroll-year"; target: string; year: number } & Motion)
   | ({ action: "scroll-loop"; target: string; amount: number; pauseMs: number } & Motion)
-  | ({ action: "scroll-to"; target: string; destination: string; caption: string } & Motion)
+  | ({ action: "scroll-to"; target: string; destination: string; caption: string; align?: "start" | "center" } & Motion)
   | ({ action: "scroll-day"; target: string; cell: string; horizontalAmount: number; verticalOffset: number } & Motion)
   | ({ action: "slider"; target: string; value: number; caption: string } & Motion)
   | {
@@ -58,6 +58,7 @@ export type Scenario<P extends ProductId = ProductId> = {
 export type Product<P extends ProductId = ProductId> = {
   id: P;
   label: string;
+  tabLabel?: string;
   title: string;
   description: string;
   preview: string[];

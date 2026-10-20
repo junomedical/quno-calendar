@@ -100,23 +100,32 @@ allows the site and function build steps to run concurrently.
 
 The isolated `demo/concept` experiment composes public product entry points with demo-owned fixtures and DOM
 interaction playback. Product manifests order the 23 scene JSON files; `demo.json` owns startup order and shared
-fixture context. Validation checks IDs, references, initial values and typed actions. Date Input derives its reference
+fixture context. Product manifests may provide a short tabLabel for top navigation independently of their full
+label and introduction copy. Validation checks IDs, labels, references, initial values and typed actions. Date Input derives its reference
 from today rather than the fixed fixture context; Date Parser keeps its inspectable reference date.
 
-`ConceptTour` composes the stable `ConceptCanvas`, bottom-right fullscreen button and `FloatingGuide` for every
+`ConceptTour` composes the stable `ConceptCanvas` and `FloatingGuide`, whose header groups fullscreen and chevron, for every
 product. `DemoContents` and `DemoNavigation` include a presentation introduction before manifest chapters; Calendar's
 introduction lives in `calendarIntroduction.json`, Datepicker’s in `datepickerIntroduction.json`, and others use product metadata. The footer sits outside the guide's
 scrollable text body and disappears on collapse. No title rail, section scroller, playback toolbar or inert mobile
 preview remains. `useDemoPresentation` owns fullscreen/focus restoration without remounting the live component.
 
 `useFloatingGuide` stores left/bottom offsets, bounds frame-limited captured pointer dragging, handles keyboard
-positioning, and measures guide height for the narrow non-calendar stage. Resizing text grows upward from the same
-bottom edge. CSS places other products right of the explanation or in a clipped scrollable area above it on phones.
-Calendar's compact scenario controls sit immediately left of fullscreen; narrow scenes reserve footer clearance.
+positioning, and measures guide height for the mobile Calendar control dock. Resizing text grows upward from the same
+bottom edge. CSS places other products right of the explanation on desktop. Mobile product stages fill the canvas,
+top aligned with fixed padding, and the drawer overlays them. The `--concept-guide-height` measurement is consumed
+only by the floating Calendar dock clearance; it never sizes or repositions non-calendar stages.
+`useGuideDrawer` owns mobile header pointer capture, swipe thresholds/cancellation and reduced-motion-aware height
+animation. Mobile CSS attaches the guide to the bottom edge; desktop positioning stays in `useFloatingGuide` and is
+retained across breakpoint changes. Body scrolling stays native. Calendar controls clear the measured mobile drawer
+height and sit at bottom right on desktop. Fullscreen focus remains owned by `useDemoPresentation`.
 
 `usePlayback` repeats only the selected scene under one AbortController. Deliberate trusted pointerdown, wheel,
 keyboard, focus and tab visibility cancel pending actions; synthetic synchronous focus is marked internal. Hover
-alone never cancels playback. The actor uses public component controls and browser hit testing, not library internals.
+alone never cancels playback. The demo-owned playbackTakeover filter excludes mobile header/chevron pointer input,
+its associated focus and Enter/Space disclosure. The same actor keeps running; paused scenes stay paused. Contents,
+fullscreen, working controls and desktop guide interaction retain takeover. The actor uses public component controls
+and browser hit testing, not library internals.
 Day-cell clicks commit on pointerup, so playback does not dispatch an additional keyboard-style click afterward.
 `ConceptProducts` resets only its active lazy product mount on the scoped loop event. Datepicker’s authored
 continuous loops skip that event and retain the same picker. Its synthetic day-hover marker mirrors preview chrome
@@ -124,11 +133,17 @@ in demo-owned CSS because untrusted events cannot set native `:hover`. Calendar 
 restores a session checkpoint only when needed; naturally closed sequences use `loop: "continue"`.
 
 Motion uses cancellable animation frames, integer cumulative scroll deltas and real controlled slider input.
+The scroll-to action defaults to centering; optional start alignment lets Calendar return to a measured day header
+before locating its virtualized participant/event.
 Datepicker’s `scroll-year` action uses measured year height and the loaded year span to animate to an offscreen
 virtual year. Step checks live in `scenarioStepChecks`, separate from document/product validation. The
 rounded 15° cursor never intercepts input or renders captions. `playbackSurface` temporarily excludes the guide
 only during synchronous synthetic hit testing; real input still operates it normally. Hover uses unpressed pointer
 frames through topmost hit targets and closes before other actions, including the overlap chapter's closed hold.
+
+Calendar's demo zoom hook observes viewport dimensions and shares the responsive public labelWidth with the
+calendar settings and zoom floor: 30% horizontally on mobile, 238 px otherwise. Mobile label typography remains in
+demo CSS; vertical time-pane geometry retains its existing width.
 
 Calendar retains one cached fixture source and session edits across chapters, projecting density through
 `projectEvents`. Draft focus changes displayed doctors while all IDs remain in load coverage; public viewport anchors
@@ -141,3 +156,9 @@ selected hour; later updates use minimal reveal only for offscreen options and n
 Concept appearance is demo-owned: useSystemTheme listens for OS changes, while scoped CSS keeps explainers and
 non-calendar controls light. Calendar resolves system scene defaults separately from explicit palettes. Its private
 useCalendarZoom observes viewport width and shares settings with the renderer; it imports no private library modules.
+
+Infinite Calendar can bound its scroll extent with optional settings.dateWindowRadius; the concept and guide scroll
+exhibits use seven included dates per side while the library default remains month-based. The demo fixture source
+retains full density choices separately from the calendar’s 22-event persistent baseline, preventing unprojected
+cached packed days from changing ordinary offscreen geometry. Embedded guide exhibits opt out of the concept shell’s
+grid rows and mobile preview control hiding.
