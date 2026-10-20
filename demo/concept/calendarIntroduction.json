@@ -1,7 +1,7 @@
 {
   "title": "Calendar",
   "paragraphs": [
-    "When I explored calendar concepts, I found that many approaches make calendars feel unfocused: too much mouse movement, lost focus, and poor visibility when many participants and meetings share the view.",
+    "When I explored calendar concepts, I found that many approaches make calendars feel unfocused: too much mouse movement to navigate, loss of focus during interactions, and poor visibility when many participants and meetings share the view.",
     "This demo shows my approach to that problem, with a few opinionated decisions about how a calendar should work."
   ]
 }

@@ -213,3 +213,7 @@ The guide’s embedded density exhibit opts out of concept-page grid rows and mo
 Quiet/Busy/Packed use 4/20/60 events, with one/five/fifteen per person. densityFixtures seeds shuffled start times by
 date across four bands of the working day; nested prefixes preserve the same appointment identities through toggles.
 This separate fixture leaves the ordinary reference appointments and deliberate overlap/creation tours unchanged.
+
+Standalone Timepicker uses a Cadence fieldset with 5 min, 15 min and 20 min buttons at least 80×44 px, 14 px text and
+8 px gaps. The larger hit targets are scoped to timeCadence.css; public minute choices keep their own styling.
+The Calendar introduction names navigation mouse travel and loss of focus during interactions explicitly.

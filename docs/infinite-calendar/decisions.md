@@ -1997,3 +1997,12 @@ cards, copyable generation recipe, documentation and tests together.
 Verify exact daily/per-resource counts, four-band coverage, repeatability and variation across dates, stable nested
 identities and no forced overlap records. Browser checks cover all three densities, card readability, looping and
 full embedded layout. Higher-density algorithmic stress tests remain library verification rather than demo presets.
+
+## 158 - Clarify Navigation And Interaction Focus In The Concept Introduction
+
+Date: 2026-10-20
+Status: Accepted; refines the concept introduction copy under Decision 147
+
+Explain the navigation cost as too much mouse movement to navigate and the interaction cost as loss of focus during
+interactions. Retain the first-person introduction, participant/meeting visibility concern and following approach
+paragraph. Check the complete first paragraph on desktop and phone; calendar behavior and public contracts remain unchanged.
