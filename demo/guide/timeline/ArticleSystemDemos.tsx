@@ -139,7 +139,8 @@ export function AvailabilityLayerDemo() {
               start: request.start,
               end: request.end,
               color: isAvailability ? "#4b9b7d" : "#246b5d",
-              kind: isAvailability ? "availability" : "appointment"
+              kind: isAvailability ? "availability" : "appointment",
+              renderLayer: isAvailability ? "availability" : undefined
             };
             setEvents((current) => [...current, event]);
             setActivity(isAvailability ? "New availability drawn" : "New appointment drawn");

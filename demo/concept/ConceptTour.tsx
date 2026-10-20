@@ -12,6 +12,7 @@ export function ConceptTour({
   scenario,
   actions,
   select,
+  intro,
   fullscreen,
   mobile,
   open,
@@ -24,7 +25,8 @@ export function ConceptTour({
   product: ProductId;
   scenario: Scenario;
   actions: PlaybackActions;
-  select: (scene: string) => void;
+  select: (scene: string, intro?: boolean) => void;
+  intro: boolean;
   fullscreen: boolean;
   mobile: boolean;
   open: () => void;
@@ -34,7 +36,6 @@ export function ConceptTour({
   feedback: string;
   children: ReactNode;
 }) {
-  const [intro, setIntro] = useState(true);
   const [collapsed, setCollapsed] = useState(false);
   const [contents, setContents] = useState(false);
   const container = useRef<HTMLDivElement>(null);
@@ -42,17 +43,15 @@ export function ConceptTour({
   const introduction = tourIntroduction(product);
   const choose = (scene: string) => {
     actions.stop();
-    setIntro(false);
     setCollapsed(false);
     setContents(false);
     select(scene);
   };
   const introduce = () => {
     actions.stop();
-    setIntro(true);
     setCollapsed(false);
     setContents(false);
-    select(scenes[0].id);
+    select(scenes[0].id, true);
   };
   return (
     <>

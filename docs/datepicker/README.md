@@ -4,7 +4,7 @@ Quno/Datepicker owns direct manipulation of a timezone-free day or inclusive ran
 editing, range movement, month navigation, motion, localization, theming, and day presentation hooks.
 
 - Public entry point: `@quno/calendar/datepicker`
-- Live field guide: `/guide/datepicker`
+- Live field guide: `/docs/datepicker`
 - Focused demo: `/demo/datepicker`
 - [Decisions](./decisions.md)
 - [Shared usage recipes](../shared/usage.md)
@@ -101,3 +101,7 @@ as needed; opening still reveals the selected hour. See shared QUNO-036.
 
 The concept canvas follows the computer's light/dark setting while this product and the explainer retain their
 existing light presentation on bright panels; see [QUNO-037](../shared/decisions.md#quno-037---follow-system-appearance-around-light-demo-panels).
+
+The main concept homepage uses shareable product/demo links. The current field guide connects those chapters to
+its integration examples and recipes; the previous guide is preserved under `/docs/archive/datepicker`.
+See [QUNO-041](../shared/decisions.md#quno-041---promote-the-concept-homepage-and-preserve-field-guides).

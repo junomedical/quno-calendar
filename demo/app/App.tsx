@@ -1,20 +1,17 @@
 import { useEffect, useState, type ComponentType } from "react";
 import { DateInputDemo } from "#quno-demo/demos/DateInputDemo";
 import { TimePickerDemo } from "#quno-demo/demos/TimePickerDemo";
-import { TimePickerFieldGuide } from "#quno-demo/guide/time-picker/TimePickerFieldGuide";
 import { DateTimeDemo } from "#quno-demo/demos/DateTimeDemo";
 import { DateParserDemo } from "#quno-demo/demos/DateParserDemo";
 import { DateRangeDemo } from "#quno-demo/demos/DateRangeDemo";
-import { DateInputFieldGuide } from "#quno-demo/guide/date-input/DateInputFieldGuide";
-import { DateParserFieldGuide } from "#quno-demo/guide/date-parser/DateParserFieldGuide";
-import { DatePickerStory } from "#quno-demo/guide/date-picker/DatePickerStory";
-import { IntegrationWalkthrough } from "#quno-demo/guide/timeline/IntegrationWalkthrough";
 import { DefaultDemo } from "#quno-demo/showcase/DefaultDemo";
 import { Demo1 } from "#quno-demo/showcase/demo1/Demo1";
 import { Demo2 } from "#quno-demo/showcase/demo2/Demo2";
 import { Demo3 } from "#quno-demo/showcase/demo3/Demo3";
 import type { DemoRoute } from "#quno-demo/showcase/types";
 import { DemoConcept } from "#quno-demo/concept/DemoConcept";
+import { CurrentDocs } from "#quno-demo/guide/CurrentDocs";
+import { ArchiveDocs } from "#quno-demo/archive/ArchiveDocs";
 import { ProjectHome } from "./ProjectHome";
 import "./App.css";
 
@@ -52,28 +49,29 @@ export function App() {
   };
   const redirect = redirects[pathname];
   if (redirect) {
-    window.history.replaceState({}, "", `${redirect}${window.location.hash}`);
+    window.history.replaceState({}, "", `${redirect}${window.location.search}${window.location.hash}`);
   }
-  const routePath = redirect ?? pathname;
+  const resolved = redirect ?? pathname;
+  const routePath =
+    resolved.startsWith("/docs/") && !resolved.startsWith("/docs/archive")
+      ? resolved.replace("/docs/", "/guide/")
+      : resolved;
 
-  if (routePath === "/guide/infinite-calendar") {
-    return <IntegrationWalkthrough />;
+  if (routePath.startsWith("/guide/")) return <CurrentDocs product={routePath.split("/")[2]} />;
+
+  if (routePath === "/concept" || routePath === "/") return <DemoConcept />;
+  if (routePath === "/docs") return <ProjectHome />;
+  if (routePath === "/docs/archive" || routePath.startsWith("/docs/archive/")) {
+    return <ArchiveDocs product={routePath.split("/")[3] ?? ""} />;
   }
-
-  if (routePath === "/concept") return <DemoConcept />;
-  if (routePath === "/") return <ProjectHome />;
-  if (routePath === "/guide/datepicker") return <DatePickerStory />;
-  if (routePath === "/guide/date-input") return <DateInputFieldGuide />;
-  if (routePath === "/guide/date-parser") return <DateParserFieldGuide />;
   if (routePath === "/demo/datepicker") return <DateRangeDemo />;
   if (routePath === "/demo/date-input") return <DateInputDemo />;
-  if (routePath === "/guide/timepicker") return <TimePickerFieldGuide />;
   if (routePath === "/demo/timepicker") return <TimePickerDemo />;
   if (routePath === "/demo/date-time") return <DateTimeDemo />;
   if (routePath === "/demo/date-parser") return <DateParserDemo />;
 
   const activeRoute = demoRoutes.find((route) => route.path === routePath);
-  if (!activeRoute) return <ProjectHome />;
+  if (!activeRoute) return <DemoConcept />;
   const Demo = demoComponents[activeRoute.id] ?? DefaultDemo;
   return <Demo routes={demoRoutes} />;
 }

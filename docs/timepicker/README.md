@@ -4,7 +4,7 @@ Quno/Timepicker selects a standalone timezone-free clock, without requiring a da
 
 - Public entry point: `@quno/calendar/timepicker`
 - Optional stylesheet: `@quno/calendar/timepicker/styles.css`
-- Live guide: `/guide/timepicker`
+- Live guide: `/docs/timepicker`
 - Focused demo: `/demo/timepicker`
 - [Decisions](./decisions.md)
 - [Copyable recipe](../shared/usage.md#qunotimepicker)
@@ -83,3 +83,7 @@ existing light presentation on bright panels; see [QUNO-037](../shared/decisions
 The concept labels its configuration **Cadence**, with larger 5 min, 15 min and 20 min choices (at least 80×44 px).
 The buttons stay below the clock and preserve an existing time while the slot cadence changes. These styles apply
 only to the concept controls; see QTP-007.
+
+The main concept homepage uses shareable product/demo links. The current field guide connects those chapters to
+its integration examples and recipes; the previous guide is preserved under `/docs/archive/timepicker`.
+See [QUNO-041](../shared/decisions.md#quno-041---promote-the-concept-homepage-and-preserve-field-guides).

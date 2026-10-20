@@ -4,6 +4,22 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+- Homepage/docs verification: all 671 unit tests pass. The complete 426-case Chromium run passed 413 checks;
+  13 checks used pre-update `/guide` link expectations and all 13 pass on a fresh rerun after correcting them.
+  All seven final homepage/docs checks pass, including direct chapter links for every product, mobile geometry,
+  archive separation, lazy-guide anchors and light density styling under a dark OS. No unresolved verification
+  blockers remain. Formatting, architecture, types, lint, Preact/React 19 compatibility, demo build, package
+  verification, size reporting and pack dry-run pass. Library sizes are unchanged; lazily loaded guides reduce
+  the demo's main JavaScript chunk from 594.88 kB to 440.76 kB.
+
+- Make the concept the main `/` page, retaining `/concept`, remove the corner logo, and persist product/chapter
+  navigation in shareable URL queries with reload/history and per-product last-chapter restoration.
+- Serve current documentation at `/docs` with lazy product guides, consistent product navigation and direct links
+  to matching live demos. Preserve all distinctive API examples and focused sandboxes. Keep an independent
+  20 October 2026 guide source snapshot at `/docs/archive`; legacy `/guide/*` links and anchors remain supported.
+- Start the busy-schedule documentation exhibit in light mode regardless of OS preference. Fix newly drawn
+  availability being treated as a faded inactive foreground event by assigning its explicit availability layer.
+
 - Cadence/copy verification: all 658 unit tests and 23 affected Chromium checks pass, including desktop/phone button
   geometry, keyboard/mouse selection, slot counts, preserved clocks and exact introduction copy. Formatting,
   architecture, types, lint, Preact compatibility, demo build, package verification, size reporting and pack dry-run

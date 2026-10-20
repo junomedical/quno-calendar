@@ -44,7 +44,7 @@ test("all five field guides share editorial structure and theme", async ({ page 
   for (const route of ["infinite-calendar", "datepicker", "date-input", "date-parser", "timepicker"]) {
     await page.goto(`/guide/${route}`);
     const guide = page.locator(".field-guide");
-    await expect(guide.getByRole("link", { name: "All components" })).toHaveAttribute("href", "/");
+    await expect(guide.getByRole("link", { name: "All components" })).toHaveAttribute("href", "/docs");
     await expect(guide.getByRole("link", { name: /^Demo/ })).toBeVisible();
     await expect(guide.getByRole("navigation", { name: "Table of contents" })).toBeVisible();
     await expect(guide.getByText(/^Try it$/).first()).toBeVisible();
@@ -91,21 +91,15 @@ test("datepicker field guide keeps picker geometry stable", async ({ page }) => 
 });
 
 test("project home keeps its sections, routes, and responsive layout", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/docs");
   await expect(page.locator(".project-home h1")).toBeVisible();
-  await expect(page.locator(".project-home__intro")).toBeVisible();
+  await expect(page.locator(".project-home__intro").first()).toBeVisible();
   const principles = page.locator(".project-home__principles");
   await expect(principles.locator(".project-home__principle")).toHaveCount(6);
   const createdBy = page.locator(".project-home__created-by");
   await expect(createdBy).toBeVisible();
   await expect(createdBy.locator('a[href="mailto:dmitry@qunomedical.com"]')).toBeVisible();
-  const routes = [
-    ["/guide/infinite-calendar", "/demo/infinite-calendar", ".quno-calendar-viewport"],
-    ["/guide/datepicker", "/demo/datepicker", ".quno-date-picker"],
-    ["/guide/date-input", "/demo/date-input", ".quno-date-picker-input"],
-    ["/guide/date-parser", "/demo/date-parser", ".component-demo__panel"],
-    ["/guide/timepicker", "/demo/timepicker", ".quno-time-picker"]
-  ] as const;
+  const routes = ["infinite-calendar", "datepicker", "date-input", "date-parser", "timepicker"] as const;
   const cards = page.locator(".project-home__card");
   await expect(cards).toHaveCount(5);
   const desktopBoxes = await cards.evaluateAll((elements) =>
@@ -120,16 +114,16 @@ test("project home keeps its sections, routes, and responsive layout", async ({ 
   const createdByDesktopBox = await createdBy.boundingBox();
   const principlesDesktopBox = await principles.boundingBox();
   expect(createdByDesktopBox?.y).toBeGreaterThan((principlesDesktopBox?.y ?? 0) + (principlesDesktopBox?.height ?? 0));
-  for (const [guideHref, demoHref, demoSelector] of routes) {
+  for (const product of routes) {
+    const guideHref = `/docs/${product}`;
     await expect(page.locator(`.project-home__card[href="${guideHref}"]`)).toHaveCount(1);
     await page.goto(guideHref);
     const guideLinks = page.locator(".field-guide__links");
-    await expect(guideLinks.locator('a[href="/"]')).toHaveCount(1);
-    const demoLink = guideLinks.locator(`a[href="${demoHref}"]`);
-    await demoLink.click();
-    await expect(page).toHaveURL(new RegExp(`${demoHref}$`));
-    await expect(page.locator(demoSelector).first()).toBeVisible();
-    await page.goto("/");
+    await expect(guideLinks.locator('a[href="/docs"]')).toHaveCount(1);
+    await guideLinks.getByRole("link", { name: /^Demo/ }).click();
+    await expect(page.locator(".concept")).toHaveAttribute("data-product", product);
+    await expect(page).toHaveURL(new RegExp(`product=${product}&demo=intro$`));
+    await page.goto("/docs");
   }
   await page.setViewportSize({ width: 390, height: 844 });
   const mobileBoxes = await cards.evaluateAll((elements) => elements.map((element) => element.getBoundingClientRect()));
@@ -182,7 +176,7 @@ test("date input field guide follows the task-oriented component contract", asyn
   );
   await expect(guide.getByRole("link", { name: "Date Parser field guide" })).toHaveAttribute(
     "href",
-    "/guide/date-parser"
+    "/docs/date-parser"
   );
   const production = guide.locator("#library-size");
   await expect(production.getByText(/^Implementation/)).toHaveCount(0);
@@ -1019,6 +1013,18 @@ test("editorial availability exhibit switches the only interactive event layer",
   await page.mouse.up();
   await expect(demo.locator('[data-event-id^="article-availability-created-"]')).toBeVisible();
   await expect(demo.getByText("New availability drawn")).toBeVisible();
+  const created = demo.locator('[data-event-id^="article-availability-created-"]');
+  await expect(created).toHaveClass(/quno-calendar-availability-shell.*is-active-layer/);
+  await expect(created).toHaveCSS("pointer-events", "auto");
+  await expect(created.locator(".article-event-card")).toHaveCSS("opacity", "1");
+  await expect(created.locator(".article-event-card")).toHaveCSS("background-color", "rgba(212, 237, 221, 0.92)");
+  await demo.getByRole("button", { name: "Appointments", exact: true }).click();
+  await expect(created).toHaveCSS("pointer-events", "none");
+  await expect(created.locator(".article-event-card")).toHaveCSS("opacity", "0.58");
+  await demo.getByRole("button", { name: "Vertical", exact: true }).click();
+  await demo.getByRole("button", { name: "Edit availability" }).click();
+  await expect(created).toHaveClass(/is-active-layer/);
+  await expect(created.locator(".article-event-card")).toHaveCSS("opacity", "1");
 });
 
 test("editorial drag/create exhibit stages parent-owned changes for accept or cancel", async ({ page }) => {

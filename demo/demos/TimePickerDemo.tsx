@@ -5,7 +5,7 @@ export function TimePickerDemo() {
   return (
     <ComponentDemoShell
       title="Quno/Timepicker"
-      guideHref="/guide/timepicker"
+      guideHref="/docs/timepicker"
       description="Choose a clock with sticky hours and your preferred minute cadence."
     >
       <TimePickerExample />

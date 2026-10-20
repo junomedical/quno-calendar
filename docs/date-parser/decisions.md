@@ -247,3 +247,9 @@ This updates demo presentation only; public component contracts and desktop layo
 [QUNO-040](../shared/decisions.md#quno-040---keep-mobile-drawer-disclosure-independent-of-playback) keeps a running
 concept demo playing through mobile header swipes and chevron disclosure, while paused scenes remain paused.
 This updates shared demo takeover only; public product behavior and desktop guide interaction retain their contracts.
+
+## Shared homepage and documentation routes — 2026-10-20
+
+[QUNO-041](../shared/decisions.md#quno-041---promote-the-concept-homepage-and-preserve-field-guides) promotes the
+concept to `/`, persists product/chapter navigation in the URL, and moves current field guides to `/docs`.
+The pre-change guide source is retained at `/docs/archive`; public product contracts remain unchanged.

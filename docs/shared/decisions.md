@@ -554,3 +554,21 @@ retain their finite scenes and short tours.
 - Consequences: Remove explicit mobile drawer stop calls and filter only presentation events in the shared playback
   listener. Verify all five products with native input, continuing cycle progression, retained canvas identity and
   paused-state preservation. This behavior belongs to demo/concept; public package contracts remain unchanged.
+
+## QUNO-041 - Promote The Concept Homepage And Preserve Field Guides
+
+- Date: 2026-10-20
+- Status: Accepted; supersedes QUNO-032's isolated concept route and earlier overview/guide route placement
+- Decision: Serve the concept at `/` and retain `/concept` as an alternate entry. Remove its corner logo. Record
+  stable product and demo IDs in `?product=...&demo=...`, using `intro` for the product introduction. Validate links
+  against the authored catalog, restore them on reload and browser back/forward, and remember each product's last
+  chapter while switching tabs in the mounted visit. Presentation and playback state do not write navigation.
+- Documentation: `/docs` owns the overview and `/docs/{product}` the current field guides. Keep legacy guide routes
+  and hash anchors working. Copy the previous overview and all guide sources, recipes and exhibits before changing
+  them, then expose the independent snapshot at `/docs/archive` and `/docs/archive/{product}`. The archive is dated
+  20 October 2026 at source commit 9013d1c, and still uses current public package/demo infrastructure.
+- Consequences: Load current and archived guides lazily. Current guides provide consistent product navigation,
+  catalog-driven links to all concept chapters and matching chapter links alongside integration recipes. Retain
+  distinctive API exhibits, including availability layers, loading/focus, localization, custom presentation and
+  controlled/uncontrolled examples. Keep focused sandboxes accessible. Browser checks cover shared/reloaded links,
+  invalid links, history, per-tab restoration, archive separation, deep links and phone geometry. No public API changes.

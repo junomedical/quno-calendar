@@ -73,3 +73,8 @@ The performance chapter includes a lazy Quiet/Busy/Packed playground with exact 
 The infinite-scroll exhibit opts into `dateWindowRadius: 7`, retaining 15 included dates instead of the default
 month-based window. Its adjacent copyable recipe uses the public setting. The performance exhibit keeps a 560 px
 block layout independent of the concept navigation grid, with density controls visible on mobile.
+
+Current route: `/docs/infinite-calendar` (legacy `/guide/infinite-calendar` still works). The guide links chapters
+to the matching homepage demos while preserving specialized exhibits. The pre-change guide source lives in
+`demo/archive/guide/timeline` and is served at `/docs/archive/infinite-calendar`. Density starts light even when
+the OS is dark. New availability uses the explicit availability render layer, just like the initial windows.

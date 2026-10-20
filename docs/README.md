@@ -1,5 +1,9 @@
 # Documentation
 
+The concept homepage is `/`, with shareable product/demo queries. Current field guides live at `/docs`;
+the 20 October 2026 source snapshot remains at `/docs/archive`. Legacy `/guide/*` links continue to work.
+Current guides link directly to every matching concept chapter and retain their specialized public-API examples.
+
 The documentation follows the five public `@quno/calendar` products. Start with the product you are changing, then
 use the shared records for package-wide contracts and release work.
 
@@ -7,13 +11,13 @@ Focused input/picker compositions keep Start and End shortcut navigation inside 
 [composition recipe](./shared/usage.md#qunodate-input) and
 [focus contract](./shared/decisions.md#quno-014---retain-focus-through-composed-endpoint-navigation).
 
-| Product                | Public entry point                 | Documentation                                      | Live field guide           |
-| ---------------------- | ---------------------------------- | -------------------------------------------------- | -------------------------- |
-| Quno/Infinite Calendar | `@quno/calendar/infinite-calendar` | [Infinite Calendar](./infinite-calendar/README.md) | `/guide/infinite-calendar` |
-| Quno/Datepicker        | `@quno/calendar/datepicker`        | [Datepicker](./datepicker/README.md)               | `/guide/datepicker`        |
-| Quno/Date Input        | `@quno/calendar/date-input`        | [Date Input](./date-input/README.md)               | `/guide/date-input`        |
-| Quno/Timepicker        | `@quno/calendar/timepicker`        | [Timepicker](./timepicker/README.md)               | `/guide/timepicker`        |
-| Quno/Date Parser       | `@quno/calendar/date-parser`       | [Date Parser](./date-parser/README.md)             | `/guide/date-parser`       |
+| Product                | Public entry point                 | Documentation                                      | Live field guide          |
+| ---------------------- | ---------------------------------- | -------------------------------------------------- | ------------------------- |
+| Quno/Infinite Calendar | `@quno/calendar/infinite-calendar` | [Infinite Calendar](./infinite-calendar/README.md) | `/docs/infinite-calendar` |
+| Quno/Datepicker        | `@quno/calendar/datepicker`        | [Datepicker](./datepicker/README.md)               | `/docs/datepicker`        |
+| Quno/Date Input        | `@quno/calendar/date-input`        | [Date Input](./date-input/README.md)               | `/docs/date-input`        |
+| Quno/Timepicker        | `@quno/calendar/timepicker`        | [Timepicker](./timepicker/README.md)               | `/docs/timepicker`        |
+| Quno/Date Parser       | `@quno/calendar/date-parser`       | [Date Parser](./date-parser/README.md)             | `/docs/date-parser`       |
 
 The [named-contract migration](./shared/migration.md#unreleased-named-contracts-and-product-ownership) maps the
 current breaking API cleanup. Product decision records preserve the historical signatures they supersede.
@@ -117,7 +121,7 @@ viewport presentation subscriptions, reusable geometry and native observation or
 
 ## Concept playground
 
-`/concept` presents all five products with the same live canvas and floating guide. The guide contains an introduction,
+`/` (also `/concept`) presents all five products with the same live canvas and floating guide. The guide contains an introduction,
 All demos contents, chapter explanation, recipe link and previous/next footer. Chapters autoplay and repeat until
 manual takeover; reduced motion starts paused. Fullscreen sits beside the chevron, including when collapsed.
 The guide starts 24 px from bottom left on desktop; mobile uses a bottom drawer with tap/swipe collapse and expansion. Non-calendar products sit to its right on wide screens;

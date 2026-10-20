@@ -7,8 +7,8 @@ describe("date input field guide", () => {
     expect(
       screen.getByRole("heading", { name: "A date field that stays useful while people type." })
     ).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "All components" })).toHaveAttribute("href", "/");
-    expect(screen.getByRole("link", { name: /Demo/ })).toHaveAttribute("href", "/demo/date-input");
+    expect(screen.getByRole("link", { name: "All components" })).toHaveAttribute("href", "/docs");
+    expect(screen.getByRole("link", { name: /Demo/ })).toHaveAttribute("href", "/?product=date-input&demo=intro");
     const contents = screen.getByRole("navigation", { name: "Table of contents" });
     expect(within(contents).getAllByRole("link")).toHaveLength(9);
     for (const title of [
@@ -23,7 +23,7 @@ describe("date input field guide", () => {
     ]) {
       expect(screen.getByRole("heading", { name: title })).toBeInTheDocument();
     }
-    expect(screen.getByRole("link", { name: "Date Parser field guide" })).toHaveAttribute("href", "/guide/date-parser");
+    expect(screen.getByRole("link", { name: "Date Parser field guide" })).toHaveAttribute("href", "/docs/date-parser");
     const production = document.querySelector<HTMLElement>('[data-story-topic="library-size"]') as HTMLElement;
     expect(within(production).queryByText(/^Implementation/)).not.toBeInTheDocument();
     expect(within(production).queryByText("Import Date Input")).not.toBeInTheDocument();

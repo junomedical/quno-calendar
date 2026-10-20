@@ -255,3 +255,7 @@ not the Calendar Theming chapter's explicit palette selection.
 An Infinite Calendar **date-window radius** counts included dates on each side of the anchor, independently of DOM
 overscan and event prefetch. Omission preserves the default month-before/month-after window. The scroll demos use
 seven per side; excluded weekdays do not consume that count.
+
+The concept is the main demo homepage at `/`; its product/demo query names refer to authored catalog IDs.
+`/docs` means current field guides, and `/docs/archive` means the dated pre-homepage editorial snapshot.
+Legacy `/guide/*` routes are compatibility entries for the current guides.

@@ -185,7 +185,7 @@ for (const [product, scene, result] of outcomes)
     }
     await finished(page);
     await expectProductResult(page, product, result);
-    await expect(page.getByRole("link", { name: "Documentation", exact: true })).toHaveAttribute("href", /\/guide\//);
+    await expect(page.getByRole("link", { name: "Documentation", exact: true })).toHaveAttribute("href", /\/docs\//);
   });
 test("manual takeover and product changes cancel pending playback", async ({ page }) => {
   await open(page, "Date Input");
@@ -338,7 +338,7 @@ test("one scenario JSON controls its copy, initial state and actions independent
   await selectCalendarScene(page, "Follow JSON", false);
   const custom = page.locator(".concept-tour-guide");
   await expect(custom.locator("h1")).toHaveText("Follow JSON");
-  await expect(custom.getByRole("link")).toHaveAttribute("href", "/guide/date-input#keyboard-controls");
+  await expect(custom.getByRole("link")).toHaveAttribute("href", "/docs/date-input#keyboard-controls");
   await expect(page.getByLabel("JSON appointment")).toHaveValue("5 November 2026");
   await selectCalendarScene(page, "Follow JSON");
   await finished(page);

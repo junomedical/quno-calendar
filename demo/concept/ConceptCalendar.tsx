@@ -18,12 +18,14 @@ const calendarIds = calendars.map((item) => item.id);
 type ConceptCalendarProps = {
   scenario: string;
   revision?: number;
+  initialTheme?: "light" | "dark";
   initialView?: CalendarView;
   onViewChange?: (view: CalendarView) => void;
 };
 export function ConceptCalendar({
   scenario,
   revision = 0,
+  initialTheme,
   initialView = "infinite-horizontal",
   onViewChange
 }: ConceptCalendarProps) {
@@ -34,7 +36,7 @@ export function ConceptCalendar({
   const visibleDate = useCalendarReadout(root, ref);
   const [view, setView] = useState<CalendarView>(initial.view === "preferred" ? initialView : initial.view);
   const systemTheme = useSystemTheme();
-  const [themePreference, setTheme] = useState(initial.theme);
+  const [themePreference, setTheme] = useState(initialTheme ?? initial.theme);
   const theme = themePreference === "system" ? systemTheme : themePreference;
   const [density, setDensity] = useState(initial.density);
   const { zoom, setZoom, minimum, maximum, labelWidth } = useCalendarZoom(root, view, initial.zoom);
@@ -48,7 +50,7 @@ export function ConceptCalendar({
     const restore = checkpoint();
     const repeat = () => {
       restore();
-      setTheme(initial.theme);
+      setTheme(initialTheme ?? initial.theme);
       setDensity(initial.density);
       setZoom(initial.zoom);
       setView((current) => (initial.view === "preferred" ? current : initial.view));
@@ -59,12 +61,12 @@ export function ConceptCalendar({
     node?.addEventListener("concept-loop", repeat);
     navigationDate.current = date;
     setView((current) => (initial.view === "preferred" ? current : initial.view));
-    setTheme(initial.theme);
+    setTheme(initialTheme ?? initial.theme);
     setDensity(initial.density);
     setZoom(initial.zoom);
     reset();
     return () => node?.removeEventListener("concept-loop", repeat);
-  }, [initial, revision, reset, checkpoint, setZoom]);
+  }, [initial, initialTheme, revision, reset, checkpoint, setZoom]);
   const settings = useMemo(() => ({ ...conceptCalendarSettings, labelWidth, zoom }), [labelWidth, zoom]);
   useEffect(() => {
     const frame = requestAnimationFrame(() => {

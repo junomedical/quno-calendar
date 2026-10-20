@@ -127,3 +127,9 @@ This updates shared demo takeover only; public product behavior and desktop guid
 - Consequences: Verify accessible naming, geometry, phone fit, mouse/keyboard activation, actual slot counts and
   preservation of an existing off-slot time. Public minuteCadence names, package minute buttons and other guides
   retain their contracts and presentation.
+
+## Shared homepage and documentation routes — 2026-10-20
+
+[QUNO-041](../shared/decisions.md#quno-041---promote-the-concept-homepage-and-preserve-field-guides) promotes the
+concept to `/`, persists product/chapter navigation in the URL, and moves current field guides to `/docs`.
+The pre-change guide source is retained at `/docs/archive`; public product contracts remain unchanged.

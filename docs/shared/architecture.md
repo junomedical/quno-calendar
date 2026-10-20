@@ -98,7 +98,7 @@ source during development. This avoids relying on development aliases in Vercel'
 bundle is excluded from the published calendar package and the browser's `dist-demo` assets. Atomic publication
 allows the site and function build steps to run concurrently.
 
-The isolated `demo/concept` experiment composes public product entry points with demo-owned fixtures and DOM
+The `demo/concept` homepage composes public product entry points with demo-owned fixtures and DOM
 interaction playback. Product manifests order the 23 scene JSON files; `demo.json` owns startup order and shared
 fixture context. Product manifests may provide a short tabLabel for top navigation independently of their full
 label and introduction copy. Validation checks IDs, labels, references, initial values and typed actions. Date Input derives its reference
@@ -162,3 +162,7 @@ exhibits use seven included dates per side while the library default remains mon
 retains full density choices separately from the calendar’s 22-event persistent baseline, preventing unprojected
 cached packed days from changing ordinary offscreen geometry. Embedded guide exhibits opt out of the concept shell’s
 grid rows and mobile preview control hiding.
+
+The demo application owns URL navigation and the concept homepage at `/`. `demo/guide` contains lazily loaded
+current `/docs/*` field guides; `demo/archive` holds an independent editorial source snapshot for `/docs/archive/*`.
+Both consume public entry points. Neither URL state nor archive code is shipped in the package.

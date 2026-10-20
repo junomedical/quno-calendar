@@ -44,7 +44,7 @@ export function DateInputGuideIntegration() {
           <p>
             Date Input consumes Quno/Date Parser semantics. Configure the same expected range, language, date order,
             reference date, and week start; explore the full grammar in the{" "}
-            <a href="/guide/date-parser">Date Parser field guide</a>.
+            <a href="/docs/date-parser">Date Parser field guide</a>.
           </p>
         }
         instruction="Type this week and press Enter. This field starts weeks on Sunday, matching the configured Datepicker format."

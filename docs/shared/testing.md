@@ -575,3 +575,10 @@ stable identities and repeatable but date-varying starts. Browser checks verify 
 Concept cadence checks require the accessible Cadence group, 80×44 px minimum buttons with 14 px text and 8 px gaps,
 no phone overflow, native mouse/keyboard activation, correct minute-slot counts and unchanged off-slot selections.
 They also assert the clarified Calendar introduction in full at desktop and both phone widths.
+
+Homepage/documentation checks verify exact product and chapter URL round trips, introductions, invalid query
+fallbacks, per-product last-chapter restoration, reload, shared-link arrival and browser back/forward. Current and
+archived guide tests cover all five routes, archive provenance, distinct navigation, preserved recipes/examples,
+phone link geometry and deep anchors. The density exhibit must remain light under a dark OS with its full calendar
+height. Newly drawn availability must use the active availability layer with full opacity in both orientations,
+then become muted pointer-inactive context in appointment mode.

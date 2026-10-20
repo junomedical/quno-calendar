@@ -14,7 +14,7 @@ navigate to October 30, 2026: scroll toward October 31 and back. Room 201 stays 
 rows unmount. Customize the alternate color with `--quno-calendar-alternate-surface`.
 
 - Public entry point: `@quno/calendar/infinite-calendar`
-- Live field guide: `/guide/infinite-calendar`
+- Live field guide: `/docs/infinite-calendar`
 - Focused demo: `/demo/infinite-calendar`
 - [Architecture](./architecture.md)
 - [Responsibility domains](./domains/README.md)
@@ -257,3 +257,7 @@ fixture does not change the reference appointments used by the other concept tou
 
 The concept introduction explicitly describes mouse movement needed to navigate and loss of focus during
 interactions, followed by the shared-view visibility concern. See Decision 158.
+
+The main concept homepage uses shareable product/demo links. The current field guide connects those chapters to
+its integration examples and recipes; the previous guide is preserved under `/docs/archive/infinite-calendar`.
+See [QUNO-041](../shared/decisions.md#quno-041---promote-the-concept-homepage-and-preserve-field-guides).
