@@ -23,7 +23,7 @@ const initial: Record<ProductId, Check> = {
     {
       view: oneOf("preferred", "infinite-horizontal", "infinite-vertical"),
       theme: oneOf("system", "light", "dark", "brand"),
-      density: between(4, 400, true),
+      density: between(4, 60, true),
       zoom: between(0.5, 8),
       controls: array(oneOf("view", "theme", "density", "zoom"))
     },

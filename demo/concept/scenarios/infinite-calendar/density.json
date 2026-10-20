@@ -1,7 +1,7 @@
 {
   "id": "density",
   "label": "Event density",
-  "hint": "Compare 4, 40, and 400 events per day.",
+  "hint": "Compare 4, 20, and 60 events per day.",
   "anchor": "performance",
   "initial": {
     "view": "infinite-horizontal",
@@ -13,7 +13,7 @@
   "steps": [
     {
       "action": "find",
-      "target": "[data-event-id=\"2026-10-19-event-0\"]"
+      "target": "[data-event-id=\"2026-10-19-density-0\"]"
     },
     {
       "action": "wait",
@@ -21,8 +21,8 @@
     },
     {
       "action": "click",
-      "target": "[data-action=\"density-40\"]",
-      "caption": "Click Busy · 40 events/day"
+      "target": "[data-action=\"density-20\"]",
+      "caption": "Click Busy · 20 events/day"
     },
     {
       "action": "wait",
@@ -30,8 +30,8 @@
     },
     {
       "action": "click",
-      "target": "[data-action=\"density-400\"]",
-      "caption": "Click Packed · 400 events/day"
+      "target": "[data-action=\"density-60\"]",
+      "caption": "Click Packed · 60 events/day"
     },
     {
       "action": "wait",
@@ -39,7 +39,7 @@
     },
     {
       "action": "hover",
-      "target": "[data-event-id=\"2026-10-19-event-0\"]"
+      "target": "[data-event-id=\"2026-10-19-density-0\"]"
     },
     {
       "action": "scroll",
@@ -73,7 +73,7 @@
   ],
   "paragraphs": [
     "Normally, calendars should not have overlapping events—but life is more mysterious than that.",
-    "The calendar fits up to three appointments into the standard row height, then lets the row grow to accommodate more overlapping appointments."
+    "Quiet, Busy and Packed show 4, 20 and 60 appointments across four people. Start times are scattered across the working day, so any overlaps arise from the schedule. Rows grow only when they need more room."
   ],
   "loop": "continue"
 }

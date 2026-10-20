@@ -169,3 +169,9 @@ responsive dock clearance belong to the demo; this product's public behavior and
 [QUNO-039](../shared/decisions.md#quno-039--overlay-the-full-mobile-canvas-with-the-explainer-drawer) removes reserved
 mobile stage space: the shared explainer overlays the full canvas without disclosure-driven product movement.
 This updates demo presentation only; public component contracts and desktop layout remain unchanged.
+
+## Shared mobile drawer playback — 2026-10-20
+
+[QUNO-040](../shared/decisions.md#quno-040---keep-mobile-drawer-disclosure-independent-of-playback) keeps a running
+concept demo playing through mobile header swipes and chevron disclosure, while paused scenes remain paused.
+This updates shared demo takeover only; public product behavior and desktop guide interaction retain their contracts.

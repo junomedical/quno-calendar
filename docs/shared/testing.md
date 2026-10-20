@@ -163,7 +163,7 @@ Architecture checks enforce object arguments and product dependency direction, i
 - Chapter 01 explains why complex business scheduling needs a dedicated calendar before introducing horizontal time,
   vertically stacked resources, and the familiar vertical mouse-wheel or touchpad axis.
 - The performance chapter presents the four-to-hundreds-of-events use case and 60–120fps scrolling target without
-  implying a universal device guarantee. Its 4/40/400 density cards share one row at article width and stack at the
+  implying a universal device guarantee. Its 4/20/60 density cards share one row at article width and stack at the
   mobile breakpoint; algorithmic performance remains covered by the scaling test and explicit budgets below.
 - The CSS-native chapter verifies computed `position: sticky` ownership for day, date, and resource labels, then checks
   that date and resource X geometry remains fixed during horizontal timeline scrolling without synchronized React
@@ -557,3 +557,17 @@ point to the drawer. Screenshots supplement these geometry, layering and retaine
 
 Parser introduction checks require the short Parser top tab, Date parser heading and tokenization/date-interpretation
 explanation on desktop and phone, alongside the existing ready value, token/result visibility and navigation.
+
+Mobile drawer playback checks cover all five products with trusted taps, native header/chevron swipes, short/cancelled
+gestures and Enter/Space disclosure. They require unchanged canvas identity, continued cycle progression and retained
+playing state; manual canvas interaction still pauses and subsequent disclosure cannot resume it. Contents, fullscreen
+and desktop guide collapse/drag retain cancellation. Touch helpers await actual drawer animation completion before
+measuring the next gesture's target.
+
+Calendar date-window tests cover the existing month default, explicit included-date radii, excluded weekdays,
+leap days, normalization, live settings changes and semantic continuity. Browser checks require 15-date demo scroll
+extents, idle/autoplay scrollbar recentering and unchanged date offsets on desktop/phone. The performance exhibit
+must fill its 560 px wrapper with reachable controls at every density. Demo dataset tests distinguish the 22-event
+persistent baseline from the stable 60-event source used for density projection, and leave unrequested dates empty.
+Seeded density tests require exact 4/20/60 totals, equal per-resource counts, all four time bands, working-hour bounds,
+stable identities and repeatable but date-varying starts. Browser checks verify every preset’s actual per-day counts.

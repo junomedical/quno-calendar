@@ -58,7 +58,7 @@
   .concept--fullscreen .concept-content[data-calendar="true"] > .concept-canvas {
     inset: 0;
   }
-  .concept-calendar-workspace > .concept-controls {
+  .concept--guided .concept-calendar-workspace > .concept-controls {
     right: 12px;
     bottom: calc(var(--concept-guide-height, 80px) + 12px);
     max-width: calc(100% - 24px);

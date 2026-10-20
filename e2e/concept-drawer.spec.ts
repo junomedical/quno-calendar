@@ -1,22 +1,8 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test } from "@playwright/test";
+
+import { swipeDrawer } from "#quno-e2e/concept-drawer-helpers";
 
 test.describe.configure({ mode: "parallel" });
-
-async function swipe(page: Page, selector: string, distance: number, cancel = false) {
-  const box = (await page.locator(selector).boundingBox())!;
-  const x = box.x + box.width / 2;
-  const y = box.y + box.height / 2;
-  const client = await page.context().newCDPSession(page);
-  await client.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x, y, id: 1 }] });
-  for (let step = 1; step <= 8; step++) {
-    await client.send("Input.dispatchTouchEvent", {
-      type: "touchMove",
-      touchPoints: [{ x, y: y + (distance * step) / 8, id: 1 }]
-    });
-  }
-  await client.send("Input.dispatchTouchEvent", { type: cancel ? "touchCancel" : "touchEnd", touchPoints: [] });
-  await client.detach();
-}
 
 test("phone drawer swipes from its chevron and header, preserves the calendar and leaves fullscreen reachable", async ({
   page
@@ -30,7 +16,7 @@ test("phone drawer swipes from its chevron and header, preserves the calendar an
   await page.screenshot({ path: test.info().outputPath("phone-drawer-expanded.png") });
   const original = await viewport.elementHandle();
   const before = await viewport.evaluate((node) => ({ top: node.scrollTop, left: node.scrollLeft }));
-  await swipe(page, ".concept-tour-toggle", 90);
+  await swipeDrawer(page, ".concept-tour-toggle", 90);
   await expect(guide).toHaveAttribute("data-collapsed", "true");
   await expect(guide.getByRole("button", { name: "Expand description" })).toHaveAttribute("aria-expanded", "false");
   const box = (await guide.boundingBox())!;
@@ -43,11 +29,11 @@ test("phone drawer swipes from its chevron and header, preserves the calendar an
   await expect(guide).toHaveAttribute("data-collapsed", "true");
   await page.keyboard.press("Escape");
   await expect(page.getByRole("button", { name: "Full screen calendar", exact: true })).toBeFocused();
-  await swipe(page, ".concept-tour-guide h1", -90);
+  await swipeDrawer(page, ".concept-tour-guide h1", -90);
   await expect(guide).toHaveAttribute("data-collapsed", "false");
-  await swipe(page, ".concept-tour-toggle", 24);
+  await swipeDrawer(page, ".concept-tour-toggle", 24);
   await expect(guide).toHaveAttribute("data-collapsed", "false");
-  await swipe(page, ".concept-tour-toggle", 90, true);
+  await swipeDrawer(page, ".concept-tour-toggle", 90, true);
   await expect(guide).toHaveAttribute("data-collapsed", "false");
   expect(await guide.evaluate((node) => getComputedStyle(node).transform)).toBe("matrix(1, 0, 0, 1, 0, 0)");
   expect(await viewport.evaluate((node) => ({ top: node.scrollTop, left: node.scrollLeft }))).toEqual(before);
@@ -65,7 +51,7 @@ test("drawer contents scroll natively without moving or collapsing the sheet", a
   const guide = page.locator(".concept-tour-guide");
   const before = await guide.boundingBox();
   expect(await body.evaluate((node) => node.scrollHeight > node.clientHeight)).toBe(true);
-  await swipe(page, ".concept-tour-body", -60);
+  await swipeDrawer(page, ".concept-tour-body", -60);
   await expect.poll(() => body.evaluate((node) => node.scrollTop)).toBeGreaterThan(0);
   await expect(guide).toHaveAttribute("data-collapsed", "false");
   expect(await guide.boundingBox()).toEqual(before);
@@ -86,7 +72,7 @@ test("a downward swipe settles from its dragged position without jumping upward"
     }
     return positions;
   });
-  await swipe(page, ".concept-tour-toggle", 90);
+  await swipeDrawer(page, ".concept-tour-toggle", 90);
   await expect(guide).toHaveAttribute("data-collapsed", "true");
   const positions = await samples;
   expect(positions.at(-1)! - positions[0]).toBeGreaterThan(90);

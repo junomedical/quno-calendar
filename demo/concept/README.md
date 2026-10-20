@@ -14,7 +14,9 @@ Above 850 px, drag the whole guide except buttons and links, or focus it and use
 Its default left/bottom inset is 24 px, clamped on constrained displays; height changes grow upward from that corner.
 At 850 px and below, the guide becomes a full-width bottom drawer with safe-area padding. Tap its downward chevron
 or swipe down more than 48 px from the header/chevron to collapse it; tap the upward chevron or swipe up to reopen.
-Short and cancelled drags leave its state unchanged. Text and contents scroll natively without dragging the drawer.
+Short and cancelled drags leave its state unchanged. Mobile header/chevron taps, swipes and Enter/Space disclosure
+keep the current playback running without restarting or resuming an already paused demo. Text and contents scroll
+natively without dragging the drawer.
 Height changes animate over 240 ms unless reduced motion is enabled. Desktop controls are 34 px; mobile controls
 have 44 px touch targets. Fullscreen/viewport changes preserve the working component and desktop guide position.
 
@@ -26,7 +28,9 @@ There are no separate scenario pages, bottom title rail, launch buttons, inert p
 
 Chapter arrival starts playback unless reduced motion is enabled. Every chapter loops in place without clicking
 chapter navigation. Revisiting restarts it. Manual pointerdown, wheel, keyboard, focus entering a working control,
-hiding the tab, product changes and unmount cancel pending actions. Hover alone does not pause. Synthetic synchronous
+hiding the tab, product changes and unmount cancel pending actions. Mobile drawer disclosure/header gestures and
+associated focus are presentation-only; contents, fullscreen and desktop guide interactions still pause. Hover alone
+does not pause. Synthetic synchronous
 focus is marked internal so real component navigation can run without cancelling its own script.
 
 ## Edit scenarios in JSON
@@ -88,11 +92,12 @@ Datepicker eight, Date Input five, Timepicker four and Date Parser four.
 ## Calendar choreography
 
 One stable Calendar instance owns a cached fixture source and session edits across chapters and fullscreen. Initial
-view/theme/density/zoom and starting navigation reset per chapter. Desktop uses a 238 px label pane (167 px vertically).
+view/theme/density/zoom and starting navigation reset per chapter. The public dateWindowRadius setting keeps seven
+included dates per side (15 total), with idle recentering during the authored scroll pauses. Desktop uses a 238 px label pane (167 px vertically).
 At widths up to 850 px, horizontal names use 30% of the measured viewport; names shrink from 16 to 12 px and dates
 from 16 to 9.6 px. Real calendar geometry and the zoom floor share that width through resize and fullscreen.
 There is no date/count status row or Saved/Moved corner message. Ordinary schedules have 22 appointments across the
-working day, regular one-hour durations, 32 additional varied titles and 2× zoom. Density presets project 4/40/400
+working day, regular one-hour durations, 32 additional varied titles and 2× zoom. Density presets project 4/20/60
 appointments from the same data. Compact titles and clocks stay on one line; hover reveals bounded details.
 
 Scroll loops advance 900 px over one second with two-second pauses. Zoom quickly moves 8 → the effective minimum, explores 900 px, then
@@ -199,3 +204,12 @@ pending intent so reversing remains responsive. No package or other route styles
 
 Dark Calendar creation drafts use a dark green surface and light dashed border, keeping light title/clock text
 readable. Light drafts retain their existing fill, and saved glints and cancellation fades remain in place.
+
+The demo source cache retains the ordinary 22-event choreography and a separate 60-event density schedule per
+loaded date, while loadEvents returns the ordinary 22-event baseline. Synchronous density projection reads only already-loaded full source dates and overlays session
+edits. This prevents unprojected cached packed days outside the render range from distorting the scroll extent.
+The guide’s embedded density exhibit opts out of concept-page grid rows and mobile preview control hiding.
+
+Quiet/Busy/Packed use 4/20/60 events, with one/five/fifteen per person. densityFixtures seeds shuffled start times by
+date across four bands of the working day; nested prefixes preserve the same appointment identities through toggles.
+This separate fixture leaves the ordinary reference appointments and deliberate overlap/creation tours unchanged.

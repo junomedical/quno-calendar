@@ -241,3 +241,9 @@ This updates demo presentation only; public component contracts and desktop layo
 - Consequences: The public parser resolves 2012-11-10, 2027-02-01 and 1980-02-11 respectively. Verify both endpoints,
   repeated playback, visible tokens/results and manual takeover on desktop/phone. Keep this change in authored scene
   JSON and documentation; parser grammar, ranking, configuration and public contracts remain unchanged.
+
+## Shared mobile drawer playback — 2026-10-20
+
+[QUNO-040](../shared/decisions.md#quno-040---keep-mobile-drawer-disclosure-independent-of-playback) keeps a running
+concept demo playing through mobile header swipes and chevron disclosure, while paused scenes remain paused.
+This updates shared demo takeover only; public product behavior and desktop guide interaction retain their contracts.

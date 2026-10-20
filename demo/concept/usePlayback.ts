@@ -2,6 +2,7 @@ import { useEffect, useState, type RefObject } from "react";
 import { reveal } from "./playbackScroll";
 import { PlaybackActor } from "./PlaybackActor";
 import { getScenario, type ProductId } from "./scenarioCatalog";
+import { isMobileDrawerPresentation } from "./playbackTakeover";
 export type PlaybackActions = { playing: boolean; stop: () => void };
 export type Session = { product: ProductId; scene: string; revision: number; mode: "preview" | "scene" | "idle" };
 export function usePlayback(
@@ -25,7 +26,7 @@ export function usePlayback(
     canvas.dataset.playbackCycle = "0";
     const actor = new PlaybackActor(canvas, canvas.querySelector<HTMLElement>(".concept-cursor")!, controller.signal);
     const takeover = (event: Event) => {
-      if (event.isTrusted && !actor.internal) {
+      if (event.isTrusted && !actor.internal && !isMobileDrawerPresentation(event)) {
         controller.abort();
         stop();
       }

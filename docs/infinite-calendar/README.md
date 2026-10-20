@@ -139,7 +139,7 @@ Products own recurrence expansion; saves and filters still refresh through `even
 ## Bundle budget
 
 JavaScript is limited to 50 KiB gzip and the optional stylesheet to 2 KiB gzip. The current artifacts measure
-32.92 KiB and 1.97 KiB gzip respectively (Node 23.10.0, gzip level 9). See [Decision 100](./decisions.md#100---reconcile-the-infinite-calendar-budget-after-branch-integration).
+33.07 KiB and 1.97 KiB gzip respectively (Node 23.10.0, gzip level 9). See [Decision 100](./decisions.md#100---reconcile-the-infinite-calendar-budget-after-branch-integration).
 
 ## Zoom continuity
 
@@ -206,6 +206,8 @@ explainer as a bottom drawer with chevron taps and header swipes; fullscreen sit
 ([QUNO-038](../shared/decisions.md#quno-038--use-a-mobile-explainer-drawer-with-adjacent-fullscreen)). The drawer
 overlays the full mobile canvas without reserving space or shifting the working product when collapsed
 ([QUNO-039](../shared/decisions.md#quno-039--overlay-the-full-mobile-canvas-with-the-explainer-drawer)).
+Mobile chevron disclosure and header swipes preserve the current playback state
+([QUNO-040](../shared/decisions.md#quno-040---keep-mobile-drawer-disclosure-independent-of-playback)).
 
 Its Calendar introduction precedes eight chapters. A stable canvas retains cached appointments and session edits.
 Scene controls sit at bottom right on desktop and above the mobile drawer. The desktop guide starts 24 px from bottom
@@ -236,3 +238,19 @@ pane. See [Decision 153](./decisions.md#153---give-mobile-calendar-labels-thirty
 
 The orientation tour returns to its starting day's measured header before hovering its appointment, keeping the
 loop valid when that participant was virtualized offscreen. See Decision 154.
+
+### Smaller date windows
+
+Set `settings={{ dateWindowRadius: 7 }}` to keep seven included dates before and after the current anchor (15 total).
+Excluded weekdays are skipped when counting. Omit the setting for the existing month-before/month-after window.
+Finite values are rounded down to at least one date per side; non-finite values use the default. Changing the setting
+preserves visible content. Idle recentering keeps the same date and intra-day position while rebuilding the window.
+The concept and field-guide scroll demos use seven; see [Decision 155](./decisions.md#155---use-smaller-demo-date-windows-with-stable-density-geometry).
+
+The Keep busy schedules fast exhibit retains its full 560 px calendar and visible density controls on desktop and
+phone, independently of the concept page’s navigation grid. See [Decision 156](./decisions.md#156---isolate-the-embedded-density-exhibit-from-concept-page-layout).
+
+Quiet, Busy and Packed now contain 4, 20 and 60 appointments per day across four people. A seeded shuffle distributes
+start times across morning and afternoon, with no forced overlap appointments. Presets reuse the same appointments,
+so switching back restores the same schedule; different dates get different arrangements. The dedicated density
+fixture does not change the reference appointments used by the other concept tours. See Decision 157.

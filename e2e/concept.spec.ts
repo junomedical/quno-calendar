@@ -129,7 +129,7 @@ test("view, theme and density scenes expose only their relevant controls", async
   await expect(page.locator(".quno-calendar-shell")).toHaveCSS("background-color", "rgb(37, 35, 50)");
   await finished(page);
   await play(page, "Event density");
-  await expect(page.locator(".concept-calendar-workspace")).toHaveAttribute("data-density", "400");
+  await expect(page.locator(".concept-calendar-workspace")).toHaveAttribute("data-density", "60");
   await finished(page);
   await expect(page.locator(".concept-calendar-workspace")).toHaveAttribute("data-density", "4");
   await expect(page.locator(".concept-controls fieldset")).toHaveCount(1);
@@ -263,8 +263,8 @@ test("density guide has a lazy interactive exhibit and copyable recipe", async (
   const section = page.locator("#performance");
   await section.locator('[data-demo-label="event density comparison"]').scrollIntoViewIfNeeded();
   await expect(section.getByTestId("density-guide-demo")).toBeVisible();
-  await section.locator('[data-action="density-40"]').click();
-  await expect(section.locator(".concept-calendar-workspace")).toHaveAttribute("data-density", "40");
+  await section.locator('[data-action="density-20"]').click();
+  await expect(section.locator(".concept-calendar-workspace")).toHaveAttribute("data-density", "20");
   await expect(
     section.getByText("Implementation · Generate a deterministic range at three event densities", { exact: true })
   ).toBeVisible();

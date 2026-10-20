@@ -4,6 +4,28 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+- Final demo verification: all 658 unit tests and 53 focused Chromium checks pass. The full Chromium run passed
+  416/417 checks; `e2e/specs/calendar-row-filter.spec.ts:20` timed out during its initial October 15 navigation
+  (`:17`, expected 2026-10-15, received 2026-10-08) under four workers. Three isolated single-worker reruns pass.
+  Formatting, architecture, typechecking, lint, Preact compatibility, demo build, package verification, size reporting
+  and pack dry-run pass. An earlier concurrent unit run exceeded the mixed-layout timing ratio (25.15 versus 25);
+  the complete final unit rerun passes. The full-run navigation timeout remains a verification caveat.
+  Infinite Calendar is 33.07 KiB gzip within its 50 KiB budget; other library sizes are unchanged. The demo retains
+  its non-blocking 594.84 kB main-chunk warning.
+
+- Quiet, Busy and Packed now compare 4, 20 and 60 appointments per day with repeatable shuffled starts across the
+  working day. The density exhibit uses separate fixtures without forced overlaps; ordinary concept tours retain
+  their reference appointments. Guide cards, controls, autoplay and the copyable recipe use the same presets.
+
+- Restore the Keep busy schedules fast guide exhibit’s full 560 px calendar and mobile density controls by isolating
+  its embedded layout from the concept shell. Scroll demos now use seven included dates per side through optional
+  settings.dateWindowRadius; normal consumers keep the month-based default. The demo’s 22-event persistent baseline
+  is separate from its density fixture source, so hidden packed days cannot distort ordinary scrollbar centering.
+
+- Mobile explainer collapse/expand taps, header/chevron swipes and Enter/Space disclosure now preserve the current
+  demo playback state. Running demos continue and paused demos stay paused; contents, fullscreen, working controls
+  and desktop guide interactions retain their existing pause behavior.
+
 - Ambiguity demo verification: all 655 unit tests and all 401 Chromium checks pass, including all three short-date
   interpretations, repeated playback and manual editing on desktop/phone. The initial concurrent unit run exceeded
   the dense-layout timing ratio (27.61 versus a limit of 25); its isolated recheck and the full unit rerun pass.

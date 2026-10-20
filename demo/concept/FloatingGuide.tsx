@@ -43,10 +43,10 @@ export function FloatingGuide({
   const title = contents ? `${introduction.title} demos` : intro ? introduction.title : scenario.label;
   const floating = useFloatingGuide(container, actions.stop, mobile);
   const toggle = () => {
-    actions.stop();
+    if (!mobile) actions.stop();
     setCollapsed(!collapsed);
   };
-  const drawer = useGuideDrawer({ card: floating.card, mobile, collapsed, toggle, stop: actions.stop });
+  const drawer = useGuideDrawer({ card: floating.card, mobile, collapsed, toggle });
   useLayoutEffect(() => {
     if (contents) floating.card.current?.focus({ preventScroll: true });
   }, [contents, floating.card]);

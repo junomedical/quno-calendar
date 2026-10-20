@@ -234,6 +234,7 @@ A drawer **overlay** reserves no content spacer and does not resize the stage on
 A **presentation introduction** precedes scene chapters without adding a playback scene. A **cycle** is one pass
 of the selected scene's actions and hold. A **loop** repeats that scene without changing navigation. **Continuous
 scroll** moves downward without resetting dates. **Takeover** is deliberate manual interaction cancelling playback.
+Mobile drawer **disclosure** and header gestures only change presentation and preserve the current playback state.
 Revisiting a chapter restores its initial state and starts it again unless reduced motion is enabled.
 
 Datepicker’s **synthetic hover marker** mirrors the native hover preview only during demo playback; it does not
@@ -241,7 +242,7 @@ change the committed selection. Its **continuous loop** retains the same picker 
 ranges or return the endpoint/range to its starting value.
 
 A **caption** is optional authoring metadata; no label appears under the rounded, 15° cursor. Calendar **density**
-counts appointments across all resources per day; ordinary scenes use 22, while Quiet/Busy/Packed use 4/40/400.
+counts appointments across all resources per day; ordinary scenes use 22, while Quiet/Busy/Packed use 4/20/60.
 **Draft focus** selects only the edited doctor while retaining all-doctor read coverage. **Glint** is a saved-card
 highlight; **cancellation fade** is the public draft-release animation, both presented by demo-owned styling.
 
@@ -250,3 +251,7 @@ up to 0.01), 0.5 vertically, and 8 at the maximum. Its **mobile names column** u
 viewport; the calendar geometry and zoom floor share that same label width. This is consumer-owned demo behavior; the library's viewport-fill
 zoom floor above remains a rendering contract. **System appearance** means the current prefers-color-scheme value,
 not the Calendar Theming chapter's explicit palette selection.
+
+An Infinite Calendar **date-window radius** counts included dates on each side of the anchor, independently of DOM
+overscan and event prefetch. Omission preserves the default month-before/month-after window. The scroll demos use
+seven per side; excluded weekdays do not consume that count.

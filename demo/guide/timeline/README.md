@@ -65,7 +65,11 @@ Every live calendar expands through a shared viewport overlay rather than the br
 the same React calendar instance mounted, so its visible date, intra-date offset, and loaded event cache survive the
 transition.
 
-The payload chapter reports the 0.6.3 Infinite Calendar artifacts: 32.92 KiB gzip JavaScript with a 50 KiB ceiling,
+The payload chapter reports the 0.6.3 Infinite Calendar artifacts: 33.07 KiB gzip JavaScript with a 50 KiB ceiling,
 and 1.97 KiB gzip optional CSS with a 2 KiB ceiling. The shared production profile supplies the same facts.
 
-The performance chapter includes a lazy Quiet/Busy/Packed playground with exact 4/40/400 events per day, view/theme controls, and a complete range-loader recipe.
+The performance chapter includes a lazy Quiet/Busy/Packed playground with exact 4/20/60 events per day, view/theme controls, and a complete range-loader recipe.
+
+The infinite-scroll exhibit opts into `dateWindowRadius: 7`, retaining 15 included dates instead of the default
+month-based window. Its adjacent copyable recipe uses the public setting. The performance exhibit keeps a 560 px
+block layout independent of the concept navigation grid, with density controls visible on mobile.

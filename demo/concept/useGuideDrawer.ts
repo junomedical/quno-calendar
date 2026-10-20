@@ -5,11 +5,10 @@ type Options = {
   mobile: boolean;
   collapsed: boolean;
   toggle: () => void;
-  stop: () => void;
 };
 
 /** Mobile drawer gestures stay on the header so explanation/contents scrolling remains native. */
-export function useGuideDrawer({ card, mobile, collapsed, toggle, stop }: Options) {
+export function useGuideDrawer({ card, mobile, collapsed, toggle }: Options) {
   const previous = useRef<{ height: number; collapsed: boolean; mobile: boolean } | null>(null);
   const gesture = useRef<{ id: number; x: number; y: number; distance: number } | null>(null);
   const suppressClick = useRef(false);
@@ -69,7 +68,6 @@ export function useGuideDrawer({ card, mobile, collapsed, toggle, stop }: Option
       suppressClick.current = false;
       const control = (event.target as Element).closest("button, a");
       if (control && !control.classList.contains("concept-tour-toggle")) return;
-      stop();
       (control ?? event.currentTarget).setPointerCapture(event.pointerId);
       gesture.current = { id: event.pointerId, x: event.clientX, y: event.clientY, distance: 0 };
     },

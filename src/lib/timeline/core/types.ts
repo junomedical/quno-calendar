@@ -90,6 +90,8 @@ export type QunoInfiniteCalendarSettings = {
   verticalColumnOverlapCapacity: number;
   verticalColumnOverlapGrowth: number;
   verticalEventHoverMinHeight: number;
+  /** Included dates retained on each side of the anchor; omitted retains the month-based window. */
+  dateWindowRadius?: number;
 };
 
 /** Props passed to custom event card renderers. */

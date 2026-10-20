@@ -117,8 +117,10 @@ The isolated `/concept` playground presents all five products in a live full-win
 collapsible guide. The contextual contents button opens the contents; previous/next navigation stays inside the guide. Chapters autoplay
 and loop unless reduced motion is enabled, and deliberate interaction pauses playback. The guide starts 24 px from
 the bottom left on desktop. On mobile it becomes a bottom drawer: tap its chevron or swipe its header down to collapse,
-and swipe up or tap to expand. Fullscreen sits beside the chevron in both layouts.
-Mobile Calendar names use 30% of the viewport, with smaller name/date text. Other products sit to the right of the
+and swipe up or tap to expand. Mobile drawer taps and swipes keep the current demo playing. Fullscreen sits beside
+the chevron in both layouts.
+Calendar demos keep seven included dates on either side through optional `settings.dateWindowRadius`, while the
+library retains its month-based default. Mobile Calendar names use 30% of the viewport, with smaller name/date text. Other products sit to the right of the
 explanation on wide screens; on phones, the drawer overlays their full-height canvas without reserving space. Datepicker has seven
 chapters with first-person explanations, including an 8840 ms scroll to 22 July 1980; Date Input explains format
 guessing, opens its composed picker on focus and demonstrates natural typing

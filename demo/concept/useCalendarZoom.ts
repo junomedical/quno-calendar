@@ -6,7 +6,8 @@ export const conceptCalendarSettings = {
   endHour: 19,
   rowHeight: 76,
   labelWidth: 238,
-  verticalColumnMinWidth: 185
+  verticalColumnMinWidth: 185,
+  dateWindowRadius: 7
 };
 const maximum = 8;
 

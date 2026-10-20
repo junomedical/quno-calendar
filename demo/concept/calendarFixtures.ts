@@ -7,10 +7,10 @@ export const calendars: CalendarRow[] = ["Maya Chen", "Leo Hart", "Sofia Reyes",
   name,
   color: colors[i]
 }));
-const clock = (minutes: number) =>
+export const clock = (minutes: number) =>
   `${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}:00`;
 const daytimeSlots = [510, 780, 900, 1050];
-const daytimeTitles = [
+export const daytimeTitles = [
   "Morning sync",
   "Project planning",
   "Client call",

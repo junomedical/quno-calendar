@@ -542,3 +542,15 @@ retain their finite scenes and short tours.
   Verify full canvas/stage geometry, stable card placement through disclosure/contents/fullscreen, retained mounts
   and actual top-layer hit testing at overlapping Datepicker coordinates on phone and landscape. Scope the change
   to demo CSS; public component layouts and styles remain unchanged.
+
+## QUNO-040 - Keep Mobile Drawer Disclosure Independent Of Playback
+
+- Date: 2026-10-20
+- Status: Accepted; refines QUNO-032's manual takeover and QUNO-038's drawer gestures
+- Decision: Mobile header/chevron gestures and chevron disclosure change only presentation. Preserve the running
+  scene and actor through down/up swipes, short/cancelled drags, taps and Enter/Space activation with their associated
+  focus. Leave already paused scenes paused. Keep contents, fullscreen, working controls, desktop guide interaction,
+  ordinary keyboard/wheel takeover and hidden-tab cancellation unchanged.
+- Consequences: Remove explicit mobile drawer stop calls and filter only presentation events in the shared playback
+  listener. Verify all five products with native input, continuing cycle progression, retained canvas identity and
+  paused-state preservation. This behavior belongs to demo/concept; public package contracts remain unchanged.

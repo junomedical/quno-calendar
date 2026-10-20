@@ -63,6 +63,8 @@ explainer as a bottom drawer with chevron taps and header swipes; fullscreen sit
 ([QUNO-038](../shared/decisions.md#quno-038--use-a-mobile-explainer-drawer-with-adjacent-fullscreen)). The drawer
 overlays the full mobile canvas without reserving space or shifting the working product when collapsed
 ([QUNO-039](../shared/decisions.md#quno-039--overlay-the-full-mobile-canvas-with-the-explainer-drawer)).
+Mobile chevron disclosure and header swipes preserve the current playback state
+([QUNO-040](../shared/decisions.md#quno-040---keep-mobile-drawer-disclosure-independent-of-playback)).
 
 Its chapters cover minute selection and preservation of a value when cadence changes. The concept keeps minutes
 13 px/400 beside 16 px/700 hours and aligns both at the top. These are scoped demo styles; package styles and

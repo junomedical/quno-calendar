@@ -1940,3 +1940,60 @@ next-day pans and return to October 19 on desktop/phone, including repeated cycl
 [QUNO-039](../shared/decisions.md#quno-039--overlay-the-full-mobile-canvas-with-the-explainer-drawer) removes reserved
 mobile stage space: the shared explainer overlays the full canvas without disclosure-driven product movement.
 This updates demo presentation only; public component contracts and desktop layout remain unchanged.
+
+## Shared mobile drawer playback — 2026-10-20
+
+[QUNO-040](../shared/decisions.md#quno-040---keep-mobile-drawer-disclosure-independent-of-playback) keeps a running
+concept demo playing through mobile header swipes and chevron disclosure, while paused scenes remain paused.
+This updates shared demo takeover only; public product behavior and desktop guide interaction retain their contracts.
+
+## 155 - Use Smaller Demo Date Windows With Stable Density Geometry
+
+Date: 2026-10-20
+Status: Accepted; refines the demo window and density behavior under Decisions 128, 147 and 153
+
+Add optional settings.dateWindowRadius as a count of included dates on each side of the anchor. Keep the existing
+month-before/month-after window when omitted or non-finite; finite values are truncated to at least one. Date-window
+caches include this setting, and changes preserve the current semantic position. Both orientations and excluded
+weekdays use the same timezone-free sequence. The concept Calendar and guide’s infinite-scroll exhibit opt into
+seven dates per side (15 total) while normal consumers retain their existing default.
+
+Keep all 400 fixture appointments in the demo-owned source cache, but load a 22-event baseline into the calendar’s
+persistent cache. The selected density is projected synchronously from already-loaded fixture dates, with session
+edits overlaid as before. Raw 400-event buckets outside the projected render range must not inflate offscreen day
+heights in the ordinary scroll demo. Keep source appointment identities stable across range loads and density changes.
+
+Verify default/month and explicit-radius sequences, excluded days, live radius changes, centered idle/autoplay
+scrollbars and unchanged visible date offsets on desktop/phone. Keep density counts, edits and public projection
+semantics intact; source fixtures and unrequested dates never bypass loading.
+
+## 156 - Isolate The Embedded Density Exhibit From Concept Page Layout
+
+Date: 2026-10-20
+Status: Accepted; refines Decision 128’s lazy performance exhibit and the shared concept presentation
+
+Render the Keep busy schedules fast exhibit as a block within its 560 px wrapper, so the concept shell’s 88 px
+navigation grid cannot compress its calendar. Mark the embedded presentation explicitly and exclude it from the
+old mobile-preview control-hiding rule. Only guided concept calendars reserve floating dock clearance above a drawer.
+
+Verify full calendar height/width and contained, reachable Quiet/Busy/Packed controls at desktop and phone widths.
+Preserve lazy mounting, the same public Calendar entry point, density counts and standalone concept drawer layout.
+
+## 157 - Compare Realistic Shuffled Schedules At Four, Twenty And Sixty Events
+
+Date: 2026-10-20
+Status: Accepted; supersedes the 4/40/400 density presets and Decision 155’s 400-event source design
+
+Use Quiet 4, Busy 20 and Packed 60 appointments per day across four resources. Generate one stable 60-event schedule
+per loaded date, taking nested prefixes for each preset. Seed a small pseudo-random generator from the date and
+scatter starts within four time bands so even Quiet spans the working day. Each resource receives 1, 5 or 15 events;
+keep one-hour durations and working-hour bounds. There are no synthetic forced overlaps in this density fixture.
+
+Keep density fixture IDs separate from the ordinary 22-event choreography, preserving its reference appointments,
+creation gap and overlap tours. Retain the 22-event persistent baseline from Decision 155; synchronous projection
+chooses the separate loaded density source and overlays session edits. Update controls, autoplay, guide comparison
+cards, copyable generation recipe, documentation and tests together.
+
+Verify exact daily/per-resource counts, four-band coverage, repeatability and variation across dates, stable nested
+identities and no forced overlap records. Browser checks cover all three densities, card readability, looping and
+full embedded layout. Higher-density algorithmic stress tests remain library verification rather than demo presets.

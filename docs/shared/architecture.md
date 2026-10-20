@@ -122,7 +122,10 @@ height and sit at bottom right on desktop. Fullscreen focus remains owned by `us
 
 `usePlayback` repeats only the selected scene under one AbortController. Deliberate trusted pointerdown, wheel,
 keyboard, focus and tab visibility cancel pending actions; synthetic synchronous focus is marked internal. Hover
-alone never cancels playback. The actor uses public component controls and browser hit testing, not library internals.
+alone never cancels playback. The demo-owned playbackTakeover filter excludes mobile header/chevron pointer input,
+its associated focus and Enter/Space disclosure. The same actor keeps running; paused scenes stay paused. Contents,
+fullscreen, working controls and desktop guide interaction retain takeover. The actor uses public component controls
+and browser hit testing, not library internals.
 Day-cell clicks commit on pointerup, so playback does not dispatch an additional keyboard-style click afterward.
 `ConceptProducts` resets only its active lazy product mount on the scoped loop event. Datepicker’s authored
 continuous loops skip that event and retain the same picker. Its synthetic day-hover marker mirrors preview chrome
@@ -153,3 +156,9 @@ selected hour; later updates use minimal reveal only for offscreen options and n
 Concept appearance is demo-owned: useSystemTheme listens for OS changes, while scoped CSS keeps explainers and
 non-calendar controls light. Calendar resolves system scene defaults separately from explicit palettes. Its private
 useCalendarZoom observes viewport width and shares settings with the renderer; it imports no private library modules.
+
+Infinite Calendar can bound its scroll extent with optional settings.dateWindowRadius; the concept and guide scroll
+exhibits use seven included dates per side while the library default remains month-based. The demo fixture source
+retains full density choices separately from the calendar’s 22-event persistent baseline, preventing unprojected
+cached packed days from changing ordinary offscreen geometry. Embedded guide exhibits opt out of the concept shell’s
+grid rows and mobile preview control hiding.

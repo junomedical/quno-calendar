@@ -1178,7 +1178,9 @@ larger steps, or Home to restore the bottom-left default, 24 px from each edge. 
 At widths up to 850 px the explainer is a bottom drawer. Tap its downward chevron or swipe down from the header or
 chevron to collapse; tap the upward chevron or swipe up to reopen. Short/cancelled swipes retain its state, and the
 text/contents scroll independently. Reduced motion removes the drawer transition. The collapsed title, chevron and
-fullscreen control remain reachable, with 44 px mobile touch targets and safe-area padding.
+fullscreen control remain reachable, with 44 px mobile touch targets and safe-area padding. Mobile chevron taps,
+header/chevron swipes and Enter/Space disclosure keep a running demo playing; they also leave paused demos paused.
+Contents, fullscreen, working controls and desktop guide interactions still pause playback.
 
 Fullscreen sits immediately left of the chevron on mobile and desktop; Escape exits and restores focus to it.
 Escape from contents first returns to the explanation. Fullscreen changes layout without remounting the working
@@ -1193,7 +1195,7 @@ horizontal/vertical, theming, event density, creation and rescheduling. JSON sel
 control in a separate dock at bottom right on desktop and above the mobile drawer. No date/count or corner Saved/Moved
 message appears. Mobile horizontal names use 30% of the measured calendar viewport, with 12 px names and 9.6 px
 date labels; desktop keeps 238 px labels. Zoom and grid geometry share the responsive width. Ordinary schedules use
-22 varied hour-long appointments at 2× zoom; density offers 4/40/400.
+22 varied hour-long appointments at 2× zoom; density offers 4/20/60.
 
 Scroll advances 900 px in one second, pauses two seconds and continues downward. Zoom moves 8 → the viewport-fitting minimum (at least 0.5), explores, then returns
 to 8 and scrolls back. The explanation highlights Shift + scroll as a tag. Orientation switches also pan to the next
@@ -1259,3 +1261,19 @@ The concept shell and canvas follow live system appearance. The explainer and no
 light styles on bright panels. Calendar defaults to the system palette except for its explicit Theming chapter.
 Zoom controls use the calendar's viewport-fitting horizontal minimum (0.5 vertically) and maximum 8, updating on
 resize and orientation changes. These choices belong to the demo; consumer styles and public defaults are unchanged.
+
+### Smaller Infinite Calendar date windows
+
+```tsx
+<QunoInfiniteCalendar {...calendarProps} settings={{ ...calendarProps.settings, dateWindowRadius: 7 }} />
+```
+
+This retains seven included dates on either side of the current anchor, skipping excluded weekdays. Omit the setting
+for the existing month-before/month-after window. Finite values truncate to at least one date per side; non-finite
+values retain the default. This controls the scroll extent, independently of rendered overscan and event-prefetch
+policy. Changing it preserves visible content, and idle recentering preserves the intra-day position. Try dragging the
+scrollbar in `/guide/infinite-calendar#infinite-view`: its 15-date demo returns near the middle after settling.
+
+The busy-schedule guide comparison uses Quiet 4, Busy 20 and Packed 60 appointments per day across four people.
+Start times are shuffled within four parts of the working day using a date seed, keeping each replay stable while
+different days vary. Presets reuse nested appointments; the dedicated fixture adds no forced overlaps.

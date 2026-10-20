@@ -40,6 +40,24 @@ describe("engine date and extent model", () => {
     expect(new Set(workdays).size).toBe(workdays.length);
     expect(dateWindow({ anchor: date, excludedWeekdays: [0, 1, 2, 3, 4, 5, 6] })).toEqual([]);
   });
+  it("bounds an explicit radius by included days across weekends and leap days", () => {
+    expect(dateWindow({ anchor: "2024-02-29", excludedWeekdays: [], radius: 1 })).toEqual([
+      "2024-02-28",
+      "2024-02-29",
+      "2024-03-01"
+    ]);
+    expect(dateWindow({ anchor: "2026-10-17", excludedWeekdays: [0, 6], radius: 2 })).toEqual([
+      "2026-10-15",
+      "2026-10-16",
+      "2026-10-19",
+      "2026-10-20",
+      "2026-10-21"
+    ]);
+    expect(dateWindow({ anchor: date, excludedWeekdays: [], radius: 7 })).toHaveLength(15);
+    expect(dateWindow({ anchor: date, excludedWeekdays: [], radius: NaN })).toEqual(input.dates);
+    expect(dateWindow({ anchor: date, excludedWeekdays: [], radius: 0.5 })).toHaveLength(3);
+    expect(dateWindow({ anchor: date, excludedWeekdays: [0, 1, 2, 3, 4, 5, 6], radius: 7 })).toEqual([]);
+  });
 });
 
 for (const orientation of ["horizontal", "vertical"] as Orientation[]) {

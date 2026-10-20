@@ -83,6 +83,8 @@ explainer as a bottom drawer with chevron taps and header swipes; fullscreen sit
 ([QUNO-038](../shared/decisions.md#quno-038--use-a-mobile-explainer-drawer-with-adjacent-fullscreen)). The drawer
 overlays the full mobile canvas without reserving space or shifting the working product when collapsed
 ([QUNO-039](../shared/decisions.md#quno-039--overlay-the-full-mobile-canvas-with-the-explainer-drawer)).
+Mobile chevron disclosure and header swipes preserve the current playback state
+([QUNO-040](../shared/decisions.md#quno-040---keep-mobile-drawer-disclosure-independent-of-playback)).
 
 The Datepicker has seven ordered chapters: Paint a range, Adjust the end, Move the range, Guess the intent,
 Access months, Switch to start/end and Single day. Intent cycles an expansion, the other endpoint, then one day.

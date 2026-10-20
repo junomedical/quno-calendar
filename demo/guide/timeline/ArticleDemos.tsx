@@ -95,6 +95,7 @@ const creationLaneEvents: CalendarEvent[] = [
 ];
 const loadCreationLaneEvents: LoadEvents = async (request) => filterEvents(creationLaneEvents, request);
 const scrollingEventColors = ["#246b5d", "#c77b45", "#6372a7", "#9b6a9e"];
+const scrollingSettings = { ...articleSettings, dateWindowRadius: 7 };
 const loadScrollingEvents: LoadEvents = async ({ calendarIds, endDate, startDate }) => {
   const events: CalendarEvent[] = [];
   let date = startDate;
@@ -139,7 +140,7 @@ export function InfiniteCalendarDemo() {
           initialDateKey={articleDateKey}
           loadEvents={loadScrollingEvents}
           selectedCalendarIds={visibleCalendarIds}
-          settings={articleSettings}
+          settings={scrollingSettings}
         />
       </div>
     </CalendarDemoShell>

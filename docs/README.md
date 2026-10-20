@@ -164,3 +164,13 @@ followed by date interpretation. Product IDs, package imports and guide routes r
 
 The Parser concept’s Resolve ambiguity chapter demonstrates numeric order and inferred years with `10-11-12`,
 `01/02` and `feb 11 80`; see [QDPR-014](./date-parser/decisions.md#qdpr-014---demonstrate-ambiguous-short-dates-and-year-inference).
+
+Mobile explainer disclosure preserves playback; see
+[QUNO-040](./shared/decisions.md#quno-040---keep-mobile-drawer-disclosure-independent-of-playback).
+
+Infinite Calendar’s scroll demos now use a 15-date window, and its busy-schedule exhibit retains a full-size calendar.
+See [Decision 155](./infinite-calendar/decisions.md#155---use-smaller-demo-date-windows-with-stable-density-geometry)
+and [Decision 156](./infinite-calendar/decisions.md#156---isolate-the-embedded-density-exhibit-from-concept-page-layout).
+
+The busy-schedule comparison uses repeatable shuffled 4/20/60-event days; see
+[Decision 157](./infinite-calendar/decisions.md#157---compare-realistic-shuffled-schedules-at-four-twenty-and-sixty-events).
