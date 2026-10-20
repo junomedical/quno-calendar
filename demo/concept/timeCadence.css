@@ -1,0 +1,16 @@
+.concept .concept-cadence {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.concept .concept-cadence legend {
+  margin-bottom: 8px;
+}
+.concept .concept-cadence button {
+  min-width: 80px;
+  min-height: 44px;
+  margin: 0;
+  padding: 10px 16px;
+  font-size: 14px;
+  line-height: 20px;
+}

@@ -254,3 +254,6 @@ Quiet, Busy and Packed now contain 4, 20 and 60 appointments per day across four
 start times across morning and afternoon, with no forced overlap appointments. Presets reuse the same appointments,
 so switching back restores the same schedule; different dates get different arrangements. The dedicated density
 fixture does not change the reference appointments used by the other concept tours. See Decision 157.
+
+The concept introduction explicitly describes mouse movement needed to navigate and loss of focus during
+interactions, followed by the shared-view visibility concern. See Decision 158.

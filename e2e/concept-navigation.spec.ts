@@ -80,7 +80,7 @@ test("Timepicker minutes are smaller than hours and aligned at the top", async (
   await expect(page.locator(".concept-product-card output")).toHaveCount(0);
   await expect(page.getByRole("checkbox", { name: /Business hours/ })).toHaveCount(0);
   const clockBox = (await page.locator(".quno-time-picker").boundingBox())!;
-  const cadenceBox = (await page.getByRole("group", { name: "Minute cadence" }).boundingBox())!;
+  const cadenceBox = (await page.getByRole("group", { name: "Cadence", exact: true }).boundingBox())!;
   expect(cadenceBox.y).toBeGreaterThanOrEqual(clockBox.y + clockBox.height);
   const geometry = await page.locator('.quno-time-picker-hour-group[data-hour="10"]').evaluate((group) => {
     const hour = group.querySelector("h3")!;

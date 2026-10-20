@@ -127,7 +127,7 @@ guessing, opens its composed picker on focus and demonstrates natural typing
 with four varied examples and a readable pause before Enter, plus repeated day/month keyboard edits.
 See [concept notes](./demo/concept/README.md) for JSON authoring, choreography and verification.
 
-Timepicker’s concept chapters also show date-and-time selection inside Datepicker. The parser workbench exposes
+Timepicker’s concept uses larger **Cadence** buttons and also shows date-and-time selection inside Datepicker. The parser workbench exposes
 live token chips and resolved endpoints beneath the phrase, with chapter configuration kept in JSON.
 
 The concept’s **Parser** tab introduces tokenization and date interpretation under **Date parser**, with

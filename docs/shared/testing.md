@@ -571,3 +571,7 @@ must fill its 560 px wrapper with reachable controls at every density. Demo data
 persistent baseline from the stable 60-event source used for density projection, and leave unrequested dates empty.
 Seeded density tests require exact 4/20/60 totals, equal per-resource counts, all four time bands, working-hour bounds,
 stable identities and repeatable but date-varying starts. Browser checks verify every preset’s actual per-day counts.
+
+Concept cadence checks require the accessible Cadence group, 80×44 px minimum buttons with 14 px text and 8 px gaps,
+no phone overflow, native mouse/keyboard activation, correct minute-slot counts and unchanged off-slot selections.
+They also assert the clarified Calendar introduction in full at desktop and both phone widths.

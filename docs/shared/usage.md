@@ -1277,3 +1277,7 @@ scrollbar in `/guide/infinite-calendar#infinite-view`: its 15-date demo returns 
 The busy-schedule guide comparison uses Quiet 4, Busy 20 and Packed 60 appointments per day across four people.
 Start times are shuffled within four parts of the working day using a date seed, keeping each replay stable while
 different days vary. Presets reuse nested appointments; the dedicated fixture adds no forced overlaps.
+
+In `/concept`, standalone Timepicker labels the 5 min, 15 min and 20 min choices **Cadence** and gives them larger
+buttons. Change a cadence to update slots while preserving the selected clock. The Calendar introduction now
+explicitly names navigation mouse movement and loss of focus during interactions.

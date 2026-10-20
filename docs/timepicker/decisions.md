@@ -117,3 +117,13 @@ This updates demo presentation only; public component contracts and desktop layo
 [QUNO-040](../shared/decisions.md#quno-040---keep-mobile-drawer-disclosure-independent-of-playback) keeps a running
 concept demo playing through mobile header swipes and chevron disclosure, while paused scenes remain paused.
 This updates shared demo takeover only; public product behavior and desktop guide interaction retain their contracts.
+
+## QTP-007 - Enlarge Concept Cadence Choices And Shorten Their Label
+
+- Date: 2026-10-20
+- Status: Accepted; refines QTP-005's standalone concept configuration
+- Decision: Label the concept fieldset Cadence and give its 5 min, 15 min and 20 min buttons 80 px minimum width,
+  44 px minimum height, 14 px type and 8 px gaps. Scope the presentation to the concept cadence fieldset.
+- Consequences: Verify accessible naming, geometry, phone fit, mouse/keyboard activation, actual slot counts and
+  preservation of an existing off-slot time. Public minuteCadence names, package minute buttons and other guides
+  retain their contracts and presentation.

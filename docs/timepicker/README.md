@@ -79,3 +79,7 @@ business-hours checkbox. Authored scene hours remain in effect. See QTP-005.
 
 The concept canvas follows the computer's light/dark setting while this product and the explainer retain their
 existing light presentation on bright panels; see [QUNO-037](../shared/decisions.md#quno-037---follow-system-appearance-around-light-demo-panels).
+
+The concept labels its configuration **Cadence**, with larger 5 min, 15 min and 20 min choices (at least 80×44 px).
+The buttons stay below the clock and preserve an existing time while the slot cadence changes. These styles apply
+only to the concept controls; see QTP-007.

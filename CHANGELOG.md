@@ -4,6 +4,14 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+- Cadence/copy verification: all 658 unit tests and 23 affected Chromium checks pass, including desktop/phone button
+  geometry, keyboard/mouse selection, slot counts, preserved clocks and exact introduction copy. Formatting,
+  architecture, types, lint, Preact compatibility, demo build, package verification, size reporting and pack dry-run
+  pass. Library sizes are unchanged; the demo retains its non-blocking 594.88 kB main-chunk warning.
+
+- Shorten the Timepicker concept’s Minute cadence label to Cadence and enlarge its 5/15/20 minute buttons to at least
+  80×44 px with 14 px text. Clarify the Calendar introduction’s navigation and interaction-focus wording.
+
 - Final demo verification: all 658 unit tests and 53 focused Chromium checks pass. The full Chromium run passed
   416/417 checks; `e2e/specs/calendar-row-filter.spec.ts:20` timed out during its initial October 15 navigation
   (`:17`, expected 2026-10-15, received 2026-10-08) under four workers. Three isolated single-worker reruns pass.
