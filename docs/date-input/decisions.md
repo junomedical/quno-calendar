@@ -181,3 +181,9 @@ This updates shared demo takeover only; public product behavior and desktop guid
 [QUNO-041](../shared/decisions.md#quno-041---promote-the-concept-homepage-and-preserve-field-guides) promotes the
 concept to `/`, persists product/chapter navigation in the URL, and moves current field guides to `/docs`.
 The pre-change guide source is retained at `/docs/archive`; public product contracts remain unchanged.
+
+## Shared directory routes and quiet documentation — 2026-10-20
+
+[QUNO-042](../shared/decisions.md#quno-042---use-directory-routes-and-quiet-documentation-loading) replaces
+query navigation with product/chapter directories, converts earlier shared links, removes archive discovery links
+and keeps lazy documentation loading silent. Public product contracts are unchanged.

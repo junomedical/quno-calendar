@@ -4,6 +4,18 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+- Directory/loading verification: all 679 unit tests and 67 affected Chromium checks pass, including reload,
+  history, direct/shared paths, old-query conversion, archive-link removal and a deliberately delayed silent guide
+  load with computed surface/height assertions. Formatting, architecture, types, lint, Preact/React 19 fixtures,
+  demo build, package verification, size reporting and pack dry-run pass. An initial concurrent unit run exceeded
+  the dense-layout timing ratio (26.30 versus 25); the final complete unit rerun passes. Library sizes are unchanged;
+  the main demo chunk is 440.92 kB.
+
+- Replace concept query URLs with product/chapter directories such as `/calendar/zoom` and `/datepicker/paint`,
+  keeping `/` for the Calendar introduction. Convert earlier query links and retain history, reload and tab memory
+  through the existing server rewrite. Remove archive links from current navigation while retaining direct archive
+  access. Load documentation on a silent light surface rather than flashing a loading message.
+
 - Homepage/docs verification: all 671 unit tests pass. The complete 426-case Chromium run passed 413 checks;
   13 checks used pre-update `/guide` link expectations and all 13 pass on a fresh rerun after correcting them.
   All seven final homepage/docs checks pass, including direct chapter links for every product, mobile geometry,

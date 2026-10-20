@@ -1,6 +1,6 @@
 # Documentation
 
-The concept homepage is `/`, with shareable product/demo queries. Current field guides live at `/docs`;
+The concept homepage is `/`, with shareable product/chapter paths. Current field guides live at `/docs`;
 the 20 October 2026 source snapshot remains at `/docs/archive`. Legacy `/guide/*` links continue to work.
 Current guides link directly to every matching concept chapter and retain their specialized public-API examples.
 

@@ -9,6 +9,7 @@ import { Demo1 } from "#quno-demo/showcase/demo1/Demo1";
 import { Demo2 } from "#quno-demo/showcase/demo2/Demo2";
 import { Demo3 } from "#quno-demo/showcase/demo3/Demo3";
 import type { DemoRoute } from "#quno-demo/showcase/types";
+import { conceptPaths } from "#quno-demo/concept/useConceptNavigation";
 import { DemoConcept } from "#quno-demo/concept/DemoConcept";
 import { CurrentDocs } from "#quno-demo/guide/CurrentDocs";
 import { ArchiveDocs } from "#quno-demo/archive/ArchiveDocs";
@@ -59,7 +60,8 @@ export function App() {
 
   if (routePath.startsWith("/guide/")) return <CurrentDocs product={routePath.split("/")[2]} />;
 
-  if (routePath === "/concept" || routePath === "/") return <DemoConcept />;
+  if (routePath === "/concept" || routePath === "/" || Object.values(conceptPaths).includes(routePath.split("/")[1]))
+    return <DemoConcept />;
   if (routePath === "/docs") return <ProjectHome />;
   if (routePath === "/docs/archive" || routePath.startsWith("/docs/archive/")) {
     return <ArchiveDocs product={routePath.split("/")[3] ?? ""} />;

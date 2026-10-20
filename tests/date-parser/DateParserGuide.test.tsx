@@ -6,7 +6,7 @@ describe("date parser field guide", () => {
     render(<DateParserFieldGuide />);
     expect(screen.getByRole("heading", { name: "Dates, understood the way people write them." })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "All components" })).toHaveAttribute("href", "/docs");
-    expect(screen.getByRole("link", { name: /Demo/ })).toHaveAttribute("href", "/?product=date-parser&demo=intro");
+    expect(screen.getByRole("link", { name: /Demo/ })).toHaveAttribute("href", "/parser");
     const contents = screen.getByRole("navigation", { name: "Table of contents" });
     expect(within(contents).getAllByRole("link")).toHaveLength(9);
     expect(within(contents).getByRole("link", { name: /Resolve numeric order/ })).toHaveAttribute(

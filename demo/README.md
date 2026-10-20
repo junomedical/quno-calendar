@@ -32,3 +32,7 @@ and fullscreen navigation. All scenario copy, initial state and actions live in 
 
 Current guides are lazy routes under `/docs`, with links back to exact concept chapters. `archive` preserves the
 20 October 2026 guide source at `/docs/archive`; its guide chunks load separately from the homepage.
+
+Concept chapters use directory paths (`/calendar/zoom`, `/datepicker/paint`, `/parser/ambiguity`). Old query
+links normalize to them. The existing catch-all server rewrite supports direct visits and reloads. Current docs
+keep archive routes out of navigation, and lazy guide loading uses a silent light surface.

@@ -9,7 +9,7 @@ The live concept homepage is available at `/`, with shareable product/demo links
 - `/docs/date-parser`
 - `/docs/timepicker`
 
-Each guide has a focused Demo destination. This document remains the single source for copyable production recipes
+Each guide links to its concept introduction and a focused sandbox. This document remains the single source for copyable production recipes
 across all five independent feature entry points.
 
 ## Entry points
@@ -1285,7 +1285,13 @@ explicitly names navigation mouse movement and loss of focus during interactions
 
 ### Share a demo or open documentation
 
-Open `/?product=datepicker&demo=paint` to show that exact chapter, or `/?product=date-parser&demo=intro` for its
-introduction. Tab and previous/next/contents navigation update the link. Reload and browser history restore it.
+Open `/datepicker/paint` to show that exact chapter, or `/parser` for the parser introduction. Calendar starts
+at `/`; its chapters use `/calendar/{chapter}`. Other products use `/datepicker`, `/date-input`, `/timepicker`
+and `/parser`, with an optional chapter segment. Tab and previous/next/contents navigation update the link. Reload and browser history restore it.
 The live homepage is `/` (`/concept` also works); current guides are `/docs/{product}` and the previous guide
 snapshot is `/docs/archive/{product}`. Focused `/demo/*` sandboxes remain available from the current guides.
+
+Previously shared `?product=...&demo=...` links and `/concept` normalize to the corresponding directory paths.
+The existing Vercel catch-all rewrite serves the application on direct visits and reloads. Archive routes remain
+available by direct address, with no archive links in current navigation. Guide chunks load on a silent light
+surface rather than displaying a transient loading message.

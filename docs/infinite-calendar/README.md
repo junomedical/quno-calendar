@@ -261,3 +261,6 @@ interactions, followed by the shared-view visibility concern. See Decision 158.
 The main concept homepage uses shareable product/demo links. The current field guide connects those chapters to
 its integration examples and recipes; the previous guide is preserved under `/docs/archive/infinite-calendar`.
 See [QUNO-041](../shared/decisions.md#quno-041---promote-the-concept-homepage-and-preserve-field-guides).
+
+Concept chapters now use `/calendar/{chapter}` directory paths; current navigation omits archive links.
+See [QUNO-042](../shared/decisions.md#quno-042---use-directory-routes-and-quiet-documentation-loading).

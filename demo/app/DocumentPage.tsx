@@ -1,3 +1,4 @@
+import "./documentPage.css";
 import { Suspense, useLayoutEffect, type ComponentType, type ReactNode } from "react";
 function DocumentContent({ children }: { children: ReactNode }) {
   useLayoutEffect(() => {
@@ -12,7 +13,7 @@ function DocumentContent({ children }: { children: ReactNode }) {
 }
 export function DocumentPage({ page: Page }: { page: ComponentType }) {
   return (
-    <Suspense fallback={<p>Opening documentation…</p>}>
+    <Suspense fallback={<div className="document-placeholder" aria-busy="true" aria-label="Loading documentation" />}>
       <DocumentContent>
         <Page />
       </DocumentContent>

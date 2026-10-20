@@ -1,0 +1,7 @@
+.document-placeholder {
+  height: 100dvh;
+  background: #fbfaf6;
+}
+.docs-archive > .document-placeholder {
+  height: 100%;
+}

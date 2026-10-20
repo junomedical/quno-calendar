@@ -166,3 +166,9 @@ grid rows and mobile preview control hiding.
 The demo application owns URL navigation and the concept homepage at `/`. `demo/guide` contains lazily loaded
 current `/docs/*` field guides; `demo/archive` holds an independent editorial source snapshot for `/docs/archive/*`.
 Both consume public entry points. Neither URL state nor archive code is shipped in the package.
+
+Concept navigation stores product/chapter identity in path segments. `/` is the Calendar introduction;
+`/calendar/zoom` and `/datepicker/paint` are examples of chapter routes. The existing catch-all server rewrite
+serves the entry document; App and the concept navigation hook resolve the path without remounting the active
+canvas during tab/chapter navigation. Legacy query links normalize to paths. Documentation loading uses a silent
+light placeholder; archive access is by direct route rather than current navigation.

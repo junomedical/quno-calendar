@@ -8,7 +8,7 @@ describe("date input field guide", () => {
       screen.getByRole("heading", { name: "A date field that stays useful while people type." })
     ).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "All components" })).toHaveAttribute("href", "/docs");
-    expect(screen.getByRole("link", { name: /Demo/ })).toHaveAttribute("href", "/?product=date-input&demo=intro");
+    expect(screen.getByRole("link", { name: /Demo/ })).toHaveAttribute("href", "/date-input");
     const contents = screen.getByRole("navigation", { name: "Table of contents" });
     expect(within(contents).getAllByRole("link")).toHaveLength(9);
     for (const title of [

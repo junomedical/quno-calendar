@@ -49,7 +49,6 @@ export function FieldGuidePage({
                 {tabLabel ?? label}
               </a>
             ))}
-            <a href={`/docs/archive/${productId ?? ""}`}>Archive</a>
           </nav>
           <header className="field-guide__hero">
             <div className="field-guide__topline">

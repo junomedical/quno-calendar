@@ -122,7 +122,9 @@ test("project home keeps its sections, routes, and responsive layout", async ({ 
     await expect(guideLinks.locator('a[href="/docs"]')).toHaveCount(1);
     await guideLinks.getByRole("link", { name: /^Demo/ }).click();
     await expect(page.locator(".concept")).toHaveAttribute("data-product", product);
-    await expect(page).toHaveURL(new RegExp(`product=${product}&demo=intro$`));
+    await expect(page).toHaveURL(
+      new RegExp(product === "infinite-calendar" ? "/$" : `/${product === "date-parser" ? "parser" : product}$`)
+    );
     await page.goto("/docs");
   }
   await page.setViewportSize({ width: 390, height: 844 });

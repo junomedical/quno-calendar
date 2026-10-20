@@ -12,14 +12,14 @@ for (const width of [1440, 390]) {
     const tabs = page.getByRole("navigation", { name: "Products", exact: true });
     await tabs.getByRole("button", { name: "Datepicker", exact: true }).click();
     await page.getByRole("button", { name: "Next demo", exact: true }).click();
-    await expect(page).toHaveURL(/product=datepicker&demo=paint$/);
+    await expect(page).toHaveURL(/\/datepicker\/paint$/);
     await expect(page.locator(".concept-tour-content")).toHaveAttribute("data-introduction", "false");
     await page.getByRole("button", { name: "Next demo", exact: true }).click();
-    await expect(page).toHaveURL(/demo=resize$/);
+    await expect(page).toHaveURL(/\/datepicker\/resize$/);
     await tabs.getByRole("button", { name: "Parser", exact: true }).click();
-    await expect(page).toHaveURL(/product=date-parser&demo=intro$/);
+    await expect(page).toHaveURL(/\/parser$/);
     await tabs.getByRole("button", { name: "Datepicker", exact: true }).click();
-    await expect(page).toHaveURL(/product=datepicker&demo=resize$/);
+    await expect(page).toHaveURL(/\/datepicker\/resize$/);
     await expect(concept).toHaveAttribute("data-scene", "resize");
     const shared = page.url();
     await page.reload();
@@ -50,12 +50,14 @@ for (const width of [1440, 390]) {
       const demos = page.getByRole("navigation", { name: "Live demos", exact: true });
       await expect(demos).toBeVisible();
       const first = demos.getByRole("link").first();
-      await expect(first).toHaveAttribute("href", new RegExp(`^/\\?product=${product}&demo=`));
-      const nav = page.getByRole("navigation", { name: "Documentation products" });
-      await expect(nav.getByRole("link", { name: "Archive", exact: true })).toHaveAttribute(
+      await expect(first).toHaveAttribute(
         "href",
-        `/docs/archive/${product}`
+        new RegExp(
+          `^/${product === "infinite-calendar" ? "calendar" : product === "date-parser" ? "parser" : product}/`
+        )
       );
+      const nav = page.getByRole("navigation", { name: "Documentation products" });
+      await expect(page.locator('a[href^="/docs/archive"]')).toHaveCount(0);
       const geometry = await nav.evaluate((node) => {
         const box = node.getBoundingClientRect();
         return { right: box.right, scroll: node.scrollWidth, width: node.clientWidth };
@@ -85,10 +87,10 @@ test("invalid shared links fall back to a valid product introduction", async ({ 
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/?product=unknown&demo=missing&source=shared");
   await expect(page.locator("main.concept")).toHaveAttribute("data-product", "infinite-calendar");
-  await expect(page).toHaveURL(/product=infinite-calendar&demo=intro&source=shared$/);
+  await expect(page).toHaveURL(/\/\?source=shared$/);
   await page.goto("/?product=datepicker&demo=density");
   await expect(page.locator(".concept-tour-content")).toHaveAttribute("data-introduction", "true");
-  await expect(page).toHaveURL(/product=datepicker&demo=intro$/);
+  await expect(page).toHaveURL(/\/datepicker$/);
 });
 
 test("busy-schedule docs start light on a dark computer", async ({ page }) => {
@@ -118,10 +120,46 @@ test("shared chapters open directly for every product", async ({ page }) => {
     ["timepicker", "cadence", "Keep an existing time"],
     ["date-parser", "ambiguity", "Resolve ambiguity"]
   ]) {
-    await page.goto(`/?product=${product}&demo=${scene}`);
+    await page.goto(
+      `/${product === "infinite-calendar" ? "calendar" : product === "date-parser" ? "parser" : product}/${scene}`
+    );
     await expect(page.locator("main.concept")).toHaveAttribute("data-product", product);
     await expect(page.locator("main.concept")).toHaveAttribute("data-scene", scene);
     await expect(page.locator(".concept-tour-content")).toHaveAttribute("data-introduction", "false");
     await expect(page.locator(".concept-tour-guide h1")).toHaveText(label);
   }
+});
+
+test("documentation loads without flashing a message or archive links", async ({ page }) => {
+  let release!: () => void;
+  let requested!: () => void;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const pending = new Promise<void>((resolve) => {
+    requested = resolve;
+  });
+  await page.route("**/demo/guide/date-parser/DateParserFieldGuide.tsx*", async (route) => {
+    requested();
+    await gate;
+    await route.continue();
+  });
+  await page.goto("/docs/date-parser", { waitUntil: "domcontentloaded" });
+  await pending;
+  const placeholder = page.getByLabel("Loading documentation");
+  try {
+    await expect(placeholder).toBeVisible();
+    await expect(placeholder).toHaveText("");
+    await expect(placeholder).toHaveCSS("background-color", "rgb(251, 250, 246)");
+    expect((await placeholder.boundingBox())!.height).toBe(720);
+    await expect(page.getByText("Opening documentation…", { exact: true })).toHaveCount(0);
+  } finally {
+    release();
+  }
+  await expect(page.locator(".field-guide h1")).toBeVisible();
+  await expect(placeholder).toHaveCount(0);
+  await expect(page.locator('a[href^="/docs/archive"]')).toHaveCount(0);
+  await page.goto("/docs");
+  await expect(page.locator(".project-home h1")).toBeVisible();
+  await expect(page.locator('a[href^="/docs/archive"]')).toHaveCount(0);
 });

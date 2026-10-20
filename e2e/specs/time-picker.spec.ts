@@ -127,5 +127,5 @@ test("timepicker home card and guide expose recipes, local state, and scoped pre
   await expect(local.locator('[data-slot="selection-summary"]')).toHaveText("Choose a time");
   await page.locator('details[aria-label="Select a standalone time implementation"] summary').click();
   await expect(page.getByLabel("Select a standalone time TSX source")).toContainText("@quno/calendar/timepicker");
-  await expect(page.getByRole("link", { name: /^Demo/ })).toHaveAttribute("href", "/?product=timepicker&demo=intro");
+  await expect(page.getByRole("link", { name: /^Demo/ })).toHaveAttribute("href", "/timepicker");
 });

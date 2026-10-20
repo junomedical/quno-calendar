@@ -71,7 +71,7 @@ export function ProjectHome() {
           guide connects the demos to the code behind them.
         </p>
         <p className="project-home__intro">
-          <a href="/">Explore live demos →</a> · <a href="/docs/archive">Archived guides →</a>
+          <a href="/">Explore live demos →</a>
         </p>
         <div className="project-home__cards">
           {projects.map((project, index) => (

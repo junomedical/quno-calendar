@@ -221,8 +221,10 @@ The Calendar introduction names navigation mouse travel and loss of focus during
 
 ## Homepage navigation
 
-The concept is the main `/` page; `/concept` remains supported. `useConceptNavigation` reads and validates
-`product` and `demo` query parameters against the authored catalog. `demo=intro` identifies the introduction
-separately from the first scene. Explicit navigation pushes browser history; reload, recipient links and
-back/forward restore it. Each product remembers its last chapter during the mounted visit. Playback, disclosure,
-theme and fullscreen do not modify the URL. The logo is removed and Documentation opens `/docs/{product}`.
+The concept is the main `/` page. `useConceptNavigation` reads validated product/chapter path segments. Calendar
+chapters use `/calendar/zoom` and the Calendar introduction stays at `/`. Other product introductions are
+`/datepicker`, `/date-input`, `/timepicker` and `/parser`; add a scene ID for a chapter, such as `/datepicker/paint`.
+Explicit navigation pushes browser history; reload, recipient links and back/forward restore it. Each product
+remembers its last chapter during the mounted visit. Playback, disclosure, theme and fullscreen do not modify the
+URL. `/concept` and earlier query URLs convert to directory paths. The existing server catch-all rewrite supports
+direct visits and reloads. Documentation opens `/docs/{product}` without archive discovery links or loading text.

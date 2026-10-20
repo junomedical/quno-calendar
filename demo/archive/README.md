@@ -8,3 +8,5 @@ Keep historical editorial content here; improve current guides in `demo/guide`.
 Only internal guide imports and archive navigation were adjusted. The snapshot still consumes the current public
 library and shared demo infrastructure; it is not an old package distribution. Load each archived guide lazily.
 The archive banner links back to `/docs`, which owns current guidance and fixes.
+
+The archive is reachable by direct address; current documentation does not advertise archive links (QUNO-042).

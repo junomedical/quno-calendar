@@ -57,6 +57,11 @@ describe("application route registry", () => {
   it.each([
     ["/", "route-concept"],
     ["/concept", "route-concept"],
+    ["/calendar/zoom", "route-concept"],
+    ["/datepicker/paint", "route-concept"],
+    ["/date-input/keyboard", "route-concept"],
+    ["/timepicker/cadence", "route-concept"],
+    ["/parser/ambiguity", "route-concept"],
     ["/docs", "route-home"],
     ["/docs/infinite-calendar", "route-timeline-guide"],
     ["/docs/datepicker", "route-date-range-guide"],

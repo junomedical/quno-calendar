@@ -20,7 +20,7 @@ describe("datepicker field guide", () => {
     expect(within(contents).getAllByRole("link")).toHaveLength(12);
     expect(within(contents).queryByRole("link", { name: /Interactive demo/ })).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: "All components" })).toHaveAttribute("href", "/docs");
-    expect(screen.getByRole("link", { name: /Demo/ })).toHaveAttribute("href", "/?product=datepicker&demo=intro");
+    expect(screen.getByRole("link", { name: /Demo/ })).toHaveAttribute("href", "/datepicker");
     expect(
       within(contents).getByRole("link", {
         name: /Customize meaningful dates/

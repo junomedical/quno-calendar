@@ -572,3 +572,20 @@ retain their finite scenes and short tours.
   distinctive API exhibits, including availability layers, loading/focus, localization, custom presentation and
   controlled/uncontrolled examples. Keep focused sandboxes accessible. Browser checks cover shared/reloaded links,
   invalid links, history, per-tab restoration, archive separation, deep links and phone geometry. No public API changes.
+
+## QUNO-042 - Use Directory Routes And Quiet Documentation Loading
+
+- Date: 2026-10-20
+- Status: Accepted; supersedes QUNO-041's query URL representation and refines its documentation navigation
+- Decision: Keep `/` as the Calendar introduction. Use `/calendar/{chapter}`, `/datepicker/{chapter}`,
+  `/date-input/{chapter}`, `/timepicker/{chapter}` and `/parser/{chapter}`; omit the chapter for other product
+  introductions. Normalize `/concept` and earlier `?product=...&demo=...` links to these paths, removing legacy
+  navigation parameters while preserving unrelated queries and fragments. Path segments take precedence.
+- Navigation: Keep history, reload, shared links and each tab's last chapter. Resolve client paths through the
+  existing catch-all server rewrite. Product/chapter transitions retain the canvas and presentation state.
+- Documentation: Remove archive links from the current docs index and product navigation. Retain the source
+  snapshot and direct `/docs/archive/*` access. Keep guide chunks lazy, using an empty light placeholder with an
+  accessible busy state instead of flashing “Opening documentation…” text. Preserve section-anchor restoration.
+- Consequences: Verify path round trips for every authored scene, legacy query conversion, browser history and
+  direct visits, desktop/phone geometry, absence of archive discovery links, and controlled delayed module loading
+  with an empty full-height light surface. Package APIs and production library behavior remain unchanged.

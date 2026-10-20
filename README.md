@@ -70,7 +70,7 @@ keystrokes without changing the synchronous headless parser API.
 ## Guides and records
 
 Run `npm run dev` and open `/` for the five-product interactive concept homepage. Product tabs and demo chapters
-use shareable `?product=datepicker&demo=paint` links, retained on reload and browser history navigation.
+use shareable paths such as `/datepicker/paint` and `/calendar/zoom`, retained on reload and browser history navigation.
 The header links to current documentation at `/docs`; the previous guides remain at `/docs/archive`. `/demo/date-time` composes the single-day input and picker with enabled hours and minute cadence. Try `6 oct 2pm` to recognize a date without a year and a clock. Selecting a day opens time selection automatically. Its title shows the selected full date, and its arrows move through enabled days. Clicking the date title returns to day selection. Typed clocks stay unrestricted unless Date Input’s `forceCadence` is enabled:
 
 - `/docs/infinite-calendar`

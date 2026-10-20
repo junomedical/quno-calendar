@@ -582,3 +582,8 @@ archived guide tests cover all five routes, archive provenance, distinct navigat
 phone link geometry and deep anchors. The density exhibit must remain light under a dark OS with its full calendar
 height. Newly drawn availability must use the active availability layer with full opacity in both orientations,
 then become muted pointer-inactive context in appointment mode.
+
+Directory navigation checks retain per-tab state and canvas identity through history, reload and recipient links.
+They cover all five product paths, conversion of old query links, invalid chapter fallback, current documentation
+without archive navigation, and delayed guide loading with an empty light placeholder rather than visible text.
+The existing catch-all deployment rewrite remains guarded for direct URL access.

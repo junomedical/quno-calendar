@@ -2027,3 +2027,9 @@ fixtures. Kind alone does not select a background layer. This fixes a demo wirin
 was classified as a foreground event, faded and inactive while editing availability. Preserve the deliberately
 muted context in appointment mode and verify active layer, computed opacity/background and pointer interaction
 in both orientations. This changes consumer-owned demo data, not the public layer contract.
+
+## Shared directory routes and quiet documentation — 2026-10-20
+
+[QUNO-042](../shared/decisions.md#quno-042---use-directory-routes-and-quiet-documentation-loading) replaces
+query navigation with product/chapter directories, converts earlier shared links, removes archive discovery links
+and keeps lazy documentation loading silent. Public product contracts are unchanged.
