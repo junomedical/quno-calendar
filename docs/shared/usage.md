@@ -1012,7 +1012,7 @@ calendarRef.current?.scrollToDateTime({ date, time, calendarId: "room-1", align:
 
 The package waits for the updated selection to commit before measuring the row. Multiple resource-row navigation requests in
 one batch use the latest request. A later `scrollToDate`, explicit restoration, or cancellation also discards queued
-row navigation. Use `align: "center"` when the row should move to the middle even if already visible. Centering follows
+row navigation. Use `align: "center"` when the horizontal time and row should move to the middle of the usable viewport, within scroll bounds, even if already visible. Pass an event midpoint to center its duration. Centering follows
 the live row height while async events settle within the existing bounded restoration session; manual scrolling cancels it. To start a new
 draft where the operator is looking without scrolling:
 
@@ -1040,6 +1040,18 @@ The grid switches directly to five-minute cadence above zoom 6 and back to quart
 Hidden ticks keep their nodes with `display: none`. Both orientations use the same behavior without transparency effects.
 Try Overview → Quarter hour → 5 minutes and back in the guide's **Reveal time progressively** chapter;
 the controlled-zoom recipe above needs no additional animation state.
+
+Capture the current resource/time slot before changing creation rows. Restore the captured offset when cancellation returns the original selection:
+
+```tsx
+const originalViewport = calendarRef.current?.captureViewportAnchor() ?? null;
+// Change the creation selection, then on Cancel restore the original selection.
+calendarRef.current?.restoreViewportAnchor({
+  anchor: originalViewport,
+  afterRecenter: true,
+  cancelOnManualScroll: true
+});
+```
 
 ## Reveal And Focus An Event
 

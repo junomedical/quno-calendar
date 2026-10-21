@@ -7,6 +7,7 @@ import type { IsoDate } from "#quno-internal/shared/dateRangeModel";
 import { projectPoint } from "#quno-internal/timeline/runtime/model/projection";
 import type { LogicalPoint } from "#quno-internal/timeline/runtime/model/types";
 import type { CalendarEngine } from "#quno-internal/timeline/runtime/viewport/CalendarEngine";
+import { captureLayoutAnchor } from "#quno-internal/timeline/runtime/model/anchors";
 export function useRuntimeCapture({
   engine,
   containerRef,
@@ -37,9 +38,21 @@ export function useRuntimeCapture({
     [engine]
   );
   const capture = useCallback(
-    (target: CalendarViewportAnchorTarget): CalendarViewportAnchor | null => {
+    (requested?: CalendarViewportAnchorTarget): CalendarViewportAnchor | null => {
       const viewport = containerRef.current;
       if (!viewport) return null;
+      const state = engine.read();
+      const slot = requested ? null : captureLayoutAnchor({ geometry: state.geometry, viewport: state.viewport });
+      if (!requested && !slot) return null;
+      const minute = slot?.target.minute;
+      const target: CalendarViewportAnchorTarget = requested ?? {
+        dateKey: slot!.target.dateKey,
+        calendarId: slot!.target.calendarId,
+        time:
+          minute === undefined
+            ? undefined
+            : `${String(Math.floor(minute / 60)).padStart(2, "0")}:${String(Math.floor(minute % 60)).padStart(2, "0")}`
+      };
       const box = viewport.getBoundingClientRect();
       const instance = registry.eventInstance({ target, viewportBox: box });
       if (instance) {

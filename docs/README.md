@@ -178,3 +178,6 @@ The busy-schedule comparison uses repeatable shuffled 4/20/60-event days; see
 The concept’s larger **Cadence** controls and clarified Calendar introduction are recorded in
 [QTP-007](./timepicker/decisions.md#qtp-007---enlarge-concept-cadence-choices-and-shorten-their-label) and
 [Calendar Decision 158](./infinite-calendar/decisions.md#158---clarify-navigation-and-interaction-focus-in-the-concept-introduction).
+
+[Decision 159](./infinite-calendar/decisions.md#159---capture-the-current-slot-and-center-horizontal-navigation-on-both-axes)
+adds current-slot capture and horizontal centering on both usable viewport axes.

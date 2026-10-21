@@ -4,7 +4,8 @@ import {
   QunoInfiniteCalendar,
   type LoadEvents,
   type EventPrefetchPolicy,
-  type QunoInfiniteCalendarHandle
+  type QunoInfiniteCalendarHandle,
+  type CalendarViewportAnchor
 } from "@quno/calendar/infinite-calendar";
 import "@quno/calendar/infinite-calendar/styles.css";
 
@@ -13,9 +14,11 @@ const allIds = calendars.map(({ id }) => id);
 const viewportOnly = () => ({ beforeDays: 0, afterDays: 0 });
 const dense = new URLSearchParams(window.location.search).has("dense");
 const screens = new URLSearchParams(window.location.search).has("screens");
+const centering = new URLSearchParams(window.location.search).has("center");
 
 function Fixture() {
   const ref = useRef<QunoInfiniteCalendarHandle>(null);
+  const captured = useRef<CalendarViewportAnchor | null>(null);
   const [selected, setSelected] = useState(allIds);
   const [distance, setDistance] = useState(1);
   const screenPolicy = useCallback<EventPrefetchPolicy>(
@@ -48,13 +51,39 @@ function Fixture() {
         id: startDate,
         calendarId: "row-134",
         title: "Available",
-        start: `${startDate}T09:00:00`,
-        end: `${startDate}T10:00:00`
+        start: `${startDate}T${centering ? "13" : "09"}:00:00`,
+        end: `${startDate}T${centering ? "14" : "10"}:00:00`
       }
     ];
   }).current;
   return (
     <>
+      <button
+        onClick={() =>
+          ref.current?.scrollToDateTime({ date: "2026-10-15", time: "13:30", calendarId: "row-134", align: "center" })
+        }
+      >
+        Center saved event
+      </button>
+      <button
+        onClick={() => {
+          captured.current = ref.current?.captureViewportAnchor() ?? null;
+        }}
+      >
+        Capture viewport
+      </button>
+      <button
+        onClick={() => {
+          setSelected(allIds);
+          ref.current?.restoreViewportAnchor({
+            anchor: captured.current,
+            afterRecenter: true,
+            allowNavigationFallback: true
+          });
+        }}
+      >
+        Restore viewport
+      </button>
       <button onClick={() => ref.current?.scrollToDate({ date: "2026-10-15" })}>October 15</button>
       <button onClick={() => ref.current?.scrollToDate({ date: "2026-10-22" })}>October 22</button>
       <button
@@ -98,7 +127,7 @@ function Fixture() {
         eventPrefetchPolicy={screens ? screenPolicy : viewportOnly}
         loadEvents={loadEvents}
         initialDateKey="2026-10-15"
-        settings={{ excludedWeekdays: [], rowHeight: 58, dayHeaderHeight: 42 }}
+        settings={{ excludedWeekdays: [], rowHeight: 58, dayHeaderHeight: 42, zoom: centering ? 3 : 1 }}
         style={{ height: 600, width: 1000 }}
         renderEvent={({ event, style }) => <div style={style}>{event.title}</div>}
       />

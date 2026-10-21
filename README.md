@@ -1,6 +1,6 @@
 # @quno/calendar
 
-Five opinionated date and scheduling primitives in one React-authored package. Version `0.6.3` supports React 18+
+Five opinionated date and scheduling primitives in one React-authored package. Version `0.6.4.1` supports React 18+
 directly, verifies React 19 separately, and supports Preact through tested `preact/compat` aliases.
 
 ## Install
@@ -28,7 +28,7 @@ import { parseDateInput, tokenizeDateInput } from "@quno/calendar/date-parser";
 ```
 
 - **Quno/Infinite Calendar** virtualizes horizontal and vertical schedules with event loading, rendering, editing, zoom, navigation, focus, and an optional consumer-owned loading fallback.
-  Its handle exposes visible date keys for contextual creation and optional centered horizontal resource navigation.
+  Its handle exposes visible date keys for contextual creation and optional horizontal centering on both time and resource axes. Omit the capture target to retain the current viewport resource slot.
   Optional synchronous `projectEvents` displays local previews after caching without refetching persisted events.
   Resource-row navigation and anchor restoration wait for committed parent layout; ordinary state updates need no forced React commit.
   Captured event anchors retain their participant identity, and explicit row centering follows async collision sizing.

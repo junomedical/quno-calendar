@@ -2006,3 +2006,17 @@ Status: Accepted; refines the concept introduction copy under Decision 147
 Explain the navigation cost as too much mouse movement to navigate and the interaction cost as loss of focus during
 interactions. Retain the first-person introduction, participant/meeting visibility concern and following approach
 paragraph. Check the complete first paragraph on desktop and phone; calendar behavior and public contracts remain unchanged.
+
+## 159 - Capture The Current Slot And Center Horizontal Navigation On Both Axes
+
+Date: 2026-10-21
+Status: Accepted; refines Decision 094's centered resource navigation and Decision 097's committed restoration
+
+Allow `captureViewportAnchor()` without a target. Capture the current semantic date/resource slot and its exact
+screen offset. Existing explicit target captures retain their behavior. A consumer can restore a creation viewport
+after row filtering without querying private calendar DOM or aligning to the date header.
+
+In horizontal view, `scrollToDateTime({ date, time, calendarId, align: "center" })` centers the requested time in the
+usable time area as well as the actual resource row below the sticky header. Scroll bounds still clamp positioning.
+Consumers pass an event midpoint when they need its full duration centered. Unaligned and vertical navigation retain
+their existing behavior. Verify real event geometry and captured-slot restoration after selection and date changes.

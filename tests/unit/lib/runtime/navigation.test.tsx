@@ -34,3 +34,25 @@ for (const view of ["infinite-horizontal", "infinite-vertical"] as const) {
     expect(offset("2026-07-04")).toBe(8 + 90 * 2 - 48 + (view === "infinite-vertical" ? 42 : 0));
   });
 }
+
+it("centers the requested horizontal time and participant row on both usable axes", () => {
+  const ref = createRef<QunoInfiniteCalendarHandle>();
+  render(
+    <QunoInfiniteCalendar
+      ref={ref}
+      calendars={Array.from({ length: 30 }, (_, index) => ({ id: `row-${index}`, name: `Row ${index}` }))}
+      selectedCalendarIds={Array.from({ length: 30 }, (_, index) => `row-${index}`)}
+      initialDateKey="2026-07-04"
+      settings={{ startHour: 8, endHour: 18, zoom: 4 }}
+      loadEvents={async () => []}
+      renderEvent={({ event }) => <span>{event.title}</span>}
+    />
+  );
+  act(() =>
+    ref.current!.scrollToDateTime({ date: "2026-07-04", time: "13:00", calendarId: "row-15", align: "center" })
+  );
+  const viewport = screen.getByTestId("quno-calendar-timeline").querySelector<HTMLElement>(".quno-calendar-viewport")!;
+  expect(viewport.scrollLeft).toBe(220 + 8 + 300 * 4 - (220 + (1000 - 220) / 2));
+  const anchor = ref.current!.captureViewportAnchor({ dateKey: "2026-07-04", calendarId: "row-15", time: "13:00" })!;
+  expect(anchor.snapshot.top + 25).toBe(42 + (800 - 42) / 2);
+});
