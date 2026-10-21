@@ -9,6 +9,43 @@ const topDate = (page: Page) =>
     )?.dataset.date;
   });
 
+test("centers a saved event on both axes and restores the captured resource after creation layout changes", async ({
+  page
+}) => {
+  await page.goto("/e2e/fixtures/calendar-viewport-loading.html?center");
+  await page.getByRole("button", { name: "Center saved event", exact: true }).click();
+  const geometry = () =>
+    page.locator(".quno-calendar-viewport").evaluate((viewport) => {
+      const event = viewport.querySelector<HTMLElement>('[data-date="2026-10-15"] [data-testid="calendar-event"]');
+      if (!event) return null;
+      const box = event.getBoundingClientRect();
+      const frame = viewport.getBoundingClientRect();
+      return {
+        x: box.x + box.width / 2 - frame.x,
+        y: box.y + box.height / 2 - frame.y,
+        centerX: 220 + (viewport.clientWidth - 220) / 2,
+        centerY: 42 + (viewport.clientHeight - 42) / 2
+      };
+    });
+  await expect
+    .poll(async () => {
+      const box = await geometry();
+      return box ? Math.abs(box.x - box.centerX) + Math.abs(box.y - box.centerY) : Infinity;
+    })
+    .toBeLessThan(2);
+  const before = await geometry();
+  await page.getByRole("button", { name: "Capture viewport", exact: true }).click();
+  await page.getByRole("button", { name: "Compact", exact: true }).click();
+  await page.getByRole("button", { name: "October 22", exact: true }).click();
+  await page.getByRole("button", { name: "Restore viewport", exact: true }).click();
+  await expect
+    .poll(async () => {
+      const box = await geometry();
+      return box ? Math.abs(box.x - before!.x) + Math.abs(box.y - before!.y) : Infinity;
+    })
+    .toBeLessThan(2);
+});
+
 test("screen buffers follow actual day height and grow only for the configured distance", async ({ page }) => {
   await page.goto("/e2e/fixtures/calendar-viewport-loading.html?screens");
   await expect(page.getByTestId("request-count")).toHaveText("1");

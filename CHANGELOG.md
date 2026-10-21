@@ -4,6 +4,12 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+- Use `0.6.4.1` for this local calendar build and its onboarding archive. Keep earlier archives unchanged.
+
+- Capture the current semantic viewport slot when `captureViewportAnchor()` omits its target. Horizontal
+  `align: "center"` now centers both the requested time and participant row within scroll bounds. Existing explicit
+  captures, unaligned navigation and vertical navigation keep their contracts.
+
 - Cadence/copy verification: all 658 unit tests and 23 affected Chromium checks pass, including desktop/phone button
   geometry, keyboard/mouse selection, slot counts, preserved clocks and exact introduction copy. Formatting,
   architecture, types, lint, Preact compatibility, demo build, package verification, size reporting and pack dry-run

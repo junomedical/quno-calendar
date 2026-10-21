@@ -211,7 +211,7 @@ export type QunoInfiniteCalendarHandle = {
   /** Dates intersecting the viewport, excluding overscan and sticky chrome. */
   getVisibleDateKeys: () => IsoDate[];
   scrollToToday: () => void;
-  captureViewportAnchor: (target: CalendarViewportAnchorTarget) => CalendarViewportAnchor | null;
+  captureViewportAnchor: (target?: CalendarViewportAnchorTarget) => CalendarViewportAnchor | null;
   restoreViewportAnchor: (
     args: { anchor: CalendarViewportAnchor | null } & CalendarViewportAnchorRestoreOptions
   ) => void;

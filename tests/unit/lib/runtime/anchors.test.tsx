@@ -62,6 +62,20 @@ function setup(orientation: EngineLayout["orientation"] = "horizontal") {
 }
 
 describe("public anchor transactions", () => {
+  it("captures the current resource slot without a caller-supplied target", () => {
+    const { result, ref, viewport } = setup();
+    const state = result.current.engine.read();
+    const point = projectPoint({ geometry: state.geometry, target: { dateKey: "2026-07-06", calendarId: "second" } })!;
+    act(() => result.current.engine.observeScroll({ top: point.y + 12, left: 120, now: performance.now() }));
+    viewport.scrollTop = point.y + 12;
+    const anchor = ref.current!.captureViewportAnchor()!;
+    expect(anchor.target).toMatchObject({ dateKey: "2026-07-06", calendarId: "second" });
+    expect(anchor.snapshot.top).toBe(-12);
+    act(() => result.current.engine.observeScroll({ top: point.y + 250, left: 300, now: performance.now() }));
+    act(() => ref.current!.restoreViewportAnchor({ anchor, afterRecenter: true }));
+    expect(result.current.engine.read().viewport.top).toBe(point.y + 12);
+    expect(result.current.engine.read().viewport.left).toBe(120);
+  });
   it("resolves an external draft by event identity without a supplied date", () => {
     const { result, ref, rerender } = setup();
     rerender({

@@ -67,7 +67,7 @@ The horizontal navigation handle can reveal a resource row with
 `scrollToDateTime({ date, time, calendarId })`. The calendar owns resource projection and viewport correction; consumers
 do not query its DOM. Parent selection or draft state can be updated immediately before resource-row navigation or restoration
 in the same handler. The package resolves geometry after the resulting layout commits; consumers need no `flushSync` wrapper.
-Pass `align: "center"` to center the requested row even when it is already visible. `getVisibleDateKeys()` returns
+Pass `align: "center"` to center the requested time and row in the usable horizontal viewport, within scroll bounds, even when the row is already visible. Use an event midpoint as `time` to center its duration. Call `captureViewportAnchor()` without a target to capture the current resource slot and its screen offset before changing an editor layout. `getVisibleDateKeys()` returns
 only dates intersecting the usable viewport, so an external creation form can start on the middle visible date.
 Explicit centering follows the resource's actual collision height as asynchronous events arrive. A newer date request,
 restoration, or cancellation supersedes queued row navigation.
