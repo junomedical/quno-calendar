@@ -103,6 +103,10 @@ npm run test:compat
 npm run test:compat:react19
 ```
 
+Vercel builds the demo directly from a clean checkout with `npm run build:demo`; no package build is required first.
+`npm run dev` also prepares the server query bundle before starting Vite. See the
+[deployment recipe](./docs/shared/usage.md#demo-range-query-endpoint) for the server boundary.
+
 Release preparation is local only. Publishing, deprecating old packages, and deleting archival repositories require separate authorization.
 
 Infinite Calendar uses one mathematical viewport engine for both orientations, with stable semantic anchors and

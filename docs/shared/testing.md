@@ -615,3 +615,8 @@ Touch timer tests cover pending cancellation, quick taps, disposal, React event 
 activation. `e2e/specs/touch-hold.spec.ts` uses Chromium native touch input to require actual pre-hold scrolling and
 held drag/drawing geometry with stationary scroll offsets in both orientations; its native protocol cases skip
 other browser projects explicitly.
+
+Deployment regression coverage copies demo/server source, Vite configuration and the package manifest into an
+isolated directory with installed dependencies but no `dist`. It runs both `vercel-build` and `build:demo`, verifies
+site/server outputs without creating library artifacts, and invokes the private service through native Node in UTC
+and America/New_York. Existing local package builds cannot mask unresolved source imports.

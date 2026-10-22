@@ -440,6 +440,12 @@ demo endpoint from `api/demo-events.ts`. `build:demo` also bundles its server-on
 the function's `vercel-build` hook also prepares it before function tracing. It stays outside browser assets and the published package. No Vercel
 environment variables are required for the fixture-backed demo.
 
+Both build commands work without a prebuilt `dist` directory. The server builder resolves public shared helpers
+from source. Its private package import exposes source types through `types` and the compiled service through
+`default`; no TypeScript path override redirects Vite configuration loading back into unbuilt package exports.
+`npm run dev` prepares that service automatically before loading Vite. After changing server fixtures or query code,
+restart the development server to rebuild its service.
+
 ### Demo range-query endpoint
 
 The showcase sends a query rather than uploading a browser-filtered event array:

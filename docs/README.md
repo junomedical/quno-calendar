@@ -19,6 +19,9 @@ Focused input/picker compositions keep Start and End shortcut navigation inside 
 | Quno/Timepicker        | `@quno/calendar/timepicker`        | [Timepicker](./timepicker/README.md)               | `/docs/timepicker`        |
 | Quno/Date Parser       | `@quno/calendar/date-parser`       | [Date Parser](./date-parser/README.md)             | `/docs/date-parser`       |
 
+The [demo deployment recipe](./shared/usage.md#demo-range-query-endpoint) explains clean-checkout site/function
+builds without generated package assets; see Infinite Calendar Decision 164 for the server import boundary.
+
 The [named-contract migration](./shared/migration.md#unreleased-named-contracts-and-product-ownership) maps the
 current breaking API cleanup. Product decision records preserve the historical signatures they supersede.
 For creation defaults and centered row navigation, see Infinite Calendar Decision 094 and the shared usage recipes.

@@ -2116,3 +2116,20 @@ tap creates no event. Availability, controlled drafts, mutation permissions, rej
 use the same lifecycle. Delayed activation snapshots the pointer coordinates and capture target before React clears
 its event currentTarget. Verify timer/cancellation cleanup and native Chromium touch panning, held drag geometry and
 drawing in both orientations. No additional public setting or resize gesture is introduced.
+
+## 164 - Build The Demo Server Without Generated Package Assets
+
+Date: 2026-10-22
+Status: Accepted; refines Decision 111's server build boundary after Decision 160 introduced shared overlap filtering
+
+The focused demo and function build commands must work before library assets exist. Resolve the public headless
+root and its private shared dependencies directly from source when bundling the query service. Keep the native
+private service import's source typing in its package `types` condition and its built JavaScript in `default`.
+Remove the TypeScript path override that caused Vite configuration bundling to traverse query source before
+application aliases were available. Preserve explicit source aliases for tests and normal application bundling.
+
+Prepare the service before development startup as well as site/function builds. Server fixture/query edits take
+effect after restarting the development server. Keep the server bundle outside browser assets and published package
+files, retain atomic publication for concurrent builders, and add no prerequisite full-library build. Test both
+build commands in an isolated checkout without `dist`, then execute the built service through native Node imports
+in two timezones. No public component, loader, event or package export contract changes.

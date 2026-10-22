@@ -93,8 +93,10 @@ edits without making fixtures or API transport a dependency of any package entry
 [Decision 111](../infinite-calendar/decisions.md#111---query-demo-event-ranges-on-the-server).
 
 `build:demo` and the function's `vercel-build` hook bundle the server query service into `build/demo-api/events.js`. The deployed handler reaches
-that server-only bundle through a native private package import; Vite and TypeScript resolve the same name to its
-source during development. This avoids relying on development aliases in Vercel's emitted Node function. The server
+that server-only bundle through a native private package import. Its `types` condition resolves source types;
+its `default` condition resolves the built service for Node and Vite configuration. Tests retain an explicit source
+alias. The server builder resolves the public shared root and its private dependencies from source, so clean demo
+builds never require package `dist` assets. Development startup prepares the service before loading Vite configuration. This avoids relying on development aliases in Vercel's emitted Node function. The server
 bundle is excluded from the published calendar package and the browser's `dist-demo` assets. Atomic publication
 allows the site and function build steps to run concurrently.
 
