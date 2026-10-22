@@ -114,7 +114,7 @@ export function FloatingGuide({
         ) : (
           <>
             <ConceptParagraphs paragraphs={scenario.paragraphs} />
-            <a href={`/guide/${product}#${scenario.anchor}`}>
+            <a href={`/docs/${product}#${scenario.anchor}`}>
               Read the recipe <ArrowUpRight size={14} />
             </a>
           </>

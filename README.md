@@ -69,14 +69,15 @@ keystrokes without changing the synchronous headless parser API.
 
 ## Guides and records
 
-Run `npm run dev` and open `/` for the five-product overview, its shared guiding principles, and creator attribution.
-Each card links to a dedicated field guide and focused demo. `/demo/date-time` composes the single-day input and picker with enabled hours and minute cadence. Try `6 oct 2pm` to recognize a date without a year and a clock. Selecting a day opens time selection automatically. Its title shows the selected full date, and its arrows move through enabled days. Clicking the date title returns to day selection. Typed clocks stay unrestricted unless Date Input’s `forceCadence` is enabled:
+Run `npm run dev` and open `/` for the five-product interactive concept homepage. Product tabs and demo chapters
+use shareable paths such as `/datepicker/paint` and `/calendar/zoom`, retained on reload and browser history navigation.
+The header links to current documentation at `/docs`; the previous guides remain at `/docs/archive`. `/demo/date-time` composes the single-day input and picker with enabled hours and minute cadence. Try `6 oct 2pm` to recognize a date without a year and a clock. Selecting a day opens time selection automatically. Its title shows the selected full date, and its arrows move through enabled days. Clicking the date title returns to day selection. Typed clocks stay unrestricted unless Date Input’s `forceCadence` is enabled:
 
-- `/guide/infinite-calendar`
-- `/guide/datepicker`
-- `/guide/date-input`
-- `/guide/date-parser`
-- `/guide/timepicker`
+- `/docs/infinite-calendar`
+- `/docs/datepicker`
+- `/docs/date-input`
+- `/docs/date-parser`
+- `/docs/timepicker`
 
 Start with the [documentation index](./docs/README.md). Shared records cover [usage](./docs/shared/usage.md),
 [migration](./docs/shared/migration.md), [architecture](./docs/shared/architecture.md),
@@ -113,7 +114,7 @@ Shift-wheel zoom accumulates 0.20 per nonzero sample and waits for each accepted
 
 Wheel input follows the current Shift state immediately: hold Shift to zoom, release it to scroll. Remaining touchpad momentum may switch modes; there is no gesture-lock delay.
 
-The isolated `/concept` playground presents all five products in a live full-window canvas with a draggable,
+The `/` concept homepage (also available at `/concept`) presents all five products in a live full-window canvas with a draggable,
 collapsible guide. The contextual contents button opens the contents; previous/next navigation stays inside the guide. Chapters autoplay
 and loop unless reduced motion is enabled, and deliberate interaction pauses playback. The guide starts 24 px from
 the bottom left on desktop. On mobile it becomes a bottom drawer: tap its chevron or swipe its header down to collapse,

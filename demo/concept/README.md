@@ -1,7 +1,8 @@
 # Interactive concept playground
 
-`/concept` is an isolated demo application using public `@quno/calendar/*` entry points. All five products share a
-live full-window canvas and a floating information guide. Existing focused demos and field guides retain their routes.
+`/` is the main interactive homepage, also served at `/concept`, using public `@quno/calendar/*` entry points.
+All five products share a live full-window canvas and a floating information guide. Current field guides are at
+`/docs`; the previous guides are preserved at `/docs/archive`. Focused demos and legacy guide routes still work.
 
 ## Presentation and interaction
 
@@ -61,33 +62,33 @@ playback behavior on scene IDs or use recipe navigation as a simulation action.
 There are 25 action scenes and five introductory presentation pages. Calendar has nine presentation pages,
 Datepicker eight, Date Input five, Timepicker four and Date Parser four.
 
-| Product     | Scene                 | Recipe                                      |
-| ----------- | --------------------- | ------------------------------------------- |
-| Calendar    | Infinite scroll       | `/guide/infinite-calendar#infinite-view`    |
-| Calendar    | Zoom                  | `/guide/infinite-calendar#zoom`             |
-| Calendar    | Overlapping events    | `/guide/infinite-calendar#overlap-lanes`    |
-| Calendar    | Horizontal / vertical | `/guide/infinite-calendar#horizontal-first` |
-| Calendar    | Theming               | `/guide/infinite-calendar#styling`          |
-| Calendar    | Event density         | `/guide/infinite-calendar#performance`      |
-| Calendar    | Create an appointment | `/guide/infinite-calendar#drag-create`      |
-| Calendar    | Reschedule            | `/guide/infinite-calendar#drag-create`      |
-| Datepicker  | Paint a range         | `/guide/datepicker#paint`                   |
-| Datepicker  | Adjust the end        | `/guide/datepicker#paint`                   |
-| Datepicker  | Move the range        | `/guide/datepicker#segment-drag`            |
-| Datepicker  | Guess the intent      | `/guide/datepicker#wrong-guess`             |
-| Datepicker  | Access months         | `/guide/datepicker#quick-jump`              |
-| Datepicker  | Switch to start/end   | `/guide/datepicker#shortcuts`               |
-| Datepicker  | Single day            | `/guide/datepicker#single-day`              |
-| Date Input  | Format guessing       | `/guide/date-input#parser-configuration`    |
-| Date Input  | Type naturally        | `/guide/date-input#controlled-state`        |
-| Date Input  | Edit with keyboard    | `/guide/date-input#keyboard-controls`       |
-| Date Input  | Works with datepicker | `/guide/date-input#picker-composition`      |
-| Timepicker  | Choose a time         | `/guide/timepicker#time-selection`          |
-| Timepicker  | Keep an existing time | `/guide/timepicker#ownership`               |
-| Timepicker  | Works with datepicker | `/guide/timepicker#production`              |
-| Date Parser | Resolve a phrase      | `/guide/date-parser#relative-dates`         |
-| Date Parser | Resolve ambiguity     | `/guide/date-parser#preferred-date-order`   |
-| Date Parser | Cross midnight        | `/guide/date-parser#time-parsing`           |
+| Product     | Scene                 | Recipe                                     |
+| ----------- | --------------------- | ------------------------------------------ |
+| Calendar    | Infinite scroll       | `/docs/infinite-calendar#infinite-view`    |
+| Calendar    | Zoom                  | `/docs/infinite-calendar#zoom`             |
+| Calendar    | Overlapping events    | `/docs/infinite-calendar#overlap-lanes`    |
+| Calendar    | Horizontal / vertical | `/docs/infinite-calendar#horizontal-first` |
+| Calendar    | Theming               | `/docs/infinite-calendar#styling`          |
+| Calendar    | Event density         | `/docs/infinite-calendar#performance`      |
+| Calendar    | Create an appointment | `/docs/infinite-calendar#drag-create`      |
+| Calendar    | Reschedule            | `/docs/infinite-calendar#drag-create`      |
+| Datepicker  | Paint a range         | `/docs/datepicker#paint`                   |
+| Datepicker  | Adjust the end        | `/docs/datepicker#paint`                   |
+| Datepicker  | Move the range        | `/docs/datepicker#segment-drag`            |
+| Datepicker  | Guess the intent      | `/docs/datepicker#wrong-guess`             |
+| Datepicker  | Access months         | `/docs/datepicker#quick-jump`              |
+| Datepicker  | Switch to start/end   | `/docs/datepicker#shortcuts`               |
+| Datepicker  | Single day            | `/docs/datepicker#single-day`              |
+| Date Input  | Format guessing       | `/docs/date-input#parser-configuration`    |
+| Date Input  | Type naturally        | `/docs/date-input#controlled-state`        |
+| Date Input  | Edit with keyboard    | `/docs/date-input#keyboard-controls`       |
+| Date Input  | Works with datepicker | `/docs/date-input#picker-composition`      |
+| Timepicker  | Choose a time         | `/docs/timepicker#time-selection`          |
+| Timepicker  | Keep an existing time | `/docs/timepicker#ownership`               |
+| Timepicker  | Works with datepicker | `/docs/timepicker#production`              |
+| Date Parser | Resolve a phrase      | `/docs/date-parser#relative-dates`         |
+| Date Parser | Resolve ambiguity     | `/docs/date-parser#preferred-date-order`   |
+| Date Parser | Cross midnight        | `/docs/date-parser#time-parsing`           |
 
 ## Calendar choreography
 
@@ -217,3 +218,13 @@ This separate fixture leaves the ordinary reference appointments and deliberate 
 Standalone Timepicker uses a Cadence fieldset with 5 min, 15 min and 20 min buttons at least 80×44 px, 14 px text and
 8 px gaps. The larger hit targets are scoped to timeCadence.css; public minute choices keep their own styling.
 The Calendar introduction names navigation mouse travel and loss of focus during interactions explicitly.
+
+## Homepage navigation
+
+The concept is the main `/` page. `useConceptNavigation` reads validated product/chapter path segments. Calendar
+chapters use `/calendar/zoom` and the Calendar introduction stays at `/`. Other product introductions are
+`/datepicker`, `/date-input`, `/timepicker` and `/parser`; add a scene ID for a chapter, such as `/datepicker/paint`.
+Explicit navigation pushes browser history; reload, recipient links and back/forward restore it. Each product
+remembers its last chapter during the mounted visit. Playback, disclosure, theme and fullscreen do not modify the
+URL. `/concept` and earlier query URLs convert to directory paths. The existing server catch-all rewrite supports
+direct visits and reloads. Documentation opens `/docs/{product}` without archive discovery links or loading text.

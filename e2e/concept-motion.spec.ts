@@ -67,11 +67,14 @@ for (const vertical of [false, true]) {
     await scene(page, "Infinite scroll", vertical);
     await pauseCalendarScene(page);
     await restartCalendarScene(page);
-    const { values: samples, times } = await page.evaluate(async () => {
+    const { values: samples, longestHold } = await page.evaluate(async () => {
       const values: number[] = [];
-      const times: number[] = [];
       let started = false;
-      const deadline = performance.now() + 5000;
+      let heldAt = 0;
+      let heldSince = 0;
+      let heldFrames = 0;
+      let longestHold = 0;
+      const deadline = performance.now() + 10_000;
       while (
         document.querySelector(".concept")?.getAttribute("data-playing") === "true" &&
         performance.now() < deadline
@@ -83,30 +86,25 @@ for (const vertical of [false, true]) {
         // Measure visible travel: the infinite viewport may rebase its internal scroll offset.
         const reference = document.querySelector('[data-testid="calendar-day"][data-date="2026-10-20"]');
         if (reference && started) {
-          values.push(-reference.getBoundingClientRect().top);
-          times.push(performance.now());
+          const position = -reference.getBoundingClientRect().top;
+          const now = performance.now();
+          values.push(position);
+          // Wait for an observed hold after sufficient travel, rather than a fixed number of cycles.
+          // The first move can lose visible distance while newly loaded dates settle their layout.
+          if (position - values[0] < 800 || Math.abs(position - heldAt) > 1) {
+            heldAt = position;
+            heldSince = now;
+            heldFrames = 1;
+          } else if (++heldFrames >= 9) longestHold = Math.max(longestHold, now - heldSince);
+          if (longestHold >= 1900) break;
         }
         await new Promise(requestAnimationFrame);
       }
-      return { values, times };
+      return { values, longestHold };
     });
     expect(new Set(samples).size).toBeGreaterThan(25);
     expect(samples.at(-1)! - samples[0]).toBeGreaterThanOrEqual(800);
-    expect(
-      samples.some(
-        (value, index) =>
-          index >= 8 &&
-          value - samples[0] >= 800 &&
-          samples.slice(index - 8, index + 1).every((position) => Math.abs(position - value) <= 1)
-      )
-    ).toBe(true);
     expect(Math.max(...samples.slice(1).map((value, i) => Math.abs(value - samples[i])))).toBeLessThan(100);
-    let heldSince = 0;
-    let longestHold = 0;
-    for (let index = 1; index < samples.length; index++) {
-      if (Math.abs(samples[index] - samples[index - 1]) > 1) heldSince = index;
-      else longestHold = Math.max(longestHold, times[index] - times[heldSince]);
-    }
     expect(longestHold).toBeGreaterThanOrEqual(1900);
   });
 }

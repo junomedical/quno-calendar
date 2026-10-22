@@ -3,7 +3,7 @@
 Quno/Date Parser owns dependency-free recognition and tokenization of timezone-free dates and inclusive ranges.
 
 - Public entry point: `@quno/calendar/date-parser`
-- Live field guide: `/guide/date-parser`
+- Live field guide: `/docs/date-parser`
 - Focused demo: `/demo/date-parser`
 - [Decisions](./decisions.md)
 - [Shared usage recipes](../shared/usage.md)
@@ -119,3 +119,10 @@ until a chapter is chosen. Resolve a phrase cycles six examples: next Friday, to
 
 The concept canvas follows the computer's light/dark setting while this product and the explainer retain their
 existing light presentation on bright panels; see [QUNO-037](../shared/decisions.md#quno-037---follow-system-appearance-around-light-demo-panels).
+
+The main concept homepage uses shareable product/demo links. The current field guide connects those chapters to
+its integration examples and recipes; the previous guide is preserved under `/docs/archive/date-parser`.
+See [QUNO-041](../shared/decisions.md#quno-041---promote-the-concept-homepage-and-preserve-field-guides).
+
+Concept chapters now use `/parser/{chapter}` directory paths; current navigation omits archive links.
+See [QUNO-042](../shared/decisions.md#quno-042---use-directory-routes-and-quiet-documentation-loading).

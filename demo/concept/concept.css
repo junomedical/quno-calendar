@@ -33,16 +33,6 @@
   padding: 0 4%;
   border-bottom: 1px solid #e9e5ef;
 }
-.concept-logo {
-  font-size: 34px;
-  font-weight: 750;
-  letter-spacing: -2px;
-}
-.concept-logo span {
-  font-size: 12px;
-  vertical-align: top;
-  letter-spacing: 0;
-}
 .concept-nav nav {
   display: flex;
   padding: 5px;

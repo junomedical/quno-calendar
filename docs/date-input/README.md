@@ -4,7 +4,7 @@ Quno/Date Input owns the accessible controlled or uncontrolled text field that c
 the shared timezone-free `DateRange` model.
 
 - Public entry point: `@quno/calendar/date-input`
-- Live field guide: `/guide/date-input`
+- Live field guide: `/docs/date-input`
 - Focused demo: `/demo/date-input`
 - [Decisions](./decisions.md)
 - [Shared usage recipes](../shared/usage.md)
@@ -93,3 +93,10 @@ input as the range summary and retaining normal calendar navigation and selectio
 
 The concept canvas follows the computer's light/dark setting while this product and the explainer retain their
 existing light presentation on bright panels; see [QUNO-037](../shared/decisions.md#quno-037---follow-system-appearance-around-light-demo-panels).
+
+The main concept homepage uses shareable product/demo links. The current field guide connects those chapters to
+its integration examples and recipes; the previous guide is preserved under `/docs/archive/date-input`.
+See [QUNO-041](../shared/decisions.md#quno-041---promote-the-concept-homepage-and-preserve-field-guides).
+
+Concept chapters now use `/date-input/{chapter}` directory paths; current navigation omits archive links.
+See [QUNO-042](../shared/decisions.md#quno-042---use-directory-routes-and-quiet-documentation-loading).

@@ -51,7 +51,7 @@ export function DefaultDemoSidebar({
           <span>Reusable React PoC</span>
         </div>
       </div>
-      <a className="walkthrough-link" href="/guide/infinite-calendar">
+      <a className="walkthrough-link" href="/docs/infinite-calendar">
         <BookOpenText size={15} aria-hidden />
         Read the integration field guide
       </a>

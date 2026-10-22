@@ -1,0 +1,11 @@
+.docs-archive {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  height: 100dvh;
+  min-height: 0;
+}
+.docs-archive > .field-guide,
+.docs-archive > .project-home {
+  height: 100%;
+  min-height: 0;
+}

@@ -1,3 +1,4 @@
+import { GuideDemoLink } from "./GuideDemoLink";
 import type { JSX, ReactNode } from "react";
 import { useMemo, useState } from "react";
 
@@ -34,6 +35,7 @@ export function FieldGuideFeature({
     >
       <p className="field-guide__section-number">{subsection ? kicker : `${number} · ${kicker}`}</p>
       <Heading>{title}</Heading>
+      <GuideDemoLink id={id} />
       <div className="field-guide__copy">{copy}</div>
       <aside className="field-guide__try">
         <strong>Try it</strong>

@@ -554,3 +554,38 @@ retain their finite scenes and short tours.
 - Consequences: Remove explicit mobile drawer stop calls and filter only presentation events in the shared playback
   listener. Verify all five products with native input, continuing cycle progression, retained canvas identity and
   paused-state preservation. This behavior belongs to demo/concept; public package contracts remain unchanged.
+
+## QUNO-041 - Promote The Concept Homepage And Preserve Field Guides
+
+- Date: 2026-10-20
+- Status: Accepted; supersedes QUNO-032's isolated concept route and earlier overview/guide route placement
+- Decision: Serve the concept at `/` and retain `/concept` as an alternate entry. Remove its corner logo. Record
+  stable product and demo IDs in `?product=...&demo=...`, using `intro` for the product introduction. Validate links
+  against the authored catalog, restore them on reload and browser back/forward, and remember each product's last
+  chapter while switching tabs in the mounted visit. Presentation and playback state do not write navigation.
+- Documentation: `/docs` owns the overview and `/docs/{product}` the current field guides. Keep legacy guide routes
+  and hash anchors working. Copy the previous overview and all guide sources, recipes and exhibits before changing
+  them, then expose the independent snapshot at `/docs/archive` and `/docs/archive/{product}`. The archive is dated
+  20 October 2026 at source commit 9013d1c, and still uses current public package/demo infrastructure.
+- Consequences: Load current and archived guides lazily. Current guides provide consistent product navigation,
+  catalog-driven links to all concept chapters and matching chapter links alongside integration recipes. Retain
+  distinctive API exhibits, including availability layers, loading/focus, localization, custom presentation and
+  controlled/uncontrolled examples. Keep focused sandboxes accessible. Browser checks cover shared/reloaded links,
+  invalid links, history, per-tab restoration, archive separation, deep links and phone geometry. No public API changes.
+
+## QUNO-042 - Use Directory Routes And Quiet Documentation Loading
+
+- Date: 2026-10-20
+- Status: Accepted; supersedes QUNO-041's query URL representation and refines its documentation navigation
+- Decision: Keep `/` as the Calendar introduction. Use `/calendar/{chapter}`, `/datepicker/{chapter}`,
+  `/date-input/{chapter}`, `/timepicker/{chapter}` and `/parser/{chapter}`; omit the chapter for other product
+  introductions. Normalize `/concept` and earlier `?product=...&demo=...` links to these paths, removing legacy
+  navigation parameters while preserving unrelated queries and fragments. Path segments take precedence.
+- Navigation: Keep history, reload, shared links and each tab's last chapter. Resolve client paths through the
+  existing catch-all server rewrite. Product/chapter transitions retain the canvas and presentation state.
+- Documentation: Remove archive links from the current docs index and product navigation. Retain the source
+  snapshot and direct `/docs/archive/*` access. Keep guide chunks lazy, using an empty light placeholder with an
+  accessible busy state instead of flashing “Opening documentation…” text. Preserve section-anchor restoration.
+- Consequences: Verify path round trips for every authored scene, legacy query conversion, browser history and
+  direct visits, desktop/phone geometry, absence of archive discovery links, and controlled delayed module loading
+  with an empty full-height light surface. Package APIs and production library behavior remain unchanged.

@@ -1,14 +1,15 @@
 # Unified Usage Guide
 
-The live project overview is available at `/`. It links to five task-oriented field guides:
+The live concept homepage is available at `/`, with shareable product/demo links. The documentation overview at
+`/docs` links to five task-oriented field guides:
 
-- `/guide/infinite-calendar`
-- `/guide/datepicker`
-- `/guide/date-input`
-- `/guide/date-parser`
-- `/guide/timepicker`
+- `/docs/infinite-calendar`
+- `/docs/datepicker`
+- `/docs/date-input`
+- `/docs/date-parser`
+- `/docs/timepicker`
 
-Each guide has a focused Demo destination. This document remains the single source for copyable production recipes
+Each guide links to its concept introduction and a focused sandbox. This document remains the single source for copyable production recipes
 across all five independent feature entry points.
 
 ## Entry points
@@ -632,7 +633,7 @@ or cadence-sized minutes and enabled hours when forced. Enter/blur remain the co
 
 Use `defaultValue` and `defaultTime` for uncontrolled usage. Value and time can be controlled independently.
 Changing settings does not rewrite persisted clocks; consumers own revalidation. The example remounts only when typing changes the input’s month so typed dates become visible. Picker day arrows manage their own visible month without remounting or losing the time view.
-Live example: `/demo/date-time` and the date-time chapters in `/guide/datepicker` and `/guide/date-input`.
+Live example: `/demo/date-time` and the date-time chapters in `/docs/datepicker` and `/docs/date-input`.
 
 ## Quno/Date Parser
 
@@ -1151,7 +1152,7 @@ Datepicker. Five-minute cadence lays out its 12 minutes as two rows of six choic
 prevents choosing or clearing. Use labels, `formatters.time({ time, locale })`, class names, and
 `--quno-time-picker-*` tokens for consumer-owned presentation. No date or parser is required.
 
-Try `/guide/timepicker` and `/demo/timepicker`; see [the full contract](../timepicker/README.md).
+Try `/docs/timepicker` and `/demo/timepicker`; see [the full contract](../timepicker/README.md).
 
 Infinite Calendar consumers keep the same controlled zoom and renderer contracts. The runtime tracks native
 scrolling independently from React presentation and reuses prepared layout during zoom; custom event content
@@ -1166,7 +1167,7 @@ authoritative. No consumer-side forced React commit or paint acknowledgment is n
 
 ## Explore the demo concept
 
-Run `npm run dev` and open `/concept`. Choose a product using the top tabs. Its floating guide starts with an
+Run `npm run dev` and open `/` (`/concept` remains available). Choose a product using the top tabs. Its floating guide starts with an
 introduction; Next opens its first chapter. The contextual contents button opens every title inside that same guide. Choose a chapter
 or use the footer arrows. The live demo starts automatically unless reduced motion is enabled and loops without
 advancing navigation. Revisit a chapter to restart it. Click, drag, wheel, keyboard input, focus entering a working
@@ -1272,7 +1273,7 @@ This retains seven included dates on either side of the current anchor, skipping
 for the existing month-before/month-after window. Finite values truncate to at least one date per side; non-finite
 values retain the default. This controls the scroll extent, independently of rendered overscan and event-prefetch
 policy. Changing it preserves visible content, and idle recentering preserves the intra-day position. Try dragging the
-scrollbar in `/guide/infinite-calendar#infinite-view`: its 15-date demo returns near the middle after settling.
+scrollbar in `/docs/infinite-calendar#infinite-view`: its 15-date demo returns near the middle after settling.
 
 The busy-schedule guide comparison uses Quiet 4, Busy 20 and Packed 60 appointments per day across four people.
 Start times are shuffled within four parts of the working day using a date seed, keeping each replay stable while
@@ -1281,3 +1282,16 @@ different days vary. Presets reuse nested appointments; the dedicated fixture ad
 In `/concept`, standalone Timepicker labels the 5 min, 15 min and 20 min choices **Cadence** and gives them larger
 buttons. Change a cadence to update slots while preserving the selected clock. The Calendar introduction now
 explicitly names navigation mouse movement and loss of focus during interactions.
+
+### Share a demo or open documentation
+
+Open `/datepicker/paint` to show that exact chapter, or `/parser` for the parser introduction. Calendar starts
+at `/`; its chapters use `/calendar/{chapter}`. Other products use `/datepicker`, `/date-input`, `/timepicker`
+and `/parser`, with an optional chapter segment. Tab and previous/next/contents navigation update the link. Reload and browser history restore it.
+The live homepage is `/` (`/concept` also works); current guides are `/docs/{product}` and the previous guide
+snapshot is `/docs/archive/{product}`. Focused `/demo/*` sandboxes remain available from the current guides.
+
+Previously shared `?product=...&demo=...` links and `/concept` normalize to the corresponding directory paths.
+The existing Vercel catch-all rewrite serves the application on direct visits and reloads. Archive routes remain
+available by direct address, with no archive links in current navigation. Guide chunks load on a silent light
+surface rather than displaying a transient loading message.

@@ -9,7 +9,7 @@ export function DensityDemo() {
       data-testid="density-guide-demo"
       style={{ height: 560, minHeight: 0, display: "block" }}
     >
-      <ConceptCalendar scenario="density" />
+      <ConceptCalendar scenario="density" initialTheme="light" />
     </div>
   );
 }

@@ -27,6 +27,7 @@ import { EventProjectionDemo } from "./EventProjectionDemo";
 import { DensityDemo, densityRecipe } from "./DensityDemo";
 import { calendarWindowRecipe } from "./calendarWindowRecipe";
 import { ReactStateDemo } from "./ReactStateDemo";
+import { GuideDemoLink } from "#quno-demo/guide/shared/GuideDemoLink";
 import { FieldGuidePage } from "#quno-demo/guide/shared/FieldGuidePage";
 import { FieldGuideProduction } from "#quno-demo/guide/shared/FieldGuideProduction";
 import { infiniteCalendarProduction } from "#quno-demo/guide/shared/productionProfiles";
@@ -251,7 +252,7 @@ const availabilitySnippet = `const [interactionMode, setInteractionMode] =
   interactionMode={interactionMode}
   onEventCreateRequest={(range) =>
     interactionMode === "availability"
-      ? createAvailability(range)
+      ? { ...createAvailability(range), renderLayer: "availability" }
       : createAppointment(range)
   }
 />`;
@@ -331,7 +332,7 @@ const articleContents = [
   ["#horizontal-first", "01", "Fit dense schedules into a clear view"],
   ["#infinite-view", "02", "Move through dates without limits"],
   ["#performance", "03", "Keep busy schedules fast"],
-  ["#css-native", "04", "Leverage the browser engine"],
+  ["#css-native", "04", "Use the browser engine"],
   ["#event-cards", "05", "Render useful event cards"],
   ["#card-structure", "06", "Shape card structure for the occasion"],
   ["#read-only", "07", "Start with a read-only calendar"],
@@ -496,7 +497,7 @@ export function IntegrationWalkthrough({ embedded = false }: { embedded?: boolea
         </DemoBreakout>
       </ArticleSection>
 
-      <ArticleSection id="css-native" number="04" title="Leverage the browser engine">
+      <ArticleSection id="css-native" number="04" title="Use the browser engine">
         <p>
           The browser already knows how to scroll, clip, layer, and keep elements sticky. Using those native
           capabilities avoids rebuilding high-frequency layout behavior in application code.
@@ -600,8 +601,10 @@ export function IntegrationWalkthrough({ embedded = false }: { embedded?: boolea
           Background-layered availability has its own collision lanes, separate from foreground events. Parallel windows
           for one person use mini-lanes horizontally and side-by-side lanes vertically; the resource grows to the deeper
           layer rather than adding both depths. In appointment mode background availability remains behind events and
-          does not intercept the pointer. In <code>interactionMode="availability"</code>, appointments become inactive
-          context so only availability can be drawn or moved.
+          does not intercept the pointer. Set <code>renderLayer: "availability"</code> on newly created windows as well
+          as loaded ones; <code>kind</code> alone does not choose the layer. In{" "}
+          <code>interactionMode="availability"</code>, appointments become inactive context so only availability can be
+          drawn or moved.
         </p>
         <CodeBlock code={availabilitySnippet} title="Choose the editable layer" />
         <Callout>
@@ -1048,6 +1051,7 @@ function ArticleSection({
     <section className="calendar-article__section" id={id}>
       <p className="calendar-article__section-number">{number}</p>
       <h2>{title}</h2>
+      <GuideDemoLink id={id} />
       {children}
     </section>
   );

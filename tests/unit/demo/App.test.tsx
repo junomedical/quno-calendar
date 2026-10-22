@@ -40,6 +40,8 @@ vi.mock("#quno-demo/guide/time-picker/TimePickerFieldGuide", () => ({
   TimePickerFieldGuide: () => <div data-testid="route-time-picker-guide" />
 }));
 
+vi.mock("#quno-demo/concept/DemoConcept", () => ({ DemoConcept: () => <div data-testid="route-concept" /> }));
+
 import { App, demoRoutes } from "#quno-demo/app/App";
 
 describe("application route registry", () => {
@@ -53,7 +55,19 @@ describe("application route registry", () => {
   });
 
   it.each([
-    ["/", "route-home"],
+    ["/", "route-concept"],
+    ["/concept", "route-concept"],
+    ["/calendar/zoom", "route-concept"],
+    ["/datepicker/paint", "route-concept"],
+    ["/date-input/keyboard", "route-concept"],
+    ["/timepicker/cadence", "route-concept"],
+    ["/parser/ambiguity", "route-concept"],
+    ["/docs", "route-home"],
+    ["/docs/infinite-calendar", "route-timeline-guide"],
+    ["/docs/datepicker", "route-date-range-guide"],
+    ["/docs/date-input", "route-date-input-guide"],
+    ["/docs/date-parser", "route-date-parser-guide"],
+    ["/docs/timepicker", "route-time-picker-guide"],
     ["/guide/infinite-calendar", "route-timeline-guide"],
     ["/guide/datepicker", "route-date-range-guide"],
     ["/guide/date-input", "route-date-input-guide"],
@@ -68,26 +82,26 @@ describe("application route registry", () => {
     ["/demo1", "route-demo1"],
     ["/demo2", "route-demo2"],
     ["/demo3", "route-demo3"]
-  ])("renders %s from the declarative registry", (path, testId) => {
+  ])("renders %s from the declarative registry", async (path, testId) => {
     window.history.replaceState({}, "", path);
     const view = render(<App />);
-    expect(screen.getByTestId(testId)).toBeInTheDocument();
+    expect(await screen.findByTestId(testId)).toBeInTheDocument();
     view.unmount();
   });
 
-  it("falls back to the project home for unknown paths", () => {
+  it("falls back to the concept home for unknown paths", () => {
     window.history.replaceState({}, "", "/unknown");
     const view = render(<App />);
-    expect(screen.getByTestId("route-home")).toBeInTheDocument();
+    expect(screen.getByTestId("route-concept")).toBeInTheDocument();
     view.unmount();
   });
 
   it.each(["/guide", "/story", "/examples/integration-walkthrough"])(
     "redirects %s to the infinite-calendar guide",
-    (path) => {
+    async (path) => {
       window.history.replaceState({}, "", path);
       const view = render(<App />);
-      expect(screen.getByTestId("route-timeline-guide")).toBeInTheDocument();
+      expect(await screen.findByTestId("route-timeline-guide")).toBeInTheDocument();
       expect(window.location.pathname).toBe("/guide/infinite-calendar");
       view.unmount();
     }
@@ -98,10 +112,10 @@ describe("application route registry", () => {
     ["/guide/date-input-field", "/guide/date-input", "route-date-input-guide"],
     ["/demo/date-range-input", "/demo/datepicker", "route-date-range-demo"],
     ["/demo/date-input-field", "/demo/date-input", "route-date-input-demo"]
-  ])("redirects %s to %s", (path, destination, testId) => {
+  ])("redirects %s to %s", async (path, destination, testId) => {
     window.history.replaceState({}, "", path);
     const view = render(<App />);
-    expect(screen.getByTestId(testId)).toBeInTheDocument();
+    expect(await screen.findByTestId(testId)).toBeInTheDocument();
     expect(window.location.pathname).toBe(destination);
     view.unmount();
   });

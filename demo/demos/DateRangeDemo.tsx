@@ -12,7 +12,7 @@ export function DateRangeDemo() {
   return (
     <ComponentDemoShell
       description="Paint a range, resize either endpoint, or move the whole period."
-      guideHref="/guide/datepicker"
+      guideHref="/docs/datepicker"
       title="Quno/Datepicker"
     >
       <div className="component-demo__panel">

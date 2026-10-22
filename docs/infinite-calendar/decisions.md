@@ -2006,3 +2006,30 @@ Status: Accepted; refines the concept introduction copy under Decision 147
 Explain the navigation cost as too much mouse movement to navigate and the interaction cost as loss of focus during
 interactions. Retain the first-person introduction, participant/meeting visibility concern and following approach
 paragraph. Check the complete first paragraph on desktop and phone; calendar behavior and public contracts remain unchanged.
+
+## Shared homepage and documentation routes — 2026-10-20
+
+[QUNO-041](../shared/decisions.md#quno-041---promote-the-concept-homepage-and-preserve-field-guides) promotes the
+concept to `/`, persists product/chapter navigation in the URL, and moves current field guides to `/docs`.
+The pre-change guide source is retained at `/docs/archive`; public product contracts remain unchanged.
+
+## 159 - Keep Documentation Density Light And Newly Drawn Availability In Its Layer
+
+Date: 2026-10-20
+Status: Accepted; refines Decisions 155 and 157 and the availability exhibit
+
+Start the embedded Keep busy schedules fast exhibit in the guide's light palette, independently of the computer's
+color scheme. The standalone concept keeps its system preference and the exhibit retains its theme control.
+Apply the optional initial theme consistently on mount, scene reset and loop restoration.
+
+The availability exhibit must set `renderLayer: "availability"` on newly created availability, matching its initial
+fixtures. Kind alone does not select a background layer. This fixes a demo wiring regression: a created window
+was classified as a foreground event, faded and inactive while editing availability. Preserve the deliberately
+muted context in appointment mode and verify active layer, computed opacity/background and pointer interaction
+in both orientations. This changes consumer-owned demo data, not the public layer contract.
+
+## Shared directory routes and quiet documentation — 2026-10-20
+
+[QUNO-042](../shared/decisions.md#quno-042---use-directory-routes-and-quiet-documentation-loading) replaces
+query navigation with product/chapter directories, converts earlier shared links, removes archive discovery links
+and keeps lazy documentation loading silent. Public product contracts are unchanged.

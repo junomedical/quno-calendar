@@ -4,6 +4,43 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+- CI scroll verification: all 679 unit tests, all 428 Chromium checks and 12 single-worker repeated scroll checks
+  pass. Delayed startup with 4× CPU slowdown passes; shortening the pause to one second is correctly rejected.
+  Formatting, architecture, types, lint, Preact/React 19 compatibility, demo build, package verification, size
+  reporting and pack dry-run pass. No verification blocker remains; library and demo bundles are unchanged.
+
+- Stabilize the concept scroll motion check by sampling until the required travel and two-second stationary pause
+  are observed, bounded by a 10-second deadline. Retain the travel, intermediate-position, nine-frame and frame-step
+  thresholds, and measure the full pause against one fixed position. Demo playback and public APIs are unchanged.
+
+- Directory/loading verification: all 679 unit tests and 67 affected Chromium checks pass, including reload,
+  history, direct/shared paths, old-query conversion, archive-link removal and a deliberately delayed silent guide
+  load with computed surface/height assertions. Formatting, architecture, types, lint, Preact/React 19 fixtures,
+  demo build, package verification, size reporting and pack dry-run pass. An initial concurrent unit run exceeded
+  the dense-layout timing ratio (26.30 versus 25); the final complete unit rerun passes. Library sizes are unchanged;
+  the main demo chunk is 440.92 kB.
+
+- Replace concept query URLs with product/chapter directories such as `/calendar/zoom` and `/datepicker/paint`,
+  keeping `/` for the Calendar introduction. Convert earlier query links and retain history, reload and tab memory
+  through the existing server rewrite. Remove archive links from current navigation while retaining direct archive
+  access. Load documentation on a silent light surface rather than flashing a loading message.
+
+- Homepage/docs verification: all 671 unit tests pass. The complete 426-case Chromium run passed 413 checks;
+  13 checks used pre-update `/guide` link expectations and all 13 pass on a fresh rerun after correcting them.
+  All seven final homepage/docs checks pass, including direct chapter links for every product, mobile geometry,
+  archive separation, lazy-guide anchors and light density styling under a dark OS. No unresolved verification
+  blockers remain. Formatting, architecture, types, lint, Preact/React 19 compatibility, demo build, package
+  verification, size reporting and pack dry-run pass. Library sizes are unchanged; lazily loaded guides reduce
+  the demo's main JavaScript chunk from 594.88 kB to 440.76 kB.
+
+- Make the concept the main `/` page, retaining `/concept`, remove the corner logo, and persist product/chapter
+  navigation in shareable URL queries with reload/history and per-product last-chapter restoration.
+- Serve current documentation at `/docs` with lazy product guides, consistent product navigation and direct links
+  to matching live demos. Preserve all distinctive API examples and focused sandboxes. Keep an independent
+  20 October 2026 guide source snapshot at `/docs/archive`; legacy `/guide/*` links and anchors remain supported.
+- Start the busy-schedule documentation exhibit in light mode regardless of OS preference. Fix newly drawn
+  availability being treated as a faded inactive foreground event by assigning its explicit availability layer.
+
 - Cadence/copy verification: all 658 unit tests and 23 affected Chromium checks pass, including desktop/phone button
   geometry, keyboard/mouse selection, slot counts, preserved clocks and exact introduction copy. Formatting,
   architecture, types, lint, Preact compatibility, demo build, package verification, size reporting and pack dry-run

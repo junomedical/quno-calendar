@@ -113,9 +113,9 @@ for (const width of [1280, 390]) {
 }
 
 test("timepicker home card and guide expose recipes, local state, and scoped presentation", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/docs");
   await page.getByRole("link", { name: "Explore the Timepicker guide" }).click();
-  await expect(page).toHaveURL(/\/guide\/timepicker$/);
+  await expect(page).toHaveURL(/\/docs\/timepicker$/);
   const local = page.locator("#ownership .quno-time-picker");
   await expect(local.locator('[data-slot="selection-summary"]')).toHaveText("13:15 Uhr");
   const option = local.getByRole("button", { name: "14:30 Uhr", exact: true });
@@ -127,5 +127,5 @@ test("timepicker home card and guide expose recipes, local state, and scoped pre
   await expect(local.locator('[data-slot="selection-summary"]')).toHaveText("Choose a time");
   await page.locator('details[aria-label="Select a standalone time implementation"] summary').click();
   await expect(page.getByLabel("Select a standalone time TSX source")).toContainText("@quno/calendar/timepicker");
-  await expect(page.getByRole("link", { name: /^Demo/ })).toHaveAttribute("href", "/demo/timepicker");
+  await expect(page.getByRole("link", { name: /^Demo/ })).toHaveAttribute("href", "/timepicker");
 });

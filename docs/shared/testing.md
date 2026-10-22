@@ -491,7 +491,13 @@ file without affecting others, and add a new scene through JSON alone. Browser c
 initial value, actions and revisiting. Chapter arrival starts loops; reduced motion is idle. Manual takeover and
 hidden tabs cancel all pending work, never advance navigation, and preserve the current result.
 
-Calendar coverage samples real scroll travel and stationary pauses, zoom extrema and event geometry, next-day pans
+Calendar scroll coverage samples until it observes at least 800 px of visible travel followed by a stationary hold
+of at least 1900 ms and nine frames, with a 10-second safety deadline. Loading/layout settlement can shorten the
+first move's visible travel, so the check may observe a later loop rather than assuming a five-second window always
+contains the qualifying pause. Holds stay within 1 px of their starting position; intermediate-position and
+sub-100 px frame-step assertions remain required in both orientations.
+
+Calendar coverage also samples zoom extrema and event geometry, next-day pans
 after both orientations, theme/density cycles, three-appointment rescheduling round trips, session continuity and
 bounded creation. Hover coverage follows topmost browser hit targets through all underlying lanes, asserts no clicks,
 and requires a cursor-outside/all-closed hold. Native hover remains usable after explicit takeover. Card checks assert
@@ -575,3 +581,15 @@ stable identities and repeatable but date-varying starts. Browser checks verify 
 Concept cadence checks require the accessible Cadence group, 80×44 px minimum buttons with 14 px text and 8 px gaps,
 no phone overflow, native mouse/keyboard activation, correct minute-slot counts and unchanged off-slot selections.
 They also assert the clarified Calendar introduction in full at desktop and both phone widths.
+
+Homepage/documentation checks verify exact product and chapter URL round trips, introductions, invalid query
+fallbacks, per-product last-chapter restoration, reload, shared-link arrival and browser back/forward. Current and
+archived guide tests cover all five routes, archive provenance, distinct navigation, preserved recipes/examples,
+phone link geometry and deep anchors. The density exhibit must remain light under a dark OS with its full calendar
+height. Newly drawn availability must use the active availability layer with full opacity in both orientations,
+then become muted pointer-inactive context in appointment mode.
+
+Directory navigation checks retain per-tab state and canvas identity through history, reload and recipient links.
+They cover all five product paths, conversion of old query links, invalid chapter fallback, current documentation
+without archive navigation, and delayed guide loading with an empty light placeholder rather than visible text.
+The existing catch-all deployment rewrite remains guarded for direct URL access.
