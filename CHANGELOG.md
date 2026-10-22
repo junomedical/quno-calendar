@@ -4,6 +4,15 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+- CI scroll verification: all 679 unit tests, all 428 Chromium checks and 12 single-worker repeated scroll checks
+  pass. Delayed startup with 4× CPU slowdown passes; shortening the pause to one second is correctly rejected.
+  Formatting, architecture, types, lint, Preact/React 19 compatibility, demo build, package verification, size
+  reporting and pack dry-run pass. No verification blocker remains; library and demo bundles are unchanged.
+
+- Stabilize the concept scroll motion check by sampling until the required travel and two-second stationary pause
+  are observed, bounded by a 10-second deadline. Retain the travel, intermediate-position, nine-frame and frame-step
+  thresholds, and measure the full pause against one fixed position. Demo playback and public APIs are unchanged.
+
 - Directory/loading verification: all 679 unit tests and 67 affected Chromium checks pass, including reload,
   history, direct/shared paths, old-query conversion, archive-link removal and a deliberately delayed silent guide
   load with computed surface/height assertions. Formatting, architecture, types, lint, Preact/React 19 fixtures,

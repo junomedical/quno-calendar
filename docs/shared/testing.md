@@ -491,7 +491,13 @@ file without affecting others, and add a new scene through JSON alone. Browser c
 initial value, actions and revisiting. Chapter arrival starts loops; reduced motion is idle. Manual takeover and
 hidden tabs cancel all pending work, never advance navigation, and preserve the current result.
 
-Calendar coverage samples real scroll travel and stationary pauses, zoom extrema and event geometry, next-day pans
+Calendar scroll coverage samples until it observes at least 800 px of visible travel followed by a stationary hold
+of at least 1900 ms and nine frames, with a 10-second safety deadline. Loading/layout settlement can shorten the
+first move's visible travel, so the check may observe a later loop rather than assuming a five-second window always
+contains the qualifying pause. Holds stay within 1 px of their starting position; intermediate-position and
+sub-100 px frame-step assertions remain required in both orientations.
+
+Calendar coverage also samples zoom extrema and event geometry, next-day pans
 after both orientations, theme/density cycles, three-appointment rescheduling round trips, session continuity and
 bounded creation. Hover coverage follows topmost browser hit targets through all underlying lanes, asserts no clicks,
 and requires a cursor-outside/all-closed hold. Native hover remains usable after explicit takeover. Card checks assert
