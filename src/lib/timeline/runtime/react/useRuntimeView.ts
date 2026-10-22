@@ -9,8 +9,7 @@ import { useVerticalColumnHover } from "#quno-internal/timeline/infinite/renderi
 import { Preparation, projectBuckets } from "#quno-internal/timeline/runtime/data/Preparation";
 import type { Orientation } from "#quno-internal/timeline/runtime/model/types";
 import { captureLayoutAnchor } from "#quno-internal/timeline/runtime/model/anchors";
-import { eventCalendarIds } from "#quno-internal/timeline/data/calendarEvents";
-import { eventDateKey } from "#quno-internal/timeline/infinite/events/eventDateKey";
+import { transientPins } from "#quno-internal/timeline/runtime/model/transientPins";
 import { defaultEventPrefetchPolicy } from "#quno-internal/timeline/data/eventPrefetch";
 import { useViewportPrefetch } from "./useViewportPrefetch";
 import { useEngine } from "./useEngine";
@@ -139,13 +138,14 @@ export function useRuntimeView({
   const draft = interactions.renderedDraftEvent;
   const preview = interactions.dragPreviewEvent;
   useLayoutEffect(() => {
-    const resources = new Map<IsoDate, readonly string[]>();
-    for (const event of [draft, preview])
-      if (event) {
-        const date = eventDateKey(event) as IsoDate;
-        resources.set(date, [...new Set([...(resources.get(date) ?? []), ...eventCalendarIds(event)])]);
-      }
-    engine.setPins({ date: draft ? (eventDateKey(draft) as IsoDate) : undefined, resources, now: performance.now() });
+    const state = engine.read();
+    const pins = transientPins({
+      geometry: state.geometry,
+      visibleDates: state.window.visibleDateKeys,
+      draft,
+      preview
+    });
+    engine.setPins({ ...pins, now: performance.now() });
   }, [draft, engine, preview]);
   const hoverArgs = {
     disabled: interactions.isInteractionActive || props.interactionMode === "availability",

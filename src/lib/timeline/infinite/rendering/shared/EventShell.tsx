@@ -6,6 +6,7 @@ export type CssLength = number | string;
 
 export type EventShellProps = {
   event: CalendarEvent;
+  segment?: import("#quno-internal/timeline/core/types").CalendarEventSegment;
   status: EventRenderStatus;
   left: CssLength;
   top: CssLength;
@@ -28,17 +29,19 @@ export type EventShellProps = {
     event: PointerEvent<HTMLDivElement>;
     calendarEvent: CalendarEvent;
     renderedCalendarId: CalendarId;
+    renderedDateKey?: import("#quno-internal/shared/dateRangeModel").IsoDate;
   }) => void;
 };
 
 type EventRendererContentProps = Pick<
   EventShellProps,
-  "event" | "status" | "lane" | "laneCount" | "isOverlapping" | "renderEvent"
+  "event" | "segment" | "status" | "lane" | "laneCount" | "isOverlapping" | "renderEvent"
 >;
 
 /** Keeps product-owned card rendering independent from shell geometry updates. */
 const EventRendererContent = memo(function EventRendererContent({
   event,
+  segment,
   status,
   lane,
   laneCount,
@@ -48,6 +51,7 @@ const EventRendererContent = memo(function EventRendererContent({
   return (
     <RenderEvent
       event={event}
+      segment={segment}
       status={status}
       style={{ width: "100%", height: "100%" }}
       lane={lane}
@@ -65,6 +69,7 @@ const EventRendererContent = memo(function EventRendererContent({
 export const EventShell = memo(
   function EventShell({
     event,
+    segment,
     status,
     left,
     top,
@@ -93,11 +98,12 @@ export const EventShell = memo(
         geometryRegistration?.registerEventElement({
           eventId: event.id,
           calendarId: renderedCalendarId,
+          dateKey: segment?.dateKey,
           element,
           previousElement
         });
       },
-      [event.id, geometryRegistration, renderedCalendarId]
+      [event.id, geometryRegistration, renderedCalendarId, segment?.dateKey]
     );
 
     return (
@@ -113,13 +119,22 @@ export const EventShell = memo(
           .join(" ")}
         data-event-id={event.id}
         data-calendar-id={renderedCalendarId}
+        data-date={segment?.dateKey}
+        data-continues-before={segment?.continuesBefore ? "true" : undefined}
+        data-continues-after={segment?.continuesAfter ? "true" : undefined}
         data-status={status}
         data-lane-count={laneCount}
         data-exiting={isExiting ? "true" : undefined}
         data-testid={testId}
         ref={registerEventElement}
         onPointerDown={(pointerEvent) =>
-          !disableDrag && onEventPointerDown?.({ event: pointerEvent, calendarEvent: event, renderedCalendarId })
+          !disableDrag &&
+          onEventPointerDown?.({
+            event: pointerEvent,
+            calendarEvent: event,
+            renderedCalendarId,
+            renderedDateKey: segment?.dateKey
+          })
         }
         style={
           {
@@ -139,6 +154,7 @@ export const EventShell = memo(
       >
         <EventRendererContent
           event={event}
+          segment={segment}
           status={status}
           lane={lane}
           laneCount={laneCount}
@@ -159,6 +175,7 @@ function toCssLength({ value }: { value: CssLength }): string {
 function areEventShellPropsEqual({ previous, next }: { previous: EventShellProps; next: EventShellProps }): boolean {
   return (
     previous.event === next.event &&
+    previous.segment === next.segment &&
     previous.status === next.status &&
     previous.left === next.left &&
     previous.top === next.top &&

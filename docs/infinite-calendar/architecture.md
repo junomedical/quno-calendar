@@ -67,16 +67,19 @@ Shift modifier on every sample (Decision 124), without momentum detection or a l
 releases overflow immediately; the next unshifted sample cancels queued zoom and scrolls. If keyup was missed and
 overflow was still hidden during hit testing, the adapter delivers that first delta once with default action
 prevented. Further samples are native. Window blur cancels zoom, and cleanup removes the global listeners.
-The 300 ms idle unlock and anchor-continuity interval are housekeeping, not a delay before accepting ordinary input.
+The 300 ms idle overflow unlock is housekeeping; the first Shift time anchor survives idle pauses until input takeover.
 This suspends Chrome's native momentum scrolling while `ViewportAdapter` retains programmatic anchor writes.
 The lock restores the original inline overflow declarations/priorities on settlement, observed takeover or unmount;
 it does not change render windows or add compositor layers. See Decision 119. Wheel takeover classification waits
 until the next task, after all native listeners can cancel the event. A microtask is insufficient because browsers
 can run one between capture and bubble listeners, incorrectly cancelling captured Shift input.
 
-Both wheel projections preserve the nearest time tick beneath the first pointer in a burst. External horizontal
-zoom preserves a visible current-time marker, otherwise the grid center or origin. External vertical zoom retains
-the visible fraction of the day board. `ZoomCommitCoordinator` allows one unexpired controlled request at a time. It accumulates newer samples into one
+Both wheel projections preserve the exact time and screen point beneath the first Shift pointer, across pauses
+and bounds. `ZoomInputAnchor` owns that input lifetime independently of request timeout, rejected requests and
+overflow unlock. `ZoomAnchors` also retains a cancelled request’s focus for an immediate parent-clamped acknowledgement inside
+its requested interval and original expiry. Unrelated external values still take over. Both external projections
+preserve the focused current clock, centering it if offscreen; clocks
+outside displayed hours retain the grid center/origin or vertical day fraction fallback. See Decision 162. `ZoomCommitCoordinator` allows one unexpired controlled request at a time. It accumulates newer samples into one
 bounded target and waits for `ViewportAdapter.subscribeCommit` after current DOM geometry and scroll correction.
 A matching engine value alone does not acknowledge the request. The next accumulated target is scheduled on the next
 animation callback; this does not certify GPU presentation. External values and viewport takeovers cancel queued work.
@@ -88,8 +91,10 @@ reset it. Time labels switch immediately at full opacity and grid cadence follow
 
 ## Data and preparation
 
-`EventRepository` publishes immutable date arrays and indexes event IDs. Replacement deduplicates IDs; targeted edits
-preserve same-date order and do not manufacture unloaded destination buckets. LRU eviction has a hard 120-date bound.
+`EventRepository` publishes immutable retained-date arrays referencing complete events, with canonical ID lookup.
+Replacement deduplicates IDs and indexes every overlapping retained date. Targeted edits/moves/removal update all
+retained instances, preserve unchanged ordering/snapshots and never expand the complete event span. LRU eviction
+has a hard 120-date bound; removing one date keeps events referenced by another. Loaders return overlap queries.
 `Acquisition` tracks date/resource coverage independently of rendering. It keeps useful adjacent reads, cancels
 incompatible/distant requests, rejects ignored aborts and obsolete generations, and retries failures only after
 250 ms and 1,000 ms. Invalidations retain stale visible records while refreshes settle.
@@ -131,3 +136,13 @@ therefore updates visible columns without rebuilding unchanged time labels.
 See [shared testing](../shared/testing.md), [runtime flows](./flows/README.md) and [responsibility domains](./domains/README.md).
 The replacement keeps the 50 KiB JavaScript/2 KiB CSS gzip budgets, DOM limits, compatibility fixtures and package guards.
 No runtime selector or alternate implementation is shipped.
+
+Daily `CalendarEventSegment` intervals are prepared with each date/resource and shared by both projections and
+transient rectangles. Renderer events remain complete records. Pointer offsets use elapsed time from the complete
+start to the grabbed local date/time; proposals retain the original elapsed duration without display-hour clamping.
+Mounted event registrations and captured anchors include segment date and participant identity. See Decision 160.
+
+`TouchHoldGesture` gates pointer starts before the shared drag/draft lifecycle. Pending primary touches permit
+native panning; an activated hold captures the saved target and reserves touch movement. Its timer and native
+listeners are scoped to one touch and removed on completion, cancellation or unmount. Presentation shells retain
+ordinary touch behavior; consumer card content and existing permission gates stay separate. See Decision 163.

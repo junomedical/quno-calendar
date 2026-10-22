@@ -1,6 +1,6 @@
 import type { CalendarEvent } from "@quno/calendar/infinite-calendar";
 import type { DemoEventQuery } from "./demoEventQuery";
-import { isoDateInputValue } from "./draftFormUtils";
+import { overlapsEventRange } from "#quno-demo/shared/eventRange";
 
 /** Suppress an edited source even when its replacement moved outside the requested dates or calendars. */
 export function mergeDemoEventOverrides({
@@ -15,12 +15,7 @@ export function mergeDemoEventOverrides({
   const changedIds = new Set(overrides.map((event) => event.id));
   const selected = new Set(query.calendarIds);
   const matching = overrides.filter((event) => {
-    const date = isoDateInputValue(event.start);
-    return (
-      date >= query.startDate &&
-      date <= query.endDate &&
-      (event.calendarIds ?? [event.calendarId]).some((id) => selected.has(id))
-    );
+    return overlapsEventRange(event, query) && (event.calendarIds ?? [event.calendarId]).some((id) => selected.has(id));
   });
   const replacements = new Map(matching.map((event) => [event.id, event]));
   const returnedIds = new Set(events.map((event) => event.id));

@@ -1,3 +1,4 @@
+import { overlapsEventRange } from "#quno-demo/shared/eventRange";
 import type {
   CalendarEvent,
   CalendarRow,
@@ -189,13 +190,8 @@ export function createEventLoader(events: readonly CalendarEvent[]): LoadEvents 
 export function filterEvents(events: readonly CalendarEvent[], request: LoadEventsArgs) {
   const selected = new Set(request.calendarIds);
   return events.filter((event) => {
-    const dateKey = event.start.slice(0, 10);
     const memberships = event.calendarIds?.length ? event.calendarIds : [event.calendarId];
-    return (
-      dateKey >= request.startDate &&
-      dateKey <= request.endDate &&
-      memberships.some((calendarId) => selected.has(calendarId))
-    );
+    return overlapsEventRange(event, request) && memberships.some((calendarId) => selected.has(calendarId));
   });
 }
 
@@ -217,7 +213,15 @@ export function abortableDelay(durationMs: number, signal?: AbortSignal) {
   });
 }
 
-export function ArticleEventCard({ event, status, style, lane, laneCount, isOverlapping }: EventRendererProps) {
+export function ArticleEventCard({
+  event,
+  status,
+  style,
+  lane,
+  laneCount,
+  isOverlapping,
+  timeLabel
+}: EventRendererProps & { timeLabel?: string }) {
   const isAvailability = event.kind === "availability";
   const isConsultation = event.title.toLowerCase().includes("consultation");
   const isBlocked = event.kind === "blocker";
@@ -259,9 +263,7 @@ export function ArticleEventCard({ event, status, style, lane, laneCount, isOver
       </span>
       <strong>{event.title}</strong>
       {event.subtitle ? <span className="article-event-card__subtitle">{event.subtitle}</span> : null}
-      <span className="article-event-card__time">
-        {start}–{end}
-      </span>
+      <span className="article-event-card__time">{timeLabel ?? `${start}–${end}`}</span>
     </article>
   );
 }

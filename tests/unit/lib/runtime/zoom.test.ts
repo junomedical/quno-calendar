@@ -16,11 +16,12 @@ const layout: EngineLayout = {
 const viewport = { top: 0, left: 0, width: 800, height: 500 };
 
 describe("committed zoom anchors", () => {
-  it("keeps the visible vertical day fraction through extreme slider reversals", () => {
+  it("keeps the current time through extreme vertical slider reversals", () => {
     const engine = new CalendarEngine({ layout, viewport });
     engine.observeScroll({ top: engine.read().viewport.top + 230, left: 0, now: 0 });
     const before = engine.read();
     const original = externalZoomAnchor({ geometry: before.geometry, viewport: before.viewport, nowMinute: 720 })!;
+    expect(original.target.minute).toBe(720);
     for (const zoom of [0.5, 8, 0.5, 3, 2.85, 8, 3]) {
       engine.updateLayout({ layout: { ...layout, settings: { ...layout.settings, zoom } }, now: 10 });
       const state = engine.read();
@@ -49,7 +50,7 @@ describe("committed zoom anchors", () => {
     }
   });
 
-  it("keeps the pointer's nearest time tick when the parent accepts a wheel request", async () => {
+  it("keeps the exact pointer time when the parent accepts a wheel request", async () => {
     const engine = new CalendarEngine({ layout, viewport });
     const before = engine.read();
     const anchor = wheelAnchor({ geometry: before.geometry, viewport: before.viewport, pointer: { x: 300, y: 240 } })!;
@@ -62,6 +63,59 @@ describe("committed zoom anchors", () => {
     );
     await Promise.resolve();
     expect(engine.ownership.active({ now: 101 })).toBeNull();
+  });
+
+  it.each(["horizontal", "vertical"] as const)(
+    "reveals an offscreen current-time anchor for %s slider input",
+    (orientation) => {
+      const input = { ...layout, orientation, settings: { ...settings, zoom: 8 } };
+      const engine = new CalendarEngine({ layout: input, viewport });
+      const before = engine.read();
+      const anchor = externalZoomAnchor({ geometry: before.geometry, viewport: before.viewport, nowMinute: 720 })!;
+      expect(anchor.target.minute).toBe(720);
+      expect(orientation === "horizontal" ? anchor.screen.x : anchor.screen.y).toBeGreaterThan(200);
+      engine.updateLayout({ layout: { ...input, settings: { ...input.settings, zoom: 4 } }, now: 0 });
+      const after = engine.read();
+      const point = projectPoint({ geometry: after.geometry, target: anchor.target })!;
+      expect(orientation === "horizontal" ? point.x - after.viewport.left : point.y - after.viewport.top).toBeCloseTo(
+        orientation === "horizontal" ? anchor.screen.x : anchor.screen.y,
+        8
+      );
+    }
+  );
+  it("retains the vertical viewport fraction when the current time is outside displayed hours", () => {
+    const engine = new CalendarEngine({ layout, viewport });
+    engine.observeScroll({ top: engine.read().viewport.top + 230, left: 0, now: 0 });
+    const before = engine.read();
+    const anchor = externalZoomAnchor({ geometry: before.geometry, viewport: before.viewport, nowMinute: 60 })!;
+    expect(anchor.target.dateFraction).toBeDefined();
+  });
+  it("captures fractional pointer minutes without snapping to grid cadence", () => {
+    const engine = new CalendarEngine({
+      layout: { ...layout, orientation: "horizontal", settings: { ...settings, zoom: 2 } },
+      viewport
+    });
+    const before = engine.read();
+    const anchor = wheelAnchor({ geometry: before.geometry, viewport: before.viewport, pointer: { x: 413, y: 100 } })!;
+    expect(anchor.target.minute).toBe(572.5);
+    expect(anchor.screen.x).toBe(413);
+  });
+
+  it("keeps a cancelled wheel anchor when the parent acknowledges a value clamped inside its request", () => {
+    const initial = { ...layout, orientation: "horizontal" as const, settings: { ...settings, zoom: 2 } };
+    const engine = new CalendarEngine({ layout: initial, viewport });
+    engine.observeScroll({ top: engine.read().viewport.top, left: 100, now: 0 });
+    const before = engine.read();
+    const anchor = wheelAnchor({ geometry: before.geometry, viewport: before.viewport, pointer: { x: 500, y: 100 } })!;
+    engine.expectZoom({ zoom: 1.8, anchor, now: 0 });
+    engine.cancel({ now: 1 });
+    engine.updateLayout({ layout: { ...initial, settings: { ...settings, zoom: 1.9 } }, now: 2 });
+    const after = engine.read();
+    expect(after.reason).toBe("zoom-clamp");
+    expect(projectPoint({ geometry: after.geometry, target: anchor.target })!.x - after.viewport.left).toBeCloseTo(
+      500,
+      8
+    );
   });
 
   it("releases an ignored wheel request and lets an external value take over", () => {

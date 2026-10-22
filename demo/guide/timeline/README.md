@@ -78,3 +78,10 @@ Current route: `/docs/infinite-calendar` (legacy `/guide/infinite-calendar` stil
 to the matching homepage demos while preserving specialized exhibits. The pre-change guide source lives in
 `demo/archive/guide/timeline` and is served at `/docs/archive/infinite-calendar`. Density starts light even when
 the OS is dark. New availability uses the explicit availability render layer, just like the initial windows.
+
+`MultiDayEventsDemo.tsx` adds the lazy `#multi-day-events` exhibit and copyable overlap-loading recipe.
+Try beginning/middle/ending grabs, both orientations, working-hour clipping, rejected moves and the controlled draft.
+Its small segment adapter reuses ArticleEventCard, including availability and interaction states, and supplies
+clipped clocks and continuation arrows. Callbacks retain complete event timestamps.
+
+The editing exhibit explains touch hold activation; the zoom exhibit describes current-clock slider focus and exact pointer-time reversal. Both continue to use the public calendar entry point and existing controls.

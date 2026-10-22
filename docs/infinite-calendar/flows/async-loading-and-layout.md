@@ -29,3 +29,8 @@ independent timers prevent one event's appearance from prematurely ending anothe
 
 Tests combine ignored aborts, old generations, subset/superset resources, empty ranges, delayed failures, local previews,
 late row growth, native scrolling during reads, filtering and editor cancellation.
+
+For overnight and multi-day events, the loader returns full records overlapping the inclusive requested dates,
+including earlier starts. The repository distributes them across intersecting retained buckets without expanding
+unrequested dates. An incoming changed record repairs every retained instance. Edits and removal likewise update
+all retained dates, and eviction keeps canonical ID lookup while another date still references the event.

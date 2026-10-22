@@ -13,6 +13,9 @@ The original consolidation record, `QUNO-001`, remains in the
 [Infinite Calendar historical ledger](../infinite-calendar/decisions.md#quno-001---consolidate-calendar-picker-and-natural-input)
 because that repository was the consolidation source. Its identifier and text remain unchanged.
 
+Infinite Calendar's daily segments, overlap loading and grabbed-time movement are product-owned in
+[Decision 160](../infinite-calendar/decisions.md#160---render-daily-event-segments-and-drag-by-the-grabbed-time).
+
 ## QUNO-002 - Organize documentation and decisions by product ownership
 
 - Date: 2026-08-25

@@ -1,13 +1,12 @@
 import { eventBelongsToCalendar } from "#quno-internal/timeline/data/calendarEvents";
-import type { CalendarEvent, EventRenderStatus } from "#quno-internal/timeline/core/types";
-import { eventDateKey } from "#quno-internal/timeline/infinite/events/eventDateKey";
+import type { CalendarEvent } from "#quno-internal/timeline/core/types";
+import { eventSegment } from "#quno-internal/timeline/infinite/events/eventSegment";
 import { EventShell } from "./EventShell";
 import type {
   AvailabilityLayerProps,
   CommittedItem,
   CommittedLayerProps,
-  EventProjection,
-  SharedLayerProps
+  TransientLayerProps
 } from "./eventLayerTypes";
 export type { EventProjection } from "./eventLayerTypes";
 
@@ -26,8 +25,15 @@ export function CommittedLayer<Item extends CommittedItem>({
 }: CommittedLayerProps<Item>) {
   return items.map((item) => {
     const isDragging = dragEventId === item.event.id;
-    const isHovered = !dragEventId && hoveredEvent?.eventId === item.event.id && hoveredEvent.calendarId === calendarId;
-    const isFocused = focusedEventTarget?.eventId === item.event.id && focusedEventTarget.calendarId === calendarId;
+    const isHovered =
+      !dragEventId &&
+      hoveredEvent?.eventId === item.event.id &&
+      hoveredEvent.calendarId === calendarId &&
+      (!hoveredEvent.dateKey || hoveredEvent.dateKey === item.segment?.dateKey);
+    const isFocused =
+      focusedEventTarget?.eventId === item.event.id &&
+      focusedEventTarget.calendarId === calendarId &&
+      (!focusedEventTarget.dateKey || focusedEventTarget.dateKey === item.segment?.dateKey);
     const status = isDragging
       ? "dragging"
       : isFocused
@@ -43,6 +49,7 @@ export function CommittedLayer<Item extends CommittedItem>({
         {...shellProps}
         {...project({ item, hovered: isHovered })}
         event={item.event}
+        segment={item.segment}
         status={status}
         zIndex={isHovered ? 30 : item.lane + 2}
         lane={item.lane}
@@ -76,7 +83,10 @@ export function AvailabilityLayer<Item extends CommittedItem>({
     const event = item.event;
     const isDraft = event.id === "draft-new-event";
     const isDragging = dragEventId === event.id;
-    const isFocused = focusedEventTarget?.eventId === event.id && focusedEventTarget.calendarId === calendarId;
+    const isFocused =
+      focusedEventTarget?.eventId === event.id &&
+      focusedEventTarget.calendarId === calendarId &&
+      (!focusedEventTarget.dateKey || focusedEventTarget.dateKey === item.segment?.dateKey);
     const status = isDraft
       ? "new"
       : isDragging
@@ -92,6 +102,7 @@ export function AvailabilityLayer<Item extends CommittedItem>({
         {...shellProps}
         {...project({ item })}
         event={event}
+        segment={item.segment}
         status={status}
         zIndex={interactionMode === "availability" || isDraft ? 40 : 1}
         lane={item.lane}
@@ -113,20 +124,10 @@ export function AvailabilityLayer<Item extends CommittedItem>({
   });
 }
 
-type TransientLayerProps = SharedLayerProps & {
-  dateKey: string;
-  draftEvent: CalendarEvent | null;
-  draftEventStatus: EventRenderStatus;
-  draftEventIsDraggable: boolean;
-  draftEventIsExiting: boolean;
-  draftEventReleaseDurationMs?: number;
-  dragPreviewEvent: CalendarEvent | null;
-  project: (args: { event: CalendarEvent; preview: boolean }) => EventProjection;
-};
-
 export function TransientLayer({
   calendarId,
   dateKey,
+  settings,
   draftEvent,
   draftEventStatus,
   draftEventIsDraggable,
@@ -139,15 +140,18 @@ export function TransientLayer({
   ...shellProps
 }: TransientLayerProps) {
   const belongs = ({ event }: { event: CalendarEvent | null }) =>
-    Boolean(event && eventDateKey(event) === dateKey && eventBelongsToCalendar({ event, calendarId }));
+    Boolean(event && eventSegment({ event, dateKey, settings }) && eventBelongsToCalendar({ event, calendarId }));
+  const draftSegment = draftEvent ? eventSegment({ event: draftEvent, dateKey, settings }) : null;
+  const previewSegment = dragPreviewEvent ? eventSegment({ event: dragPreviewEvent, dateKey, settings }) : null;
 
   return (
     <>
-      {draftEvent && belongs({ event: draftEvent }) ? (
+      {draftEvent && draftSegment && belongs({ event: draftEvent }) ? (
         <EventShell
           {...shellProps}
-          {...project({ event: draftEvent, preview: false })}
+          {...project({ event: draftEvent, preview: false, segment: draftSegment })}
           event={draftEvent}
+          segment={draftSegment}
           status={draftEventStatus}
           zIndex={55}
           lane={0}
@@ -169,11 +173,12 @@ export function TransientLayer({
           releaseDurationMs={draftEventReleaseDurationMs}
         />
       ) : null}
-      {dragPreviewEvent && belongs({ event: dragPreviewEvent }) ? (
+      {dragPreviewEvent && previewSegment && belongs({ event: dragPreviewEvent }) ? (
         <EventShell
           {...shellProps}
-          {...project({ event: dragPreviewEvent, preview: true })}
+          {...project({ event: dragPreviewEvent, preview: true, segment: previewSegment })}
           event={dragPreviewEvent}
+          segment={previewSegment}
           status="drop-preview"
           zIndex={60}
           lane={0}

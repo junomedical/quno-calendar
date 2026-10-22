@@ -20,6 +20,7 @@ export {
   type ActiveEventDraft,
   type CalendarEvent,
   type CalendarEventBase,
+  type CalendarEventSegment,
   type CalendarEventKind,
   type CalendarRuleKind,
   type CalendarId,

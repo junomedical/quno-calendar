@@ -7,6 +7,7 @@ import type {
 } from "./types";
 
 export type CalendarFocusedEventTarget = {
+  dateKey?: import("#quno-internal/shared/dateRangeModel").IsoDate;
   eventId: EventId;
   calendarId: CalendarId;
 };

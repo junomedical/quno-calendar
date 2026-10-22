@@ -4,14 +4,9 @@ import type {
   CalendarId,
   QunoInfiniteCalendarSettings
 } from "#quno-internal/timeline/core/types";
+import { parseIsoDate } from "#quno-internal/timeline/date/localDate";
 import { dateAtVirtualOffset } from "#quno-internal/timeline/date/dateVirtualization";
-import {
-  clampEventToTimeline,
-  dateKeyAndMinuteToIso,
-  minutesSinceStartOfDay,
-  snapMinute,
-  xToMinute
-} from "#quno-internal/timeline/time/time";
+import { dateKeyAndMinuteToIso, snapMinute, xToMinute } from "#quno-internal/timeline/time/time";
 
 /** Raw coordinates and calendar geometry used for non-virtualized hit tests. */
 export type HitTestInput = {
@@ -91,16 +86,19 @@ export function buildMoveProposal({
   pointerOffsetMinutes: number;
   settings: Pick<QunoInfiniteCalendarSettings, "startHour" | "endHour" | "snapMinutes">;
 }) {
-  const durationMinutes = Math.max(
-    1,
-    minutesSinceStartOfDay({ value: event.end }) - minutesSinceStartOfDay({ value: event.start })
+  const originalStart = parseIsoDate({ value: event.start }).getTime();
+  const duration = parseIsoDate({ value: event.end }).getTime() - originalStart;
+  const target = Date.parse(
+    dateKeyAndMinuteToIso({
+      dateKey: hit.dateKey,
+      minute: snapMinute({ minute: hit.minute, snapMinutes: settings.snapMinutes })
+    })
   );
-  const startMinute = snapMinute({ minute: hit.minute - pointerOffsetMinutes, snapMinutes: settings.snapMinutes });
-  const clamped = clampEventToTimeline({ startMinute, durationMinutes, geometry: settings });
+  const start = target - pointerOffsetMinutes * 60_000;
   return {
     event,
-    proposedStart: dateKeyAndMinuteToIso({ dateKey: hit.dateKey, minute: clamped.startMinute }),
-    proposedEnd: dateKeyAndMinuteToIso({ dateKey: hit.dateKey, minute: clamped.endMinute }),
+    proposedStart: new Date(start).toISOString(),
+    proposedEnd: new Date(start + duration).toISOString(),
     proposedCalendarId: hit.calendarId
   };
 }

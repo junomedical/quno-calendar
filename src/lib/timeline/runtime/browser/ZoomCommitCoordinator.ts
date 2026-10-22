@@ -66,7 +66,8 @@ export class ZoomCommitCoordinator {
     const zoom = snapshot.geometry.settings.zoom;
     const external = zoom !== this.observed && zoom !== this.waiting?.zoom;
     this.observed = zoom;
-    if (external || ["cancel", "navigation", "restore", "scroll", "resize"].includes(snapshot.reason)) this.reset();
+    if (external || ["cancel", "manual", "navigation", "restore", "scroll", "resize"].includes(snapshot.reason))
+      this.reset();
   }
 
   private committed(snapshot: EngineSnapshot) {

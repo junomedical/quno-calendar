@@ -2,6 +2,18 @@
 
 Version `0.6.0` presents Infinite Calendar, Datepicker, Date Input, and Date Parser as independent package surfaces. There are no legacy JavaScript exports or wrapper packages.
 
+## Unreleased: overnight and multi-day event movement
+
+Infinite Calendar loaders now need overlap semantics: include full events that intersect the requested dates even
+when their start predates the request. Start-date-only filtering cannot supply later-day continuations. Request
+shapes and event timestamp fields remain unchanged. Renderer `segment`, `CalendarEventSegment` and activation
+`renderedDateKey` are additive, optional contracts on the existing Infinite Calendar subpath.
+
+Move proposals preserve full elapsed duration and the grabbed time, allowing events to cross midnight or extend
+outside displayed hours. Applications enforcing business-hour limits should reject proposals through
+`onEventMoveRequest`. Display-hour clipping no longer truncates or clamps moved data. Drawing remains single-day.
+See the [overnight recipe](./usage.md#overnight-and-multi-day-events).
+
 ## Unreleased: screen-based event prefetch
 
 Infinite Calendar's default changes from seven calendar days on each side to one usable viewport height on each

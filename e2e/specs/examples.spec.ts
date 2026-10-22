@@ -233,7 +233,7 @@ test("editorial table of contents presents the feature chapters and navigates th
 }) => {
   await page.goto("/guide");
   const contents = page.getByRole("navigation", { name: "Table of contents" });
-  await expect(contents.getByRole("link")).toHaveCount(26);
+  await expect(contents.getByRole("link")).toHaveCount(27);
   const chapterBreakoutCounts = await page
     .locator(".calendar-article__section")
     .evaluateAll((sections) =>
@@ -242,7 +242,7 @@ test("editorial table of contents presents the feature chapters and navigates th
           [...section.children].filter((child) => child.classList.contains("calendar-article__breakout")).length
       )
     );
-  expect(chapterBreakoutCounts).toHaveLength(26);
+  expect(chapterBreakoutCounts).toHaveLength(27);
   expect(chapterBreakoutCounts.every((count) => count <= 1)).toBe(true);
   await expect(
     contents.getByRole("link", {
@@ -254,6 +254,10 @@ test("editorial table of contents presents the feature chapters and navigates th
       name: /Style days, hours, rows, and columns from data/
     })
   ).toHaveAttribute("href", "#calendar-cell-styling");
+  await expect(contents.getByRole("link", { name: /Keep overnight and multi-day events together/ })).toHaveAttribute(
+    "href",
+    "#multi-day-events"
+  );
   const horizontalSection = page.locator("#horizontal-first");
   await expect(
     page.getByRole("heading", {
@@ -1134,7 +1138,7 @@ test("editorial zoom controls and gesture requests keep zoom parent-controlled",
   await expect(zoomSection.getByRole("heading", { name: "Zoom without losing precision" })).toBeVisible();
   await expect(zoomSection).toContainText("Zoom out to compare the shape of the day");
   await expect(zoomSection).toContainText("zoom in to read cards");
-  await expect(zoomSection).toContainText("without losing the part of the schedule");
+  await expect(zoomSection).toContainText("Zooming back restores that time to the same point");
   const slider = page.getByTestId("article-zoom-slider");
   const output = page.getByTestId("article-zoom-value");
   const marker = demo.locator(".quno-calendar-now-pin.is-current");

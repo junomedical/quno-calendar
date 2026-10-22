@@ -49,8 +49,6 @@ for (const initialZoom of [0.5, 3, 8]) {
             const inset = 50; // 42px day header plus the 8px timeline gutter.
             await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
             const initialHeight = board.getBoundingClientRect().height - 16;
-            const initialDayTop = day.getBoundingClientRect().top;
-            const topFraction = (box.top - initialDayTop - 42) / (initialHeight + 16);
             const anchorY = day.getBoundingClientRect().top + inset + 240 * initialZoom;
             const appointment = Array.from(day.querySelectorAll<HTMLElement>('[data-testid="calendar-event"]')).find(
               (node) => {
@@ -69,11 +67,7 @@ for (const initialZoom of [0.5, 3, 8]) {
               const height = board.getBoundingClientRect().height - 16;
               const origin = day.getBoundingClientRect().top + inset;
               const ratio = height / initialHeight;
-              const expectedDayTop = box.top - 42 - topFraction * (height + 16);
-              const expectedEvent =
-                mode === "wheel"
-                  ? anchorY + (eventY - anchorY) * ratio
-                  : expectedDayTop + inset + (eventY - initialDayTop - inset) * ratio;
+              const expectedEvent = anchorY + (eventY - anchorY) * ratio;
               const days = Array.from(viewport.querySelectorAll<HTMLElement>('[data-testid="calendar-day"]'))
                 .map((node) => node.getBoundingClientRect())
                 .sort((a, b) => a.top - b.top);
@@ -81,10 +75,7 @@ for (const initialZoom of [0.5, 3, 8]) {
               samples.push({
                 ratio,
                 gap: Math.max(0, ...gaps),
-                anchor:
-                  mode === "wheel"
-                    ? Math.abs(origin + 240 * (height / 600) - anchorY)
-                    : Math.abs(day.getBoundingClientRect().top - expectedDayTop),
+                anchor: Math.abs(origin + 240 * (height / 600) - anchorY),
                 event: Math.abs(appointment.getBoundingClientRect().top - expectedEvent),
                 connected: day.isConnected && appointment.isConnected
               });

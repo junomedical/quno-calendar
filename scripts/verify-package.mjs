@@ -69,7 +69,7 @@ writeFileSync(
   join(appDir, "src", "main.tsx"),
   `import { createRoot } from "react-dom/client";
 import { addDays, type DateRange } from "@quno/calendar";
-import { QunoInfiniteCalendar, type EventRendererProps, type LoadEvents } from "@quno/calendar/infinite-calendar";
+import { QunoInfiniteCalendar, type EventRendererProps, type CalendarEventSegment, type LoadEvents } from "@quno/calendar/infinite-calendar";
 import { QunoDatePicker } from "@quno/calendar/datepicker";
 import { QunoDateInput } from "@quno/calendar/date-input";
 import { QunoTimePicker } from "@quno/calendar/timepicker";
@@ -85,7 +85,10 @@ const loadEvents: LoadEvents = async ({ startDate }) => [{
   id: "event", calendarId: "team", title: "Visit",
   start: startDate + "T09:00:00+02:00", end: startDate + "T10:00:00+02:00"
 }];
-function EventCard({ event, style }: EventRendererProps) { return <div style={style}>{event.title}</div>; }
+function EventCard({ event, style, segment }: EventRendererProps) {
+  const portion: CalendarEventSegment | undefined = segment;
+  return <div style={style} data-date={portion?.dateKey}>{event.title}</div>;
+}
 const value: DateRange = { start: "2026-08-24", end: addDays({ date: "2026-08-24", amount: 1 }) };
 const parsed = parseDateInput({ text: "tomorrow", referenceDate: "2026-08-24", expectedRange: value });
 if (parsed.status === "success" || parsed.status === "partial-range") {
@@ -195,6 +198,8 @@ for (const oldSubpath of [
   "@quno/calendar/date-parser/dateInputTimeParser",
   "@quno/calendar/timepicker/TimeOptions",
   "@quno/calendar/dist/time-picker/TimeOptions",
+  "@quno/calendar/infinite-calendar/eventSegment",
+  "@quno/calendar/dist/timeline/infinite/events/eventSegment",
   "@quno/calendar/dist/date-parser/dateInputDateParser"
 ]) {
   try {

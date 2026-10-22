@@ -28,6 +28,7 @@ type UseTimelineDragInteractionArgs = {
 type StartDragArgs = {
   event: CalendarEvent;
   sourceCalendarId: CalendarId;
+  renderedDateKey?: import("#quno-internal/shared/dateRangeModel").IsoDate;
   offsetMinutes: number;
   point: PointerLike;
 };
@@ -70,11 +71,12 @@ export function useTimelineDragInteraction({
   const isFinishingRef = useRef(false);
   const { start: startMovement, clear: clearMovement, movedRef, trackPointerMovement } = useDragMovement();
   const startDrag = useCallback(
-    ({ event, sourceCalendarId, offsetMinutes, point }: StartDragArgs) => {
+    ({ event, sourceCalendarId, renderedDateKey, offsetMinutes, point }: StartDragArgs) => {
       startMovement(point);
       const next = {
         event,
         sourceCalendarId,
+        renderedDateKey,
         offsetMinutes,
         preview: null
       };
@@ -145,7 +147,11 @@ export function useTimelineDragInteraction({
         }
       } else if (!movedRef.current && onEventActivate) {
         // A click activates; a drag returning to its original slot does nothing.
-        onEventActivate({ event: currentDrag.event, renderedCalendarId: currentDrag.sourceCalendarId });
+        onEventActivate({
+          event: currentDrag.event,
+          renderedCalendarId: currentDrag.sourceCalendarId,
+          renderedDateKey: currentDrag.renderedDateKey
+        });
       }
       return true;
     } finally {

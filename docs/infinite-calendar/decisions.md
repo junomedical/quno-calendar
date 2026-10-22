@@ -2033,3 +2033,86 @@ in both orientations. This changes consumer-owned demo data, not the public laye
 [QUNO-042](../shared/decisions.md#quno-042---use-directory-routes-and-quiet-documentation-loading) replaces
 query navigation with product/chapter directories, converts earlier shared links, removes archive discovery links
 and keeps lazy documentation loading silent. Public product contracts are unchanged.
+
+## 160 - Render Daily Event Segments And Drag By The Grabbed Time
+
+Date: 2026-10-22
+Status: Accepted; extends Decisions 011, 021, 028 and 096, and refines the runtime's start-date-only event indexing
+
+Represent an event with its complete timestamp range and stable ID. Render the half-open range `[start, end)` on
+every intersecting included date/resource, clipped to displayed hours. Use one segment calculation for committed
+collision lanes, drafts, availability, previews and viewport rectangles. Midnight endings create no extra card.
+Expose optional renderer `segment: CalendarEventSegment` with date, clipped minute bounds and continuation flags;
+retain full events in every callback. Excluded dates hide portions without changing elapsed duration.
+
+Load by overlap with inclusive date requests, including events beginning before the range. Retain complete events
+across multiple immutable date buckets, updating all affected retained instances on edit/move/delete. Deduplicate
+projection input/output by ID and segment projection output over rendered dates. Keep expansion bounded by retained
+dates, the 120-date LRU and the existing request-generation/coverage rules.
+
+At pointer-down retain the elapsed offset of the snapped date/time from the original start, including later-day
+offsets. Move that grabbed time to the snapped destination, preserving original elapsed duration. Remove display-hour
+clamping for all moved events, including originally same-day ones. Keep native browser-local clock resolution,
+UTC proposal serialization, click thresholds, no-op returns, rejected drops, participant policy and controlled drafts.
+Drawing remains single-day; grabbing an ending portion moves rather than resizes the event.
+
+Registry identities include date/resource/event and retain simultaneous committed, draft and preview shells until
+each unmounts. Captured anchors retain the resolved date and activation reports
+optional renderedDateKey. Hover remains local to the segment while dragging affects the full event. Focus chooses
+the first included date with a visible segment when the starting portion is hidden.
+
+Demonstrate complete overlap-loading and segment rendering through the public entry point in the lazy field-guide
+exhibit. Verify both projections' geometry/layers, begin/middle/end grabs, clipping, drafts, rejection, virtualized
+identity, overlapping refreshes, bounded long spans and 23/25-hour duration across clock changes.
+
+## 161 - Reuse The Guide Card Renderer For Multi-Day Events
+
+Date: 2026-10-22
+Status: Accepted; refines Decision 160's demo presentation
+
+Use the field guide's existing ArticleEventCard for overnight and multi-day appointments, availability, drafts and
+move previews. Pass a segment-specific time label through a small adapter, preserving clipped clocks and continuation
+arrows. Keep the established card structure, typography, accent border, rounded corners, responsive content and
+status styling. Remove the example's separate inline card design. Verify computed appearance against the read-only
+exhibit and retain movement coverage in both orientations. Public package contracts and library styles are unchanged.
+
+## 162 - Retain The Exact Time And Screen Point Across Zoom Reversals
+
+Date: 2026-10-22
+Status: Accepted; supersedes Decisions 118–121's nearest-tick and idle anchor recapture behavior, and refines Decision 124
+
+Capture the exact unsnapped time under the first Shift-wheel sample, including an outward sample at a limit.
+Keep that semantic date/time and screen coordinate while Shift remains held, across pauses, controlled-request
+expiry and rejected out-of-range requests. Native content bounds may move it temporarily; reversing zoom restores
+the original point as soon as the bounds permit. Shift release, ordinary scrolling, navigation, resize, blur or an
+external zoom value ends that input anchor. An explicitly cancelled request acknowledged within its original
+expiry by a value between the previous scale and requested scale retains the same focus; this supports consumer
+minimum/maximum clamps. The 300 ms overflow unlock remains housekeeping, independent of anchor lifetime.
+
+Slider/external zoom in either orientation anchors the current clock on the focused visible date. Preserve its
+visible screen position; when offscreen, target the usable viewport center. Prefer the current top date when its
+clock is visible, then another visible clock. If the clock falls outside displayed hours, retain the existing
+center/origin or vertical fraction fallback. Retain this semantic anchor across successive values, including bounds,
+until a viewport takeover. Preserve controlled request pacing and before-paint geometry/scroll commits.
+
+Verify fractional pointer times, extreme reversals and pauses in both orientations, native content clamping,
+iPad-emulated slider focus in Chromium/WebKit, dense frame geometry and existing delayed/rejected request behavior.
+No public API changes.
+
+## 163 - Require A Touch Hold Before Moving Or Drawing Events
+
+Date: 2026-10-22
+Status: Accepted; refines Decisions 011 and 028's pointer activation without changing movement proposals
+
+Wait 350 ms for a stationary primary touch before starting event movement or empty-grid drawing. Allow up to eight
+pixels of initial touch jitter; movement beyond that, native scroll, pointer cancellation, a second pointer, Escape,
+blur or unmount cancels the pending hold. Before activation, leave native panning and default touch behavior available.
+After activation, capture the pointer and prevent native touch movement until release/cancellation. Do not reserve
+all card touches through touch-action: none. Mouse and pen retain immediate activation and existing drag thresholds.
+
+A quick stationary event tap retains the four-pixel movement threshold and still invokes onEventActivate with full
+event/date/resource identity; an empty-grid
+tap creates no event. Availability, controlled drafts, mutation permissions, rejection and grabbed-time anchoring
+use the same lifecycle. Delayed activation snapshots the pointer coordinates and capture target before React clears
+its event currentTarget. Verify timer/cancellation cleanup and native Chromium touch panning, held drag geometry and
+drawing in both orientations. No additional public setting or resize gesture is introduced.

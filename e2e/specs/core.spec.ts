@@ -97,9 +97,8 @@ test("renders, scrolls vertically, zooms, and changes dataset scale", async ({ p
         const timelineGutter = 8;
         const startMinute = 8 * 60;
         const endMinute = 18 * 60;
-        const cadence = zoomValue > 6 ? 5 : 15;
         const cursorMinute = startMinute + (x + element.scrollLeft - labelWidth - timelineGutter) / zoomValue;
-        const minute = Math.min(endMinute, Math.max(startMinute, Math.round(cursorMinute / cadence) * cadence));
+        const minute = Math.min(endMinute, Math.max(startMinute, cursorMinute));
         return {
           minute,
           screenX: labelWidth + timelineGutter + (minute - startMinute) * zoomValue - element.scrollLeft
@@ -122,10 +121,16 @@ test("renders, scrolls vertically, zooms, and changes dataset scale", async ({ p
   await expect(page.getByTestId("zoom-value")).not.toHaveText(afterButtonZoom ?? "");
   await expect(page.getByTestId("zoom-value")).toHaveText("2.20");
   await expect.poll(async () => topVisibleDayState(page)).toEqual(visibleDayBeforeShiftWheel);
-  await expect.poll(async () => (await timelineNodeNearPointer()).minute).toBe(anchoredNodeBeforeShiftWheel.minute);
   await expect
-    .poll(async () => Math.abs((await timelineNodeNearPointer()).screenX - anchoredNodeBeforeShiftWheel.screenX))
-    // Native scroll offsets round the fractional zoom projection to the nearest pixel.
+    .poll(async () => Math.abs((await timelineNodeNearPointer()).minute - anchoredNodeBeforeShiftWheel.minute))
+    .toBeLessThanOrEqual(0.5 / 2.2);
+  await expect
+    .poll(async () =>
+      viewport.evaluate(
+        (element, minute) => Math.abs(230 + 8 + (minute - 480) * 2.2 - element.scrollLeft - 520),
+        anchoredNodeBeforeShiftWheel.minute
+      )
+    )
     .toBeLessThanOrEqual(0.5);
   await expect
     .poll(async () => page.evaluate(() => ({ x: window.scrollX, y: window.scrollY })))
@@ -194,6 +199,7 @@ test("renders, scrolls vertically, zooms, and changes dataset scale", async ({ p
 });
 
 test("renders route-specific demo treatments", async ({ page }) => {
+  await page.clock.setFixedTime(new Date("2026-10-08T12:00:00"));
   await page.goto("/demo/infinite-calendar");
   await expect(page.locator('[data-demo-id="default"]')).toBeVisible();
   await expect(page.getByRole("navigation", { name: "Demo variants" })).toHaveCount(0);

@@ -52,6 +52,43 @@ then change API delay to refetch: the saved edit remains. See
 Dragging an event back to its starting slot neither opens its editor nor requests a move. The calendar owns
 this distinction from an ordinary click, which still invokes `onEventActivate`. Pointer jitter within four pixels
 also activates, even if it crosses a snap boundary; consumers need no movement guard.
+On touch, hold still for 350 ms to move a card or draw in empty space. Swiping before the hold scrolls normally;
+a quick event tap opens it, while an empty-grid tap creates nothing. Mouse and pen remain immediate.
+
+Slider zoom in either orientation keeps the current clock at its visible screen point, or brings an offscreen
+clock toward the viewport center. Shift-wheel keeps the exact first pointer time through pauses and zoom limits.
+If bounds temporarily displace that time, reversing restores the same point when space permits. Releasing Shift or
+scrolling starts a new focus. See [Decision 162](./decisions.md#162---retain-the-exact-time-and-screen-point-across-zoom-reversals).
+
+## Overnight and multi-day events
+
+Events occupy the half-open interval `[start, end)` and render once per intersecting included date/resource.
+Midnight belongs to the following date, so an event ending at midnight has no extra ending-day card. Each segment
+is clipped to displayed hours and has its own collision lanes; hidden hours and excluded weekdays do not shorten events.
+Full original events reach renderers and callbacks. Optional `EventRendererProps.segment` contains `dateKey`,
+`startMinute`, `endMinute` (up to 1440), `continuesBefore` and `continuesAfter` for the visible portion.
+Continuation flags include clipping at displayed-hour boundaries. The exported type is `CalendarEventSegment`.
+Shells expose `data-date`, `data-continues-before="true"` and `data-continues-after="true"` when applicable.
+
+Loaders must return every event overlapping the requested inclusive dates, even if it started earlier.
+Return complete records once per ID; the cache distributes them across retained dates without expanding the entire
+span. `projectEvents` receives deduplicated complete records and its output is segmented over the rendered range.
+Edits, accepted moves and removal update all retained instances. Existing timestamps retain browser-local/offset semantics.
+
+Dragging any portion moves the whole event, including from later-day portions or beyond displayed hours. The snapped
+grabbed time follows the pointer; full elapsed milliseconds remain fixed through daylight-saving changes. A same-day
+event may now cross midnight when moved. Consumers can reject proposals through the existing callback. Native local
+clock conversion chooses the earlier repeated clock and advances nonexistent clocks through the DST gap.
+Drawing a new range retains its existing single-day behavior. There are no event resize handles.
+
+Activation adds optional `renderedDateKey` beside `renderedCalendarId`. Captured event anchors retain both identities;
+explicit date targets select that portion. Hover is instance-local and drag status is shared across the event.
+Focus finds the first portion inside displayed hours on an included weekday when the start is hidden.
+
+Try `/docs/infinite-calendar#multi-day-events`: show the beginning, middle or ending, drag a portion to another date,
+then switch orientation. Enable working hours only or Reject moves, and move the controlled draft before Save/Cancel.
+The example reuses the guide's shared event card, with segment clocks and continuation arrows.
+See the [copyable recipe](../shared/usage.md#overnight-and-multi-day-events) and [Decision 160](./decisions.md#160---render-daily-event-segments-and-drag-by-the-grabbed-time).
 
 `CalendarEventBase` exposes the shared `id`, `calendarId`, and `start` fields. `CalendarEvent` extends it with the
 remaining renderer data, so consumers can store an event's identity and start position without a local field selection.
@@ -139,7 +176,7 @@ Products own recurrence expansion; saves and filters still refresh through `even
 ## Bundle budget
 
 JavaScript is limited to 50 KiB gzip and the optional stylesheet to 2 KiB gzip. The current artifacts measure
-33.07 KiB and 1.97 KiB gzip respectively (Node 23.10.0, gzip level 9). See [Decision 100](./decisions.md#100---reconcile-the-infinite-calendar-budget-after-branch-integration).
+33.90 KiB and 1.97 KiB gzip respectively (Node 23.10.0, gzip level 9). See [Decision 100](./decisions.md#100---reconcile-the-infinite-calendar-budget-after-branch-integration).
 
 ## Zoom continuity
 
@@ -160,11 +197,12 @@ zoom distance. Unacknowledged input expires after one second without retry. This
 The physical-touchpad experiment still showed gaps without the native-scroll lock, so it remains enabled.
 See [Decision 121](./decisions.md#121---pace-wheel-requests-after-dom-and-scroll-commit).
 
-Both Shift-wheel orientations restore their first pointer-nearest time node in the controlled zoom layout commit before paint,
+Both Shift-wheel orientations restore their first exact pointer time in the controlled zoom layout commit before paint,
 using actual effective geometry. External zoom immediately takes over anchoring; delayed parents retain the old view
 until they commit. Vertical dates and both virtual windows project to their final geometry before paint, including
-large zoom-outs. Horizontal slider changes prefer a visible current-time marker; vertical slider changes retain the
-top date/time. See [Decision 113](./decisions.md#113---commit-vertical-zoom-geometry-and-focus-before-paint).
+large zoom-outs. Both slider orientations preserve the current clock’s screen point, centering an offscreen clock.
+See [Decision 162](./decisions.md#162---retain-the-exact-time-and-screen-point-across-zoom-reversals), which updates the
+focus choices in [Decision 113](./decisions.md#113---commit-vertical-zoom-geometry-and-focus-before-paint).
 
 Time labels appear or disappear immediately at their readable zoom thresholds, at full opacity. The grid switches
 directly between quarter-hour and five-minute cadence above zoom 6. Hidden ticks retain their nodes with `display: none`;

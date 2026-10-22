@@ -4,8 +4,8 @@ import { clampViewport, restoreAnchor } from "#quno-internal/timeline/runtime/mo
 import { samePins } from "#quno-internal/timeline/runtime/model/window";
 import type { Geometry, SemanticAnchor, Viewport } from "#quno-internal/timeline/runtime/model/types";
 import { ViewportOwnership, type IntentKind } from "./ownership";
-import { initialSnapshot, layoutGeometry, pinnedWindow } from "./initialSnapshot";
-import { externalZoomAnchor } from "./zoomAnchor";
+import { initialSnapshot, layoutGeometry, pinnedWindow, traceSnapshot } from "./initialSnapshot";
+import { ZoomAnchors } from "./ZoomAnchors";
 
 import type { EngineLayout, EngineSnapshot, EngineTrace, EngineOptions } from "./types";
 export type { EngineLayout, EngineSnapshot, EngineTrace } from "./types";
@@ -19,7 +19,7 @@ export class CalendarEngine {
   private pinnedDate?: IsoDate;
   private pinnedResources: ReadonlyMap<IsoDate, readonly string[]> = new Map();
   private trace?: (entry: EngineTrace) => void;
-  private zoomAnchor: SemanticAnchor | null = null;
+  private zoomAnchors = new ZoomAnchors();
   private wheel: { zoom: number; id: number } | null = null;
 
   constructor({ layout, viewport, trace }: EngineOptions) {
@@ -43,21 +43,20 @@ export class CalendarEngine {
       this.wheel = null;
     }
     if (zoomChanged && !this.wheel && this.ownership.active({ now })?.kind === "navigation") this.ownership.cancel();
-    if (this.wheel) this.zoomAnchor = null;
-    const anchor = zoomChanged
-      ? (this.zoomAnchor ??= externalZoomAnchor({
-          geometry: this.snapshot.geometry,
-          viewport: this.snapshot.viewport,
-          nowMinute: layout.nowMinute ?? 0
-        }))
-      : captureLayoutAnchor({ geometry: this.snapshot.geometry, viewport: this.snapshot.viewport });
+    const { anchor, clamped } = this.zoomAnchors.layout({
+      geometry: this.snapshot.geometry,
+      viewport: this.snapshot.viewport,
+      zoom: layout.settings.zoom,
+      nowMinute: layout.nowMinute ?? 0,
+      wheel: Boolean(this.wheel),
+      now
+    });
     this.layout = { ...layout, anchorDate: this.layout.anchorDate };
-    if (this.wheel) this.zoomAnchor = null;
     this.reproject({
       geometry: this.geometry({ viewport: this.snapshot.viewport }),
       now,
       fallback: anchor,
-      reason: "layout"
+      reason: clamped ? "zoom-clamp" : "layout"
     });
     if (zoomChanged && wheel?.zoom === layout.settings.zoom)
       queueMicrotask(() => {
@@ -79,7 +78,7 @@ export class CalendarEngine {
 
   resize({ width, height, now }: { width: number; height: number; now: number }) {
     if (width === this.snapshot.viewport.width && height === this.snapshot.viewport.height) return;
-    this.zoomAnchor = null;
+    this.zoomAnchors.clear();
     const anchor = captureLayoutAnchor({ geometry: this.snapshot.geometry, viewport: this.snapshot.viewport });
     const viewport = { ...this.snapshot.viewport, width, height };
     this.reproject({ geometry: this.geometry({ viewport }), now, fallback: anchor, viewport, reason: "resize" });
@@ -91,7 +90,7 @@ export class CalendarEngine {
     if (manual) {
       this.wheel = null;
       this.ownership.manual();
-      this.zoomAnchor = null;
+      this.zoomAnchors.clear();
     }
     this.publish({ geometry, viewport: { ...viewport, top, left }, now, reason: manual ? "scroll" : "clamp" });
   }
@@ -111,7 +110,7 @@ export class CalendarEngine {
   }): number | null {
     const intent = this.ownership.claim({ kind, anchor, now, duration, cancelOnManual });
     if (!intent) return null;
-    this.zoomAnchor = null;
+    this.zoomAnchors.clear();
     if (!this.snapshot.geometry.dateIndex.has(anchor.target.dateKey))
       this.layout = { ...this.layout, anchorDate: anchor.target.dateKey };
     this.reproject({ geometry: this.geometry({ viewport: this.snapshot.viewport }), now, reason: kind });
@@ -134,11 +133,21 @@ export class CalendarEngine {
   }
 
   cancel({ now, manual = false }: { now: number; manual?: boolean }) {
+    this.zoomAnchors.cancel({
+      manual,
+      request: this.wheel,
+      intent: this.ownership.active({ now }),
+      from: this.layout.settings.zoom
+    });
     this.wheel = null;
-    this.zoomAnchor = null;
     if (manual) this.ownership.manual();
     else this.ownership.cancel();
-    this.publish({ geometry: this.snapshot.geometry, viewport: this.snapshot.viewport, now, reason: "cancel" });
+    this.publish({
+      geometry: this.snapshot.geometry,
+      viewport: this.snapshot.viewport,
+      now,
+      reason: manual ? "manual" : "cancel"
+    });
   }
 
   settle({ now }: { now: number }) {
@@ -200,13 +209,7 @@ export class CalendarEngine {
       owner,
       window: pinnedWindow({ geometry, viewport, owner, date: this.pinnedDate, pinned: this.pinnedResources })
     });
-    this.trace?.({
-      revision: this.snapshot.revision,
-      reason,
-      owner: owner?.kind ?? null,
-      top: viewport.top,
-      left: viewport.left
-    });
+    traceSnapshot({ snapshot: this.snapshot, trace: this.trace });
     for (const listener of this.listeners) listener();
   }
 }

@@ -5,6 +5,7 @@ import type { PreparedEventCell } from "./preparedCell";
 /** Positioned event geometry for one rendered calendar row. */
 export type EventLayoutItem = {
   event: CalendarEvent;
+  segment?: import("#quno-internal/timeline/core/types").CalendarEventSegment;
   left: number;
   width: number;
   top: number;
@@ -29,6 +30,7 @@ export function layoutPreparedEventsForRow({
 
     return {
       event: item.event,
+      segment: item.segment,
       left: minuteToX({ minute: item.startMinute, geometry: settings }),
       width: Math.max(
         12,

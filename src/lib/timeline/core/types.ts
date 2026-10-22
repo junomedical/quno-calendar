@@ -1,3 +1,4 @@
+export type { CalendarEventSegment } from "./calendarEventSegmentTypes";
 import type { CSSProperties, ReactNode } from "react";
 import type { IsoDate } from "#quno-internal/shared/dateRangeModel";
 import type { CalendarDateLabelOptions } from "./calendarFormatterTypes";
@@ -97,6 +98,7 @@ export type QunoInfiniteCalendarSettings = {
 /** Props passed to custom event card renderers. */
 export type EventRendererProps = {
   event: CalendarEvent;
+  segment?: import("./calendarEventSegmentTypes").CalendarEventSegment;
   status: EventRenderStatus;
   style: CSSProperties;
   lane: number;
@@ -166,6 +168,7 @@ export type ActiveDraftReleaseOptions = {
 /** Parent callback payload for activating an existing rendered event. */
 export type EventActivateRequest = {
   event: CalendarEvent;
+  renderedDateKey?: IsoDate;
   renderedCalendarId: CalendarId;
 };
 

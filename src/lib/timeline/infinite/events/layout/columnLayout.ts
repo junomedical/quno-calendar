@@ -5,6 +5,7 @@ import type { PreparedEventCell } from "./preparedCell";
 /** Positioned event geometry for one rendered vertical calendar column. */
 export type EventColumnLayoutItem = {
   event: CalendarEvent;
+  segment?: import("#quno-internal/timeline/core/types").CalendarEventSegment;
   leftPercent: number;
   widthPercent: number;
   top: number;
@@ -24,6 +25,7 @@ export function layoutPreparedEventsForColumn({
 }): EventColumnLayoutItem[] {
   return preparedCell.items.map((item) => ({
     event: item.event,
+    segment: item.segment,
     leftPercent: (item.lane / item.laneCount) * 100,
     widthPercent: 100 / item.laneCount,
     top: minuteToY({ minute: item.startMinute, geometry: settings }),

@@ -27,13 +27,14 @@ export type VirtualDayItem = {
   start: number;
 };
 
-export type HoveredEvent = { eventId: string; calendarId: CalendarId } | null;
+export type HoveredEvent = { eventId: string; calendarId: CalendarId; dateKey?: string } | null;
 export type HorizontalRowLayoutItems = ReturnType<typeof layoutPreparedEventsForRow>;
 
 export type HorizontalEventPointerDown = (args: {
   event: PointerEvent<HTMLDivElement>;
   calendarEvent: CalendarEvent;
   renderedCalendarId: CalendarId;
+  renderedDateKey?: import("#quno-internal/shared/dateRangeModel").IsoDate;
 }) => void;
 
 export type HorizontalTimelineDayProps = CalendarDateLabelOptions & {

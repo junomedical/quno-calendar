@@ -36,7 +36,11 @@ export function useVerticalColumnHover({ disabled, setHoveredEvent }: VerticalCo
         const width = (item.widthPercent / 100) * rect.width;
         return x >= left && x <= left + width && y >= item.top && y <= item.top + item.height;
       });
-      setHoveredEvent(hovered ? { eventId: hovered.event.id, calendarId: renderedCalendarId } : null);
+      setHoveredEvent(
+        hovered
+          ? { eventId: hovered.event.id, calendarId: renderedCalendarId, dateKey: hovered.segment?.dateKey }
+          : null
+      );
     },
     [disabled, clearHoveredEvent, setHoveredEvent]
   );

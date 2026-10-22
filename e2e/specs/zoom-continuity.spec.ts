@@ -1,19 +1,11 @@
 import { expect, test, type Page } from "@playwright/test";
 import { firstViewportEventBox, goToWorkday, topVisibleDayDate, waitForDemoEvents } from "#quno-e2e/helpers";
 
-async function visibleTimelineCenterMinuteOffset(page: Page) {
-  return page.locator(".quno-calendar-viewport").evaluate((viewport) => {
-    const label = viewport.querySelector<HTMLElement>(".quno-calendar-row-label");
-    const zoomText = document.querySelector<HTMLElement>('[data-testid="zoom-value"]')?.textContent;
-    if (!label || !zoomText) throw new Error("Missing horizontal zoom geometry");
-    const zoom = Number(zoomText);
-    const timelineGutter = 8;
-    const visibleTimelineWidth = Math.max(
-      0,
-      viewport.clientWidth - label.getBoundingClientRect().width - timelineGutter
-    );
-    return (viewport.scrollLeft + visibleTimelineWidth / 2) / zoom;
-  });
+async function currentTimeScreenX(page: Page) {
+  return page
+    .locator(".quno-calendar-now-pin")
+    .first()
+    .evaluate((pin) => pin.getBoundingClientRect().left);
 }
 
 test("coalesces a touchpad wheel burst into one anchored timeline projection", async ({ page }) => {
@@ -73,7 +65,7 @@ test("coalesces a touchpad wheel burst into one anchored timeline projection", a
 });
 
 test("keeps horizontal slider zoom continuous without replacing rendered content", async ({ page }) => {
-  await page.clock.install({ time: new Date("2026-07-06T03:00:00") });
+  await page.clock.install({ time: new Date("2026-07-06T12:00:00") });
   await page.goto("/demo/infinite-calendar");
   await goToWorkday(page);
   await waitForDemoEvents(page);
@@ -150,13 +142,11 @@ test("keeps horizontal slider zoom continuous without replacing rendered content
     state.zoomMutationObserver.observe(virtualSpace, { childList: true, subtree: true });
   });
 
-  const centerMinuteOffset = await visibleTimelineCenterMinuteOffset(page);
+  const nowX = await currentTimeScreenX(page);
   for (const value of [2.6, 3.2, 2.4, 1.8]) {
     await zoom.fill(String(value));
     await expect(page.getByTestId("zoom-value")).toHaveText(value.toFixed(2));
-    await expect
-      .poll(async () => Math.abs((await visibleTimelineCenterMinuteOffset(page)) - centerMinuteOffset))
-      .toBeLessThanOrEqual(1);
+    await expect.poll(async () => Math.abs((await currentTimeScreenX(page)) - nowX)).toBeLessThanOrEqual(1);
     await expect(page.locator('[data-zoom-stable-shell="true"]')).toHaveCount(1);
     await expect(page.locator('[data-zoom-stable-content="true"]')).toHaveCount(1);
     await expect(page.locator('[data-zoom-stable-availability-shell="true"]')).toHaveCount(1);

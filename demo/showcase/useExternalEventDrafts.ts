@@ -111,9 +111,11 @@ export function useExternalEventDrafts({
       activeEditSourceEventRef.current = draftEvent;
       activeEditSourceAnchorRef.current = captureEditorAnchor(
         draftEvent,
-        firstPersonParticipantId(eventParticipantIds(draftEvent)) ?? draftEvent.calendarId
+        firstPersonParticipantId(eventParticipantIds(draftEvent)) ?? draftEvent.calendarId,
+        false,
+        request.renderedDateKey
       );
-      const visibleAnchor = captureEditorAnchor(draftEvent, request.renderedCalendarId, true);
+      const visibleAnchor = captureEditorAnchor(draftEvent, request.renderedCalendarId, true, request.renderedDateKey);
       activeDraftLastSeenAnchorRef.current = visibleAnchor ?? activeEditSourceAnchorRef.current;
       setDraftParticipantsChanged(false);
       setActiveDraft({

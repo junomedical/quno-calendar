@@ -1,4 +1,4 @@
-import { fromDateKey } from "#quno-internal/timeline/date/dateVirtualization";
+import { localMinuteDate } from "#quno-internal/timeline/infinite/events/eventSegment";
 import { parseIsoDate } from "#quno-internal/timeline/date/localDate";
 
 /** Timeline geometry inputs used by pure pixel/time conversion helpers. */
@@ -123,9 +123,7 @@ export function clampEventToTimeline({
 
 /** Builds an ISO timestamp for a date key plus a minute offset from midnight. */
 export function dateKeyAndMinuteToIso({ dateKey, minute }: { dateKey: string; minute: number }): string {
-  const date = fromDateKey({ dateKey });
-  date.setTime(date.getTime() + minute * 60_000);
-  return date.toISOString();
+  return localMinuteDate({ dateKey, minute }).toISOString();
 }
 
 /** Formats a timeline tick label as an hour or two-digit minute marker. */

@@ -1,9 +1,12 @@
 import type { CalendarEvent, QunoInfiniteCalendarSettings } from "#quno-internal/timeline/core/types";
-import { minutesSinceStartOfDay, timelineEndMinute, timelineStartMinute } from "#quno-internal/timeline/time/time";
+import { eventSegment } from "#quno-internal/timeline/infinite/events/eventSegment";
+import { eventDateKey } from "#quno-internal/timeline/infinite/events/eventDateKey";
+import type { CalendarEventSegment } from "#quno-internal/timeline/core/types";
 
 /** Visible, same-day interval used by the overlap engine. */
 export type EventInterval = {
   event: CalendarEvent;
+  segment: CalendarEventSegment;
   startMinute: number;
   endMinute: number;
   sourceIndex: number;
@@ -18,21 +21,19 @@ function compareIntervals({ left, right }: { left: EventInterval; right: EventIn
 /** Clips events and keeps caller order when appointments share a start time. */
 export function eventIntervals({
   events,
-  settings
+  settings,
+  dateKey
 }: {
   events: readonly CalendarEvent[];
+  dateKey?: string;
   settings: Pick<QunoInfiniteCalendarSettings, "startHour" | "endHour">;
 }): EventInterval[] {
-  const timelineStart = timelineStartMinute(settings);
-  const timelineEnd = timelineEndMinute(settings);
-
   return events
-    .map((event, sourceIndex) => ({
-      event,
-      startMinute: Math.max(timelineStart, minutesSinceStartOfDay({ value: event.start })),
-      endMinute: Math.min(timelineEnd, minutesSinceStartOfDay({ value: event.end })),
-      sourceIndex
-    }))
-    .filter((interval) => interval.endMinute > timelineStart && interval.startMinute < timelineEnd)
-    .sort((argument0, argument1) => compareIntervals({ left: argument0, right: argument1 }));
+    .flatMap((event, sourceIndex) => {
+      const segment = eventSegment({ event, dateKey: dateKey ?? eventDateKey(event), settings });
+      return segment
+        ? [{ event, segment, startMinute: segment.startMinute, endMinute: segment.endMinute, sourceIndex }]
+        : [];
+    })
+    .sort((left, right) => compareIntervals({ left, right }));
 }

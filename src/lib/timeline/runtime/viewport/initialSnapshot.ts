@@ -75,3 +75,13 @@ export function pinnedWindow({
     pinnedResources: resources
   });
 }
+
+export function traceSnapshot({ snapshot, trace }: { snapshot: EngineSnapshot; trace?: EngineOptions["trace"] }) {
+  trace?.({
+    revision: snapshot.revision,
+    reason: snapshot.reason,
+    owner: snapshot.owner?.kind ?? null,
+    top: snapshot.viewport.top,
+    left: snapshot.viewport.left
+  });
+}

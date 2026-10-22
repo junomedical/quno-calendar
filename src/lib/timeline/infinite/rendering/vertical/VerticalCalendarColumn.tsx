@@ -24,8 +24,14 @@ import {
 
 function useEventProjections(settings: VerticalCalendarColumnProps["settings"]) {
   const event = useCallback(
-    (calendarEvent: CalendarEvent) => {
-      const box = verticalEventBox({ event: calendarEvent, settings });
+    ({
+      calendarEvent,
+      segment
+    }: {
+      calendarEvent: CalendarEvent;
+      segment: import("#quno-internal/timeline/core/types").CalendarEventSegment;
+    }) => {
+      const box = verticalEventBox({ event: calendarEvent, settings, segment });
       return {
         left: 0,
         top: box.top,
@@ -177,6 +183,7 @@ export const VerticalCalendarColumn = memo(function VerticalCalendarColumn({
       />
       <TransientLayer
         dateKey={dateKey}
+        settings={settings}
         calendarId={calendar.id}
         draftEvent={draftEvent}
         draftEventStatus={draftEventStatus}
@@ -188,7 +195,7 @@ export const VerticalCalendarColumn = memo(function VerticalCalendarColumn({
         renderEvent={renderEvent}
         geometryRegistration={geometryRegistration}
         onEventPointerDown={onEventPointerDown}
-        project={({ event }) => project.event(event)}
+        project={({ event, segment }) => project.event({ calendarEvent: event, segment })}
         shellClassName="icv-event-shell"
       />
     </div>

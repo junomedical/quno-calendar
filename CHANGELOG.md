@@ -4,6 +4,42 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+- Zoom/touch verification: all 724 unit tests, 139 final affected Chromium checks and five WebKit zoom checks pass.
+  The complete 449-case Chromium attempt passed 433; it included 12 playback timeouts while implementation was
+  still changing, a clock-dependent route-width assertion, outdated zoom copy/top-date assertions and the custom
+  minimum handoff regression. The final source-stable reruns cover every failed case, native pre-hold scrolling,
+  held drag/drawing geometry, both zoom limits, pauses, iPad-emulated slider focus and dense frame alignment.
+  Formatting, architecture, types, lint, Preact/React 19 compatibility, demo build, package verification, size
+  reporting and pack dry-run pass. No unresolved verification blocker remains. Infinite Calendar is 35.24 KiB
+  JavaScript and 1.96 KiB CSS gzip within its 50/2 KiB budgets; the demo main chunk is 448.16 kB.
+
+- Preserve the exact first Shift-pointer time and screen coordinate through zoom pauses, limits and rejected
+  requests. Slider/external zoom focuses the current clock in both orientations, revealing it when offscreen and
+  retaining its original point through reversals. Native bounds can temporarily displace focus until space permits.
+- Require a stationary 350 ms touch hold before event dragging or empty-grid drawing. Pre-hold swipes scroll
+  normally, quick event taps activate, and empty-grid taps create nothing. Mouse and pen remain immediate.
+
+- Reuse the shared field-guide event card in the overnight/multi-day exhibit, including its availability and
+  interaction-state styling. Retain clipped segment clocks and continuation arrows without a separate inline design.
+  Verification: all 701 unit tests and 65 affected Chromium checks pass, including computed-style comparisons
+  against the existing read-only cards in both orientations. Formatting, architecture, types, lint, compatibility,
+  demo build, package verification, size reporting and pack dry-run pass. No unresolved blocker remains.
+
+- Overnight/multi-day verification: all 701 unit tests pass. The complete 438-case Chromium run passed 437 checks;
+  its sole failure expected the previous 26 guide chapters. Update that expectation to 27; all 104 affected Chromium
+  checks pass on the final rerun, including the ten new multi-day scenarios and editor/anchor/drag regressions.
+  Formatting, architecture, types, lint, Preact/React 19 compatibility, demo build, package verification, size reporting
+  and pack dry-run pass. No unresolved verification blocker remains. Infinite Calendar measures 33.90 KiB JavaScript
+  and 1.97 KiB CSS gzip, within its 50/2 KiB budgets; the demo's main chunk is 444.08 kB.
+
+- Support overnight and multi-day Infinite Calendar events in both orientations with half-open daily segments,
+  overlap loading, independent daily lanes and complete-event renderer/callback data. Add optional renderer
+  `segment: CalendarEventSegment`, activation `renderedDateKey` and continuation/date shell attributes.
+- Move complete events using the grabbed date/time as anchor, preserving elapsed duration across midnight and DST.
+  Same-day events can cross displayed-hour/date boundaries; parent rejection and single-day drawing remain intact.
+  Update all retained date instances on edits/moves/removal and deduplicate projected events. Add the interactive
+  overnight/multi-day field-guide exhibit, overlap recipes and focused geometry/cache/timezone regression coverage.
+
 - CI scroll verification: all 679 unit tests, all 428 Chromium checks and 12 single-worker repeated scroll checks
   pass. Delayed startup with 4× CPU slowdown passes; shortening the pause to one second is correctly rejected.
   Formatting, architecture, types, lint, Preact/React 19 compatibility, demo build, package verification, size

@@ -1,7 +1,6 @@
 import { resourceRectangle } from "./resourceRectangle";
-import { minutesSinceStartOfDay } from "#quno-internal/timeline/time/time";
 import { eventBelongsToCalendar } from "#quno-internal/timeline/data/calendarEvents";
-import { eventDateKey } from "#quno-internal/timeline/infinite/events/eventDateKey";
+import { eventSegment } from "#quno-internal/timeline/infinite/events/eventSegment";
 import type { Geometry, LogicalPoint, Rectangle } from "./types";
 
 /** Event identity resolves through prepared lanes; transient drafts never change collision metrics. */
@@ -13,7 +12,7 @@ export function eventRectangle({ geometry, target }: { geometry: Geometry; targe
     if (target.calendarId && resource.calendarId !== target.calendarId) continue;
     const draft =
       geometry.draft?.id === target.eventId &&
-      eventDateKey(geometry.draft) === target.dateKey &&
+      eventSegment({ event: geometry.draft, dateKey: target.dateKey, settings: geometry.settings }) &&
       eventBelongsToCalendar({ event: geometry.draft, calendarId: resource.calendarId })
         ? geometry.draft
         : null;
@@ -22,14 +21,10 @@ export function eventRectangle({ geometry, target }: { geometry: Geometry; targe
     );
     const event = draft ?? item?.event;
     if (!event) continue;
-    const start = Math.max(
-      geometry.settings.startHour * 60,
-      Math.min(geometry.settings.endHour * 60, minutesSinceStartOfDay({ value: event.start }))
-    );
-    const end = Math.max(
-      geometry.settings.startHour * 60,
-      Math.min(geometry.settings.endHour * 60, minutesSinceStartOfDay({ value: event.end }))
-    );
+    const segment = eventSegment({ event, dateKey: target.dateKey, settings: geometry.settings });
+    if (!segment) continue;
+    const start = segment.startMinute;
+    const end = segment.endMinute;
     const bounds = resourceRectangle({ geometry, day, index });
     const time = geometry.timeGutter + (start - geometry.settings.startHour * 60) * geometry.scale;
     const duration = Math.max(12, (end - start) * geometry.scale);

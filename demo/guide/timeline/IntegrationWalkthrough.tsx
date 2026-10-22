@@ -23,6 +23,7 @@ import {
   TimeMarkerDemo
 } from "./ArticleProductDemos";
 import { DragCreateArticleDemo, PrefetchLoadingDemo, ReadOnlyArticleDemo } from "./ArticleRecipeDemos";
+import { MultiDayEventsDemo, multiDayRecipe } from "./MultiDayEventsDemo";
 import { EventProjectionDemo } from "./EventProjectionDemo";
 import { DensityDemo, densityRecipe } from "./DensityDemo";
 import { calendarWindowRecipe } from "./calendarWindowRecipe";
@@ -338,6 +339,7 @@ const articleContents = [
   ["#read-only", "07", "Start with a read-only calendar"],
   ["#availability", "08", "Add availability and event layers"],
   ["#drag-create", "09", "Create, move, and edit content"],
+  ["#multi-day-events", "09a", "Keep overnight and multi-day events together"],
   ["#current-time", "10", "Mark and return to the current time"],
   ["#date-time-navigation", "11", "Connect familiar date navigation"],
   ["#zoom", "12", "Zoom without losing precision"],
@@ -633,11 +635,29 @@ export function IntegrationWalkthrough({ embedded = false }: { embedded?: boolea
         <Callout>
           Drag a saved card to another visible date or resource. Its row stays where you were working; choose Cancel and
           the original event and viewport return together. Drawing on empty timeline space follows the same review flow.
+          On touch, hold still briefly before moving or drawing; a quick swipe scrolls normally.
         </Callout>
         <CodeBlock code={mutationSnippet} title="Stage a proposal, then accept or cancel it" />
         <DemoBreakout>
           <LazyArticleDemo label="drag and create calendar example">
             <DragCreateArticleDemo />
+          </LazyArticleDemo>
+        </DemoBreakout>
+      </ArticleSection>
+
+      <ArticleSection id="multi-day-events" number="09a" title="Keep overnight and multi-day events together">
+        <p>
+          Long shifts continue on each date they occupy. Grab the beginning, a middle hour, or the ending portion: the
+          whole event moves, retaining its elapsed duration and the time point under your pointer.
+        </p>
+        <Callout>
+          Try it: show the middle, drag either continuation to another date or resource, then show the ending. Switch
+          orientation or display working hours only. Edit the multi-day draft to try moving before Save or Cancel.
+        </Callout>
+        <CodeBlock code={multiDayRecipe} title="Load overlapping events and render each daily segment" />
+        <DemoBreakout>
+          <LazyArticleDemo label="overnight and multi-day events example">
+            <MultiDayEventsDemo />
           </LazyArticleDemo>
         </DemoBreakout>
       </ArticleSection>
@@ -695,9 +715,9 @@ export function IntegrationWalkthrough({ embedded = false }: { embedded?: boolea
           zoom in to read cards, inspect short gaps, or place work precisely.
         </p>
         <p>
-          The slider and step buttons change scale while preserving the visible current-time marker or schedule center.
-          Shift + wheel or Shift + trackpad zooms around the nearest time under the pointer. Both controls let the user
-          change detail without losing the part of the schedule they were examining.
+          The slider and step buttons focus the current clock in either orientation, bringing it into view if needed.
+          Shift + wheel or Shift + trackpad locks the exact time under the first pointer through pauses and zoom limits.
+          Zooming back restores that time to the same point when the content bounds permit.
         </p>
         <CodeBlock code={zoomSnippet} title="Keep zoom smooth and controlled" />
         <DemoBreakout>
