@@ -39,6 +39,10 @@ Cached cards appear immediately; returning reuses the earlier coverage. The stat
 loading until every concurrent read settles, including failed or cancelled reads. Demo tracking is separate from
 the calendar's request scheduling. See [Decision 128](./decisions.md#128---demonstrate-concurrent-loading-and-verify-visible-stability).
 
+The demo’s site and server builds work from a clean checkout without package `dist` assets.
+Development startup prepares its server service automatically. See
+[Decision 164](./decisions.md#164---build-the-demo-server-without-generated-package-assets) and the shared deployment recipe.
+
 Showcase HTTP requests send `{ startDate, endDate, calendarIds, eventsPerYear }` to `/api/demo-events`.
 The server generates deterministic fixtures for the requested years and returns only matching date/resource records.
 It never receives event arrays. Appointments fit the common working hours of both participants. Fixture timestamps

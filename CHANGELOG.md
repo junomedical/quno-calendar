@@ -4,6 +4,16 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+- Fix Vercel builds after shared overlap filtering added a runtime import from the package root. Bundle headless
+  shared helpers from source and resolve the private demo service through separate source-type/compiled-runtime
+  package conditions. Prepare the service before development startup; remove the conflicting TypeScript path
+  override. Site/function builds no longer depend on existing library `dist` assets. The regression test reproduces
+  the original resolver failure and verifies both clean builds plus native service execution in two timezones.
+  Verification: all 724 unit tests and 16 affected Chromium checks pass. Clean development startup and HTTP queries
+  work without `dist`. Formatting, architecture, types, lint, Preact/React 19 compatibility, demo build, package
+  verification, size reporting and pack dry-run pass; published library and demo bundle sizes are unchanged.
+  No unresolved local verification blocker remains.
+
 - Zoom/touch verification: all 724 unit tests, 139 final affected Chromium checks and five WebKit zoom checks pass.
   The complete 449-case Chromium attempt passed 433; it included 12 playback timeouts while implementation was
   still changing, a clock-dependent route-width assertion, outdated zoom copy/top-date assertions and the custom

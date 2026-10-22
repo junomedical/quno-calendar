@@ -7,7 +7,13 @@ import { build } from "vite";
 const result = await build({
   configFile: false,
   publicDir: false,
-  resolve: { alias: [{ find: /^#quno-demo\//, replacement: `${resolve("demo")}/` }] },
+  resolve: {
+    alias: [
+      { find: /^@quno\/calendar$/, replacement: resolve("src/lib/index.ts") },
+      { find: /^#quno-internal\//, replacement: `${resolve("src/lib")}/` },
+      { find: /^#quno-demo\//, replacement: `${resolve("demo")}/` }
+    ]
+  },
   build: {
     outDir: "build/demo-api",
     write: false,

@@ -4,7 +4,10 @@
   "description": "Quno Infinite Calendar, Datepicker, Date Input, Timepicker, and headless Date Parser for React and Preact-compatible applications.",
   "type": "module",
   "imports": {
-    "#quno-api/demo-event-service": "./build/demo-api/events.js"
+    "#quno-api/demo-event-service": {
+      "types": "./demo/server/queryDemoEvents.ts",
+      "default": "./build/demo-api/events.js"
+    }
   },
   "license": "MIT",
   "author": "",
@@ -84,7 +87,7 @@
     "./timepicker/styles.css": "./dist/timepicker.css"
   },
   "scripts": {
-    "dev": "vite --host 127.0.0.1",
+    "dev": "npm run build:demo-api && vite --host 127.0.0.1",
     "build": "npm run build:lib && npm run build:demo",
     "build:lib": "vite build -c vite.lib.config.ts --mode shared && vite build -c vite.lib.config.ts --mode infinite-calendar && vite build -c vite.lib.config.ts --mode datepicker && vite build -c vite.lib.config.ts --mode date-input && vite build -c vite.lib.config.ts --mode date-parser && vite build -c vite.lib.config.ts --mode timepicker",
     "build:demo": "npm run build:demo-api && vite build -c vite.config.ts --outDir dist-demo",

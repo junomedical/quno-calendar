@@ -20,7 +20,6 @@
       "@quno/calendar/date-parser": ["./src/lib/date-parser/index.ts"],
       "#quno-internal/*": ["./src/lib/*"],
       "#quno-demo/*": ["./demo/*"],
-      "#quno-api/demo-event-service": ["./demo/server/queryDemoEvents.ts"],
       "#quno-api/*": ["./api/*"],
       "#quno-e2e/*": ["./e2e/*"],
       "#quno-tests/*": ["./tests/*"],
