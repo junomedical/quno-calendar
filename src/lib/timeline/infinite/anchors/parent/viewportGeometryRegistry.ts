@@ -7,7 +7,7 @@ type Listener = () => void;
 export class ViewportGeometryRegistry {
   private readonly days = new Map<string, HTMLElement>();
   private readonly resources = new Map<string, Map<CalendarId, HTMLElement>>();
-  private readonly events = new Map<EventId, Map<CalendarId, HTMLElement>>();
+  private readonly events = new Map<EventId, Map<string, Set<HTMLElement>>>();
   private readonly listeners = new Set<Listener>();
 
   registerDay({ dateKey, element }: { dateKey: string; element: HTMLElement | null }) {
@@ -29,15 +29,32 @@ export class ViewportGeometryRegistry {
   registerEvent({
     eventId,
     calendarId,
+    dateKey,
     element,
     previousElement
   }: {
     eventId: EventId;
     calendarId: CalendarId;
+    dateKey?: IsoDate;
     element: HTMLElement | null;
     previousElement?: HTMLElement | null;
   }) {
-    this.setNestedElement({ map: this.events, outerKey: eventId, innerKey: calendarId, element, previousElement });
+    const key = `${calendarId}\0${dateKey ?? ""}`;
+    const instances = this.events.get(eventId) ?? new Map<string, Set<HTMLElement>>();
+    const elements = instances.get(key) ?? new Set<HTMLElement>();
+    if (element) {
+      if (elements.has(element)) return;
+      elements.add(element);
+      instances.set(key, elements);
+      this.events.set(eventId, instances);
+    } else {
+      if (previousElement) {
+        if (!elements.delete(previousElement)) return;
+        if (!elements.size) instances.delete(key);
+      } else if (!instances.delete(key)) return;
+      if (!instances.size) this.events.delete(eventId);
+    }
+    this.invalidate();
   }
 
   day({ dateKey }: { dateKey: string }) {
@@ -64,8 +81,17 @@ export class ViewportGeometryRegistry {
     const instances = this.events.get(target.eventId);
     if (!instances) return null;
     const candidates = [...instances]
-      .filter(([calendarId]) => !target.calendarId || calendarId === target.calendarId)
-      .map(([calendarId, element]) => ({ calendarId, element }));
+      .flatMap(([key, elements]) => {
+        const [calendarId, dateKey] = key.split("\0");
+        return [...elements]
+          .reverse()
+          .map((element) => ({ calendarId, dateKey: (dateKey || undefined) as IsoDate | undefined, element }));
+      })
+      .filter(
+        (instance) =>
+          (!target.calendarId || instance.calendarId === target.calendarId) &&
+          (!target.dateKey || !instance.dateKey || instance.dateKey === target.dateKey)
+      );
     return (
       candidates.find(({ element }) => isVisible({ element, viewportBox })) ??
       (target.requireVisible ? null : (candidates[0] ?? null))

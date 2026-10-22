@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import type { CalendarEvent, ProjectEvents } from "@quno/calendar/infinite-calendar";
 import { createCalendarDataset } from "./calendarDataset";
-import { eventDate } from "./CalendarEditor";
+import { overlapsEventRange } from "#quno-demo/shared/eventRange";
 export function useCalendarData(density: number) {
   const [changes, setChanges] = useState<Record<string, CalendarEvent>>({});
   const latest = useRef(changes);
@@ -17,10 +17,7 @@ export function useCalendarData(density: number) {
         (event) => !changes[event.id]
       ),
       ...Object.values(changes).filter(
-        (event) =>
-          eventDate(event.start) >= startDate &&
-          eventDate(event.start) <= endDate &&
-          calendarIds.includes(event.calendarId)
+        (event) => overlapsEventRange(event, { startDate, endDate }) && calendarIds.includes(event.calendarId)
       )
     ],
     [changes, density, readEvents]

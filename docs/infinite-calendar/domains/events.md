@@ -23,3 +23,7 @@ identity when every date metric matches, so a zoom-only update also reuses the i
 
 See [loading flow](../flows/async-loading-and-layout.md) and the repository/loading/preparation tests under
 `tests/unit/lib/runtime`.
+
+`infinite/events/eventSegment.ts` owns half-open date overlap and visible daily intervals. Complete records may
+reference several retained date buckets; collision preparation clips each date independently. Projection callbacks
+receive one record per event ID and their output is distributed only across the rendered dates.

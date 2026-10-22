@@ -22,9 +22,17 @@ export function verticalMinuteToY({
 }
 
 /** Converts event time into the positioned block shared by transient and availability layers. */
-export function verticalEventBox({ event, settings }: { event: CalendarEvent; settings: VerticalGeometrySettings }) {
-  const startMinute = minutesSinceStartOfDay({ value: event.start });
-  const endMinute = minutesSinceStartOfDay({ value: event.end });
+export function verticalEventBox({
+  event,
+  settings,
+  segment
+}: {
+  event: CalendarEvent;
+  settings: VerticalGeometrySettings;
+  segment?: import("#quno-internal/timeline/core/types").CalendarEventSegment;
+}) {
+  const startMinute = segment?.startMinute ?? minutesSinceStartOfDay({ value: event.start });
+  const endMinute = segment?.endMinute ?? minutesSinceStartOfDay({ value: event.end });
   return {
     top: verticalMinuteToY({ minute: startMinute, settings }),
     height: Math.max(

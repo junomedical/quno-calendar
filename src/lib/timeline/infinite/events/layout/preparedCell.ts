@@ -17,6 +17,7 @@ import { MinHeap } from "./minHeap";
 /** Lane assignment and clipped time range shared by both visual projections. */
 export type PreparedEventCellItem = {
   event: CalendarEvent;
+  segment?: import("#quno-internal/timeline/core/types").CalendarEventSegment;
   startMinute: number;
   endMinute: number;
   lane: number;
@@ -108,6 +109,7 @@ function prepareOverlapGroup({ group }: { group: EventInterval[] }): PreparedEve
 
   return group.map((interval, index) => ({
     event: interval.event,
+    segment: interval.segment,
     startMinute: interval.startMinute,
     endMinute: interval.endMinute,
     lane: assignedLanes[index],
@@ -134,12 +136,14 @@ function maximumMetricLaneCount({ intervals }: { intervals: EventInterval[] }): 
 /** Prepares one cell once for sizing, horizontal layout, and vertical layout. */
 export function prepareEventCell({
   events,
-  settings
+  settings,
+  dateKey
 }: {
   events: readonly CalendarEvent[];
+  dateKey?: string;
   settings: Pick<QunoInfiniteCalendarSettings, "startHour" | "endHour">;
 }): PreparedEventCell {
-  const intervals = eventIntervals({ events, settings });
+  const intervals = eventIntervals({ events, settings, dateKey });
   const items = splitOverlapGroups({ intervals }).flatMap((argument0) => prepareOverlapGroup({ group: argument0 }));
 
   return {
@@ -152,9 +156,11 @@ export function prepareEventCell({
 /** Partitions a resource once and prepares each visual layer independently. */
 export function prepareEventLayers({
   events,
-  settings
+  settings,
+  dateKey
 }: {
   events: readonly CalendarEvent[];
+  dateKey?: string;
   settings: Pick<QunoInfiniteCalendarSettings, "startHour" | "endHour">;
 }): PreparedEventLayers {
   const foreground: CalendarEvent[] = [];
@@ -162,8 +168,8 @@ export function prepareEventLayers({
   for (const event of events) {
     (event.renderLayer === "availability" ? availability : foreground).push(event);
   }
-  const preparedEvents = prepareEventCell({ events: foreground, settings });
-  const preparedAvailability = prepareEventCell({ events: availability, settings });
+  const preparedEvents = prepareEventCell({ events: foreground, settings, dateKey });
+  const preparedAvailability = prepareEventCell({ events: availability, settings, dateKey });
   return {
     events: preparedEvents,
     availability: preparedAvailability,

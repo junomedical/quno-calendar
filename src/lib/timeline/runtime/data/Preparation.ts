@@ -7,7 +7,7 @@ import type {
 } from "#quno-internal/timeline/core/types";
 import type { ProjectEvents } from "#quno-internal/timeline/core/calendarEventProjectionTypes";
 import { eventCalendarIds } from "#quno-internal/timeline/data/calendarEvents";
-import { eventDateKey } from "#quno-internal/timeline/infinite/events/eventDateKey";
+import { eventIntersectsDate } from "#quno-internal/timeline/infinite/events/eventSegment";
 import {
   prepareEventLayers,
   rowHeightForPreparedLayers,
@@ -58,7 +58,7 @@ export class Preparation {
         dateKey,
         resources: calendars.map((calendar) => {
           const rowEvents = members.get(calendar.id)!;
-          const layers = prepareEventLayers({ events: rowEvents, settings });
+          const layers = prepareEventLayers({ events: rowEvents, settings, dateKey });
           return {
             calendarId: calendar.id,
             events: rowEvents,
@@ -94,12 +94,13 @@ export function projectBuckets({
   const sorted = [...new Set(dates)].sort();
   const groups = new Map(sorted.map((date) => [date, [] as CalendarEvent[]]));
   const projected = projectEvents({
-    events: sorted.flatMap((date) => buckets.get(date) ?? []),
+    events: [...new Map(sorted.flatMap((date) => buckets.get(date) ?? []).map((event) => [event.id, event])).values()],
     startDate: sorted[0],
     endDate: sorted[sorted.length - 1],
     calendarIds
   });
-  for (const event of projected) groups.get(eventDateKey(event) as IsoDate)?.push(event);
+  for (const event of new Map(projected.map((event) => [event.id, event])).values())
+    for (const [dateKey, events] of groups) if (eventIntersectsDate({ event, dateKey })) events.push(event);
   const output = new Map(buckets);
   for (const [date, events] of groups) {
     const previous = buckets.get(date);

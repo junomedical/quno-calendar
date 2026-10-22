@@ -222,7 +222,8 @@ test("grows vertical columns after three overlap lanes and keeps headers aligned
   expect(Math.abs(denseColumn.headerWidth - denseColumn.columnWidth)).toBeLessThanOrEqual(1);
 });
 
-test("keeps the vertical current date anchored when zoom changes", async ({ page }) => {
+test("keeps the vertical current clock anchored when zoom changes", async ({ page }) => {
+  await page.clock.setFixedTime(new Date("2026-08-12T12:00:00"));
   await page.goto("/demo/infinite-calendar");
   await page.getByTestId("view-infinite-vertical").check();
   await page.getByRole("spinbutton", { name: "Start" }).fill("8");
@@ -241,9 +242,13 @@ test("keeps the vertical current date anchored when zoom changes", async ({ page
   await setDemoZoom(page, 0.5);
   await expect(page.getByTestId("zoom-value")).toHaveText("0.50");
 
-  await expect.poll(async () => topVisibleDayDate(page)).toBe("2026-08-12");
-  const afterZoom = await topVisibleDayState(page);
-  expect(afterZoom.date).toBe("2026-08-12");
+  const marker = page.locator(".icv-now-line").first();
+  await expect(marker).toBeVisible();
+  const focusedY = (await marker.boundingBox())!.y;
+  for (const zoom of [8, 0.5]) {
+    await setDemoZoom(page, zoom);
+    await expect.poll(async () => Math.abs((await marker.boundingBox())!.y - focusedY)).toBeLessThanOrEqual(1);
+  }
 
   const viewport = page.locator(".quno-calendar-viewport");
   const viewportBox = await viewport.boundingBox();
@@ -266,9 +271,8 @@ test("keeps the vertical current date anchored when zoom changes", async ({ page
       const timelineGutter = 8;
       const startMinute = 8 * 60;
       const endMinute = 18 * 60;
-      const cadence = zoom > 6 ? 5 : 15;
       const cursorMinute = startMinute + (y - dayBox.top - dayHeaderHeight - timelineGutter) / Math.max(0.5, zoom);
-      const minute = Math.min(endMinute, Math.max(startMinute, Math.round(cursorMinute / cadence) * cadence));
+      const minute = Math.min(endMinute, Math.max(startMinute, cursorMinute));
       return {
         date: day.dataset.date ?? "",
         minute,
@@ -285,7 +289,9 @@ test("keeps the vertical current date anchored when zoom changes", async ({ page
   await page.keyboard.up("Shift");
   await expect(page.getByTestId("zoom-value")).toHaveText("0.90");
   await expect.poll(async () => (await timelineNodeNearMouse())?.date ?? null).toBe(beforeGestureZoomIn?.date);
-  await expect.poll(async () => (await timelineNodeNearMouse())?.minute ?? null).toBe(beforeGestureZoomIn?.minute);
+  await expect
+    .poll(async () => Math.abs(((await timelineNodeNearMouse())?.minute ?? 0) - beforeGestureZoomIn!.minute))
+    .toBeLessThanOrEqual(2);
   await expect
     .poll(async () => Math.abs(((await timelineNodeNearMouse())?.screenY ?? 0) - (beforeGestureZoomIn?.screenY ?? 0)))
     .toBeLessThanOrEqual(1);

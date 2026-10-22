@@ -1,0 +1,28 @@
+.article-calendar-demo--multi-day {
+  height: 700px;
+}
+.multi-day-values {
+  flex: 0 0 78px;
+  overflow: auto;
+  margin: 0;
+  padding: 0 16px 8px;
+  font-size: 12px;
+}
+.multi-day-values > div {
+  display: flex;
+  gap: 12px;
+}
+.multi-day-values dt {
+  font-weight: 600;
+}
+.multi-day-values dd {
+  margin: 0;
+}
+@media (max-width: 700px) {
+  .article-calendar-demo--multi-day {
+    height: 850px;
+  }
+  .multi-day-values > div {
+    display: block;
+  }
+}

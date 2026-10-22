@@ -20,18 +20,13 @@ const MANUAL_SCROLL_KEYS = new Set([
 
 export type PendingFocus = {
   event: CalendarEvent;
+  dateKey: IsoDate;
+  time: string;
   targetCalendarId: CalendarId;
   desiredCalendarIds: CalendarId[];
   anchor: CalendarViewportAnchor | null;
   resolve: (result: CalendarFocusResult) => void;
 };
-
-export function eventDateAndTime(event: CalendarEvent) {
-  return {
-    dateKey: event.start.slice(0, 10) as IsoDate,
-    time: event.start.slice(11, 16)
-  };
-}
 
 type FocusEffectsArgs = Pick<
   QunoInfiniteCalendarProps,
@@ -72,14 +67,14 @@ export function useCalendarFocusEffects({
     );
     if (!selectionReady) return;
 
-    const { dateKey, time } = eventDateAndTime(pendingFocus.event);
+    const { dateKey, time } = pendingFocus;
     const target = {
       eventId: pendingFocus.event.id,
       calendarId: pendingFocus.targetCalendarId,
       dateKey,
       time
     };
-    setFocusedEventTarget({ eventId: pendingFocus.event.id, calendarId: pendingFocus.targetCalendarId });
+    setFocusedEventTarget({ eventId: pendingFocus.event.id, calendarId: pendingFocus.targetCalendarId, dateKey });
     if (!viewRef.current?.isEventFullyVisible(target)) {
       if (pendingFocus.anchor) {
         viewRef.current?.restoreViewportAnchor({

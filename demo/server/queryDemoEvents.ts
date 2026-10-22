@@ -1,3 +1,4 @@
+import { overlapsEventRange } from "#quno-demo/shared/eventRange";
 import type { CalendarEvent } from "@quno/calendar/infinite-calendar";
 import type { DemoEventQuery } from "#quno-demo/showcase/demoEventQuery";
 import { demoCalendars } from "#quno-demo/showcase/demoCalendars";
@@ -43,8 +44,7 @@ export function queryDemoEvents(query: DemoEventQuery): CalendarEvent[] {
     fixtures.set(key, annual);
     if (fixtures.size > 4) fixtures.delete(fixtures.keys().next().value!);
     for (const event of annual) {
-      const date = event.start.slice(0, 10);
-      if (date >= query.startDate && date <= query.endDate && event.calendarIds?.some((id) => selected.has(id)))
+      if (overlapsEventRange(event, query) && (event.calendarIds ?? [event.calendarId]).some((id) => selected.has(id)))
         events.push(event);
     }
   }

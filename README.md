@@ -28,6 +28,7 @@ import { parseDateInput, tokenizeDateInput } from "@quno/calendar/date-parser";
 ```
 
 - **Quno/Infinite Calendar** virtualizes horizontal and vertical schedules with event loading, rendering, editing, zoom, navigation, focus, and an optional consumer-owned loading fallback.
+  Overnight and multi-day events continue on each occupied date. Dragging any portion preserves its grabbed time and full elapsed duration.
   Its handle exposes visible date keys for contextual creation and optional centered horizontal resource navigation.
   Optional synchronous `projectEvents` displays local previews after caching without refetching persisted events.
   Resource-row navigation and anchor restoration wait for committed parent layout; ordinary state updates need no forced React commit.
@@ -109,6 +110,8 @@ bounded date/resource windows. Native movement within an unchanged rendered wind
 reuses stable resource layout. See its [runtime architecture](docs/infinite-calendar/architecture.md).
 
 With Infinite Calendar zoom enabled, wheel samples with Shift held stay reserved for zoom at both limits.
+The first exact pointer time stays anchored through pauses and reversals; slider zoom focuses the current clock
+in either orientation. Touch event movement and drawing require a 350 ms hold, leaving quick swipes available for scrolling.
 
 Shift-wheel zoom accumulates 0.20 per nonzero sample and waits for each accepted DOM/scroll commit before issuing the next request.
 

@@ -22,6 +22,7 @@ import type { ViewportGeometryRegistration } from "#quno-internal/timeline/infin
 import type { CalendarFocusedEventTarget } from "#quno-internal/timeline/core/internalTypes";
 
 export type VerticalHoveredEvent = {
+  dateKey?: string;
   eventId: string;
   calendarId: CalendarId;
 } | null;
@@ -36,6 +37,7 @@ export type VerticalEventPointerDown = (args: {
   event: ReactPointerEvent<HTMLDivElement>;
   calendarEvent: CalendarEvent;
   renderedCalendarId: CalendarId;
+  renderedDateKey?: import("#quno-internal/shared/dateRangeModel").IsoDate;
 }) => void;
 
 /** Input contract for a single virtualized vertical date section. */

@@ -89,6 +89,8 @@ extends committed zoom correction to vertical date/time anchors and uniform date
 [Decision 116](./infinite-calendar/decisions.md#116---remove-zoom-detail-transparency)
 restores immediate time-label and grid-cadence changes without transparency effects.
 
+Overnight and multi-day scheduling is covered by Infinite Calendar [Decision 160](./infinite-calendar/decisions.md#160---render-daily-event-segments-and-drag-by-the-grabbed-time), with a live `/docs/infinite-calendar#multi-day-events` exhibit and an [overlap-loading recipe](./shared/usage.md#overnight-and-multi-day-events).
+
 ## Shared package records
 
 - [Architecture](./shared/architecture.md) defines public surfaces, dependency direction, framework compatibility,
@@ -182,3 +184,7 @@ The busy-schedule comparison uses repeatable shuffled 4/20/60-event days; see
 The concept’s larger **Cadence** controls and clarified Calendar introduction are recorded in
 [QTP-007](./timepicker/decisions.md#qtp-007---enlarge-concept-cadence-choices-and-shorten-their-label) and
 [Calendar Decision 158](./infinite-calendar/decisions.md#158---clarify-navigation-and-interaction-focus-in-the-concept-introduction).
+
+Infinite Calendar interaction recipes cover [touch holds and anchored zoom](./shared/usage.md#navigation-and-zoom),
+including iPad slider focus and restoring the original pointer time after zoom-limit reversals. Product rationale
+lives in Infinite Calendar Decisions 162–163.

@@ -48,7 +48,11 @@ export function useHorizontalEventHover({ disabled, setHoveredEvent }: Horizonta
       const laneHeight = rowHeight / maxLaneCount;
       const preferredLane = Math.min(maxLaneCount - 1, Math.max(0, Math.floor(y / Math.max(1, laneHeight))));
       const preferred = candidates.find((item) => item.lane === preferredLane) ?? candidates[0];
-      setHoveredEvent({ eventId: preferred.event.id, calendarId: renderedCalendarId });
+      setHoveredEvent({
+        eventId: preferred.event.id,
+        calendarId: renderedCalendarId,
+        dateKey: preferred.segment?.dateKey
+      });
     },
     [clearHoveredEvent, disabled, setHoveredEvent]
   );

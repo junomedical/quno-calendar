@@ -123,7 +123,7 @@ describe("controlled wheel input", () => {
     window.dispatchEvent(new KeyboardEvent("keyup", { key: "Shift" }));
     expect(cancel).not.toHaveBeenCalled();
   });
-  it("starts a fresh pointer anchor after an expired gesture reaches the zoom limit", async () => {
+  it("retains the starting time through pauses, pointer movement and the zoom limit", async () => {
     let now = 100;
     vi.spyOn(performance, "now").mockImplementation(() => now);
     const { wheel, flush, engine, layout, commit } = setup({ zoom: 7.85 });
@@ -138,9 +138,30 @@ describe("controlled wheel input", () => {
     act(() => wheel({ clientX: 700, deltaY: 100 }));
     await flush();
     const newAnchor = expectZoom.mock.calls.at(-1)![0].anchor;
-    expect(newAnchor.screen.x).toBeGreaterThan(oldAnchor.screen.x + 200);
-    expect(Math.abs(newAnchor.screen.x - 700)).toBeLessThanOrEqual(20);
+    expect(newAnchor).toBe(oldAnchor);
+    expect(newAnchor.screen.x).toBe(400);
   });
+  it("locks the first input even when it starts at a zoom limit", async () => {
+    const { wheel, flush, engine } = setup({ zoom: 8 });
+    const expectZoom = vi.spyOn(engine, "expectZoom");
+    wheel({ clientX: 413 });
+    wheel({ clientX: 700, deltaY: 100 });
+    await flush();
+    expect(expectZoom.mock.calls[0][0].anchor.screen.x).toBe(413);
+  });
+  it("starts a new exact pointer anchor after releasing Shift", async () => {
+    const { wheel, flush, engine, accept, commit } = setup({ zoom: 7.8 });
+    const expectZoom = vi.spyOn(engine, "expectZoom");
+    wheel({ clientX: 413 });
+    await flush();
+    accept(8);
+    commit();
+    window.dispatchEvent(new KeyboardEvent("keyup", { key: "Shift", shiftKey: false }));
+    wheel({ clientX: 707, deltaY: 100 });
+    await flush();
+    expect(expectZoom.mock.calls.at(-1)![0].anchor.screen.x).toBe(707);
+  });
+
   it("captures Shift-touch movement without requesting zoom and releases ordinary touch", () => {
     const { element, onZoomChange, unmount } = setup();
     const touch = (shiftKey: boolean) => new TouchEvent("touchmove", { shiftKey, cancelable: true });
@@ -222,6 +243,18 @@ describe("controlled wheel input", () => {
     wheel();
     await flush();
     expect(onZoomChange.mock.calls.map(([request]) => request.zoom)).toEqual([1.2, 1.4]);
+  });
+  it.each([false, true])("retains the original anchor unless cancellation is manual=%s", async (manual) => {
+    const { wheel, flush, engine } = setup();
+    wheel();
+    await flush();
+    const anchor = engine.ownership.active({ now: performance.now() })!.anchor;
+    engine.cancel({ now: performance.now(), manual });
+    wheel({ clientX: 600 });
+    await flush();
+    const next = engine.ownership.active({ now: performance.now() })!.anchor;
+    expect(next.screen.x).toBe(manual ? 600 : 400);
+    expect(next === anchor).toBe(!manual);
   });
   it.each([false, true])("cancels queued input on manual=%s takeover", async (manual) => {
     const { wheel, flush, onZoomChange, accept, commit, engine } = setup();

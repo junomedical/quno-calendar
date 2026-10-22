@@ -3,7 +3,6 @@
   min-width: 12px;
   container-name: calendar-event;
   container-type: size;
-  touch-action: none;
   cursor: default;
 }
 

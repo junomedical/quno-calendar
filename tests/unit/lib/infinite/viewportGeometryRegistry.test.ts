@@ -83,3 +83,15 @@ describe("ViewportGeometryRegistry", () => {
     expect(registry.event({ target: { eventId: "draft", calendarId: "a" }, viewportBox: viewport })).toBe(replacement);
   });
 });
+
+it("retains the committed segment after a preview with the same date/resource unmounts", () => {
+  const registry = new ViewportGeometryRegistry();
+  const committed = elementAt(20, 20),
+    preview = elementAt(40, 20);
+  const identity = { eventId: "long", calendarId: "a", dateKey: "2026-07-07" as const };
+  registry.registerEvent({ ...identity, element: committed });
+  registry.registerEvent({ ...identity, element: preview });
+  registry.registerEvent({ ...identity, element: null, previousElement: preview });
+  const viewportBox = new DOMRect(0, 0, 200, 100);
+  expect(registry.eventInstance({ target: identity, viewportBox })?.element).toBe(committed);
+});

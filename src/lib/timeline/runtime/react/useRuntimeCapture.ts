@@ -45,7 +45,7 @@ export function useRuntimeCapture({
       if (instance) {
         const bounds = instance.element.getBoundingClientRect();
         return {
-          target: { ...target, calendarId: instance.calendarId },
+          target: { ...target, calendarId: instance.calendarId, dateKey: instance.dateKey ?? target.dateKey },
           snapshot: { top: bounds.top - box.top, left: bounds.left - box.left }
         };
       }
@@ -54,7 +54,7 @@ export function useRuntimeCapture({
       const point = logical ? projectPoint({ geometry: engine.read().geometry, target: logical }) : null;
       if (!point || !logical || !registry.day({ dateKey: logical.dateKey })) return null;
       return {
-        target,
+        target: target.eventId ? { ...target, dateKey: logical.dateKey } : target,
         snapshot: {
           top: point.y - viewport.scrollTop,
           left: !target.time && !target.calendarId && !target.eventId ? 0 : point.x - viewport.scrollLeft

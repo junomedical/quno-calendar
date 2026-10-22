@@ -154,3 +154,50 @@ describe("public anchor transactions", () => {
     ).not.toBeNull();
   });
 });
+
+it.each(["horizontal", "vertical"] as const)(
+  "restores a captured later-day segment after its instance unmounts: %s",
+  (orientation) => {
+    const { result, ref, rerender } = setup(orientation);
+    rerender({
+      layout: {
+        ...initial,
+        orientation,
+        draft: {
+          id: "long-draft",
+          calendarId: "second",
+          title: "Long draft",
+          start: "2026-07-06T17:00:00",
+          end: "2026-07-08T12:00:00"
+        }
+      }
+    });
+    const element = document.createElement("div");
+    const instance = { eventId: "long-draft", calendarId: "second", dateKey: "2026-07-07" as const };
+    const before = result.current.engine.read();
+    const initialPoint = projectPoint({
+      geometry: before.geometry,
+      target: { dateKey: instance.dateKey, eventId: instance.eventId, calendarId: instance.calendarId }
+    })!;
+    element.getBoundingClientRect = () => new DOMRect(initialPoint.x - before.viewport.left, 200, 100, 30);
+    result.current.handle.registration.registerEventElement({ ...instance, element });
+    const anchor = ref.current!.captureViewportAnchor({
+      eventId: instance.eventId,
+      calendarId: instance.calendarId,
+      requireVisible: true
+    });
+    expect(anchor?.target.dateKey).toBe("2026-07-07");
+    result.current.handle.registration.registerEventElement({ ...instance, element: null, previousElement: element });
+    act(() => ref.current!.scrollToDate({ date: "2028-04-04" }));
+    expect(result.current.engine.read().geometry.dateIndex.has("2026-07-07")).toBe(false);
+    act(() => ref.current!.restoreViewportAnchor({ anchor, afterRecenter: true }));
+    const state = result.current.engine.read();
+    expect(state.owner?.anchor.target).toMatchObject(instance);
+    const point = projectPoint({
+      geometry: state.geometry,
+      target: { dateKey: instance.dateKey, eventId: instance.eventId, calendarId: instance.calendarId }
+    })!;
+    expect(point.y - state.viewport.top).toBe(anchor!.snapshot.top);
+    expect(point.x - state.viewport.left).toBe(anchor!.snapshot.left);
+  }
+);

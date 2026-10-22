@@ -24,11 +24,14 @@ export function useCalendarEdits(
   const reset = useCallback(() => {
     setDraft(null);
   }, []);
-  const retainSlot = (event: Pick<CalendarEvent, "calendarId" | "start">) => {
+  const retainSlot = (
+    event: Pick<CalendarEvent, "calendarId" | "start">,
+    dateKey?: CalendarViewportAnchorTarget["dateKey"]
+  ) => {
     if (!focusDraft) return () => {};
     const target: CalendarViewportAnchorTarget = {
       calendarId: event.calendarId,
-      dateKey: event.start.slice(0, 10) as CalendarViewportAnchorTarget["dateKey"],
+      dateKey: dateKey ?? (event.start.slice(0, 10) as CalendarViewportAnchorTarget["dateKey"]),
       time: event.start.slice(11, 16)
     };
     const anchor = ref.current?.captureViewportAnchor(target) ?? null;
@@ -56,8 +59,8 @@ export function useCalendarEdits(
     setDraft({ ...request, id: `concept-created-${++sequence.current}`, title: "", color: "#9b7cc6" });
     restore();
   };
-  const onEventActivate: QunoInfiniteCalendarProps["onEventActivate"] = ({ event }) => {
-    const restore = retainSlot(event);
+  const onEventActivate: QunoInfiniteCalendarProps["onEventActivate"] = ({ event, renderedDateKey }) => {
+    const restore = retainSlot(event, renderedDateKey);
     setEditing(true);
     setDraft(event);
     restore();

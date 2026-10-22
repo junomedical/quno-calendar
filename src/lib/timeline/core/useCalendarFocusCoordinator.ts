@@ -1,16 +1,18 @@
 import { useCallback, useRef, useState, type RefObject } from "react";
 import { eventCalendarIds } from "#quno-internal/timeline/data/calendarEvents";
-import { fromDateKey, isWeekdayExcluded } from "#quno-internal/timeline/date/dateVirtualization";
+import { firstEventSegment } from "#quno-internal/timeline/infinite/events/eventSegment";
 import type { CalendarEvent, QunoInfiniteCalendarProps } from "./types";
 import type { CalendarFocusOptions, CalendarFocusResult } from "./calendarFocusTypes";
 import type { CalendarFocusedEventTarget, CalendarViewHandle } from "./internalTypes";
-import { eventDateAndTime, useCalendarFocusEffects, type PendingFocus } from "./useCalendarFocusEffects";
+import { useCalendarFocusEffects, type PendingFocus } from "./useCalendarFocusEffects";
 
 type FocusCoordinatorArgs = Pick<
   QunoInfiniteCalendarProps,
   "calendars" | "selectedCalendarIds" | "focusRequest" | "onCalendarVisibilityRequest" | "onFocusRequestComplete"
 > & {
   excludedWeekdays: number[];
+  startHour: number;
+  endHour: number;
   viewRef: RefObject<CalendarViewHandle | null>;
 };
 
@@ -18,6 +20,8 @@ export function useCalendarFocusCoordinator({
   calendars,
   selectedCalendarIds,
   excludedWeekdays,
+  startHour,
+  endHour,
   focusRequest,
   onCalendarVisibilityRequest,
   onFocusRequestComplete,
@@ -57,10 +61,12 @@ export function useCalendarFocusCoordinator({
   const focusEvent = useCallback(
     ({ event, ...options }: { event: CalendarEvent } & CalendarFocusOptions): Promise<CalendarFocusResult> => {
       cancelActiveFocus();
-      const { dateKey, time } = eventDateAndTime(event);
-      if (isWeekdayExcluded({ date: fromDateKey({ dateKey }), excludedWeekdays })) {
+      const segment = firstEventSegment({ event, settings: { startHour, endHour, excludedWeekdays } });
+      if (!segment) {
         return Promise.resolve({ eventId: event.id, status: "unavailable" });
       }
+      const { dateKey, startMinute } = segment;
+      const time = `${String(Math.floor(startMinute / 60)).padStart(2, "0")}:${String(startMinute % 60).padStart(2, "0")}`;
       const knownCalendarIds = new Set(calendars.map((calendar) => calendar.id));
       const participantIds = eventCalendarIds(event).filter((calendarId) => knownCalendarIds.has(calendarId));
       const preferredCalendarId =
@@ -96,6 +102,8 @@ export function useCalendarFocusCoordinator({
       return new Promise<CalendarFocusResult>((resolve) => {
         const pending = {
           event,
+          dateKey,
+          time,
           targetCalendarId: preferredCalendarId,
           desiredCalendarIds,
           anchor,
@@ -111,7 +119,16 @@ export function useCalendarFocusCoordinator({
         }
       });
     },
-    [calendars, cancelActiveFocus, excludedWeekdays, onCalendarVisibilityRequest, selectedCalendarIds, viewRef]
+    [
+      calendars,
+      cancelActiveFocus,
+      excludedWeekdays,
+      startHour,
+      endHour,
+      onCalendarVisibilityRequest,
+      selectedCalendarIds,
+      viewRef
+    ]
   );
 
   useCalendarFocusEffects({

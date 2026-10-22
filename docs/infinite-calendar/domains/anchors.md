@@ -17,3 +17,12 @@ Required visible events never silently become resource slots.
 Priority: explicit restore, gesture, navigation, automatic layout correction, idle recenter. New equal-priority intents
 supersede old ones; obsolete cancellation cannot cancel a successor. Manual input cancels opted-in ownership.
 Network replies cannot claim navigation. All corrections reach the single browser commit adapter.
+
+Event registrations include segment date as well as participant identity. Multiple live shells for that instance
+remain registered independently, so unmounting a preview or fading draft cannot erase its surviving committed card.
+Captured event anchors retain the resolved segment date through unmounting, date-window changes and restoration.
+
+`ZoomInputAnchor` retains exact Shift-pointer date/time and screen coordinates independently of request expiry or
+overflow unlock. Manual input, resize, navigation, restoration, external zoom and Shift release reset it. Temporary
+native clamps do not replace it, allowing later reversal to restore the original point. External slider values share
+the current-clock anchor in both orientations; see Decision 162 for its visible/offscreen fallback rules.

@@ -118,21 +118,21 @@ Use code identifiers such as `QunoInfiniteCalendar` and `QunoDatePicker` only fo
 | Parent validation        | The parent callback that accepts or rejects moves and creates.                                                                                                   | `onEventMoveRequest`, `onEventCreateRequest` |
 | Snap interval            | The minute increment used for drag and draw interactions.                                                                                                        | `settings.snapMinutes`                       |
 | Zoom                     | Pixels-per-minute scale for the timeline axis.                                                                                                                   | `settings.zoom`                              |
-| Nearest-node zoom anchor | `Shift` + wheel behavior that keeps the rendered time-grid node nearest the mouse visually fixed while zoom changes.                                             | `onZoomChange`                               |
+| Pointer-time zoom anchor | `Shift` + wheel behavior that retains the exact first pointer time and screen coordinate through pauses and bounds.                                              | `onZoomChange`                               |
 | Viewport-fill zoom floor | A horizontal render-scale floor that lets the timeline board fill the available viewport width after sticky labels without changing the parent-owned zoom value. | `settings.zoom`                              |
 
 ## Viewport And Focus Anchors
 
-| Term                      | Meaning                                                                                                                                                                | Owner                                    |
-| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
-| Visual focus              | The semantic calendar location kept at the same viewport-relative coordinate. It is not browser DOM or keyboard focus.                                                 | Runtime policy                           |
-| Virtual-window anchor     | The normalized date around which the bounded month-before/month-after date model is built.                                                                             | Calendar engine                          |
-| Visible-position snapshot | The top visible `{ dateKey, offsetWithinDate }` captured during scrolling and used by idle recentering.                                                                | Calendar engine                          |
-| Data-layout anchor        | A one-commit grid anchor used when late events change metrics; horizontally it preserves a date header or `{ dateKey, calendarId, offsetWithinRow }`.                  | Calendar engine layout transaction       |
-| Parent viewport anchor    | An explicit event or slot geometry snapshot captured/restored through `QunoInfiniteCalendarHandle` for product-owned UI changes.                                       | Parent flow plus engine restore intent   |
-| Event focus request       | A one-shot request that reveals known participants, positions one preferred event instance, and briefly highlights it without taking DOM focus.                        | `QunoInfiniteCalendar` focus coordinator |
-| Zoom anchor               | A visible current-time marker for external zoom, its grid-center/origin fallback, or the first pointer-nearest rendered time node for a `Shift` + wheel gesture burst. | Zoom controller                          |
-| Fallback date offset      | The date-local pixel retained by a data-layout anchor in case its resource disappears before restoration.                                                              | Data-layout anchor                       |
+| Term                      | Meaning                                                                                                                                               | Owner                                    |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
+| Visual focus              | The semantic calendar location kept at the same viewport-relative coordinate. It is not browser DOM or keyboard focus.                                | Runtime policy                           |
+| Virtual-window anchor     | The normalized date around which the bounded month-before/month-after date model is built.                                                            | Calendar engine                          |
+| Visible-position snapshot | The top visible `{ dateKey, offsetWithinDate }` captured during scrolling and used by idle recentering.                                               | Calendar engine                          |
+| Data-layout anchor        | A one-commit grid anchor used when late events change metrics; horizontally it preserves a date header or `{ dateKey, calendarId, offsetWithinRow }`. | Calendar engine layout transaction       |
+| Parent viewport anchor    | An explicit event or slot geometry snapshot captured/restored through `QunoInfiniteCalendarHandle` for product-owned UI changes.                      | Parent flow plus engine restore intent   |
+| Event focus request       | A one-shot request that reveals known participants, positions one preferred event instance, and briefly highlights it without taking DOM focus.       | `QunoInfiniteCalendar` focus coordinator |
+| Zoom anchor               | A current clock and retained screen point for external zoom, its fallback, or the exact first pointer time while Shift stays held.                    | Zoom controller                          |
+| Fallback date offset      | The date-local pixel retained by a data-layout anchor in case its resource disappears before restoration.                                             | Data-layout anchor                       |
 
 ## Renderer Statuses
 
@@ -259,3 +259,13 @@ seven per side; excluded weekdays do not consume that count.
 The concept is the main demo homepage at `/`; its product slugs and chapter path segments refer to authored catalog IDs.
 `/docs` means current field guides, and `/docs/archive` means the dated pre-homepage editorial snapshot.
 Legacy `/guide/*` routes are compatibility entries for the current guides.
+
+## Timestamped event portions
+
+- **Event**: one complete timestamp range and ID, independent of the number of visible dates or participants.
+- **Daily segment**: that event's intersection with one date's displayed hours (`CalendarEventSegment`).
+- **Continuation**: an event extends before or after the visible segment, including hidden-hour clipping.
+- **Grabbed time**: the full event's elapsed-time point held under the pointer throughout a move.
+- **Overlap query**: a loader returns events intersecting the inclusive requested dates, including earlier starts.
+
+- **Touch hold**: a stationary 350 ms primary touch before Infinite Calendar movement/drawing; pre-hold swipes remain native scrolling.

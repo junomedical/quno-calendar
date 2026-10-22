@@ -593,3 +593,25 @@ Directory navigation checks retain per-tab state and canvas identity through his
 They cover all five product paths, conversion of old query links, invalid chapter fallback, current documentation
 without archive navigation, and delayed guide loading with an empty light placeholder rather than visible text.
 The existing catch-all deployment rewrite remains guarded for direct URL access.
+
+## Overnight and multi-day regressions
+
+`tests/unit/lib/runtime/multiDay.test.ts` covers half-open daily intervals, clipping, excluded weekdays,
+independent collisions/rectangles, bounded retention, edits/removal, overlapping loads and deduplicated projection.
+`tests/unit/lib/time/eventTimezone.test.ts` executes elapsed-duration and clock-placement checks in fresh UTC,
+Europe/Berlin and America/New_York processes, including 23/25-hour spans.
+`e2e/specs/multi-day.spec.ts` verifies real pointer anchors, begin/middle/end portions, resource changes,
+continuation geometry/layers, rejection and parent-controlled drafts in both orientations. Use Chromium with the
+normal suite; geometry/state assertions are required rather than screenshots alone.
+
+`tests/unit/lib/runtime/anchors.test.tsx` restores a later-day segment after its mounted instance is removed and
+navigation leaves its date window. Registry coverage also retains committed anchors after a same-instance preview
+unmounts, preventing a drag or released draft from erasing its surviving registration.
+
+Zoom focus checks retain exact fractional pointer minutes, request/limit continuity, external takeover and repeated
+slider reversals. `e2e/specs/zoom-focus.spec.ts` covers both limits, pauses and iPad-emulated current-clock focus in
+Chromium/WebKit. Dense vertical tests assert frame-by-frame event and clock geometry for wheel and slider input.
+Touch timer tests cover pending cancellation, quick taps, disposal, React event snapshots and unchanged mouse/pen
+activation. `e2e/specs/touch-hold.spec.ts` uses Chromium native touch input to require actual pre-hold scrolling and
+held drag/drawing geometry with stationary scroll offsets in both orientations; its native protocol cases skip
+other browser projects explicitly.

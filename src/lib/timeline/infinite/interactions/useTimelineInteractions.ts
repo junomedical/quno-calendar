@@ -1,6 +1,6 @@
 import { useCallback, useState, type PointerEvent as ReactPointerEvent } from "react";
 import type { CalendarHit } from "./timelineInteractionModel";
-import { minutesSinceStartOfDay } from "#quno-internal/timeline/time/time";
+import { useTimelinePointerStart } from "#quno-internal/timeline/infinite/interactions/pointer/useTimelinePointerStart";
 import type {
   ActiveEventDraft,
   CalendarEvent,
@@ -17,10 +17,10 @@ import { useTimelineDragInteraction } from "#quno-internal/timeline/infinite/int
 import { useTimelineDraftInteraction } from "#quno-internal/timeline/infinite/interactions/draft/useTimelineDraftInteraction";
 import { useTimelinePointerFrames } from "#quno-internal/timeline/infinite/interactions/pointer/useTimelinePointerFrames";
 
-export type HoveredTimelineEvent = { eventId: string; calendarId: CalendarId } | null;
+export type HoveredTimelineEvent = { eventId: string; calendarId: CalendarId; dateKey?: string } | null;
 type PointerLike = Pick<PointerEvent | ReactPointerEvent, "clientX" | "clientY">;
 
-type UseTimelineInteractionsArgs = {
+export type UseTimelineInteractionsArgs = {
   activeDraft?: ActiveEventDraft | null;
   interactionMode: NonNullable<CalendarViewComponentProps["interactionMode"]>;
   settings: QunoInfiniteCalendarSettings;
@@ -35,10 +35,11 @@ type UseTimelineInteractionsArgs = {
   applyCreatedEventToLoadedEvents: (event: CalendarEvent) => void;
 };
 
-type EventPointerDownArgs = {
+export type EventPointerDownArgs = {
   event: ReactPointerEvent<HTMLDivElement>;
   calendarEvent: CalendarEvent;
   renderedCalendarId: CalendarId;
+  renderedDateKey?: import("#quno-internal/shared/dateRangeModel").IsoDate;
 };
 
 function resolveDraftRenderState({
@@ -106,43 +107,6 @@ export function useTimelineInteractions(args: UseTimelineInteractionsArgs) {
   const { updateDragFromPoint, finishDrag, cancelDrag } = drag;
   const { updateDraftFromPoint, finishDraft, cancelDraft } = draft;
 
-  const handleGridPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (
-      !canStartDraft ||
-      args.activeDraft ||
-      (event.target as HTMLElement).closest("[data-event-id]") ||
-      !args.isTimelinePoint(event)
-    ) {
-      return;
-    }
-    const hit = args.getHit(event);
-    if (!hit) return;
-    event.preventDefault();
-    event.currentTarget.setPointerCapture(event.pointerId);
-    draft.startDraft(hit);
-    setHoveredEvent(null);
-  };
-
-  const handleEventPointerDown = ({ event, calendarEvent, renderedCalendarId }: EventPointerDownArgs) => {
-    event.stopPropagation();
-    if (args.activeDraft && !isActiveDraftEvent(calendarEvent)) return;
-    if ((args.interactionMode === "availability") !== (calendarEvent.renderLayer === "availability")) return;
-    const canInteract = isActiveDraftEvent(calendarEvent)
-      ? Boolean(args.onActiveDraftMoveRequest)
-      : Boolean(args.onEventMoveRequest || args.onEventActivate);
-    if (!canInteract) return;
-    event.preventDefault();
-    event.currentTarget.setPointerCapture(event.pointerId);
-    const pointerMinute = args.getHit(event)?.minute ?? minutesSinceStartOfDay({ value: calendarEvent.start });
-    drag.startDrag({
-      event: calendarEvent,
-      sourceCalendarId: renderedCalendarId,
-      offsetMinutes: pointerMinute - minutesSinceStartOfDay({ value: calendarEvent.start }),
-      point: event
-    });
-    setHoveredEvent(null);
-  };
-
   const updateInteraction = useCallback(
     (event: PointerLike) => {
       if (!updateDragFromPoint(event)) updateDraftFromPoint(event);
@@ -166,6 +130,14 @@ export function useTimelineInteractions(args: UseTimelineInteractionsArgs) {
     observe: drag.trackPointerMovement,
     finish: finishInteraction,
     cancel: cancelInteraction
+  });
+
+  const pointerStart = useTimelinePointerStart({
+    args,
+    drag,
+    draft,
+    clearHover: () => setHoveredEvent(null),
+    cancel: cancelFromPointer
   });
 
   useGlobalPointerContinuation({
@@ -197,8 +169,7 @@ export function useTimelineInteractions(args: UseTimelineInteractionsArgs) {
     isInteractionActive,
     canStartDraft,
     canInteractWithPersistedEvents,
-    handleGridPointerDown,
-    handleEventPointerDown,
+    ...pointerStart,
     handlePointerMove: schedulePointerMove,
     handlePointerUp: (event: ReactPointerEvent<HTMLDivElement>) => void finishFromPoint(event),
     handlePointerCancel: cancelFromPointer

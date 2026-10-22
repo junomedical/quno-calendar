@@ -172,3 +172,11 @@ Concept navigation stores product/chapter identity in path segments. `/` is the 
 serves the entry document; App and the concept navigation hook resolve the path without remounting the active
 canvas during tab/chapter navigation. Legacy query links normalize to paths. Documentation loading uses a silent
 light placeholder; archive access is by direct route rather than current navigation.
+
+Infinite Calendar alone owns daily event segments and elapsed-time drag anchors. One complete timestamped event may
+appear on several date/resource cells; neither segmentation nor overlap loading changes shared IsoDate contracts.
+See [Decision 160](../infinite-calendar/decisions.md#160---render-daily-event-segments-and-drag-by-the-grabbed-time).
+
+Infinite Calendar keeps input activation and zoom-anchor lifetimes in its own runtime; touch holds, request pacing
+and projection behavior do not extend shared date contracts or other products. See its interaction flow and
+Decisions 162–163 for product behavior. Public renderer ownership and React/Preact boundaries remain unchanged.

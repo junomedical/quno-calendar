@@ -1,74 +1,65 @@
 import type { CalendarEvent } from "#quno-internal/timeline/core/types";
 import type { IsoDate } from "#quno-internal/shared/dateRangeModel";
-import { eventDateKey } from "#quno-internal/timeline/infinite/events/eventDateKey";
+import { eventIntersectsDate } from "#quno-internal/timeline/infinite/events/eventSegment";
 
-/** Immutable bucket publication and one indexed location per event. No request or viewport ownership. */
+/** Immutable retained-date buckets reference complete events; no expansion by event duration. */
 export class EventRepository {
   private buckets = new Map<IsoDate, readonly CalendarEvent[]>();
-  private index = new Map<string, IsoDate>();
+  private index = new Map<string, CalendarEvent>();
   private access = new Map<IsoDate, number>();
   private sequence = 0;
-  private snapshot: ReadonlyMap<IsoDate, readonly CalendarEvent[]> = this.buckets;
 
-  read = () => this.snapshot;
+  read = () => this.buckets as ReadonlyMap<IsoDate, readonly CalendarEvent[]>;
   event({ eventId }: { eventId: string }): CalendarEvent | undefined {
-    const date = this.index.get(eventId);
-    return date ? this.buckets.get(date)?.find((event) => event.id === eventId) : undefined;
+    return this.index.get(eventId);
   }
 
   replace({ dates, events }: { dates: readonly IsoDate[]; events: readonly CalendarEvent[] }) {
+    const incoming = new Map(events.map((event) => [event.id, event]));
+    const refreshed = new Set(dates);
     const next = new Map(this.buckets);
-    const updated = new Map<IsoDate, Map<string, CalendarEvent>>();
-    const bucket = ({ date }: { date: IsoDate }) => {
-      let values = updated.get(date);
-      if (!values) {
-        values = new Map((next.get(date) ?? []).map((event) => [event.id, event]));
-        updated.set(date, values);
-      }
-      return values;
-    };
-    for (const date of dates) updated.set(date, new Map());
-    for (const event of new Map(events.map((event) => [event.id, event])).values()) {
-      const date = eventDateKey(event) as IsoDate;
-      const previous = this.index.get(event.id);
-      if (previous && previous !== date) bucket({ date: previous }).delete(event.id);
-      bucket({ date }).set(event.id, event);
+    for (const date of dates) if (!next.has(date)) next.set(date, []);
+    for (const [dateKey, previous] of next) {
+      const values = refreshed.has(dateKey)
+        ? []
+        : previous.flatMap((event) => {
+            const replacement = incoming.get(event.id);
+            return replacement ? (eventIntersectsDate({ event: replacement, dateKey }) ? [replacement] : []) : [event];
+          });
+      const present = new Set(values.map((event) => event.id));
+      for (const event of incoming.values())
+        if (!present.has(event.id) && eventIntersectsDate({ event, dateKey })) values.push(event);
+      next.set(dateKey, values);
     }
-    for (const [date, values] of updated) next.set(date, [...values.values()]);
     this.publish({ next });
-    this.touch({ dates: [...dates, ...events.map((event) => eventDateKey(event) as IsoDate)] });
+    this.touch({ dates });
   }
 
   commit({ event, previousEventId = event.id }: { event: CalendarEvent; previousEventId?: string }): boolean {
-    const date = eventDateKey(event) as IsoDate;
-    const previous = this.index.get(previousEventId);
-    const destinationLoaded = this.buckets.has(date);
-    if (!previous && !this.index.has(event.id) && !destinationLoaded) return false;
+    const known = this.index.has(previousEventId) || this.index.has(event.id);
+    if (!known && ![...this.buckets.keys()].some((dateKey) => eventIntersectsDate({ event, dateKey }))) return false;
     const next = new Map(this.buckets);
-    for (const key of new Set([previous, this.index.get(event.id), date])) {
-      if (!key || !next.has(key)) continue;
-      const bucket = next.get(key)!;
-      const replaced = key === date && previous === date;
-      const values = bucket.flatMap((item) =>
-        item.id === previousEventId ? (replaced ? [event] : []) : item.id === event.id ? [] : [item]
-      );
-      if (key === date && destinationLoaded && !replaced) values.push(event);
-      next.set(key, values);
+    for (const [dateKey, previous] of next) {
+      const intersects = eventIntersectsDate({ event, dateKey });
+      let replaced = false;
+      const values = previous.flatMap((item) => {
+        if (item.id !== previousEventId && item.id !== event.id) return [item];
+        if (!intersects || replaced) return [];
+        replaced = true;
+        return [event];
+      });
+      if (intersects && !replaced) values.push(event);
+      next.set(dateKey, values);
     }
     this.publish({ next });
-    this.touch({ dates: [date, ...(previous ? [previous] : [])] });
     return true;
   }
 
   remove({ eventId }: { eventId: string }): boolean {
-    const date = this.index.get(eventId);
-    if (!date) return false;
-    const next = new Map(this.buckets);
-    next.set(
-      date,
-      next.get(date)!.filter((event) => event.id !== eventId)
-    );
-    this.publish({ next });
+    if (!this.index.has(eventId)) return false;
+    this.publish({
+      next: new Map([...this.buckets].map(([date, events]) => [date, events.filter((event) => event.id !== eventId)]))
+    });
     return true;
   }
 
@@ -101,12 +92,14 @@ export class EventRepository {
   private publish({ next }: { next: Map<IsoDate, readonly CalendarEvent[]> }) {
     for (const [date, events] of next) {
       const previous = this.buckets.get(date);
-      if (previous?.length === events.length && events.every((event, index) => event === previous[index]))
-        next.set(date, previous);
-      else next.set(date, Object.freeze([...events]));
+      next.set(
+        date,
+        previous?.length === events.length && events.every((event, index) => event === previous[index])
+          ? previous
+          : Object.freeze([...events])
+      );
     }
     this.buckets = next;
-    this.index = new Map([...next].flatMap(([date, events]) => events.map((event) => [event.id, date] as const)));
-    this.snapshot = next;
+    this.index = new Map([...next.values()].flatMap((events) => events.map((event) => [event.id, event] as const)));
   }
 }

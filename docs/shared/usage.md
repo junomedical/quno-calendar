@@ -97,6 +97,67 @@ Repository example: the read-only chapter in
 [`ArticleRecipeDemos.tsx`](../../demo/guide/timeline/ArticleRecipeDemos.tsx) and the
 [integration field guide](../../demo/guide/timeline/README.md).
 
+## Overnight and multi-day events
+
+Supply full timestamp ranges; the calendar renders each visible daily portion automatically. Return overlapping
+records for the inclusive requested dates, including events starting earlier. For example, a server query should use
+`event.start < midnightAfterEndDate && event.end > midnightAtStartDate`, plus the requested resource membership.
+Compute those midnights as calendar boundaries in the same timezone used for the stored events; never assume every
+day is 24 elapsed hours. Browser-local rendering retains the existing timestamp semantics.
+
+```tsx
+import {
+  QunoInfiniteCalendar,
+  type CalendarEvent,
+  type EventRendererProps,
+  type LoadEvents
+} from "@quno/calendar/infinite-calendar";
+
+const events: CalendarEvent[] = [
+  {
+    id: "night-shift",
+    calendarId: "team",
+    title: "Night shift",
+    start: "2026-10-22T22:00:00",
+    end: "2026-10-24T02:00:00"
+  }
+];
+const loadEvents: LoadEvents = async ({ startDate, endDate, calendarIds, signal }) =>
+  api.events.overlapping({ startDate, endDate, calendarIds, signal });
+
+function ShiftCard({ event, segment, style }: EventRendererProps) {
+  return (
+    <article style={style}>
+      {segment?.continuesBefore ? "← " : ""}
+      {event.title}
+      {segment?.continuesAfter ? " →" : ""}
+    </article>
+  );
+}
+
+<QunoInfiniteCalendar
+  calendars={[{ id: "team", name: "Team" }]}
+  selectedCalendarIds={["team"]}
+  initialDateKey="2026-10-22"
+  settings={{ startHour: 0, endHour: 24 }}
+  loadEvents={loadEvents}
+  renderEvent={ShiftCard}
+  onEventMoveRequest={async (proposal) => {
+    await api.events.move(proposal);
+    return true;
+  }}
+/>;
+```
+
+`event` always retains its full timestamps; `segment` identifies the visible date and clipped minute bounds.
+The ending minute can be 1440. Grab any portion to move the complete event using that time as the pointer anchor.
+Elapsed duration stays fixed across midnight and daylight-saving changes. Moves may now extend beyond displayed
+hours; return `false` to reject a proposal. Drawing retains its existing single-day behavior.
+
+When opening an editor, use activation's `renderedDateKey` with `event.id` and `renderedCalendarId` to capture the
+clicked portion. Captured anchors retain that resolved date/resource. See the lazy live
+`/docs/infinite-calendar#multi-day-events` example for both orientations, working hours, rejected moves and controlled drafts.
+
 ## Local Event Previews
 
 Keep `loadEvents` stable while editing a draft. Use `projectEvents` to change the display after the calendar cache:
@@ -745,6 +806,10 @@ these callbacks is read-only.
 />
 ```
 
+On touch, hold still for 350 ms before dragging a card or drawing in empty space. Movement beyond eight pixels
+before the hold cancels it and scrolls normally. A quick event tap activates; an empty-grid tap creates nothing.
+Avoid adding `touch-action: none` to consumer cards when ordinary swiping should scroll. Mouse and pen remain immediate.
+
 A normal click invokes `onEventActivate`, including pointer jitter within four pixels that crosses a snap boundary.
 A move request requires movement beyond that tolerance. Dragging away and back to the original slot invokes neither
 activation nor a move request; the calendar tracks the gesture, so consumers need no pointer-movement suppression.
@@ -1114,7 +1179,15 @@ available sooner. Both paths preserve the visible date and its date-local pixel 
 `settings.excludedWeekdays` also preserves the current included date (or advances an excluded date to the next included
 date) while the bounded date sequence and dense variable row measurements are rebuilt.
 
-Horizontal slider or external prop zoom keeps a visible current-time marker stationary by default. If that marker is outside the viewport, horizontal scrolling uses the time at the center of the visible grid, while the timeline origin keeps its left edge stationary. `Shift` + wheel instead preserves the first time node nearest the pointer throughout the gesture. Both orientations commit time geometry and their scroll correction together before paint; a delayed controlled parent retains the old view until its new zoom commits. External zoom changes immediately take over the anchor. Vertical zoom also publishes final uniform date geometry and date/resource windows before paint, preserving the top date/time for slider changes. Zoom reprojects event-shell geometry without reloading events, rebuilding prepared overlap cells, or rerunning an unchanged external event renderer.
+Slider or external prop zoom in either orientation preserves the current clock at its visible screen point,
+or brings it toward the usable viewport center if offscreen. If the clock is outside displayed hours, horizontal
+zoom uses its grid-center/origin fallback and vertical zoom preserves the top day-board fraction. Successive values
+share the original anchor. Shift + wheel instead locks the exact first pointer time and screen point while Shift
+stays held, including pauses, outward limit samples and rejected requests. Native bounds may temporarily move the
+focus; reversing restores the same point when space permits. Shift release, ordinary scrolling, navigation, resize
+or external zoom takeover resets wheel focus. Both orientations commit time geometry and scroll correction before
+paint; delayed controlled parents retain the old view until acceptance. Zoom reprojects shells without reloading
+events, rebuilding overlap cells or rerunning unchanged external renderers.
 
 ## Finding The Owning Implementation
 

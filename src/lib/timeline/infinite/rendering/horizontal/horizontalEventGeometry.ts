@@ -11,13 +11,21 @@ type HorizontalEventGeometry = {
 
 export function horizontalEventGeometry({
   event,
-  settings
+  settings,
+  segment
 }: {
   event: Pick<CalendarEvent, "start" | "end">;
+  segment?: import("#quno-internal/timeline/core/types").CalendarEventSegment;
   settings: Pick<QunoInfiniteCalendarSettings, "startHour" | "endHour" | "zoom">;
 }): HorizontalEventGeometry {
-  const startX = minuteToX({ minute: minutesSinceStartOfDay({ value: event.start }), geometry: settings });
-  const endX = minuteToX({ minute: minutesSinceStartOfDay({ value: event.end }), geometry: settings });
+  const startX = minuteToX({
+    minute: segment?.startMinute ?? minutesSinceStartOfDay({ value: event.start }),
+    geometry: settings
+  });
+  const endX = minuteToX({
+    minute: segment?.endMinute ?? minutesSinceStartOfDay({ value: event.end }),
+    geometry: settings
+  });
   return {
     left: TIMELINE_LEFT_GUTTER_PX + startX,
     width: Math.max(12, endX - startX)

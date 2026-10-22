@@ -39,8 +39,16 @@ function useEventProjections({
   );
   const transient = useMemo(
     () =>
-      ({ event, preview }: { event: CalendarEvent; preview: boolean }) => {
-        const geometry = horizontalEventGeometry({ event, settings });
+      ({
+        event,
+        preview,
+        segment
+      }: {
+        event: CalendarEvent;
+        preview: boolean;
+        segment: import("#quno-internal/timeline/core/types").CalendarEventSegment;
+      }) => {
+        const geometry = horizontalEventGeometry({ event, settings, segment });
         return {
           ...geometry,
           top: preview ? 6 : 0,
@@ -173,6 +181,7 @@ export const InfiniteTimelineRow = memo(function InfiniteTimelineRow({
       <TransientLayer
         {...sharedLayerProps}
         dateKey={dateKey}
+        settings={settings}
         draftEvent={draftEvent}
         draftEventStatus={draftEventStatus}
         draftEventIsDraggable={draftEventIsDraggable}

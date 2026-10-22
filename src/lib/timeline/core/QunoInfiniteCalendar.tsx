@@ -21,6 +21,8 @@ export const QunoInfiniteCalendar = forwardRef<QunoInfiniteCalendarHandle, QunoI
       calendars: props.calendars,
       selectedCalendarIds: props.selectedCalendarIds,
       excludedWeekdays: props.settings?.excludedWeekdays ?? defaultQunoInfiniteCalendarSettings.excludedWeekdays,
+      startHour: props.settings?.startHour ?? defaultQunoInfiniteCalendarSettings.startHour,
+      endHour: props.settings?.endHour ?? defaultQunoInfiniteCalendarSettings.endHour,
       focusRequest: props.focusRequest,
       onCalendarVisibilityRequest: props.onCalendarVisibilityRequest,
       onFocusRequestComplete: props.onFocusRequestComplete,

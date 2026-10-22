@@ -7,6 +7,7 @@ import type {
   CalendarViewportAnchorTarget,
   CalendarView
 } from "@quno/calendar/infinite-calendar";
+import { overlapsEventRange } from "#quno-demo/shared/eventRange";
 import { isoDateInputValue, isoTimeInputValue } from "./draftFormUtils";
 
 export type DraftRestoreOptions = {
@@ -24,22 +25,27 @@ function eventTarget(
   event: CalendarEvent,
   calendarId?: CalendarId,
   eventId = event.id,
-  requireVisible = false
+  requireVisible = false,
+  dateKey = isoDateInputValue(event.start)
 ): CalendarViewportAnchorTarget {
   return {
     eventId,
     calendarId,
-    dateKey: isoDateInputValue(event.start),
-    time: isoTimeInputValue(event.start),
+    dateKey,
+    time: dateKey === isoDateInputValue(event.start) ? isoTimeInputValue(event.start) : "00:00",
     requireVisible
   };
 }
 
-function slotTarget(event: CalendarEvent, calendarId?: CalendarId): CalendarViewportAnchorTarget {
+function slotTarget(
+  event: CalendarEvent,
+  calendarId?: CalendarId,
+  dateKey = isoDateInputValue(event.start)
+): CalendarViewportAnchorTarget {
   return {
     calendarId: calendarId ?? event.calendarId,
-    dateKey: isoDateInputValue(event.start),
-    time: isoTimeInputValue(event.start)
+    dateKey,
+    time: dateKey === isoDateInputValue(event.start) ? isoTimeInputValue(event.start) : "00:00"
   };
 }
 
@@ -50,14 +56,22 @@ export function useExternalDraftNavigation(
   const lastSeenAnchorRef = useRef<CalendarViewportAnchor | null>(null);
 
   const captureEventAnchor = useCallback(
-    (event: CalendarEvent, calendarId?: CalendarId, requireVisible = false) =>
-      calendarRef.current?.captureViewportAnchor(eventTarget(event, calendarId, event.id, requireVisible)) ?? null,
+    (
+      event: CalendarEvent,
+      calendarId?: CalendarId,
+      requireVisible = false,
+      dateKey?: CalendarViewportAnchorTarget["dateKey"]
+    ) =>
+      calendarRef.current?.captureViewportAnchor({
+        ...eventTarget(event, calendarId, event.id, requireVisible),
+        dateKey
+      }) ?? null,
     [calendarRef]
   );
 
   const captureSlotAnchor = useCallback(
-    (event: CalendarEvent, calendarId?: CalendarId) =>
-      calendarRef.current?.captureViewportAnchor(slotTarget(event, calendarId)) ?? null,
+    (event: CalendarEvent, calendarId?: CalendarId, dateKey?: CalendarViewportAnchorTarget["dateKey"]) =>
+      calendarRef.current?.captureViewportAnchor(slotTarget(event, calendarId, dateKey)) ?? null,
     [calendarRef]
   );
 
@@ -69,7 +83,12 @@ export function useExternalDraftNavigation(
           target: eventTarget(
             event,
             options.targetCalendarId ?? anchor?.target.calendarId,
-            options.eventId ?? event.id
+            options.eventId ?? event.id,
+            false,
+            anchor?.target.dateKey &&
+              overlapsEventRange(event, { startDate: anchor.target.dateKey, endDate: anchor.target.dateKey })
+              ? anchor.target.dateKey
+              : undefined
           ),
           afterRecenter: options.afterRecenter ?? true,
           allowNavigationFallback: options.allowNavigationFallback,
@@ -85,7 +104,14 @@ export function useExternalDraftNavigation(
       calendarRef.current?.restoreViewportAnchor({
         anchor,
         ...{
-          target: slotTarget(event, options.targetCalendarId ?? anchor?.target.calendarId),
+          target: slotTarget(
+            event,
+            options.targetCalendarId ?? anchor?.target.calendarId,
+            anchor?.target.dateKey &&
+              overlapsEventRange(event, { startDate: anchor.target.dateKey, endDate: anchor.target.dateKey })
+              ? anchor.target.dateKey
+              : undefined
+          ),
           afterRecenter: options.afterRecenter ?? true,
           allowNavigationFallback: options.allowNavigationFallback,
           cancelOnManualScroll: options.cancelOnManualScroll
@@ -98,9 +124,16 @@ export function useExternalDraftNavigation(
   // Horizontal edit chrome fills the row; anchoring its compact lane would move
   // the grid on open and make a closing restore chase hover expansion.
   const captureEditorAnchor = useCallback(
-    (event: CalendarEvent, calendarId?: CalendarId, requireVisible = false) => {
-      const anchor = captureEventAnchor(event, calendarId, requireVisible);
-      return anchor && view === "infinite-horizontal" ? captureSlotAnchor(event, anchor.target.calendarId) : anchor;
+    (
+      event: CalendarEvent,
+      calendarId?: CalendarId,
+      requireVisible = false,
+      dateKey?: CalendarViewportAnchorTarget["dateKey"]
+    ) => {
+      const anchor = captureEventAnchor(event, calendarId, requireVisible, dateKey);
+      return anchor && view === "infinite-horizontal"
+        ? captureSlotAnchor(event, anchor.target.calendarId, anchor.target.dateKey)
+        : anchor;
     },
     [captureEventAnchor, captureSlotAnchor, view]
   );
