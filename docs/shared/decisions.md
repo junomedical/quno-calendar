@@ -657,3 +657,15 @@ retain their finite scenes and short tours.
   through portrait/landscape resizing, month navigation, both calendar orientations, contents, disclosure and
   fullscreen. Include a 280 px layout viewport as well as standard phone widths. Keep public component styling,
   desktop presentation and the documentation/archive body minimum unchanged.
+
+## QUNO-047 - Constrain The Inner Product Card Grid
+
+- Date: 2026-10-24
+- Status: Accepted; refines QUNO-046’s demo width containment
+- Context: The outer card could shrink while its implicit grid column retained a child’s intrinsic width.
+  Timepicker’s 360 px default then escaped a phone-sized card despite its public max-width: 100% rule.
+- Decision: Give both direct and mounted concept product cards one explicit minmax(0, 1fr) column. Resolve child
+  percentage limits against the available card content width rather than an expanding implicit track.
+- Consequences: Check actual component and choice bounds inside the card as well as page bounds. Include
+  Timepicker in mobile rotation, drawer and fullscreen checks, retain desktop component sizes and verify
+  Datepicker, Date Input and Parser card geometry. Public component styles and contracts remain unchanged.

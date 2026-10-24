@@ -206,3 +206,6 @@ Unit-test startup is independent of demo server builds, including on clean CI ch
 
 Main demo mobile containment, including narrow layout viewports and rotation, is recorded in
 [QUNO-046](./shared/decisions.md#quno-046---keep-the-main-demo-within-the-available-mobile-width).
+
+The main Timepicker demo also constrains its inner card grid. At 320 px, compact side gutters keep the clock
+inside the card and all three cadence buttons on one row without reducing their touch targets.

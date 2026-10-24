@@ -240,3 +240,6 @@ The guided main demo has no 320 px body floor. Its canvas/content and product gr
 mobile width without expanding the page; Calendar’s larger content remains scrollable inside its viewport. Keep
 product mounts/cards shrinkable, and check portrait/landscape rotation, month navigation, drawer states and
 fullscreen at 280, 320, 360, 390 and 844 px. Header tabs scroll internally when their labels do not fit.
+
+The main Timepicker demo also constrains its inner card grid. At 320 px, compact side gutters keep the clock
+inside the card and all three cadence buttons on one row without reducing their touch targets.

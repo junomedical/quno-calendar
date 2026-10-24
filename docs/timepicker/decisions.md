@@ -150,3 +150,14 @@ desktop supporting column. This product retains its public contracts and authore
 [QUNO-044](../shared/decisions.md#quno-044---keep-guide-sections-in-reading-order-with-one-instruction) refines QUNO-043 with one instruction aligned to the full description,
 demos before implementation recipes, and shared-header-only demo navigation in current guides. This product's
 public contracts, interactive examples and archive presentation remain unchanged.
+
+## QTP-008 - Fit The Concept Controls At 320 Pixels
+
+- Date: 2026-10-24
+- Status: Accepted; refines QTP-007 and adopts the inner-card grid constraint in QUNO-047
+- Decision: Use 12 px side gutters for the mobile Timepicker concept stage. At 320 px, this leaves enough card
+  content width for all three 80×44 px cadence buttons and their 8 px gaps on one row. Keep the public clock’s
+  360 px desktop width and allow its existing max-width rule to shrink it inside the constrained card.
+- Consequences: Verify root/minute/cadence bounds at 280–844 px, one-row cadence geometry and real pointer/keyboard
+  activation at 320×667, all three slot counts, off-slot value preservation, rotation and fullscreen. Desktop and
+  package styles retain their existing values.

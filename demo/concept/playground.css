@@ -226,6 +226,7 @@
 }
 .concept-product-stage > .concept-product-card {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 14px;
   padding: 18px;
   width: min(410px, 100%);
@@ -410,6 +411,7 @@
 .concept-product-mount > .concept-product-card {
   min-width: 0;
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 14px;
   padding: 18px;
   width: 100%;

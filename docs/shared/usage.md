@@ -1401,3 +1401,6 @@ The dedicated Vitest configuration resolves source imports without loading the d
 The main demo’s product canvas and bottom drawer fit the available mobile layout width, including widths below
 320 px. Rotate the phone, open month navigation, switch Calendar orientation or enter fullscreen without widening
 the page. Swipe the header’s product menu horizontally when its labels do not all fit.
+
+The main Timepicker demo also constrains its inner card grid. At 320 px, compact side gutters keep the clock
+inside the card and all three cadence buttons on one row without reducing their touch targets.
