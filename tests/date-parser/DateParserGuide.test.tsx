@@ -14,9 +14,10 @@ describe("date parser field guide", () => {
       "href",
       "#preferred-date-order"
     );
-    expect(screen.getAllByText(/^Try it$/)).toHaveLength(9);
+    expect(screen.getAllByText(/^Try it$/)).toHaveLength(8);
     expect(screen.getAllByText(/^Implementation/)).toHaveLength(8);
     const production = document.querySelector<HTMLElement>('[data-story-topic="parser-production"]') as HTMLElement;
+    expect(within(production).queryByText(/^Try it$/)).not.toBeInTheDocument();
     expect(within(production).queryByText(/^Implementation/)).not.toBeInTheDocument();
     expect(within(production).queryByText("Import Date Parser")).not.toBeInTheDocument();
   });

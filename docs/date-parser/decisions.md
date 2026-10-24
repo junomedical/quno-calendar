@@ -270,3 +270,8 @@ desktop supporting column. This product retains its public contracts and authore
 [QUNO-044](../shared/decisions.md#quno-044---keep-guide-sections-in-reading-order-with-one-instruction) refines QUNO-043 with one instruction aligned to the full description,
 demos before implementation recipes, and shared-header-only demo navigation in current guides. This product's
 public contracts, interactive examples and archive presentation remain unchanged.
+
+## Shared statistics presentation — 2026-10-24
+
+[QUNO-048](../shared/decisions.md#quno-048---keep-statistics-free-of-instructions-and-list-actual-dependencies)
+removes Try it notes from static statistics blocks and lists only actual dependencies, omitting an empty row.

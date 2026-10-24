@@ -669,3 +669,14 @@ retain their finite scenes and short tours.
 - Consequences: Check actual component and choice bounds inside the card as well as page bounds. Include
   Timepicker in mobile rotation, drawer and fullscreen checks, retain desktop component sizes and verify
   Datepicker, Date Input and Parser card geometry. Public component styles and contracts remain unchanged.
+
+## QUNO-048 - Keep Statistics Free Of Instructions And List Actual Dependencies
+
+- Date: 2026-10-24
+- Status: Accepted; refines QUNO-004, QUNO-009 and QUNO-044
+- Decision: Omit Try it notes from every current guide’s static production statistics section. Keep instructions
+  on interactive examples. Represent dependencies as actual package names: React UI profiles list `react` and
+  `react-dom` peers; the headless parser omits the Dependencies row because its list is empty. Keep Preact in
+  Compatibility and retain the separate payload, stylesheet and runtime facts.
+- Consequences: Verify all five statistics sections on desktop and phone for absent Try it notes, exact dependency
+  names, an omitted empty row and contained description/statistics geometry. Public package behavior is unchanged.

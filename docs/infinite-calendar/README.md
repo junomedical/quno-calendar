@@ -311,7 +311,7 @@ Current documentation shares the demo's left-aligned header, follows browser lig
 places supporting notes on the right on desktop. The Demo link returns to this product's concept; smaller
 screens stack the notes. See [QUNO-043](../shared/decisions.md#quno-043---share-left-aligned-navigation-and-system-themed-documentation).
 
-Sections keep one Try it note bottom-aligned with the full desktop description, then show the demo followed by
+Interactive sections keep one Try it note bottom-aligned with the full desktop description, then show the demo followed by
 Implementation recipes. Extra demo-link panels and per-section links are removed; return through Demo in the
 shared header. See [QUNO-044](../shared/decisions.md#quno-044---keep-guide-sections-in-reading-order-with-one-instruction).
 
@@ -328,3 +328,6 @@ scrolls within its header when necessary. See [QUNO-046](../shared/decisions.md#
 Layout changes flush captured native scroll observations rather than rereading a potentially superseded DOM
 position. This preserves the engine’s semantic date through row changes and idle date-window recentering.
 See [Decision 166](./decisions.md#166---ignore-uncommitted-dom-positions-during-layout-changes).
+
+The guide’s statistics block has no Try it note. Its Dependencies row lists the `react` and `react-dom` peers.
+See [QUNO-048](../shared/decisions.md#quno-048---keep-statistics-free-of-instructions-and-list-actual-dependencies).

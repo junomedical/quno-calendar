@@ -81,7 +81,6 @@ export function TimePickerFieldGuide() {
             own date and navigation behavior.
           </p>
         }
-        instruction="Copy the first recipe, or use Demo in the shared header to return to the live playground."
       >
         <FieldGuideProduction profile={timepickerProduction} />
       </FieldGuideFeature>

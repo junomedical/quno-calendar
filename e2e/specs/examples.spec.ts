@@ -341,29 +341,54 @@ test("editorial CSS-native exhibit keeps stable chrome browser-positioned", asyn
     .toBeLessThanOrEqual(1);
 });
 
-test("all five guides separate exact payloads from runtime contracts", async ({ page }) => {
-  const guides = [
-    ["infinite-calendar", "33.07 KiB gzip", "1.97 KiB gzip", "@quno/calendar/infinite-calendar"],
-    ["datepicker", "12.46 KiB gzip", "3.36 KiB gzip", "@quno/calendar/datepicker"],
-    ["date-input", "9.64 KiB gzip", "0.58 KiB gzip", "@quno/calendar/date-input"],
-    ["timepicker", "1.59 KiB gzip", "0.78 KiB gzip", "@quno/calendar/timepicker"],
-    ["date-parser", "6.03 KiB gzip", "No stylesheet", "@quno/calendar/date-parser"]
-  ] as const;
+for (const width of [1440, 390])
+  test(`all five guides separate exact payloads from runtime contracts at ${width}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 900 });
+    const guides = [
+      ["infinite-calendar", "33.07 KiB gzip", "1.97 KiB gzip", "@quno/calendar/infinite-calendar"],
+      ["datepicker", "12.46 KiB gzip", "3.36 KiB gzip", "@quno/calendar/datepicker"],
+      ["date-input", "9.64 KiB gzip", "0.58 KiB gzip", "@quno/calendar/date-input"],
+      ["timepicker", "1.59 KiB gzip", "0.78 KiB gzip", "@quno/calendar/timepicker"],
+      ["date-parser", "6.03 KiB gzip", "No stylesheet", "@quno/calendar/date-parser"]
+    ] as const;
 
-  for (const [route, javascript, styles, entrypoint] of guides) {
-    await page.goto(`/guide/${route}`);
-    const production = page.locator(".field-guide-production");
-    await production.scrollIntoViewIfNeeded();
-    await expect(production.getByText(javascript, { exact: true })).toBeVisible();
-    await expect(production.getByText(styles, { exact: true })).toBeVisible();
-    await expect(production.getByText(entrypoint, { exact: true })).toBeVisible();
-    await expect(production.getByText("Public API at a glance", { exact: true })).toHaveCount(0);
-    await expect(production).not.toContainText("Total package");
-    await expect(production).toContainText(
-      route === "date-parser" ? "no CSS artifact or combined total" : "JavaScript and CSS are separate imports"
-    );
-  }
-});
+    for (const [route, javascript, styles, entrypoint] of guides) {
+      await page.goto(`/guide/${route}`);
+      const production = page.locator(".field-guide-production");
+      await production.scrollIntoViewIfNeeded();
+      await expect(production.getByText(javascript, { exact: true })).toBeVisible();
+      await expect(production.getByText(styles, { exact: true })).toBeVisible();
+      await expect(production.getByText(entrypoint, { exact: true })).toBeVisible();
+      await expect(production.getByText("Public API at a glance", { exact: true })).toHaveCount(0);
+      await expect(production).not.toContainText("Total package");
+      const section = production.locator("xpath=ancestor::section[1]");
+      await expect(section.getByText(/^Try it$/)).toHaveCount(0);
+      const dependencies = production.locator("dt").filter({ hasText: /^Dependencies$/ });
+      if (route === "date-parser") {
+        await expect(dependencies).toHaveCount(0);
+      } else {
+        await expect(dependencies.locator("..").locator("dd code")).toHaveText(["react", "react-dom"]);
+      }
+      const geometry = await production.evaluate((node) => {
+        const section = node.closest("section")!;
+        const box = node.getBoundingClientRect();
+        const description = section.querySelector(".field-guide__description")?.getBoundingClientRect();
+        return {
+          right: box.right,
+          scroll: node.scrollWidth,
+          width: node.clientWidth,
+          descriptionRight: description?.right ?? box.right,
+          sectionRight: section.getBoundingClientRect().right
+        };
+      });
+      expect(geometry.right).toBeLessThanOrEqual(width);
+      expect(geometry.scroll).toBeLessThanOrEqual(geometry.width);
+      expect(geometry.descriptionRight).toBeLessThanOrEqual(geometry.sectionRight);
+      await expect(production).toContainText(
+        route === "date-parser" ? "no CSS artifact or combined total" : "JavaScript and CSS are separate imports"
+      );
+    }
+  });
 
 test("editorial current-time marker provides a shared reference and can be restored", async ({ page }) => {
   await page.goto("/guide");

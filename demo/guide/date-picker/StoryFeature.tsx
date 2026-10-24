@@ -7,7 +7,7 @@ type StoryFeatureProps = {
   kicker: string;
   title: string;
   copy: ReactNode;
-  instruction: ReactNode;
+  instruction?: ReactNode;
   howTo?: ReactNode;
   subsection?: boolean;
   children: ReactNode;

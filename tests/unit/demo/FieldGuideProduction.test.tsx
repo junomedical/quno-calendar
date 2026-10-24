@@ -27,6 +27,13 @@ describe("field guide production facts", () => {
       })
     ).toBeInTheDocument();
     expect(within(contract).getByText(profile.entrypoint, { exact: true })).toBeInTheDocument();
+    if (profile === dateParserProduction) {
+      expect(within(contract).queryByText("Dependencies", { exact: true })).not.toBeInTheDocument();
+    } else {
+      expect(within(contract).getByText("Dependencies", { exact: true })).toBeInTheDocument();
+      expect(within(contract).getByText("react", { exact: true })).toBeInTheDocument();
+      expect(within(contract).getByText("react-dom", { exact: true })).toBeInTheDocument();
+    }
     expect(screen.queryByText("Public API at a glance")).not.toBeInTheDocument();
     expect(screen.queryByText(/Total package/)).not.toBeInTheDocument();
     unmount();

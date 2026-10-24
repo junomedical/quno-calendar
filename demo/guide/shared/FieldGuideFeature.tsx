@@ -8,7 +8,7 @@ type FieldGuideFeatureProps = {
   kicker: string;
   title: string;
   copy: ReactNode;
-  instruction: ReactNode;
+  instruction?: ReactNode;
   implementation?: ReactNode;
   subsection?: boolean;
   children: ReactNode;

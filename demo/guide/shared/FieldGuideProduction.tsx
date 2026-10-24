@@ -45,10 +45,16 @@ export function FieldGuideProduction({ profile, anchorIds = [], testId }: Props)
           <dt>Compatibility</dt>
           <dd>{profile.compatibility}</dd>
         </div>
-        <div>
-          <dt>Dependencies</dt>
-          <dd>{profile.dependencies}</dd>
-        </div>
+        {profile.dependencies.length > 0 && (
+          <div>
+            <dt>Dependencies</dt>
+            <dd>
+              {profile.dependencies.map((dependency) => (
+                <code key={dependency}>{dependency}</code>
+              ))}
+            </dd>
+          </div>
+        )}
       </dl>
       <p className="field-guide-production__note">
         Measured from the production package build with maximum gzip compression, before consumer tree-shaking.

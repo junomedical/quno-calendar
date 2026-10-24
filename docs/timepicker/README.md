@@ -103,3 +103,6 @@ The main Timepicker demo fits a 320 px phone: its inner card grid can shrink the
 keep all three cadence controls on one row with 80×44 px targets. Minute choices remain inside the clock for every
 cadence. See [QTP-008](./decisions.md#qtp-008---fit-the-concept-controls-at-320-pixels) and
 [QUNO-047](../shared/decisions.md#quno-047---constrain-the-inner-product-card-grid).
+
+The guide’s statistics block has no Try it note. Its Dependencies row lists the `react` and `react-dom` peers.
+See [QUNO-048](../shared/decisions.md#quno-048---keep-statistics-free-of-instructions-and-list-actual-dependencies).

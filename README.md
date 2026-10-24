@@ -153,8 +153,9 @@ Demo and current documentation share a left-aligned product header and follow th
 In documentation, **Demo** returns to the matching product. Wide guides place supporting notes on the right;
 smaller screens keep them in reading order.
 
-Guide sections pair the complete description with one bottom-aligned Try it note on desktop, then show the live
-example and its Implementation recipes. Use Demo in the shared header to return to the playground.
+Interactive guide sections pair the complete description with one bottom-aligned Try it note on desktop, then show
+the live example and its Implementation recipes. Statistics blocks have no Try it note; dependencies list actual
+package names and omit the row when empty. Use Demo in the shared header to return to the playground.
 
 The main demo keeps its canvas, product card and bottom drawer within the available mobile width, including narrow
 layout viewports below 320 px. Rotation, month navigation and fullscreen retain those bounds; the product menu
