@@ -630,3 +630,7 @@ Section-order browser checks inspect every current guide at desktop and phone wi
 note per section, matching note/complete-copy bottom edges on desktop, notes above examples, and implementations
 after examples in both DOM order and measured geometry. Check absent interaction-link panels and per-section
 Watch demo links, retained header navigation, multi-paragraph Calendar descriptions and actual lazy demo mounting.
+
+The busy-schedule exhibit’s typography checks cover 1440 px and 390 px layouts in both browser appearances.
+Across Quiet/Busy/Packed, require compact single-line dates, normal demo line spacing, text bounds inside each
+header, vertical fit and retained calendar height.

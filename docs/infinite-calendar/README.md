@@ -314,3 +314,6 @@ screens stack the notes. See [QUNO-043](../shared/decisions.md#quno-043---share-
 Sections keep one Try it note bottom-aligned with the full desktop description, then show the demo followed by
 Implementation recipes. Extra demo-link panels and per-section links are removed; return through Demo in the
 shared header. See [QUNO-044](../shared/decisions.md#quno-044---keep-guide-sections-in-reading-order-with-one-instruction).
+
+The busy-schedule guide isolates its typography from the article: dates stay compact on one line inside their
+header at every density. Long labels use ellipsis; the phone layout retains smaller date text. See Decision 165.

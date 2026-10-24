@@ -2144,3 +2144,16 @@ desktop supporting column. This product retains its public contracts and authore
 [QUNO-044](../shared/decisions.md#quno-044---keep-guide-sections-in-reading-order-with-one-instruction) refines QUNO-043 with one instruction aligned to the full description,
 demos before implementation recipes, and shared-header-only demo navigation in current guides. This product's
 public contracts, interactive examples and archive presentation remain unchanged.
+
+## 165 - Isolate Density Guide Typography From Editorial Text
+
+Date: 2026-10-24
+Status: Accepted; extends Decision 156’s embedded presentation boundary
+
+Give the busy-schedule exhibit its own 16 px base and normal line height rather than inheriting the article’s
+20 px body and 1.72 line spacing. Match other guide calendars with compact 13 px single-line date labels, retaining
+the existing 9.6 px phone treatment. Constrain overflow with ellipsis so long dates remain inside their header.
+
+Scope the reset and label styling to this exhibit. Verify text bounds, computed size/line height, no wrapping or
+vertical clipping, and all three density choices on desktop/phone under light/dark browser preferences. Preserve
+the 560 px exhibit, its light calendar palette, responsive labels and public component styles.

@@ -85,3 +85,7 @@ Its small segment adapter reuses ArticleEventCard, including availability and in
 clipped clocks and continuation arrows. Callbacks retain complete event timestamps.
 
 The editing exhibit explains touch hold activation; the zoom exhibit describes current-clock slider focus and exact pointer-time reversal. Both continue to use the public calendar entry point and existing controls.
+
+The embedded density exhibit owns its font size and line height in `densityDemo.css`, preventing article body
+styles from enlarging or wrapping dates. Date labels match the compact guide presentation, retain smaller phone
+text, and clip long lines with ellipsis within their header.

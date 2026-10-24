@@ -4,6 +4,13 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+- Fix oversized, wrapping dates in Keep busy schedules fast by isolating the embedded calendar’s typography from
+  article body styles. Use compact single-line dates with ellipsis and retain the smaller phone labels.
+  Verification: all 723 unit tests and 12 affected Chromium checks pass, covering date text bounds, computed
+  typography and all density choices on desktop/phone in light/dark browser modes. Formatting, architecture,
+  types, lint, Preact/React 19 compatibility, demo build, package verification, size reporting and pack dry-run pass.
+  Published library sizes are unchanged; no unresolved verification blocker remains.
+
 - Start the Datepicker guide’s Six weeks, every month example without a selected period. Keep its six-week frame,
   month navigation and interactive selection. Other examples and public defaults retain their existing values.
   Verification: all 723 unit tests and five affected Chromium checks pass, including empty initial selection,

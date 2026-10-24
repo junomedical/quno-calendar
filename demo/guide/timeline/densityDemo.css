@@ -1,0 +1,13 @@
+.density-guide-demo {
+  font-size: 16px;
+  line-height: normal;
+}
+.density-guide-demo .quno-calendar-date-label {
+  min-width: 0;
+  padding-inline: 10px;
+  overflow: hidden;
+  font-size: 13px;
+  line-height: 1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
