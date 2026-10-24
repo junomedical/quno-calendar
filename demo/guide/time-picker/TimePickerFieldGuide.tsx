@@ -10,7 +10,7 @@ export function TimePickerFieldGuide() {
       product="Quno/Timepicker"
       title="Choose a time, at your own pace."
       intro={<p>Keep hours in view while choosing a minute. Use the clock on its own or beside a date control.</p>}
-      demoHref="/demo/timepicker"
+
       contents={[
         ["#time-selection", "01", "Choose a clock"],
         ["#ownership", "02", "Own the value and presentation"],
@@ -81,7 +81,7 @@ export function TimePickerFieldGuide() {
             own date and navigation behavior.
           </p>
         }
-        instruction="Copy the first recipe or open the focused demo from the guide header."
+        instruction="Copy the first recipe, or use Demo in the shared header to return to the live playground."
       >
         <FieldGuideProduction profile={timepickerProduction} />
       </FieldGuideFeature>

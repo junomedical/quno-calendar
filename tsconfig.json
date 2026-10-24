@@ -39,6 +39,7 @@
     "e2e",
     "vite",
     "vite.config.ts",
+    "vitest.config.ts",
     "vite.lib.config.ts",
     "playwright.config.ts"
   ]

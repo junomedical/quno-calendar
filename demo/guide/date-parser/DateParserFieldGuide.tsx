@@ -43,7 +43,7 @@ export function DateParserFieldGuide() {
       intro={
         <p>Turn familiar formats, relative phrases, and multilingual ranges into one timezone-free value model.</p>
       }
-      demoHref="/demo/date-parser"
+
       contents={contents}
       meta={["Interactive examples", "Copyable recipes", "Headless + SSR-safe"]}
     >

@@ -24,35 +24,7 @@
   outline: 3px solid #8d71b9;
   outline-offset: 4px;
 }
-.concept-nav {
-  height: 88px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  padding: 0 4%;
-  border-bottom: 1px solid #e9e5ef;
-}
-.concept-nav nav {
-  display: flex;
-  padding: 5px;
-  border: 1px solid #e4deec;
-  border-radius: 30px;
-  gap: 3px;
-}
-.concept-nav nav button {
-  border: 0;
-  background: transparent;
-  color: #756d82;
-  border-radius: 24px;
-  padding: 10px 17px;
-  font-size: 12px;
-}
-.concept-nav nav button[aria-pressed="true"] {
-  color: #fff;
-  background: #393046;
-}
-.concept-docs,
+
 .concept-intro a {
   display: inline-flex;
   align-items: center;
@@ -309,22 +281,6 @@
   height: calc(100dvh - 280px);
 }
 @media (max-width: 850px) {
-  .concept-nav {
-    height: auto;
-    padding: 15px 5%;
-    flex-wrap: wrap;
-    gap: 12px;
-  }
-  .concept-nav nav {
-    order: 3;
-    width: 100%;
-    overflow-x: auto;
-  }
-  .concept-nav nav button {
-    flex: 1;
-    white-space: nowrap;
-    padding: 9px 10px;
-  }
   .concept-intro {
     width: 72%;
     padding-left: 6%;

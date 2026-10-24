@@ -173,7 +173,7 @@ Concept navigation stores product/chapter identity in path segments. `/` is the 
 `/calendar/zoom` and `/datepicker/paint` are examples of chapter routes. The existing catch-all server rewrite
 serves the entry document; App and the concept navigation hook resolve the path without remounting the active
 canvas during tab/chapter navigation. Legacy query links normalize to paths. Documentation loading uses a silent
-light placeholder; archive access is by direct route rather than current navigation.
+browser-themed placeholder; archive access is by direct route rather than current navigation.
 
 Infinite Calendar alone owns daily event segments and elapsed-time drag anchors. One complete timestamped event may
 appear on several date/resource cells; neither segmentation nor overlap loading changes shared IsoDate contracts.
@@ -182,3 +182,18 @@ See [Decision 160](../infinite-calendar/decisions.md#160---render-daily-event-se
 Infinite Calendar keeps input activation and zoom-anchor lifetimes in its own runtime; touch holds, request pacing
 and projection behavior do not extend shared date contracts or other products. See its interaction flow and
 Decisions 162–163 for product behavior. Public renderer ownership and React/Preact boundaries remain unchanged.
+
+Current documentation uses `demo/app/DocumentationShell` around lazy product guides and the index. Its shared
+`SiteHeader` also serves the concept, while guide layout and appearance remain in `demo/guide/shared`. The header
+stays outside the guide scroller; browser appearance applies to editorial surfaces and loading placeholders.
+Authored live examples retain their explicit palettes, and archive sources remain independent.
+
+`FieldGuideDescription` groups complete narrative content and one optional instruction in a shared row. Desktop
+notes align to the narrative's bottom edge; mobile notes follow it in DOM order. Calendar's editorial section
+renderer groups description, instructions, demo breakouts and implementation blocks in that order. Current guides
+use the shared header for demo navigation and render no chapter-link panel or per-section demo links.
+
+Vite and Vitest share source resolution through `vite/projectAliases.ts`. Vitest owns a separate configuration
+that never loads the demo API middleware or requires its generated service bundle. Vite retains that middleware
+for development/preview; the existing dev and deployment commands prepare the service. This keeps test startup
+independent from build order without changing native deployed imports.

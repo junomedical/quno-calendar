@@ -1,0 +1,88 @@
+.documentation-shell .calendar-article {
+  --article-ink: var(--guide-ink);
+  --article-muted: var(--guide-muted);
+  --article-line: var(--guide-line);
+  --article-paper: var(--guide-paper);
+  --article-green: var(--guide-accent);
+  --article-green-dark: var(--guide-accent-dark);
+}
+.documentation-shell
+  :is(
+    .field-guide__intro,
+    .field-guide__toc a,
+    .project-home__intro,
+    .project-home__card p,
+    .project-home__principle p,
+    .project-home__created-by p
+  ) {
+  color: var(--guide-muted);
+}
+.documentation-shell
+  :is(.field-guide__links a, .field-guide__try, .field-guide__recipe button, .calendar-article__callout) {
+  color: var(--guide-accent-dark);
+  background: var(--guide-panel);
+  border-color: var(--guide-line);
+}
+.documentation-shell :is(.project-home__card, .field-guide-production dl > div) {
+  background: var(--guide-surface);
+  border-color: var(--guide-line);
+}
+.documentation-shell
+  :is(
+    .project-home__eyebrow,
+    .project-home__number,
+    .project-home__principle > span,
+    .project-home__card strong,
+    .project-home__created-by a,
+    .project-home__intro a
+  ) {
+  color: var(--guide-accent-dark);
+}
+.documentation-shell .project-home__created-by strong {
+  color: var(--guide-ink);
+}
+.documentation-shell :is(.project-home__principles, .project-home__created-by, .field-guide__toc li) {
+  border-color: var(--guide-line);
+}
+.documentation-shell .field-guide-production dd {
+  color: var(--guide-muted);
+}
+.documentation-shell .calendar-article__section .field-guide__copy > p code {
+  color: var(--guide-accent-dark);
+  background: var(--guide-panel);
+}
+/* Authored live examples keep their own palettes inside the system-themed reading surface. */
+.documentation-shell :is(.field-guide__example, .calendar-article__breakout, .story__comparison, .story__idea-grid) {
+  color-scheme: light;
+  color: #252823;
+  --guide-ink: #252823;
+  --guide-muted: #687069;
+  --guide-line: #d9ddd6;
+  --guide-accent: #246b5d;
+  --guide-accent-dark: #174c42;
+  --guide-surface: #fffefa;
+}
+.documentation-shell .story__idea-grid article {
+  color: #252823;
+}
+.documentation-shell .field-guide__example {
+  padding: 20px;
+  border: 1px solid #d9ddd6;
+  border-radius: 16px;
+  background: #fffefa;
+}
+.documentation-shell .calendar-article__breakout {
+  --article-ink: #252823;
+  --article-muted: #687069;
+  --article-line: #d9ddd6;
+  --article-paper: #fbfaf6;
+  --article-green: #246b5d;
+  --article-green-dark: #174c42;
+}
+.documentation-shell .article-performance-range article {
+  background: var(--guide-surface);
+  border-color: var(--guide-line);
+}
+.documentation-shell .calendar-article .article-performance-range :is(p, span) {
+  color: var(--guide-muted);
+}

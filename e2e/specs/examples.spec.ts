@@ -45,7 +45,7 @@ test("all five field guides share editorial structure and theme", async ({ page 
     await page.goto(`/guide/${route}`);
     const guide = page.locator(".field-guide");
     await expect(guide.getByRole("link", { name: "All components" })).toHaveAttribute("href", "/docs");
-    await expect(guide.getByRole("link", { name: /^Demo/ })).toBeVisible();
+    await expect(page.locator(".site-header").getByRole("link", { name: "Demo", exact: true })).toBeVisible();
     await expect(guide.getByRole("navigation", { name: "Table of contents" })).toBeVisible();
     await expect(guide.getByText(/^Try it$/).first()).toBeVisible();
     await expect(guide.getByText(/^Implementation/).first()).toBeVisible();
@@ -120,7 +120,7 @@ test("project home keeps its sections, routes, and responsive layout", async ({ 
     await page.goto(guideHref);
     const guideLinks = page.locator(".field-guide__links");
     await expect(guideLinks.locator('a[href="/docs"]')).toHaveCount(1);
-    await guideLinks.getByRole("link", { name: /^Demo/ }).click();
+    await page.locator(".site-header").getByRole("link", { name: "Demo", exact: true }).click();
     await expect(page.locator(".concept")).toHaveAttribute("data-product", product);
     await expect(page).toHaveURL(
       new RegExp(product === "infinite-calendar" ? "/$" : `/${product === "date-parser" ? "parser" : product}$`)

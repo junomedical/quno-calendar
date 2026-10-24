@@ -103,6 +103,8 @@ npm run test:compat
 npm run test:compat:react19
 ```
 
+`npm test` and `npm run test:watch` use an independent test configuration and need no generated demo or library assets.
+
 Vercel builds the demo directly from a clean checkout with `npm run build:demo`; no package build is required first.
 `npm run dev` also prepares the server query bundle before starting Vite. See the
 [deployment recipe](./docs/shared/usage.md#demo-range-query-endpoint) for the server boundary.
@@ -146,3 +148,10 @@ opening and external offscreen selections retain automatic reveal.
 
 Concept backgrounds follow the computer's light/dark preference, while explainers and non-calendar controls stay
 light on bright panels. Calendar defaults follow the system palette, and demo zoom limits track its viewport.
+
+Demo and current documentation share a left-aligned product header and follow the browser's light/dark setting.
+In documentation, **Demo** returns to the matching product. Wide guides place supporting notes on the right;
+smaller screens keep them in reading order.
+
+Guide sections pair the complete description with one bottom-aligned Try it note on desktop, then show the live
+example and its Implementation recipes. Use Demo in the shared header to return to the playground.

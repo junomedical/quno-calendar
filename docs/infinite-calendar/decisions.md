@@ -2133,3 +2133,33 @@ effect after restarting the development server. Keep the server bundle outside b
 files, retain atomic publication for concurrent builders, and add no prerequisite full-library build. Test both
 build commands in an isolated checkout without `dist`, then execute the built service through native Node imports
 in two timezones. No public component, loader, event or package export contract changes.
+
+## Shared documentation presentation — 2026-10-24
+
+[QUNO-043](../shared/decisions.md#quno-043---share-left-aligned-navigation-and-system-themed-documentation) owns the shared header, browser-driven editorial appearance and
+desktop supporting column. This product retains its public contracts and authored interactive examples.
+
+## Shared section reading order — 2026-10-24
+
+[QUNO-044](../shared/decisions.md#quno-044---keep-guide-sections-in-reading-order-with-one-instruction) refines QUNO-043 with one instruction aligned to the full description,
+demos before implementation recipes, and shared-header-only demo navigation in current guides. This product's
+public contracts, interactive examples and archive presentation remain unchanged.
+
+## 165 - Isolate Density Guide Typography From Editorial Text
+
+Date: 2026-10-24
+Status: Accepted; extends Decision 156’s embedded presentation boundary
+
+Give the busy-schedule exhibit its own 16 px base and normal line height rather than inheriting the article’s
+20 px body and 1.72 line spacing. Match other guide calendars with compact 13 px single-line date labels, retaining
+the existing 9.6 px phone treatment. Constrain overflow with ellipsis so long dates remain inside their header.
+
+Scope the reset and label styling to this exhibit. Verify text bounds, computed size/line height, no wrapping or
+vertical clipping, and all three density choices on desktop/phone under light/dark browser preferences. Preserve
+the 560 px exhibit, its light calendar palette, responsive labels and public component styles.
+
+## Shared clean-test startup — 2026-10-24
+
+[QUNO-045](../shared/decisions.md#quno-045---keep-test-startup-independent-of-demo-server-builds) extends the
+verification around Decision 164 with a dedicated Vitest configuration. API tests resolve the query service from
+source without loading the demo middleware or requiring generated assets. Deployed native imports stay unchanged.

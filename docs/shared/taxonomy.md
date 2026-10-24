@@ -269,3 +269,7 @@ Legacy `/guide/*` routes are compatibility entries for the current guides.
 - **Overlap query**: a loader returns events intersecting the inclusive requested dates, including earlier starts.
 
 - **Touch hold**: a stationary 350 ms primary touch before Infinite Calendar movement/drawing; pre-hold swipes remain native scrolling.
+
+A **documentation supporting column** holds one bottom-aligned Try it note per complete section description beside the left-aligned reading
+column at desktop widths. It stacks into reading order below that breakpoint. The **shared site header** owns
+product tabs and the Documentation/Demo destination link across the concept and current documentation.

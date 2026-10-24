@@ -13,6 +13,7 @@ import { conceptPaths } from "#quno-demo/concept/useConceptNavigation";
 import { DemoConcept } from "#quno-demo/concept/DemoConcept";
 import { CurrentDocs } from "#quno-demo/guide/CurrentDocs";
 import { ArchiveDocs } from "#quno-demo/archive/ArchiveDocs";
+import { DocumentationShell } from "./DocumentationShell";
 import { ProjectHome } from "./ProjectHome";
 import "./App.css";
 
@@ -62,7 +63,12 @@ export function App() {
 
   if (routePath === "/concept" || routePath === "/" || Object.values(conceptPaths).includes(routePath.split("/")[1]))
     return <DemoConcept />;
-  if (routePath === "/docs") return <ProjectHome />;
+  if (routePath === "/docs")
+    return (
+      <DocumentationShell>
+        <ProjectHome />
+      </DocumentationShell>
+    );
   if (routePath === "/docs/archive" || routePath.startsWith("/docs/archive/")) {
     return <ArchiveDocs product={routePath.split("/")[3] ?? ""} />;
   }

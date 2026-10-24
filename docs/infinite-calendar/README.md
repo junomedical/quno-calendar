@@ -306,3 +306,17 @@ See [QUNO-041](../shared/decisions.md#quno-041---promote-the-concept-homepage-an
 
 Concept chapters now use `/calendar/{chapter}` directory paths; current navigation omits archive links.
 See [QUNO-042](../shared/decisions.md#quno-042---use-directory-routes-and-quiet-documentation-loading).
+
+Current documentation shares the demo's left-aligned header, follows browser light/dark appearance and
+places supporting notes on the right on desktop. The Demo link returns to this product's concept; smaller
+screens stack the notes. See [QUNO-043](../shared/decisions.md#quno-043---share-left-aligned-navigation-and-system-themed-documentation).
+
+Sections keep one Try it note bottom-aligned with the full desktop description, then show the demo followed by
+Implementation recipes. Extra demo-link panels and per-section links are removed; return through Demo in the
+shared header. See [QUNO-044](../shared/decisions.md#quno-044---keep-guide-sections-in-reading-order-with-one-instruction).
+
+The busy-schedule guide isolates its typography from the article: dates stay compact on one line inside their
+header at every density. Long labels use ellipsis; the phone layout retains smaller date text. See Decision 165.
+
+API unit tests also run before the demo service is built. The dedicated Vitest configuration shares source aliases
+with Vite while leaving server middleware out of test startup; see shared Decision QUNO-045.

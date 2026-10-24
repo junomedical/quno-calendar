@@ -228,3 +228,10 @@ Explicit navigation pushes browser history; reload, recipient links and back/for
 remembers its last chapter during the mounted visit. Playback, disclosure, theme and fullscreen do not modify the
 URL. `/concept` and earlier query URLs convert to directory paths. The existing server catch-all rewrite supports
 direct visits and reloads. Documentation opens `/docs/{product}` without archive discovery links or loading text.
+
+The product tabs and Documentation link share `app/SiteHeader` with current documentation. They sit together
+on the left on desktop. Documentation changes the destination link to Demo for the matching product, retains
+active product navigation and follows the same browser light/dark preference.
+
+Current documentation returns to the product playground through Demo in the shared header. It omits the extra
+interaction-link panel and per-section Watch demo links; concept chapter routes and guide recipe anchors remain.

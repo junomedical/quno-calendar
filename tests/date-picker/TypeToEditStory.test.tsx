@@ -8,7 +8,8 @@ describe("date input field guide", () => {
       screen.getByRole("heading", { name: "A date field that stays useful while people type." })
     ).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "All components" })).toHaveAttribute("href", "/docs");
-    expect(screen.getByRole("link", { name: /Demo/ })).toHaveAttribute("href", "/date-input");
+    expect(screen.queryByText("Explore the interactions")).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /^Watch demo/ })).not.toBeInTheDocument();
     const contents = screen.getByRole("navigation", { name: "Table of contents" });
     expect(within(contents).getAllByRole("link")).toHaveLength(9);
     for (const title of [
