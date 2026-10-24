@@ -45,3 +45,6 @@ on narrower screens; archives keep their snapshot presentation.
 `guide/shared/FieldGuideDescription` owns the description/instruction row. Current Calendar sections group
 narrative, one instruction, exhibits and recipes so implementations follow demos. Guides omit the demo-link
 panel and per-section Watch demo links; shared-header Demo navigation remains.
+
+`vitest.config.ts` shares `vite/projectAliases.ts` with the demo’s Vite configuration but loads no API middleware.
+Unit/watch startup therefore needs no generated service file; dev and deployment commands still prepare it.

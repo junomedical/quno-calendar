@@ -2157,3 +2157,9 @@ the existing 9.6 px phone treatment. Constrain overflow with ellipsis so long da
 Scope the reset and label styling to this exhibit. Verify text bounds, computed size/line height, no wrapping or
 vertical clipping, and all three density choices on desktop/phone under light/dark browser preferences. Preserve
 the 560 px exhibit, its light calendar palette, responsive labels and public component styles.
+
+## Shared clean-test startup — 2026-10-24
+
+[QUNO-045](../shared/decisions.md#quno-045---keep-test-startup-independent-of-demo-server-builds) extends the
+verification around Decision 164 with a dedicated Vitest configuration. API tests resolve the query service from
+source without loading the demo middleware or requiring generated assets. Deployed native imports stay unchanged.

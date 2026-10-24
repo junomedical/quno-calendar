@@ -4,6 +4,15 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+- Fix CI’s unit-test startup failure (`Could not resolve #quno-api/demo-event-service` with no generated
+  `build/demo-api/events.js`). Give Vitest a separate React/source-alias configuration instead of loading the demo
+  server middleware. Share the alias definitions with Vite and retain all CI checks in their existing order. An
+  isolated-checkout regression reproduces the failure before the fix and runs actual API tests without generated
+  server or library assets afterward.
+  Local verification: all 724 unit tests and 12 affected Chromium checks pass, including the isolated startup and
+  clean deployment regressions. Formatting, architecture, types, lint, Preact/React 19 compatibility, demo build,
+  package verification, size reporting and pack dry-run pass.
+
 - Fix oversized, wrapping dates in Keep busy schedules fast by isolating the embedded calendar’s typography from
   article body styles. Use compact single-line dates with ellipsis and retain the smaller phone labels.
   Verification: all 723 unit tests and 12 affected Chromium checks pass, covering date text bounds, computed

@@ -199,3 +199,7 @@ smaller right column. See [QUNO-043](./shared/decisions.md#quno-043---share-left
 Sections show the description and one Try it note, then the demo and Implementation recipes. The note aligns
 with the full description's bottom edge on desktop and stacks on mobile. Current guides omit extra demo-link
 panels and per-section Watch demo links; see [QUNO-044](./shared/decisions.md#quno-044---keep-guide-sections-in-reading-order-with-one-instruction).
+
+Unit-test startup is independent of demo server builds, including on clean CI checkouts. See
+[QUNO-045](./shared/decisions.md#quno-045---keep-test-startup-independent-of-demo-server-builds) and the
+[test setup](./shared/testing.md#unit-tests).

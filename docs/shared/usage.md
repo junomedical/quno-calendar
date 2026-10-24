@@ -1385,3 +1385,15 @@ Documentation product tabs switch guides; **All components** opens `/docs`. Dire
 Browser light/dark preferences update the header and reading surface automatically. Desktop guides align one Try it note with the bottom of the complete section description; narrower screens stack
 it before the related example. Implementation recipes follow each section’s live examples. Live
 examples retain their authored palettes and copyable recipes.
+
+### Run tests before building
+
+```sh
+npm ci
+npm test
+# Or start watch mode:
+npm run test:watch
+```
+
+The dedicated Vitest configuration resolves source imports without loading the demo server configuration. No
+`build`, `dist` or `dist-demo` artifacts are required. Demo startup still uses `npm run dev` to prepare its service.

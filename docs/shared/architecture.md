@@ -192,3 +192,8 @@ Authored live examples retain their explicit palettes, and archive sources remai
 notes align to the narrative's bottom edge; mobile notes follow it in DOM order. Calendar's editorial section
 renderer groups description, instructions, demo breakouts and implementation blocks in that order. Current guides
 use the shared header for demo navigation and render no chapter-link panel or per-section demo links.
+
+Vite and Vitest share source resolution through `vite/projectAliases.ts`. Vitest owns a separate configuration
+that never loads the demo API middleware or requires its generated service bundle. Vite retains that middleware
+for development/preview; the existing dev and deployment commands prepare the service. This keeps test startup
+independent from build order without changing native deployed imports.

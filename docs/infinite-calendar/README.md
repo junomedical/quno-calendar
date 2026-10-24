@@ -317,3 +317,6 @@ shared header. See [QUNO-044](../shared/decisions.md#quno-044---keep-guide-secti
 
 The busy-schedule guide isolates its typography from the article: dates stay compact on one line inside their
 header at every density. Long labels use ellipsis; the phone layout retains smaller date text. See Decision 165.
+
+API unit tests also run before the demo service is built. The dedicated Vitest configuration shares source aliases
+with Vite while leaving server middleware out of test startup; see shared Decision QUNO-045.

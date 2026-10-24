@@ -3,6 +3,10 @@
 ## Unit Tests
 
 Vitest unit tests live in `tests/unit`, `tests/date-picker`, `tests/date-input`, and `tests/date-parser`.
+`vitest.config.ts` loads React and the source aliases from `vite/projectAliases.ts`, without the demo server plugin.
+`npm test` and watch mode work before any build. A regression runs API tests in an isolated checkout with no
+`build`, `dist` or `dist-demo` directories, preserving the same fresh-checkout order used by CI.
+
 Public contract tests verify named arguments, formatter contexts, notification payloads, and ISO guard narrowing.
 Compile-time consumers reject removed names, positional signatures, duplicate exports, and parser-private types.
 Architecture checks enforce object arguments and product dependency direction, including headless type imports.

@@ -630,3 +630,17 @@ retain their finite scenes and short tours.
 - Consequences: Verify every current guide on desktop and phone for single-note counts, full-description bottom
   alignment, demo-before-implementation order, absence of removed links, viewport fit and live lazy examples.
   Preserve browser appearance, copyable recipes, deep anchors, archive sources and public package contracts.
+
+## QUNO-045 - Keep Test Startup Independent Of Demo Server Builds
+
+- Date: 2026-10-24
+- Status: Accepted; extends the clean-checkout verification around Infinite Calendar Decision 164
+- Context: Vitest loaded the demo’s Vite configuration and eagerly bundled its server plugin before source aliases
+  applied. CI ran unit tests before building the demo service, so the native package import’s generated JavaScript
+  target was absent. Previously generated local files concealed the startup dependency.
+- Decision: Give Vitest its own configuration with React, source aliases and the existing test settings. Keep the
+  demo API middleware in the Vite configuration only. Share one project-alias factory between both configurations
+  so public and private source imports retain their boundaries. Typecheck both configurations.
+- Consequences: Unit and watch startup require no build, dist or dist-demo output, while dev/preview and deployed
+  server builds retain their preparation steps. Keep every CI check and its existing order. Regress this with an
+  isolated checkout that runs actual API tests and creates no generated output; retain clean deployment coverage.
