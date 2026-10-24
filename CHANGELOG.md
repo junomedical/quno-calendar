@@ -4,6 +4,11 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+- Fix the sticky-header browser fixture’s wall-clock dependency: freeze a working-hour clock before mounting,
+  preserving its real horizontal-scroll and pin-alignment assertions. A late clock left the calendar at its right
+  scroll limit, so adding 60 px could not move the pin (467/468 full Chromium cases passed; this fixture then
+  reproduced the same unchanged-x failure three times). The corrected fixture passes five repeated Chromium runs.
+
 - Keep the main demo’s Datepicker, Calendar and bottom drawer inside narrow mobile layout viewports. Remove its
   inherited 320 px body floor and use shrinkable content/product grids. Add touch-enabled mobile Chromium geometry
   checks across rotation, month navigation, both Calendar orientations, drawer states and fullscreen at 280–844 px.

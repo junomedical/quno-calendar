@@ -650,3 +650,7 @@ commit, expires navigation ownership and changes parent layout; the current date
 position must survive. The external-create cancellation fixture reserves enough viewport height for all three
 asserted participant rows to remain mounted under Linux font metrics, retaining the three-draft and row-offset
 assertions.
+
+Sticky-header pin geometry uses a fixed working-hour clock. External zoom deliberately reveals the current clock;
+a machine clock past displayed hours can already place the viewport at its maximum horizontal offset. The test
+must retain real scroll room before asserting movement rather than changing the pin’s geometry requirements.
