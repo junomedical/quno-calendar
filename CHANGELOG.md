@@ -4,6 +4,15 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+- Fit the Timepicker concept at 320 px. Constrain the inner product-card grid so the 360 px clock can shrink to
+  its card, and use 12 px Timepicker phone gutters so all three cadence controls retain 80×44 px targets on one
+  row. Extend mobile bounds checks to Timepicker, all cadence choices and actual minute selection. The regression
+  reproduces the original control extending to x=403 on a 390 px viewport before the fix.
+  Verification: all 725 unit tests and 24 affected Chromium checks pass, including 320×667 cadence geometry,
+  real minute selection, rotation/fullscreen bounds and other product cards. Formatting, architecture, types, lint,
+  Preact/React 19 compatibility, demo build, package verification, size reporting and pack dry-run pass.
+  Public library assets and sizes are unchanged; no unresolved verification blocker remains.
+
 - Fix the sticky-header browser fixture’s wall-clock dependency: freeze a working-hour clock before mounting,
   preserving its real horizontal-scroll and pin-alignment assertions. A late clock left the calendar at its right
   scroll limit, so adding 60 px could not move the pin (467/468 full Chromium cases passed; this fixture then

@@ -14,3 +14,8 @@
   font-size: 14px;
   line-height: 20px;
 }
+@media (max-width: 850px) {
+  .concept[data-product="timepicker"] .concept-tour-content .concept-product-stage {
+    padding-inline: 12px;
+  }
+}

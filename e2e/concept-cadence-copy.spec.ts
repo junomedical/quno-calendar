@@ -6,7 +6,8 @@ test.describe.configure({ mode: "parallel" });
 for (const [width, height] of [
   [1440, 900],
   [390, 844],
-  [375, 667]
+  [375, 667],
+  [320, 667]
 ]) {
   test(`calendar introduction and larger cadence controls remain usable at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height });
@@ -42,5 +43,7 @@ for (const [width, height] of [
     }
     await cadence.getByRole("button", { name: "5 min", exact: true }).press("Space");
     await expect(cadence.getByRole("button", { name: "5 min", exact: true })).toHaveAttribute("aria-pressed", "true");
+    await page.locator('[data-time="10:40"]').click();
+    await expect(page.locator('.quno-time-picker [data-slot="selection-summary"]')).toHaveText("10:40");
   });
 }

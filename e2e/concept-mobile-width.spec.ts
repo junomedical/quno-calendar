@@ -8,9 +8,15 @@ async function expectViewportFit(page: Page, width: number, product: string) {
       ".concept-tour-content",
       ".concept-canvas",
       ".concept-tour-guide",
-      ...(product === "datepicker"
-        ? [".concept-product-stage", ".concept-product-mount", ".concept-product-card", ".quno-date-picker"]
-        : [".quno-calendar-viewport"])
+      ...(product === "calendar"
+        ? [".quno-calendar-viewport"]
+        : [
+            ".concept-product-stage",
+            ".concept-product-mount",
+            ".concept-product-card",
+            product === "datepicker" ? ".quno-date-picker" : ".quno-time-picker"
+          ]),
+      ...(product === "timepicker" ? [".concept-cadence"] : [])
     ];
     return {
       document: document.documentElement.scrollWidth,
@@ -32,7 +38,7 @@ async function expectViewportFit(page: Page, width: number, product: string) {
   }
 }
 
-for (const product of ["datepicker", "calendar"]) {
+for (const product of ["datepicker", "calendar", "timepicker"]) {
   test(`mobile ${product} fits the viewport through rotation, navigation and drawer changes`, async ({
     browser,
     browserName,
@@ -42,10 +48,22 @@ for (const product of ["datepicker", "calendar"]) {
     const context = await browser.newContext({ ...devices["Pixel 7"], baseURL, reducedMotion: "reduce" });
     const page = await context.newPage();
     try {
-      await page.goto(product === "datepicker" ? "/datepicker/paint" : "/calendar/views");
+      await page.goto(
+        product === "datepicker"
+          ? "/datepicker/paint"
+          : product === "calendar"
+            ? "/calendar/views"
+            : "/timepicker/cadence"
+      );
       const guide = page.locator(".concept-tour-guide");
       await expect(
-        page.locator(product === "datepicker" ? ".quno-date-picker" : ".quno-calendar-viewport")
+        page.locator(
+          product === "datepicker"
+            ? ".quno-date-picker"
+            : product === "calendar"
+              ? ".quno-calendar-viewport"
+              : ".quno-time-picker"
+        )
       ).toBeVisible();
       for (const size of [
         { width: 390, height: 844 },
@@ -60,14 +78,36 @@ for (const product of ["datepicker", "calendar"]) {
         if (product === "datepicker") {
           await page.locator('[data-slot="month-heading-button"]').click();
           await expect(page.locator('[data-slot="month-navigation"]')).toBeVisible();
-        } else {
+        } else if (product === "calendar") {
           await page.getByRole("button", { name: "Vertical", exact: true }).click();
+        } else if (size.width >= 320 && size.height >= 600) {
+          for (const step of [5, 15, 20]) {
+            await page.getByRole("button", { name: `${step} min`, exact: true }).click();
+            await expect(page.locator('[data-hour="10"] [data-slot="minute-option"]')).toHaveCount(60 / step);
+            await expect(page.locator('[data-slot="selection-summary"]')).toHaveText("10:35");
+            const bounds = await page.locator(".quno-time-picker").boundingBox();
+            const card = await page.locator(".concept-product-card").boundingBox();
+            const choices = await page
+              .locator('.quno-time-picker [data-slot="minute-option"], .concept-cadence button')
+              .evaluateAll((nodes) => nodes.map((node) => node.getBoundingClientRect().toJSON()));
+            for (const choice of choices) {
+              expect(choice.left).toBeGreaterThanOrEqual(0);
+              expect(choice.right).toBeLessThanOrEqual(size.width);
+            }
+            expect(bounds!.x).toBeGreaterThanOrEqual(card!.x);
+            expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(card!.x + card!.width);
+            for (const button of await page.locator(".concept-cadence button").all()) {
+              const box = (await button.boundingBox())!;
+              expect(box.width).toBeGreaterThanOrEqual(80);
+              expect(box.height).toBeGreaterThanOrEqual(44);
+            }
+          }
         }
         await expectViewportFit(page, size.width, product);
         if (product === "datepicker") {
           await page.locator('[data-slot="month-heading-button"]').click();
           await page.getByRole("button", { name: "Next month", exact: true }).click();
-        } else {
+        } else if (product === "calendar") {
           await page.getByRole("button", { name: "Horizontal", exact: true }).click();
         }
         await guide.getByRole("button", { name: "Expand description", exact: true }).click();
@@ -80,7 +120,7 @@ for (const product of ["datepicker", "calendar"]) {
       }
       await page.screenshot({ path: info.outputPath(`${product}-mobile-width.png`) });
     } finally {
-      await context.close();
+      await context.close().catch(() => {});
     }
   });
 }

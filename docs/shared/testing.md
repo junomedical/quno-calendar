@@ -654,3 +654,8 @@ assertions.
 Sticky-header pin geometry uses a fixed working-hour clock. External zoom deliberately reveals the current clock;
 a machine clock past displayed hours can already place the viewport at its maximum horizontal offset. The test
 must retain real scroll room before asserting movement rather than changing the pin’s geometry requirements.
+
+Mobile width checks include Timepicker’s actual root, every minute column and cadence choices, rather than only
+its outer card. At 320×667 require all three 80×44 px cadence controls on one row, real pointer/keyboard changes,
+correct slot counts, preserved off-slot time and successful minute selection. Retain 280–844 px rotation, drawer
+and fullscreen geometry and desktop cadence coverage.
