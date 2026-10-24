@@ -2133,3 +2133,14 @@ effect after restarting the development server. Keep the server bundle outside b
 files, retain atomic publication for concurrent builders, and add no prerequisite full-library build. Test both
 build commands in an isolated checkout without `dist`, then execute the built service through native Node imports
 in two timezones. No public component, loader, event or package export contract changes.
+
+## Shared documentation presentation — 2026-10-24
+
+[QUNO-043](../shared/decisions.md#quno-043---share-left-aligned-navigation-and-system-themed-documentation) owns the shared header, browser-driven editorial appearance and
+desktop supporting column. This product retains its public contracts and authored interactive examples.
+
+## Shared section reading order — 2026-10-24
+
+[QUNO-044](../shared/decisions.md#quno-044---keep-guide-sections-in-reading-order-with-one-instruction) refines QUNO-043 with one instruction aligned to the full description,
+demos before implementation recipes, and shared-header-only demo navigation in current guides. This product's
+public contracts, interactive examples and archive presentation remain unchanged.

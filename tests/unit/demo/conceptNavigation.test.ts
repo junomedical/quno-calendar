@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { conceptHref, readConceptLocation } from "#quno-demo/concept/useConceptNavigation";
 import { catalog } from "#quno-demo/concept/scenarioCatalog";
-import { guideDemos } from "#quno-demo/guide/shared/guideDemos";
 describe("shared concept locations", () => {
   it.each(["infinite-calendar", "datepicker", "date-input", "timepicker", "date-parser"] as const)(
     "round-trips every %s demo and introduction",
@@ -21,11 +20,5 @@ describe("shared concept locations", () => {
   it("gives path segments precedence over legacy query state", () => {
     window.history.replaceState(null, "", "/datepicker/paint?product=timepicker&demo=cadence");
     expect(readConceptLocation()).toEqual({ product: "datepicker", scene: "paint", intro: false });
-  });
-  it("only connects documentation sections to existing demos", () => {
-    for (const product of Object.keys(guideDemos) as (keyof typeof guideDemos)[]) {
-      for (const scene of Object.values(guideDemos[product]).flat())
-        expect(catalog[product].some(({ id }) => id === scene)).toBe(true);
-    }
   });
 });

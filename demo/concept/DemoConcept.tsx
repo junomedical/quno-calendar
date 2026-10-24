@@ -1,7 +1,7 @@
 import type { CalendarView } from "@quno/calendar/infinite-calendar";
 import { useCallback, useRef, useState } from "react";
 import { ConceptCanvas } from "./ConceptCanvas";
-import { ConceptHeader } from "./ConceptHeader";
+import { SiteHeader } from "#quno-demo/app/SiteHeader";
 import { ConceptTour } from "./ConceptTour";
 import { catalog } from "./scenarioCatalog";
 import { usePlayback } from "./usePlayback";
@@ -41,7 +41,7 @@ export function DemoConcept() {
       data-playing={actions.playing}
       data-scene={session.scene}
     >
-      {!fullscreen && <ConceptHeader product={session.product} change={change} />}
+      {!fullscreen && <SiteHeader product={session.product} change={change} />}
       <ConceptTour
         key={session.product}
         product={session.product}

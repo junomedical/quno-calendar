@@ -56,3 +56,23 @@ test("explicit state cards form a two-by-two grid", async ({ page }) => {
   expect(Math.abs(boxes[2].top - boxes[3].top)).toBeLessThan(1);
   expect(Math.abs(boxes[0].width - boxes[3].width)).toBeLessThan(1);
 });
+
+test("stable-month example starts empty and keeps its frame through navigation", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/docs/datepicker#stable-view");
+  const section = page.locator("#stable-view");
+  const picker = section.locator(".quno-date-picker");
+  const grid = picker.getByRole("grid");
+  await expect(picker.locator('[data-selected="true"]')).toHaveCount(0);
+  await expect(grid.locator('[data-slot="day"]')).toHaveCount(42);
+  const initialBox = (await picker.boundingBox())!;
+  for (const name of ["Next month", "Previous month"]) {
+    await section.getByRole("button", { name, exact: true }).click();
+    await expect(picker.locator('[data-selected="true"]')).toHaveCount(0);
+    await expect(grid.locator('[data-slot="day"]')).toHaveCount(42);
+    expect((await picker.boundingBox())!.height).toBeCloseTo(initialBox.height, 1);
+  }
+  await picker.locator('[data-date="2026-08-18"]').click();
+  await expect(picker.locator('[data-date="2026-08-18"]')).toHaveAttribute("data-selected", "true");
+  await expect(page.locator('#quick-jump [data-selected="true"]')).toHaveCount(9);
+});

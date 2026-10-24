@@ -1,0 +1,49 @@
+.documentation-shell {
+  height: 100dvh;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+  color-scheme: light;
+  --guide-ink: #252823;
+  --guide-muted: #687069;
+  --guide-line: #d9ddd6;
+  --guide-paper: #fbfaf6;
+  --guide-accent: #246b5d;
+  --guide-accent-dark: #174c42;
+  --guide-panel: #edf3ef;
+  --guide-surface: #fffefa;
+}
+.documentation-shell__page {
+  min-width: 0;
+  min-height: 0;
+}
+.documentation-shell :is(.field-guide, .project-home, .document-placeholder) {
+  height: 100%;
+  color: var(--guide-ink);
+  background: var(--guide-paper);
+}
+@media (prefers-color-scheme: dark) {
+  .documentation-shell {
+    color-scheme: dark;
+    --guide-ink: #f1e9f8;
+    --guide-muted: #c2b5d0;
+    --guide-line: #51465f;
+    --guide-paper: #1d1b26;
+    --guide-accent: #9cdbc8;
+    --guide-accent-dark: #b2e9d8;
+    --guide-panel: #293b37;
+    --guide-surface: #262330;
+  }
+  .documentation-shell .field-guide {
+    --guide-ink: #f1e9f8;
+    --guide-muted: #c2b5d0;
+    --guide-line: #51465f;
+    --guide-paper: #1d1b26;
+    --guide-accent: #9cdbc8;
+    --guide-accent-dark: #b2e9d8;
+  }
+}
+.documentation-shell,
+.documentation-shell__page {
+  overflow: clip;
+}

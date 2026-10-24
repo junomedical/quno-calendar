@@ -29,7 +29,7 @@ export const DatePickerStory = ({ embedded = false }: { embedded?: boolean }): J
       product="Quno/Datepicker"
       title="Date range selection you won't hate"
       intro={<p>Paint, drag and correct a range without going to forced from-to sequence.</p>}
-      demoHref="/demo/datepicker"
+
       contents={contents}
       meta={["Interactive examples", "Copyable recipes", "React + Preact"]}
       embedded={embedded}

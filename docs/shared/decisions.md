@@ -592,3 +592,41 @@ retain their finite scenes and short tours.
 - Consequences: Verify path round trips for every authored scene, legacy query conversion, browser history and
   direct visits, desktop/phone geometry, absence of archive discovery links, and controlled delayed module loading
   with an empty full-height light surface. Package APIs and production library behavior remain unchanged.
+
+## QUNO-043 - Share Left-Aligned Navigation And System-Themed Documentation
+
+- Date: 2026-10-24
+- Status: Accepted; extends QUNO-037 and QUNO-041, supersedes QUNO-042's always-light loading surface
+- Decision: Use one product header for the concept, documentation index, and all current product guides. Keep
+  desktop tabs and the destination link together at the left edge. Documentation opens the active product's guide;
+  Demo returns to its concept introduction. Documentation tabs use links with an active-page state; concept tabs
+  preserve their existing chapter memory. Keep the header visible above the independently scrolling guide, including
+  while a lazy guide loads. Legacy `/guide/*` entries receive the same current shell.
+- Appearance: Follow the browser's live light/dark preference for the shared header, documentation reading surface,
+  index, supporting notes and empty loading placeholder. Authored interactive examples retain their explicit palettes.
+  Preserve the independent archive snapshot and its presentation.
+- Layout: Start current documentation at the shared header's left inset. At desktop widths of at least 1100 px, put
+  live chapter links and Try it notes in a smaller 280 px right column with a 48 px gap beside the 720 px reading
+  column. Wide Infinite Calendar examples extend rightward within the available viewport. Stack supporting content
+  in reading order on smaller screens; retain copyable recipes, deep links and lazy calendar mounts.
+- Consequences: Verify matching header geometry, links/active states, light/dark changes including delayed loading,
+  persistent header/anchor geometry, right-column placement, mobile stacking, clipping and real example interaction.
+  Public package names, classes, tokens, entry points and component behavior remain unchanged.
+
+## QUNO-044 - Keep Guide Sections In Reading Order With One Instruction
+
+- Date: 2026-10-24
+- Status: Accepted; refines QUNO-043's supporting column and supersedes QUNO-041's current-guide chapter-link navigation
+- Decision: Present each current guide section as a complete description with at most one Try it note, followed by
+  its live demo and then its Implementation recipes. Align the note's bottom edge with the whole description on
+  desktop, including sections with multiple paragraphs. Stack the note between the description and demo on smaller
+  screens. Use a shared description row rather than floats or per-paragraph alignment.
+- Editorial ownership: Keep performance verification details in ordinary prose and combine the React state and
+  projection instructions into one note. Calendar sections group their description, instructions, exhibits and
+  recipes explicitly so all implementations follow the section's demos in DOM and visual reading order.
+- Navigation: Remove the Explore the interactions panel, its focused-sandbox link and all per-section Watch demo
+  links from current guides. Keep Demo in the shared header as the return route, together with product navigation,
+  All components and the section contents. Direct concept, focused-demo and archive routes remain available.
+- Consequences: Verify every current guide on desktop and phone for single-note counts, full-description bottom
+  alignment, demo-before-implementation order, absence of removed links, viewport fit and live lazy examples.
+  Preserve browser appearance, copyable recipes, deep anchors, archive sources and public package contracts.

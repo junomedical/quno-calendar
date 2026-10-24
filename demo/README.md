@@ -30,9 +30,18 @@ start automatically and loop with reduced-motion and manual-takeover guards. Ful
 Non-calendar demos sit to its right on wide screens and behind its overlay drawer on phones. Calendar session edits survive chapter
 and fullscreen navigation. All scenario copy, initial state and actions live in individual JSON files.
 
-Current guides are lazy routes under `/docs`, with links back to exact concept chapters. `archive` preserves the
+Current guides are lazy routes under `/docs`, with a shared-header Demo return link. `archive` preserves the
 20 October 2026 guide source at `/docs/archive`; its guide chunks load separately from the homepage.
 
 Concept chapters use directory paths (`/calendar/zoom`, `/datepicker/paint`, `/parser/ambiguity`). Old query
 links normalize to them. The existing catch-all server rewrite supports direct visits and reloads. Current docs
-keep archive routes out of navigation, and lazy guide loading uses a silent light surface.
+keep archive routes out of navigation, and lazy guide loading uses a silent surface following browser appearance.
+
+`app/SiteHeader` owns the shared left-aligned concept/documentation header. `app/DocumentationShell` keeps it
+above the scrolling current guides and their lazy loading state. Header and reading surfaces follow browser
+appearance. Current desktop guides bottom-align one Try it note beside each complete description, stacking
+on narrower screens; archives keep their snapshot presentation.
+
+`guide/shared/FieldGuideDescription` owns the description/instruction row. Current Calendar sections group
+narrative, one instruction, exhibits and recipes so implementations follow demos. Guides omit the demo-link
+panel and per-section Watch demo links; shared-header Demo navigation remains.

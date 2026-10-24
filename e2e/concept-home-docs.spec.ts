@@ -47,15 +47,10 @@ for (const width of [1440, 390]) {
     await page.setViewportSize({ width, height: 900 });
     for (const product of ["infinite-calendar", "datepicker", "date-input", "timepicker", "date-parser"]) {
       await page.goto(`/docs/${product}`);
-      const demos = page.getByRole("navigation", { name: "Live demos", exact: true });
-      await expect(demos).toBeVisible();
-      const first = demos.getByRole("link").first();
-      await expect(first).toHaveAttribute(
-        "href",
-        new RegExp(
-          `^/${product === "infinite-calendar" ? "calendar" : product === "date-parser" ? "parser" : product}/`
-        )
-      );
+      await expect(page.locator(".field-guide h1")).toBeVisible();
+      await expect(page.getByRole("navigation", { name: "Live demos", exact: true })).toHaveCount(0);
+      await expect(page.getByRole("link", { name: /^Watch demo/ })).toHaveCount(0);
+      await expect(page.locator(".site-header").getByRole("link", { name: "Demo", exact: true })).toHaveCount(1);
       const nav = page.getByRole("navigation", { name: "Documentation products" });
       await expect(page.locator('a[href^="/docs/archive"]')).toHaveCount(0);
       const geometry = await nav.evaluate((node) => {
@@ -79,7 +74,9 @@ for (const width of [1440, 390]) {
     await page.goto("/docs/datepicker#single-day");
     await expect(page.locator("#single-day .quno-date-picker")).toBeVisible();
     await expect.poll(async () => (await page.locator("#single-day").boundingBox())!.y).toBeGreaterThanOrEqual(0);
-    await expect.poll(async () => (await page.locator("#single-day").boundingBox())!.y).toBeLessThan(60);
+    await expect
+      .poll(async () => (await page.locator("#single-day").boundingBox())!.y)
+      .toBeLessThan((await page.locator(".site-header").boundingBox())!.height + 60);
   });
 }
 
@@ -151,7 +148,9 @@ test("documentation loads without flashing a message or archive links", async ({
     await expect(placeholder).toBeVisible();
     await expect(placeholder).toHaveText("");
     await expect(placeholder).toHaveCSS("background-color", "rgb(251, 250, 246)");
-    expect((await placeholder.boundingBox())!.height).toBe(720);
+    expect((await placeholder.boundingBox())!.height).toBe(
+      720 - (await page.locator(".site-header").boundingBox())!.height
+    );
     await expect(page.getByText("Opening documentation…", { exact: true })).toHaveCount(0);
   } finally {
     release();

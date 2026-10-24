@@ -2,7 +2,7 @@
 
 The concept homepage is `/`, with shareable product/chapter paths. Current field guides live at `/docs`;
 the 20 October 2026 source snapshot remains at `/docs/archive`. Legacy `/guide/*` links continue to work.
-Current guides link directly to every matching concept chapter and retain their specialized public-API examples.
+Current guides retain their specialized public-API examples; Demo in the shared header returns to the selected product.
 
 The documentation follows the five public `@quno/calendar` products. Start with the product you are changing, then
 use the shared records for package-wide contracts and release work.
@@ -191,3 +191,11 @@ The concept’s larger **Cadence** controls and clarified Calendar introduction 
 Infinite Calendar interaction recipes cover [touch holds and anchored zoom](./shared/usage.md#navigation-and-zoom),
 including iPad slider focus and restoring the original pointer time after zoom-limit reversals. Product rationale
 lives in Infinite Calendar Decisions 162–163.
+
+Current guides and the index share the demo header, with **Demo** linking back to the selected product.
+The reading surface follows browser appearance, and desktop guides keep a single Try it note beside each complete description in a
+smaller right column. See [QUNO-043](./shared/decisions.md#quno-043---share-left-aligned-navigation-and-system-themed-documentation).
+
+Sections show the description and one Try it note, then the demo and Implementation recipes. The note aligns
+with the full description's bottom edge on desktop and stacks on mobile. Current guides omit extra demo-link
+panels and per-section Watch demo links; see [QUNO-044](./shared/decisions.md#quno-044---keep-guide-sections-in-reading-order-with-one-instruction).

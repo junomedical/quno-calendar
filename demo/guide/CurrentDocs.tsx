@@ -1,5 +1,6 @@
 import { lazy } from "react";
 import { ProjectHome } from "#quno-demo/app/ProjectHome";
+import { DocumentationShell } from "#quno-demo/app/DocumentationShell";
 import { DocumentPage } from "#quno-demo/app/DocumentPage";
 const pages = {
   "infinite-calendar": lazy(() =>
@@ -20,5 +21,9 @@ export function CurrentDocs({ product }: { product: string }) {
   const Page = Object.prototype.hasOwnProperty.call(pages, product)
     ? pages[product as keyof typeof pages]
     : ProjectHome;
-  return <DocumentPage key={product} page={Page} />;
+  return (
+    <DocumentationShell product={product}>
+      <DocumentPage key={product} page={Page} />
+    </DocumentationShell>
+  );
 }

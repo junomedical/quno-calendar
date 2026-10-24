@@ -4,6 +4,34 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+- Start the Datepicker guide’s Six weeks, every month example without a selected period. Keep its six-week frame,
+  month navigation and interactive selection. Other examples and public defaults retain their existing values.
+  Verification: all 723 unit tests and five affected Chromium checks pass, including empty initial selection,
+  month-navigation geometry, real selection, prefetch/cache interaction and guide section layout. Formatting,
+  architecture, types, lint, Preact compatibility, demo build, package verification, size reporting and pack dry-run
+  pass. No unresolved verification blocker remains.
+
+- Shorten the preloading guide’s Try it note to the jump, return and distance controls. Keep cache, request and
+  loading details in the section’s main explanation.
+
+- Put current guide Implementation recipes after each section’s demos. Bottom-align a single Try it note with the
+  complete desktop description and stack it before the demo on smaller screens. Consolidate duplicate Calendar
+  instructions and keep performance verification in prose. Remove the Explore the interactions panel and per-section
+  Watch demo links across all five current guides; retain Demo in the shared header, live examples and archive sources.
+  Verification: all 723 unit tests and 66 affected Chromium checks pass, including every guide's note count,
+  full-description alignment, DOM/visual recipe order, removed-link absence and lazy example interactions.
+  Formatting, architecture, types, lint, Preact/React 19 compatibility, demo build, package verification, size
+  reporting and pack dry-run pass. No unresolved verification blocker remains; published library sizes are unchanged.
+
+- Share the demo product header with current documentation and its index. Keep desktop tabs and the
+  Documentation/Demo link together on the left, preserve active-product return links and keep the header above
+  lazy guide loading. Follow live browser light/dark appearance across documentation and its empty placeholder.
+  Left-align guide content, place chapter links and Try it notes in a smaller desktop column, and stack them on
+  smaller screens. Keep authored example palettes, wide calendar exhibits, deep links and archive presentation.
+  Verification: all 724 unit tests, the complete 457-case Chromium run and nine final shell/theme checks pass.
+  Formatting, architecture, types, lint, Preact/React 19 compatibility, demo build, package verification, size
+  reporting and pack dry-run pass. Published library sizes are unchanged; no unresolved verification blocker remains.
+
 - Fix Vercel builds after shared overlap filtering added a runtime import from the package root. Bundle headless
   shared helpers from source and resolve the private demo service through separate source-type/compiled-runtime
   package conditions. Prepare the service before development startup; remove the conflicting TypeScript path

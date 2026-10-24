@@ -24,7 +24,7 @@ export function DateInputFieldGuide() {
       product="Quno/Date Input"
       title="A date field that stays useful while people type."
       intro={<p>Keep one native field while people type, spin, localize, and commit timezone-free dates and ranges.</p>}
-      demoHref="/demo/date-input"
+
       contents={contents}
       meta={["Interactive examples", "Copyable recipes", "React + Preact"]}
     >

@@ -181,20 +181,7 @@
   .concept {
     grid-template-rows: auto minmax(0, 1fr) 94px;
   }
-  .concept-nav {
-    padding: 10px 5%;
-    gap: 8px;
-  }
-  .concept-nav nav {
-    padding: 3px;
-  }
-  .concept-nav nav button {
-    font-size: 11px;
-    padding: 7px 9px;
-  }
-  .concept-docs {
-    font-size: 11px;
-  }
+
   .concept-screen {
     display: flex;
     flex-direction: column;
@@ -286,9 +273,7 @@
   .concept {
     grid-template-rows: 64px minmax(0, 1fr) 84px;
   }
-  .concept-nav {
-    height: 64px;
-  }
+
   .concept-intro {
     padding-block: 14px;
   }

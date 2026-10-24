@@ -591,7 +591,7 @@ then become muted pointer-inactive context in appointment mode.
 
 Directory navigation checks retain per-tab state and canvas identity through history, reload and recipient links.
 They cover all five product paths, conversion of old query links, invalid chapter fallback, current documentation
-without archive navigation, and delayed guide loading with an empty light placeholder rather than visible text.
+without archive navigation, and delayed guide loading with an empty browser-themed placeholder rather than visible text.
 The existing catch-all deployment rewrite remains guarded for direct URL access.
 
 ## Overnight and multi-day regressions
@@ -620,3 +620,13 @@ Deployment regression coverage copies demo/server source, Vite configuration and
 isolated directory with installed dependencies but no `dist`. It runs both `vercel-build` and `build:demo`, verifies
 site/server outputs without creating library artifacts, and invokes the private service through native Node in UTC
 and America/New_York. Existing local package builds cannot mask unresolved source imports.
+
+The shared header/documentation browser checks cover desktop alignment, matching demo/docs geometry, active
+product links, return navigation, persistent header placement through deep links and delayed loading, live
+light/dark changes, right-column note geometry, mobile stacking and viewport clipping for all five guides.
+Check authored examples independently so editorial themes cannot produce unreadable controls.
+
+Section-order browser checks inspect every current guide at desktop and phone widths. Require at most one Try it
+note per section, matching note/complete-copy bottom edges on desktop, notes above examples, and implementations
+after examples in both DOM order and measured geometry. Check absent interaction-link panels and per-section
+Watch demo links, retained header navigation, multi-paragraph Calendar descriptions and actual lazy demo mounting.

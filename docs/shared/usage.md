@@ -9,7 +9,7 @@ The live concept homepage is available at `/`, with shareable product/demo links
 - `/docs/date-parser`
 - `/docs/timepicker`
 
-Each guide links to its concept introduction and a focused sandbox. This document remains the single source for copyable production recipes
+Each guide links to its concept introduction through Demo in the shared header; focused sandboxes retain their direct routes. This document remains the single source for copyable production recipes
 across all five independent feature entry points.
 
 ## Entry points
@@ -1368,9 +1368,20 @@ Open `/datepicker/paint` to show that exact chapter, or `/parser` for the parser
 at `/`; its chapters use `/calendar/{chapter}`. Other products use `/datepicker`, `/date-input`, `/timepicker`
 and `/parser`, with an optional chapter segment. Tab and previous/next/contents navigation update the link. Reload and browser history restore it.
 The live homepage is `/` (`/concept` also works); current guides are `/docs/{product}` and the previous guide
-snapshot is `/docs/archive/{product}`. Focused `/demo/*` sandboxes remain available from the current guides.
+snapshot is `/docs/archive/{product}`. Focused `/demo/*` sandboxes remain available by direct address.
 
 Previously shared `?product=...&demo=...` links and `/concept` normalize to the corresponding directory paths.
 The existing Vercel catch-all rewrite serves the application on direct visits and reloads. Archive routes remain
-available by direct address, with no archive links in current navigation. Guide chunks load on a silent light
+available by direct address, with no archive links in current navigation. Guide chunks load on a silent browser-themed
 surface rather than displaying a transient loading message.
+
+### Move between demos and documentation
+
+Use **Documentation** in the shared header to open the current product's guide, such as
+`/datepicker` → `/docs/datepicker`. The same header's **Demo** link returns to that product's introduction.
+Documentation product tabs switch guides; **All components** opens `/docs`. Direct section links such as
+`/docs/datepicker#single-day` keep the header visible above the scrolled article.
+
+Browser light/dark preferences update the header and reading surface automatically. Desktop guides align one Try it note with the bottom of the complete section description; narrower screens stack
+it before the related example. Implementation recipes follow each section’s live examples. Live
+examples retain their authored palettes and copyable recipes.

@@ -1,5 +1,5 @@
 /** @see ./README.md */
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { Children, Fragment, isValidElement, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   CreationLaneDemo,
   EventCardsDemo,
@@ -28,7 +28,7 @@ import { EventProjectionDemo } from "./EventProjectionDemo";
 import { DensityDemo, densityRecipe } from "./DensityDemo";
 import { calendarWindowRecipe } from "./calendarWindowRecipe";
 import { ReactStateDemo } from "./ReactStateDemo";
-import { GuideDemoLink } from "#quno-demo/guide/shared/GuideDemoLink";
+import { FieldGuideDescription } from "#quno-demo/guide/shared/FieldGuideDescription";
 import { FieldGuidePage } from "#quno-demo/guide/shared/FieldGuidePage";
 import { FieldGuideProduction } from "#quno-demo/guide/shared/FieldGuideProduction";
 import { infiniteCalendarProduction } from "#quno-demo/guide/shared/productionProfiles";
@@ -390,7 +390,7 @@ export function IntegrationWalkthrough({ embedded = false }: { embedded?: boolea
       intro={
         <p>Move through dense schedules, keep events readable, and preserve focus while data and layouts change.</p>
       }
-      demoHref="/demo/infinite-calendar"
+
       contents={articleContents}
       meta={["Interactive examples", "Copyable recipes", "React + Preact"]}
       embedded={embedded}
@@ -483,10 +483,10 @@ export function IntegrationWalkthrough({ embedded = false }: { embedded?: boolea
             <p>Virtualization bounds the work to what can be seen.</p>
           </article>
         </div>
-        <Callout>
+        <p>
           Performance tests cover dense layout scaling, bounded DOM and cache sizes, frame-batched interaction work, and
           stable renderer identity. Product event renderers should keep their own card work equally disciplined.
-        </Callout>
+        </p>
         <Callout>
           Try Quiet, Busy, and Packed to compare 4, 20, and 60 appointments per day across four people. Switch the view
           and inspect a card. These are fixture counts, not frame-rate guarantees.
@@ -879,14 +879,15 @@ export function IntegrationWalkthrough({ embedded = false }: { embedded?: boolea
           inspect its request body, then edit a card and change API delay to refetch it.
         </p>
         <CodeBlock code={prefetchSnippet} title="Preload nearby dates with a bounded policy" />
+        <p>
+          Loaded events lists the full warm cache, including dates outside the viewport. Jumping to a cached date may
+          request missing neighboring dates without delaying its cached events. The loading indicator stays active until
+          every concurrent request finishes. A positive prefetch distance warms at least the previous and next included
+          day; zero fetches visible dates only. Changing the distance retains existing cached data.
+        </p>
         <Callout>
-          The loaded-events strip shows every event returned into the warm cache, including the July 9 consultation,
-          before that date is visible. Then jump to the prefetched date: the same consultation appears immediately in
-          the calendar while the request counter may advance only for missing dates around the new viewport. Wait until
-          loading finishes, then choose Back to starting date to reuse the earlier cache. The loading message stays
-          active until every concurrent request finishes. Change Prefetch distance to adjust the screens kept warm on
-          each side. Any positive distance keeps at least the next and previous included day warm, even when a dense day
-          fills several screens; zero loads the visible viewport only. Existing cached data is retained.
+          Jump to the prefetched date: the July 9 consultation appears immediately. Wait for loading to finish, go back,
+          then change Prefetch distance.
         </Callout>
         <DemoBreakout>
           <LazyArticleDemo label="event preloading example">
@@ -967,17 +968,20 @@ export function IntegrationWalkthrough({ embedded = false }: { embedded?: boolea
           visibility and zoom requests flow back through callbacks. The surrounding product can then persist proposals,
           patch visible events immediately, or change <code>eventVersion</code> when it needs a wider refresh.
         </p>
-        <Callout>
-          Switch between one and two calendars, then change zoom. The state summary and calendar update together because
-          React owns both values; the calendar keeps its visible date and loaded events while those props change.
-        </Callout>
         <p>
           Keep <code>loadEvents</code> for persisted data. A synchronous <code>projectEvents</code> callback can replace
           or add local previews in the rendered date window without invalidating loaded events. Return a new collection;
           leave cached records unchanged. Accepted moves preserve saved metadata when the projection is cleared.
           Recurrence expansion stays in your application.
         </p>
-        <Callout>Try it: show the preview, move it to noon, then clear it. The load count stays unchanged.</Callout>
+        <Callout>
+          <p>
+            Switch between one and two calendars, then change zoom. The state summary and calendar update together
+            because React owns both values; the calendar keeps its visible date and loaded events while those props
+            change.
+          </p>
+          <p>Show the preview, move it to noon, then clear it. The load count stays unchanged.</p>
+        </Callout>
         <DemoBreakout>
           <LazyArticleDemo label="React-controlled calendar example">
             <ReactStateDemo />
@@ -1067,12 +1071,36 @@ function ArticleSection({
   number: string;
   title: string;
 }) {
+  const copy: ReactNode[] = [];
+  const notes: ReactNode[] = [];
+  const demos: ReactNode[] = [];
+  const recipes: ReactNode[] = [];
+  Children.toArray(children).forEach((child) => {
+    if (isValidElement<{ children: ReactNode }>(child)) {
+      if (child.type === Callout) {
+        notes.push(<Fragment key={child.key}>{child.props.children}</Fragment>);
+        return;
+      }
+      if (child.type === DemoBreakout) {
+        demos.push(child);
+        return;
+      }
+      if (child.type === CodeBlock) {
+        recipes.push(child);
+        return;
+      }
+    }
+    copy.push(child);
+  });
   return (
     <section className="calendar-article__section" id={id}>
       <p className="calendar-article__section-number">{number}</p>
       <h2>{title}</h2>
-      <GuideDemoLink id={id} />
-      {children}
+      <FieldGuideDescription instruction={notes.length ? notes : undefined} noteClassName="calendar-article__callout">
+        {copy}
+      </FieldGuideDescription>
+      {demos}
+      {recipes}
     </section>
   );
 }

@@ -1,3 +1,4 @@
+import { FieldGuideDescription } from "#quno-demo/guide/shared/FieldGuideDescription";
 import type { JSX } from "react";
 import { FieldGuideRecipe } from "#quno-demo/guide/shared/FieldGuideFeature";
 import { FieldGuideProduction } from "#quno-demo/guide/shared/FieldGuideProduction";
@@ -36,33 +37,37 @@ const comparisons = [
 
 export const DifferenceStory = (): JSX.Element => (
   <section className="story__wide" id="difference">
-    <div className="story__section-heading">
-      <span>Why another datepicker?</span>
-      <h2>Range editing, not two date inputs sharing a box</h2>
-      <p>
-        The difference is not the number of calendars by itself. It is whether choosing and correcting a period follows
-        the user’s intent or forces a From–To sequence to start over.
-      </p>
-    </div>
-    <div className="story__comparison" role="table" aria-label="Range picker friction comparison">
-      <div className="story__comparison-row story__comparison-head" role="row">
-        <span role="columnheader">Friction</span>
-        <span role="columnheader">Conventional pattern</span>
-        <span role="columnheader">Direct range editing</span>
+    <FieldGuideDescription
+      instruction={
+        <>
+          Focus the selected-period input to open the picker. Type a new endpoint or choose dates directly; both edit
+          the same range.
+        </>
+      }
+    >
+      <div className="story__section-heading">
+        <span>Why another datepicker?</span>
+        <h2>Range editing, not two date inputs sharing a box</h2>
+        <p>
+          The difference is not the number of calendars by itself. It is whether choosing and correcting a period
+          follows the user’s intent or forces a From–To sequence to start over.
+        </p>
       </div>
-      {comparisons.map(([concern, common, directEditing]) => (
-        <div className="story__comparison-row" role="row" key={concern}>
-          <strong role="cell">{concern}</strong>
-          <span role="cell">{common}</span>
-          <span role="cell">{directEditing}</span>
+      <div className="story__comparison" role="table" aria-label="Range picker friction comparison">
+        <div className="story__comparison-row story__comparison-head" role="row">
+          <span role="columnheader">Friction</span>
+          <span role="columnheader">Conventional pattern</span>
+          <span role="columnheader">Direct range editing</span>
         </div>
-      ))}
-    </div>
-    <aside className="field-guide__try">
-      <strong>Try it</strong>
-      Focus the selected-period input to open the picker. Type a new endpoint or choose dates directly; both edit the
-      same range.
-    </aside>
+        {comparisons.map(([concern, common, directEditing]) => (
+          <div className="story__comparison-row" role="row" key={concern}>
+            <strong role="cell">{concern}</strong>
+            <span role="cell">{common}</span>
+            <span role="cell">{directEditing}</span>
+          </div>
+        ))}
+      </div>
+    </FieldGuideDescription>
     <div className="field-guide__example">
       <TypeToEditExample />
     </div>
@@ -77,39 +82,39 @@ export const DifferenceStory = (): JSX.Element => (
 
 export const ArchitectureStory = (): JSX.Element => (
   <section className="story__wide story__idea" id="idea">
-    <div className="story__section-heading">
-      <span>The idea underneath</span>
-      <h2>Small state, explicit interaction</h2>
-    </div>
-    <div className="story__idea-grid">
-      <article>
-        <strong>One value</strong>
-        <code>null | {"{ start, end }"}</code>
-        <p>A single day is just start equal to end.</p>
-      </article>
-      <article>
-        <strong>One view</strong>
-        <code>visibleMonth</code>
-        <p>Navigation never silently edits selection.</p>
-      </article>
-      <article>
-        <strong>One active gesture</strong>
-        <code>paint · resize · move</code>
-        <p>
-          One gesture owns the pointer at a time, so actions cannot collide. Release returns the calendar cleanly to
-          rest.
-        </p>
-      </article>
-      <article>
-        <strong>Two layers</strong>
-        <code>committed + transient</code>
-        <p>Hover and drag previews cannot masquerade as public state.</p>
-      </article>
-    </div>
-    <aside className="field-guide__try">
-      <strong>Try it</strong>
-      Review which layer owns committed value, visible month, and the active gesture.
-    </aside>
+    <FieldGuideDescription
+      instruction={<>Review which layer owns committed value, visible month, and the active gesture.</>}
+    >
+      <div className="story__section-heading">
+        <span>The idea underneath</span>
+        <h2>Small state, explicit interaction</h2>
+      </div>
+      <div className="story__idea-grid">
+        <article>
+          <strong>One value</strong>
+          <code>null | {"{ start, end }"}</code>
+          <p>A single day is just start equal to end.</p>
+        </article>
+        <article>
+          <strong>One view</strong>
+          <code>visibleMonth</code>
+          <p>Navigation never silently edits selection.</p>
+        </article>
+        <article>
+          <strong>One active gesture</strong>
+          <code>paint · resize · move</code>
+          <p>
+            One gesture owns the pointer at a time, so actions cannot collide. Release returns the calendar cleanly to
+            rest.
+          </p>
+        </article>
+        <article>
+          <strong>Two layers</strong>
+          <code>committed + transient</code>
+          <p>Hover and drag previews cannot masquerade as public state.</p>
+        </article>
+      </div>
+    </FieldGuideDescription>
     <FieldGuideRecipe
       title="Keep state responsibilities separate"
       language="TSX"

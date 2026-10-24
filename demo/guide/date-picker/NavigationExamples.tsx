@@ -7,12 +7,7 @@ const labels = { hint: "" };
 export const StableViewExample = (): JSX.Element => (
   <div className="story__fixed-frame">
     <span>Fixed six-week frame</span>
-    <QunoDatePicker
-      className="story__picker"
-      defaultValue={{ start: "2026-08-10", end: "2026-08-18" }}
-      initialMonth="2026-08-01"
-      labels={labels}
-    />
+    <QunoDatePicker className="story__picker" defaultValue={null} initialMonth="2026-08-01" labels={labels} />
   </div>
 );
 

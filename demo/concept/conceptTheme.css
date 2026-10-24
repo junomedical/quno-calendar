@@ -24,17 +24,7 @@
 .concept .concept-canvas {
   background: var(--concept-canvas);
 }
-.concept .concept-nav,
-.concept .concept-nav nav {
-  border-color: var(--concept-border);
-}
-.concept .concept-nav nav button {
-  color: var(--concept-muted);
-}
-.concept .concept-nav nav button[aria-pressed="true"] {
-  color: var(--concept-on-selected);
-  background: var(--concept-selected);
-}
+
 .concept .concept-tour-guide,
 .concept .concept-product-card {
   color-scheme: light;
