@@ -119,3 +119,7 @@ shared header. See [QUNO-044](../shared/decisions.md#quno-044---keep-guide-secti
 
 The “Six weeks, every month” guide example starts with no selected period so month navigation demonstrates frame
 stability on its own. Selecting dates remains available in the example.
+
+The main demo keeps its canvas, product card and bottom drawer within the available mobile width, including narrow
+layout viewports below 320 px. Rotation, month navigation and fullscreen retain those bounds; the product menu
+scrolls within its header when necessary. See [QUNO-046](../shared/decisions.md#quno-046---keep-the-main-demo-within-the-available-mobile-width).

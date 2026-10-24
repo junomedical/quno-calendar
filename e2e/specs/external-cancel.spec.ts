@@ -172,6 +172,8 @@ test("keeps a later participant calendar row anchored when cancelling external c
 test("keeps the drawn Marco date focused after adding participants and cancelling external create", async ({
   page
 }) => {
+  // Keep all three participant rows mounted, including with Linux system fonts.
+  await page.setViewportSize({ width: 1280, height: 1200 });
   await page.goto("/demo/infinite-calendar");
   await page.getByTestId("scale-select").selectOption("5000");
   await goToWorkday(page, "2026-06-22");

@@ -18,9 +18,15 @@ const open = async (page: Page) => {
 };
 
 test("compacting many loaded rows preserves the date and clears estimates outside the loaded window", async ({
-  page
+  page,
+  browserName
 }) => {
+  if (browserName === "chromium") {
+    const session = await page.context().newCDPSession(page);
+    await session.send("Emulation.setCPUThrottlingRate", { rate: 6 });
+  }
   await open(page);
+  await expect(page.locator(".quno-calendar-viewport")).toHaveCSS("overflow-anchor", "none");
   await page.getByRole("button", { name: "Compact", exact: true }).click();
   await expect.poll(() => topDate(page)).toBe("2026-10-15");
   await expect.poll(async () => (await day(page, "2026-10-15").boundingBox())?.height).toBe(100);

@@ -320,3 +320,11 @@ header at every density. Long labels use ellipsis; the phone layout retains smal
 
 API unit tests also run before the demo service is built. The dedicated Vitest configuration shares source aliases
 with Vite while leaving server middleware out of test startup; see shared Decision QUNO-045.
+
+The main demo keeps its canvas, product card and bottom drawer within the available mobile width, including narrow
+layout viewports below 320 px. Rotation, month navigation and fullscreen retain those bounds; the product menu
+scrolls within its header when necessary. See [QUNO-046](../shared/decisions.md#quno-046---keep-the-main-demo-within-the-available-mobile-width).
+
+Layout changes flush captured native scroll observations rather than rereading a potentially superseded DOM
+position. This preserves the engine’s semantic date through row changes and idle date-window recentering.
+See [Decision 166](./decisions.md#166---ignore-uncommitted-dom-positions-during-layout-changes).

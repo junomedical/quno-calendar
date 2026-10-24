@@ -155,3 +155,7 @@ smaller screens keep them in reading order.
 
 Guide sections pair the complete description with one bottom-aligned Try it note on desktop, then show the live
 example and its Implementation recipes. Use Demo in the shared header to return to the playground.
+
+The main demo keeps its canvas, product card and bottom drawer within the available mobile width, including narrow
+layout viewports below 320 px. Rotation, month navigation and fullscreen retain those bounds; the product menu
+scrolls within its header when necessary. See [QUNO-046](./docs/shared/decisions.md#quno-046---keep-the-main-demo-within-the-available-mobile-width).

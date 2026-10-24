@@ -19,6 +19,36 @@ const layout: EngineLayout = {
 const viewport = { width: 800, height: 300, top: 0, left: 0 };
 
 describe("work proportional to changed presentation", () => {
+  it("keeps an uncommitted navigation when parent layout changes after its ownership expires", () => {
+    const clock = vi.spyOn(performance, "now").mockReturnValue(0);
+    const hook = renderHook(({ input }) => useEngine({ layout: input }), { initialProps: { input: layout } });
+    const { engine, adapter } = hook.result.current;
+    const element = document.createElement("div");
+    Object.defineProperties(element, { clientWidth: { value: 800 }, clientHeight: { value: 300 } });
+    let detach = () => {};
+    act(() => {
+      detach = adapter.attach({ viewport: element });
+    });
+    // A superseded React commit can leave the DOM at the preceding geometry revision.
+    vi.spyOn(adapter, "commit").mockImplementationOnce(() => {});
+    act(() => {
+      engine.position({
+        kind: "navigation",
+        now: 0,
+        anchor: { target: { dateKey: "2026-10-15" }, screen: { x: 0, y: 0 }, axes: "y" }
+      });
+    });
+    expect(element.scrollTop).not.toBe(engine.read().viewport.top);
+    clock.mockReturnValue(1000);
+    act(() => {
+      hook.rerender({ input: { ...layout, calendars: layout.calendars.slice(-1) } });
+    });
+    expect(engine.read().window.visibleDateKeys[0]).toBe("2026-10-15");
+    expect(element.scrollTop).toBe(engine.read().viewport.top);
+    detach();
+    clock.mockRestore();
+  });
+
   it("commits the current position after a pin update that leaves the rendered window unchanged", () => {
     const hook = renderHook(() => useEngine({ layout }));
     const { engine, adapter } = hook.result.current;

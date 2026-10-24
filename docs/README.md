@@ -203,3 +203,6 @@ panels and per-section Watch demo links; see [QUNO-044](./shared/decisions.md#qu
 Unit-test startup is independent of demo server builds, including on clean CI checkouts. See
 [QUNO-045](./shared/decisions.md#quno-045---keep-test-startup-independent-of-demo-server-builds) and the
 [test setup](./shared/testing.md#unit-tests).
+
+Main demo mobile containment, including narrow layout viewports and rotation, is recorded in
+[QUNO-046](./shared/decisions.md#quno-046---keep-the-main-demo-within-the-available-mobile-width).

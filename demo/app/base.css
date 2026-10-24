@@ -24,6 +24,10 @@ body {
   overflow: hidden;
 }
 
+body:has(.concept--guided) {
+  min-width: 0;
+}
+
 button,
 input,
 select {

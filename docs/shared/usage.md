@@ -1397,3 +1397,7 @@ npm run test:watch
 
 The dedicated Vitest configuration resolves source imports without loading the demo server configuration. No
 `build`, `dist` or `dist-demo` artifacts are required. Demo startup still uses `npm run dev` to prepare its service.
+
+The main demo’s product canvas and bottom drawer fit the available mobile layout width, including widths below
+320 px. Rotate the phone, open month navigation, switch Calendar orientation or enter fullscreen without widening
+the page. Swipe the header’s product menu horizontally when its labels do not all fit.

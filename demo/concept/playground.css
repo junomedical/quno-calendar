@@ -218,6 +218,8 @@
   color: #95869f;
 }
 .concept-product-stage {
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr);
   padding: 24px;
   place-items: center;
   overflow: auto;
@@ -399,11 +401,14 @@
   align-content: safe center;
 }
 .concept-product-stage > .concept-product-mount {
+  min-width: 0;
+  max-width: 100%;
   width: min(410px, 100%);
   padding: 0;
   display: block;
 }
 .concept-product-mount > .concept-product-card {
+  min-width: 0;
   display: grid;
   gap: 14px;
   padding: 18px;

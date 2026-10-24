@@ -644,3 +644,16 @@ retain their finite scenes and short tours.
 - Consequences: Unit and watch startup require no build, dist or dist-demo output, while dev/preview and deployed
   server builds retain their preparation steps. Keep every CI check and its existing order. Regress this with an
   isolated checkout that runs actual API tests and creates no generated output; retain clean deployment coverage.
+
+## QUNO-046 - Keep The Main Demo Within The Available Mobile Width
+
+- Date: 2026-10-24
+- Status: Accepted; refines the responsive presentation in QUNO-038, QUNO-039 and QUNO-043
+- Decision: Let the guided homepage shrink below the application’s legacy 320 px body minimum. Constrain its
+  single grid column and product mount to the available width; give the content and product card zero automatic
+  minimum width. Keep wide Calendar time/resource content scrolling inside its own viewport. The product menu
+  may scroll inside its header when labels exceed the available phone width.
+- Consequences: Verify actual document, visual viewport, canvas, component and drawer bounds in mobile Chromium
+  through portrait/landscape resizing, month navigation, both calendar orientations, contents, disclosure and
+  fullscreen. Include a 280 px layout viewport as well as standard phone widths. Keep public component styling,
+  desktop presentation and the documentation/archive body minimum unchanged.
