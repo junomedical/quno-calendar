@@ -638,3 +638,19 @@ Watch demo links, retained header navigation, multi-paragraph Calendar descripti
 The busy-schedule exhibit’s typography checks cover 1440 px and 390 px layouts in both browser appearances.
 Across Quiet/Busy/Packed, require compact single-line dates, normal demo line spacing, text bounds inside each
 header, vertical fit and retained calendar height.
+
+Mobile-width regression checks use a touch-enabled mobile Chromium context and assert document, layout/visual
+viewport, canvas, drawer, card and component bounds at 280, 320, 360, 390 and 844 px. Exercise rotation, both
+Calendar orientations, picker month navigation, drawer contents/disclosure and fullscreen. Reinstating the old
+320 px body minimum must fail the 280 px case for both products. Header checks require contained, reachable tabs
+while allowing the authored internal horizontal scrolling, including with Linux system font metrics.
+
+Row-filter settlement runs with sixfold Chromium CPU throttling and requires native scroll anchoring to be disabled. A unit regression skips an obsolete viewport
+commit, expires navigation ownership and changes parent layout; the current date and resulting committed scroll
+position must survive. The external-create cancellation fixture reserves enough viewport height for all three
+asserted participant rows to remain mounted under Linux font metrics, retaining the three-draft and row-offset
+assertions.
+
+Sticky-header pin geometry uses a fixed working-hour clock. External zoom deliberately reveals the current clock;
+a machine clock past displayed hours can already place the viewport at its maximum horizontal offset. The test
+must retain real scroll room before asserting movement rather than changing the pin’s geometry requirements.

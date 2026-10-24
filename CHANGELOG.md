@@ -4,6 +4,24 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+- Fix the sticky-header browser fixture’s wall-clock dependency: freeze a working-hour clock before mounting,
+  preserving its real horizontal-scroll and pin-alignment assertions. A late clock left the calendar at its right
+  scroll limit, so adding 60 px could not move the pin (467/468 full Chromium cases passed; this fixture then
+  reproduced the same unchanged-x failure three times). The corrected fixture passes five repeated Chromium runs.
+
+- Keep the main demo’s Datepicker, Calendar and bottom drawer inside narrow mobile layout viewports. Remove its
+  inherited 320 px body floor and use shrinkable content/product grids. Add touch-enabled mobile Chromium geometry
+  checks across rotation, month navigation, both Calendar orientations, drawer states and fullscreen at 280–844 px.
+
+- Address the subsequent Chromium CI failures: allow the mobile product menu’s intended internal scrolling while
+  checking reachable tabs and page containment; reserve enough height for all three participant drafts in the
+  cancellation fixture; flush captured native observations before layout changes instead of reading an uncommitted DOM position,
+  preserving the date through row filtering and idle recentering. Disable native scroll anchoring in the virtual
+  viewport so the browser cannot apply a competing correction. The previous run had 463/466 passes, failing menu scroll-width equality,
+  a week-shift after row contraction, and a three-draft assertion with only two rows mounted. The main run repeated
+  the menu/draft failures with 464/466 passes. Focused verification passes all 725 unit tests, 24 affected Chromium
+  cases and 20 consecutive sixfold CPU-throttled row-filter runs.
+
 - Fix CI’s unit-test startup failure (`Could not resolve #quno-api/demo-event-service` with no generated
   `build/demo-api/events.js`). Give Vitest a separate React/source-alias configuration instead of loading the demo
   server middleware. Share the alias definitions with Vite and retain all CI checks in their existing order. An

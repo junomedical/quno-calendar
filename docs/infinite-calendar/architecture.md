@@ -55,6 +55,8 @@ so delayed collision growth remains centered. Date-only restoration leaves the o
 `CalendarEngine` publishes geometry, viewport and windows together. React renders that revision; `ViewportAdapter`
 commits it in a layout effect before paint. The adapter rejects obsolete revisions and observes browser clamping once.
 It never retries an old pixel position. Native scroll observations are frame-bounded and flushed before layout changes.
+These layout flushes use captured observations; they never reinterpret a superseded DOM position as current input.
+The optional stylesheet disables native scroll anchoring so the engine owns semantic corrections.
 
 Ownership priority is explicit restoration, gesture, navigation, automatic layout correction, then idle recentering.
 Equal-priority requests supersede older ones; cancellation IDs cannot cancel a later owner. Manual intent cancels
@@ -146,3 +148,7 @@ Mounted event registrations and captured anchors include segment date and partic
 native panning; an activated hold captures the saved target and reserves touch movement. Its timer and native
 listeners are scoped to one touch and removed on completion, cancellation or unmount. Presentation shells retain
 ordinary touch behavior; consumer card content and existing permission gates stay separate. See Decision 163.
+
+Layout changes flush captured native scroll observations rather than rereading a potentially superseded DOM
+position. This preserves the engine’s semantic date through row changes and idle date-window recentering.
+See [Decision 166](./decisions.md#166---ignore-uncommitted-dom-positions-during-layout-changes).

@@ -2163,3 +2163,27 @@ the 560 px exhibit, its light calendar palette, responsive labels and public com
 [QUNO-045](../shared/decisions.md#quno-045---keep-test-startup-independent-of-demo-server-builds) extends the
 verification around Decision 164 with a dedicated Vitest configuration. API tests resolve the query service from
 source without loading the demo middleware or requiring generated assets. Deployed native imports stay unchanged.
+
+## Shared mobile width bounds — 2026-10-24
+
+[QUNO-046](../shared/decisions.md#quno-046---keep-the-main-demo-within-the-available-mobile-width) keeps the guided
+main demo inside the available mobile width through rotation and interaction, including layout viewports below
+320 px. This shared demo presentation does not change the public component’s styles or contracts.
+
+## 166 - Ignore Uncommitted DOM Positions During Layout Changes
+
+Date: 2026-10-24
+Status: Accepted; refines Decision 116-runtime’s single viewport authority and Decision 117’s commit model
+
+Before every layout change, flush only native scroll observations captured before React mutated the DOM. Do not
+read the viewport’s current scroll offset at that point: a superseded commit may leave it at the previous geometry
+revision even though the engine has already navigated or recentered. Reinterpreting those pixels against the new
+geometry can shift the displayed date by one week after row filtering. Retain actual DOM reads for browser input,
+settlement and committed clamp observation. This extends the existing zoom-safe flush to ordinary layout changes.
+Disable native CSS scroll anchoring in the virtual viewport as well, so the browser cannot apply another correction
+after the engine has preserved its semantic anchor.
+
+Regress a skipped commit followed by expired navigation ownership and a parent layout change, preserving date and
+committed scroll position. Exercise row contraction, expansion and idle recentering under sixfold Chromium CPU
+throttling, plus normal navigation, zoom, draft and compatibility coverage. The optional stylesheet carries the
+anchoring policy; no public API changes.

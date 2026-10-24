@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test";
 import { goToWorkday, setDemoZoom, topVisibleDayDate } from "#quno-e2e/helpers";
 
 test("keeps the time scale fixed and day dates css-sticky", async ({ page }) => {
+  await page.clock.setFixedTime(new Date("2026-07-06T11:00:00Z"));
   await page.goto("/demo/infinite-calendar");
   await setDemoZoom(page, 1.7);
   const viewport = page.locator(".quno-calendar-viewport");

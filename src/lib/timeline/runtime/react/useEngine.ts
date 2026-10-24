@@ -11,8 +11,7 @@ export function useEngine({ layout }: { layout: EngineLayout }) {
   const snapshot = useSyncExternalStore((listener) => engine.subscribe({ listener }), reader.read, reader.read);
   useLayoutEffect(() => {
     const now = performance.now();
-    if (engine.expectsZoom({ zoom: layout.settings.zoom, now })) adapter.flushPending();
-    else adapter.flush();
+    adapter.flushPending();
     engine.updateLayout({ layout, now });
   }, [adapter, engine, layout]);
   useLayoutEffect(() => {

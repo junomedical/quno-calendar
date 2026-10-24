@@ -1263,3 +1263,9 @@ public contracts, interactive examples and archive presentation remain unchanged
   existing August 2026 month. Month navigation alone leaves selection empty; visitors may still select dates.
 - Consequences: Verify no initial selected days, a fixed 42-cell grid and unchanged frame height through both month
   chevrons, then verify real selection. Keep other examples, archive sources and public Datepicker defaults unchanged.
+
+## Shared mobile width bounds — 2026-10-24
+
+[QUNO-046](../shared/decisions.md#quno-046---keep-the-main-demo-within-the-available-mobile-width) keeps the guided
+main demo inside the available mobile width through rotation and interaction, including layout viewports below
+320 px. This shared demo presentation does not change the public component’s styles or contracts.

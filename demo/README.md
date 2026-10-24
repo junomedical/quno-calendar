@@ -48,3 +48,8 @@ panel and per-section Watch demo links; shared-header Demo navigation remains.
 
 `vitest.config.ts` shares `vite/projectAliases.ts` with the demo’s Vite configuration but loads no API middleware.
 Unit/watch startup therefore needs no generated service file; dev and deployment commands still prepare it.
+
+The guided main demo has no 320 px body floor. Its canvas/content and product grid can shrink to the available
+mobile width without expanding the page; Calendar’s larger content remains scrollable inside its viewport. Keep
+product mounts/cards shrinkable, and check portrait/landscape rotation, month navigation, drawer states and
+fullscreen at 280, 320, 360, 390 and 844 px. Header tabs scroll internally when their labels do not fit.

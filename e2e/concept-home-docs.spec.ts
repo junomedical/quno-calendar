@@ -55,10 +55,17 @@ for (const width of [1440, 390]) {
       await expect(page.locator('a[href^="/docs/archive"]')).toHaveCount(0);
       const geometry = await nav.evaluate((node) => {
         const box = node.getBoundingClientRect();
-        return { right: box.right, scroll: node.scrollWidth, width: node.clientWidth };
+        return { left: box.left, right: box.right, overflow: getComputedStyle(node).overflowX };
       });
+      expect(geometry.left).toBeGreaterThanOrEqual(0);
       expect(geometry.right).toBeLessThanOrEqual(width);
-      expect(geometry.scroll).toBeLessThanOrEqual(geometry.width);
+      if (width < 851) expect(geometry.overflow).toBe("auto");
+      const lastTab = nav.getByRole("link").last();
+      await lastTab.scrollIntoViewIfNeeded();
+      const lastTabBox = (await lastTab.boundingBox())!;
+      expect(lastTabBox.x).toBeGreaterThanOrEqual(geometry.left);
+      expect(lastTabBox.x + lastTabBox.width).toBeLessThanOrEqual(geometry.right);
+      expect(await page.locator("body").evaluate((node) => node.scrollWidth)).toBeLessThanOrEqual(width);
       await page.goto(`/docs/archive/${product}`);
       await expect(page.getByText(/Archived field guides · 20 October 2026/)).toBeVisible();
       await expect(page.locator(".field-guide h1")).toBeVisible();
