@@ -1,5 +1,7 @@
 # Quno/Date Parser
 
+The demo popup shows chapter explanations; use Documentation in the shared header to open implementation recipes.
+
 Quno/Date Parser owns dependency-free recognition and tokenization of timezone-free dates and inclusive ranges.
 
 - Public entry point: `@quno/calendar/date-parser`

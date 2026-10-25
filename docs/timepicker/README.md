@@ -1,5 +1,7 @@
 # Quno/Timepicker
 
+The demo popup shows chapter explanations; use Documentation in the shared header to open implementation recipes.
+
 Quno/Timepicker selects a standalone timezone-free clock, without requiring a date.
 
 - Public entry point: `@quno/calendar/timepicker`

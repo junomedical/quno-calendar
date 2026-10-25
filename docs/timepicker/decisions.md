@@ -166,3 +166,8 @@ public contracts, interactive examples and archive presentation remain unchanged
 
 [QUNO-048](../shared/decisions.md#quno-048---keep-statistics-free-of-instructions-and-list-actual-dependencies)
 removes Try it notes from static statistics blocks and lists only actual dependencies, omitting an empty row.
+
+## Shared demo recipe navigation — 2026-10-25
+
+[QUNO-049](../shared/decisions.md#quno-049---keep-recipe-links-out-of-demo-popups) removes the recipe link from
+demo popups. Implementation recipes remain accessible through Documentation in the shared header.

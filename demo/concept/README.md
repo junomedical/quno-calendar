@@ -1,5 +1,7 @@
 # Interactive concept playground
 
+Demo popups show chapter explanations without a recipe link. Open Documentation in the shared header for implementation recipes.
+
 `/` is the main interactive homepage, also served at `/concept`, using public `@quno/calendar/*` entry points.
 All five products share a live full-window canvas and a floating information guide. Current field guides are at
 `/docs`; the previous guides are preserved at `/docs/archive`. Focused demos and legacy guide routes still work.

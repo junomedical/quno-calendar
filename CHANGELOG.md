@@ -4,6 +4,13 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+- Remove Read the recipe links from all demo popups; implementation recipes remain in Documentation through
+  the shared header. Explain how the horizontal timeline fits more calendars and gives appointment text more room
+  in the Infinite scroll chapter.
+  Verification: all 725 unit tests and 29 affected Chromium checks pass, including popup text bounds at desktop
+  and 320 px, drawer disclosure and fullscreen. Formatting, architecture, types, lint, Preact compatibility, demo
+  build, package verification, size reporting and pack dry-run pass. No unresolved verification blocker remains.
+
 - Remove Try it notes from guide statistics blocks. List actual `react` and `react-dom` peer dependencies for UI
   products and omit the dependency-free parser’s empty row. Retain interactive example instructions.
   Verification: all 725 unit tests pass with two workers, and 22 affected Chromium checks pass, including

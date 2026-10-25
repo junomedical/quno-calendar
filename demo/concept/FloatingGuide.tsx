@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowUpRight, ChevronDown, ChevronUp } from "lucide-react";
+import { ArrowLeft, ChevronDown, ChevronUp } from "lucide-react";
 import { useLayoutEffect, type ReactNode, type RefObject } from "react";
 import type { PlaybackActions } from "./usePlayback";
 import { DemoContents } from "./DemoContents";
@@ -112,12 +112,7 @@ export function FloatingGuide({
         ) : intro ? (
           <ConceptParagraphs paragraphs={introduction.paragraphs} />
         ) : (
-          <>
-            <ConceptParagraphs paragraphs={scenario.paragraphs} />
-            <a href={`/docs/${product}#${scenario.anchor}`}>
-              Read the recipe <ArrowUpRight size={14} />
-            </a>
-          </>
+          <ConceptParagraphs paragraphs={scenario.paragraphs} />
         )}
       </div>
       {!collapsed && children}

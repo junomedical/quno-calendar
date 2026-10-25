@@ -135,6 +135,7 @@ explanation on wide screens; on phones, the drawer overlays their full-height ca
 chapters with first-person explanations, including an 8840 ms scroll to 22 July 1980; Date Input explains format
 guessing, opens its composed picker on focus and demonstrates natural typing
 with four varied examples and a readable pause before Enter, plus repeated day/month keyboard edits.
+Demo popups show chapter explanations without a recipe link. Open Documentation in the shared header for implementation recipes.
 See [concept notes](./demo/concept/README.md) for JSON authoring, choreography and verification.
 
 Timepicker’s concept uses larger **Cadence** buttons and also shows date-and-time selection inside Datepicker. The parser workbench exposes

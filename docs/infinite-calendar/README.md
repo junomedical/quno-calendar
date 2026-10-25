@@ -1,5 +1,7 @@
 # Quno/Infinite Calendar
 
+The demo popup shows chapter explanations; use Documentation in the shared header to open implementation recipes.
+
 Quno/Infinite Calendar owns virtualized horizontal and vertical schedules, timestamped events, async loading, event
 rendering, creation and movement, navigation, zoom, and visual focus.
 

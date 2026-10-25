@@ -1,5 +1,7 @@
 # Quno/Datepicker
 
+The demo popup shows chapter explanations; use Documentation in the shared header to open implementation recipes.
+
 Quno/Datepicker owns direct manipulation of a timezone-free day or inclusive range, including painting, endpoint
 editing, range movement, month navigation, motion, localization, theming, and day presentation hooks.
 

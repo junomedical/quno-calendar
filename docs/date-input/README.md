@@ -1,5 +1,7 @@
 # Quno/Date Input
 
+The demo popup shows chapter explanations; use Documentation in the shared header to open implementation recipes.
+
 Quno/Date Input owns the accessible controlled or uncontrolled text field that consumes Date Parser results and emits
 the shared timezone-free `DateRange` model.
 

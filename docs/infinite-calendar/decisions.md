@@ -2192,3 +2192,17 @@ anchoring policy; no public API changes.
 
 [QUNO-048](../shared/decisions.md#quno-048---keep-statistics-free-of-instructions-and-list-actual-dependencies)
 removes Try it notes from static statistics blocks and lists only actual dependencies, omitting an empty row.
+
+## Shared demo recipe navigation — 2026-10-25
+
+[QUNO-049](../shared/decisions.md#quno-049---keep-recipe-links-out-of-demo-popups) removes the recipe link from
+demo popups. Implementation recipes remain accessible through Documentation in the shared header.
+
+## 167 - Explain The Horizontal Timeline In The Infinite Scroll Chapter
+
+Date: 2026-10-25
+Status: Accepted; refines Decision 147's concept explanations
+
+Follow the infinite-calendar paragraph with the rationale for a horizontal timeline: fitting more calendars on
+screen and giving appointment cards more room for natural text flow. Combine the previous wider-card sentence
+with this explanation. Keep the chapter's scrolling demonstration unchanged.

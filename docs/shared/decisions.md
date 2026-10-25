@@ -680,3 +680,12 @@ retain their finite scenes and short tours.
   Compatibility and retain the separate payload, stylesheet and runtime facts.
 - Consequences: Verify all five statistics sections on desktop and phone for absent Try it notes, exact dependency
   names, an omitted empty row and contained description/statistics geometry. Public package behavior is unchanged.
+
+## QUNO-049 - Keep Recipe Links Out Of Demo Popups
+
+- Date: 2026-10-25
+- Status: Accepted; refines QUNO-028's recipe navigation and QUNO-043's shared header
+- Decision: Remove Read the recipe from every product's floating demo explanation and mobile drawer. Use
+  Documentation in the shared header to reach the product guide and its implementation recipes.
+- Consequences: Preserve chapter navigation, disclosure and playback. Verify desktop and phone popup bounds,
+  reachable explanation text and header documentation links across all five products. Public APIs are unchanged.
