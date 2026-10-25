@@ -135,6 +135,7 @@ explanation on wide screens; on phones, the drawer overlays their full-height ca
 chapters with first-person explanations, including an 8840 ms scroll to 22 July 1980; Date Input explains format
 guessing, opens its composed picker on focus and demonstrates natural typing
 with four varied examples and a readable pause before Enter, plus repeated day/month keyboard edits.
+Demo popups show chapter explanations without a recipe link. Open Documentation in the shared header for implementation recipes.
 See [concept notes](./demo/concept/README.md) for JSON authoring, choreography and verification.
 
 Timepicker’s concept uses larger **Cadence** buttons and also shows date-and-time selection inside Datepicker. The parser workbench exposes
@@ -153,8 +154,9 @@ Demo and current documentation share a left-aligned product header and follow th
 In documentation, **Demo** returns to the matching product. Wide guides place supporting notes on the right;
 smaller screens keep them in reading order.
 
-Guide sections pair the complete description with one bottom-aligned Try it note on desktop, then show the live
-example and its Implementation recipes. Use Demo in the shared header to return to the playground.
+Interactive guide sections pair the complete description with one bottom-aligned Try it note on desktop, then show
+the live example and its Implementation recipes. Statistics blocks have no Try it note; dependencies list actual
+package names and omit the row when empty. Use Demo in the shared header to return to the playground.
 
 The main demo keeps its canvas, product card and bottom drawer within the available mobile width, including narrow
 layout viewports below 320 px. Rotation, month navigation and fullscreen retain those bounds; the product menu

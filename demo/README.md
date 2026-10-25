@@ -56,3 +56,6 @@ fullscreen at 280, 320, 360, 390 and 844 px. Header tabs scroll internally when 
 
 The main Timepicker demo also constrains its inner card grid. At 320 px, compact side gutters keep the clock
 inside the card and all three cadence buttons on one row without reducing their touch targets.
+
+Current guide statistics blocks omit Try it notes. Dependencies contain actual package names and disappear when
+empty; keep compatibility details in their separate row. See shared decision QUNO-048.

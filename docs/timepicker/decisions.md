@@ -161,3 +161,13 @@ public contracts, interactive examples and archive presentation remain unchanged
 - Consequences: Verify root/minute/cadence bounds at 280–844 px, one-row cadence geometry and real pointer/keyboard
   activation at 320×667, all three slot counts, off-slot value preservation, rotation and fullscreen. Desktop and
   package styles retain their existing values.
+
+## Shared statistics presentation — 2026-10-24
+
+[QUNO-048](../shared/decisions.md#quno-048---keep-statistics-free-of-instructions-and-list-actual-dependencies)
+removes Try it notes from static statistics blocks and lists only actual dependencies, omitting an empty row.
+
+## Shared demo recipe navigation — 2026-10-25
+
+[QUNO-049](../shared/decisions.md#quno-049---keep-recipe-links-out-of-demo-popups) removes the recipe link from
+demo popups. Implementation recipes remain accessible through Documentation in the shared header.

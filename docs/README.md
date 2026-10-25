@@ -1,8 +1,12 @@
 # Documentation
 
+Demo popups show chapter explanations without a recipe link. Open Documentation in the shared header for implementation recipes.
+
 The concept homepage is `/`, with shareable product/chapter paths. Current field guides live at `/docs`;
 the 20 October 2026 source snapshot remains at `/docs/archive`. Legacy `/guide/*` links continue to work.
 Current guides retain their specialized public-API examples; Demo in the shared header returns to the selected product.
+Statistics blocks omit Try it notes and list only actual dependencies; see
+[QUNO-048](./shared/decisions.md#quno-048---keep-statistics-free-of-instructions-and-list-actual-dependencies).
 
 The documentation follows the five public `@quno/calendar` products. Start with the product you are changing, then
 use the shared records for package-wide contracts and release work.

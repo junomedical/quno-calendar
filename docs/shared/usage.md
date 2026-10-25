@@ -1,5 +1,7 @@
 # Unified Usage Guide
 
+Demo popups show chapter explanations without a recipe link. Open Documentation in the shared header for implementation recipes.
+
 The live concept homepage is available at `/`, with shareable product/demo links. The documentation overview at
 `/docs` links to five task-oriented field guides:
 
@@ -10,7 +12,8 @@ The live concept homepage is available at `/`, with shareable product/demo links
 - `/docs/timepicker`
 
 Each guide links to its concept introduction through Demo in the shared header; focused sandboxes retain their direct routes. This document remains the single source for copyable production recipes
-across all five independent feature entry points.
+across all five independent feature entry points. Statistics blocks omit Try it notes. Their Dependencies row lists
+`react` and `react-dom` for UI products and is omitted for the headless parser; Preact remains in Compatibility.
 
 ## Entry points
 

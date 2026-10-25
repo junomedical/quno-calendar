@@ -659,3 +659,7 @@ Mobile width checks include Timepicker’s actual root, every minute column and 
 its outer card. At 320×667 require all three 80×44 px cadence controls on one row, real pointer/keyboard changes,
 correct slot counts, preserved off-slot time and successful minute selection. Retain 280–844 px rotation, drawer
 and fullscreen geometry and desktop cadence coverage.
+
+Statistics browser checks cover all five guides at 1440 px and 390 px. Require no Try it note in their enclosing
+section, exact `react`/`react-dom` dependency names for UI entries, no empty Dependencies row for Parser, and
+statistics/description bounds inside their section and viewport. Unit checks cover the same dependency facts.

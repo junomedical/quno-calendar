@@ -10,7 +10,7 @@ export type FieldGuideProductionProfile = {
   }>;
   runtime: string;
   compatibility: string;
-  dependencies: string;
+  dependencies: ReadonlyArray<string>;
 };
 
 export const infiniteCalendarProduction: FieldGuideProductionProfile = {
@@ -23,7 +23,7 @@ export const infiniteCalendarProduction: FieldGuideProductionProfile = {
   ],
   runtime: "React 18+ and React DOM peers",
   compatibility: "Preact 10.18+ through compat aliases",
-  dependencies: "Viewport virtualization is included; React peers stay external"
+  dependencies: ["react", "react-dom"]
 };
 
 export const datepickerProduction: FieldGuideProductionProfile = {
@@ -36,7 +36,7 @@ export const datepickerProduction: FieldGuideProductionProfile = {
   ],
   runtime: "React 18+ and React DOM peers",
   compatibility: "Preact 10.18+ through compat aliases",
-  dependencies: "No bundled date or positioning library"
+  dependencies: ["react", "react-dom"]
 };
 
 export const dateInputProduction: FieldGuideProductionProfile = {
@@ -49,7 +49,7 @@ export const dateInputProduction: FieldGuideProductionProfile = {
   ],
   runtime: "React 18+ and React DOM peers",
   compatibility: "Preact 10.18+ through compat aliases",
-  dependencies: "No bundled date library"
+  dependencies: ["react", "react-dom"]
 };
 
 export const dateParserProduction: FieldGuideProductionProfile = {
@@ -59,7 +59,7 @@ export const dateParserProduction: FieldGuideProductionProfile = {
   artifacts: [{ label: "JavaScript", gzip: "6.03 KiB", raw: "22.63 KiB", budget: "≤ 7 KiB gzip" }],
   runtime: "No UI framework runtime",
   compatibility: "ESM, CommonJS, browser, Node, and SSR",
-  dependencies: "No runtime dependencies"
+  dependencies: []
 };
 
 export const timepickerProduction: FieldGuideProductionProfile = {
@@ -72,5 +72,5 @@ export const timepickerProduction: FieldGuideProductionProfile = {
   ],
   runtime: "React 18+ and React DOM peers",
   compatibility: "Preact 10.18+ through compat aliases",
-  dependencies: "No bundled date, parser, or positioning library"
+  dependencies: ["react", "react-dom"]
 };

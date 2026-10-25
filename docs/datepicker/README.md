@@ -1,5 +1,7 @@
 # Quno/Datepicker
 
+The demo popup shows chapter explanations; use Documentation in the shared header to open implementation recipes.
+
 Quno/Datepicker owns direct manipulation of a timezone-free day or inclusive range, including painting, endpoint
 editing, range movement, month navigation, motion, localization, theming, and day presentation hooks.
 
@@ -113,7 +115,7 @@ Current documentation shares the demo's left-aligned header, follows browser lig
 places supporting notes on the right on desktop. The Demo link returns to this product's concept; smaller
 screens stack the notes. See [QUNO-043](../shared/decisions.md#quno-043---share-left-aligned-navigation-and-system-themed-documentation).
 
-Sections keep one Try it note bottom-aligned with the full desktop description, then show the demo followed by
+Interactive sections keep one Try it note bottom-aligned with the full desktop description, then show the demo followed by
 Implementation recipes. Extra demo-link panels and per-section links are removed; return through Demo in the
 shared header. See [QUNO-044](../shared/decisions.md#quno-044---keep-guide-sections-in-reading-order-with-one-instruction).
 
@@ -123,3 +125,6 @@ stability on its own. Selecting dates remains available in the example.
 The main demo keeps its canvas, product card and bottom drawer within the available mobile width, including narrow
 layout viewports below 320 px. Rotation, month navigation and fullscreen retain those bounds; the product menu
 scrolls within its header when necessary. See [QUNO-046](../shared/decisions.md#quno-046---keep-the-main-demo-within-the-available-mobile-width).
+
+The guide’s statistics block has no Try it note. Its Dependencies row lists the `react` and `react-dom` peers.
+See [QUNO-048](../shared/decisions.md#quno-048---keep-statistics-free-of-instructions-and-list-actual-dependencies).

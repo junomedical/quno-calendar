@@ -1269,3 +1269,13 @@ public contracts, interactive examples and archive presentation remain unchanged
 [QUNO-046](../shared/decisions.md#quno-046---keep-the-main-demo-within-the-available-mobile-width) keeps the guided
 main demo inside the available mobile width through rotation and interaction, including layout viewports below
 320 px. This shared demo presentation does not change the public component’s styles or contracts.
+
+## Shared statistics presentation — 2026-10-24
+
+[QUNO-048](../shared/decisions.md#quno-048---keep-statistics-free-of-instructions-and-list-actual-dependencies)
+removes Try it notes from static statistics blocks and lists only actual dependencies, omitting an empty row.
+
+## Shared demo recipe navigation — 2026-10-25
+
+[QUNO-049](../shared/decisions.md#quno-049---keep-recipe-links-out-of-demo-popups) removes the recipe link from
+demo popups. Implementation recipes remain accessible through Documentation in the shared header.

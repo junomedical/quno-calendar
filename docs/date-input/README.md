@@ -1,5 +1,7 @@
 # Quno/Date Input
 
+The demo popup shows chapter explanations; use Documentation in the shared header to open implementation recipes.
+
 Quno/Date Input owns the accessible controlled or uncontrolled text field that consumes Date Parser results and emits
 the shared timezone-free `DateRange` model.
 
@@ -108,3 +110,6 @@ screens stack the notes. See [QUNO-043](../shared/decisions.md#quno-043---share-
 Sections keep one Try it note bottom-aligned with the full desktop description, then show the demo followed by
 Implementation recipes. Extra demo-link panels and per-section links are removed; return through Demo in the
 shared header. See [QUNO-044](../shared/decisions.md#quno-044---keep-guide-sections-in-reading-order-with-one-instruction).
+
+The guide’s statistics block has no Try it note. Its Dependencies row lists the `react` and `react-dom` peers.
+See [QUNO-048](../shared/decisions.md#quno-048---keep-statistics-free-of-instructions-and-list-actual-dependencies).
