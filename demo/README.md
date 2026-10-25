@@ -25,7 +25,7 @@ flowchart LR
 The demo may use development dependencies and mock transports. Library code must never import from `demo/`.
 
 The [`concept`](./concept/README.md) folder owns `/` and `/concept`: all five products share a live full-window
-canvas and draggable, collapsible guide with introduction, All demos contents and previous/next footer. Chapters
+canvas and draggable, collapsible guide with introduction and an arrow-free All demos button between Previous and Next in the footer. Chapters
 start automatically and loop with reduced-motion and manual-takeover guards. Fullscreen sits beside the guide chevron. Calendar scene controls remain in a separate dock. The guide starts 24 px from bottom left and grows upward.
 Non-calendar demos sit to its right on wide screens and behind its overlay drawer on phones. Calendar session edits survive chapter
 and fullscreen navigation. All scenario copy, initial state and actions live in individual JSON files.

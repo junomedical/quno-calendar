@@ -1,10 +1,10 @@
-import { ArrowLeft, ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import { useLayoutEffect, type ReactNode, type RefObject } from "react";
 import type { PlaybackActions } from "./usePlayback";
 import { DemoContents } from "./DemoContents";
 import type { ProductId, Scenario } from "./scenarioTypes";
 import { useFloatingGuide } from "./useFloatingGuide";
-import { contentsLabel, type Introduction } from "./tourContent";
+import { type Introduction } from "./tourContent";
 import { ConceptParagraphs } from "./ConceptParagraphs";
 import { useGuideDrawer } from "./useGuideDrawer";
 export function FloatingGuide({
@@ -70,20 +70,6 @@ export function FloatingGuide({
       }}
     >
       <div className="concept-tour-guide-top" {...drawer}>
-        {!contents && !collapsed && (
-          <button
-            className="concept-tour-back"
-            aria-label={contentsLabel(product)}
-            onClick={() => {
-              actions.stop();
-              setContents(true);
-              setCollapsed(false);
-            }}
-          >
-            <ArrowLeft size={16} />
-            <span>{contentsLabel(product)}</span>
-          </button>
-        )}
         <h1>{title}</h1>
         <div className="concept-tour-guide-actions">
           {fullscreenControl}

@@ -1,5 +1,6 @@
 # Documentation
 
+Demo popups place the arrow-free All demos button between Previous and Next in the footer.
 Demo popups show chapter explanations without a recipe link. Open Documentation in the shared header for implementation recipes.
 
 The concept homepage is `/`, with shareable product/chapter paths. Current field guides live at `/docs`;

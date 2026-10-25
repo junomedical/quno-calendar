@@ -689,3 +689,14 @@ retain their finite scenes and short tours.
   Documentation in the shared header to reach the product guide and its implementation recipes.
 - Consequences: Preserve chapter navigation, disclosure and playback. Verify desktop and phone popup bounds,
   reachable explanation text and header documentation links across all five products. Public APIs are unchanged.
+
+## QUNO-050 - Put Demo Contents Between Previous And Next
+
+- Date: 2026-10-25
+- Status: Accepted; supersedes QUNO-035's two-button footer and header contents placement
+- Decision: Place the contextual All demos button between Previous and Next in the shared guide footer. Remove
+  its back arrow and keep its full product label visible on phones. Keep the title beside fullscreen and collapse
+  controls. Hide the contents button while contents are open and hide the footer while collapsed.
+- Consequences: Preserve contents selection, Escape dismissal, playback stopping and chapter navigation. Verify
+  centered footer geometry, non-overlapping controls and 44 px mobile targets across all five products, including
+  narrow phones and landscape. Public component contracts remain unchanged.

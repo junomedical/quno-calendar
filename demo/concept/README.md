@@ -189,8 +189,9 @@ opts into `chapterOnly`, so introduction arrival/restoration leaves the ready co
 Resolve a phrase cycles next Friday, tomorrow 10:30, past 3 days, 22 July 1980, 12 Oct 2026 - 16 Oct 2026 and
 next month, holding each complete example for 1700 ms. Loop reset restores the ready date/time before repeating.
 
-Guide footers contain only Previous and Next, with no counter or duplicate title. The contextual All calendar demos
-(or current product) action opens contents and matches collapse height: 34 px desktop, 44 px mobile. Calendar docks
+Guide footers place the arrow-free All calendar demos (or current product) action between Previous and Next,
+with no counter or duplicate title. It opens contents and retains its full label on narrow phones. Footer controls
+match collapse height: 34 px desktop, 44 px mobile. The contents action hides while contents are open. Calendar docks
 omit small labels, retain accessible group names and keep their independent 40 px height. Controlled drafts use the public
 active-draft move callback; their editor follows dragging, Save commits the new slot and Cancel discards it.
 

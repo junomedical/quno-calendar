@@ -30,7 +30,7 @@ for (const [product, chapter, count] of products)
       await expect(all).toHaveText(`All ${product.toLowerCase()} demos`);
       const collapse = guide.getByRole("button", { name: "Collapse description", exact: true });
       expect((await all.boundingBox())!.height).toBe((await collapse.boundingBox())!.height);
-      await expect(guide.locator(".concept-tour-pagination button")).toHaveCount(2);
+      await expect(guide.locator(".concept-tour-pagination button")).toHaveCount(3);
       await expect(guide.locator(".concept-tour-current")).toHaveCount(0);
       await all.click();
       await expect(guide.locator(".concept-tour-contents button")).toHaveCount(count);

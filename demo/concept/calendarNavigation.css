@@ -1,5 +1,6 @@
 .concept-tour-guide .concept-tour-pagination {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
   justify-content: space-between;
   gap: 8px;
@@ -7,6 +8,17 @@
   margin-top: 16px;
   padding-top: 12px;
   border-top: 1px solid #e4ddec;
+}
+.concept-tour-pagination button:first-child {
+  justify-self: start;
+}
+.concept-tour-pagination button:last-child {
+  grid-column: 3;
+  justify-self: end;
+}
+.concept-tour-guide .concept-tour-pagination button {
+  min-height: 34px;
+  padding: 6px 8px;
 }
 .concept-tour-pagination button:disabled {
   opacity: 0.35;
@@ -32,6 +44,9 @@
   font-variant-numeric: tabular-nums;
 }
 @media (max-width: 450px) {
+  .concept-tour-guide .concept-tour-pagination {
+    gap: 4px;
+  }
   .concept-tour-pagination button > span {
     display: none;
   }

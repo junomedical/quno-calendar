@@ -91,7 +91,16 @@ export function ConceptTour({
           }
           select={choose}
         >
-          <DemoNavigation product={product} scene={scenario.id} {...{ intro, choose, introduce }} />
+          <DemoNavigation
+            product={product}
+            scene={scenario.id}
+            {...{ intro, choose, introduce, contents }}
+            showContents={() => {
+              actions.stop();
+              setContents(true);
+              setCollapsed(false);
+            }}
+          />
         </FloatingGuide>
         <span className="concept-tour-status" role="status">
           {feedback}
