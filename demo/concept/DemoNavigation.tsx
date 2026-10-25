@@ -1,17 +1,22 @@
 import { ArrowLeft, ArrowRight } from "lucide-react";
+import { contentsLabel } from "./tourContent";
 import { catalog, type ProductId } from "./scenarioCatalog";
 export function DemoNavigation({
   product,
   intro,
   scene,
   choose,
-  introduce
+  introduce,
+  contents,
+  showContents
 }: {
   product: ProductId;
   intro: boolean;
   scene: string;
   choose: (scene: string) => void;
   introduce: () => void;
+  contents: boolean;
+  showContents: () => void;
 }) {
   const scenes = catalog[product];
   const index = scenes.findIndex((item) => item.id === scene);
@@ -25,6 +30,11 @@ export function DemoNavigation({
         <ArrowLeft size={18} />
         <span>Previous</span>
       </button>
+      {!contents && (
+        <button className="concept-tour-all" onClick={showContents}>
+          {contentsLabel(product)}
+        </button>
+      )}
       <button
         aria-label="Next demo"
         disabled={!intro && index === scenes.length - 1}

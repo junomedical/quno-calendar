@@ -1,5 +1,6 @@
 # Unified Usage Guide
 
+Demo popups place the arrow-free All demos button between Previous and Next in the footer.
 Demo popups show chapter explanations without a recipe link. Open Documentation in the shared header for implementation recipes.
 
 The live concept homepage is available at `/`, with shareable product/demo links. The documentation overview at

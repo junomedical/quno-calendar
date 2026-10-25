@@ -4,6 +4,13 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+- Move the contextual All demos button between Previous and Next in every demo guide footer and remove its back
+  arrow. Keep its full label visible on narrow phones, with 44 px mobile controls and the title beside fullscreen
+  and collapse controls.
+  Verification: all 725 unit tests and 52 affected Chromium tests pass, including centered footer geometry at
+  desktop, landscape, 320 px and 280 px across all five products. Formatting, architecture, typechecking, lint,
+  Preact compatibility, demo build, package verification, size reporting and pack dry-run pass.
+
 - Remove Read the recipe links from all demo popups; implementation recipes remain in Documentation through
   the shared header. Explain how the horizontal timeline fits more calendars and gives appointment text more room
   in the Infinite scroll chapter.

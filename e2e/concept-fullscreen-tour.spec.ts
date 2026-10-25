@@ -334,13 +334,13 @@ test("floater opens with a dedicated introduction, and scene navigation and cont
   await expect(guide.locator("h1")).toHaveText("Calendar");
   await expect(guide).toContainText("When I explored calendar concepts");
   await expect(guide.locator(".concept-playback-controls, a")).toHaveCount(0);
-  await expect(guide.locator(".concept-tour-pagination button")).toHaveCount(2);
+  await expect(guide.locator(".concept-tour-pagination button")).toHaveCount(3);
   await expect(guide.locator(".concept-tour-current")).toHaveCount(0);
   await page.getByRole("button", { name: "Next demo", exact: true }).click();
   await expect(guide).toHaveAttribute("data-page", "scene");
   await expect(guide.locator("h1")).toHaveText("Infinite scroll");
   await expect(page.getByRole("button", { name: "Previous demo", exact: true })).toBeEnabled();
-  await expect(guide.locator(".concept-tour-pagination button")).toHaveCount(2);
+  await expect(guide.locator(".concept-tour-pagination button")).toHaveCount(3);
   await page.getByRole("button", { name: "Previous demo", exact: true }).click();
   await expect(guide).toHaveAttribute("data-page", "intro");
   await guide.getByRole("button", { name: /^All .+ demos$/ }).click();

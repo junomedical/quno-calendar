@@ -26,11 +26,6 @@
     font-size: 20px;
     letter-spacing: -0.5px;
   }
-  .concept-tour-guide .concept-tour-back {
-    grid-row: 2;
-    margin-top: 4px;
-    height: 44px;
-  }
   .concept-tour-guide .concept-tour-toggle,
   .concept-tour-guide .concept-tour-fullscreen {
     width: 44px;
@@ -45,25 +40,11 @@
   .concept-tour-body {
     touch-action: pan-y;
   }
+  .concept-tour-guide .concept-tour-pagination button {
+    min-height: 44px;
+  }
   .concept-tour-guide .concept-tour-pagination {
     margin-top: 12px;
     padding-top: 8px;
-  }
-}
-
-@media (max-width: 850px) and (max-height: 500px) and (min-width: 600px) {
-  .concept-tour-guide .concept-tour-guide-top {
-    grid-template-columns: auto minmax(0, 1fr) auto;
-  }
-  .concept-tour-guide .concept-tour-back {
-    grid-column: 1;
-    grid-row: 1;
-    margin: 0;
-  }
-  .concept-tour-guide:not([data-collapsed="true"]):not([data-page="contents"]) .concept-tour-guide-top h1 {
-    grid-column: 2;
-  }
-  .concept-tour-guide .concept-tour-guide-actions {
-    grid-column: 3;
   }
 }
