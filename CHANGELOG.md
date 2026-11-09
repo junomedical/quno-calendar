@@ -4,6 +4,11 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+- Restore Enter and Space day selection in date-only Datepicker mode. Preserve day focus, existing range intent,
+  disabled-day checks and time-mode focus behavior. All 729 unit tests and 24 affected Chromium checks pass.
+  Formatting, architecture, types, lint, Preact compatibility, demo build, package verification, size reporting
+  and pack dry-run pass. Package verification uses a network-enabled retry for its disposable consumer install.
+
 - Move the contextual All demos button between Previous and Next in every demo guide footer and remove its back
   arrow. Keep its full label visible on narrow phones, with 44 px mobile controls and the title beside fullscreen
   and collapse controls.

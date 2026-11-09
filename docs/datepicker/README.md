@@ -19,6 +19,9 @@ itself before separately composing a range-enabled picker with a focused Quno/Da
 Start and End shortcuts reveal the endpoint month without editing selection. Activation focuses the stable month
 heading before the shortcut exits, preserving focus inside a composed input popup for pointer and keyboard use.
 
+Enter and Space activate enabled days even without `timeMode`. Date-only activation retains day focus and uses
+the existing single-day or range-selection rules; disabled days and inclusive limits still apply. See QDP-137.
+
 The guide presents range selection as direct manipulation instead of a forced from-to sequence. Its in-place month
 navigator follows seasonal groups—March–May, June–August, September–November, and December continuing into
 January–February—while sticky year labels preserve context during fast scrolling.

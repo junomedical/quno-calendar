@@ -550,6 +550,9 @@ function TravelDates() {
 
 Use `selectionMode="single"` when the product chooses one day while retaining the `DateRange` state shape. `initialMonth` controls only the initial view; navigation and Clear do not unexpectedly change one another. Consumer customization is presentational through scoped `--quno-date-picker-*` properties, typed `classNames`, stable `data-slot`/state attributes, and `getDayCellProps`.
 
+Focus an enabled day and press Enter or Space to select it in date-only mode. Range mode uses the same selection
+rules as a pointer click; focus stays on the day, and disabled dates and hard limits remain enforced.
+
 Keep asynchronous day availability in parent state. `isDayDisabled` is synchronous so every pointer and keyboard
 decision has an immediate answer; treat missing and failed results as disabled, and use `getDayCellProps` only to
 present their state:
