@@ -48,6 +48,7 @@ import { parseDateInput, tokenizeDateInput } from "@quno/calendar/date-parser";
   Demo event requests send date/resource queries; server fixtures respect every participant's working hours, while session edits survive refetches.
 
 - **Quno/Datepicker** paints, resizes, and moves one timezone-free date or inclusive range, with optional single-day time selection; endpoint shortcuts keep composed input popups open while navigating.
+  Enter and Space activate enabled days in date-only mode while retaining day focus.
 - **Quno/Date Input** provides a native controlled or uncontrolled field for typed dates, ranges, and optional single-day clock times.
 - **Quno/Timepicker** selects a standalone clock with prominent sticky hours, enabled-hour choices, regular-weight minutes, and cadence-sized minute rows, including six choices per five-minute row and 20-minute steps. Omitted or empty enabled hours allows all 24 hours.
 - **Quno/Date Parser** recognizes formats, relative phrases, configurable weeks, ranges, optional clock times, and multilingual vocabulary without a UI runtime. Its `start` and `end` endpoints each contain a timezone-free `date` and a `time` clock, or `null` when no clock was supplied.

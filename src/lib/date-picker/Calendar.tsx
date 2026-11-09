@@ -154,15 +154,13 @@ export const Calendar = ({ controller, config, view, onViewChange, clock, footer
               }
               controller.finishDrag({ date });
             }}
-            onActivate={
-              timeEnabled
-                ? ({ date }) => {
-                    focusHeading();
-                    controller.beginDrag({ date });
-                    controller.finishDrag({ date });
-                  }
-                : undefined
-            }
+            onActivate={({ date }) => {
+              if (timeEnabled) {
+                focusHeading();
+              }
+              controller.beginDrag({ date });
+              controller.finishDrag({ date });
+            }}
             onCancel={controller.cancelDrag}
             onOverflowChange={({ index }) => setTouchOverflowIndex(index)}
           />

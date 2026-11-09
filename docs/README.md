@@ -12,6 +12,8 @@ Statistics blocks omit Try it notes and list only actual dependencies; see
 The documentation follows the five public `@quno/calendar` products. Start with the product you are changing, then
 use the shared records for package-wide contracts and release work.
 
+Date-only Datepicker keyboard activation is covered by [QDP-137](./datepicker/decisions.md#qdp-137--retain-native-day-activation-without-time-selection).
+
 Focused input/picker compositions keep Start and End shortcut navigation inside the popup. See the
 [composition recipe](./shared/usage.md#qunodate-input) and
 [focus contract](./shared/decisions.md#quno-014---retain-focus-through-composed-endpoint-navigation).

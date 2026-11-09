@@ -1279,3 +1279,14 @@ removes Try it notes from static statistics blocks and lists only actual depende
 
 [QUNO-049](../shared/decisions.md#quno-049---keep-recipe-links-out-of-demo-popups) removes the recipe link from
 demo popups. Implementation recipes remain accessible through Documentation in the shared header.
+
+## QDP-137 — Retain Native Day Activation Without Time Selection
+
+- Date: 2026-11-09
+- Status: Accepted; restores QDP-008's native activation contract alongside QDP-130
+- Context: The day activation handler was supplied only when time selection was enabled, leaving date-only
+  single-day and range pickers unresponsive to Enter and Space.
+- Decision: Always connect native day activation to the existing begin/finish selection flow. Transfer focus to
+  the stable heading only when entering time navigation; date-only activation retains focus on the day.
+- Consequences: Disabled dates, hard limits, range intent, pointer compatibility-click suppression and callback
+  shapes retain their existing behavior. Cover both keys, single-day and range selection, and time-mode regressions.
