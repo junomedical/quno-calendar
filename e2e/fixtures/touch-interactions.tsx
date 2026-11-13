@@ -1,6 +1,11 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { createRoot } from "react-dom/client";
-import { QunoInfiniteCalendar, type ActiveEventDraft, type CalendarView } from "@quno/calendar/infinite-calendar";
+import {
+  QunoInfiniteCalendar,
+  type ActiveEventDraft,
+  type CalendarView,
+  type LoadEvents
+} from "@quno/calendar/infinite-calendar";
 import "@quno/calendar/infinite-calendar/styles.css";
 
 const event = {
@@ -16,6 +21,11 @@ const calendars = [
   { id: "three", name: "Three" }
 ];
 function Fixture() {
+  const timeZone = new URLSearchParams(location.search).get("timeZone") ?? undefined;
+  const loadEvents = useCallback<LoadEvents>(
+    async () => (timeZone ? [{ ...event, start: "2026-10-08T07:00:00Z", end: "2026-10-08T08:00:00Z" }] : [event]),
+    [timeZone]
+  );
   const [result, setResult] = useState("");
   const [activeDraft, setActiveDraft] = useState<ActiveEventDraft | null>(null);
   const view = (new URLSearchParams(location.search).get("view") as CalendarView) ?? "infinite-horizontal";
@@ -26,11 +36,11 @@ function Fixture() {
         calendars={calendars}
         selectedCalendarIds={calendars.map(({ id }) => id)}
         initialDateKey="2026-10-08"
-        now={new Date("2026-10-08T12:00:00")}
+        now={new Date(timeZone ? "2026-10-08T08:00:00Z" : "2026-10-08T12:00:00")}
         view={view}
-        settings={{ zoom: 1.5, rowHeight: 120, excludedWeekdays: [] }}
+        settings={{ zoom: 1.5, rowHeight: 120, excludedWeekdays: [], timeZone }}
         style={{ height: 600 }}
-        loadEvents={async () => [event]}
+        loadEvents={loadEvents}
         activeDraft={activeDraft}
         onEventActivate={({ event }) => setResult(`activate:${event.id}`)}
         onEventMoveRequest={(request) => {

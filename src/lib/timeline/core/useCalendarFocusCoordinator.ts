@@ -10,6 +10,7 @@ type FocusCoordinatorArgs = Pick<
   QunoInfiniteCalendarProps,
   "calendars" | "selectedCalendarIds" | "focusRequest" | "onCalendarVisibilityRequest" | "onFocusRequestComplete"
 > & {
+  timeZone?: string;
   excludedWeekdays: number[];
   startHour: number;
   endHour: number;
@@ -19,6 +20,7 @@ type FocusCoordinatorArgs = Pick<
 export function useCalendarFocusCoordinator({
   calendars,
   selectedCalendarIds,
+  timeZone,
   excludedWeekdays,
   startHour,
   endHour,
@@ -61,7 +63,7 @@ export function useCalendarFocusCoordinator({
   const focusEvent = useCallback(
     ({ event, ...options }: { event: CalendarEvent } & CalendarFocusOptions): Promise<CalendarFocusResult> => {
       cancelActiveFocus();
-      const segment = firstEventSegment({ event, settings: { startHour, endHour, excludedWeekdays } });
+      const segment = firstEventSegment({ event, settings: { startHour, endHour, excludedWeekdays, timeZone } });
       if (!segment) {
         return Promise.resolve({ eventId: event.id, status: "unavailable" });
       }
@@ -122,6 +124,7 @@ export function useCalendarFocusCoordinator({
     [
       calendars,
       cancelActiveFocus,
+      timeZone,
       excludedWeekdays,
       startHour,
       endHour,

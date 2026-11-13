@@ -1,5 +1,11 @@
 # Test Plan
 
+## Display timezone verification
+
+`displayTimeZone.test.ts` checks explicit-zone segmentation, 23/25-hour boundaries, compatible DST conversion,
+fractional-hour zones, cached/projection membership and UTC drawing/movement. `display-timezone.spec.ts` checks
+actual event and current-marker geometry plus UTC pointer results in both orientations across three browser zones.
+
 ## Unit Tests
 
 Vitest unit tests live in `tests/unit`, `tests/date-picker`, `tests/date-input`, and `tests/date-parser`.

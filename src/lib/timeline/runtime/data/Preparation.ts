@@ -36,6 +36,7 @@ export class Preparation {
       activeDraft?.mode === "edit" ? (activeDraft.sourceEventId ?? activeDraft.event.id) : activeDraft?.sourceEventId;
     const common = JSON.stringify([
       calendars.map((calendar) => calendar.id),
+      settings.timeZone,
       settings.startHour,
       settings.endHour,
       settings.rowHeight,
@@ -83,12 +84,14 @@ export function projectBuckets({
   buckets,
   dates,
   calendarIds,
-  projectEvents
+  projectEvents,
+  timeZone
 }: {
   buckets: ReadonlyMap<IsoDate, readonly CalendarEvent[]>;
   dates: readonly IsoDate[];
   calendarIds: readonly string[];
   projectEvents?: ProjectEvents;
+  timeZone?: string;
 }): ReadonlyMap<IsoDate, readonly CalendarEvent[]> {
   if (!projectEvents || !dates.length || !calendarIds.length) return buckets;
   const sorted = [...new Set(dates)].sort();
@@ -100,7 +103,7 @@ export function projectBuckets({
     calendarIds
   });
   for (const event of new Map(projected.map((event) => [event.id, event])).values())
-    for (const [dateKey, events] of groups) if (eventIntersectsDate({ event, dateKey })) events.push(event);
+    for (const [dateKey, events] of groups) if (eventIntersectsDate({ event, dateKey, timeZone })) events.push(event);
   const output = new Map(buckets);
   for (const [date, events] of groups) {
     const previous = buckets.get(date);
