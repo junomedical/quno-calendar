@@ -66,6 +66,17 @@ clock toward the viewport center. Shift-wheel keeps the exact first pointer time
 If bounds temporarily displace that time, reversing restores the same point when space permits. Releasing Shift or
 scrolling starts a new focus. See [Decision 162](./decisions.md#162---retain-the-exact-time-and-screen-point-across-zoom-reversals).
 
+## AI Overview
+
+Set `settings.timeZone` to display a schedule in a fixed IANA timezone. Loading boundaries are civil dates in
+that zone. Return absolute event timestamps with `Z` or an explicit offset. Event placement, cached date buckets,
+current-time markers, focus and pointer conversions use the same zone. Changing it reloads the date coverage.
+Omitting it retains browser-local rendering. Day keys remain timezone-free `IsoDate` values.
+
+Try the Display timezone control in the read-only field-guide exhibit. Stored event instants do not change.
+Drawing and dragging return UTC instants. A repeated clock chooses the earlier instant; a missing clock advances
+through the DST gap. Moves preserve elapsed event duration. See Decision 168 and the shared usage recipe.
+
 ## Overnight and multi-day events
 
 Events occupy the half-open interval `[start, end)` and render once per intersecting included date/resource.
@@ -79,7 +90,7 @@ Shells expose `data-date`, `data-continues-before="true"` and `data-continues-af
 Loaders must return every event overlapping the requested inclusive dates, even if it started earlier.
 Return complete records once per ID; the cache distributes them across retained dates without expanding the entire
 span. `projectEvents` receives deduplicated complete records and its output is segmented over the rendered range.
-Edits, accepted moves and removal update all retained instances. Existing timestamps retain browser-local/offset semantics.
+Edits, accepted moves and removal update all retained instances. Omitted display timezone retains browser-local/offset semantics. An explicit display timezone preserves absolute timestamps and changes their civil placement.
 
 Dragging any portion moves the whole event, including from later-day portions or beyond displayed hours. The snapped
 grabbed time follows the pointer; full elapsed milliseconds remain fixed through daylight-saving changes. A same-day

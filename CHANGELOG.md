@@ -4,6 +4,13 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+- Add optional Infinite Calendar `settings.timeZone` for event geometry, date buckets, Today, current-time markers,
+  focus and UTC drag/draw conversion. Retain browser-local defaults and stored instants. Add DST, fractional-offset,
+  cache and browser-zone regressions and a read-only guide control. Package version: `0.65.0`.
+  Preserve the optional viewport-capture target and horizontal centering used by the existing onboarding artifact.
+  Verification: 738 unit tests and 39 focused Chromium checks pass. Typechecking, lint, architecture, formatting,
+  Preact and React 19 consumers, demo build, package verification, size checks and pack dry-run pass.
+
 - Restore Enter and Space day selection in date-only Datepicker mode. Preserve day focus, existing range intent,
   disabled-day checks and time-mode focus behavior. All 729 unit tests and 24 affected Chromium checks pass.
   Formatting, architecture, types, lint, Preact compatibility, demo build, package verification, size reporting

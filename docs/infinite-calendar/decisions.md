@@ -2206,3 +2206,19 @@ Status: Accepted; refines Decision 147's concept explanations
 Follow the infinite-calendar paragraph with the rationale for a horizontal timeline: fitting more calendars on
 screen and giving appointment cards more room for natural text flow. Combine the previous wider-card sentence
 with this explanation. Keep the chapter's scrolling demonstration unchanged.
+
+## 168 - Use One Explicit Display Timezone Throughout The Timeline
+
+Date: 2026-11-12
+Status: Accepted; extends Decision 160 and preserves browser-local defaults
+
+Add optional `settings.timeZone` as an IANA display timezone. Project absolute event timestamps into that zone
+for date membership, segments, overlap preparation, Today, current-time markers, focus and viewport anchors.
+Use it for drawing and grabbed-time conversion. Return UTC mutation instants and retain elapsed move duration.
+Choose the earlier repeated clock and advance through missing clocks. Compute civil day boundaries without a
+fixed 24-hour assumption. Changing the timezone replaces acquisition coverage and invalidates prepared geometry.
+
+Keep `IsoDate` keys and the other products timezone-free. Omission retains existing local timestamp behavior.
+Demonstrate the setting in the read-only guide and test geometry and UTC mutations in both orientations under
+UTC, America/Los_Angeles and Asia/Tokyo browser timezones. Preserve no-target viewport capture and horizontal
+centering already consumed by onboarding's vendored package when replacing that artifact.

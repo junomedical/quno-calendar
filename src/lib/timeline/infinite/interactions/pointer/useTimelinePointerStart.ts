@@ -53,7 +53,13 @@ export function useTimelinePointerStart({ args, drag, draft, clearHover, cancel 
         ? undefined
         : () => args.onEventActivate?.({ event: calendarEvent, renderedCalendarId, renderedDateKey }),
       onHold: () => {
-        startEventDrag({ ...request, event: point, getHit: args.getHit, startDrag: drag.startDrag });
+        startEventDrag({
+          ...request,
+          event: point,
+          getHit: args.getHit,
+          startDrag: drag.startDrag,
+          timeZone: args.settings.timeZone
+        });
         clearHover();
       }
     });

@@ -3,6 +3,12 @@
 Five opinionated date and scheduling primitives in one React-authored package. Version `0.6.3` supports React 18+
 directly, verifies React 19 separately, and supports Preact through tested `preact/compat` aliases.
 
+## AI Overview
+
+Infinite Calendar accepts an optional `settings.timeZone` IANA timezone. The timeline uses it for event geometry,
+date buckets, current time, focus, drawing and movement. Event timestamps remain absolute. Omitting it retains
+browser-local behavior. The other date and time primitives retain their timezone-free contracts.
+
 ## Install
 
 ```sh

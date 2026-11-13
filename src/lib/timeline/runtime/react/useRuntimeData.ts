@@ -25,8 +25,9 @@ export function useRuntimeData({
   anchorDate: IsoDate;
   prefetchedDates?: readonly IsoDate[];
 }) {
-  const [acquisition] = useState(() => new Acquisition());
-  const [buckets, setBuckets] = useState(acquisition.repository.read);
+  const timeZone = props.settings?.timeZone;
+  const acquisition = useMemo(() => new Acquisition({ timeZone }), [timeZone]);
+  const [, setVersion] = useState(0);
   const [settledDates, setSettledDates] = useState<readonly IsoDate[]>([]);
   const appearance = useAppearingEvents({ requestedEventIds: props.appearingEventIds });
   const appearanceRef = useRef(appearance);
@@ -40,7 +41,9 @@ export function useRuntimeData({
   }, [visibleKey]);
   const calendarKey = JSON.stringify(calendarIds);
   const ids = useMemo(() => JSON.parse(calendarKey) as string[], [calendarKey]);
-  const draftDate = props.activeDraft ? (eventDateKey(props.activeDraft.event) as IsoDate) : undefined;
+  const draftDate = props.activeDraft
+    ? (eventDateKey({ event: props.activeDraft.event, timeZone }) as IsoDate)
+    : undefined;
   const retainedDates = useRef<readonly IsoDate[]>(settledDates);
   const dates = useMemo(() => {
     const next = settledDates;
@@ -63,7 +66,7 @@ export function useRuntimeData({
     for (const request of acquisition.plan({ dates, calendarIds: ids })) {
       void acquisition.execute({ request, loadEvents: props.loadEvents, clock: requestClock }).then((accepted) => {
         if (!accepted) return;
-        setBuckets(acquisition.repository.read());
+        setVersion((version) => version + 1);
         appearanceRef.current.markRequestedEventsAppearing(
           [...acquisition.repository.read().values()].flatMap((events) => events.map((event) => event.id))
         );
@@ -78,7 +81,9 @@ export function useRuntimeData({
   );
   const commit = useCallback(
     ({ event, previousEventId, appearing }: { event: CalendarEvent } & CalendarVisibleEventCommitOptions) => {
-      if (acquisition.repository.commit({ event, previousEventId })) setBuckets(acquisition.repository.read());
+      if (acquisition.repository.commit({ event, previousEventId })) {
+        setVersion((version) => version + 1);
+      }
       if (appearing) appearanceRef.current.markEventsAppearing([event.id]);
     },
     [acquisition]
@@ -93,9 +98,18 @@ export function useRuntimeData({
   const create = useCallback((event: CalendarEvent) => commit({ event, appearing: true }), [commit]);
   const remove = useCallback(
     ({ eventId }: { eventId: string }) => {
-      if (acquisition.repository.remove({ eventId })) setBuckets(acquisition.repository.read());
+      if (acquisition.repository.remove({ eventId })) {
+        setVersion((version) => version + 1);
+      }
     },
     [acquisition]
   );
-  return { buckets, commit, move, create, remove, appearingEventIds: appearance.appearingEventIds };
+  return {
+    buckets: acquisition.repository.read(),
+    commit,
+    move,
+    create,
+    remove,
+    appearingEventIds: appearance.appearingEventIds
+  };
 }

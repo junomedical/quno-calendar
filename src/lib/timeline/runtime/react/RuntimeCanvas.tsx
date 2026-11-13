@@ -3,7 +3,7 @@ import { useMemo } from "react";
 import type { CalendarInternalViewProps } from "#quno-internal/timeline/core/internalTypes";
 import { calendarHourPresentations } from "#quno-internal/timeline/core/calendarCellPresentation";
 import { buildTimeTicks } from "#quno-internal/timeline/time/timelineTicks";
-import { toDateKey } from "#quno-internal/timeline/date/dateVirtualization";
+import { zonedDateKey, zonedMinute } from "#quno-internal/timeline/time/timeZone";
 import { InfiniteTimeScaleHeader } from "#quno-internal/timeline/infinite/rendering/shared/TimeScaleHeader";
 import type { HorizontalTimelineDayProps } from "#quno-internal/timeline/infinite/rendering/horizontal/types";
 import type { VerticalTimelineDayProps } from "#quno-internal/timeline/infinite/rendering/vertical/types";
@@ -26,7 +26,7 @@ export function RuntimeCanvas({
   const horizontal = geometry.orientation === "horizontal";
   const view = horizontal ? "infinite-horizontal" : "infinite-vertical";
   const now = props.now ?? new Date();
-  const nowMinute = now.getHours() * 60 + now.getMinutes();
+  const nowMinute = zonedMinute({ date: now, timeZone: settings.timeZone });
   const showNowLine = nowMinute >= settings.startHour * 60 && nowMinute <= settings.endHour * 60;
   const ticks = useMemo(() => buildTimeTicks(settings), [settings]);
   const hours = useMemo(
@@ -39,7 +39,7 @@ export function RuntimeCanvas({
     settings,
     selectedCalendars,
     hiddenCalendarIds: runtime.hiddenCalendarIds,
-    todayKey: toDateKey({ date: now }),
+    todayKey: zonedDateKey({ date: now, timeZone: settings.timeZone }),
     getDayCellProps: props.getDayCellProps,
     getDayProps: props.getDayProps,
     calendarHourPresentations: hours,

@@ -9,7 +9,7 @@ import { minuteToY, minutesSinceStartOfDay } from "#quno-internal/timeline/time/
 export const VERTICAL_COLUMN_GAP_PX = 0;
 export const VERTICAL_TIMELINE_GUTTER_PX = 8;
 
-type VerticalGeometrySettings = Pick<QunoInfiniteCalendarSettings, "startHour" | "endHour" | "zoom">;
+type VerticalGeometrySettings = Pick<QunoInfiniteCalendarSettings, "startHour" | "endHour" | "zoom" | "timeZone">;
 
 export function verticalMinuteToY({
   minute,
@@ -31,8 +31,9 @@ export function verticalEventBox({
   settings: VerticalGeometrySettings;
   segment?: import("#quno-internal/timeline/core/types").CalendarEventSegment;
 }) {
-  const startMinute = segment?.startMinute ?? minutesSinceStartOfDay({ value: event.start });
-  const endMinute = segment?.endMinute ?? minutesSinceStartOfDay({ value: event.end });
+  const startMinute =
+    segment?.startMinute ?? minutesSinceStartOfDay({ value: event.start, timeZone: settings.timeZone });
+  const endMinute = segment?.endMinute ?? minutesSinceStartOfDay({ value: event.end, timeZone: settings.timeZone });
   return {
     top: verticalMinuteToY({ minute: startMinute, settings }),
     height: Math.max(

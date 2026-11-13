@@ -1,5 +1,8 @@
 # Documentation
 
+Infinite Calendar can display a fixed IANA timezone through `settings.timeZone`. Try the Display timezone control
+in the read-only guide and see the [usage recipe](./shared/usage.md#display-timezone).
+
 Demo popups place the arrow-free All demos button between Previous and Next in the footer.
 Demo popups show chapter explanations without a recipe link. Open Documentation in the shared header for implementation recipes.
 

@@ -6,24 +6,23 @@ import type {
 import type { IsoDate } from "#quno-internal/shared/dateRangeModel";
 import { parseIsoDate, addCalendarDays } from "#quno-internal/timeline/date/localDate";
 import { toDateKey } from "#quno-internal/timeline/date/dateVirtualization";
+import { zonedDateKey, zonedMinute, zonedMinuteDate } from "#quno-internal/timeline/time/timeZone";
 
 /** Local civil boundaries; elapsed arithmetic must never substitute for clock placement on DST days. */
-export function localMinuteDate({ dateKey, minute }: { dateKey: string; minute: number }): Date {
-  const date = parseIsoDate({ value: dateKey });
-  date.setHours(0, minute, 0, 0);
-  return date;
-}
+export const localMinuteDate = zonedMinuteDate;
 
 /** Half-open overlap, independent of displayed hours and excluded weekdays. */
 export function eventIntersectsDate({
   event,
-  dateKey
+  dateKey,
+  timeZone
 }: {
   event: Pick<CalendarEvent, "start" | "end">;
   dateKey: string;
+  timeZone?: string;
 }): boolean {
-  const day = parseIsoDate({ value: dateKey });
-  const next = addCalendarDays({ date: day, amount: 1 });
+  const day = localMinuteDate({ dateKey, minute: 0, timeZone });
+  const next = localMinuteDate({ dateKey, minute: 1440, timeZone });
   const start = parseIsoDate({ value: event.start }).getTime();
   const end = parseIsoDate({ value: event.end }).getTime();
   return end > start && start < next.getTime() && end > day.getTime();
@@ -37,16 +36,21 @@ export function eventSegment({
 }: {
   event: Pick<CalendarEvent, "start" | "end">;
   dateKey: string;
-  settings: Pick<QunoInfiniteCalendarSettings, "startHour" | "endHour">;
+  settings: Pick<QunoInfiniteCalendarSettings, "startHour" | "endHour" | "timeZone">;
 }): CalendarEventSegment | null {
-  if (!eventIntersectsDate({ event, dateKey })) return null;
+  if (!eventIntersectsDate({ event, dateKey, timeZone: settings.timeZone })) {
+    return null;
+  }
   const start = parseIsoDate({ value: event.start });
   const end = parseIsoDate({ value: event.end });
-  const lower = localMinuteDate({ dateKey, minute: settings.startHour * 60 });
-  const upper = localMinuteDate({ dateKey, minute: settings.endHour * 60 });
-  if (start >= upper || end <= lower) return null;
-  const startMinute = start <= lower ? settings.startHour * 60 : start.getHours() * 60 + start.getMinutes();
-  const endMinute = end >= upper ? settings.endHour * 60 : end.getHours() * 60 + end.getMinutes();
+  const lower = localMinuteDate({ dateKey, minute: settings.startHour * 60, timeZone: settings.timeZone });
+  const upper = localMinuteDate({ dateKey, minute: settings.endHour * 60, timeZone: settings.timeZone });
+  if (start >= upper || end <= lower) {
+    return null;
+  }
+  const startMinute =
+    start <= lower ? settings.startHour * 60 : zonedMinute({ date: start, timeZone: settings.timeZone });
+  const endMinute = end >= upper ? settings.endHour * 60 : zonedMinute({ date: end, timeZone: settings.timeZone });
   return {
     dateKey: dateKey as IsoDate,
     startMinute,
@@ -62,13 +66,17 @@ export function firstEventSegment({
   settings
 }: {
   event: CalendarEvent;
-  settings: Pick<QunoInfiniteCalendarSettings, "startHour" | "endHour" | "excludedWeekdays">;
+  settings: Pick<QunoInfiniteCalendarSettings, "startHour" | "endHour" | "excludedWeekdays" | "timeZone">;
 }): CalendarEventSegment | null {
-  let date = parseIsoDate({ value: toDateKey({ date: parseIsoDate({ value: event.start }) }) });
+  let date = parseIsoDate({
+    value: zonedDateKey({ date: parseIsoDate({ value: event.start }), timeZone: settings.timeZone })
+  });
   for (let index = 0; index < 8; index++) {
     const dateKey = toDateKey({ date });
     const segment = eventSegment({ event, dateKey, settings });
-    if (segment && !settings.excludedWeekdays.includes(date.getDay())) return segment;
+    if (segment && !settings.excludedWeekdays.includes(date.getDay())) {
+      return segment;
+    }
     date = addCalendarDays({ date, amount: 1 });
   }
   return null;

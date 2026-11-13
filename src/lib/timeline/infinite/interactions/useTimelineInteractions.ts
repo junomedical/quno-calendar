@@ -94,6 +94,7 @@ export function useTimelineInteractions(args: UseTimelineInteractionsArgs) {
     applyMoveToLoadedEvents: args.applyMoveToLoadedEvents
   });
   const draft = useTimelineDraftInteraction({
+    timeZone: args.settings.timeZone,
     interactionMode: args.interactionMode,
     getHit: args.getHit,
     onEventCreateRequest: args.onEventCreateRequest,

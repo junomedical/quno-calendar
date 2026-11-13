@@ -51,21 +51,52 @@ function slotAnchorTarget(event: CalendarEvent): CalendarViewportAnchorTarget {
 }
 
 export function ReadOnlyArticleDemo() {
+  const [timeZone, setTimeZone] = useState("");
   return (
     <CalendarDemoShell
       data-testid="article-read-only-demo"
       note="Dates, resources, loading, and card rendering—with no mutation callbacks"
-      tools={<span className="article-toolbar-badge">Read only</span>}
+      tools={
+        <>
+          <span className="article-toolbar-badge">Read only</span>
+          <label>
+            Display timezone{" "}
+            <select
+              aria-label="Display timezone"
+              value={timeZone}
+              onChange={(event) => setTimeZone(event.target.value)}
+            >
+              <option value="">Browser timezone</option>
+              <option value="UTC">UTC</option>
+              <option value="Europe/Berlin">Europe/Berlin</option>
+              <option value="America/Los_Angeles">America/Los_Angeles</option>
+            </select>
+          </label>
+        </>
+      }
     >
       <div className="article-calendar-frame">
         <QunoInfiniteCalendar
           ariaLabel="Read-only article calendar"
           calendars={articleCalendars}
-          renderEvent={ArticleEventCard}
+          renderEvent={(props) => {
+            const clock = new Intl.DateTimeFormat("en-GB", {
+              timeZone: timeZone || undefined,
+              hour: "2-digit",
+              minute: "2-digit",
+              hourCycle: "h23"
+            });
+            return (
+              <ArticleEventCard
+                {...props}
+                timeLabel={`${clock.format(new Date(props.event.start))}–${clock.format(new Date(props.event.end))}`}
+              />
+            );
+          }}
           initialDateKey={articleDateKey}
           loadEvents={loadArticleEvents}
           selectedCalendarIds={introductoryCalendarIds}
-          settings={articleSettings}
+          settings={{ ...articleSettings, timeZone: timeZone || undefined }}
         />
       </div>
     </CalendarDemoShell>

@@ -1,3 +1,6 @@
+import type { QunoInfiniteCalendarSettings } from "./calendarSettings";
+export type { QunoInfiniteCalendarSettings } from "./calendarSettings";
+export { defaultQunoInfiniteCalendarSettings } from "./calendarSettings";
 export type { CalendarEventSegment } from "./calendarEventSegmentTypes";
 import type { CSSProperties, ReactNode } from "react";
 import type { IsoDate } from "#quno-internal/shared/dateRangeModel";
@@ -76,24 +79,6 @@ export type CalendarEvent = CalendarEventBase & {
 
 /** Visual state passed to the external event renderer. */
 export type EventRenderStatus = "existing" | "hovered" | "dragging" | "drop-preview" | "new" | "appearing" | "focused";
-
-/** Shared geometry, interaction, and filtering settings for timeline views. */
-export type QunoInfiniteCalendarSettings = {
-  startHour: number;
-  endHour: number;
-  zoom: number;
-  snapMinutes: number;
-  excludedWeekdays: number[];
-  rowHeight: number;
-  dayHeaderHeight: number;
-  labelWidth: number;
-  verticalColumnMinWidth: number;
-  verticalColumnOverlapCapacity: number;
-  verticalColumnOverlapGrowth: number;
-  verticalEventHoverMinHeight: number;
-  /** Included dates retained on each side of the anchor; omitted retains the month-based window. */
-  dateWindowRadius?: number;
-};
 
 /** Props passed to custom event card renderers. */
 export type EventRendererProps = {
@@ -214,7 +199,7 @@ export type QunoInfiniteCalendarHandle = {
   /** Dates intersecting the viewport, excluding overscan and sticky chrome. */
   getVisibleDateKeys: () => IsoDate[];
   scrollToToday: () => void;
-  captureViewportAnchor: (target: CalendarViewportAnchorTarget) => CalendarViewportAnchor | null;
+  captureViewportAnchor: (target?: CalendarViewportAnchorTarget) => CalendarViewportAnchor | null;
   restoreViewportAnchor: (
     args: { anchor: CalendarViewportAnchor | null } & CalendarViewportAnchorRestoreOptions
   ) => void;
@@ -231,20 +216,4 @@ export type QunoInfiniteCalendarProps = CalendarViewComponentProps & {
   /** Consumer-owned initial loading state; selected rows measure and fetch events beneath the fallback. */
   isLoading?: boolean;
   loadingFallback?: ReactNode;
-};
-
-/** Defaults merged with caller-provided timeline settings. */
-export const defaultQunoInfiniteCalendarSettings: QunoInfiniteCalendarSettings = {
-  startHour: 8,
-  endHour: 18,
-  zoom: 1,
-  snapMinutes: 15,
-  excludedWeekdays: [],
-  rowHeight: 50,
-  dayHeaderHeight: 42,
-  labelWidth: 220,
-  verticalColumnMinWidth: 240,
-  verticalColumnOverlapCapacity: 3,
-  verticalColumnOverlapGrowth: 80,
-  verticalEventHoverMinHeight: 64
 };

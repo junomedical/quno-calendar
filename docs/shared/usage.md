@@ -101,13 +101,31 @@ Repository example: the read-only chapter in
 [`ArticleRecipeDemos.tsx`](../../demo/guide/timeline/ArticleRecipeDemos.tsx) and the
 [integration field guide](../../demo/guide/timeline/README.md).
 
+## Display timezone
+
+```tsx
+<QunoInfiniteCalendar
+  calendars={calendars}
+  selectedCalendarIds={["provider-a"]}
+  loadEvents={loadEvents}
+  renderEvent={EventCard}
+  settings={{ timeZone: "Europe/Berlin" }}
+/>
+```
+
+Use absolute event timestamps with `Z` or an explicit offset. Loader date boundaries, event geometry, Today,
+current-time markers, focus and drag/draw callbacks follow this timezone. Convert requested civil midnights in the
+same zone when querying a backend. A day may contain 23 or 25 elapsed hours. Event timestamps stay unchanged;
+mutation callbacks return UTC. Omit `timeZone` for the existing browser-local behavior.
+The read-only guide's Display timezone control demonstrates the public setting.
+
 ## Overnight and multi-day events
 
 Supply full timestamp ranges; the calendar renders each visible daily portion automatically. Return overlapping
 records for the inclusive requested dates, including events starting earlier. For example, a server query should use
 `event.start < midnightAfterEndDate && event.end > midnightAtStartDate`, plus the requested resource membership.
 Compute those midnights as calendar boundaries in the same timezone used for the stored events; never assume every
-day is 24 elapsed hours. Browser-local rendering retains the existing timestamp semantics.
+day is 24 elapsed hours. Omitting `settings.timeZone` retains browser-local timestamp semantics.
 
 ```tsx
 import {
