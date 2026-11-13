@@ -48,6 +48,8 @@ async function observeFrames(page: Page, duration: number) {
 for (const width of [1280, 1800]) {
   test(`draw and cancel keep the resource fixed on every frame at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 1000 });
+    // Keep the October fixture away from the real-clock date-window boundary.
+    await page.clock.setFixedTime(new Date("2026-10-16T10:00:00"));
     await page.goto("/demo/infinite-calendar");
     await page.getByTestId("api-latency-select").selectOption("0");
     await page.getByTestId("scale-select").selectOption("1000");

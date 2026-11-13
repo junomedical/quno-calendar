@@ -4,6 +4,12 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+- Fix the Draw/Cancel frame test's real-clock dependency by freezing its October fixture date before mounting.
+  Keep the existing frame, row-position, horizontal-scroll and blank-gap assertions.
+  Verification: six Chromium runs pass across 1280px and 1800px. Typechecking, scoped lint and formatting pass.
+  The earlier full CI run also reports failures in `concept-cadence-copy.spec.ts` (320px cadence row) and
+  `concept.spec.ts` (scenario JSON documentation link). Those cases are outside this test fix.
+
 - Add optional Infinite Calendar `settings.timeZone` for event geometry, date buckets, Today, current-time markers,
   focus and UTC drag/draw conversion. Retain browser-local defaults and stored instants. Add DST, fractional-offset,
   cache and browser-zone regressions and a read-only guide control. Package version: `0.65.0`.
