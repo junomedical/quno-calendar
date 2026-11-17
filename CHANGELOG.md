@@ -4,6 +4,16 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+- Prevent batched native scroll observations from overwriting newer animation-frame movement, while retaining
+  captured pre-mutation positions during layout changes. Keep cadence choices on one row at 320 px with wider
+  fallback fonts and 80×44 px targets.
+  Pan the orientation chapter to measured next-day headings and align the scenario JSON test with header-only
+  documentation navigation. Fix participant-draft fixture clocks and wait for event loading before drawing;
+  exercise dense participant editing with sixfold Chromium CPU throttling without relaxing focus/stability checks.
+  Verification: all 740 unit tests and 501 Chromium tests pass, plus 15 repeated orientation/participant checks.
+  Formatting, architecture, typechecking, lint, demo build, package verification, bundle-size checks,
+  Preact/React 19 compatibility and pack dry-run pass.
+
 - Fix the Draw/Cancel frame test's real-clock dependency by freezing its October fixture date before mounting.
   Keep the existing frame, row-position, horizontal-scroll and blank-gap assertions.
   Verification: six Chromium runs pass across 1280px and 1800px. Typechecking, scoped lint and formatting pass.

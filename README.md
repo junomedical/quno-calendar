@@ -171,4 +171,4 @@ layout viewports below 320 px. Rotation, month navigation and fullscreen retain 
 scrolls within its header when necessary. See [QUNO-046](./docs/shared/decisions.md#quno-046---keep-the-main-demo-within-the-available-mobile-width).
 
 The main Timepicker demo also constrains its inner card grid. At 320 px, compact side gutters keep the clock
-inside the card and all three cadence buttons on one row without reducing their touch targets.
+inside the card and all three cadence buttons on one row, including wider fallback fonts, without reducing their touch targets.

@@ -2222,3 +2222,17 @@ Keep `IsoDate` keys and the other products timezone-free. Omission retains exist
 Demonstrate the setting in the read-only guide and test geometry and UTC mutations in both orientations under
 UTC, America/Los_Angeles and Asia/Tokyo browser timezones. Preserve no-target viewport capture and horizontal
 centering already consumed by onboarding's vendored package when replacing that artifact.
+
+## 169 - Retain Newer Scroll Movement Between Observation Frames
+
+Date: 2026-11-17
+Status: Accepted; refines Decision 166 without changing its layout-transition rule
+
+A native scroll event can be followed by another animation callback before its batched observation runs.
+Observe the latest live viewport position in that frame so a later commit cannot overwrite the newer movement.
+Continue flushing captured pre-mutation observations before parent layout changes; a DOM clamp from new layout
+must not replace the retained semantic position. Unit regressions cover both callback orders.
+
+The orientation demo uses the existing scroll-to action to pan to each next date's measured heading in both
+views, followed by its measured return to the initial date. Preserve animated native scrolling, the mounted
+calendar, scene looping and the October 20/21 progression with the return to October 19.

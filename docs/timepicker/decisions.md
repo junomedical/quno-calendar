@@ -171,3 +171,12 @@ removes Try it notes from static statistics blocks and lists only actual depende
 
 [QUNO-049](../shared/decisions.md#quno-049---keep-recipe-links-out-of-demo-popups) removes the recipe link from
 demo popups. Implementation recipes remain accessible through Documentation in the shared header.
+
+## QTP-009 - Allow Wider Cadence Labels Within The Phone Row
+
+- Date: 2026-11-17
+- Status: Accepted; refines QTP-008
+- Decision: Use 12 px horizontal button padding so wider fallback font metrics do not expand the 15 min and
+  20 min choices beyond the available 320 px row. Preserve 80×44 px minimum targets, 14 px text and 8 px gaps.
+- Consequences: Repeat the existing geometry and real pointer/keyboard checks with monospace cadence labels.
+  Public Timepicker styles and value/cadence behavior retain their contracts.

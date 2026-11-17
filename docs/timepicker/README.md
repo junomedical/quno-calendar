@@ -102,7 +102,7 @@ Implementation recipes. Extra demo-link panels and per-section links are removed
 shared header. See [QUNO-044](../shared/decisions.md#quno-044---keep-guide-sections-in-reading-order-with-one-instruction).
 
 The main Timepicker demo fits a 320 px phone: its inner card grid can shrink the clock, and 12 px side gutters
-keep all three cadence controls on one row with 80×44 px targets. Minute choices remain inside the clock for every
+keep all three cadence controls on one row with 80×44 px targets, including wider fallback fonts. Minute choices remain inside the clock for every
 cadence. See [QTP-008](./decisions.md#qtp-008---fit-the-concept-controls-at-320-pixels) and
 [QUNO-047](../shared/decisions.md#quno-047---constrain-the-inner-product-card-grid).
 

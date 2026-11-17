@@ -1428,4 +1428,4 @@ The main demo’s product canvas and bottom drawer fit the available mobile layo
 the page. Swipe the header’s product menu horizontally when its labels do not all fit.
 
 The main Timepicker demo also constrains its inner card grid. At 320 px, compact side gutters keep the clock
-inside the card and all three cadence buttons on one row without reducing their touch targets.
+inside the card and all three cadence buttons on one row, including wider fallback fonts, without reducing their touch targets.

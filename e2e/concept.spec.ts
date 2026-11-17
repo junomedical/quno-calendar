@@ -318,6 +318,7 @@ test("one scenario JSON controls its copy, initial state and actions independent
   const scene = structuredClone(data) as import("#quno-demo/concept/scenarioTypes").Scenario<"date-input">;
   scene.label = "Follow JSON";
   scene.hint = "A single scenario from data.";
+  scene.paragraphs = ["This explanation comes from the scenario JSON."];
   scene.anchor = "keyboard-controls";
   scene.initial = {
     range: { start: "2026-11-05", end: "2026-11-05" },
@@ -338,7 +339,12 @@ test("one scenario JSON controls its copy, initial state and actions independent
   await selectCalendarScene(page, "Follow JSON", false);
   const custom = page.locator(".concept-tour-guide");
   await expect(custom.locator("h1")).toHaveText("Follow JSON");
-  await expect(custom.getByRole("link")).toHaveAttribute("href", "/docs/date-input#keyboard-controls");
+  await expect(custom.locator(".concept-explanation p")).toHaveText(scene.paragraphs);
+  await expect(custom.getByRole("link")).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Documentation", exact: true })).toHaveAttribute(
+    "href",
+    "/docs/date-input"
+  );
   await expect(page.getByLabel("JSON appointment")).toHaveValue("5 November 2026");
   await selectCalendarScene(page, "Follow JSON");
   await finished(page);

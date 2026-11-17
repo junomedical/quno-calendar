@@ -104,7 +104,7 @@ working day, regular one-hour durations, 32 additional varied titles and 2× zoo
 appointments from the same data. Compact titles and clocks stay on one line; hover reveals bounded details.
 
 Scroll loops advance 900 px over one second with two-second pauses. Zoom quickly moves 8 → the effective minimum, explores 900 px, then
-returns to 8 and scrolls back. Orientation changes include next-day pans and return to the initial day’s measured header, so an offscreen first
+returns to 8 and scrolls back. Orientation changes pan to each next day’s measured header and return to the initial day’s measured header, so an offscreen first
 appointment is mounted before its final hover. Themes end
 in Light. Density ends in Quiet/horizontal. Reschedule moves three different appointments forward, then back in
 reverse order. Overlap hovers each underlying lane, moves outside all three and holds every card closed for 1500 ms.

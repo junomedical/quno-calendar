@@ -112,7 +112,9 @@ export class ViewportAdapter {
   };
   private onScroll = () => {
     if (this.viewport) this.pending = { top: this.viewport.scrollTop, left: this.viewport.scrollLeft };
-    if (this.frame === null) this.frame = requestAnimationFrame(() => this.flushPending());
+    // Animation callbacks may have moved again since the native scroll event.
+    // Layout effects still use flushPending() to retain pre-mutation observations.
+    if (this.frame === null) this.frame = requestAnimationFrame(() => this.flush());
     if (this.idle !== null) clearTimeout(this.idle);
     this.idle = setTimeout(
       () => {

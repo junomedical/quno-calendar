@@ -344,3 +344,9 @@ See [Decision 166](./decisions.md#166---ignore-uncommitted-dom-positions-during-
 
 The guide’s statistics block has no Try it note. Its Dependencies row lists the `react` and `react-dom` peers.
 See [QUNO-048](../shared/decisions.md#quno-048---keep-statistics-free-of-instructions-and-list-actual-dependencies).
+
+Between layout changes, batched scroll frames read the latest viewport position so newer animation movement
+is preserved; pre-layout flushes still use captured native observations.
+
+The concept's orientation chapter pans to measured next-day headings in each view instead of assuming a fixed
+pixel distance. Its return pan uses the same header geometry; see Decision 169.

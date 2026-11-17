@@ -172,11 +172,13 @@ test("keeps a later participant calendar row anchored when cancelling external c
 test("keeps the drawn Marco date focused after adding participants and cancelling external create", async ({
   page
 }) => {
+  await page.clock.setFixedTime(new Date("2026-06-22T10:00:00"));
   // Keep all three participant rows mounted, including with Linux system fonts.
   await page.setViewportSize({ width: 1280, height: 1200 });
   await page.goto("/demo/infinite-calendar");
   await page.getByTestId("scale-select").selectOption("5000");
   await goToWorkday(page, "2026-06-22");
+  await waitForDemoEvents(page);
 
   const drawTarget = await horizontalDrawTarget(page, {
     calendarId: "marco-eggens",
@@ -189,6 +191,7 @@ test("keeps the drawn Marco date focused after adding participants and cancellin
   await page.mouse.move(drawTarget.endX, drawTarget.y, { steps: 8 });
   await page.mouse.up();
   await expect(page.getByTestId("external-event-popup")).toBeVisible();
+  await expect(page.getByTestId("draft-participant-marco-eggens")).toBeChecked();
 
   await page.getByTestId("draft-participant-dr-kirillov").check();
   await page.getByTestId("draft-participant-dr-thakker").check();
