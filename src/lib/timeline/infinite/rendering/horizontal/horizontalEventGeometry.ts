@@ -16,14 +16,14 @@ export function horizontalEventGeometry({
 }: {
   event: Pick<CalendarEvent, "start" | "end">;
   segment?: import("#quno-internal/timeline/core/types").CalendarEventSegment;
-  settings: Pick<QunoInfiniteCalendarSettings, "startHour" | "endHour" | "zoom">;
+  settings: Pick<QunoInfiniteCalendarSettings, "startHour" | "endHour" | "zoom" | "timeZone">;
 }): HorizontalEventGeometry {
   const startX = minuteToX({
-    minute: segment?.startMinute ?? minutesSinceStartOfDay({ value: event.start }),
+    minute: segment?.startMinute ?? minutesSinceStartOfDay({ value: event.start, timeZone: settings.timeZone }),
     geometry: settings
   });
   const endX = minuteToX({
-    minute: segment?.endMinute ?? minutesSinceStartOfDay({ value: event.end }),
+    minute: segment?.endMinute ?? minutesSinceStartOfDay({ value: event.end, timeZone: settings.timeZone }),
     geometry: settings
   });
   return {

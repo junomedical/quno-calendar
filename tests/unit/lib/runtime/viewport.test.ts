@@ -177,3 +177,47 @@ describe("engine viewport transactions", () => {
     detach();
   });
 });
+
+it("keeps newer native movement when the observation frame runs after an animation frame", () => {
+  vi.useFakeTimers();
+  const engine = new CalendarEngine({ layout, viewport });
+  const element = document.createElement("div");
+  Object.defineProperties(element, { clientWidth: { value: 800 }, clientHeight: { value: 500 } });
+  const adapter = new ViewportAdapter(engine);
+  const detach = adapter.attach({ viewport: element });
+  try {
+    adapter.commit({ snapshot: engine.read() });
+    const start = element.scrollTop;
+    element.scrollTop = start + 100;
+    element.dispatchEvent(new Event("scroll"));
+    // A later animation callback moves again before the batched observer runs.
+    element.scrollTop = start + 180;
+    vi.advanceTimersToNextFrame();
+    adapter.commit({ snapshot: engine.read() });
+    expect(element.scrollTop).toBe(start + 180);
+    expect(engine.read().viewport.top).toBe(start + 180);
+  } finally {
+    detach();
+    vi.useRealTimers();
+  }
+});
+
+it("keeps the captured native position when flushing before a layout change", () => {
+  const engine = new CalendarEngine({ layout, viewport });
+  const element = document.createElement("div");
+  Object.defineProperties(element, { clientWidth: { value: 800 }, clientHeight: { value: 500 } });
+  const adapter = new ViewportAdapter(engine);
+  const detach = adapter.attach({ viewport: element });
+  try {
+    adapter.commit({ snapshot: engine.read() });
+    const start = element.scrollTop;
+    element.scrollTop = start + 100;
+    element.dispatchEvent(new Event("scroll"));
+    // Parent DOM changes can clamp the live position before their layout effect.
+    element.scrollTop = 0;
+    adapter.flushPending();
+    expect(engine.read().viewport.top).toBe(start + 100);
+  } finally {
+    detach();
+  }
+});

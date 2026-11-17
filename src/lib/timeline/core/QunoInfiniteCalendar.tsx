@@ -18,6 +18,7 @@ export const QunoInfiniteCalendar = forwardRef<QunoInfiniteCalendarHandle, QunoI
   function QunoInfiniteCalendar({ view = "infinite-horizontal", isLoading = false, loadingFallback, ...props }, ref) {
     const viewRef = useRef<CalendarViewHandle | null>(null);
     const focus = useCalendarFocusCoordinator({
+      timeZone: props.settings?.timeZone,
       calendars: props.calendars,
       selectedCalendarIds: props.selectedCalendarIds,
       excludedWeekdays: props.settings?.excludedWeekdays ?? defaultQunoInfiniteCalendarSettings.excludedWeekdays,

@@ -1,3 +1,4 @@
+import { zonedMinute } from "#quno-internal/timeline/time/timeZone";
 import { localMinuteDate } from "#quno-internal/timeline/infinite/events/eventSegment";
 import { parseIsoDate } from "#quno-internal/timeline/date/localDate";
 
@@ -16,9 +17,9 @@ export function parseClockToMinutes({ clock }: { clock: string }): number {
 }
 
 /** Returns the local minutes from midnight for an ISO string or Date. */
-export function minutesSinceStartOfDay({ value }: { value: string | Date }): number {
+export function minutesSinceStartOfDay({ value, timeZone }: { value: string | Date; timeZone?: string }): number {
   const date = typeof value === "string" ? parseIsoDate({ value }) : value;
-  return date.getHours() * 60 + date.getMinutes();
+  return zonedMinute({ date, timeZone });
 }
 
 /** Returns the inclusive visible timeline start minute. */
@@ -122,8 +123,16 @@ export function clampEventToTimeline({
 }
 
 /** Builds an ISO timestamp for a date key plus a minute offset from midnight. */
-export function dateKeyAndMinuteToIso({ dateKey, minute }: { dateKey: string; minute: number }): string {
-  return localMinuteDate({ dateKey, minute }).toISOString();
+export function dateKeyAndMinuteToIso({
+  dateKey,
+  minute,
+  timeZone
+}: {
+  dateKey: string;
+  minute: number;
+  timeZone?: string;
+}): string {
+  return localMinuteDate({ dateKey, minute, timeZone }).toISOString();
 }
 
 /** Formats a timeline tick label as an hour or two-digit minute marker. */

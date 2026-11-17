@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { goToWorkday, openDrawnExternalDraft, viewportRelativeEventBox } from "#quno-e2e/helpers";
+import { goToWorkday, openDrawnExternalDraft, viewportRelativeEventBox, waitForDemoEvents } from "#quno-e2e/helpers";
 
 async function sampleSettledDraft(page: Page, selector: string, durationMs: number) {
   return page.evaluate(
@@ -43,13 +43,26 @@ async function sampleSettledDraft(page: Page, selector: string, durationMs: numb
 }
 
 for (const density of ["100", "20000"]) {
-  test(`three-participant edit stays focused and settles after toggles (${density} events/year)`, async ({ page }) => {
+  test(`three-participant edit stays focused and settles after toggles (${density} events/year)`, async ({
+    page,
+    browserName
+  }) => {
+    if (density === "20000" && browserName === "chromium") {
+      test.setTimeout(60000);
+      const session = await page.context().newCDPSession(page);
+      await session.send("Emulation.setCPUThrottlingRate", { rate: 6 });
+    }
     const browserErrors: string[] = [];
     page.on("pageerror", (error) => browserErrors.push(error.message));
+    await page.clock.setFixedTime(new Date("2026-07-06T10:00:00"));
     await page.goto("/demo/infinite-calendar");
     await page.getByTestId("scale-select").selectOption(density);
     await goToWorkday(page);
-    await openDrawnExternalDraft(page, { dateKey: "2026-07-06", calendarId: "dr-kirillov" });
+    await waitForDemoEvents(page);
+    await openDrawnExternalDraft(page, {
+      dateKey: "2026-07-06",
+      calendarId: "dr-kirillov"
+    });
     for (const id of ["dr-kirillov", "dr-thakker", "marco-eggens"]) {
       await page.getByTestId(`draft-participant-${id}`).check();
     }

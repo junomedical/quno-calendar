@@ -3,6 +3,12 @@
 Five opinionated date and scheduling primitives in one React-authored package. Version `0.6.3` supports React 18+
 directly, verifies React 19 separately, and supports Preact through tested `preact/compat` aliases.
 
+## AI Overview
+
+Infinite Calendar accepts an optional `settings.timeZone` IANA timezone. The timeline uses it for event geometry,
+date buckets, current time, focus, drawing and movement. Event timestamps remain absolute. Omitting it retains
+browser-local behavior. The other date and time primitives retain their timezone-free contracts.
+
 ## Install
 
 ```sh
@@ -165,4 +171,4 @@ layout viewports below 320 px. Rotation, month navigation and fullscreen retain 
 scrolls within its header when necessary. See [QUNO-046](./docs/shared/decisions.md#quno-046---keep-the-main-demo-within-the-available-mobile-width).
 
 The main Timepicker demo also constrains its inner card grid. At 320 px, compact side gutters keep the clock
-inside the card and all three cadence buttons on one row without reducing their touch targets.
+inside the card and all three cadence buttons on one row, including wider fallback fonts, without reducing their touch targets.

@@ -3,7 +3,6 @@ import {
   buildDraftEvent,
   type CalendarHit
 } from "#quno-internal/timeline/infinite/interactions/timelineInteractionModel";
-import { minutesSinceStartOfDay } from "#quno-internal/timeline/time/time";
 import { type CalendarEvent, type CalendarViewComponentProps } from "#quno-internal/timeline/core/types";
 
 type PointerLike = Pick<PointerEvent, "clientX" | "clientY">;
@@ -15,6 +14,7 @@ export type DraftState = {
 };
 
 type UseTimelineDraftInteractionArgs = {
+  timeZone?: string;
   interactionMode: NonNullable<CalendarViewComponentProps["interactionMode"]>;
   getHit: (event: PointerLike) => CalendarHit | null;
   onEventCreateRequest?: CalendarViewComponentProps["onEventCreateRequest"];
@@ -24,6 +24,7 @@ type UseTimelineDraftInteractionArgs = {
 
 export function useTimelineDraftInteraction({
   interactionMode,
+  timeZone,
   getHit,
   onEventCreateRequest,
   onEventDraftRequest,
@@ -41,12 +42,12 @@ export function useTimelineDraftInteraction({
       const next = {
         start: hit,
         current: hit,
-        event: buildDraftEvent({ startHit: hit, endHit: hit, kind: draftKind })
+        event: buildDraftEvent({ startHit: hit, endHit: hit, kind: draftKind, timeZone })
       };
       draftStateRef.current = next;
       setDraftState(next);
     },
-    [draftKind]
+    [draftKind, timeZone]
   );
 
   const updateDraftFromPoint = useCallback(
@@ -63,13 +64,13 @@ export function useTimelineDraftInteraction({
       const next = {
         start: currentDraft.start,
         current: hit,
-        event: buildDraftEvent({ startHit: currentDraft.start, endHit: hit, kind: draftKind })
+        event: buildDraftEvent({ startHit: currentDraft.start, endHit: hit, kind: draftKind, timeZone })
       };
       draftStateRef.current = next;
       setDraftState(next);
       return true;
     },
-    [draftKind, getHit]
+    [draftKind, getHit, timeZone]
   );
 
   const finishDraft = useCallback(async () => {
@@ -83,7 +84,7 @@ export function useTimelineDraftInteraction({
     }
 
     const draft = currentDraft.event;
-    if (minutesSinceStartOfDay({ value: draft.end }) > minutesSinceStartOfDay({ value: draft.start })) {
+    if (Date.parse(draft.end) > Date.parse(draft.start)) {
       const request = {
         start: draft.start,
         end: draft.end,

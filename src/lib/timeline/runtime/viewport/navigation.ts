@@ -51,7 +51,13 @@ export function navigate({
     anchor: {
       target,
       axes: validTime ? (horizontal ? "both" : "y") : "y",
-      screen: { x: state.geometry.labelWidth + 48, y }
+      screen: {
+        x:
+          horizontal && align === "center"
+            ? state.geometry.labelWidth + (state.viewport.width - state.geometry.labelWidth) / 2
+            : state.geometry.labelWidth + 48,
+        y
+      }
     },
     now: performance.now(),
     duration: align === "center" ? 2800 : 160

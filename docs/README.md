@@ -1,5 +1,8 @@
 # Documentation
 
+Infinite Calendar can display a fixed IANA timezone through `settings.timeZone`. Try the Display timezone control
+in the read-only guide and see the [usage recipe](./shared/usage.md#display-timezone).
+
 Demo popups place the arrow-free All demos button between Previous and Next in the footer.
 Demo popups show chapter explanations without a recipe link. Open Documentation in the shared header for implementation recipes.
 
@@ -134,7 +137,7 @@ viewport presentation subscriptions, reusable geometry and native observation or
 ## Concept playground
 
 `/` (also `/concept`) presents all five products with the same live canvas and floating guide. The guide contains an introduction,
-All demos contents, chapter explanation, recipe link and previous/next footer. Chapters autoplay and repeat until
+All demos contents, chapter explanation and previous/next footer. Recipes are reached through Documentation in the shared header. Chapters autoplay and repeat until
 manual takeover; reduced motion starts paused. Fullscreen sits beside the chevron, including when collapsed.
 The guide starts 24 px from bottom left on desktop; mobile uses a bottom drawer with tap/swipe collapse and expansion. Non-calendar products sit to its right on wide screens;
 phones keep a full-height product canvas behind the drawer, without reserved space. See [QUNO-032](./shared/decisions.md#quno-032---share-the-floating-guide-across-all-concept-products).
@@ -215,4 +218,4 @@ Main demo mobile containment, including narrow layout viewports and rotation, is
 [QUNO-046](./shared/decisions.md#quno-046---keep-the-main-demo-within-the-available-mobile-width).
 
 The main Timepicker demo also constrains its inner card grid. At 320 px, compact side gutters keep the clock
-inside the card and all three cadence buttons on one row without reducing their touch targets.
+inside the card and all three cadence buttons on one row, including wider fallback fonts, without reducing their touch targets.

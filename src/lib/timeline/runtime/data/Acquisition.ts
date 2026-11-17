@@ -9,7 +9,11 @@ export type RequestClock = {
 
 /** Request generations and coverage are independent of React and geometry revisions. */
 export class Acquisition {
-  readonly repository = new EventRepository();
+  readonly repository: EventRepository;
+
+  constructor(options: { timeZone?: string } = {}) {
+    this.repository = new EventRepository(options);
+  }
   private generation = 0;
   private sequence = 0;
   private requests = new Map<number, RangeRequest>();

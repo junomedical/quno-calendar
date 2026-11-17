@@ -24,6 +24,10 @@ that model throughout. Infinite Calendar uses `IsoDate` for day keys, navigation
 `start` and `end` values remain local or offset-aware timestamp strings. Never apply timezone-free day arithmetic to
 event timestamps.
 
+The timeline owns optional IANA display-zone conversion. `settings.timeZone` flows through acquisition date
+buckets, prepared segments, current time and pointer conversions. It does not change other products or stored
+event instants. Changing zones creates fresh acquisition coverage.
+
 Date Parser returns top-level `start` and `end` objects of type `DateInputParseEndpoint`, pairing an `IsoDate` with a
 timezone-free `HH:mm` clock. A date-only or omitted endpoint time is `null`. Empty and invalid results have no endpoints.
 Overnight inference uses calendar-day arithmetic, without producing event

@@ -84,13 +84,14 @@ export function buildMoveProposal({
   event: CalendarEvent;
   hit: CalendarHit;
   pointerOffsetMinutes: number;
-  settings: Pick<QunoInfiniteCalendarSettings, "startHour" | "endHour" | "snapMinutes">;
+  settings: Pick<QunoInfiniteCalendarSettings, "startHour" | "endHour" | "snapMinutes" | "timeZone">;
 }) {
   const originalStart = parseIsoDate({ value: event.start }).getTime();
   const duration = parseIsoDate({ value: event.end }).getTime() - originalStart;
   const target = Date.parse(
     dateKeyAndMinuteToIso({
       dateKey: hit.dateKey,
+      timeZone: settings.timeZone,
       minute: snapMinute({ minute: hit.minute, snapMinutes: settings.snapMinutes })
     })
   );
@@ -107,11 +108,13 @@ export function buildMoveProposal({
 export function buildDraftEvent({
   startHit,
   endHit,
-  kind = "appointment"
+  kind = "appointment",
+  timeZone
 }: {
   startHit: CalendarHit;
   endHit: CalendarHit;
   kind?: CalendarEventKind;
+  timeZone?: string;
 }): CalendarEvent {
   const startMinute = Math.min(startHit.minute, endHit.minute);
   const endMinute = Math.max(startHit.minute, endHit.minute);
@@ -122,8 +125,8 @@ export function buildDraftEvent({
     calendarIds: [startHit.calendarId],
     title: isAvailability ? "Available" : "New appointment",
     subtitle: isAvailability ? "Availability draft" : "Draft",
-    start: dateKeyAndMinuteToIso({ dateKey: startHit.dateKey, minute: startMinute }),
-    end: dateKeyAndMinuteToIso({ dateKey: startHit.dateKey, minute: Math.max(endMinute, startMinute + 15) }),
+    start: dateKeyAndMinuteToIso({ dateKey: startHit.dateKey, minute: startMinute, timeZone }),
+    end: dateKeyAndMinuteToIso({ dateKey: startHit.dateKey, minute: Math.max(endMinute, startMinute + 15), timeZone }),
     kind,
     ...(isAvailability ? { renderLayer: "availability" as const } : {})
   };

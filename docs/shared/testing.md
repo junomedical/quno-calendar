@@ -1,5 +1,11 @@
 # Test Plan
 
+## Display timezone verification
+
+`displayTimeZone.test.ts` checks explicit-zone segmentation, 23/25-hour boundaries, compatible DST conversion,
+fractional-hour zones, cached/projection membership and UTC drawing/movement. `display-timezone.spec.ts` checks
+actual event and current-marker geometry plus UTC pointer results in both orientations across three browser zones.
+
 ## Unit Tests
 
 Vitest unit tests live in `tests/unit`, `tests/date-picker`, `tests/date-input`, and `tests/date-parser`.
@@ -663,3 +669,12 @@ and fullscreen geometry and desktop cadence coverage.
 Statistics browser checks cover all five guides at 1440 px and 390 px. Require no Try it note in their enclosing
 section, exact `react`/`react-dom` dependency names for UI entries, no empty Dependencies row for Parser, and
 statistics/description bounds inside their section and viewport. Unit checks cover the same dependency facts.
+
+Cadence geometry also runs with wider monospace labels at 320 px to cover cross-platform fallback font metrics.
+Scenario JSON customization asserts authored paragraphs, no popup recipe link and the product Documentation
+link in the shared header. The Marco cancellation and participant-focus fixtures freeze a working-hour clock
+and wait for loaded demo events before drawing; dense participant editing also runs under sixfold Chromium CPU
+throttling. Keep their participant counts, focus, anchored row positions and late-mutation assertions intact.
+
+Viewport observation regressions distinguish newer animation movement from DOM changes during parent layout:
+regular observation frames retain the latest live scroll, while pre-layout flushes preserve captured positions.

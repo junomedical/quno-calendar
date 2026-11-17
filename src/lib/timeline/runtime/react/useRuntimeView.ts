@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ForwardedRef } from "react";
-import { todayIso, type IsoDate } from "#quno-internal/shared/dateRangeModel";
+import { type IsoDate } from "#quno-internal/shared/dateRangeModel";
 import type { CalendarInternalViewProps, CalendarViewHandle } from "#quno-internal/timeline/core/internalTypes";
 import { mergeQunoInfiniteCalendarSettings } from "#quno-internal/timeline/infinite/views/shared/mergeQunoInfiniteCalendarSettings";
 import { useRetainedCalendarRows } from "#quno-internal/timeline/infinite/events/metrics/useRetainedCalendarRows";
@@ -17,6 +17,7 @@ import { useRuntimeData } from "./useRuntimeData";
 import { useRuntimeHandle } from "./useRuntimeHandle";
 import { useRuntimeHit } from "./useRuntimeHit";
 import { useRuntimeZoom } from "./useRuntimeZoom";
+import { zonedDateKey, zonedMinute } from "#quno-internal/timeline/time/timeZone";
 
 export function useRuntimeView({
   props,
@@ -27,14 +28,11 @@ export function useRuntimeView({
   orientation: Orientation;
   forwardedRef: ForwardedRef<CalendarViewHandle>;
 }) {
-  const initial = useRef(
-    props.initialDateKey ??
-      (props.now
-        ? (`${props.now.getFullYear()}-${String(props.now.getMonth() + 1).padStart(2, "0")}-${String(props.now.getDate()).padStart(2, "0")}` as IsoDate)
-        : todayIso())
-  ).current;
   const now = props.now ?? new Date();
-  const nowMinute = now.getHours() * 60 + now.getMinutes();
+  const timeZone = props.settings?.timeZone;
+  const today = zonedDateKey({ date: now, timeZone });
+  const initial = useRef(props.initialDateKey ?? today).current;
+  const nowMinute = zonedMinute({ date: now, timeZone });
   const [visibleDates, setVisibleDates] = useState<readonly IsoDate[]>([initial]);
   const [prefetchedDates, setPrefetchedDates] = useState<readonly IsoDate[]>([]);
   const updatePrefetchedDates = useCallback(
@@ -61,9 +59,10 @@ export function useRuntimeView({
         buckets: data.buckets,
         dates: renderDates,
         calendarIds: JSON.parse(selectedKey) as string[],
-        projectEvents: props.projectEvents
+        projectEvents: props.projectEvents,
+        timeZone
       }),
-    [data.buckets, props.projectEvents, renderDates, selectedKey]
+    [data.buckets, props.projectEvents, renderDates, selectedKey, timeZone]
   );
   const metrics = useMemo(
     () =>
@@ -115,9 +114,8 @@ export function useRuntimeView({
     applyCreatedEventToLoadedEvents: data.create
   });
   const handle = useRuntimeHandle({
-    today:
-      `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}` as IsoDate,
-    nowTime: `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`,
+    today,
+    nowTime: `${String(Math.floor(nowMinute / 60)).padStart(2, "0")}:${String(nowMinute % 60).padStart(2, "0")}`,
     engine,
     containerRef,
     forwardedRef,

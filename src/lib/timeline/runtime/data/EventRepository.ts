@@ -9,6 +9,8 @@ export class EventRepository {
   private access = new Map<IsoDate, number>();
   private sequence = 0;
 
+  constructor(private readonly options: { timeZone?: string } = {}) {}
+
   read = () => this.buckets as ReadonlyMap<IsoDate, readonly CalendarEvent[]>;
   event({ eventId }: { eventId: string }): CalendarEvent | undefined {
     return this.index.get(eventId);
@@ -24,11 +26,16 @@ export class EventRepository {
         ? []
         : previous.flatMap((event) => {
             const replacement = incoming.get(event.id);
-            return replacement ? (eventIntersectsDate({ event: replacement, dateKey }) ? [replacement] : []) : [event];
+            return replacement
+              ? eventIntersectsDate({ event: replacement, dateKey, timeZone: this.options.timeZone })
+                ? [replacement]
+                : []
+              : [event];
           });
       const present = new Set(values.map((event) => event.id));
       for (const event of incoming.values())
-        if (!present.has(event.id) && eventIntersectsDate({ event, dateKey })) values.push(event);
+        if (!present.has(event.id) && eventIntersectsDate({ event, dateKey, timeZone: this.options.timeZone }))
+          values.push(event);
       next.set(dateKey, values);
     }
     this.publish({ next });
@@ -37,10 +44,16 @@ export class EventRepository {
 
   commit({ event, previousEventId = event.id }: { event: CalendarEvent; previousEventId?: string }): boolean {
     const known = this.index.has(previousEventId) || this.index.has(event.id);
-    if (!known && ![...this.buckets.keys()].some((dateKey) => eventIntersectsDate({ event, dateKey }))) return false;
+    if (
+      !known &&
+      ![...this.buckets.keys()].some((dateKey) =>
+        eventIntersectsDate({ event, dateKey, timeZone: this.options.timeZone })
+      )
+    )
+      return false;
     const next = new Map(this.buckets);
     for (const [dateKey, previous] of next) {
-      const intersects = eventIntersectsDate({ event, dateKey });
+      const intersects = eventIntersectsDate({ event, dateKey, timeZone: this.options.timeZone });
       let replaced = false;
       const values = previous.flatMap((item) => {
         if (item.id !== previousEventId && item.id !== event.id) return [item];

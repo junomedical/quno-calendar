@@ -11,7 +11,8 @@ export function startEventDrag({
   renderedCalendarId,
   renderedDateKey,
   getHit,
-  startDrag
+  startDrag,
+  timeZone
 }: {
   event: Pick<PointerEvent, "clientX" | "clientY">;
   calendarEvent: CalendarEvent;
@@ -19,10 +20,11 @@ export function startEventDrag({
   renderedDateKey?: IsoDate;
   getHit: (event: Pick<PointerEvent, "clientX" | "clientY">) => CalendarHit | null;
   startDrag: ReturnType<typeof useTimelineDragInteraction>["startDrag"];
+  timeZone?: string;
 }) {
   const hit = getHit(event);
   const grabbed = hit
-    ? Date.parse(dateKeyAndMinuteToIso({ dateKey: hit.dateKey, minute: hit.minute }))
+    ? Date.parse(dateKeyAndMinuteToIso({ dateKey: hit.dateKey, minute: hit.minute, timeZone }))
     : Date.parse(calendarEvent.start);
   startDrag({
     event: calendarEvent,

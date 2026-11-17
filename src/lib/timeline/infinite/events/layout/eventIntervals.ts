@@ -26,11 +26,15 @@ export function eventIntervals({
 }: {
   events: readonly CalendarEvent[];
   dateKey?: string;
-  settings: Pick<QunoInfiniteCalendarSettings, "startHour" | "endHour">;
+  settings: Pick<QunoInfiniteCalendarSettings, "startHour" | "endHour" | "timeZone">;
 }): EventInterval[] {
   return events
     .flatMap((event, sourceIndex) => {
-      const segment = eventSegment({ event, dateKey: dateKey ?? eventDateKey(event), settings });
+      const segment = eventSegment({
+        event,
+        dateKey: dateKey ?? eventDateKey({ event, timeZone: settings.timeZone }),
+        settings
+      });
       return segment
         ? [{ event, segment, startMinute: segment.startMinute, endMinute: segment.endMinute, sourceIndex }]
         : [];

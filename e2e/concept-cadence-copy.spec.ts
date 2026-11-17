@@ -3,13 +3,16 @@ import { selectCalendarScene } from "#quno-e2e/concept-helpers";
 
 test.describe.configure({ mode: "parallel" });
 
-for (const [width, height] of [
+for (const [width, height, fontFamily] of [
   [1440, 900],
   [390, 844],
   [375, 667],
-  [320, 667]
-]) {
-  test(`calendar introduction and larger cadence controls remain usable at ${width}px`, async ({ page }) => {
+  [320, 667],
+  [320, 667, "monospace"]
+] as const) {
+  test(`calendar introduction and larger cadence controls remain usable at ${width}px${fontFamily ? " with wider text" : ""}`, async ({
+    page
+  }) => {
     await page.setViewportSize({ width, height });
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/concept");
@@ -18,7 +21,12 @@ for (const [width, height] of [
     );
     await page.getByRole("button", { name: "Timepicker", exact: true }).click();
     await selectCalendarScene(page, "Keep an existing time", false);
-    if (width < 851) await page.getByRole("button", { name: "Collapse description" }).click();
+    if (width < 851) {
+      await page.getByRole("button", { name: "Collapse description" }).click();
+    }
+    if (fontFamily) {
+      await page.addStyleTag({ content: `.concept-cadence button { font-family: ${fontFamily}; }` });
+    }
     const cadence = page.getByRole("group", { name: "Cadence", exact: true });
     await expect(page.getByRole("group", { name: "Minute cadence", exact: true })).toHaveCount(0);
     const buttons = cadence.getByRole("button");
@@ -30,7 +38,9 @@ for (const [width, height] of [
       expect(box.width).toBeGreaterThanOrEqual(80);
       expect(box.height).toBeGreaterThanOrEqual(44);
       expect(box.y).toBeCloseTo(boxes[0].y, 0);
-      if (index) expect(box.x - boxes[index - 1].right).toBeGreaterThanOrEqual(8);
+      if (index) {
+        expect(box.x - boxes[index - 1].right).toBeGreaterThanOrEqual(8);
+      }
     }
     expect(await cadence.evaluate((node) => node.scrollWidth <= node.clientWidth)).toBe(true);
     for (const step of [5, 15, 20]) {
