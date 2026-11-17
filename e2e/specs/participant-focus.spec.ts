@@ -1,21 +1,10 @@
 import { expect, test, type Page } from "@playwright/test";
-import {
-  goToWorkday,
-  openDrawnExternalDraft,
-  viewportRelativeEventBox,
-  waitForDemoEvents,
-} from "#quno-e2e/helpers";
+import { goToWorkday, openDrawnExternalDraft, viewportRelativeEventBox, waitForDemoEvents } from "#quno-e2e/helpers";
 
-async function sampleSettledDraft(
-  page: Page,
-  selector: string,
-  durationMs: number,
-) {
+async function sampleSettledDraft(page: Page, selector: string, durationMs: number) {
   return page.evaluate(
     async ({ selector, durationMs }) => {
-      const viewport = document.querySelector<HTMLElement>(
-        ".quno-calendar-viewport",
-      )!;
+      const viewport = document.querySelector<HTMLElement>(".quno-calendar-viewport")!;
       const start = performance.now();
       const positions: number[] = [];
       const datePositions: number[] = [];
@@ -28,7 +17,7 @@ async function sampleSettledDraft(
         subtree: true,
         childList: true,
         attributes: true,
-        attributeFilter: ["class", "style"],
+        attributeFilter: ["class", "style"]
       });
       while (performance.now() - start < durationMs) {
         await new Promise(requestAnimationFrame);
@@ -37,8 +26,7 @@ async function sampleSettledDraft(
         const viewportTop = viewport.getBoundingClientRect().top;
         positions.push(card.getBoundingClientRect().top - viewportTop);
         const day = card.closest<HTMLElement>('[data-testid="calendar-day"]');
-        if (!day?.dataset.date)
-          throw new Error("Surviving draft lost its date");
+        if (!day?.dataset.date) throw new Error("Surviving draft lost its date");
         datePositions.push(day.getBoundingClientRect().top - viewportTop);
         dateKeys.add(day.dataset.date);
       }
@@ -47,17 +35,17 @@ async function sampleSettledDraft(
         cardMovement: Math.max(...positions) - Math.min(...positions),
         dateMovement: Math.max(...datePositions) - Math.min(...datePositions),
         dateKeys: [...dateKeys],
-        lateMutations,
+        lateMutations
       };
     },
-    { selector, durationMs },
+    { selector, durationMs }
   );
 }
 
 for (const density of ["100", "20000"]) {
   test(`three-participant edit stays focused and settles after toggles (${density} events/year)`, async ({
     page,
-    browserName,
+    browserName
   }) => {
     if (density === "20000" && browserName === "chromium") {
       test.setTimeout(60000);
@@ -73,31 +61,28 @@ for (const density of ["100", "20000"]) {
     await waitForDemoEvents(page);
     await openDrawnExternalDraft(page, {
       dateKey: "2026-07-06",
-      calendarId: "dr-kirillov",
+      calendarId: "dr-kirillov"
     });
     for (const id of ["dr-kirillov", "dr-thakker", "marco-eggens"]) {
       await page.getByTestId(`draft-participant-${id}`).check();
     }
-    await page
-      .getByTestId("draft-title-input")
-      .fill("Participant focus regression");
+    await page.getByTestId("draft-title-input").fill("Participant focus regression");
     await page.getByTestId("draft-save-button").click();
     await expect(page.getByTestId("external-event-popup")).toHaveCount(0);
     const saved = page.locator(
-      '[data-testid="calendar-event"][data-calendar-id="dr-kirillov"]:has-text("Participant focus regression")',
+      '[data-testid="calendar-event"][data-calendar-id="dr-kirillov"]:has-text("Participant focus regression")'
     );
     await expect(saved).toBeVisible();
     await saved.scrollIntoViewIfNeeded();
     const savedId = await saved.getAttribute("data-event-id");
     const sourceRowBeforeEdit = await viewportRelativeEventBox(
       page,
-      `[data-testid="calendar-row"][data-calendar-id="dr-kirillov"]:has([data-event-id="${savedId}"])`,
+      `[data-testid="calendar-row"][data-calendar-id="dr-kirillov"]:has([data-event-id="${savedId}"])`
     );
     expect(sourceRowBeforeEdit).not.toBeNull();
     await saved.click({ position: { x: 12, y: 12 } });
     await expect(page.getByTestId("external-event-popup")).toBeVisible();
-    const draftSelector =
-      '[data-testid="draft-event"][data-calendar-id="dr-kirillov"]';
+    const draftSelector = '[data-testid="draft-event"][data-calendar-id="dr-kirillov"]';
     await expect
       .poll(async () => {
         const box = await viewportRelativeEventBox(page, draftSelector);
@@ -106,12 +91,7 @@ for (const density of ["100", "20000"]) {
       .toBeLessThanOrEqual(8);
     const before = await viewportRelativeEventBox(page, draftSelector);
     expect(before).not.toBeNull();
-    for (const id of [
-      "dr-thakker",
-      "marco-eggens",
-      "dr-thakker",
-      "marco-eggens",
-    ]) {
+    for (const id of ["dr-thakker", "marco-eggens", "dr-thakker", "marco-eggens"]) {
       const checkbox = page.getByTestId(`draft-participant-${id}`);
       await checkbox.uncheck();
       await expect(checkbox).toBeFocused();
@@ -130,8 +110,7 @@ for (const density of ["100", "20000"]) {
         })
         .toBeLessThanOrEqual(8);
     }
-    const survivor =
-      '[data-testid="draft-event"][data-calendar-id="dr-thakker"]';
+    const survivor = '[data-testid="draft-event"][data-calendar-id="dr-thakker"]';
     const survivorBefore = await viewportRelativeEventBox(page, survivor);
     await page.getByTestId("draft-participant-dr-kirillov").uncheck();
     await expect
@@ -157,11 +136,7 @@ for (const density of ["100", "20000"]) {
         }
       }
     }
-    const stability = await sampleSettledDraft(
-      page,
-      survivor,
-      density === "20000" ? 8000 : 3200,
-    );
+    const stability = await sampleSettledDraft(page, survivor, density === "20000" ? 8000 : 3200);
     expect(stability.cardMovement).toBeLessThanOrEqual(2);
     // Recentring may translate scrollTop while preserving the visible date and resource.
     expect(stability.dateMovement).toBeLessThanOrEqual(2);
