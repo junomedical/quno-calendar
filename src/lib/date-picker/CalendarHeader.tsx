@@ -64,25 +64,30 @@ export const CalendarHeader = ({
         data-slot="month-heading"
         data-month-motion={monthMotion === -1 ? "previous" : monthMotion === 1 ? "next" : undefined}
       >
-        <button
-          type="button"
-          className={cx({ values: ["quno-date-picker-month-heading-button", classNames?.monthHeadingButton] })}
-          data-slot="month-heading-button"
-          aria-label={`${headingLabel}. ${
-            timeDate
-              ? labels.chooseDate
-              : monthNavigationOpen
-                ? labels.closeMonthNavigation
-                : labels.openMonthNavigation
-          }`}
-          aria-expanded={timeDate ? undefined : monthNavigationOpen}
-          onClick={(event) => {
-            event.currentTarget.focus();
-            onHeadingClick();
-          }}
-        >
-          <span key={timeDate ?? visibleMonth}>{headingLabel}</span>
-        </button>
+        {config.showMonthNavigation === false && !timeDate ? (
+          <span>{headingLabel}</span>
+        ) : (
+          <button
+            type="button"
+            className={cx({ values: ["quno-date-picker-month-heading-button", classNames?.monthHeadingButton] })}
+            data-slot="month-heading-button"
+            aria-label={`${headingLabel}. ${
+              timeDate
+                ? labels.chooseDate
+                : monthNavigationOpen
+                  ? labels.closeMonthNavigation
+                  : labels.openMonthNavigation
+            }`}
+            disabled={!timeDate && config.showMonthNavigation === false}
+            aria-expanded={timeDate ? undefined : monthNavigationOpen}
+            onClick={(event) => {
+              event.currentTarget.focus();
+              onHeadingClick();
+            }}
+          >
+            <span key={timeDate ?? visibleMonth}>{headingLabel}</span>
+          </button>
+        )}
       </h2>
       <button
         type="button"

@@ -74,6 +74,7 @@ describe("architecture guard", () => {
 describe("bundle-size guard", () => {
   function writePassingBundles(distRoot: string) {
     for (const file of [
+      "booking-picker.js",
       "index.js",
       "infinite-calendar.js",
       "datepicker.js",
@@ -83,7 +84,13 @@ describe("bundle-size guard", () => {
     ]) {
       writeFileSync(join(distRoot, file), "export const value = 1;\n".repeat(10));
     }
-    for (const file of ["infinite-calendar.css", "datepicker.css", "date-input.css", "timepicker.css"]) {
+    for (const file of [
+      "infinite-calendar.css",
+      "datepicker.css",
+      "date-input.css",
+      "timepicker.css",
+      "booking-picker.css"
+    ]) {
       writeFileSync(join(distRoot, file), ".quno { display: grid; }\n".repeat(5));
     }
   }

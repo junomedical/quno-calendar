@@ -24,7 +24,7 @@ that model throughout. Infinite Calendar uses `IsoDate` for day keys, navigation
 `start` and `end` values remain local or offset-aware timestamp strings. Never apply timezone-free day arithmetic to
 event timestamps.
 
-The timeline owns optional IANA display-zone conversion. `settings.timeZone` flows through acquisition date
+Private `shared/zonedTime.ts` owns cached IANA field formatting, ISO date keys and civil-clock timestamps for the timeline and Booking Picker. It specifies the ISO calendar and Latin digits and does not set a country-specific locale. The timeline retains its native local-time fallback and owns optional IANA display-zone behavior. `settings.timeZone` flows through acquisition date
 buckets, prepared segments, current time and pointer conversions. It does not change other products or stored
 event instants. Changing zones creates fresh acquisition coverage.
 
@@ -201,3 +201,11 @@ Vite and Vitest share source resolution through `vite/projectAliases.ts`. Vitest
 that never loads the demo API middleware or requires its generated service bundle. Vite retains that middleware
 for development/preview; the existing dev and deployment commands prepare the service. This keeps test startup
 independent from build order without changing native deployed imports.
+
+## Optional booking boundary
+
+`src/lib/booking-picker` may consume Datepicker and shared date helpers. Standalone Datepicker does not import booking. The headless package root does not export booking UI. HTTP transport, provider grants, identity mapping, and booking mutations remain in applications.
+
+Booking Picker's source loader accepts application adapters and caller-owned caches. It coordinates source reads,
+comparison, one expiry refresh, cache lifecycle, and adjacent-month prefetch. It owns no URLs, credentials, eligibility
+rules, global capability cache, or booking writes. This keeps Patient Journey and Funnel on one loading lifecycle.

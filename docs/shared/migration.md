@@ -183,3 +183,13 @@ Omitted `enabledHours` and `enabledHours={[]}` now both enable 00–23 in Timepi
 validation/clock edits. An empty list previously offered no slots and rejected forced clock input. Nonempty hour
 lists still restrict hours. Use Timepicker's `disabled` prop to disable its actions, or disable Datepicker's `timeMode`
 when time selection should be unavailable.
+
+## Optional booking subpath
+
+Existing standalone entry points remain unchanged. Booking consumers use `@quno/calendar/booking-picker` and its stylesheet. Helpers and callbacks use named objects, such as `onSlotSelected({ slot })` and `onVisibleMonthChange({ month })`. Applications retain their existing booking writer.
+
+### Doctor cards and choice layout
+
+`QunoBookingDoctorOptions`, `QunoBookingChoiceGroup`, and their types were removed from the booking subpath.
+Render doctor cards from the app's booking data and use a local flex column for the list. Calendar still lays out the
+time buttons. Slot-spacing overrides can use `--quno-booking-choice-gap` on the existing slot group.

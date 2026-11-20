@@ -1,7 +1,7 @@
 import type { IsoDate } from "#quno-internal/shared/dateRangeModel";
+import { civilDateKey, civilTimestamp, zonedFields as readZonedFields } from "#quno-internal/shared/zonedTime";
 import { parseIsoDate } from "#quno-internal/timeline/date/localDate";
 
-const formatters = new Map<string, Intl.DateTimeFormat>();
 const wallInstants = new Map<string, number>();
 const DAY = 86_400_000;
 
@@ -17,50 +17,18 @@ export function zonedFields({ date, timeZone }: { date: Date; timeZone?: string 
       second: date.getSeconds()
     };
   }
-  let formatter = formatters.get(timeZone);
-  if (!formatter) {
-    formatter = new Intl.DateTimeFormat("en-GB", {
-      timeZone,
-      calendar: "iso8601",
-      numberingSystem: "latn",
-      hourCycle: "h23",
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit"
-    });
-    formatters.set(timeZone, formatter);
-  }
-  const parts = Object.fromEntries(formatter.formatToParts(date).map(({ type, value }) => [type, Number(value)]));
-  return {
-    year: parts.year,
-    month: parts.month,
-    day: parts.day,
-    hour: parts.hour,
-    minute: parts.minute,
-    second: parts.second
-  };
+  return readZonedFields({ date, timeZone });
 }
 
 /** Map an absolute instant to the displayed calendar day. */
 export function zonedDateKey({ date, timeZone }: { date: Date; timeZone?: string }): IsoDate {
-  const fields = zonedFields({ date, timeZone });
-  return `${String(fields.year).padStart(4, "0")}-${String(fields.month).padStart(2, "0")}-${String(fields.day).padStart(2, "0")}` as IsoDate;
+  return civilDateKey(zonedFields({ date, timeZone }));
 }
 
 /** Map an absolute instant to its displayed minute of day. */
 export function zonedMinute({ date, timeZone }: { date: Date; timeZone?: string }): number {
   const fields = zonedFields({ date, timeZone });
   return fields.hour * 60 + fields.minute;
-}
-
-function civilTimestamp(fields: ReturnType<typeof zonedFields>): number {
-  const date = new Date(0);
-  date.setUTCFullYear(fields.year, fields.month - 1, fields.day);
-  date.setUTCHours(fields.hour, fields.minute, fields.second, 0);
-  return date.getTime();
 }
 
 /** Resolve civil time compatibly: choose the earlier fold and advance through a DST gap. */

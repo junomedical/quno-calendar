@@ -1,6 +1,6 @@
 {
   "name": "@quno/calendar",
-  "version": "0.65.0",
+  "version": "0.66.0",
   "description": "Quno Infinite Calendar, Datepicker, Date Input, Timepicker, and headless Date Parser for React and Preact-compatible applications.",
   "type": "module",
   "imports": {
@@ -23,7 +23,8 @@
     "README.md",
     "LICENSE",
     "CHANGELOG.md",
-    "docs/shared/migration.md"
+    "docs/shared/migration.md",
+    "docs/booking-picker"
   ],
   "sideEffects": [
     "**/*.css"
@@ -47,6 +48,9 @@
       ],
       "timepicker": [
         "dist/time-picker/index.d.ts"
+      ],
+      "booking-picker": [
+        "dist/booking-picker/index.d.ts"
       ]
     }
   },
@@ -84,12 +88,18 @@
       "import": "./dist/timepicker.js",
       "require": "./dist/timepicker.cjs"
     },
-    "./timepicker/styles.css": "./dist/timepicker.css"
+    "./timepicker/styles.css": "./dist/timepicker.css",
+    "./booking-picker": {
+      "types": "./dist/booking-picker/index.d.ts",
+      "import": "./dist/booking-picker.js",
+      "require": "./dist/booking-picker.cjs"
+    },
+    "./booking-picker/styles.css": "./dist/booking-picker.css"
   },
   "scripts": {
     "dev": "npm run build:demo-api && vite --host 127.0.0.1",
     "build": "npm run build:lib && npm run build:demo",
-    "build:lib": "vite build -c vite.lib.config.ts --mode shared && vite build -c vite.lib.config.ts --mode infinite-calendar && vite build -c vite.lib.config.ts --mode datepicker && vite build -c vite.lib.config.ts --mode date-input && vite build -c vite.lib.config.ts --mode date-parser && vite build -c vite.lib.config.ts --mode timepicker",
+    "build:lib": "vite build -c vite.lib.config.ts --mode shared && vite build -c vite.lib.config.ts --mode infinite-calendar && vite build -c vite.lib.config.ts --mode datepicker && vite build -c vite.lib.config.ts --mode date-input && vite build -c vite.lib.config.ts --mode date-parser && vite build -c vite.lib.config.ts --mode timepicker && vite build -c vite.lib.config.ts --mode booking-picker",
     "build:demo": "npm run build:demo-api && vite build -c vite.config.ts --outDir dist-demo",
     "build:demo-api": "node scripts/build-demo-api.mjs",
     "vercel-build": "npm run build:demo-api",

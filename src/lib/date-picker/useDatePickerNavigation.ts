@@ -6,6 +6,8 @@ import type { MonthChangeSource } from "./datePickerControllerTypes";
 import type { DatePickerInteraction } from "./datePickerTypes";
 
 type Args = {
+  visibleMonth: IsoDate;
+  controlledMonth?: IsoDate;
   autoNavigateDelay: number;
   autoNavigateRepeatDelay: number;
   interaction: DatePickerInteraction;
@@ -18,6 +20,8 @@ type Args = {
 };
 
 export function useDatePickerNavigation({
+  visibleMonth,
+  controlledMonth,
   autoNavigateDelay,
   autoNavigateRepeatDelay,
   interaction,
@@ -29,8 +33,11 @@ export function useDatePickerNavigation({
   setVisibleMonth
 }: Args) {
   const edgeTimer = useRef<number | null>(null);
+  const currentMonth = useRef(visibleMonth);
   const stopEdgeNavigation = (): void => {
-    if (edgeTimer.current === null) return;
+    if (edgeTimer.current === null) {
+      return;
+    }
     window.clearTimeout(edgeTimer.current);
     edgeTimer.current = null;
   };
@@ -47,21 +54,23 @@ export function useDatePickerNavigation({
   }): void => {
     setMonthMotion(motion);
     setMonthChangeSource(source);
+    currentMonth.current = month;
     setVisibleMonth(month);
     onVisibleMonthChange?.({ month });
   };
   const navigateFrom = ({ direction, source }: { direction: MonthDirection; source: MonthChangeSource }): void => {
     setMonthMotion(direction);
     setMonthChangeSource(source);
-    setVisibleMonth((current) => {
-      const next = addMonths({ date: current, amount: direction });
-      onVisibleMonthChange?.({ month: next });
-      return next;
-    });
+    const next = addMonths({ date: controlledMonth ?? currentMonth.current, amount: direction });
+    currentMonth.current = next;
+    setVisibleMonth(next);
+    onVisibleMonthChange?.({ month: next });
     setClickCycle(null);
   };
   const startEdgeNavigation = ({ direction }: { direction: MonthDirection }): void => {
-    if (selectionMode === "single" || interaction.type === "idle") return;
+    if (selectionMode === "single" || interaction.type === "idle") {
+      return;
+    }
     stopEdgeNavigation();
     const step = (): void => {
       navigateFrom({ direction, source: "interaction" });

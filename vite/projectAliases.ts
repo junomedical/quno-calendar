@@ -3,6 +3,11 @@ import { resolve } from "node:path";
 export function projectAliases(root: string) {
   return [
     {
+      find: /^@quno\/calendar\/booking-picker\/styles\.css$/,
+      replacement: resolve(root, "src/lib/booking-picker/styles.css")
+    },
+    { find: /^@quno\/calendar\/booking-picker$/, replacement: resolve(root, "src/lib/booking-picker/index.ts") },
+    {
       find: /^@quno\/calendar\/infinite-calendar\/styles\.css$/,
       replacement: resolve(root, "src/lib/timeline/infinite/rendering/styles/calendar.css")
     },

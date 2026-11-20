@@ -139,6 +139,8 @@ export type QunoDatePickerProps = TimeSelectionOptions & {
   defaultValue?: DateRange | null;
   selectionMode?: DateSelectionMode;
   initialMonth?: IsoDate;
+  /** Control the displayed month independently of selection. Navigation requests changes via onVisibleMonthChange. */
+  visibleMonth?: IsoDate;
   locale?: string;
   labels?: Partial<QunoDatePickerLabels>;
   formatters?: Partial<QunoDatePickerFormatters>;
@@ -150,6 +152,12 @@ export type QunoDatePickerProps = TimeSelectionOptions & {
   isDayDisabled?: QunoDatePickerDisabledDayPredicate;
   getDayCellProps?: QunoDatePickerDayCellCustomizer;
   calendarFooter?: ReactNode;
+  /** Optional controls for a compact booking composition. Defaults preserve the standalone picker. */
+  showSelectionHeader?: boolean;
+  showOffscreenPills?: boolean;
+  showMonthNavigation?: boolean;
+  limitNavigation?: boolean;
+  padDayNumbers?: boolean;
   autoNavigateDelay?: number;
   autoNavigateRepeatDelay?: number;
   onChange?: (args: DateTimeSelectionChange) => void;
@@ -157,6 +165,9 @@ export type QunoDatePickerProps = TimeSelectionOptions & {
 };
 
 export type ResolvedDatePickerConfig = {
+  showMonthNavigation?: boolean;
+  limitNavigation?: boolean;
+  padDayNumbers?: boolean;
   locale: string;
   labels: Required<QunoDatePickerLabels>;
   formatters: Required<QunoDatePickerFormatters>;
