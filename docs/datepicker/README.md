@@ -16,6 +16,11 @@ The visible month remains independent from the selected value. Controlled and un
 with equal endpoints representing a single day. The field guide demonstrates `selectionMode="single"` on Datepicker by
 itself before separately composing a range-enabled picker with a focused Quno/Date Input selection surface.
 
+Use `initialMonth` to set the first view. Supply `visibleMonth` to control the displayed month independently of
+selection. The picker normalizes it to the first day of the month and sends navigation requests through
+`onVisibleMonthChange({ month })`. Updating `visibleMonth` from the application applies the view without emitting
+a navigation request or a selection change.
+
 Start and End shortcuts reveal the endpoint month without editing selection. Activation focuses the stable month
 heading before the shortcut exits, preserving focus inside a composed input popup for pointer and keyboard use.
 
@@ -131,3 +136,7 @@ scrolls within its header when necessary. See [QUNO-046](../shared/decisions.md#
 
 The guide’s statistics block has no Try it note. Its Dependencies row lists the `react` and `react-dom` peers.
 See [QUNO-048](../shared/decisions.md#quno-048---keep-statistics-free-of-instructions-and-list-actual-dependencies).
+
+## Compact booking composition
+
+`showSelectionHeader`, `showOffscreenPills`, `showMonthNavigation`, `limitNavigation`, and `padDayNumbers` are optional composition controls. Existing defaults remain unchanged. `limitNavigation` bounds month arrows to `limitDateFrom` and `limitDateTo`. Padded day numbers do not change accessible full-date labels. Use `@quno/calendar/booking-picker` for provider-neutral available times and exact-slot selection.

@@ -12,7 +12,10 @@ export function useResolvedConfig({
   limitDateFrom,
   limitDateTo,
   isDayDisabled,
-  getDayCellProps
+  getDayCellProps,
+  showMonthNavigation,
+  limitNavigation,
+  padDayNumbers
 }: Pick<
   QunoDatePickerProps,
   | "selectionMode"
@@ -24,6 +27,9 @@ export function useResolvedConfig({
   | "limitDateTo"
   | "isDayDisabled"
   | "getDayCellProps"
+  | "showMonthNavigation"
+  | "limitNavigation"
+  | "padDayNumbers"
 >) {
   const effectiveIsDayDisabled = useMemo(
     () => resolveDatePickerDisabledDayPredicate({ matcher: isDayDisabled, limitDateFrom, limitDateTo }),
@@ -42,7 +48,10 @@ export function useResolvedConfig({
       isDayDisabled: effectiveIsDayDisabled,
       limitDateFrom,
       limitDateTo,
-      getDayCellProps
+      getDayCellProps,
+      showMonthNavigation,
+      limitNavigation,
+      padDayNumbers
     };
   }, [
     classNames,
@@ -53,7 +62,10 @@ export function useResolvedConfig({
     locale,
     selectionMode,
     limitDateFrom,
-    limitDateTo
+    limitDateTo,
+    showMonthNavigation,
+    limitNavigation,
+    padDayNumbers
   ]);
   return { config, effectiveIsDayDisabled };
 }

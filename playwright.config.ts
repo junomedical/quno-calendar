@@ -10,9 +10,12 @@ export default defineConfig({
     timeout: 5_000
   },
   webServer: {
-    command: `npm run dev -- --port ${port} --strictPort`,
+    command:
+      process.env.QUNO_DEMO_PRODUCTION === "true"
+        ? `npm run preview -- --port ${port} --strictPort`
+        : `npm run dev -- --port ${port} --strictPort`,
     url: baseURL,
-    reuseExistingServer: process.env.QUNO_TEST_PORT === undefined,
+    reuseExistingServer: process.env.QUNO_DEMO_PRODUCTION !== "true" && process.env.QUNO_TEST_PORT === undefined,
     timeout: 120_000
   },
   use: {

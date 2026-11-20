@@ -145,17 +145,21 @@ export const CalendarGrid = ({
             }}
             onPointerMove={pointer.movePointer}
             onPointerEnter={(event) => {
-              if (event.pointerType === "touch") return;
+              if (event.pointerType === "touch") {
+                return;
+              }
               onOverflowChange({ index: null });
               onEnter({ date });
             }}
             onPointerUp={(event) => pointer.finishPointer({ event, fallback: date })}
             onPointerCancel={pointer.cancelPointer}
             onClick={(event) => {
-              if (event.detail === 0 && !event.defaultPrevented) onActivate?.({ date });
+              if (event.detail === 0 && !event.defaultPrevented) {
+                onActivate?.({ date });
+              }
             }}
           >
-            <span>{dayNumber}</span>
+            <span>{config.padDayNumbers ? String(dayNumber).padStart(2, "0") : dayNumber}</span>
             {(isStart || isEnd) && (
               <i
                 className={cx({ values: ["quno-date-picker-handle", classNames?.handle] })}

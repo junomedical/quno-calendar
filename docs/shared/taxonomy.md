@@ -273,3 +273,7 @@ Legacy `/guide/*` routes are compatibility entries for the current guides.
 A **documentation supporting column** holds one bottom-aligned Try it note per complete section description beside the left-aligned reading
 column at desktop widths. It stacks into reading order below that breakpoint. The **shared site header** owns
 product tabs and the Documentation/Demo destination link across the concept and current documentation.
+
+## Booking composition
+
+`booking-picker` is the optional available-date and exact-time composition. It is separate from timezone-free Datepicker and does not add provider concepts to that primitive.

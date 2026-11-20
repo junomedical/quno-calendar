@@ -700,3 +700,23 @@ retain their finite scenes and short tours.
 - Consequences: Preserve contents selection, Escape dismissal, playback stopping and chapter navigation. Verify
   centered footer geometry, non-overlapping controls and 44 px mobile targets across all five products, including
   narrow phones and landscape. Public component contracts remain unchanged.
+
+## QUNO-051 - Share Locale-Independent Timezone Primitives
+
+- Date: 2026-11-17
+- Status: Accepted; refines the implementation ownership of Infinite Calendar Decision 168 and BPK-007
+- Decision: Put cached timestamp-to-calendar-field conversion in private `shared/zonedTime.ts`. Reuse it in the
+  timeline and Booking Picker. Use the runtime locale with explicit `calendar: "iso8601"`, `numberingSystem: "latn"`
+  and `hourCycle: "h23"`; construct internal date keys from named fields. Keep display labels in the consumer locale.
+- Consequences: Reuse one formatter per timezone in each loaded module. Preserve the timeline's native local-time
+  fallback and existing booking month-boundary solver. Date-only primitives and public package exports remain
+  unchanged. Regress non-Gregorian locale defaults, repeated midnight, invalid booking input and formatter reuse.
+
+## QUNO-052 - Share ordinal days and booking headings
+
+- Date: 2026-11-17
+- Status: Accepted
+- Decision: Reuse one private ordinal-day helper in timeline and booking formatting. Export the opt-in
+  `formatBookingDate({ date, locale })` from Booking Picker instead of duplicating it in Patient Journey and Funnel.
+- Consequences: Preserve the existing long English ordinal heading and native non-English ordering. Format the
+  already-resolved civil date in UTC. Keep timeline date semantics and the picker's default heading unchanged.

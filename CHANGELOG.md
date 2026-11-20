@@ -4,6 +4,51 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+- Let consumers move focus to the first enabled time after a patient explicitly selects a date.
+
+- Let public booking consumers preselect a bookable day for date-only appointments. Keep the booking action explicit.
+  Show seasonal timezone abbreviations on time options without a separate summary.
+  Look ahead through empty months inside the authorized date-only booking window when the picker first opens.
+  Raise the Booking Picker JavaScript gzip ceiling to 19.5 KiB for the booking date and time behavior.
+
+- Apply changed controlled booking slots after delayed availability. Synchronize the date grid and time list across
+  months. Preserve independent browsing and identify value-driven month changes in the existing callback.
+
+- Restore two-click date-only booking. Selecting a day reveals one Confirm button for its first bookable slot.
+  Recovery dialogs can use their own confirmation control.
+
+- Respect caller-supplied booking availability expiry and match selections against fresh canonical slots.
+  Raise the Booking Picker JavaScript gzip ceiling from 18.5 to 19 KiB for the 19,272-byte bundle.
+
+- Export `formatBookingDate({ date, locale })` from Booking Picker. Share English ordinal-day logic with the
+  timeline and remove duplicate Patient Journey/Funnel formatters. Preserve the long heading, native non-English
+  ordering, UTC civil-date handling and the picker's default medium-date heading.
+  Verification: 18 formatter tests, 17 picker tests and three production-guide Chromium tests pass. Types,
+  architecture, lint, formatting, bundle sizes and packed React/Preact checks pass. A first full unit run passed;
+  repeat broad runs hit worker/task timeouts, including `tests/unit/scripts/guardScripts.test.ts`.
+
+- Move doctor cards and doctor-list layout to Patient Journey and Funnel. Remove the doctor options and
+  generic choice-group exports. Keep the time-slot layout inside Booking Picker.
+  Changed source files pass formatting. The package-wide format check flags existing files
+  `src/lib/booking-picker/bookingAvailabilityLoader.ts` and `tests/booking-picker/bookingAvailabilityLoader.test.ts`.
+
+- Share cached timezone field conversion between Booking Picker and Infinite Calendar. Use explicit ISO calendar
+  fields and Latin digits without a country-specific internal locale. Preserve display localization, timeline local
+  fallback and booking month-boundary behavior. The booking bundle adds 173 B gzip; its ceiling moves from 18 to
+  18.25 KiB to account for the shared primitive. All 792 unit tests, nine focused Chromium checks and three
+  production booking-guide checks pass. Types, lint, architecture, library/demo builds, size and packed React/Preact
+  TypeScript/module/SSR checks pass.
+
+- Add the optional Booking Picker and injected source loader as local package `0.66.0`. Share complete pagination, comparison, capability refresh, month caches and adjacent-month prefetch. Keep provider HTTP and booking authority in the consumers.
+- Preserve exact slot payloads and disabled diagnostic slots. Apply server-supplied cadence after pagination.
+- Keep the browsing day independent of an unchanged controlled slot. Synchronize actual external value changes. Clear previous-month dates and times on navigation, including stable slot-array references and asynchronous month loading.
+- Put the live booking example in the Datepicker guide. Link it from the existing navigation and documentation.
+- Preserve targetless viewport capture used by the onboarding calendar when replacing its older vendored archive.
+
+  Earlier verification before the PR #66 base refresh: all 774 unit tests and the three production-guide Chromium cases pass. The full Chromium development suite passes 496/497. Its remaining `e2e/concept.spec.ts:314` JSON-link assertion also fails on untouched base source. The broad suite intercepts development JSON modules and must use the development server; production verification is scoped to the booking guide. Formatting, architecture, types, lint, library/demo builds, packed React/Preact/TypeScript/SSR checks, package verification and size checks pass.
+
+  2026-11-17 base refresh: all 785 unit tests pass. The Chromium development suite passes 502/504 on its first run; both failed assertions pass when rerun serially. All three production booking-guide tests pass. Strict types, lint, formatting, architecture, library/demo builds, size checks and packed React/Preact/TypeScript/module/SSR checks pass. The feature now includes PR #66 display-timezone behavior and uses package version 0.66.0.
+
 - Prevent batched native scroll observations from overwriting newer animation-frame movement, while retaining
   captured pre-mutation positions during layout changes. Keep cadence choices on one row at 320 px with wider
   fallback fonts and 80×44 px targets.

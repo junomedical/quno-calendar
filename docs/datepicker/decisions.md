@@ -1290,3 +1290,20 @@ demo popups. Implementation recipes remain accessible through Documentation in t
   the stable heading only when entering time navigation; date-only activation retains focus on the day.
 - Consequences: Disabled dates, hard limits, range intent, pointer compatibility-click suppression and callback
   shapes retain their existing behavior. Cover both keys, single-day and range selection, and time-mode regressions.
+
+## QDP-138 — Support compact booking
+
+- Date: 2026-11-04
+- Decision: Add optional selection-header, offscreen-pill, month-navigation, bounded-navigation, and padded-day controls. Keep existing defaults. Notify parent month observers outside React state-updater execution.
+- Why: Booking Picker requires compact bounded navigation without changing ordinary Datepicker presentation.
+
+- Budget: raise the Datepicker JavaScript ceiling from 12.75 to 13.25 KiB for the compact composition controls. Booking Picker has a separate 18 KiB JavaScript and 4.5 KiB CSS ceiling. This supersedes only QDP-135's JavaScript ceiling.
+
+## QDP-139 — Allow the parent to control the displayed month
+
+- Date: 2026-11-19
+- Status: Accepted. Extends QDP-138.
+- Decision: Accept an optional `visibleMonth` independent of the selected date. Normalize it to the first day.
+  Treat user navigation as a request through `onVisibleMonthChange`. Keep `initialMonth` as the initializer
+  for uncontrolled views.
+- Why: Booking Picker must move its date grid and time list together when an external slot changes months.

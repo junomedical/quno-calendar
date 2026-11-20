@@ -4,6 +4,26 @@ import { QunoDatePicker } from "@quno/calendar/datepicker";
 import { clickDay, day, edge, pill, slot } from "./datePickerTestUtils";
 
 describe("QunoDatePicker navigation", () => {
+  it("requests navigation from the controlled month without rewriting the selection", () => {
+    const props = {
+      value: { start: "2026-08-10", end: "2026-08-20" } as const,
+      onVisibleMonthChange: vi.fn(),
+      onChange: vi.fn()
+    };
+    const { rerender } = render(<QunoDatePicker {...props} initialMonth="2026-07-01" visibleMonth="2026-08-15" />);
+    expect(slot("month-heading")).toHaveTextContent("August 2026");
+    fireEvent.click(screen.getByRole("button", { name: "Next month" }));
+    expect(props.onVisibleMonthChange).toHaveBeenCalledExactlyOnceWith({ month: "2026-09-01" });
+    expect(slot("month-heading")).toHaveTextContent("August 2026");
+
+    rerender(<QunoDatePicker {...props} initialMonth="2026-07-01" visibleMonth="2026-10-01" />);
+    expect(slot("month-heading")).toHaveTextContent("October 2026");
+    expect(props.onVisibleMonthChange).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByRole("button", { name: "Previous month" }));
+    expect(props.onVisibleMonthChange).toHaveBeenLastCalledWith({ month: "2026-09-01" });
+    expect(props.onChange).not.toHaveBeenCalled();
+  });
+
   it("keeps passive outside-month hover noncommitting", () => {
     const onChange = vi.fn();
     const onVisibleMonthChange = vi.fn();

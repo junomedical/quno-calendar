@@ -9,6 +9,7 @@ export function useDatePickerSetup({
   defaultValue = null,
   selectionMode = "range",
   initialMonth,
+  visibleMonth,
   locale = "en-GB",
   labels,
   formatters,
@@ -18,6 +19,9 @@ export function useDatePickerSetup({
   limitDateTo,
   isDayDisabled,
   getDayCellProps,
+  showMonthNavigation,
+  limitNavigation,
+  padDayNumbers,
   autoNavigateDelay = 400,
   autoNavigateRepeatDelay = 650,
   onChange,
@@ -47,20 +51,26 @@ export function useDatePickerSetup({
     limitDateFrom,
     limitDateTo,
     isDayDisabled,
-    getDayCellProps
+    getDayCellProps,
+    showMonthNavigation,
+    limitNavigation,
+    padDayNumbers
   });
   const controller = useDatePickerController({
     value,
     defaultValue,
     selectionMode,
     initialMonth,
+    visibleMonth,
     weekStartsOn,
     isDayDisabled: effectiveIsDayDisabled,
     autoNavigateDelay,
     autoNavigateRepeatDelay,
     onChange: ({ value }) => {
       clock.onDateChange({ value });
-      if (clock.enabled) setView(value ? "time" : "dates");
+      if (clock.enabled) {
+        setView(value ? "time" : "dates");
+      }
     },
     onVisibleMonthChange
   });

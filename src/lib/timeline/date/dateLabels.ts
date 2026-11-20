@@ -1,4 +1,5 @@
 import type { CalendarDateLabelOptions as DateLabelOptions } from "#quno-internal/timeline/core/calendarFormatterTypes";
+import { formatOrdinalDay } from "#quno-internal/shared/formatOrdinalDay";
 import { toDateKey } from "./dateVirtualization";
 
 const DEFAULT_LOCALE_KEY = "__default__";
@@ -35,23 +36,6 @@ function dateFormatter({
 
 function usesEnglishOrdinals(formatter: Intl.DateTimeFormat): boolean {
   return formatter.resolvedOptions().locale.split("-")[0] === "en";
-}
-
-/** Returns an English ordinal for a positive calendar day. */
-export function formatOrdinalDay({ day }: { day: number }): string {
-  const remainder100 = day % 100;
-  const suffix =
-    remainder100 >= 11 && remainder100 <= 13
-      ? "th"
-      : day % 10 === 1
-        ? "st"
-        : day % 10 === 2
-          ? "nd"
-          : day % 10 === 3
-            ? "rd"
-            : "th";
-
-  return `${day}${suffix}`;
 }
 
 /** Formats a local month/day label, retaining ordinal days for English locales. */

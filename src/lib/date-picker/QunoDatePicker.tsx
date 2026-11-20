@@ -31,24 +31,28 @@ export const QunoDatePicker = (props: QunoDatePickerProps): JSX.Element => {
       aria-label={config.labels.calendar}
       onPointerUp={controller.stopEdgeNavigation}
     >
-      <SelectionHeader
-        selection={controller.selection}
-        time={clock.enabled ? clock.time : null}
-        config={config}
-        onClear={controller.clear}
-      />
-      <OffscreenPills
-        selection={controller.selection}
-        selectionMode={selectionMode}
-        visibleMonth={controller.visibleMonth}
-        position="before"
-        monthChangeSource={controller.monthChangeSource}
-        config={config}
-        onJump={({ date }) => {
-          controller.jumpToEndpoint({ date });
-          setView("dates");
-        }}
-      />
+      {props.showSelectionHeader !== false && (
+        <SelectionHeader
+          selection={controller.selection}
+          time={clock.enabled ? clock.time : null}
+          config={config}
+          onClear={controller.clear}
+        />
+      )}
+      {props.showOffscreenPills !== false && (
+        <OffscreenPills
+          selection={controller.selection}
+          selectionMode={selectionMode}
+          visibleMonth={controller.visibleMonth}
+          position="before"
+          monthChangeSource={controller.monthChangeSource}
+          config={config}
+          onJump={({ date }) => {
+            controller.jumpToEndpoint({ date });
+            setView("dates");
+          }}
+        />
+      )}
       <Calendar
         controller={controller}
         config={config}
@@ -57,18 +61,20 @@ export const QunoDatePicker = (props: QunoDatePickerProps): JSX.Element => {
         clock={clock}
         footer={calendarFooter}
       />
-      <OffscreenPills
-        selection={controller.selection}
-        selectionMode={selectionMode}
-        visibleMonth={controller.visibleMonth}
-        position="after"
-        monthChangeSource={controller.monthChangeSource}
-        config={config}
-        onJump={({ date }) => {
-          controller.jumpToEndpoint({ date });
-          setView("dates");
-        }}
-      />
+      {props.showOffscreenPills !== false && (
+        <OffscreenPills
+          selection={controller.selection}
+          selectionMode={selectionMode}
+          visibleMonth={controller.visibleMonth}
+          position="after"
+          monthChangeSource={controller.monthChangeSource}
+          config={config}
+          onJump={({ date }) => {
+            controller.jumpToEndpoint({ date });
+            setView("dates");
+          }}
+        />
+      )}
       {config.labels.hint && (
         <p className={cx({ values: ["quno-date-picker-hint", classNames?.hint] })} data-slot="hint">
           {config.labels.hint}

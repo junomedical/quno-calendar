@@ -71,6 +71,8 @@ writeFileSync(
 import { addDays, type DateRange } from "@quno/calendar";
 import { QunoInfiniteCalendar, type EventRendererProps, type CalendarEventSegment, type LoadEvents } from "@quno/calendar/infinite-calendar";
 import { QunoDatePicker } from "@quno/calendar/datepicker";
+import { QunoBookingDateTimePicker } from "@quno/calendar/booking-picker";
+import "@quno/calendar/booking-picker/styles.css";
 import { QunoDateInput } from "@quno/calendar/date-input";
 import { QunoTimePicker } from "@quno/calendar/timepicker";
 import "@quno/calendar/timepicker/styles.css";
@@ -117,7 +119,13 @@ execFileSync("npm", ["install", "--prefer-offline", "--no-audit", "--no-fund"], 
 });
 const installed = join(appDir, "node_modules", "@quno", "calendar");
 const manifest = JSON.parse(readFileSync(join(installed, "package.json"), "utf8"));
-for (const file of ["infinite-calendar.css", "datepicker.css", "date-input.css", "timepicker.css"]) {
+for (const file of [
+  "infinite-calendar.css",
+  "datepicker.css",
+  "date-input.css",
+  "timepicker.css",
+  "booking-picker.css"
+]) {
   const stylesheet = join(installed, "dist", file);
   accessSync(stylesheet);
   const source = readFileSync(stylesheet, "utf8");
@@ -130,6 +138,8 @@ for (const subpath of [
   ".",
   "./infinite-calendar",
   "./infinite-calendar/styles.css",
+  "./booking-picker",
+  "./booking-picker/styles.css",
   "./datepicker",
   "./datepicker/styles.css",
   "./date-input",
@@ -146,6 +156,7 @@ for (const subpath of ["./timeline", "./date-picker", "./time-picker"]) {
 for (const subpath of [
   "@quno/calendar",
   "@quno/calendar/infinite-calendar",
+  "@quno/calendar/booking-picker",
   "@quno/calendar/datepicker",
   "@quno/calendar/date-input",
   "@quno/calendar/date-parser",
@@ -197,6 +208,7 @@ for (const oldSubpath of [
   "@quno/calendar/time-picker",
   "@quno/calendar/date-parser/dateInputTimeParser",
   "@quno/calendar/timepicker/TimeOptions",
+  "@quno/calendar/booking-picker/bookingPickerTypes",
   "@quno/calendar/dist/time-picker/TimeOptions",
   "@quno/calendar/infinite-calendar/eventSegment",
   "@quno/calendar/dist/timeline/infinite/events/eventSegment",

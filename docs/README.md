@@ -198,6 +198,8 @@ The concept’s larger **Cadence** controls and clarified Calendar introduction 
 [QTP-007](./timepicker/decisions.md#qtp-007---enlarge-concept-cadence-choices-and-shorten-their-label) and
 [Calendar Decision 158](./infinite-calendar/decisions.md#158---clarify-navigation-and-interaction-focus-in-the-concept-introduction).
 
+[Decision 159](./infinite-calendar/decisions.md#159---capture-the-current-slot-and-center-horizontal-navigation-on-both-axes)
+adds current-slot capture and horizontal centering on both usable viewport axes.
 Infinite Calendar interaction recipes cover [touch holds and anchored zoom](./shared/usage.md#navigation-and-zoom),
 including iPad slider focus and restoring the original pointer time after zoom-limit reversals. Product rationale
 lives in Infinite Calendar Decisions 162–163.
@@ -219,3 +221,11 @@ Main demo mobile containment, including narrow layout viewports and rotation, is
 
 The main Timepicker demo also constrains its inner card grid. At 320 px, compact side gutters keep the clock
 inside the card and all three cadence buttons on one row, including wider fallback fonts, without reducing their touch targets.
+
+## Optional booking composition
+
+[Booking Picker](booking-picker/README.md) combines Datepicker and exact available times without changing the standalone Datepicker entry point. The interactive example is `/guide/datepicker#booking-picker`. Applications retain provider transport and server booking authority. The shared comparison helper applies that authority to payload selection and read-only intervals.
+
+Its optional `formatBookingDate` label formatter preserves long English ordinal headings and native localized ordering.
+
+Booking and timeline timestamp calculations share locale-independent cached timezone primitives. See [QUNO-051](shared/decisions.md#quno-051---share-locale-independent-timezone-primitives).

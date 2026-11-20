@@ -2236,3 +2236,13 @@ must not replace the retained semantic position. Unit regressions cover both cal
 The orientation demo uses the existing scroll-to action to pan to each next date's measured heading in both
 views, followed by its measured return to the initial date. Preserve animated native scrolling, the mounted
 calendar, scene looping and the October 20/21 progression with the return to October 19.
+
+## 170 - Preserve optional viewport capture when packaging the booking picker
+
+Date: 2026-11-11
+Status: Accepted; retained from compatibility branch-local Decision 168
+
+PR #66 uses Decision 168 for explicit display timezones and also preserves this viewport contract. This record
+retains the compatibility branch decision under a distinct identifier.
+
+Keep `captureViewportAnchor()` callable without a target, as required by the onboarding editor. Capture the current grid slot with the existing layout-anchor mechanism. Explicit event and slot targets retain their behavior. This preserves the consumer contract while updating the shared package for booking.

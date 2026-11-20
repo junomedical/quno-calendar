@@ -9,6 +9,7 @@ export type DatePickerControllerOptions = {
   defaultValue: DateRange | null;
   selectionMode: DateSelectionMode;
   initialMonth?: IsoDate;
+  visibleMonth?: IsoDate;
   weekStartsOn: WeekStart;
   isDayDisabled?: QunoDatePickerDisabledDayPredicate;
   autoNavigateDelay: number;
