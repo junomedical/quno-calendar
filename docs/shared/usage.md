@@ -1451,6 +1451,7 @@ import "@quno/calendar/booking-picker/styles.css";
 <QunoBookingDateTimePicker
   slots={availableSlots}
   queryPeriods={queryPeriods}
+  initialMonth="2026-11"
   timeZone="Europe/Berlin"
   showTimeZone={false}
   labels={{ selectedDate: formatBookingDate }}
@@ -1459,7 +1460,7 @@ import "@quno/calendar/booking-picker/styles.css";
 />;
 ```
 
-Try `/guide/datepicker#booking-picker` for source comparison, mobile layout, and pointer date-only booking. With `dateOnly`, select a day or set `autoSelectDate` to preselect the first bookable day. The localized action submits its first selectable slot. `selectable: false` displays a diagnostic interval without permitting submission. Set envelope `bookingAuthority` from the server tenant setting. Shared comparison uses API payloads for `quno`, keeps Cronofy payloads otherwise, and disables intervals exclusive to the other writer. It never upgrades a read-only slot. Import plain `@quno/calendar/datepicker` for a timezone-free day or range without the booking workflow.
+Try `/guide/datepicker#booking-picker` for source comparison, mobile layout, and pointer date-only booking. With `dateOnly`, select a day or set `autoSelectDate` to preselect the first bookable day. The localized action submits its first selectable slot. Timed booking can also select a day in a later month when `shouldSeekFirstAvailableDate` returns true. `selectable: false` displays a diagnostic interval without permitting submission. Set envelope `bookingAuthority` from the server tenant setting. Shared comparison uses API payloads for `quno`, keeps Cronofy payloads otherwise, and disables intervals exclusive to the other writer. It never upgrades a read-only slot. Import plain `@quno/calendar/datepicker` for a timezone-free day or range without the booking workflow.
 
 ### Shared booking source loader
 
@@ -1480,7 +1481,7 @@ const month = await availability.readCached(request);
 await availability.prefetch({
   ...request,
   bootstrap: isBookingSuccess(month.result) ? month.result : bootstrap,
-  month: "2026-11-01",
+  month: "2026-11",
   timeZone: "Europe/Berlin",
   onResult: showPrefetchedMonth
 });

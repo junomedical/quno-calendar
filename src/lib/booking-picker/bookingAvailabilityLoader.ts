@@ -5,6 +5,7 @@ import {
 } from "./bookingAvailabilityCache";
 import { createBookingAvailabilityRead } from "./bookingAvailabilitySources";
 import { bookingAvailabilityMonthPeriod } from "./bookingMonthPeriod";
+import type { BookingMonth } from "./bookingDateTimePickerModel";
 import type {
   BookingAvailabilityCacheRequest,
   BookingAvailabilityFetchResult,
@@ -12,9 +13,9 @@ import type {
   BookingAvailabilityWindow
 } from "./bookingAvailabilityLoaderTypes";
 
-const shiftMonth = ({ month, offset }: { month: string; offset: number }): string => {
+const shiftMonth = ({ month, offset }: { month: BookingMonth; offset: number }): BookingMonth => {
   const [year, number] = month.split("-").map(Number);
-  return new Date(Date.UTC(year, number - 1 + offset, 1)).toISOString().slice(0, 10);
+  return new Date(Date.UTC(year, number - 1 + offset, 1)).toISOString().slice(0, 7) as BookingMonth;
 };
 /** Coordinates injected sources and caller-owned month caches without HTTP or provider credentials. */
 export const createBookingAvailabilityLoader = <
@@ -37,15 +38,15 @@ export const createBookingAvailabilityLoader = <
     continueForward,
     ...request
   }: BookingAvailabilityCacheRequest<TInput, TBootstrap, TResult> & {
-    month: string;
+    month: BookingMonth;
     timeZone: string;
     onResult?: (result: BookingAvailabilityFetchResult<TResult>) => void;
     continueForward?: (args: { result?: BookingAvailabilityFetchResult<TResult> }) => boolean;
   }): Promise<void> => {
     const periods = config.queryPeriods({ bootstrap: request.bootstrap });
+    const lastEnd = periods.reduce((end, period) => Math.max(end, Date.parse(period.end)), -Infinity);
     const readMonth = async ({ period }: { period: ReturnType<typeof bookingAvailabilityMonthPeriod> }) => {
       if (
-        periods.length &&
         !periods.some(
           (query) =>
             Date.parse(query.start) < Date.parse(period.availabilityTo) &&
@@ -59,17 +60,15 @@ export const createBookingAvailabilityLoader = <
       return result;
     };
     const forward = async (): Promise<void> => {
-      const lastEnd = Math.max(...periods.map(({ end }) => Date.parse(end)));
       let candidate = shiftMonth({ month, offset: 1 });
       let period = bookingAvailabilityMonthPeriod({ month: candidate, timeZone });
-      let result = await readMonth({ period });
-      while (continueForward?.({ result })) {
-        candidate = shiftMonth({ month: candidate, offset: 1 });
-        period = bookingAvailabilityMonthPeriod({ month: candidate, timeZone });
-        if (!(Date.parse(period.availabilityFrom) < lastEnd)) {
+      while (Date.parse(period.availabilityFrom) < lastEnd) {
+        const result = await readMonth({ period });
+        if (!continueForward?.({ result })) {
           return;
         }
-        result = await readMonth({ period });
+        candidate = shiftMonth({ month: candidate, offset: 1 });
+        period = bookingAvailabilityMonthPeriod({ month: candidate, timeZone });
       }
     };
     const previous = bookingAvailabilityMonthPeriod({ month: shiftMonth({ month, offset: -1 }), timeZone });

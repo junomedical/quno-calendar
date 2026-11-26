@@ -99,16 +99,60 @@ describe("QunoBookingDateTimePicker", () => {
     const bookable = slot("2026-09-03T09:00:00Z");
     const onSlotSelected = vi.fn();
     const props = { ...baseProps, dateOnly: true, autoSelectDate: true, showTimeZone: true, onSlotSelected };
-    const { rerender } = render(<QunoBookingDateTimePicker {...props} initialMonth="2026-09-01" slots={[]} loading />);
+    const { rerender } = render(<QunoBookingDateTimePicker {...props} initialMonth="2026-09" slots={[]} loading />);
     expect(screen.queryByRole("button", { name: "Confirm" })).not.toBeInTheDocument();
-    rerender(<QunoBookingDateTimePicker {...props} initialMonth="2026-09-01" slots={[]} />);
+    rerender(<QunoBookingDateTimePicker {...props} initialMonth="2026-09" slots={[]} />);
     expect(screen.getByText("No available times on this date.")).toBeInTheDocument();
-    rerender(<QunoBookingDateTimePicker {...props} initialMonth="2026-09-01" slots={[readOnly, bookable]} />);
+    rerender(<QunoBookingDateTimePicker {...props} initialMonth="2026-09" slots={[readOnly, bookable]} />);
     expect(screen.queryByText(/^Times shown in/)).not.toBeInTheDocument();
     expect(screen.getByRole("gridcell", { selected: true })).toHaveAttribute("data-date", "2026-09-03");
     expect(onSlotSelected).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
     expect(onSlotSelected).toHaveBeenCalledExactlyOnceWith({ slot: bookable });
+  });
+
+  it.each([false, true])(
+    "moves to the first bookable month after the opening read settles (date-only: %s)",
+    (dateOnly) => {
+      const openingMonth = "2026-09";
+      const onVisibleMonthChange = vi.fn();
+      const onSlotSelected = vi.fn();
+      const props = {
+        ...baseProps,
+        dateOnly,
+        autoSelectDate: true,
+        shouldSeekFirstAvailableDate: () => true,
+        onVisibleMonthChange,
+        onSlotSelected
+      };
+      const openingReadOnly = { ...slot("2026-09-02T08:00:00Z"), selectable: false };
+      const readOnly = { ...slot("2026-10-02T08:00:00Z"), selectable: false };
+      const bookable = slot("2026-12-03T09:00:00Z");
+      const { rerender } = render(
+        <QunoBookingDateTimePicker {...props} initialMonth={openingMonth} slots={[]} loading />
+      );
+      rerender(
+        <QunoBookingDateTimePicker
+          {...props}
+          initialMonth={openingMonth}
+          slots={[openingReadOnly, readOnly, bookable]}
+        />
+      );
+      expect(screen.getByRole("gridcell", { selected: true })).toHaveAttribute("data-date", "2026-12-03");
+      expect(screen.getByRole("button", { name: dateOnly ? "Confirm" : "09:00–09:30" })).toBeEnabled();
+      expect(onVisibleMonthChange).toHaveBeenCalledExactlyOnceWith({ month: "2026-12" });
+      expect(onSlotSelected).not.toHaveBeenCalled();
+    }
+  );
+
+  it("leaves the visible month in place after the consumer ends the initial search", () => {
+    const onVisibleMonthChange = vi.fn();
+    const shouldSeekFirstAvailableDate = vi.fn().mockReturnValue(false);
+    const props = { ...baseProps, onVisibleMonthChange, shouldSeekFirstAvailableDate };
+    const { rerender } = render(<QunoBookingDateTimePicker {...props} initialMonth="2026-09" slots={[]} loading />);
+    rerender(<QunoBookingDateTimePicker {...props} initialMonth="2026-09" slots={[slot("2026-12-03T09:00:00Z")]} />);
+    expect(screen.getByRole("grid", { name: /September 2026/ })).toBeVisible();
+    expect(onVisibleMonthChange).not.toHaveBeenCalled();
   });
 
   it("hands off a date-only draft on day click when the consumer supplies confirmation", () => {
@@ -183,7 +227,7 @@ describe("QunoBookingDateTimePicker", () => {
     const october = slot("2026-10-12T11:00:00Z");
     const props = {
       ...baseProps,
-      initialMonth: "2026-09-01" as const,
+      initialMonth: "2026-09" as const,
       queryPeriods: [{ start: "2026-09-01T00:00:00Z", end: "2026-11-01T00:00:00Z" }],
       onSlotSelected: vi.fn(),
       onVisibleMonthChange: vi.fn()
@@ -201,12 +245,12 @@ describe("QunoBookingDateTimePicker", () => {
     expect(container.querySelector('[data-date="2026-10-12"]')).toHaveAttribute("aria-selected", "true");
     expect(screen.getByRole("button", { name: "11:00–11:30" })).toHaveAttribute("aria-pressed", "true");
     expect(props.onSlotSelected).not.toHaveBeenCalled();
-    expect(props.onVisibleMonthChange).toHaveBeenCalledExactlyOnceWith({ month: "2026-10-01", source: "value" });
+    expect(props.onVisibleMonthChange).toHaveBeenCalledExactlyOnceWith({ month: "2026-10", source: "value" });
 
     fireEvent.click(screen.getByRole("button", { name: "Previous month" }));
     expect(screen.getByRole("heading", { name: "September 2026" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "10:00–10:30" })).toBeInTheDocument();
-    expect(props.onVisibleMonthChange).toHaveBeenLastCalledWith({ month: "2026-09-01" });
+    expect(props.onVisibleMonthChange).toHaveBeenLastCalledWith({ month: "2026-09" });
     rerender(<QunoBookingDateTimePicker {...props} slots={[september, october]} value={{ ...october }} />);
     expect(screen.getByRole("heading", { name: "September 2026" })).toBeInTheDocument();
     expect(props.onVisibleMonthChange).toHaveBeenCalledTimes(2);
@@ -263,8 +307,8 @@ describe("QunoBookingDateTimePicker", () => {
     expect(screen.getByRole("button", { name: "10:00–10:30" })).toHaveAttribute("aria-pressed", "false");
     expect(screen.queryByRole("button", { name: "11:00–11:30" })).not.toBeInTheDocument();
     expect(props.onVisibleMonthChange.mock.calls).toEqual([
-      [{ month: "2026-10-01", source: "value" }],
-      [{ month: "2026-09-01" }]
+      [{ month: "2026-10", source: "value" }],
+      [{ month: "2026-09" }]
     ]);
     expect(props.onSlotSelected).not.toHaveBeenCalled();
   });
@@ -282,7 +326,7 @@ describe("QunoBookingDateTimePicker", () => {
     expect(screen.getByRole("heading", { name: "November 2026" })).toBeInTheDocument();
     expect(container.querySelector('[data-date="2026-11-01"]')).toHaveAttribute("aria-selected", "true");
     expect(screen.getByRole("button", { name: "00:30–01:00" })).toHaveAttribute("aria-pressed", "true");
-    expect(props.onVisibleMonthChange).toHaveBeenCalledExactlyOnceWith({ month: "2026-11-01", source: "value" });
+    expect(props.onVisibleMonthChange).toHaveBeenCalledExactlyOnceWith({ month: "2026-11", source: "value" });
     expect(props.onSlotSelected).not.toHaveBeenCalled();
   });
 
@@ -336,7 +380,7 @@ describe("QunoBookingDateTimePicker", () => {
         {...baseProps}
         slots={[octoberLocal]}
         timeZone="Europe/Berlin"
-        initialMonth="2026-09-01"
+        initialMonth="2026-09"
         queryPeriods={[{ start: "2026-08-31T22:00:00Z", end: "2026-10-31T23:00:00Z" }]}
       />
     );
@@ -362,7 +406,7 @@ describe("QunoBookingDateTimePicker", () => {
     expect(screen.queryByRole("button", { name: "09:00–09:30" })).not.toBeInTheDocument();
     expect(container.querySelector('[data-slot="available-slots"] button')).toBeNull();
     expect(onSlotSelected).not.toHaveBeenCalled();
-    expect(onVisibleMonthChange).toHaveBeenCalledWith({ month: "2026-10-01" });
+    expect(onVisibleMonthChange).toHaveBeenCalledWith({ month: "2026-10" });
   });
 
   it("opts scheduling calendars into two-digit day numbers", () => {

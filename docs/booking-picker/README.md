@@ -60,6 +60,9 @@ Booking helpers accept one object: `bookingSlotDate({ timestamp, timeZone })`, `
 
 The composition supports the current Datepicker's time-navigation contract without replacing that implementation. Optional compact controls hide the selection summary and offscreen pills, bound month arrows, and pad visible day numbers. Their defaults preserve standalone Datepicker behavior.
 
+Booking Picker uses `YYYY-MM` for `initialMonth`, visible-month callbacks, and month availability helpers. Use
+`bookingMonth({ date })` to derive a month from a booking day. Day selection still reports a full `YYYY-MM-DD` date.
+
 A changed controlled `value` synchronizes the booking day when its availability arrives. An in-bounds value in
 another month changes the grid immediately and emits `onVisibleMonthChange({ month, source: "value" })` so consumers
 can request that month. User navigation emits `{ month }`. A newer external value, clearing the value, or a deliberate
@@ -68,7 +71,7 @@ Prop synchronization never dispatches `onSlotSelected`. The booking timezone det
 
 `fetchBookingAvailabilityBatches({ periods, fetchBatch })` continues full 512-slot pages from an inclusive cursor, deduplicates that boundary, and rejects a non-advancing response. Funnel and Patient Journey use this one helper for complete months. Applications supply network requests and expired-capability classification; the shared loader coordinates refresh.
 
-In date-only mode, choosing a day reveals one **Confirm** button. The `autoSelectDate` option makes the first bookable day active when availability loads, including a later month on opening. It never dispatches a slot selection. The button selects that day's first bookable slot, and `labels.dateOnlySlot` localizes it. A consumer with its own confirmation control can set `selectSlotOnDayClick` to receive a draft on the day click.
+In date-only mode, choosing a day reveals one **Confirm** button. The `autoSelectDate` option makes the first bookable day active when availability loads, including a later month on opening for date-only bookings. Applications can opt in for timed bookings with `shouldSeekFirstAvailableDate` and return false after a specialist or source change. Time selection stays with the patient. The button selects that day's first bookable slot, and `labels.dateOnlySlot` localizes it. A consumer with its own confirmation control can set `selectSlotOnDayClick` to receive a draft on the day click.
 
 Set `focusFirstTimeOnDateSelection` to focus the first enabled time after the patient chooses a date. The initial date,
 month navigation, and controlled value updates leave focus with the patient. Date-only choices keep their confirmation.
@@ -96,10 +99,9 @@ the recovery dialog.
 
 `prefetch` warms only adjacent months that overlap the authorized horizon. It uses
 `bookingAvailabilityMonthPeriod({ month, timeZone })` for local-midnight boundaries across daylight-saving changes.
-A failed background month does not cancel its neighbor. Date-only consumers can provide
+A failed background month does not cancel its neighbor. Consumers can provide
 `continueForward({ result })` to read one month at a time until the first bookable result or the end of the booking
-window. The predicate receives no result for a gap between query periods. `isReady` reports completed, unexpired month reads
-for loader-free navigation.
+window. The predicate receives no result for a gap between query periods. After an automatic or manual month change, prefetch the next month if it overlaps the window. `isReady` reports completed, unexpired month reads for loader-free navigation.
 
 Applications still own URLs, authentication, HTTP error classification, Product/invitation context, doctor identity,
 provider payload mapping, themes, and booking submission. Source adapters implement `hasBootstrap`, `bootstrap`,

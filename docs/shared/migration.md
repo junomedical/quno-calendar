@@ -188,6 +188,10 @@ when time selection should be unavailable.
 
 Existing standalone entry points remain unchanged. Booking consumers use `@quno/calendar/booking-picker` and its stylesheet. Helpers and callbacks use named objects, such as `onSlotSelected({ slot })` and `onVisibleMonthChange({ month })`. Applications retain their existing booking writer.
 
+Use `YYYY-MM` for Booking Picker's `initialMonth`, month callbacks, `prefetch`, and `bookingAvailabilityMonthPeriod`.
+For example, replace `"2026-11-01"` with `"2026-11"`. Use `bookingMonth({ date })` to convert a date from a
+booking window. Standalone Datepicker uses its existing `YYYY-MM-DD` month anchor.
+
 ### Doctor cards and choice layout
 
 `QunoBookingDoctorOptions`, `QunoBookingChoiceGroup`, and their types were removed from the booking subpath.

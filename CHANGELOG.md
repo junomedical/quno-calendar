@@ -4,6 +4,11 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+- Use `YYYY-MM` for Booking Picker month state, navigation callbacks, and availability month reads.
+
+- Find the first available month in timed bookings. Warm the next authorized month after the picker lands.
+  Package version: `0.66.1`.
+
 - Let consumers move focus to the first enabled time after a patient explicitly selects a date.
 
 - Let public booking consumers preselect a bookable day for date-only appointments. Keep the booking action explicit.

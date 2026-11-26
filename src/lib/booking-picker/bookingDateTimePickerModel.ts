@@ -2,6 +2,8 @@ import type { IsoDate } from "#quno-internal/shared/dateRangeModel";
 import { civilDateKey, zonedFields } from "#quno-internal/shared/zonedTime";
 import type { QunoBookingQueryPeriod } from "./bookingAvailabilityModel";
 import { formatBookingTimeZoneLabel } from "./formatBookingTimeZoneLabel";
+/** A calendar month in YYYY-MM format. */
+export type BookingMonth = `${number}-${number}`;
 export type QunoBookingDateTimeSlot = {
   start: string;
   end: string;
@@ -53,7 +55,7 @@ export const bookingPickerDateBounds = ({
     maxDate: max === undefined ? undefined : bookingSlotDate({ timestamp: new Date(max).toISOString(), timeZone })
   };
 };
-export const bookingMonth = ({ date }: { date: IsoDate }): IsoDate => `${date.slice(0, 7)}-01` as IsoDate;
+export const bookingMonth = ({ date }: { date: IsoDate }): BookingMonth => date.slice(0, 7) as BookingMonth;
 export const todayIso = ({ timeZone }: { timeZone: string }): IsoDate =>
   bookingSlotDate({ timestamp: new Date().toISOString(), timeZone });
 export const formatBookingSlotTime = ({

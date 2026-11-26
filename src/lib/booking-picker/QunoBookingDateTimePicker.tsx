@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type JSX } from "react";
 import { QunoDatePicker } from "#quno-internal/date-picker/QunoDatePicker";
 import { formatIsoDate, singleDay } from "#quno-internal/shared/dateRangeModel";
 import { BookingSlotOptions } from "./BookingSlotOptions";
-import type { QunoBookingDateTimeSlot } from "./bookingDateTimePickerModel";
+import { bookingMonth, type QunoBookingDateTimeSlot } from "./bookingDateTimePickerModel";
 import type { QunoBookingDateTimePickerLabels, QunoBookingDateTimePickerProps } from "./bookingPickerTypes";
 import { useBookingPickerViewModel } from "./bookingPickerViewModel";
 const DEFAULT_LABELS: QunoBookingDateTimePickerLabels = {
@@ -24,6 +24,7 @@ export const QunoBookingDateTimePicker = <TSlot extends QunoBookingDateTimeSlot>
   loading = false,
   dateOnly = false,
   autoSelectDate = !dateOnly,
+  shouldSeekFirstAvailableDate,
   selectSlotOnDayClick = false,
   focusFirstTimeOnDateSelection = false,
   showTimeZone,
@@ -53,6 +54,7 @@ export const QunoBookingDateTimePicker = <TSlot extends QunoBookingDateTimeSlot>
     loading,
     dateOnly,
     autoSelectDate,
+    shouldSeekFirstAvailableDate,
     onDateSelected,
     onVisibleMonthChange
   });
@@ -65,7 +67,7 @@ export const QunoBookingDateTimePicker = <TSlot extends QunoBookingDateTimeSlot>
         selectionMode="single"
         padDayNumbers
         value={picker.selectedDate ? singleDay({ date: picker.selectedDate }) : null}
-        visibleMonth={picker.visibleMonth}
+        visibleMonth={`${picker.visibleMonth}-01`}
         limitDateFrom={picker.bounds.minDate}
         limitDateTo={picker.bounds.maxDate}
         showSelectionHeader={false}
@@ -93,7 +95,7 @@ export const QunoBookingDateTimePicker = <TSlot extends QunoBookingDateTimeSlot>
             void onSlotSelected({ slot });
           }
         }}
-        onVisibleMonthChange={picker.selectMonth}
+        onVisibleMonthChange={({ month }) => picker.selectMonth({ month: bookingMonth({ date: month }) })}
       />
       <div
         className={classes({ values: ["quno-booking-date-time-picker__slots", classNames?.slots] })}

@@ -30,12 +30,13 @@ export type {
   QunoBookingDateTimePickerProps
 } from "./bookingPickerTypes";
 export {
+  bookingMonth,
   bookingPickerDateBounds,
   bookingSlotDate,
   formatBookingSlotTime,
   groupBookingSlots
 } from "./bookingDateTimePickerModel";
-export type { QunoBookingDateTimeSlot } from "./bookingDateTimePickerModel";
+export type { BookingMonth, QunoBookingDateTimeSlot } from "./bookingDateTimePickerModel";
 
 export { BOOKING_AVAILABILITY_BATCH_SIZE, fetchBookingAvailabilityBatches } from "./bookingAvailabilityBatches";
 

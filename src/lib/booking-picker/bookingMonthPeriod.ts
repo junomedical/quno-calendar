@@ -1,4 +1,5 @@
 import { civilTimestamp, zonedFields } from "#quno-internal/shared/zonedTime";
+import type { BookingMonth } from "./bookingDateTimePickerModel";
 
 const zonedStartOfDay = ({ date, timeZone }: { date: string; timeZone: string }): Date => {
   const [year, month, day] = date.split("-").map(Number);
@@ -19,7 +20,7 @@ export const bookingAvailabilityMonthPeriod = ({
   month,
   timeZone
 }: {
-  month: string;
+  month: BookingMonth;
   timeZone: string;
 }): {
   availabilityFrom: string;
@@ -28,7 +29,7 @@ export const bookingAvailabilityMonthPeriod = ({
   const [year, monthNumber] = month.split("-").map(Number);
   const nextMonth = new Date(Date.UTC(year, monthNumber, 1)).toISOString().slice(0, 10);
   return {
-    availabilityFrom: zonedStartOfDay({ date: month, timeZone }).toISOString(),
+    availabilityFrom: zonedStartOfDay({ date: `${month}-01`, timeZone }).toISOString(),
     availabilityTo: zonedStartOfDay({ date: nextMonth, timeZone }).toISOString()
   };
 };

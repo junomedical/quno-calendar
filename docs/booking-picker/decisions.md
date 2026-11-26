@@ -175,3 +175,21 @@
 - Decision: Let consumers opt in to focusing the first enabled time after the patient chooses a date.
   Preserve the date-only confirmation and leave focus in place during initial preselection.
 - Why: Make the available times immediately reachable after a deliberate date choice.
+
+## BPK-021 — Find the first available month for timed bookings
+
+- Date: 2026-11-26
+- Status: Accepted. Extends BPK-018 to timed bookings.
+- Decision: Search forward within the authorized window when the opening month has no bookable day. Select
+  the first available day and keep time selection explicit. The consumer can end the search when the
+  specialist or source changes. Warm the next month after automatic or manual navigation while it remains
+  in the authorized window.
+- Why: Patients can see the first available day without paging through empty months.
+
+## BPK-022 — Represent booking months as year and month
+
+- Date: 2026-11-26
+- Status: Accepted.
+- Decision: Use `YYYY-MM` in the Booking Picker API and availability loader. Convert to a full date at the
+  Datepicker boundary and when calculating local midnight.
+- Why: Initial positioning, navigation and prefetch use one month value.

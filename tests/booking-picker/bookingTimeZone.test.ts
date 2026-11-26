@@ -14,7 +14,7 @@ describe("shared booking timezone conversion", () => {
     const { bookingAvailabilityMonthPeriod } = await import("#quno-internal/booking-picker/bookingMonthPeriod");
 
     expect(bookingSlotDate({ timestamp: "2026-11-17T23:30:00Z", timeZone: "Europe/Berlin" })).toBe("2026-11-18");
-    expect(bookingAvailabilityMonthPeriod({ month: "2026-03-01", timeZone: "Europe/Berlin" })).toEqual({
+    expect(bookingAvailabilityMonthPeriod({ month: "2026-03", timeZone: "Europe/Berlin" })).toEqual({
       availabilityFrom: "2026-02-28T23:00:00.000Z",
       availabilityTo: "2026-03-31T22:00:00.000Z"
     });
@@ -42,14 +42,14 @@ describe("shared booking timezone conversion", () => {
     }));
     const grouped = groupBookingSlots({ slots, timeZone: "Europe/Berlin" });
     expect(grouped.get("2026-11-18")).toHaveLength(64);
-    bookingAvailabilityMonthPeriod({ month: "2026-11-01", timeZone: "Europe/Berlin" });
+    bookingAvailabilityMonthPeriod({ month: "2026-11", timeZone: "Europe/Berlin" });
     expect(zonedDateKey({ date: new Date(slots[0].start), timeZone: "Europe/Berlin" })).toBe("2026-11-18");
     expect(formatter).toHaveBeenCalledTimes(1);
   });
 
   it("chooses the earlier midnight when a month starts during a repeated clock", async () => {
     const { bookingAvailabilityMonthPeriod } = await import("#quno-internal/booking-picker/bookingMonthPeriod");
-    expect(bookingAvailabilityMonthPeriod({ month: "2026-11-01", timeZone: "America/Havana" })).toEqual({
+    expect(bookingAvailabilityMonthPeriod({ month: "2026-11", timeZone: "America/Havana" })).toEqual({
       availabilityFrom: "2026-11-01T04:00:00.000Z",
       availabilityTo: "2026-12-01T05:00:00.000Z"
     });

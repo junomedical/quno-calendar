@@ -236,9 +236,9 @@ describe("caller-owned booking month caches", () => {
 
 describe("timezone-aware adjacent month reads", () => {
   it.each([
-    ["2026-03-01", "Europe/Berlin", "2026-02-28T23:00:00.000Z", "2026-03-31T22:00:00.000Z"],
-    ["2026-11-01", "America/New_York", "2026-11-01T04:00:00.000Z", "2026-12-01T05:00:00.000Z"]
-  ])("keeps local month boundaries across DST: %s %s", (month, timeZone, availabilityFrom, availabilityTo) => {
+    ["2026-03", "Europe/Berlin", "2026-02-28T23:00:00.000Z", "2026-03-31T22:00:00.000Z"],
+    ["2026-11", "America/New_York", "2026-11-01T04:00:00.000Z", "2026-12-01T05:00:00.000Z"]
+  ] as const)("keeps local month boundaries across DST: %s %s", (month, timeZone, availabilityFrom, availabilityTo) => {
     expect(bookingAvailabilityMonthPeriod({ month, timeZone })).toEqual({ availabilityFrom, availabilityTo });
   });
 
@@ -249,7 +249,7 @@ describe("timezone-aware adjacent month reads", () => {
     const onResult = vi.fn();
     const input = { ...context, tenant: "tenant", doctor: "doctor" };
     const request = { mode: "quno" as const, input, bootstrap: previous, cache: h.cache };
-    await h.loader.prefetch({ ...request, month: "2026-03-01", timeZone: "Europe/Berlin", onResult });
+    await h.loader.prefetch({ ...request, month: "2026-03", timeZone: "Europe/Berlin", onResult });
     const april = {
       ...request,
       input: { ...input, availabilityFrom: "2026-03-31T22:00:00.000Z", availabilityTo: "2026-04-30T22:00:00.000Z" }
@@ -274,7 +274,7 @@ describe("timezone-aware adjacent month reads", () => {
       input: context,
       bootstrap: previous,
       cache: h.cache,
-      month: "2026-03-01",
+      month: "2026-03",
       timeZone: "UTC",
       continueForward: () => true
     });
@@ -294,7 +294,7 @@ describe("timezone-aware adjacent month reads", () => {
         input: context,
         bootstrap: bootstrap(),
         cache: h.cache,
-        month: "2026-03-01",
+        month: "2026-03",
         timeZone: "UTC",
         onResult
       })
