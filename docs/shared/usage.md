@@ -1460,7 +1460,7 @@ import "@quno/calendar/booking-picker/styles.css";
 />;
 ```
 
-Try `/guide/datepicker#booking-picker` for source comparison, mobile layout, and pointer date-only booking. With `dateOnly`, select a day or set `autoSelectDate` to preselect the first bookable day. The localized action submits its first selectable slot. Timed booking can also select a day in a later month when `shouldSeekFirstAvailableDate` returns true. `selectable: false` displays a diagnostic interval without permitting submission. Set envelope `bookingAuthority` from the server tenant setting. Shared comparison uses API payloads for `quno`, keeps Cronofy payloads otherwise, and disables intervals exclusive to the other writer. It never upgrades a read-only slot. Import plain `@quno/calendar/datepicker` for a timezone-free day or range without the booking workflow.
+Try `/guide/datepicker#booking-picker` for source comparison, mobile layout, and pointer date-only booking. With `dateOnly`, select a day or set `autoSelectDate` to preselect the first bookable day. The localized action submits its first selectable slot. Timed booking can also select a day in a later month when `shouldSeekFirstAvailableDate` returns true. When the timed picker stays in a month with only diagnostic intervals, it displays those times as disabled buttons. Set envelope `bookingAuthority` from the server tenant setting. Shared comparison uses API payloads for `quno`, keeps Cronofy payloads otherwise, and disables intervals exclusive to the other writer. It never upgrades a read-only slot. Import plain `@quno/calendar/datepicker` for a timezone-free day or range without the booking workflow.
 
 ### Shared booking source loader
 

@@ -4,6 +4,9 @@ All notable changes to the combined package are recorded here. `Unreleased` rema
 
 ## Unreleased
 
+- Show read-only times when a timed picker stays in a month with diagnostic availability. Package version: `0.66.2`.
+  The Booking Picker JavaScript bundle is 19,984 bytes gzip against a 20,000-byte limit.
+
 - Use `YYYY-MM` for Booking Picker month state, navigation callbacks, and availability month reads.
 
 - Find the first available month in timed bookings. Warm the next authorized month after the picker lands.

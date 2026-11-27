@@ -1,6 +1,6 @@
 {
   "name": "@quno/calendar",
-  "version": "0.66.1",
+  "version": "0.66.2",
   "description": "Quno Infinite Calendar, Datepicker, Date Input, Timepicker, and headless Date Parser for React and Preact-compatible applications.",
   "type": "module",
   "imports": {

@@ -155,6 +155,27 @@ describe("QunoBookingDateTimePicker", () => {
     expect(onVisibleMonthChange).not.toHaveBeenCalled();
   });
 
+  it.each([true, false])("shows a read-only timed slot after the month loads (seeking: %s)", (seeking) => {
+    const readOnly = { ...slot("2026-09-02T08:00:00Z"), selectable: false };
+    const onDateSelected = vi.fn();
+    const onSlotSelected = vi.fn();
+    const props = {
+      ...baseProps,
+      initialMonth: "2026-09" as const,
+      shouldSeekFirstAvailableDate: () => seeking,
+      onDateSelected,
+      onSlotSelected
+    };
+    const { rerender } = render(<QunoBookingDateTimePicker {...props} slots={[]} loading />);
+    rerender(<QunoBookingDateTimePicker {...props} slots={[readOnly]} loading />);
+    expect(onDateSelected).not.toHaveBeenCalled();
+    rerender(<QunoBookingDateTimePicker {...props} slots={[readOnly]} />);
+    expect(screen.getByRole("gridcell", { selected: true })).toHaveAttribute("data-date", "2026-09-02");
+    expect(screen.getByRole("button", { name: "08:00–08:30" })).toBeDisabled();
+    expect(onDateSelected).toHaveBeenCalledExactlyOnceWith({ date: "2026-09-02" });
+    expect(onSlotSelected).not.toHaveBeenCalled();
+  });
+
   it("hands off a date-only draft on day click when the consumer supplies confirmation", () => {
     const first = slot("2026-09-01T09:00:00.000Z");
     const onSlotSelected = vi.fn();
