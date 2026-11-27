@@ -1,3 +1,4 @@
+import { BookingPickerExample } from "#quno-demo/booking-picker-example";
 import { FieldGuidePage } from "#quno-demo/guide/shared/FieldGuidePage";
 import type { JSX } from "react";
 import { ArchitectureStory, DifferenceStory, FootprintStory } from "./StoryDetails";
@@ -20,7 +21,8 @@ const contents = [
   ["#single-day", "09", "Choose one day"],
   ["#date-input-composition", "10", "Combine with Date Input"],
   ["#date-time", "11", "Choose a date and time"],
-  ["#idea", "12", "Separate value, view, and gesture state"]
+  ["#idea", "12", "Separate value, view, and gesture state"],
+  ["#booking-picker", "13", "Book an available slot"]
 ] as const;
 
 export const DatePickerStory = ({ embedded = false }: { embedded?: boolean }): JSX.Element => {
@@ -42,6 +44,7 @@ export const DatePickerStory = ({ embedded = false }: { embedded?: boolean }): J
       <ArchitectureStory />
 
       <FootprintStory />
+      <BookingPickerExample />
     </FieldGuidePage>
   );
 };

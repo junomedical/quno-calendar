@@ -1,13 +1,13 @@
 # @quno/calendar
 
-Five opinionated date and scheduling primitives in one React-authored package. Version `0.6.3` supports React 18+
+Five opinionated date and scheduling primitives in one React-authored package. Version `0.66.1` supports React 18+
 directly, verifies React 19 separately, and supports Preact through tested `preact/compat` aliases.
 
 ## AI Overview
 
 Infinite Calendar accepts an optional `settings.timeZone` IANA timezone. The timeline uses it for event geometry,
 date buckets, current time, focus, drawing and movement. Event timestamps remain absolute. Omitting it retains
-browser-local behavior. The other date and time primitives retain their timezone-free contracts.
+browser-local behavior. The other date and time primitives retain their timezone-free contracts. Timestamped booking and timeline calculations share cached timezone primitives with an explicit ISO calendar and Latin digits. Internal date keys do not depend on a country-specific locale.
 
 ## Install
 
@@ -34,6 +34,7 @@ import { parseDateInput, tokenizeDateInput } from "@quno/calendar/date-parser";
 ```
 
 - **Quno/Infinite Calendar** virtualizes horizontal and vertical schedules with event loading, rendering, editing, zoom, navigation, focus, and an optional consumer-owned loading fallback.
+  Its handle exposes visible date keys for contextual creation and optional horizontal centering on both time and resource axes. Omit the capture target to retain the current viewport resource slot.
   Overnight and multi-day events continue on each occupied date. Dragging any portion preserves its grabbed time and full elapsed duration.
   Its handle exposes visible date keys for contextual creation and optional centered horizontal resource navigation.
   Optional synchronous `projectEvents` displays local previews after caching without refetching persisted events.
@@ -172,3 +173,17 @@ scrolls within its header when necessary. See [QUNO-046](./docs/shared/decisions
 
 The main Timepicker demo also constrains its inner card grid. At 320 px, compact side gutters keep the clock
 inside the card and all three cadence buttons on one row, including wider fallback fonts, without reducing their touch targets.
+
+## Optional booking composition
+
+Import `QunoBookingDateTimePicker` from `@quno/calendar/booking-picker` and its optional `@quno/calendar/booking-picker/styles.css`. It composes the standalone Datepicker with exact timestamped slots, timezone grouping, query bounds, source diagnostics, and minute-level interval comparison. It also exports complete-month cursor pagination. Shared comparison preserves the slot payload selected by server-provided `bookingAuthority`; source diagnostics cannot select a different writer. Applications own HTTP transport, grants, participant identity, themes, and booking writes.
+
+See [Booking Picker](docs/booking-picker/README.md) and the interactive [booking example](/guide/datepicker#booking-picker). The five standalone primitives retain their public entry points.
+
+Booking Picker also exports `createBookingAvailabilityLoader` for injected source reads, month caches, expiry refresh,
+and adjacent-month prefetch. Applications keep HTTP/authentication and booking adapters. See the
+[Booking Picker guide](docs/booking-picker/README.md#source-loading-and-month-sessions).
+
+`filterBookingSlots` shares consumer-supplied cadence and overlap filtering after complete pagination. See the [slot policy contract](docs/booking-picker/README.md#slot-cadence-policy).
+
+Applications render their own practitioner choices. Booking Picker lays out the available time buttons.

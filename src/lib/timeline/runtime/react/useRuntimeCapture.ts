@@ -43,7 +43,9 @@ export function useRuntimeCapture({
       if (!viewport) return null;
       const state = engine.read();
       const slot = requested ? null : captureLayoutAnchor({ geometry: state.geometry, viewport: state.viewport });
-      if (!requested && !slot) return null;
+      if (!requested && !slot) {
+        return null;
+      }
       const minute = slot?.target.minute;
       const target: CalendarViewportAnchorTarget = requested ?? {
         dateKey: slot!.target.dateKey,

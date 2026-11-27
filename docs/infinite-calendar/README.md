@@ -350,3 +350,5 @@ is preserved; pre-layout flushes still use captured native observations.
 
 The concept's orientation chapter pans to measured next-day headings in each view instead of assuming a fixed
 pixel distance. Its return pan uses the same header geometry; see Decision 169.
+
+Timeline and Booking Picker timestamp calculations reuse private cached timezone primitives with an explicit ISO calendar and Latin digits. Display labels keep the configured locale, and omitting `settings.timeZone` retains native local-time behavior.

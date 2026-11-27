@@ -117,7 +117,7 @@ Use absolute event timestamps with `Z` or an explicit offset. Loader date bounda
 current-time markers, focus and drag/draw callbacks follow this timezone. Convert requested civil midnights in the
 same zone when querying a backend. A day may contain 23 or 25 elapsed hours. Event timestamps stay unchanged;
 mutation callbacks return UTC. Omit `timeZone` for the existing browser-local behavior.
-The read-only guide's Display timezone control demonstrates the public setting.
+The read-only guide's Display timezone control demonstrates the public setting. Internal calendar keys use ISO calendar fields and Latin digits independently of display language; user-facing labels continue to use their configured locale.
 
 ## Overnight and multi-day events
 
@@ -1109,7 +1109,7 @@ calendarRef.current?.scrollToDateTime({ date, time, calendarId: "room-1", align:
 
 The package waits for the updated selection to commit before measuring the row. Multiple resource-row navigation requests in
 one batch use the latest request. A later `scrollToDate`, explicit restoration, or cancellation also discards queued
-row navigation. Use `align: "center"` when the row should move to the middle even if already visible. Centering follows
+row navigation. Use `align: "center"` when the horizontal time and row should move to the middle of the usable viewport, within scroll bounds, even if already visible. Pass an event midpoint to center its duration. Centering follows
 the live row height while async events settle within the existing bounded restoration session; manual scrolling cancels it. To start a new
 draft where the operator is looking without scrolling:
 
@@ -1137,6 +1137,18 @@ The grid switches directly to five-minute cadence above zoom 6 and back to quart
 Hidden ticks keep their nodes with `display: none`. Both orientations use the same behavior without transparency effects.
 Try Overview → Quarter hour → 5 minutes and back in the guide's **Reveal time progressively** chapter;
 the controlled-zoom recipe above needs no additional animation state.
+
+Capture the current resource/time slot before changing creation rows. Restore the captured offset when cancellation returns the original selection:
+
+```tsx
+const originalViewport = calendarRef.current?.captureViewportAnchor() ?? null;
+// Change the creation selection, then on Cancel restore the original selection.
+calendarRef.current?.restoreViewportAnchor({
+  anchor: originalViewport,
+  afterRecenter: true,
+  cancelOnManualScroll: true
+});
+```
 
 ## Reveal And Focus An Event
 
@@ -1429,3 +1441,61 @@ the page. Swipe the header’s product menu horizontally when its labels do not 
 
 The main Timepicker demo also constrains its inner card grid. At 320 px, compact side gutters keep the clock
 inside the card and all three cadence buttons on one row, including wider fallback fonts, without reducing their touch targets.
+
+## Booking Picker
+
+```tsx
+import { QunoBookingDateTimePicker, formatBookingDate } from "@quno/calendar/booking-picker";
+import "@quno/calendar/booking-picker/styles.css";
+
+<QunoBookingDateTimePicker
+  slots={availableSlots}
+  queryPeriods={queryPeriods}
+  initialMonth="2026-11"
+  timeZone="Europe/Berlin"
+  showTimeZone={false}
+  labels={{ selectedDate: formatBookingDate }}
+  onVisibleMonthChange={({ month }) => loadMonth(month)}
+  onSlotSelected={({ slot }) => submitExactSlot(slot)}
+/>;
+```
+
+Try `/guide/datepicker#booking-picker` for source comparison, mobile layout, and pointer date-only booking. With `dateOnly`, select a day or set `autoSelectDate` to preselect the first bookable day. The localized action submits its first selectable slot. Timed booking can also select a day in a later month when `shouldSeekFirstAvailableDate` returns true. `selectable: false` displays a diagnostic interval without permitting submission. Set envelope `bookingAuthority` from the server tenant setting. Shared comparison uses API payloads for `quno`, keeps Cronofy payloads otherwise, and disables intervals exclusive to the other writer. It never upgrades a read-only slot. Import plain `@quno/calendar/datepicker` for a timezone-free day or range without the booking workflow.
+
+### Shared booking source loader
+
+Supply application-owned source adapters, comparison adaptation, and authorized query periods:
+
+```ts
+import { createBookingAvailabilityLoader } from "@quno/calendar/booking-picker";
+
+const availability = createBookingAvailabilityLoader({
+  sources: { cronofy: cronofyAdapter, quno: apiAdapter },
+  success: ({ result }) => (isBookingSuccess(result) ? result : undefined),
+  compare: ({ cronofy, quno }) => compareForBooking({ cronofy, quno }),
+  queryPeriods: ({ bootstrap }) => bootstrap?.booking_availability.query_periods ?? []
+});
+const cache = new Map(); // One mounted picker session.
+const request = { mode: "quno" as const, input: bookingContext, bootstrap, cache };
+const month = await availability.readCached(request);
+await availability.prefetch({
+  ...request,
+  bootstrap: isBookingSuccess(month.result) ? month.result : bootstrap,
+  month: "2026-11",
+  timeZone: "Europe/Berlin",
+  onResult: showPrefetchedMonth
+});
+```
+
+Adapters keep request URLs, auth, doctor mappings, and exact provider slot payloads. The shared loader coordinates
+reads and expiry refresh. It never submits a booking. Reuse the caller-owned cache for navigation; replace it when
+the picker session ends. Complete and in-flight reads remain isolated by the full input context, source and capability.
+
+Apply a server-supplied interval policy after loading every provider page:
+
+```ts
+import { filterBookingSlots } from "@quno/calendar/booking-picker";
+const visible = filterBookingSlots({ slots, policy: { cadenceMinutes: 45, overlappingSlots: false } });
+```
+
+The helper retains the original slot object for submission. It does not authorize a booking.

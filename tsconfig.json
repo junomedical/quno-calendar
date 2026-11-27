@@ -24,7 +24,8 @@
       "#quno-e2e/*": ["./e2e/*"],
       "#quno-tests/*": ["./tests/*"],
       "#quno-project/*": ["./*"],
-      "@quno/calendar/timepicker": ["./src/lib/time-picker/index.ts"]
+      "@quno/calendar/timepicker": ["./src/lib/time-picker/index.ts"],
+      "@quno/calendar/booking-picker": ["./src/lib/booking-picker/index.ts"]
     },
     "resolveJsonModule": true,
     "isolatedModules": true,

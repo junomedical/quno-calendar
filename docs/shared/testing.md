@@ -404,7 +404,7 @@ At 1280×720 with 50 resources and 20,000 total events/year:
 - Calendar DOM stays below 5,000 horizontal nodes and 6,500 vertical nodes, with at most 1,000 committed event shells.
 - Pointer work is animation-frame bounded and does not rerender unrelated external event cards.
 - p95 scripting plus layout remains below 10ms, no task exceeds 50ms, and a 10× layout benchmark input stays below 25× runtime.
-- JavaScript gzip ceilings are 2 KiB for shared helpers, 50 KiB for Infinite Calendar, 12.75 KiB for Datepicker,
+- JavaScript gzip ceilings are 2 KiB for shared helpers, 50 KiB for Infinite Calendar, 13.25 KiB for Datepicker,
   10 KiB for Date Input, and 7 KiB for Date Parser. Optional CSS keeps its independent feature ceilings.
 
 ## Manual Checks
@@ -416,7 +416,7 @@ At 1280×720 with 50 resources and 20,000 total events/year:
 
 Clock-dependent default-demo scenarios set a fixed working-day morning in the browser while leaving timers running.
 Committed date/resource identities must remain stable across ordinary renders; navigation, zoom, and dense-layout
-browser tests guard that boundary. Current budgets are 50 KiB gzip for Infinite Calendar, 12.75 KiB for Datepicker,
+browser tests guard that boundary. Current budgets are 50 KiB gzip for Infinite Calendar, 13.25 KiB for Datepicker,
 and 10 KiB for Date Input.
 
 ## Optional clock verification
@@ -678,3 +678,13 @@ throttling. Keep their participant counts, focus, anchored row positions and lat
 
 Viewport observation regressions distinguish newer animation movement from DOM changes during parent layout:
 regular observation frames retain the latest live scroll, while pre-layout flushes preserve captured positions.
+
+## Booking composition checks
+
+`tests/booking-picker` covers comparison, complete-month pagination, compact bounds, exact-slot submission, and explicit date-only actions. `e2e/booking-picker.spec.ts` checks desktop/mobile geometry and real keyboard activation through the public entry point. Packed package checks include the booking JavaScript and CSS subpaths.
+
+Booking source-loader regressions cover concurrent comparison, exact adapter context, single expiry refresh,
+non-expiry failures, in-flight coalescing, context/source/session isolation, bootstrap-error eviction, stale request
+completion, refreshed-token cache reuse, daylight-saving month boundaries, and independent adjacent-month failures.
+
+`bookingTimeZone.test.ts` checks ISO date keys under Persian runtime defaults, localized visible labels, a repeated-midnight month boundary, invalid booking input and the timeline local-time fallback. A formatter-construction regression groups 64 slots, computes month bounds and reads a timeline date with one formatter for that timezone.

@@ -52,6 +52,8 @@ writeFileSync(
   `import { render } from "preact";
 import { QunoInfiniteCalendar } from "@quno/calendar/infinite-calendar";
 import { QunoDatePicker } from "@quno/calendar/datepicker";
+import { QunoBookingDateTimePicker } from "@quno/calendar/booking-picker";
+import "@quno/calendar/booking-picker/styles.css";
 import { QunoDateInput } from "@quno/calendar/date-input";
 import { QunoTimePicker } from "@quno/calendar/timepicker";
 import "@quno/calendar/timepicker/styles.css";
@@ -61,7 +63,7 @@ const parsed = parseDateInput({ text: "today", expectedRange: value, referenceDa
 if (parsed.status !== "success" || parsed.start.date !== value.start || parsed.start.time !== null ||
     parsed.end.date !== value.end || parsed.end.time !== null || "value" in parsed || "times" in parsed)
   throw new Error("Preact consumer lost paired parser endpoints");
-render(<><QunoTimePicker defaultValue="10:30" enabledHours={[10]} /><QunoDatePicker value={value} selectionMode="single" timeMode time="10:30" minuteCadence={15} enabledHours={[10, 11]} /><QunoDateInput expectedRange={value} value={value} selectionMode="single" timeMode forceCadence time="10:30" />
+render(<><QunoBookingDateTimePicker slots={[]} showTimeZone={false} onSlotSelected={() => {}} /><QunoTimePicker defaultValue="10:30" enabledHours={[10]} /><QunoDatePicker value={value} selectionMode="single" timeMode time="10:30" minuteCadence={15} enabledHours={[10, 11]} /><QunoDateInput expectedRange={value} value={value} selectionMode="single" timeMode forceCadence time="10:30" />
   <QunoInfiniteCalendar calendars={[{ id: "team", name: "Team" }]} selectedCalendarIds={["team"]}
     loadEvents={async () => []} renderEvent={() => null} initialDateKey="2026-08-24" /></>, document.getElementById("root"));
 `
@@ -72,4 +74,4 @@ execFileSync("npm", ["install", "--prefer-offline", "--no-audit", "--no-fund"], 
   stdio: "inherit"
 });
 execFileSync("npm", ["run", "build"], { cwd: appDir, env: npmEnvironment, stdio: "inherit" });
-console.log("Packed Preact compatibility fixture passed for four UI subpaths and the headless parser.");
+console.log("Packed Preact compatibility fixture passed for five UI subpaths and the headless parser.");

@@ -13,11 +13,11 @@ describe("datepicker field guide", () => {
     expect(
       screen.getByText("Paint, drag and correct a range without going to forced from-to sequence.")
     ).toBeInTheDocument();
-    expect(screen.getAllByRole("grid")).toHaveLength(15);
+    expect(screen.getAllByRole("grid")).toHaveLength(16);
     const contents = screen.getByRole("navigation", {
       name: "Table of contents"
     });
-    expect(within(contents).getAllByRole("link")).toHaveLength(12);
+    expect(within(contents).getAllByRole("link")).toHaveLength(13);
     expect(within(contents).queryByRole("link", { name: /Interactive demo/ })).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: "All components" })).toHaveAttribute("href", "/docs");
     expect(screen.queryByText("Explore the interactions")).not.toBeInTheDocument();
@@ -27,6 +27,10 @@ describe("datepicker field guide", () => {
         name: /Customize meaningful dates/
       })
     ).toHaveAttribute("href", "#day-handler");
+    expect(within(contents).getByRole("link", { name: /Book an available slot/ })).toHaveAttribute(
+      "href",
+      "#booking-picker"
+    );
     expect(document.querySelector("#quick-jump")).toBeInTheDocument();
     expect(screen.getByText(/Months follow the seasons/)).toBeInTheDocument();
     expect(screen.getByText(/Sticky year labels keep the year readable during fast scrolling/)).toBeInTheDocument();

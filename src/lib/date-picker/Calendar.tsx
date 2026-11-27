@@ -1,3 +1,4 @@
+import { datePickerMonthBounds } from "./datePickerMonthBounds";
 import { CalendarGrid } from "./CalendarGrid";
 import { CalendarHeader } from "./CalendarHeader";
 import { classNames as cx } from "#quno-internal/shared/classNames";
@@ -32,9 +33,12 @@ export const Calendar = ({ controller, config, view, onViewChange, clock, footer
       ? "dates"
       : view;
   useEffect(() => {
-    if (activeView !== view) onViewChange({ view: activeView });
+    if (activeView !== view) {
+      onViewChange({ view: activeView });
+    }
   }, [activeView, onViewChange, view]);
   const monthNavigationOpen = activeView === "months";
+  const monthBounds = datePickerMonthBounds({ month: controller.visibleMonth, config });
   const dayNavigation = useTimeDayNavigation({ active: activeView === "time", controller, config });
   const changeView = ({ view }: { view: CalendarView }) => {
     controller.cancelDrag();
@@ -67,10 +71,13 @@ export const Calendar = ({ controller, config, view, onViewChange, clock, footer
         suppressDayClick.current = false;
       }}
       onKeyDown={(event) => {
-        if (activeView === "dates" || event.key !== "Escape") return;
+        if (activeView === "dates" || event.key !== "Escape") {
+          return;
+        }
         event.preventDefault();
-        if (activeView === "time") closeTime();
-        else {
+        if (activeView === "time") {
+          closeTime();
+        } else {
           event.currentTarget.querySelector<HTMLButtonElement>('[data-slot="month-heading-button"]')?.focus();
           changeView({ view: "dates" });
         }
@@ -97,16 +104,22 @@ export const Calendar = ({ controller, config, view, onViewChange, clock, footer
         monthMotion={controller.monthMotion}
         config={config}
         monthNavigationOpen={monthNavigationOpen}
-        previousDisabled={activeView === "time" && dayNavigation.previousDisabled}
-        nextDisabled={activeView === "time" && dayNavigation.nextDisabled}
+        previousDisabled={activeView === "time" ? dayNavigation.previousDisabled : monthBounds.previousDisabled}
+        nextDisabled={activeView === "time" ? dayNavigation.nextDisabled : monthBounds.nextDisabled}
         onNavigate={({ direction }) => {
-          if (activeView === "time") return dayNavigation.navigate({ direction });
+          if (activeView === "time") {
+            return dayNavigation.navigate({ direction });
+          }
           controller.navigate({ direction });
           changeView({ view: "dates" });
         }}
         onHeadingClick={() => {
-          if (activeView === "time" && controller.selection)
+          if (config.showMonthNavigation === false && activeView === "dates") {
+            return;
+          }
+          if (activeView === "time" && controller.selection) {
             controller.goToMonth({ month: controller.selection.start });
+          }
           changeView({ view: activeView === "dates" ? "months" : "dates" });
         }}
       />
@@ -125,7 +138,9 @@ export const Calendar = ({ controller, config, view, onViewChange, clock, footer
           clock={clock}
           config={config}
           onSelect={({ time }) => {
-            if (!controller.selection || config.isDayDisabled?.({ date: controller.selection.start })) return;
+            if (!controller.selection || config.isDayDisabled?.({ date: controller.selection.start })) {
+              return;
+            }
             clock.select({ value: controller.selection, time });
             closeTime();
           }}

@@ -4,6 +4,7 @@ import dts from "vite-plugin-dts";
 import { resolve } from "node:path";
 
 const entries = {
+  "booking-picker": { entry: "src/lib/booking-picker/index.ts", file: "booking-picker" },
   shared: { entry: "src/lib/index.ts", file: "index" },
   "infinite-calendar": { entry: "src/lib/timeline/index.ts", file: "infinite-calendar" },
   timepicker: { entry: "src/lib/time-picker/index.ts", file: "timepicker" },
