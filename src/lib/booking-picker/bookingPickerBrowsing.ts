@@ -54,11 +54,14 @@ export function useBookingBrowsing<TSlot extends QunoBookingDateTimeSlot>({
           todayIso({ timeZone })
       })
   );
-  const bookableDates =
-    autoSelectDate && (dateOnly || shouldSeekFirstAvailableDate)
-      ? availableDates.filter((date) => slotsByDay.get(date)?.some((slot) => slot.selectable !== false))
-      : availableDates;
-  const firstDate = autoSelectDate ? firstDateInMonth({ dates: bookableDates, month: visibleMonth }) : null;
+  const searchOpeningMonths = autoSelectDate && (dateOnly || shouldSeekFirstAvailableDate);
+  const bookableDates = searchOpeningMonths
+    ? availableDates.filter((date) => slotsByDay.get(date)?.some((slot) => slot.selectable !== false))
+    : availableDates;
+  const firstBookableDate = autoSelectDate ? firstDateInMonth({ dates: bookableDates, month: visibleMonth }) : null;
+  const firstDate =
+    firstBookableDate ??
+    (autoSelectDate && !dateOnly && !loading ? firstDateInMonth({ dates: availableDates, month: visibleMonth }) : null);
   const [selectedDate, setSelectedDate] = useState<IsoDate | null>(() =>
     valueDate && bookingMonth({ date: valueDate }) === visibleMonth ? valueDate : firstDate
   );
@@ -74,7 +77,7 @@ export function useBookingBrowsing<TSlot extends QunoBookingDateTimeSlot>({
   });
   const { minDate, maxDate } = bookingPickerDateBounds({ periods: queryPeriods, timeZone });
   const laterDate =
-    autoSelectDate && !firstDate && (dateOnly || shouldSeekFirstAvailableDate)
+    searchOpeningMonths && !firstBookableDate
       ? bookableDates.find(
           (date) =>
             bookingMonth({ date }) > visibleMonth && (!minDate || date >= minDate) && (!maxDate || date <= maxDate)
@@ -116,7 +119,6 @@ export function useBookingBrowsing<TSlot extends QunoBookingDateTimeSlot>({
     if (
       !loading &&
       !valueDate &&
-      autoSelectDate &&
       seekingInitialDate.current &&
       (firstDate || laterDate) &&
       (shouldSeekFirstAvailableDate?.() ?? true)
@@ -167,7 +169,9 @@ export function useBookingBrowsing<TSlot extends QunoBookingDateTimeSlot>({
     }
   };
   const selectMonth = ({ month }: { month: BookingMonth }): void => {
-    const firstDate = autoSelectDate ? firstDateInMonth({ dates: bookableDates, month }) : null;
+    const firstDate = autoSelectDate
+      ? firstDateInMonth({ dates: dateOnly ? bookableDates : availableDates, month })
+      : null;
     pendingSlots.current = firstDate ? undefined : slots;
     setVisibleMonth(month);
     selectDate({ date: firstDate });

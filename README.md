@@ -1,6 +1,6 @@
 # @quno/calendar
 
-Five opinionated date and scheduling primitives in one React-authored package. Version `0.66.1` supports React 18+
+Five opinionated date and scheduling primitives in one React-authored package. Version `0.66.2` supports React 18+
 directly, verifies React 19 separately, and supports Preact through tested `preact/compat` aliases.
 
 ## AI Overview

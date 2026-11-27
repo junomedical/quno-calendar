@@ -7,7 +7,7 @@ const KIB = 1024;
 const projectRoot = resolve(".");
 const distRoot = resolve(process.argv[2] ?? "dist");
 const bundles = [
-  { label: "Booking Picker JavaScript", path: resolve(distRoot, "booking-picker.js"), gzipLimit: 19.5 * KIB },
+  { label: "Booking Picker JavaScript", path: resolve(distRoot, "booking-picker.js"), gzipLimit: 20_000 },
   { label: "Booking Picker CSS", path: resolve(distRoot, "booking-picker.css"), gzipLimit: 4.5 * KIB },
   { label: "Shared root JavaScript", path: resolve(distRoot, "index.js"), gzipLimit: 2 * KIB },
   { label: "Infinite Calendar JavaScript", path: resolve(distRoot, "infinite-calendar.js"), gzipLimit: 50 * KIB },

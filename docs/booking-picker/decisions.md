@@ -193,3 +193,11 @@
 - Decision: Use `YYYY-MM` in the Booking Picker API and availability loader. Convert to a full date at the
   Datepicker boundary and when calculating local midnight.
 - Why: Initial positioning, navigation and prefetch use one month value.
+
+## BPK-023 — Display read-only times in the visible month
+
+- Date: 2026-11-27
+- Status: Accepted. Refines BPK-021.
+- Decision: Prefer the first bookable day during the opening search. When a timed picker stays in a month that
+  has only read-only availability, select the first day with slots and display disabled time buttons.
+- Why: Source diagnostics must show the times a source returns while booking authority still governs submission.
